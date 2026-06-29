@@ -26,11 +26,11 @@ export default function Home() {
       <div className={styles.appContainer}>
         <header className={styles.header}>
           <div className={styles.headerLogo} onClick={() => setActiveEntity(null)}>
-            <Network className={styles.logoIcon} size={24} />
+            <Network className={styles.logoIcon} size={24} suppressHydrationWarning />
             <span>Trellis Engine</span>
           </div>
           <form className={styles.headerSearch} onSubmit={handleSearch}>
-            <Search size={16} color="var(--text-muted)" />
+            <Search size={16} color="var(--text-muted)" suppressHydrationWarning />
             <input
               type="text"
               value={query}
@@ -49,7 +49,7 @@ export default function Home() {
     <main className={styles.container}>
       <div className={`${styles.searchContainer} animate-fade-in`}>
         <div className={styles.logo}>
-          <Network className={styles.logoIcon} size={48} />
+          <Network className={styles.logoIcon} size={48} suppressHydrationWarning />
           <span>Trellis Engine</span>
         </div>
         
@@ -63,7 +63,7 @@ export default function Home() {
             autoFocus
           />
           <button type="submit" className={styles.searchButton}>
-            <Search size={24} />
+            <Search size={24} suppressHydrationWarning />
           </button>
         </form>
 
