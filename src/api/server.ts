@@ -1,11 +1,18 @@
 import express from 'express';
-import { parseMarkdownToAST, ASTNode } from '../core/ast/parser.js';
+import { parseMarkdownToAST, parseUnstructuredJSONToAST, ASTNode } from '../core/ast/parser.js';
 import { pgPool, neo4jDriver } from '../config/db.js';
 import { extractionQueue } from '../workers/queue.js';
+import multer from 'multer';
+import { execFile } from 'child_process';
+import util from 'util';
+import path from 'path';
+
+const execFileAsync = util.promisify(execFile);
+const upload = multer({ dest: 'uploads/' });
 
 const app = express();
-// Accept raw text/markdown in the body
-app.use(express.text({ type: '*/*' }));
+// Only accept raw text/markdown if content-type is text/*
+app.use(express.text({ type: ['text/*', 'application/json', 'application/x-www-form-urlencoded'] }));
 
 // Helper to recursively flatten the AST
 function flattenAST(node: ASTNode, acc: ASTNode[] = []): ASTNode[] {
@@ -18,15 +25,31 @@ function flattenAST(node: ASTNode, acc: ASTNode[] = []): ASTNode[] {
   return acc;
 }
 
-app.post('/ingest', async (req, res) => {
-  const markdown = req.body;
-  if (!markdown || typeof markdown !== 'string') {
-    return res.status(400).send('Expected raw Markdown string in body');
-  }
-
+app.post('/ingest', upload.single('file'), async (req, res) => {
   try {
-    // 1. Parse Markdown to AST
-    const rootNode = parseMarkdownToAST(markdown);
+    let rootNode: ASTNode;
+    
+    if (req.file) {
+      // PDF File Upload Path
+      const pythonScript = path.resolve('scripts/parse_pdf.py');
+      const { stdout } = await execFileAsync('python', [pythonScript, req.file.path], {
+        maxBuffer: 1024 * 1024 * 50 // 50MB buffer for large JSON outputs
+      });
+      
+      const elements = JSON.parse(stdout);
+      if (elements.error) {
+        throw new Error(`Python script error: ${elements.error}\n${elements.traceback || ''}`);
+      }
+      
+      rootNode = parseUnstructuredJSONToAST(elements);
+    } else {
+      // Raw Markdown String Path
+      const markdown = req.body;
+      if (!markdown || typeof markdown !== 'string') {
+        return res.status(400).send('Expected raw Markdown string in body or a file upload');
+      }
+      rootNode = parseMarkdownToAST(markdown);
+    }
     
     // Flatten AST
     const allNodes = flattenAST(rootNode);

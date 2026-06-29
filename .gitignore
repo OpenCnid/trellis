@@ -24,3 +24,7 @@ out/
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Ingestion
+uploads/
+*.pdf
