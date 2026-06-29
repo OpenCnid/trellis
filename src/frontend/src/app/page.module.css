@@ -1,0 +1,162 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.15), transparent 60%);
+}
+
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  margin-top: -10vh;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (prefers-color-scheme: light) {
+  .logo {
+    background: linear-gradient(135deg, #09090b 0%, #71717a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.logoIcon {
+  color: var(--brand-primary);
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.searchBox:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.searchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 1rem 1.5rem;
+  font-size: 1.125rem;
+  color: var(--foreground);
+}
+
+.searchButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  border-radius: 9999px;
+  background: var(--brand-primary);
+  color: white;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.searchButton:hover {
+  background: var(--brand-primary-light);
+  transform: scale(1.05);
+}
+
+.exampleButton {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-bg);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.exampleButton:hover {
+  color: var(--foreground);
+  border-color: var(--text-muted);
+  background: var(--surface-hover);
+}
+
+.appContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--background);
+  z-index: 10;
+  height: 64px;
+}
+
+.headerLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1.25rem;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (prefers-color-scheme: light) {
+  .headerLogo {
+    background: linear-gradient(135deg, #09090b 0%, #71717a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.headerSearch {
+  display: flex;
+  align-items: center;
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  width: 300px;
+}
+
+.headerSearchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0.25rem 0.5rem;
+  color: var(--foreground);
+}
