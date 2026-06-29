@@ -42,7 +42,7 @@ export default function GraphPane({ graph, onNodeClick }: { graph: any[], onNode
       links.push({
         source: sourceId,
         target: targetId,
-        label: r.name || r.type,
+        label: r.verb || r.name || r.type,
         sourceNodeIds: r.sourceNodeIds || []
       });
     });
@@ -68,6 +68,52 @@ export default function GraphPane({ graph, onNodeClick }: { graph: any[], onNode
           linkDirectionalArrowRelPos={1}
           linkColor={() => 'rgba(148, 163, 184, 0.4)'}
           backgroundColor="var(--surface-bg)"
+          nodeCanvasObject={(node: any, ctx: any, globalScale: number) => {
+            const label = node.name;
+            const fontSize = 12 / globalScale;
+            ctx.font = `${fontSize}px Sans-Serif`;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, node.x, node.y + 8 + (fontSize / 2)); 
+            
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI, false);
+            ctx.fillStyle = node.color || '#3b82f6';
+            ctx.fill();
+          }}
+          linkCanvasObjectMode={() => 'after'}
+          linkCanvasObject={(link: any, ctx: any, globalScale: number) => {
+            const start = link.source;
+            const end = link.target;
+            if (typeof start !== 'object' || typeof end !== 'object') return;
+
+            const textPos = {
+              x: start.x + (end.x - start.x) / 2,
+              y: start.y + (end.y - start.y) / 2
+            };
+
+            const relLink = { x: end.x - start.x, y: end.y - start.y };
+            let textAngle = Math.atan2(relLink.y, relLink.x);
+            if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
+            if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
+
+            const label = link.label;
+            if (!label) return;
+            
+            const fontSize = Math.max(2, 10 / globalScale);
+            ctx.font = `${fontSize}px Sans-Serif`;
+            
+            ctx.save();
+            ctx.translate(textPos.x, textPos.y);
+            ctx.rotate(textAngle);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.8)';
+            ctx.fillText(label, 0, -2);
+            ctx.restore();
+          }}
         />
       )}
     </div>
