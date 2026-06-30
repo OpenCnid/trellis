@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD): Trellis MVP
 
 ## 1. Product Vision
-Trellis is a deterministic GraphRAG engine. It aims to solve the hallucination and dynamic-update problems of standard RAG by strictly decoupling a document's physical geometry (AST) from its semantic meaning (Knowledge Graph). 
+Trellis is a Deterministic Spatial Reasoning Engine. It aims to solve the hallucination and dynamic-update problems of standard RAG and lossy GraphRAG implementations by strictly decoupling a document's physical geometry (AST) from its semantic meaning (Knowledge Graph), preserving spatial bounding boxes and utilizing Merkle-tree hashing. 
 
 ## 2. Target Audience
 * **Enterprise Knowledge Workers:** Lawyers, researchers, and engineers who need 100% accurate, multi-hop reasoning with absolute citation provenance back to the source text.

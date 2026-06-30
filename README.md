@@ -1,10 +1,10 @@
 # Trellis Engine
 
-Trellis is a deterministic GraphRAG engine designed for enterprise knowledge. It replaces standard, lossy vector RAG with a mathematically rigorous, dual-layer architecture, mapping the amorphous reasoning of Large Language Models directly to an immutable, Merkle-hashed coordinate system.
+Trellis is a Deterministic Spatial Reasoning Engine designed for enterprise knowledge. Standard GraphRAG (like Microsoft's implementation) extracts semantic entities but destroys the physical geometry of the source document, causing it to break when documents are updated. Trellis solves this by replacing standard, lossy GraphRAG with a mathematically rigorous architecture that maps the amorphous reasoning of Large Language Models directly to an immutable, Merkle-hashed coordinate system.
 
 ## Overview
-1. **The Physical Layer (AST):** Markdown documents are parsed into an Abstract Syntax Tree. Each node is given a deterministic SHA-256 ID based on its content and children.
-2. **The Semantic Layer (Knowledge Graph):** LLMs process leaf nodes via asynchronous workers to extract strict Entities and Actions using Zod.
+1. **The Physical Layer (AST):** Markdown documents are parsed into an Abstract Syntax Tree. Each node is given a deterministic SHA-256 Merkle-tree hash based on its content and children. We preserve physical geometry by tracking Spatial Bounding Boxes for every node.
+2. **The Semantic Layer (Knowledge Graph):** LLMs process leaf nodes via asynchronous workers to extract strict Entities and Actions using Zod. We employ a pgvector hybrid fallback for robust similarity matching when topological traversal isn't enough.
 3. **The Bridge:** Extracted entities point directly back to the physical AST Node IDs.
 
 ## Prerequisites

@@ -7,7 +7,7 @@ If you want to familiarize yourself with the codebase, you are just in the right
 
 On the highest level, Trellis is a pipeline that accepts unstructured source documents (PDFs, Markdown) and produces a deterministically synchronized semantic model of the knowledge within them.
 
-Unlike standard RAG, Trellis preserves the physical geometry of the document using an Abstract Syntax Tree (AST) and maps extracted knowledge (Entities/Actions) directly to the AST Node IDs, solving the Shift Problem (dynamic updating).
+Unlike standard RAG and lossy GraphRAG implementations, Trellis preserves the physical geometry of the document using an Abstract Syntax Tree (AST) with Spatial Bounding Boxes, and maps extracted knowledge (Entities/Actions) directly to the Merkle-hashed AST Node IDs, solving the Shift Problem (dynamic updating). We also incorporate a pgvector hybrid fallback for robust retrieval.
 
 ## Architecture Invariants
 
