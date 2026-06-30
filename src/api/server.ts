@@ -107,14 +107,19 @@ app.get('/retrieve', async (req, res) => {
   let graphData: any[] = [];
   try {
     const neoRes = await session.run(`
-      MATCH (e:Entity)-[r:ACTION]-(neighbor:Entity)
+      MATCH (e:Entity)-[rel:ACTION|CONTRADICTS]-(neighbor:Entity)
       WHERE e.name = toLower($entityName)
-      RETURN e, r, neighbor
+      RETURN e, rel, neighbor
+      UNION
+      MATCH (e:Entity)-[:ACTION|CONTRADICTS]-(neighbor:Entity)-[rel:CONTRADICTS]-(neighbor_of_neighbor:Entity)
+      WHERE e.name = toLower($entityName)
+      RETURN neighbor AS e, rel, neighbor_of_neighbor AS neighbor
     `, { entityName });
 
     for (const record of neoRes.records) {
       const e = record.get('e').properties;
-      const r = record.get('r').properties;
+      const rRaw = record.get('rel');
+      const r = { type: rRaw.type, ...rRaw.properties };
       const neighbor = record.get('neighbor').properties;
       graphData.push({ e, r, neighbor });
 
