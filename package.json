@@ -23,6 +23,7 @@
     "neo4j-driver": "^6.1.0",
     "openai": "^6.45.0",
     "pg": "^8.22.0",
+    "pgvector": "^0.2.1",
     "remark-parse": "^11.0.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",

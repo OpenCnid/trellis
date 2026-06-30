@@ -1,6 +1,6 @@
 import { Worker, Job } from 'bullmq';
 import { connectionParams } from './queue.js';
-import { neo4jDriver } from '../config/db.js';
+import { neo4jDriver, pgPool } from '../config/db.js';
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { GraphSchema, Graph } from '../core/graph/schemas.js';
@@ -82,6 +82,31 @@ async function processJob(job: Job) {
     throw error;
   } finally {
     await session.close();
+  }
+
+  // 4. Generate Embeddings & Update PostgreSQL
+  console.log(`[Job ${job.id}] Generating embeddings for AST Node: ${astNodeId}`);
+  try {
+    const embedRes = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: text,
+    });
+    const embedding = embedRes.data[0].embedding;
+
+    const pgClient = await pgPool.connect();
+    try {
+      await pgClient.query(`
+        UPDATE ast_nodes
+        SET embedding = $1
+        WHERE id = $2
+      `, [JSON.stringify(embedding), astNodeId]);
+      console.log(`[Job ${job.id}] Successfully saved embedding for AST Node: ${astNodeId} in PostgreSQL.`);
+    } finally {
+      pgClient.release();
+    }
+  } catch (error) {
+    console.error(`[Job ${job.id}] Error generating or saving embeddings:`, error);
+    throw error;
   }
 }
 

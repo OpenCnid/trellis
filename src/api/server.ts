@@ -6,6 +6,7 @@ import multer from 'multer';
 import { execFile } from 'child_process';
 import util from 'util';
 import path from 'path';
+import OpenAI from 'openai';
 
 const execFileAsync = util.promisify(execFile);
 const upload = multer({ dest: 'uploads/' });
@@ -129,19 +130,37 @@ app.get('/retrieve', async (req, res) => {
   }
 
   const idsArray = Array.from(sourceNodeIds);
-  if (idsArray.length === 0) {
-    return res.json({ graph: graphData, provenance: [] });
-  }
-
   const pgClient = await pgPool.connect();
   let provenance: any[] = [];
+  let fallback_active = false;
+
   try {
-    const pgRes = await pgClient.query(`
-      SELECT id, data->>'content' as content 
-      FROM ast_nodes 
-      WHERE id = ANY($1);
-    `, [idsArray]);
-    provenance = pgRes.rows;
+    if (idsArray.length === 0) {
+      console.log(`[Retrieve] No graph matches for '${entityName}'. Triggering Vector Fallback.`);
+      fallback_active = true;
+      const openai = new OpenAI();
+      const embedRes = await openai.embeddings.create({
+        model: "text-embedding-3-small",
+        input: entityName,
+      });
+      const queryEmbedding = embedRes.data[0].embedding;
+
+      const pgRes = await pgClient.query(`
+        SELECT id, data->>'content' as content 
+        FROM ast_nodes 
+        WHERE embedding IS NOT NULL
+        ORDER BY embedding <=> $1 
+        LIMIT 3;
+      `, [JSON.stringify(queryEmbedding)]);
+      provenance = pgRes.rows;
+    } else {
+      const pgRes = await pgClient.query(`
+        SELECT id, data->>'content' as content 
+        FROM ast_nodes 
+        WHERE id = ANY($1);
+      `, [idsArray]);
+      provenance = pgRes.rows;
+    }
   } catch (error) {
     console.error("Postgres retrieve error:", error);
     return res.status(500).json({ error: 'Postgres retrieve error' });
@@ -151,7 +170,8 @@ app.get('/retrieve', async (req, res) => {
 
   return res.json({
     graph: graphData,
-    provenance
+    provenance,
+    fallback_active
   });
 });
 

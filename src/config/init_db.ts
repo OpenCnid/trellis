@@ -8,10 +8,12 @@ async function initializeDatabases() {
   try {
     const pgClient = await pgPool.connect();
     await pgClient.query(`
+      CREATE EXTENSION IF NOT EXISTS vector;
       CREATE TABLE IF NOT EXISTS ast_nodes (
         id VARCHAR PRIMARY KEY,
         document_id VARCHAR,
-        data JSONB
+        data JSONB,
+        embedding vector(1536)
       );
     `);
     console.log("[PASS] PostgreSQL: AST Nodes table created/verified.");
