@@ -42,8 +42,10 @@ export default function GraphPane({ graph, onNodeClick }: { graph: any[], onNode
       links.push({
         source: sourceId,
         target: targetId,
-        label: r.verb || r.name || r.type,
-        sourceNodeIds: r.sourceNodeIds || []
+        label: r.belief_state ? `${r.verb || r.name || r.type} (${r.belief_state})` : (r.verb || r.name || r.type),
+        sourceNodeIds: r.sourceNodeIds || [],
+        type: r.type,
+        belief_state: r.belief_state
       });
     });
 
@@ -66,7 +68,11 @@ export default function GraphPane({ graph, onNodeClick }: { graph: any[], onNode
           onLinkClick={(link: any) => onNodeClick(link.sourceNodeIds || [])}
           linkDirectionalArrowLength={3.5}
           linkDirectionalArrowRelPos={1}
-          linkColor={() => 'rgba(148, 163, 184, 0.4)'}
+          linkColor={(link: any) => {
+            if (link.type === 'CONTRADICTS') return '#ef4444';
+            if (link.belief_state) return '#f97316';
+            return 'rgba(148, 163, 184, 0.4)';
+          }}
           backgroundColor="var(--surface-bg)"
           nodeCanvasObject={(node: any, ctx: any, globalScale: number) => {
             const label = node.name;
@@ -110,7 +116,7 @@ export default function GraphPane({ graph, onNodeClick }: { graph: any[], onNode
             ctx.rotate(textAngle);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillStyle = 'rgba(148, 163, 184, 0.8)';
+            ctx.fillStyle = link.type === 'CONTRADICTS' ? '#ef4444' : link.belief_state ? '#f97316' : 'rgba(148, 163, 184, 0.8)';
             ctx.fillText(label, 0, -2);
             ctx.restore();
           }}

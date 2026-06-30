@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import styles from "./SplitPaneViewer.module.css";
 
-export default function ProvenancePane({ provenance, activeNodeIds }: { provenance: any[], activeNodeIds: Set<string> }) {
+export default function ProvenancePane({ provenance, activeNodeIds, hasContradictions }: { provenance: any[], activeNodeIds: Set<string>, hasContradictions?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,6 +21,11 @@ export default function ProvenancePane({ provenance, activeNodeIds }: { provenan
 
   return (
     <div className={styles.provenanceContainer} ref={containerRef}>
+      {hasContradictions && (
+        <div className={styles.warningBanner}>
+          ⚠️ Warning: The underlying documents contain conflicting information regarding this entity. Branching into Belief States.
+        </div>
+      )}
       {provenance.map(item => {
         const isActive = activeNodeIds.has(item.id);
         return (

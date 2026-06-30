@@ -27,7 +27,7 @@ export default function SplitPaneViewer({ entity }: { entity: string }) {
       setActiveNodeIds(new Set());
       
       try {
-        const res = await fetch(`/api/retrieve?entity=${encodeURIComponent(entity)}`);
+        const res = await fetch(`/api/retrieve?entity=${encodeURIComponent(entity)}&_t=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) {
            const errText = await res.text();
            throw new Error(errText || "Failed to fetch provenance data");
@@ -65,6 +65,7 @@ export default function SplitPaneViewer({ entity }: { entity: string }) {
           <ProvenancePane 
             provenance={data.provenance} 
             activeNodeIds={activeNodeIds} 
+            hasContradictions={data.graph.some((record: any) => record.r.type === 'CONTRADICTS' || record.r.belief_state)}
           />
         )}
       </div>

@@ -93,3 +93,13 @@
   color: white;
   opacity: 1;
 }
+
+.warningBanner {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
