@@ -75,7 +75,7 @@ docker exec -it trellis-redis redis-cli ping
 ```
 
 **Common BullMQ Issues:**
-- **Stuck Jobs / Not Processing:** Check if the extraction worker process (`src/workers/extraction_worker.ts`) is running. If the worker crashed (e.g., OOM or unhandled exception), jobs will remain in the `wait` or `active` state indefinitely until a worker is revived.
+- **Stuck Jobs / Not Processing:** Check if the respective worker processes (`src/workers/extraction_worker.ts` or `src/workers/rlm_worker.ts`) are running. If a worker crashes (e.g., OOM or unhandled exception), jobs will remain in the `wait` or `active` state indefinitely until a worker is revived.
 - **503 Rate Limits from OpenAI:** The BullMQ configuration automatically uses exponential backoff to handle 429 and 503 errors. Let the queue automatically retry before intervening.
 - **Clearing the Queue Manually:** If you need to purge the Redis queue entirely, you can flush the Redis instance:
   ```bash

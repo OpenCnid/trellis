@@ -31,6 +31,7 @@ Because LLM extraction can take seconds (or fail due to rate limits), ingestion 
 1. **Ingestion API**: Receives a raw document and pushes it to the `Parsing Queue`.
 2. **Parsing Workers**: Pop jobs off the queue, run the AST generation, save the AST to the Document Store, and fan out the individual AST Nodes to the `Extraction Queue`.
 3. **Archivist Workers**: Pop AST Nodes off the extraction queue. They call the LLM API using strict Structured Outputs, map the response to Graph schemas, and write to the Graph Database.
+4. **RLM Workers**: Pop jobs off the `rlm_queue`. They spawn a sandboxed Python REPL agent injected with deterministic database tools (`TrellisNeo4j`, `TrellisPostgres`) to traverse the knowledge graph and vector layer, streaming thought-process stdout via Redis PubSub back to the frontend.
 
 ## Error Handling & Resiliency
 * **LLM Failures**: If an LLM returns a malformed schema, the worker throws a validation error and the message is returned to the queue with an exponential backoff.

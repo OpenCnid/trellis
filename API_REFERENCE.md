@@ -77,3 +77,25 @@ curl -X GET "http://localhost:3000/retrieve?entity=Globex%20Corporation"
   ]
 }
 ```
+
+---
+
+## 3. RLM Agent Stream Endpoint
+
+### `GET /api/rlm-stream`
+Initiates an asynchronous Trellis RLM Agent execution to resolve physical contradictions and answers a user query dynamically. The endpoint streams the REPL thought process in real-time using Server-Sent Events (SSE).
+
+**Query Parameters:**
+- `query` (string, required): The prompt for the agent.
+
+**Example Request:**
+```bash
+curl -N -X GET "http://localhost:3000/api/rlm-stream?query=Find%20the%20contradiction"
+```
+
+**Example Stream Output:**
+```text
+data: {"type": "stdout", "data": "Let's explore the graph...\n"}
+
+data: {"type": "done", "code": 0}
+```
