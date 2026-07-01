@@ -1,7 +1,7 @@
 import express from 'express';
 import { parseMarkdownToAST, parseUnstructuredJSONToAST, ASTNode } from '../core/ast/parser.js';
 import { pgPool, neo4jDriver } from '../config/db.js';
-import { extractionQueue } from '../workers/queue.js';
+import { extractionQueue, rlmQueue } from '../workers/queue.js';
 import multer from 'multer';
 import { execFile } from 'child_process';
 import util from 'util';
@@ -177,6 +177,64 @@ app.get('/retrieve', async (req, res) => {
     graph: graphData,
     provenance,
     fallback_active
+  });
+});
+
+import IORedis from 'ioredis';
+import crypto from 'crypto';
+
+app.get('/api/rlm-stream', async (req, res) => {
+  const query = req.query.query;
+  if (!query || typeof query !== 'string') {
+    return res.status(400).send('Expected query parameter');
+  }
+
+  // Set up SSE headers
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  res.flushHeaders();
+
+  const jobId = crypto.randomUUID();
+  const redisSubscriber = new IORedis({
+    host: '127.0.0.1',
+    port: 6379,
+  });
+
+  const channel = `rlm-stream:${jobId}`;
+
+  redisSubscriber.subscribe(channel, (err, count) => {
+    if (err) {
+      console.error('Failed to subscribe to redis channel:', err);
+      res.end();
+      return;
+    }
+    
+    // Once subscribed, enqueue the job
+    rlmQueue.add('rlm_job', { query, jobId });
+  });
+
+  redisSubscriber.on('message', (subChannel, message) => {
+    if (subChannel === channel) {
+      const data = JSON.parse(message);
+      if (data.type === 'done') {
+        res.write(`data: ${JSON.stringify({ type: 'done', code: data.code })}\n\n`);
+        res.end();
+      } else {
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      }
+    }
+  });
+
+  req.on('close', () => {
+    try {
+      redisSubscriber.unsubscribe(channel).catch(() => {});
+      redisSubscriber.quit().catch(() => {});
+    } catch (e) {
+      // ignore
+    }
   });
 });
 

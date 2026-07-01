@@ -9,4 +9,5 @@ const connection = new IORedis({
 
 export const connectionParams = { connection };
 export const extractionQueue = new Queue('extraction_queue', connectionParams);
+export const rlmQueue = new Queue('rlm_queue', connectionParams);
 export const supervisorQueue = new Queue('supervisor_queue', connectionParams);
