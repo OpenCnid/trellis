@@ -38,3 +38,19 @@ The asynchronous extraction engine. These workers read `ASTNode` payloads, commu
 
 ### `src/config`
 Environment and boot-time configuration, strictly validated by `zod`.
+
+## The Active Reasoning Layer (Phase 3 RLM)
+
+While Trellis uses **Node.js, Zod, and BullMQ** to strictly and deterministically *ingest* data, it uses a **Python-based Recursive Language Model (RLM)** for retrieval and reasoning.
+
+Instead of standard JSON tool-calling, Trellis provides the LLM with a sandboxed Python REPL (via the `rlms` pip package). 
+
+### The Execution Boundary
+1. **Express API:** Receives user request, returns an SSE stream.
+2. **BullMQ Worker:** Picks up the job, uses `child_process.spawn()` to boot the Python RLM environment.
+3. **Python REPL:** The LLM writes and executes dynamic Python scripts to traverse the Neo4j graph and fetch Postgres AST text, evaluating evidence via recursive sub-calls. The `stdout` is piped back to Node.js and streamed to the user.
+
+### Architecture Invariant 4: The REPL Sandbox is STRICTLY Read-Only
+To protect the mathematical integrity of the Spatial Engine, the RLM operates under strict security boundaries:
+1. **No Destructive Cypher:** The `TrellisNeo4j` python wrapper explicitly blocks `CREATE`, `MERGE`, `DELETE`, `SET`, or `DROP` commands during standard reasoning loops. The RLM is a navigator, not a builder.
+2. **The Flywheel Exception:** The only allowed mutation is through a highly specific, whitelisted tool: `write_derived_insight(subject, verb, object, sourceNodeIds)`. If the RLM deduces a new fact, it may write a `[DERIVED_INSIGHT]` edge back to the graph, provided it strictly passes the original spatial provenance hashes that led to the deduction.
