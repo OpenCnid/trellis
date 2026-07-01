@@ -5,7 +5,7 @@ Trellis is a Deterministic Spatial Reasoning Engine designed for enterprise know
 ## Overview
 1. **The Physical Layer (AST):** Markdown documents are parsed into an Abstract Syntax Tree. Each node is given a deterministic SHA-256 Merkle-tree hash based on its content and children. We preserve physical geometry by tracking Spatial Bounding Boxes for every node.
 2. **The Semantic Layer (Knowledge Graph):** LLMs process leaf nodes via asynchronous workers to extract strict Entities and Actions using Zod. We employ a pgvector hybrid fallback for robust similarity matching when topological traversal isn't enough.
-3. **The Bridge:** Extracted entities point directly back to the physical AST Node IDs.
+3. **The Bridge (RLM Harness):** Extracted entities point directly back to the physical AST Node IDs. We use a Recursive Language Model (RLM) agent with a secure Python REPL to autonomously traverse the graph and resolve physical data contradictions safely.
 
 ## Prerequisites
 - Node.js (v18+)
@@ -39,16 +39,16 @@ Trellis is a Deterministic Spatial Reasoning Engine designed for enterprise know
 
 ## Running the Engine
 
-To run the Trellis pipeline locally, you need to boot both the ingestion server and the background extraction worker.
+To run the Trellis pipeline locally, you need to boot the ingestion server and the background workers. The easiest way to start all components simultaneously is using our unified startup script:
 
-1. **Start the Extraction Worker:**
+1. **Start all services (Server, Extraction Worker, RLM Worker):**
    ```bash
-   npx tsx src/workers/extraction_worker.ts
+   npx tsx scripts/start_all.ts
    ```
-2. **Start the API Server:**
-   ```bash
-   npx tsx src/api/server.ts
-   ```
-   The API will start on port `3000`.
+
+*(Alternatively, you can run them individually)*:
+- **API Server:** `npx tsx src/api/server.ts` (Starts on port `3000`)
+- **Extraction Worker:** `npx tsx src/workers/extraction_worker.ts`
+- **RLM Worker:** `npx tsx src/workers/rlm_worker.ts`
 
 For integration details on hitting the endpoints, see the [API Reference](API_REFERENCE.md).
