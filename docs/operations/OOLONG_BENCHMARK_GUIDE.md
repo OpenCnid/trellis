@@ -58,8 +58,10 @@ Trellis translates this quadratic reasoning problem into structured database ope
 ### I. The Physical Layer (PostgreSQL)
 The input corpus is parsed into a flat sequence of child nodes under a root document node using our Markdown parser.
 *   **Table:** `ast_nodes`
-*   **Hashing Rule:** Each leaf entry $N_i$ is mapped to a deterministic SHA-256 hash:
-    $$\text{ID}(N_i) = \text{SHA256}(\text{"paragraph"} + \text{"[Question text content]"})$$
+*   **Hashing Rule:** We always use the official parser (`src/core/ast/parser.ts`) to compute hashes recursively. Under the hood, for leaf text nodes:
+    $$\text{ID}(N_{\text{leaf}}) = \text{SHA256}(\text{Type}(N_{\text{leaf}}) + \text{":"} + \text{Content}(N_{\text{leaf}}))$$
+    For parent block nodes (like paragraph or heading blocks folding child nodes):
+    $$\text{ID}(N_{\text{parent}}) = \text{SHA256}(\text{Type}(N_{\text{parent}}) + \text{":"} + \sum \text{ID}(\text{Child}_i))$$
 *   **Record Structure:**
     ```json
     {
