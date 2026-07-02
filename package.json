@@ -7,7 +7,13 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "oolong:generate": "tsx scripts/generate_oolong_dataset.ts",
+    "oolong:ingest": "tsx scripts/ingest_oolong_dataset.ts",
+    "oolong:pairs": "tsx scripts/test_oolong_pairs_query.ts",
+    "oolong:error-routing": "tsx scripts/test_repl_error_routing.ts",
+    "oolong:flywheel-prep": "tsx scripts/prepare_oolong_flywheel.ts",
+    "oolong:benchmark": "tsx src/benchmarks/oolong_runner.ts"
   },
   "keywords": [],
   "author": "",

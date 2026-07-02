@@ -28,3 +28,10 @@ Thumbs.db
 # Ingestion
 uploads/
 *.pdf
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Benchmark transcripts
+benchmark_logs/
