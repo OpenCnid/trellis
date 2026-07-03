@@ -1,0 +1,2448 @@
+{
+  "name": "oolong-pairs-trec-synthetic-v1-drill-v2",
+  "seed": 42,
+  "records": [
+    {
+      "id": "q_0001",
+      "text": "Why is the climate of Dublin so mild?",
+      "category": "DESC",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0002",
+      "text": "What makes a violin sound different from a cello?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0003",
+      "text": "How do vaccines train the immune system?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0004",
+      "text": "What mountain range is visible from Mumbai?",
+      "category": "LOC",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0005",
+      "text": "What dish is Cairo famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0006",
+      "text": "Which explorer was born in Oslo?",
+      "category": "HUM",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0007",
+      "text": "Who founded the oldest university in Tokyo?",
+      "category": "HUM",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0008",
+      "text": "Who founded the oldest university in Paris?",
+      "category": "HUM",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0009",
+      "text": "Which airline is headquartered in Nairobi?",
+      "category": "ENTY",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0010",
+      "text": "What mountain range is visible from Zagreb?",
+      "category": "LOC",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0011",
+      "text": "Who was the mayor of Cairo during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0012",
+      "text": "Why is the climate of Paris so mild?",
+      "category": "DESC",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0013",
+      "text": "Which river runs through the center of Dublin?",
+      "category": "LOC",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0014",
+      "text": "Which country is Quito located in?",
+      "category": "LOC",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0015",
+      "text": "What is the history behind the old town of Zagreb?",
+      "category": "DESC",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0016",
+      "text": "Which airline is headquartered in Seoul?",
+      "category": "ENTY",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0017",
+      "text": "What dish is Seoul famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0018",
+      "text": "Who was the mayor of Paris during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0019",
+      "text": "Which airline is headquartered in Tokyo?",
+      "category": "ENTY",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0020",
+      "text": "Why is the climate of Havana so mild?",
+      "category": "DESC",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0021",
+      "text": "Why is the climate of Mumbai so mild?",
+      "category": "DESC",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0022",
+      "text": "In which hemisphere is Lima situated?",
+      "category": "LOC",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0023",
+      "text": "In what year was Mumbai founded?",
+      "category": "NUM",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0024",
+      "text": "In which hemisphere is Zagreb situated?",
+      "category": "LOC",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0025",
+      "text": "Which airline is headquartered in Quito?",
+      "category": "ENTY",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0026",
+      "text": "What is the history behind the old town of Havana?",
+      "category": "DESC",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0027",
+      "text": "What is the history behind the old town of Nairobi?",
+      "category": "DESC",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0028",
+      "text": "Which explorer was born in Quito?",
+      "category": "HUM",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0029",
+      "text": "Which country is Paris located in?",
+      "category": "LOC",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0030",
+      "text": "What mountain range is visible from Lima?",
+      "category": "LOC",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0031",
+      "text": "Which airline is headquartered in Dublin?",
+      "category": "ENTY",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0032",
+      "text": "What is the history behind the old town of Cairo?",
+      "category": "DESC",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0033",
+      "text": "Who founded the oldest university in Lima?",
+      "category": "HUM",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0034",
+      "text": "Which airline is headquartered in Cairo?",
+      "category": "ENTY",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0035",
+      "text": "What mountain range is visible from Vienna?",
+      "category": "LOC",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0036",
+      "text": "Who founded the oldest university in Cairo?",
+      "category": "HUM",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0037",
+      "text": "What flower is the official symbol of Mumbai?",
+      "category": "ENTY",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0038",
+      "text": "In what year was Nairobi founded?",
+      "category": "NUM",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0039",
+      "text": "Who was the mayor of Vienna during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0040",
+      "text": "What does UNICEF stand for?",
+      "category": "ABBR",
+      "concepts": [
+        "unicef"
+      ]
+    },
+    {
+      "id": "q_0041",
+      "text": "What local delicacy is served at the street festivals of Oslo?",
+      "category": "ENTY",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0042",
+      "text": "Who founded the oldest university in Zagreb?",
+      "category": "HUM",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0043",
+      "text": "In which country would a traveler find Paris?",
+      "category": "LOC",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0044",
+      "text": "In what year was Havana founded?",
+      "category": "NUM",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0045",
+      "text": "Who was the mayor of Tokyo during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0046",
+      "text": "What dish is Lima famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0047",
+      "text": "Why do leaves change color in autumn?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0048",
+      "text": "Which river runs through the center of Mumbai?",
+      "category": "LOC",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0049",
+      "text": "Which river runs through the center of Lima?",
+      "category": "LOC",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0050",
+      "text": "Who founded the oldest university in Dublin?",
+      "category": "HUM",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0051",
+      "text": "What dish is Dublin famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0052",
+      "text": "In what year was Quito founded?",
+      "category": "NUM",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0053",
+      "text": "In which hemisphere is Quito situated?",
+      "category": "LOC",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0054",
+      "text": "What does HTTP stand for?",
+      "category": "ABBR",
+      "concepts": [
+        "http"
+      ]
+    },
+    {
+      "id": "q_0055",
+      "text": "How many bridges cross the main river in Prague?",
+      "category": "NUM",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0056",
+      "text": "What does NATO stand for?",
+      "category": "ABBR",
+      "concepts": [
+        "nato"
+      ]
+    },
+    {
+      "id": "q_0057",
+      "text": "Which country is Nairobi located in?",
+      "category": "LOC",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0058",
+      "text": "How many bridges cross the main river in Dublin?",
+      "category": "NUM",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0059",
+      "text": "In which hemisphere is Prague situated?",
+      "category": "LOC",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0060",
+      "text": "What flower is the official symbol of Vienna?",
+      "category": "ENTY",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0061",
+      "text": "In what year was Dublin founded?",
+      "category": "NUM",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0062",
+      "text": "What is the population of Prague?",
+      "category": "NUM",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0063",
+      "text": "What flower is the official symbol of Zagreb?",
+      "category": "ENTY",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0064",
+      "text": "How many bridges cross the main river in Vienna?",
+      "category": "NUM",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0065",
+      "text": "Which architect designed the opera house in Dublin?",
+      "category": "HUM",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0066",
+      "text": "In what year was Oslo founded?",
+      "category": "NUM",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0067",
+      "text": "How many bridges cross the main river in Cairo?",
+      "category": "NUM",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0068",
+      "text": "What mountain range is visible from Cairo?",
+      "category": "LOC",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0069",
+      "text": "What is the history behind the old town of Quito?",
+      "category": "DESC",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0070",
+      "text": "Which river runs through the center of Seoul?",
+      "category": "LOC",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0071",
+      "text": "What is the full form of MIDI?",
+      "category": "ABBR",
+      "concepts": [
+        "midi"
+      ]
+    },
+    {
+      "id": "q_0072",
+      "text": "Which country is Tokyo located in?",
+      "category": "LOC",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0073",
+      "text": "Which airline is headquartered in Oslo?",
+      "category": "ENTY",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0074",
+      "text": "Which river runs through the center of Havana?",
+      "category": "LOC",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0075",
+      "text": "What is the history behind the old town of Dublin?",
+      "category": "DESC",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0076",
+      "text": "In which hemisphere is Mumbai situated?",
+      "category": "LOC",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0077",
+      "text": "Which explorer was born in Cairo?",
+      "category": "HUM",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0078",
+      "text": "What flower is the official symbol of Quito?",
+      "category": "ENTY",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0079",
+      "text": "What is the population of Seoul?",
+      "category": "NUM",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0080",
+      "text": "Which airline is headquartered in Prague?",
+      "category": "ENTY",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0081",
+      "text": "Which country is Dublin located in?",
+      "category": "LOC",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0082",
+      "text": "Which architect designed the opera house in Prague?",
+      "category": "HUM",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0083",
+      "text": "Which river runs through the center of Oslo?",
+      "category": "LOC",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0084",
+      "text": "Which river flows through the heart of Quito?",
+      "category": "LOC",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0085",
+      "text": "What is the population of Paris?",
+      "category": "NUM",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0086",
+      "text": "What is the expansion of DNA?",
+      "category": "ABBR",
+      "concepts": [
+        "dna"
+      ]
+    },
+    {
+      "id": "q_0087",
+      "text": "Which explorer was born in Tokyo?",
+      "category": "HUM",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0088",
+      "text": "Which architect designed the opera house in Havana?",
+      "category": "HUM",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0089",
+      "text": "In which hemisphere is Vienna situated?",
+      "category": "LOC",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0090",
+      "text": "Why is the climate of Seoul so mild?",
+      "category": "DESC",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0091",
+      "text": "What mountain range is visible from Prague?",
+      "category": "LOC",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0092",
+      "text": "What dish is Mumbai famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0093",
+      "text": "Which country is Vienna located in?",
+      "category": "LOC",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0094",
+      "text": "What is the population of Cairo?",
+      "category": "NUM",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0095",
+      "text": "Which explorer was born in Havana?",
+      "category": "HUM",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0096",
+      "text": "Who was the mayor of Oslo during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0097",
+      "text": "What does UNESCO stand for?",
+      "category": "ABBR",
+      "concepts": [
+        "unesco"
+      ]
+    },
+    {
+      "id": "q_0098",
+      "text": "How many bridges cross the main river in Zagreb?",
+      "category": "NUM",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0099",
+      "text": "Which architect designed the opera house in Quito?",
+      "category": "HUM",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0100",
+      "text": "What is the expansion of SONAR?",
+      "category": "ABBR",
+      "concepts": [
+        "sonar"
+      ]
+    },
+    {
+      "id": "q_0101",
+      "text": "Which lake lies along the eastern edge of Tokyo?",
+      "category": "LOC",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0102",
+      "text": "What mountain range is visible from Paris?",
+      "category": "LOC",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0103",
+      "text": "In which hemisphere is Nairobi situated?",
+      "category": "LOC",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0104",
+      "text": "Who founded the oldest university in Havana?",
+      "category": "HUM",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0105",
+      "text": "What dish is Vienna famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0106",
+      "text": "What dish is Oslo famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0107",
+      "text": "Which hemisphere holds the city of Havana?",
+      "category": "LOC",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0108",
+      "text": "Who founded the oldest university in Prague?",
+      "category": "HUM",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0109",
+      "text": "In what year was Lima founded?",
+      "category": "NUM",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0110",
+      "text": "What is metal fatigue?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0111",
+      "text": "Which explorer was born in Paris?",
+      "category": "HUM",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0112",
+      "text": "Which airline is headquartered in Zagreb?",
+      "category": "ENTY",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0113",
+      "text": "Which architect designed the opera house in Vienna?",
+      "category": "HUM",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0114",
+      "text": "What is the history behind the old town of Mumbai?",
+      "category": "DESC",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0115",
+      "text": "In which hemisphere is Cairo situated?",
+      "category": "LOC",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0116",
+      "text": "What is the history behind the old town of Lima?",
+      "category": "DESC",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0117",
+      "text": "Who established the earliest university of Prague?",
+      "category": "HUM",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0118",
+      "text": "What causes a rainbow to appear?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0119",
+      "text": "What is the population of Oslo?",
+      "category": "NUM",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0120",
+      "text": "How many bridges cross the main river in Nairobi?",
+      "category": "NUM",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0121",
+      "text": "Which explorer was born in Seoul?",
+      "category": "HUM",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0122",
+      "text": "Which country is Havana located in?",
+      "category": "LOC",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0123",
+      "text": "Who was the mayor of Nairobi during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0124",
+      "text": "How many bridges cross the main river in Oslo?",
+      "category": "NUM",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0125",
+      "text": "Why is the climate of Lima so mild?",
+      "category": "DESC",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0126",
+      "text": "What is the full form of UNHCR?",
+      "category": "ABBR",
+      "concepts": [
+        "unhcr"
+      ]
+    },
+    {
+      "id": "q_0127",
+      "text": "Which country is Zagreb located in?",
+      "category": "LOC",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0128",
+      "text": "What is the population of Quito?",
+      "category": "NUM",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0129",
+      "text": "Which explorer was born in Zagreb?",
+      "category": "HUM",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0130",
+      "text": "Which architect designed the opera house in Paris?",
+      "category": "HUM",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0131",
+      "text": "Why is the climate of Oslo so mild?",
+      "category": "DESC",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0132",
+      "text": "What does OPEC stand for?",
+      "category": "ABBR",
+      "concepts": [
+        "opec"
+      ]
+    },
+    {
+      "id": "q_0133",
+      "text": "How many bridges cross the main river in Havana?",
+      "category": "NUM",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0134",
+      "text": "Why is the climate of Prague so mild?",
+      "category": "DESC",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0135",
+      "text": "Which architect designed the opera house in Nairobi?",
+      "category": "HUM",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0136",
+      "text": "Which airline is headquartered in Paris?",
+      "category": "ENTY",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0137",
+      "text": "What is a black hole?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0138",
+      "text": "Which explorer was born in Lima?",
+      "category": "HUM",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0139",
+      "text": "How many bridges cross the main river in Lima?",
+      "category": "NUM",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0140",
+      "text": "Who founded the oldest university in Nairobi?",
+      "category": "HUM",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0141",
+      "text": "What flower is the official symbol of Tokyo?",
+      "category": "ENTY",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0142",
+      "text": "What is the population of Lima?",
+      "category": "NUM",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0143",
+      "text": "What dish is Nairobi famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0144",
+      "text": "Why is the climate of Quito so mild?",
+      "category": "DESC",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0145",
+      "text": "What is the history behind the old town of Prague?",
+      "category": "DESC",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0146",
+      "text": "How many bridges cross the main river in Tokyo?",
+      "category": "NUM",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0147",
+      "text": "Who founded the oldest university in Quito?",
+      "category": "HUM",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0148",
+      "text": "Which river runs through the center of Zagreb?",
+      "category": "LOC",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0149",
+      "text": "What is the full form of NASA?",
+      "category": "ABBR",
+      "concepts": [
+        "nasa"
+      ]
+    },
+    {
+      "id": "q_0150",
+      "text": "What flower is the official symbol of Nairobi?",
+      "category": "ENTY",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0151",
+      "text": "What mountain range is visible from Tokyo?",
+      "category": "LOC",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0152",
+      "text": "Which architect designed the opera house in Oslo?",
+      "category": "HUM",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0153",
+      "text": "In what year was Paris founded?",
+      "category": "NUM",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0154",
+      "text": "How many public parks lie within the city limits of Oslo?",
+      "category": "NUM",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0155",
+      "text": "Which explorer was born in Prague?",
+      "category": "HUM",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0156",
+      "text": "What does RADAR stand for?",
+      "category": "ABBR",
+      "concepts": [
+        "radar"
+      ]
+    },
+    {
+      "id": "q_0157",
+      "text": "Which country is Cairo located in?",
+      "category": "LOC",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0158",
+      "text": "What flower is the official symbol of Oslo?",
+      "category": "ENTY",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0159",
+      "text": "Why is the sky blue?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0160",
+      "text": "What is the population of Dublin?",
+      "category": "NUM",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0161",
+      "text": "What is the population of Nairobi?",
+      "category": "NUM",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0162",
+      "text": "What mountain range is visible from Dublin?",
+      "category": "LOC",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0163",
+      "text": "In which hemisphere is Tokyo situated?",
+      "category": "LOC",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0164",
+      "text": "Which country is Lima located in?",
+      "category": "LOC",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0165",
+      "text": "What is the history behind the old town of Seoul?",
+      "category": "DESC",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0166",
+      "text": "What does GDP stand for?",
+      "category": "ABBR",
+      "concepts": [
+        "gdp"
+      ]
+    },
+    {
+      "id": "q_0167",
+      "text": "Which architect designed the opera house in Cairo?",
+      "category": "HUM",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0168",
+      "text": "What dish is Prague famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0169",
+      "text": "What does INTERPOL stand for?",
+      "category": "ABBR",
+      "concepts": [
+        "interpol"
+      ]
+    },
+    {
+      "id": "q_0170",
+      "text": "What is fermentation?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0171",
+      "text": "In what year was Vienna founded?",
+      "category": "NUM",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0172",
+      "text": "How many bridges cross the main river in Seoul?",
+      "category": "NUM",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0173",
+      "text": "Which airline is headquartered in Mumbai?",
+      "category": "ENTY",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0174",
+      "text": "In which hemisphere is Havana situated?",
+      "category": "LOC",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0175",
+      "text": "What is the greenhouse effect?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0176",
+      "text": "What is photosynthesis?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0177",
+      "text": "Why do onions make you cry?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0178",
+      "text": "Why does bread rise when baked?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0179",
+      "text": "What is the full form of SCUBA?",
+      "category": "ABBR",
+      "concepts": [
+        "scuba"
+      ]
+    },
+    {
+      "id": "q_0180",
+      "text": "What flower is the official symbol of Seoul?",
+      "category": "ENTY",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0181",
+      "text": "Which country is Mumbai located in?",
+      "category": "LOC",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0182",
+      "text": "How do tides form?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0183",
+      "text": "Who was the mayor of Mumbai during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0184",
+      "text": "What dish is Tokyo famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0185",
+      "text": "Which river runs through the center of Tokyo?",
+      "category": "LOC",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0186",
+      "text": "What is the history behind the old town of Paris?",
+      "category": "DESC",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0187",
+      "text": "Which river runs through the center of Paris?",
+      "category": "LOC",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0188",
+      "text": "Which river runs through the center of Nairobi?",
+      "category": "LOC",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0189",
+      "text": "Which country is Oslo located in?",
+      "category": "LOC",
+      "concepts": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_0190",
+      "text": "Who founded the oldest university in Mumbai?",
+      "category": "HUM",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0191",
+      "text": "In what year was Prague founded?",
+      "category": "NUM",
+      "concepts": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_0192",
+      "text": "How does a compass work?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0193",
+      "text": "How many bridges cross the main river in Mumbai?",
+      "category": "NUM",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0194",
+      "text": "Which explorer was born in Nairobi?",
+      "category": "HUM",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0195",
+      "text": "Who established the earliest university of Lima?",
+      "category": "HUM",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0196",
+      "text": "What mountain range is visible from Quito?",
+      "category": "LOC",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0197",
+      "text": "Which architect designed the opera house in Zagreb?",
+      "category": "HUM",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0198",
+      "text": "Who founded the oldest university in Seoul?",
+      "category": "HUM",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0199",
+      "text": "Which architect designed the opera house in Seoul?",
+      "category": "HUM",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0200",
+      "text": "Who was the mayor of Quito during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_0201",
+      "text": "Who was the mayor of Lima during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0202",
+      "text": "Which explorer was born in Dublin?",
+      "category": "HUM",
+      "concepts": [
+        "dublin"
+      ]
+    },
+    {
+      "id": "q_0203",
+      "text": "What is the population of Zagreb?",
+      "category": "NUM",
+      "concepts": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_0204",
+      "text": "What dish is Paris famous for?",
+      "category": "ENTY",
+      "concepts": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_0205",
+      "text": "Which river runs through the center of Cairo?",
+      "category": "LOC",
+      "concepts": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_0206",
+      "text": "Which airline is headquartered in Havana?",
+      "category": "ENTY",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0207",
+      "text": "Which airline is headquartered in Vienna?",
+      "category": "ENTY",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0208",
+      "text": "What flower is the official symbol of Lima?",
+      "category": "ENTY",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0209",
+      "text": "In what year was Seoul founded?",
+      "category": "NUM",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0210",
+      "text": "Who founded the oldest university in Vienna?",
+      "category": "HUM",
+      "concepts": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_0211",
+      "text": "Which architect designed the opera house in Tokyo?",
+      "category": "HUM",
+      "concepts": [
+        "tokyo"
+      ]
+    },
+    {
+      "id": "q_0212",
+      "text": "What mountain range is visible from Nairobi?",
+      "category": "LOC",
+      "concepts": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_0213",
+      "text": "Which country is Seoul located in?",
+      "category": "LOC",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0214",
+      "text": "Who was the mayor of Havana during the 1990s?",
+      "category": "HUM",
+      "concepts": [
+        "havana"
+      ]
+    },
+    {
+      "id": "q_0215",
+      "text": "What mountain range is visible from Seoul?",
+      "category": "LOC",
+      "concepts": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_0216",
+      "text": "Which airline is headquartered in Lima?",
+      "category": "ENTY",
+      "concepts": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_0217",
+      "text": "What is the population of Mumbai?",
+      "category": "NUM",
+      "concepts": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_0218",
+      "text": "How does a refrigerator keep food cold?",
+      "category": "DESC",
+      "concepts": []
+    },
+    {
+      "id": "q_0219",
+      "text": "What is the expansion of the acronym LASER?",
+      "category": "ABBR",
+      "concepts": [
+        "laser"
+      ]
+    },
+    {
+      "id": "q_0220",
+      "text": "What flower is the official symbol of Paris?",
+      "category": "ENTY",
+      "concepts": [
+        "paris"
+      ]
+    }
+  ],
+  "ground_truth": {
+    "loc_hum_shared_concept_pairs": [
+      [
+        "q_0004",
+        "q_0183"
+      ],
+      [
+        "q_0004",
+        "q_0190"
+      ],
+      [
+        "q_0010",
+        "q_0042"
+      ],
+      [
+        "q_0010",
+        "q_0129"
+      ],
+      [
+        "q_0010",
+        "q_0197"
+      ],
+      [
+        "q_0013",
+        "q_0050"
+      ],
+      [
+        "q_0013",
+        "q_0065"
+      ],
+      [
+        "q_0013",
+        "q_0202"
+      ],
+      [
+        "q_0014",
+        "q_0028"
+      ],
+      [
+        "q_0014",
+        "q_0099"
+      ],
+      [
+        "q_0014",
+        "q_0147"
+      ],
+      [
+        "q_0014",
+        "q_0200"
+      ],
+      [
+        "q_0022",
+        "q_0033"
+      ],
+      [
+        "q_0022",
+        "q_0138"
+      ],
+      [
+        "q_0022",
+        "q_0195"
+      ],
+      [
+        "q_0022",
+        "q_0201"
+      ],
+      [
+        "q_0024",
+        "q_0042"
+      ],
+      [
+        "q_0024",
+        "q_0129"
+      ],
+      [
+        "q_0024",
+        "q_0197"
+      ],
+      [
+        "q_0029",
+        "q_0008"
+      ],
+      [
+        "q_0029",
+        "q_0018"
+      ],
+      [
+        "q_0029",
+        "q_0111"
+      ],
+      [
+        "q_0029",
+        "q_0130"
+      ],
+      [
+        "q_0030",
+        "q_0033"
+      ],
+      [
+        "q_0030",
+        "q_0138"
+      ],
+      [
+        "q_0030",
+        "q_0195"
+      ],
+      [
+        "q_0030",
+        "q_0201"
+      ],
+      [
+        "q_0035",
+        "q_0039"
+      ],
+      [
+        "q_0035",
+        "q_0113"
+      ],
+      [
+        "q_0035",
+        "q_0210"
+      ],
+      [
+        "q_0043",
+        "q_0008"
+      ],
+      [
+        "q_0043",
+        "q_0018"
+      ],
+      [
+        "q_0043",
+        "q_0111"
+      ],
+      [
+        "q_0043",
+        "q_0130"
+      ],
+      [
+        "q_0048",
+        "q_0183"
+      ],
+      [
+        "q_0048",
+        "q_0190"
+      ],
+      [
+        "q_0049",
+        "q_0033"
+      ],
+      [
+        "q_0049",
+        "q_0138"
+      ],
+      [
+        "q_0049",
+        "q_0195"
+      ],
+      [
+        "q_0049",
+        "q_0201"
+      ],
+      [
+        "q_0053",
+        "q_0028"
+      ],
+      [
+        "q_0053",
+        "q_0099"
+      ],
+      [
+        "q_0053",
+        "q_0147"
+      ],
+      [
+        "q_0053",
+        "q_0200"
+      ],
+      [
+        "q_0057",
+        "q_0123"
+      ],
+      [
+        "q_0057",
+        "q_0135"
+      ],
+      [
+        "q_0057",
+        "q_0140"
+      ],
+      [
+        "q_0057",
+        "q_0194"
+      ],
+      [
+        "q_0059",
+        "q_0082"
+      ],
+      [
+        "q_0059",
+        "q_0108"
+      ],
+      [
+        "q_0059",
+        "q_0117"
+      ],
+      [
+        "q_0059",
+        "q_0155"
+      ],
+      [
+        "q_0068",
+        "q_0011"
+      ],
+      [
+        "q_0068",
+        "q_0036"
+      ],
+      [
+        "q_0068",
+        "q_0077"
+      ],
+      [
+        "q_0068",
+        "q_0167"
+      ],
+      [
+        "q_0070",
+        "q_0121"
+      ],
+      [
+        "q_0070",
+        "q_0198"
+      ],
+      [
+        "q_0070",
+        "q_0199"
+      ],
+      [
+        "q_0072",
+        "q_0007"
+      ],
+      [
+        "q_0072",
+        "q_0045"
+      ],
+      [
+        "q_0072",
+        "q_0087"
+      ],
+      [
+        "q_0072",
+        "q_0211"
+      ],
+      [
+        "q_0074",
+        "q_0088"
+      ],
+      [
+        "q_0074",
+        "q_0095"
+      ],
+      [
+        "q_0074",
+        "q_0104"
+      ],
+      [
+        "q_0074",
+        "q_0214"
+      ],
+      [
+        "q_0076",
+        "q_0183"
+      ],
+      [
+        "q_0076",
+        "q_0190"
+      ],
+      [
+        "q_0081",
+        "q_0050"
+      ],
+      [
+        "q_0081",
+        "q_0065"
+      ],
+      [
+        "q_0081",
+        "q_0202"
+      ],
+      [
+        "q_0083",
+        "q_0006"
+      ],
+      [
+        "q_0083",
+        "q_0096"
+      ],
+      [
+        "q_0083",
+        "q_0152"
+      ],
+      [
+        "q_0084",
+        "q_0028"
+      ],
+      [
+        "q_0084",
+        "q_0099"
+      ],
+      [
+        "q_0084",
+        "q_0147"
+      ],
+      [
+        "q_0084",
+        "q_0200"
+      ],
+      [
+        "q_0089",
+        "q_0039"
+      ],
+      [
+        "q_0089",
+        "q_0113"
+      ],
+      [
+        "q_0089",
+        "q_0210"
+      ],
+      [
+        "q_0091",
+        "q_0082"
+      ],
+      [
+        "q_0091",
+        "q_0108"
+      ],
+      [
+        "q_0091",
+        "q_0117"
+      ],
+      [
+        "q_0091",
+        "q_0155"
+      ],
+      [
+        "q_0093",
+        "q_0039"
+      ],
+      [
+        "q_0093",
+        "q_0113"
+      ],
+      [
+        "q_0093",
+        "q_0210"
+      ],
+      [
+        "q_0101",
+        "q_0007"
+      ],
+      [
+        "q_0101",
+        "q_0045"
+      ],
+      [
+        "q_0101",
+        "q_0087"
+      ],
+      [
+        "q_0101",
+        "q_0211"
+      ],
+      [
+        "q_0102",
+        "q_0008"
+      ],
+      [
+        "q_0102",
+        "q_0018"
+      ],
+      [
+        "q_0102",
+        "q_0111"
+      ],
+      [
+        "q_0102",
+        "q_0130"
+      ],
+      [
+        "q_0103",
+        "q_0123"
+      ],
+      [
+        "q_0103",
+        "q_0135"
+      ],
+      [
+        "q_0103",
+        "q_0140"
+      ],
+      [
+        "q_0103",
+        "q_0194"
+      ],
+      [
+        "q_0107",
+        "q_0088"
+      ],
+      [
+        "q_0107",
+        "q_0095"
+      ],
+      [
+        "q_0107",
+        "q_0104"
+      ],
+      [
+        "q_0107",
+        "q_0214"
+      ],
+      [
+        "q_0115",
+        "q_0011"
+      ],
+      [
+        "q_0115",
+        "q_0036"
+      ],
+      [
+        "q_0115",
+        "q_0077"
+      ],
+      [
+        "q_0115",
+        "q_0167"
+      ],
+      [
+        "q_0122",
+        "q_0088"
+      ],
+      [
+        "q_0122",
+        "q_0095"
+      ],
+      [
+        "q_0122",
+        "q_0104"
+      ],
+      [
+        "q_0122",
+        "q_0214"
+      ],
+      [
+        "q_0127",
+        "q_0042"
+      ],
+      [
+        "q_0127",
+        "q_0129"
+      ],
+      [
+        "q_0127",
+        "q_0197"
+      ],
+      [
+        "q_0148",
+        "q_0042"
+      ],
+      [
+        "q_0148",
+        "q_0129"
+      ],
+      [
+        "q_0148",
+        "q_0197"
+      ],
+      [
+        "q_0151",
+        "q_0007"
+      ],
+      [
+        "q_0151",
+        "q_0045"
+      ],
+      [
+        "q_0151",
+        "q_0087"
+      ],
+      [
+        "q_0151",
+        "q_0211"
+      ],
+      [
+        "q_0157",
+        "q_0011"
+      ],
+      [
+        "q_0157",
+        "q_0036"
+      ],
+      [
+        "q_0157",
+        "q_0077"
+      ],
+      [
+        "q_0157",
+        "q_0167"
+      ],
+      [
+        "q_0162",
+        "q_0050"
+      ],
+      [
+        "q_0162",
+        "q_0065"
+      ],
+      [
+        "q_0162",
+        "q_0202"
+      ],
+      [
+        "q_0163",
+        "q_0007"
+      ],
+      [
+        "q_0163",
+        "q_0045"
+      ],
+      [
+        "q_0163",
+        "q_0087"
+      ],
+      [
+        "q_0163",
+        "q_0211"
+      ],
+      [
+        "q_0164",
+        "q_0033"
+      ],
+      [
+        "q_0164",
+        "q_0138"
+      ],
+      [
+        "q_0164",
+        "q_0195"
+      ],
+      [
+        "q_0164",
+        "q_0201"
+      ],
+      [
+        "q_0174",
+        "q_0088"
+      ],
+      [
+        "q_0174",
+        "q_0095"
+      ],
+      [
+        "q_0174",
+        "q_0104"
+      ],
+      [
+        "q_0174",
+        "q_0214"
+      ],
+      [
+        "q_0181",
+        "q_0183"
+      ],
+      [
+        "q_0181",
+        "q_0190"
+      ],
+      [
+        "q_0185",
+        "q_0007"
+      ],
+      [
+        "q_0185",
+        "q_0045"
+      ],
+      [
+        "q_0185",
+        "q_0087"
+      ],
+      [
+        "q_0185",
+        "q_0211"
+      ],
+      [
+        "q_0187",
+        "q_0008"
+      ],
+      [
+        "q_0187",
+        "q_0018"
+      ],
+      [
+        "q_0187",
+        "q_0111"
+      ],
+      [
+        "q_0187",
+        "q_0130"
+      ],
+      [
+        "q_0188",
+        "q_0123"
+      ],
+      [
+        "q_0188",
+        "q_0135"
+      ],
+      [
+        "q_0188",
+        "q_0140"
+      ],
+      [
+        "q_0188",
+        "q_0194"
+      ],
+      [
+        "q_0189",
+        "q_0006"
+      ],
+      [
+        "q_0189",
+        "q_0096"
+      ],
+      [
+        "q_0189",
+        "q_0152"
+      ],
+      [
+        "q_0196",
+        "q_0028"
+      ],
+      [
+        "q_0196",
+        "q_0099"
+      ],
+      [
+        "q_0196",
+        "q_0147"
+      ],
+      [
+        "q_0196",
+        "q_0200"
+      ],
+      [
+        "q_0205",
+        "q_0011"
+      ],
+      [
+        "q_0205",
+        "q_0036"
+      ],
+      [
+        "q_0205",
+        "q_0077"
+      ],
+      [
+        "q_0205",
+        "q_0167"
+      ],
+      [
+        "q_0212",
+        "q_0123"
+      ],
+      [
+        "q_0212",
+        "q_0135"
+      ],
+      [
+        "q_0212",
+        "q_0140"
+      ],
+      [
+        "q_0212",
+        "q_0194"
+      ],
+      [
+        "q_0213",
+        "q_0121"
+      ],
+      [
+        "q_0213",
+        "q_0198"
+      ],
+      [
+        "q_0213",
+        "q_0199"
+      ],
+      [
+        "q_0215",
+        "q_0121"
+      ],
+      [
+        "q_0215",
+        "q_0198"
+      ],
+      [
+        "q_0215",
+        "q_0199"
+      ]
+    ]
+  }
+}
