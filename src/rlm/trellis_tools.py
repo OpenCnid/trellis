@@ -53,8 +53,14 @@ class TrellisNeo4j:
 
     def write_derived_insight(self, subject: str, verb: str, obj: str, sourceNodeIds: list) -> str:
         """
-        The ONLY permitted write operation. Allows the RLM to append derived insights 
+        The ONLY permitted write operation. Allows the RLM to append derived insights
         to the belief state graph, linking them to specific AST nodes (sourceNodeIds).
+
+        Re-deriving a contested fact (one quarantined by the Phase 4
+        invalidation sweep because its source bytes were orphaned by a
+        document update) restores it to trusted state: the contested flag
+        clears, orphaned hashes are dropped from live provenance, and
+        orphanedSourceIds/rederivedAt remain as audit history.
         """
         _count_tool_call()
         if not sourceNodeIds:
@@ -68,7 +74,10 @@ class TrellisNeo4j:
         MERGE (s)-[r:DERIVED_INSIGHT {verb: toLower($verb)}]->(o)
         SET s.sourceNodeIds = coalesce(s.sourceNodeIds, []) + [x IN $sourceNodeIds WHERE NOT x IN coalesce(s.sourceNodeIds, [])],
             o.sourceNodeIds = coalesce(o.sourceNodeIds, []) + [x IN $sourceNodeIds WHERE NOT x IN coalesce(o.sourceNodeIds, [])],
-            r.sourceNodeIds = coalesce(r.sourceNodeIds, []) + [x IN $sourceNodeIds WHERE NOT x IN coalesce(r.sourceNodeIds, [])]
+            r.rederivedAt = CASE WHEN coalesce(r.contested, false) THEN timestamp() ELSE r.rederivedAt END,
+            r.sourceNodeIds = [x IN coalesce(r.sourceNodeIds, []) + [y IN $sourceNodeIds WHERE NOT y IN coalesce(r.sourceNodeIds, [])]
+                               WHERE NOT x IN coalesce(r.orphanedSourceIds, [])],
+            r.contested = false
         RETURN s.name AS subject, r.verb AS verb, o.name AS object
         """
         try:

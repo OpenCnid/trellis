@@ -52,7 +52,7 @@ Three specific aggravating factors:
 | **Verification-on-hit (sampled)** | On each cache hit, re-classify with probability *p* (e.g. 5%) and compare. Disagreement quarantines the edge and triggers arbitration by a stronger model. | Converts $O(1)$ hits into $(1-p)\cdot O(1) + p\cdot O(\text{subcall})$ — tunable, and errors are caught in expected $1/p$ reads instead of never. |
 | **Confidence scoring at write time** | Extend `write_derived_insight` to carry a confidence property (from sub-LLM self-report or logprobs). Low-confidence edges get mandatory verification-on-hit; high-confidence edges get the sampled rate. | Near-zero marginal write cost; concentrates verification spend where the classifier was actually unsure. |
 | **Consensus writes for contested categories** | For rubric-identified confusable boundaries (LOC/ENTY, HUM/DESC), require 2-of-3 agreement across sub-calls before caching. | ~2–3× classification cost on the contested subset only — still one-time, still amortized. |
-| **Merkle-anchored invalidation** | Already half-built: because edges carry `sourceNodeIds`, re-ingesting a changed document can mechanically invalidate every derived fact whose source hashes disappeared. | Free at read time; requires an ingestion-side sweep job. |
+| **Merkle-anchored invalidation** | **Shipped in Phase 4.** Edges carry `sourceNodeIds`; re-ingesting a changed document diffs Merkle node sets and a quarantine sweep contests every derived fact whose source hashes disappeared. Validated end-to-end by the [Update Drill](./UPDATE_DRILL_REPORT.md): recall 1.000, precision 1.000, post-update F1 1.000 through three induced cache poisonings. | Free at read time; sweep runs as an ingestion-side worker (`invalidation_queue`). |
 
 ## 3. Future Improvements
 

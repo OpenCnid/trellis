@@ -1,0 +1,205 @@
+{
+  "base_dataset": "oolong-pairs-trec-synthetic-v1",
+  "mutated_dataset": "oolong-pairs-trec-synthetic-v1-drill-v2",
+  "seed": 1337,
+  "mutations": [
+    {
+      "id": "q_0041",
+      "flavor": "category_flip",
+      "before": {
+        "text": "Who founded the oldest university in Oslo?",
+        "category": "HUM",
+        "concepts": [
+          "oslo"
+        ]
+      },
+      "after": {
+        "text": "What local delicacy is served at the street festivals of Oslo?",
+        "category": "ENTY",
+        "concepts": [
+          "oslo"
+        ]
+      }
+    },
+    {
+      "id": "q_0043",
+      "flavor": "rewrite",
+      "before": {
+        "text": "In which hemisphere is Paris situated?",
+        "category": "LOC",
+        "concepts": [
+          "paris"
+        ]
+      },
+      "after": {
+        "text": "In which country would a traveler find Paris?",
+        "category": "LOC",
+        "concepts": [
+          "paris"
+        ]
+      }
+    },
+    {
+      "id": "q_0084",
+      "flavor": "rewrite",
+      "before": {
+        "text": "Which river runs through the center of Quito?",
+        "category": "LOC",
+        "concepts": [
+          "quito"
+        ]
+      },
+      "after": {
+        "text": "Which river flows through the heart of Quito?",
+        "category": "LOC",
+        "concepts": [
+          "quito"
+        ]
+      }
+    },
+    {
+      "id": "q_0096",
+      "flavor": "city_swap",
+      "before": {
+        "text": "Who was the mayor of Zagreb during the 1990s?",
+        "category": "HUM",
+        "concepts": [
+          "zagreb"
+        ]
+      },
+      "after": {
+        "text": "Who was the mayor of Oslo during the 1990s?",
+        "category": "HUM",
+        "concepts": [
+          "oslo"
+        ]
+      }
+    },
+    {
+      "id": "q_0101",
+      "flavor": "category_flip",
+      "before": {
+        "text": "What is the population of Tokyo?",
+        "category": "NUM",
+        "concepts": [
+          "tokyo"
+        ]
+      },
+      "after": {
+        "text": "Which lake lies along the eastern edge of Tokyo?",
+        "category": "LOC",
+        "concepts": [
+          "tokyo"
+        ]
+      }
+    },
+    {
+      "id": "q_0107",
+      "flavor": "rewrite",
+      "before": {
+        "text": "What mountain range is visible from Havana?",
+        "category": "LOC",
+        "concepts": [
+          "havana"
+        ]
+      },
+      "after": {
+        "text": "Which hemisphere holds the city of Havana?",
+        "category": "LOC",
+        "concepts": [
+          "havana"
+        ]
+      }
+    },
+    {
+      "id": "q_0117",
+      "flavor": "rewrite",
+      "before": {
+        "text": "Who was the mayor of Prague during the 1990s?",
+        "category": "HUM",
+        "concepts": [
+          "prague"
+        ]
+      },
+      "after": {
+        "text": "Who established the earliest university of Prague?",
+        "category": "HUM",
+        "concepts": [
+          "prague"
+        ]
+      }
+    },
+    {
+      "id": "q_0154",
+      "flavor": "category_flip",
+      "before": {
+        "text": "In which hemisphere is Oslo situated?",
+        "category": "LOC",
+        "concepts": [
+          "oslo"
+        ]
+      },
+      "after": {
+        "text": "How many public parks lie within the city limits of Oslo?",
+        "category": "NUM",
+        "concepts": [
+          "oslo"
+        ]
+      }
+    },
+    {
+      "id": "q_0181",
+      "flavor": "city_swap",
+      "before": {
+        "text": "Which country is Prague located in?",
+        "category": "LOC",
+        "concepts": [
+          "prague"
+        ]
+      },
+      "after": {
+        "text": "Which country is Mumbai located in?",
+        "category": "LOC",
+        "concepts": [
+          "mumbai"
+        ]
+      }
+    },
+    {
+      "id": "q_0195",
+      "flavor": "rewrite",
+      "before": {
+        "text": "Which architect designed the opera house in Lima?",
+        "category": "HUM",
+        "concepts": [
+          "lima"
+        ]
+      },
+      "after": {
+        "text": "Who established the earliest university of Lima?",
+        "category": "HUM",
+        "concepts": [
+          "lima"
+        ]
+      }
+    },
+    {
+      "id": "q_0202",
+      "flavor": "city_swap",
+      "before": {
+        "text": "Which explorer was born in Vienna?",
+        "category": "HUM",
+        "concepts": [
+          "vienna"
+        ]
+      },
+      "after": {
+        "text": "Which explorer was born in Dublin?",
+        "category": "HUM",
+        "concepts": [
+          "dublin"
+        ]
+      }
+    }
+  ]
+}

@@ -12,6 +12,7 @@ Start here to understand **why** Trellis was built and what problems it solves.
 - **`PRD.md`:** The Phase 1 MVP requirements and features.
 - **`VALIDATION_STRATEGY.md`:** How we proved the theory before writing production code.
 - **`PHASE_2_PRD.md`:** The roadmap for the next quarter (Frontend UI, Enterprise parsing, Vector fallbacks).
+- **`PHASE_4_PRD.md`:** The invalidation loop (versioned re-ingestion, Merkle diff, quarantine sweep) and the Update Drill benchmark.
 
 ### 2. Architecture & Theory (`/architecture`)
 Read these to understand **how** Trellis works under the hood.

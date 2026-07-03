@@ -1,0 +1,44 @@
+{
+  "docKey": "oolong-corpus",
+  "fromVersion": 1,
+  "toVersion": 2,
+  "rootHash": "54cd8bb946698a262019d8254842a3f76f8b7601314555e9cdf678f63918e6a4",
+  "totalNodes": 881,
+  "totalLeaves": 440,
+  "totalRecords": 220,
+  "diff": {
+    "added": 23,
+    "orphaned": 23,
+    "retained": 858
+  },
+  "addedLeaves": 11,
+  "changedRecords": [
+    "q_0041",
+    "q_0043",
+    "q_0084",
+    "q_0096",
+    "q_0101",
+    "q_0107",
+    "q_0117",
+    "q_0154",
+    "q_0181",
+    "q_0195",
+    "q_0202"
+  ],
+  "reprocessing_ratio_records": 0.05,
+  "reprocessing_ratio_leaves": 0.025,
+  "sweep": {
+    "contestedNodes": 14,
+    "contestedRelationships": 11,
+    "batches": 1
+  },
+  "invalidation_audit": {
+    "affected": 11,
+    "affected_contested": 11,
+    "total_contested": 11,
+    "recall": 1,
+    "precision": 1,
+    "missed_ids": [],
+    "false_positive_ids": []
+  }
+}

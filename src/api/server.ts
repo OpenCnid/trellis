@@ -1,7 +1,9 @@
 import express from 'express';
 import { parseMarkdownToAST, parseUnstructuredJSONToAST, ASTNode } from '../core/ast/parser.js';
+import { diffVersions, MerkleDiff } from '../core/ast/diff.js';
+import { registerDocumentVersion, recordDocumentNodes, VersionRegistration } from '../core/ast/registry.js';
 import { pgPool, neo4jDriver } from '../config/db.js';
-import { extractionQueue, rlmQueue } from '../workers/queue.js';
+import { extractionQueue, rlmQueue, invalidationQueue } from '../workers/queue.js';
 import multer from 'multer';
 import { execFile } from 'child_process';
 import util from 'util';
@@ -55,7 +57,16 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
     // Flatten AST
     const allNodes = flattenAST(rootNode);
 
-    // 2. Persist AST to PostgreSQL
+    // Document identity (Phase 4): a doc_key ties versions of the same
+    // document together. Without one, the root hash is the key — every
+    // anonymous ingest is version 1 of its own document.
+    const docKeyRaw = typeof req.query.doc_key === 'string'
+      ? req.query.doc_key
+      : (req.file && typeof (req.body as any)?.doc_key === 'string' ? (req.body as any).doc_key : undefined);
+    const docKey = docKeyRaw?.trim() || rootNode.id;
+
+    // 2. Persist AST + version membership + registry row in one transaction
+    let registration: VersionRegistration;
     const client = await pgPool.connect();
     try {
       await client.query('BEGIN');
@@ -66,6 +77,8 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
           ON CONFLICT (id) DO NOTHING
         `, [node.id, rootNode.id, JSON.stringify(node)]);
       }
+      await recordDocumentNodes(client, rootNode.id, allNodes.map(n => n.id));
+      registration = await registerDocumentVersion(client, docKey, rootNode.id);
       await client.query('COMMIT');
     } catch (dbErr) {
       await client.query('ROLLBACK');
@@ -74,8 +87,31 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
       client.release();
     }
 
-    // 3. Fan Out to BullMQ for leaf nodes
-    const leafNodes = allNodes.filter(n => n.content && typeof n.content === 'string');
+    // 3. Merkle diff against the prior version. Shared subtree hashes are
+    // skipped entirely; only genuinely new leaf nodes enter the
+    // extraction queue. Byte-identical re-ingest yields an empty diff
+    // and queues nothing.
+    let diff: MerkleDiff | null = null;
+    if (registration.priorRootHash) {
+      diff = await diffVersions(pgPool, registration.priorRootHash, rootNode.id);
+      if (diff.orphaned.length > 0) {
+        // Quarantine sweep (Milestone 3): facts derived from bytes that
+        // vanished in this version get contested by the worker.
+        await invalidationQueue.add('sweep', {
+          docKey,
+          oldVersion: registration.version - 1,
+          newVersion: registration.version,
+          orphanedHashes: diff.orphaned
+        });
+        console.log(`[Ingest] ${docKey} v${registration.version}: queued invalidation sweep for ${diff.orphaned.length} orphaned node(s).`);
+      }
+    }
+
+    // 4. Fan Out to BullMQ for leaf nodes (added-only on re-ingest)
+    const addedSet = diff ? new Set(diff.added) : null;
+    const leafNodes = allNodes.filter(n =>
+      n.content && typeof n.content === 'string' && (!addedSet || addedSet.has(n.id))
+    );
     for (const leaf of leafNodes) {
       await extractionQueue.add('extract', {
         astNodeId: leaf.id,
@@ -83,12 +119,17 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
       });
     }
 
-    // 4. Respond with 202 Accepted and the Root AST Node ID
+    // 5. Respond with 202 Accepted, the Root AST Node ID, and diff telemetry
     res.status(202).json({
       message: 'Accepted',
       rootId: rootNode.id,
+      docKey: registration.docKey,
+      version: registration.version,
       totalNodes: allNodes.length,
-      leafNodesQueued: leafNodes.length
+      leafNodesQueued: leafNodes.length,
+      diff: diff
+        ? { added: diff.added.length, orphaned: diff.orphaned.length, retained: diff.retained.length }
+        : null
     });
   } catch (error: any) {
     console.error("Error during ingestion:", error);
@@ -102,6 +143,11 @@ app.get('/retrieve', async (req, res) => {
     return res.status(400).send('Expected entity query parameter');
   }
 
+  // Contested facts (provenance orphaned by a re-ingest) are excluded
+  // from retrieval by default; pass ?includeContested=true to inspect
+  // the quarantined belief history.
+  const includeContested = req.query.includeContested === 'true';
+
   const session = neo4jDriver.session();
   let sourceNodeIds = new Set<string>();
   let graphData: any[] = [];
@@ -109,12 +155,14 @@ app.get('/retrieve', async (req, res) => {
     const neoRes = await session.run(`
       MATCH (e:Entity)-[rel:ACTION|CONTRADICTS]-(neighbor:Entity)
       WHERE e.name = toLower($entityName)
+        AND ($includeContested OR coalesce(rel.contested, false) = false)
       RETURN e, rel, neighbor
       UNION
       MATCH (e:Entity)-[:ACTION|CONTRADICTS]-(neighbor:Entity)-[rel:CONTRADICTS]-(neighbor_of_neighbor:Entity)
       WHERE e.name = toLower($entityName)
+        AND ($includeContested OR coalesce(rel.contested, false) = false)
       RETURN neighbor AS e, rel, neighbor_of_neighbor AS neighbor
-    `, { entityName });
+    `, { entityName, includeContested });
 
     for (const record of neoRes.records) {
       const e = record.get('e').properties;
