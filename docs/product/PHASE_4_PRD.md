@@ -72,6 +72,20 @@ The drill reuses the OOLONG-Pairs corpus and machinery ([oolong_runner.ts](../..
 * Acts are individually runnable (`npm run drill:update -- --acts 2,3` is LLM-free); `npm run drill:reset` clears the drill's registry versions and semantic leftovers so the drill can re-run from Act 1 (`oolong:ingest` + `oolong:flywheel-prep` restore the v1 graph).
 * Dress-rehearsal results (acts 2–3 against a simulated perfect warm-up cache): diff 23 added / 23 orphaned / 858 retained of 881 nodes; reprocessing ratio 5.0% of records (2.5% of leaves); invalidation recall **1.000**, precision **1.000**; byte-identical re-ingest yields an empty diff and zero sweep activity.
 
+**Full-run results (2026-07-03, all four acts, `gpt-5.4-2026-03-05`; artifact: [update_drill_results.json](../../update_drill_results.json)):**
+
+| Metric | Result | Target |
+|---|---|---|
+| Act 1 baseline | F1 = 1.000 on all 20 queries, $0.8002, 5 sub-calls (all in query 1) | — |
+| Reprocessing ratio | **5.0%** of records (2.5% of leaves) | ≤ 7% |
+| Invalidation recall | **1.000** (11/11 affected cached facts contested) | 1.000 |
+| Invalidation precision | **1.000** (0 false quarantines) | ≥ 0.95 |
+| Post-update F1 | **1.000** on all 20 queries vs. mutated truth — incl. all 3 category flips (e.g. tokyo 16→20 pairs after the NUM→LOC flip re-derived) | 1.000 |
+| Amortization survival | **1 sub-call total** in Act 4: the single batched re-derivation of all 11 contested questions, landing in query 1; 19 subsequent queries ran at 0 | ≈ 0 after re-warm |
+| Cost | drill **$0.7263** vs. full-rebuild baseline **$0.8002** | measured, not estimated |
+
+Note on the amortization metric: the protocol re-classifies *all* contested questions in one batch on the first post-update query regardless of which city that query targets, so "sub-calls on unmutated-city queries = 1" is the re-warm itself, not a cache miss. The per-mutation marginal cost of the update was ~$0.007 of sub-LLM spend. The cost gap vs. rebuild understates the advantage at scale: at 220 questions the rebuild's classification sweep is a single cheap batch — the [FLYWHEEL_EXPLAINER cost model](../benchmarks/FLYWHEEL_EXPLAINER.md) covers how the gap widens with corpus size.
+
 **Metrics reported** (written to `update_drill_results.json`):
 
 | Metric | Definition | Target |
