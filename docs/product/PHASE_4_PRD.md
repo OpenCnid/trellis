@@ -62,8 +62,15 @@ The drill reuses the OOLONG-Pairs corpus and machinery ([oolong_runner.ts](../..
    * *Rewrites* (same category, same city, new wording) — the cached category is now orphaned but re-derivation should reach the same label.
    * *Category flips* (e.g., a LOC question rewritten so the correct label becomes ENTY) — the poisoned-cache scenario: the old cached label is now **wrong**, and only invalidation saves us.
    * *City swaps* (question now mentions a different city) — exercises the deterministic mention scan against fresh text.
-3. **Re-ingest & sweep:** POST v2 under the same `doc_key`; capture diff and sweep telemetry.
+3. **Re-ingest & sweep:** re-ingest v2 under the same `doc_key`; capture diff and sweep telemetry, and measure the invalidation audit **here** (Act 4 legitimately clears quarantines by re-deriving, which would mask what the sweep caught).
 4. **Post-update queries:** re-run the 20-query sequence against the mutated ground truth and score with the existing F1 machinery, plus a post-run [audit_flywheel_cache.ts](../../scripts/audit_flywheel_cache.ts) pass against v2 truth.
+
+**As built (implementation notes):**
+
+* The OOLONG corpus enters the system through the deterministic ingestion loop ([ingest_oolong_dataset.ts](../../scripts/ingest_oolong_dataset.ts)), not the LLM extraction pipeline — so Act 3 re-ingests via [reingest.ts](../../src/benchmarks/oolong/reingest.ts), which drives the same Phase 4 modules `/ingest` uses (registry, Merkle diff, quarantine sweep) and additionally refreshes the deterministic semantic layer for changed records only. Categories are **stripped** on refresh: the re-ingest must not leak ground-truth labels for exactly the mutated rows.
+* If the registry has never seen `doc_key = oolong-corpus`, Act 3 first *adopts* the base corpus as v1 (registry + membership rows only; the semantic layer comes from `oolong:ingest`).
+* Acts are individually runnable (`npm run drill:update -- --acts 2,3` is LLM-free); `npm run drill:reset` clears the drill's registry versions and semantic leftovers so the drill can re-run from Act 1 (`oolong:ingest` + `oolong:flywheel-prep` restore the v1 graph).
+* Dress-rehearsal results (acts 2–3 against a simulated perfect warm-up cache): diff 23 added / 23 orphaned / 858 retained of 881 nodes; reprocessing ratio 5.0% of records (2.5% of leaves); invalidation recall **1.000**, precision **1.000**; byte-identical re-ingest yields an empty diff and zero sweep activity.
 
 **Metrics reported** (written to `update_drill_results.json`):
 

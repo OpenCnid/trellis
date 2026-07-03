@@ -15,7 +15,11 @@
     "oolong:flywheel-prep": "tsx scripts/prepare_oolong_flywheel.ts",
     "oolong:benchmark": "tsx src/benchmarks/oolong_runner.ts",
     "test:versioned-ingest": "tsx scripts/test_versioned_ingest.ts",
-    "test:invalidation-sweep": "tsx scripts/test_invalidation_sweep.ts"
+    "test:invalidation-sweep": "tsx scripts/test_invalidation_sweep.ts",
+    "drill:mutate": "tsx scripts/mutate_oolong_dataset.ts",
+    "drill:reingest": "tsx scripts/reingest_oolong_dataset.ts",
+    "drill:update": "tsx src/benchmarks/update_drill_runner.ts",
+    "drill:reset": "tsx scripts/reset_update_drill.ts"
   },
   "keywords": [],
   "author": "",
