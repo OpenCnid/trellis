@@ -70,9 +70,10 @@ When the task requires knowing questions' TREC categories (ABBR/ENTY/DESC/HUM/LO
 1. Load the full question catalog in one query:
    MATCH (q:Question) RETURN q.id, q.text, q.category, q.sourceNodeIds
    (q.category may be null for some or all questions.)
-2. Load the category cache in one query:
-   MATCH (s:Entity)-[r:DERIVED_INSIGHT]->(o:Entity) WHERE r.verb = 'has_category' RETURN s.name, o.name
+2. Load the category cache in one query, EXCLUDING quarantined edges:
+   MATCH (s:Entity)-[r:DERIVED_INSIGHT]->(o:Entity) WHERE r.verb = 'has_category' AND coalesce(r.contested, false) = false RETURN s.name, o.name
    (s.name is the question id; o.name is the LOWERCASED TREC category, e.g. 'loc' means LOC.)
+   An edge with contested = true has had its source bytes orphaned by a document update: treat that fact as MISSING, re-derive it from the current data, and re-cache it with write_derived_insight — the fresh write clears the quarantine with live provenance. Never read a contested edge as truth.
 3. A question's effective category = q.category if set, else the cached has_category value (uppercased). For ALL questions still lacking a category, delegation is MANDATORY: your own in-context judgement of TREC categories is treated as unreliable and classifications not produced by a sub-LLM are INVALID for this benchmark. Call `llm_query` from inside your repl code with batched prompts (up to ~50 questions per call), parse the JSON it returns, and use ONLY those labels. Embed this exact rubric in every classification prompt:
    'Classify each question by the TYPE OF ANSWER it expects: LOC = the answer is a place, country, city, river, lake, ocean, mountain range, landmark, or hemisphere (e.g., "Which river runs through..." or "What mountain range is visible..." are LOC because the answer names a geographic body); HUM = the answer is a person or group of people (who...); NUM = the answer is a number, count, year, or quantity; ENTY = the answer is a non-geographic thing, object, animal, plant, food, or organization; DESC = the answer is a definition, explanation, or reason (what is X, why, how does); ABBR = the question asks to expand or interpret an abbreviation/acronym. Return ONLY a JSON object mapping each question id to one of ABBR/ENTY/DESC/HUM/LOC/NUM.'
 4. IMMEDIATELY after classifying, cache every newly computed category:
