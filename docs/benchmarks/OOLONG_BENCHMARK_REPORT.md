@@ -8,6 +8,7 @@ This report walks through the benchmark configuration, presents the full telemet
 
 - [FLYWHEEL_EXPLAINER.md](./FLYWHEEL_EXPLAINER.md) — why the cold→warm cost collapse is a paradigm shift, not an optimization.
 - [CRITIQUE_AND_FUTURE.md](./CRITIQUE_AND_FUTURE.md) — honest analysis of risks (frozen-cache errors) and the roadmap.
+- [UPDATE_DRILL_REPORT.md](./UPDATE_DRILL_REPORT.md) — the Phase 4 sequel: the same corpus mutated under a warm cache, and the invalidation loop that keeps F1 at 1.000 through the change.
 
 ---
 
