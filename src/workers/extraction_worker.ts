@@ -4,6 +4,7 @@ import { neo4jDriver, pgPool } from '../config/db.js';
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { GraphSchema, Graph } from '../core/graph/schemas.js';
+import { config } from '../config/index.js';
 import * as crypto from 'crypto';
 
 const openai = new OpenAI();
@@ -15,7 +16,7 @@ async function processJob(job: Job) {
   const promptData = `Extract the entities and actions from the following text. Map the provided AST Node ID to the 'sourceNodeIds' array. Extract ONLY the most critical, macro-level business entities and relationships. Be extremely sparse to avoid graph bloat.\n\n--- Text ---\nContent: ${text}\nAST Node ID: ${astNodeId}`;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-5.4-2026-03-05",
+    model: config.llm.extractionModel,
     messages: [
       { role: "system", content: "You are an expert GraphRAG extraction engine that strictly outputs sparse, high-level business logic graphs." },
       { role: "user", content: promptData }

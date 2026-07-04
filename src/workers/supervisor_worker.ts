@@ -4,6 +4,7 @@ import { neo4jDriver, pgPool } from '../config/db.js';
 import OpenAI from 'openai';
 import { z } from 'zod';
 import { zodResponseFormat } from 'openai/helpers/zod';
+import { config } from '../config/index.js';
 
 const openai = new OpenAI();
 
@@ -61,7 +62,7 @@ async function processJob(job: Job) {
       const promptData = `Evaluate if these two texts represent a contradiction regarding the same entity and action.\n\nText 1: ${text1}\n\nText 2: ${text2}`;
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-5.4-2026-03-05",
+        model: config.llm.extractionModel,
         messages: [
           { role: "system", content: "You are an expert graph reasoning engine evaluating logical contradictions in text." },
           { role: "user", content: promptData }
