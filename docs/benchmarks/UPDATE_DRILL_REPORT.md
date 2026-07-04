@@ -10,6 +10,7 @@
 - [FLYWHEEL_EXPLAINER.md](./FLYWHEEL_EXPLAINER.md) — the cost model behind cache-first delegation.
 - [CRITIQUE_AND_FUTURE.md](./CRITIQUE_AND_FUTURE.md) — the risk analysis that motivated Phase 4; §2's "frozen errors" is what this drill attacks.
 - [PHASE_4_PRD.md](../product/PHASE_4_PRD.md) — the invalidation-loop design (registry, Merkle diff, quarantine sweep).
+- [POISONING_DRILL_REPORT.md](./POISONING_DRILL_REPORT.md) — the Phase 5 sequel: this drill closes *drift* (bytes that changed); that one closes *original sin* (bytes that never do).
 
 ---
 
