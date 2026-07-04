@@ -85,20 +85,9 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
     let diff: MerkleDiff | null = null;
     if (registration.priorRootHash) {
       diff = await diffVersions(pgPool, registration.priorRootHash, rootNode.id);
-      if (diff.orphaned.length > 0) {
-        // Quarantine sweep (Milestone 3): facts derived from bytes that
-        // vanished in this version get contested by the worker.
-        await invalidationQueue.add('sweep', {
-          docKey,
-          oldVersion: registration.version - 1,
-          newVersion: registration.version,
-          orphanedHashes: diff.orphaned
-        });
-        console.log(`[Ingest] ${docKey} v${registration.version}: queued invalidation sweep for ${diff.orphaned.length} orphaned node(s).`);
-      }
     }
 
-    // 4. Fan Out to BullMQ, one job per block-level node (T2). Blocks
+    // 4. One extraction job per block-level node (T2). Blocks
     // (paragraph, heading, list item, code, PDF element) carry their
     // full reconstructed inline text, so `Globex **acquired** Initech`
     // is one extraction unit instead of three inline fragments. On
@@ -111,6 +100,24 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
       .filter(({ block, text }) =>
         text.trim().length > 0 && (!addedSet || addedSet.has(block.id))
       );
+
+    if (diff && diff.orphaned.length > 0) {
+      // Quarantine sweep (Milestone 3): facts derived from bytes that
+      // vanished in this version get contested by the worker. The queued
+      // extraction blocks travel along as the sweep's fresh set: the
+      // sweep and the extraction jobs race, and a fact re-extracted from
+      // this version's live bytes must stay recovered whichever write
+      // lands last (src/core/graph/provenance.ts).
+      await invalidationQueue.add('sweep', {
+        docKey,
+        oldVersion: registration.version - 1,
+        newVersion: registration.version,
+        orphanedHashes: diff.orphaned,
+        freshHashes: extractionBlocks.map(({ block }) => block.id)
+      });
+      console.log(`[Ingest] ${docKey} v${registration.version}: queued invalidation sweep for ${diff.orphaned.length} orphaned node(s).`);
+    }
+
     for (const { block, text } of extractionBlocks) {
       await extractionQueue.add('extract', {
         astNodeId: block.id,

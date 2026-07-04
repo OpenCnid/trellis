@@ -4,6 +4,8 @@ import { neo4jDriver, pgPool } from '../config/db.js';
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { GraphSchema, Graph } from '../core/graph/schemas.js';
+import { mergeExtractedGraph } from '../core/graph/extraction_merge.js';
+import { isAstNodeLive } from '../core/ast/registry.js';
 import { config } from '../config/index.js';
 import * as crypto from 'crypto';
 
@@ -11,6 +13,19 @@ const openai = new OpenAI();
 
 async function processJob(job: Job) {
   const { astNodeId, text } = job.data;
+
+  // Liveness gate: if a newer re-ingest superseded this block while the
+  // job sat in the queue, its bytes are already (or about to be) orphaned
+  // — extracting from them would re-derive facts the quarantine sweep is
+  // contesting, and pay an LLM call for it. Skipping keeps the merge's
+  // "incoming provenance is live" invariant (see extraction_merge.ts).
+  if (!(await isAstNodeLive(pgPool, astNodeId))) {
+    console.log(
+      `[Job ${job.id}] AST Node ${astNodeId} is no longer in any document's latest version — skipping (superseded by a newer re-ingest).`
+    );
+    return;
+  }
+
   console.log(`[Job ${job.id}] Extracting graph for AST Node: ${astNodeId}`);
 
   const promptData = `Extract the entities and actions from the following text. Map the provided AST Node ID to the 'sourceNodeIds' array. Extract ONLY the most critical, macro-level business entities and relationships. Be extremely sparse to avoid graph bloat.\n\n--- Text ---\nContent: ${text}\nAST Node ID: ${astNodeId}`;
@@ -51,38 +66,16 @@ async function processJob(job: Job) {
     };
   });
 
-  // 3. Database Insertion (Neo4j)
-  const session = neo4jDriver.session();
+  // 3. Database Insertion (Neo4j). The merge Cypher lives in
+  // extraction_merge.ts; its ON MATCH clauses re-derive quarantined facts
+  // (contested clears, dead provenance stays in orphanedSourceIds as
+  // audit) with semantics that commute with the invalidation sweep.
   try {
-    const tx = session.beginTransaction();
-    
-    // The Entity Cypher Query
-    const entityQuery = `
-      UNWIND $entities AS ent
-      MERGE (e:Entity {name: toLower(ent.name)})
-      ON CREATE SET e.id = ent.id, e.type = ent.type, e.sourceNodeIds = ent.sourceNodeIds
-      ON MATCH SET e.sourceNodeIds = e.sourceNodeIds + [id IN ent.sourceNodeIds WHERE NOT id IN e.sourceNodeIds]
-    `;
-    await tx.run(entityQuery, { entities: graph.entities });
-
-    // The Action Cypher Query
-    const actionQuery = `
-      UNWIND $actions AS act
-      MATCH (subj:Entity {name: toLower(act.subjectName)})
-      MATCH (obj:Entity {name: toLower(act.objectName)})
-      MERGE (subj)-[r:ACTION {verb: toLower(act.verb)}]->(obj)
-      ON CREATE SET r.id = act.id, r.sourceNodeIds = act.sourceNodeIds
-      ON MATCH SET r.sourceNodeIds = r.sourceNodeIds + [id IN act.sourceNodeIds WHERE NOT id IN r.sourceNodeIds]
-    `;
-    await tx.run(actionQuery, { actions: enrichedActions });
-
-    await tx.commit();
+    await mergeExtractedGraph(neo4jDriver, graph.entities, enrichedActions);
     console.log(`[Job ${job.id}] Successfully merged ${graph.entities.length} entities and ${enrichedActions.length} actions into Neo4j.`);
   } catch (error) {
     console.error(`[Job ${job.id}] Error during Neo4j transaction`, error);
     throw error;
-  } finally {
-    await session.close();
   }
 
   // 4. Generate Embeddings & Update PostgreSQL

@@ -33,6 +33,10 @@ async function initializeDatabases() {
         node_id VARCHAR NOT NULL REFERENCES ast_nodes(id),
         PRIMARY KEY (root_hash, node_id)
       );
+      -- The extraction worker's per-job liveness check (registry.ts
+      -- isAstNodeLive) looks membership up by node_id alone, which the
+      -- (root_hash, node_id) primary key cannot serve.
+      CREATE INDEX IF NOT EXISTS idx_document_nodes_node_id ON document_nodes (node_id);
     `);
     console.log("[PASS] PostgreSQL: AST Nodes, documents, and document_nodes tables created/verified.");
     pgClient.release();
