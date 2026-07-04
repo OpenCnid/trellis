@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { Driver } from 'neo4j-driver';
 import type { Pool } from 'pg';
+import { config } from '../../config/index.js';
 
 // Phase 5 Milestone 3: the verification layer.
 //
@@ -208,7 +209,7 @@ export function makeOracleClassifier(truth: Record<string, string>): Classifier 
 }
 
 /** Real sub-LLM classifier using the current versioned rubric. */
-export function makeOpenAIClassifier(model = 'gpt-5.4-2026-03-05'): Classifier {
+export function makeOpenAIClassifier(model = config.llm.extractionModel): Classifier {
   return async questions => {
     const OpenAI = (await import('openai')).default;
     const openai = new OpenAI();

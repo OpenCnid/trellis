@@ -3,6 +3,7 @@ import { parseMarkdownToAST, parseUnstructuredJSONToAST, ASTNode } from '../core
 import { diffVersions, MerkleDiff } from '../core/ast/diff.js';
 import { registerDocumentVersion, recordDocumentNodes, VersionRegistration } from '../core/ast/registry.js';
 import { pgPool, neo4jDriver } from '../config/db.js';
+import { config } from '../config/index.js';
 import { extractionQueue, rlmQueue, invalidationQueue } from '../workers/queue.js';
 import multer from 'multer';
 import { execFile } from 'child_process';
@@ -35,7 +36,7 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
     if (req.file) {
       // PDF File Upload Path
       const pythonScript = path.resolve('scripts/parse_pdf.py');
-      const { stdout } = await execFileAsync('python', [pythonScript, req.file.path], {
+      const { stdout } = await execFileAsync(config.python.executable, [pythonScript, req.file.path], {
         maxBuffer: 1024 * 1024 * 50 // 50MB buffer for large JSON outputs
       });
       
@@ -247,8 +248,8 @@ app.get('/api/rlm-stream', async (req, res) => {
 
   const jobId = crypto.randomUUID();
   const redisSubscriber = new IORedis({
-    host: '127.0.0.1',
-    port: 6379,
+    host: config.redis.host,
+    port: config.redis.port,
   });
 
   const channel = `rlm-stream:${jobId}`;
@@ -286,7 +287,6 @@ app.get('/api/rlm-stream', async (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Trellis API Server running on port ${PORT}`);
+app.listen(config.api.port, () => {
+  console.log(`Trellis API Server running on port ${config.api.port}`);
 });
