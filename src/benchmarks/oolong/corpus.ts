@@ -1,5 +1,10 @@
 import { parseMarkdownToAST, ASTNode } from '../../core/ast/parser';
+import { nodeText, flattenAST } from '../../core/ast/traverse';
 import { OolongRecord } from './schema';
+
+// Traversal helpers moved to src/core/ast/traverse.ts (shared with the
+// API server); re-exported here so existing imports keep working.
+export { nodeText, flattenAST };
 
 // Binds a dataset record to the physical AST nodes the parser derived
 // for it. All hashes come from parseMarkdownToAST — never computed here
@@ -22,19 +27,6 @@ export interface OolongCorpus {
 
 export function recordToMarkdown(record: OolongRecord): string {
   return `# ${record.id}\n\n${record.text}`;
-}
-
-export function nodeText(node: ASTNode): string {
-  if (node.content !== undefined) return node.content;
-  return (node.children ?? []).map(nodeText).join('');
-}
-
-export function flattenAST(node: ASTNode, acc: ASTNode[] = []): ASTNode[] {
-  acc.push(node);
-  for (const child of node.children ?? []) {
-    flattenAST(child, acc);
-  }
-  return acc;
 }
 
 // Parses the entire corpus as one markdown document (a flat sequence of

@@ -1,5 +1,6 @@
 import express from 'express';
 import { parseMarkdownToAST, parseUnstructuredJSONToAST, ASTNode } from '../core/ast/parser.js';
+import { flattenAST, nodeText, collectExtractionBlocks } from '../core/ast/traverse.js';
 import { diffVersions, MerkleDiff } from '../core/ast/diff.js';
 import { registerDocumentVersion, recordDocumentNodes, VersionRegistration } from '../core/ast/registry.js';
 import { pgPool, neo4jDriver } from '../config/db.js';
@@ -17,17 +18,6 @@ const upload = multer({ dest: 'uploads/' });
 const app = express();
 // Only accept raw text/markdown if content-type is text/*
 app.use(express.text({ type: ['text/*', 'application/json', 'application/x-www-form-urlencoded'] }));
-
-// Helper to recursively flatten the AST
-function flattenAST(node: ASTNode, acc: ASTNode[] = []): ASTNode[] {
-  acc.push(node);
-  if (node.children) {
-    for (const child of node.children) {
-      flattenAST(child, acc);
-    }
-  }
-  return acc;
-}
 
 app.post('/ingest', upload.single('file'), async (req, res) => {
   try {
@@ -108,15 +98,23 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
       }
     }
 
-    // 4. Fan Out to BullMQ for leaf nodes (added-only on re-ingest)
+    // 4. Fan Out to BullMQ, one job per block-level node (T2). Blocks
+    // (paragraph, heading, list item, code, PDF element) carry their
+    // full reconstructed inline text, so `Globex **acquired** Initech`
+    // is one extraction unit instead of three inline fragments. On
+    // re-ingest only blocks new to this version are queued — a changed
+    // inline leaf changes its parent block's Merkle hash, so the block
+    // lands in diff.added.
     const addedSet = diff ? new Set(diff.added) : null;
-    const leafNodes = allNodes.filter(n =>
-      n.content && typeof n.content === 'string' && (!addedSet || addedSet.has(n.id))
-    );
-    for (const leaf of leafNodes) {
+    const extractionBlocks = collectExtractionBlocks(rootNode)
+      .map(block => ({ block, text: nodeText(block) }))
+      .filter(({ block, text }) =>
+        text.trim().length > 0 && (!addedSet || addedSet.has(block.id))
+      );
+    for (const { block, text } of extractionBlocks) {
       await extractionQueue.add('extract', {
-        astNodeId: leaf.id,
-        text: leaf.content
+        astNodeId: block.id,
+        text
       });
     }
 
@@ -127,7 +125,7 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
       docKey: registration.docKey,
       version: registration.version,
       totalNodes: allNodes.length,
-      leafNodesQueued: leafNodes.length,
+      blocksQueued: extractionBlocks.length,
       diff: diff
         ? { added: diff.added.length, orphaned: diff.orphaned.length, retained: diff.retained.length }
         : null

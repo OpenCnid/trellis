@@ -32,14 +32,14 @@ Globex recently completed a hostile takeover of Initech."
   "rootId": "21115bcdb74502b145bd50e38251e4e430071fe3129b8f06c5ecc069078f8e78",
   "docKey": "globex-report",
   "version": 1,
-  "totalNodes": 3,
-  "leafNodesQueued": 1,
+  "totalNodes": 5,
+  "blocksQueued": 2,
   "diff": null
 }
 ```
-*Note: The HTTP `202 Accepted` indicates the document was parsed and stored, and the extraction jobs have been placed in the BullMQ queue.*
+*Note: The HTTP `202 Accepted` indicates the document was parsed and stored, and the extraction jobs have been placed in the BullMQ queue. Extraction fans out one job per block-level node (paragraph, heading, list item, code block, or PDF element) carrying the block's full reconstructed inline text; `blocksQueued` counts those jobs, while `totalNodes` counts every stored AST node including inline leaves.*
 
-On a re-ingest under an existing `doc_key`, `diff` reports the Merkle delta and `leafNodesQueued` counts only the added leaves — a byte-identical re-ingest queues zero jobs:
+On a re-ingest under an existing `doc_key`, `diff` reports the Merkle delta and `blocksQueued` counts only blocks new to this version — a byte-identical re-ingest queues zero jobs:
 ```json
 {
   "message": "Accepted",
@@ -47,7 +47,7 @@ On a re-ingest under an existing `doc_key`, `diff` reports the Merkle delta and 
   "docKey": "globex-report",
   "version": 2,
   "totalNodes": 5,
-  "leafNodesQueued": 1,
+  "blocksQueued": 1,
   "diff": { "added": 3, "orphaned": 3, "retained": 2 }
 }
 ```
