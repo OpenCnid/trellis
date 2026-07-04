@@ -1,0 +1,75 @@
+{
+  "dataset": "oolong-pairs-trec-synthetic-v1-drill-v2",
+  "seed": 4242,
+  "poison_count": 11,
+  "confidence": 0.97,
+  "poisoned": [
+    {
+      "id": "q_0101",
+      "trueLabel": "loc",
+      "poisonedLabel": "enty",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0178",
+      "trueLabel": "desc",
+      "poisonedLabel": "enty",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0097",
+      "trueLabel": "abbr",
+      "poisonedLabel": "desc",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0040",
+      "trueLabel": "abbr",
+      "poisonedLabel": "desc",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0079",
+      "trueLabel": "num",
+      "poisonedLabel": "enty",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0115",
+      "trueLabel": "loc",
+      "poisonedLabel": "enty",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0107",
+      "trueLabel": "loc",
+      "poisonedLabel": "enty",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0181",
+      "trueLabel": "loc",
+      "poisonedLabel": "enty",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0090",
+      "trueLabel": "desc",
+      "poisonedLabel": "enty",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0141",
+      "trueLabel": "enty",
+      "poisonedLabel": "loc",
+      "confidence": 0.97
+    },
+    {
+      "id": "q_0164",
+      "trueLabel": "loc",
+      "poisonedLabel": "enty",
+      "confidence": 0.97
+    }
+  ],
+  "poisoned_at": "2026-07-04T03:03:07.397Z"
+}

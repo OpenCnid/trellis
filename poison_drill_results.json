@@ -1,0 +1,1406 @@
+{
+  "benchmark": "OOLONG-Pairs Poisoning Drill (Phase 5)",
+  "mode": "dress_rehearsal_oracle",
+  "dataset": "oolong-pairs-trec-synthetic-v1-drill-v2",
+  "model": "ground-truth oracle (LLM-free)",
+  "generated_at": "2026-07-04T03:03:09.103Z",
+  "poison": {
+    "count": 11,
+    "seed": 4242,
+    "stored_confidence": 0.97,
+    "seeded_cache_confidence": 0.9,
+    "note": "labels flipped in place over UNCHANGED bytes with valid Merkle provenance — invisible to Phase 4 by construction"
+  },
+  "lifetime_model": "sweeps run after each 20-query sequence pass; every query reads the whole non-contested cache once, so lifetime_reads = lifetime_sweeps * 20",
+  "policies": [
+    {
+      "policy": "mandatory-only",
+      "sample_rate": 0,
+      "max_sweeps": 5,
+      "sweeps_run": 5,
+      "detection_recall": 0,
+      "expected_sweep_bound": null,
+      "sweeps_to_full_detection": null,
+      "lifetime_sweeps": {
+        "q_0101": null,
+        "q_0178": null,
+        "q_0097": null,
+        "q_0040": null,
+        "q_0079": null,
+        "q_0115": null,
+        "q_0107": null,
+        "q_0181": null,
+        "q_0090": null,
+        "q_0141": null,
+        "q_0164": null
+      },
+      "mean_lifetime_sweeps": null,
+      "max_lifetime_sweeps": null,
+      "mean_lifetime_reads": null,
+      "max_lifetime_reads": null,
+      "false_disputes": 0,
+      "false_dispute_rate": 0,
+      "total_classified": 0,
+      "total_subcalls": 0,
+      "verification_cost_usd": 0,
+      "cost_per_100_beliefs_per_sweep_usd": 0,
+      "sweep_trajectory": [
+        {
+          "sweep": 1,
+          "selected": 0,
+          "classified": 0,
+          "newly_detected": 0,
+          "cumulative_detected": 0,
+          "recall": 0,
+          "subcalls": 0
+        },
+        {
+          "sweep": 2,
+          "selected": 0,
+          "classified": 0,
+          "newly_detected": 0,
+          "cumulative_detected": 0,
+          "recall": 0,
+          "subcalls": 0
+        },
+        {
+          "sweep": 3,
+          "selected": 0,
+          "classified": 0,
+          "newly_detected": 0,
+          "cumulative_detected": 0,
+          "recall": 0,
+          "subcalls": 0
+        },
+        {
+          "sweep": 4,
+          "selected": 0,
+          "classified": 0,
+          "newly_detected": 0,
+          "cumulative_detected": 0,
+          "recall": 0,
+          "subcalls": 0
+        },
+        {
+          "sweep": 5,
+          "selected": 0,
+          "classified": 0,
+          "newly_detected": 0,
+          "cumulative_detected": 0,
+          "recall": 0,
+          "subcalls": 0
+        }
+      ],
+      "recovery": {
+        "disputed_rederived": 0,
+        "recovery_bulk_calls": 0,
+        "questions_missing_effective_category": 0,
+        "effective_mismatches_vs_truth": 11,
+        "mean_f1": 0.9328571428571429,
+        "queries": [
+          {
+            "index": 1,
+            "city": "cairo",
+            "phase": "post",
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16
+          },
+          {
+            "index": 2,
+            "city": "dublin",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 3,
+            "city": "havana",
+            "phase": "post",
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16
+          },
+          {
+            "index": 4,
+            "city": "lima",
+            "phase": "post",
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16
+          },
+          {
+            "index": 5,
+            "city": "mumbai",
+            "phase": "post",
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 6,
+            "truth_pairs": 8
+          },
+          {
+            "index": 6,
+            "city": "nairobi",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 7,
+            "city": "oslo",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 6,
+            "truth_pairs": 6
+          },
+          {
+            "index": 8,
+            "city": "paris",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 9,
+            "city": "prague",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8
+          },
+          {
+            "index": 10,
+            "city": "quito",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 11,
+            "city": "seoul",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 12,
+            "city": "tokyo",
+            "phase": "post",
+            "f1": 0.8000000000000002,
+            "predicted_pairs": 20,
+            "truth_pairs": 20
+          },
+          {
+            "index": 13,
+            "city": "vienna",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 14,
+            "city": "zagreb",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 12,
+            "truth_pairs": 12
+          },
+          {
+            "index": 15,
+            "city": "cairo",
+            "phase": "post_repeat",
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16
+          },
+          {
+            "index": 16,
+            "city": "dublin",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 17,
+            "city": "havana",
+            "phase": "post_repeat",
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16
+          },
+          {
+            "index": 18,
+            "city": "lima",
+            "phase": "post_repeat",
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16
+          },
+          {
+            "index": 19,
+            "city": "mumbai",
+            "phase": "post_repeat",
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 6,
+            "truth_pairs": 8
+          },
+          {
+            "index": 20,
+            "city": "nairobi",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          }
+        ]
+      }
+    },
+    {
+      "policy": "p=0.05",
+      "sample_rate": 0.05,
+      "max_sweeps": 400,
+      "sweeps_run": 62,
+      "detection_recall": 1,
+      "expected_sweep_bound": 61,
+      "sweeps_to_full_detection": 62,
+      "lifetime_sweeps": {
+        "q_0101": 5,
+        "q_0178": 29,
+        "q_0097": 4,
+        "q_0040": 3,
+        "q_0079": 7,
+        "q_0115": 8,
+        "q_0107": 1,
+        "q_0181": 4,
+        "q_0090": 62,
+        "q_0141": 10,
+        "q_0164": 4
+      },
+      "mean_lifetime_sweeps": 12.454545454545455,
+      "max_lifetime_sweeps": 62,
+      "mean_lifetime_reads": 249.0909090909091,
+      "max_lifetime_reads": 1240,
+      "false_disputes": 0,
+      "false_dispute_rate": 0,
+      "total_classified": 525,
+      "total_subcalls": 0,
+      "verification_cost_usd": 0,
+      "cost_per_100_beliefs_per_sweep_usd": 0,
+      "sweep_trajectory": [
+        {
+          "sweep": 1,
+          "selected": 8,
+          "classified": 8,
+          "newly_detected": 1,
+          "cumulative_detected": 1,
+          "recall": 0.09090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 2,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 1,
+          "recall": 0.09090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 3,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 1,
+          "cumulative_detected": 2,
+          "recall": 0.18181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 4,
+          "selected": 19,
+          "classified": 19,
+          "newly_detected": 3,
+          "cumulative_detected": 5,
+          "recall": 0.45454545454545453,
+          "subcalls": 0
+        },
+        {
+          "sweep": 5,
+          "selected": 18,
+          "classified": 18,
+          "newly_detected": 1,
+          "cumulative_detected": 6,
+          "recall": 0.5454545454545454,
+          "subcalls": 0
+        },
+        {
+          "sweep": 6,
+          "selected": 16,
+          "classified": 16,
+          "newly_detected": 0,
+          "cumulative_detected": 6,
+          "recall": 0.5454545454545454,
+          "subcalls": 0
+        },
+        {
+          "sweep": 7,
+          "selected": 4,
+          "classified": 4,
+          "newly_detected": 1,
+          "cumulative_detected": 7,
+          "recall": 0.6363636363636364,
+          "subcalls": 0
+        },
+        {
+          "sweep": 8,
+          "selected": 6,
+          "classified": 6,
+          "newly_detected": 1,
+          "cumulative_detected": 8,
+          "recall": 0.7272727272727273,
+          "subcalls": 0
+        },
+        {
+          "sweep": 9,
+          "selected": 16,
+          "classified": 16,
+          "newly_detected": 0,
+          "cumulative_detected": 8,
+          "recall": 0.7272727272727273,
+          "subcalls": 0
+        },
+        {
+          "sweep": 10,
+          "selected": 6,
+          "classified": 6,
+          "newly_detected": 1,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 11,
+          "selected": 10,
+          "classified": 10,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 12,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 13,
+          "selected": 10,
+          "classified": 10,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 14,
+          "selected": 14,
+          "classified": 14,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 15,
+          "selected": 3,
+          "classified": 3,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 16,
+          "selected": 6,
+          "classified": 6,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 17,
+          "selected": 7,
+          "classified": 7,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 18,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 19,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 20,
+          "selected": 12,
+          "classified": 12,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 21,
+          "selected": 12,
+          "classified": 12,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 22,
+          "selected": 8,
+          "classified": 8,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 23,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 24,
+          "selected": 10,
+          "classified": 10,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 25,
+          "selected": 7,
+          "classified": 7,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 26,
+          "selected": 8,
+          "classified": 8,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 27,
+          "selected": 11,
+          "classified": 11,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 28,
+          "selected": 6,
+          "classified": 6,
+          "newly_detected": 0,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 29,
+          "selected": 12,
+          "classified": 12,
+          "newly_detected": 1,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 30,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 31,
+          "selected": 10,
+          "classified": 10,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 32,
+          "selected": 6,
+          "classified": 6,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 33,
+          "selected": 12,
+          "classified": 12,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 34,
+          "selected": 8,
+          "classified": 8,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 35,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 36,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 37,
+          "selected": 10,
+          "classified": 10,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 38,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 39,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 40,
+          "selected": 11,
+          "classified": 11,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 41,
+          "selected": 6,
+          "classified": 6,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 42,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 43,
+          "selected": 14,
+          "classified": 14,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 44,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 45,
+          "selected": 7,
+          "classified": 7,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 46,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 47,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 48,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 49,
+          "selected": 6,
+          "classified": 6,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 50,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 51,
+          "selected": 11,
+          "classified": 11,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 52,
+          "selected": 6,
+          "classified": 6,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 53,
+          "selected": 7,
+          "classified": 7,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 54,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 55,
+          "selected": 11,
+          "classified": 11,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 56,
+          "selected": 8,
+          "classified": 8,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 57,
+          "selected": 3,
+          "classified": 3,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 58,
+          "selected": 7,
+          "classified": 7,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 59,
+          "selected": 8,
+          "classified": 8,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 60,
+          "selected": 5,
+          "classified": 5,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 61,
+          "selected": 7,
+          "classified": 7,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 62,
+          "selected": 7,
+          "classified": 7,
+          "newly_detected": 1,
+          "cumulative_detected": 11,
+          "recall": 1,
+          "subcalls": 0
+        }
+      ],
+      "recovery": {
+        "disputed_rederived": 11,
+        "recovery_bulk_calls": 1,
+        "questions_missing_effective_category": 0,
+        "effective_mismatches_vs_truth": 0,
+        "mean_f1": 1,
+        "queries": [
+          {
+            "index": 1,
+            "city": "cairo",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 2,
+            "city": "dublin",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 3,
+            "city": "havana",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 4,
+            "city": "lima",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 5,
+            "city": "mumbai",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8
+          },
+          {
+            "index": 6,
+            "city": "nairobi",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 7,
+            "city": "oslo",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 6,
+            "truth_pairs": 6
+          },
+          {
+            "index": 8,
+            "city": "paris",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 9,
+            "city": "prague",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8
+          },
+          {
+            "index": 10,
+            "city": "quito",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 11,
+            "city": "seoul",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 12,
+            "city": "tokyo",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 20,
+            "truth_pairs": 20
+          },
+          {
+            "index": 13,
+            "city": "vienna",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 14,
+            "city": "zagreb",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 12,
+            "truth_pairs": 12
+          },
+          {
+            "index": 15,
+            "city": "cairo",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 16,
+            "city": "dublin",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 17,
+            "city": "havana",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 18,
+            "city": "lima",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 19,
+            "city": "mumbai",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8
+          },
+          {
+            "index": 20,
+            "city": "nairobi",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          }
+        ]
+      }
+    },
+    {
+      "policy": "p=0.10",
+      "sample_rate": 0.1,
+      "max_sweeps": 200,
+      "sweeps_run": 18,
+      "detection_recall": 1,
+      "expected_sweep_bound": 31,
+      "sweeps_to_full_detection": 18,
+      "lifetime_sweeps": {
+        "q_0101": 12,
+        "q_0178": 18,
+        "q_0097": 6,
+        "q_0040": 5,
+        "q_0079": 11,
+        "q_0115": 11,
+        "q_0107": 1,
+        "q_0181": 3,
+        "q_0090": 4,
+        "q_0141": 3,
+        "q_0164": 6
+      },
+      "mean_lifetime_sweeps": 7.2727272727272725,
+      "max_lifetime_sweeps": 18,
+      "mean_lifetime_reads": 145.45454545454544,
+      "max_lifetime_reads": 360,
+      "false_disputes": 0,
+      "false_dispute_rate": 0,
+      "total_classified": 350,
+      "total_subcalls": 0,
+      "verification_cost_usd": 0,
+      "cost_per_100_beliefs_per_sweep_usd": 0,
+      "sweep_trajectory": [
+        {
+          "sweep": 1,
+          "selected": 21,
+          "classified": 21,
+          "newly_detected": 1,
+          "cumulative_detected": 1,
+          "recall": 0.09090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 2,
+          "selected": 22,
+          "classified": 22,
+          "newly_detected": 0,
+          "cumulative_detected": 1,
+          "recall": 0.09090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 3,
+          "selected": 25,
+          "classified": 25,
+          "newly_detected": 2,
+          "cumulative_detected": 3,
+          "recall": 0.2727272727272727,
+          "subcalls": 0
+        },
+        {
+          "sweep": 4,
+          "selected": 23,
+          "classified": 23,
+          "newly_detected": 1,
+          "cumulative_detected": 4,
+          "recall": 0.36363636363636365,
+          "subcalls": 0
+        },
+        {
+          "sweep": 5,
+          "selected": 25,
+          "classified": 25,
+          "newly_detected": 1,
+          "cumulative_detected": 5,
+          "recall": 0.45454545454545453,
+          "subcalls": 0
+        },
+        {
+          "sweep": 6,
+          "selected": 22,
+          "classified": 22,
+          "newly_detected": 2,
+          "cumulative_detected": 7,
+          "recall": 0.6363636363636364,
+          "subcalls": 0
+        },
+        {
+          "sweep": 7,
+          "selected": 25,
+          "classified": 25,
+          "newly_detected": 0,
+          "cumulative_detected": 7,
+          "recall": 0.6363636363636364,
+          "subcalls": 0
+        },
+        {
+          "sweep": 8,
+          "selected": 17,
+          "classified": 17,
+          "newly_detected": 0,
+          "cumulative_detected": 7,
+          "recall": 0.6363636363636364,
+          "subcalls": 0
+        },
+        {
+          "sweep": 9,
+          "selected": 16,
+          "classified": 16,
+          "newly_detected": 0,
+          "cumulative_detected": 7,
+          "recall": 0.6363636363636364,
+          "subcalls": 0
+        },
+        {
+          "sweep": 10,
+          "selected": 21,
+          "classified": 21,
+          "newly_detected": 0,
+          "cumulative_detected": 7,
+          "recall": 0.6363636363636364,
+          "subcalls": 0
+        },
+        {
+          "sweep": 11,
+          "selected": 20,
+          "classified": 20,
+          "newly_detected": 2,
+          "cumulative_detected": 9,
+          "recall": 0.8181818181818182,
+          "subcalls": 0
+        },
+        {
+          "sweep": 12,
+          "selected": 18,
+          "classified": 18,
+          "newly_detected": 1,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 13,
+          "selected": 15,
+          "classified": 15,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 14,
+          "selected": 27,
+          "classified": 27,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 15,
+          "selected": 19,
+          "classified": 19,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 16,
+          "selected": 12,
+          "classified": 12,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 17,
+          "selected": 9,
+          "classified": 9,
+          "newly_detected": 0,
+          "cumulative_detected": 10,
+          "recall": 0.9090909090909091,
+          "subcalls": 0
+        },
+        {
+          "sweep": 18,
+          "selected": 13,
+          "classified": 13,
+          "newly_detected": 1,
+          "cumulative_detected": 11,
+          "recall": 1,
+          "subcalls": 0
+        }
+      ],
+      "recovery": {
+        "disputed_rederived": 11,
+        "recovery_bulk_calls": 1,
+        "questions_missing_effective_category": 0,
+        "effective_mismatches_vs_truth": 0,
+        "mean_f1": 1,
+        "queries": [
+          {
+            "index": 1,
+            "city": "cairo",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 2,
+            "city": "dublin",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 3,
+            "city": "havana",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 4,
+            "city": "lima",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 5,
+            "city": "mumbai",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8
+          },
+          {
+            "index": 6,
+            "city": "nairobi",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 7,
+            "city": "oslo",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 6,
+            "truth_pairs": 6
+          },
+          {
+            "index": 8,
+            "city": "paris",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 9,
+            "city": "prague",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8
+          },
+          {
+            "index": 10,
+            "city": "quito",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 11,
+            "city": "seoul",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 12,
+            "city": "tokyo",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 20,
+            "truth_pairs": 20
+          },
+          {
+            "index": 13,
+            "city": "vienna",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 14,
+            "city": "zagreb",
+            "phase": "post",
+            "f1": 1,
+            "predicted_pairs": 12,
+            "truth_pairs": 12
+          },
+          {
+            "index": 15,
+            "city": "cairo",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 16,
+            "city": "dublin",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9
+          },
+          {
+            "index": 17,
+            "city": "havana",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 18,
+            "city": "lima",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          },
+          {
+            "index": 19,
+            "city": "mumbai",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8
+          },
+          {
+            "index": 20,
+            "city": "nairobi",
+            "phase": "post_repeat",
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "detection_recall_by_policy": {
+      "mandatory-only": 0,
+      "p=0.05": 1,
+      "p=0.10": 1
+    },
+    "recall_within_expected_bound": true,
+    "max_false_dispute_rate": 0,
+    "post_recovery_f1_by_policy": {
+      "mandatory-only": 0.9328571428571429,
+      "p=0.05": 1,
+      "p=0.10": 1
+    },
+    "total_verification_cost_usd": 0
+  }
+}

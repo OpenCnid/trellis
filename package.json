@@ -24,7 +24,9 @@
     "drill:mutate": "tsx scripts/mutate_oolong_dataset.ts",
     "drill:reingest": "tsx scripts/reingest_oolong_dataset.ts",
     "drill:update": "tsx src/benchmarks/update_drill_runner.ts",
-    "drill:reset": "tsx scripts/reset_update_drill.ts"
+    "drill:reset": "tsx scripts/reset_update_drill.ts",
+    "drill:poison-cache": "tsx scripts/poison_oolong_cache.ts",
+    "drill:poison": "tsx src/benchmarks/poison_drill_runner.ts"
   },
   "keywords": [],
   "author": "",
