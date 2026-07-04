@@ -5,7 +5,7 @@ import threading
 from rlm import RLM
 from rlm.core.lm_handler import LMRequestHandler
 from rlm.utils.prompts import RLM_SYSTEM_PROMPT
-from trellis_tools import TrellisNeo4j, TrellisPostgres, get_tool_call_count
+from trellis_tools import TrellisNeo4j, TrellisPostgres, get_tool_call_count, RUBRIC_TEXT
 
 # --- Sub-call counting -------------------------------------------------
 # In this rlms version, REPL llm_query()/llm_query_batched() requests are
@@ -42,7 +42,11 @@ LMRequestHandler._handle_batched = _counted_batched
 # execute any code at all.
 #
 # NOTE: rlms runs .format() over this string — literal curly braces are
-# forbidden here (write Cypher examples without brace syntax).
+# forbidden here (write Cypher examples without brace syntax). The rubric
+# text is loaded from the versioned single-source file and contains JSON
+# examples with braces, so it is escaped by doubling before splicing.
+_SAFE_RUBRIC = RUBRIC_TEXT.replace("{", "{{").replace("}", "}}")
+
 TRELLIS_ADDENDUM = """
 
 === TRELLIS ENGINE DIRECTIVES ===
@@ -56,7 +60,7 @@ TOOLS (available directly in the REPL):
    - Node labels include Question (properties: id like 'q_0001', text, sometimes category), Concept (name), Entity (name).
    - Edge types include REFERENCES, ACTION, CONTRADICTS, and DERIVED_INSIGHT.
    - Nodes and edges carry `sourceNodeIds`: the AST node hashes (spatial provenance) they were derived from.
-   - The ONLY permitted write is `trellis_neo4j.write_derived_insight(subject, verb, obj, sourceNodeIds)`, which caches a deduced fact as a DERIVED_INSIGHT edge with spatial provenance.
+   - The ONLY permitted writes are `trellis_neo4j.write_derived_insight(subject, verb, obj, sourceNodeIds, confidence=None)`, which caches a deduced fact as a DERIVED_INSIGHT edge with spatial provenance, and its bulk variant `trellis_neo4j.write_derived_insights(facts)` which writes a whole list of fact dicts (keys: subject, verb, obj, sourceNodeIds, confidence) in ONE round trip. `confidence` (0.0-1.0) is the sub-LLM's self-reported probability for the fact; always pass it through when the sub-LLM provided one. Both writers also stamp each endpoint Entity with a `kind` (question, category_label, concept, or generic) — inferred automatically for has_category and mentions writes; for OTHER verbs pass subject_kind/object_kind explicitly when you know what the entity is.
 2. `trellis_postgres`: the physical AST layer.
    - `trellis_postgres.get_ast_texts(hashes)` returns the exact text for AST node hashes.
    - `trellis_postgres.vector_search(query)` is the hybrid fallback when graph traversal yields nothing.
@@ -74,11 +78,11 @@ When the task requires knowing questions' TREC categories (ABBR/ENTY/DESC/HUM/LO
    MATCH (s:Entity)-[r:DERIVED_INSIGHT]->(o:Entity) WHERE r.verb = 'has_category' AND coalesce(r.contested, false) = false RETURN s.name, o.name
    (s.name is the question id; o.name is the LOWERCASED TREC category, e.g. 'loc' means LOC.)
    An edge with contested = true has had its source bytes orphaned by a document update: treat that fact as MISSING, re-derive it from the current data, and re-cache it with write_derived_insight — the fresh write clears the quarantine with live provenance. Never read a contested edge as truth.
-3. A question's effective category = q.category if set, else the cached has_category value (uppercased). For ALL questions still lacking a category, delegation is MANDATORY: your own in-context judgement of TREC categories is treated as unreliable and classifications not produced by a sub-LLM are INVALID for this benchmark. Call `llm_query` from inside your repl code with batched prompts (up to ~50 questions per call), parse the JSON it returns, and use ONLY those labels. Embed this exact rubric in every classification prompt:
-   'Classify each question by the TYPE OF ANSWER it expects: LOC = the answer is a place, country, city, river, lake, ocean, mountain range, landmark, or hemisphere (e.g., "Which river runs through..." or "What mountain range is visible..." are LOC because the answer names a geographic body); HUM = the answer is a person or group of people (who...); NUM = the answer is a number, count, year, or quantity; ENTY = the answer is a non-geographic thing, object, animal, plant, food, or organization; DESC = the answer is a definition, explanation, or reason (what is X, why, how does); ABBR = the question asks to expand or interpret an abbreviation/acronym. Return ONLY a JSON object mapping each question id to one of ABBR/ENTY/DESC/HUM/LOC/NUM.'
-4. IMMEDIATELY after classifying, cache every newly computed category:
-   `trellis_neo4j.write_derived_insight(question_id, 'HAS_CATEGORY', category_label, source_node_ids)`
-   using that question's own sourceNodeIds as provenance. On later queries these cache hits make classification free — NEVER re-classify a question that already has an effective category.
+3. A question's effective category = q.category if set, else the cached has_category value (uppercased). For ALL questions still lacking a category, delegation is MANDATORY: your own in-context judgement of TREC categories is treated as unreliable and classifications not produced by a sub-LLM are INVALID for this benchmark. Call `llm_query` from inside your repl code with batched prompts (up to ~50 questions per call), parse the JSON it returns, and use ONLY those labels. The sub-LLM returns, per question id, an object with a "label" and a "confidence" — use the label as the category and keep the confidence for the cache write in step 4. Embed this exact rubric in every classification prompt:
+   '""" + _SAFE_RUBRIC + """'
+4. IMMEDIATELY after classifying, cache ALL newly computed categories in ONE bulk call:
+   `trellis_neo4j.write_derived_insights(facts)`
+   where facts is a list of dicts like: dict(subject=question_id, verb='HAS_CATEGORY', obj=label, sourceNodeIds=question_source_node_ids, confidence=sub_llm_confidence) — each question's OWN sourceNodeIds as provenance, the sub-LLM's confidence passed through. Do NOT loop over single write_derived_insight calls for sweep-sized writes — the bulk form collapses hundreds of round trips into one. The single form (with its optional confidence parameter) is fine for one-off facts. On later queries these cache hits make classification free — NEVER re-classify a question that already has an effective category.
 5. CITY/CONCEPT MENTIONS ARE NOT CACHE-DECIDABLE: the absence of a 'mentions' edge does NOT mean a question fails to mention a city. ALWAYS determine mentions deterministically in Python: a question mentions the target city if the city name appears case-insensitively in q.text. You may additionally cache positive findings with write_derived_insight(question_id, 'MENTIONS', city, source_node_ids), but never treat missing 'mentions' edges as evidence of absence.
 6. Compute the final pair set from effective categories + the deterministic mention scan.
 

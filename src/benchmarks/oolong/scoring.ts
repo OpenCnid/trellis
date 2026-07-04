@@ -122,10 +122,16 @@ export async function executeScoredQuery(opts: ScoredQueryOptions): Promise<Quer
       const t = run.telemetry;
       costAccumulator += estimateCost(t);
 
+      // t === null covers a dispatch failure that never produced parseable
+      // telemetry at all (e.g. the RLM subprocess crashed before printing
+      // anything) — that is not a real "no answer", it is a transient
+      // infrastructure failure and deserves the same retry as a protocol
+      // violation, not a silent F1=0.
       const violated =
-        run.stdout.includes('TRELLIS_PROTOCOL_VIOLATION') || (t !== null && t.tool_calls === 0);
+        run.stdout.includes('TRELLIS_PROTOCOL_VIOLATION') || t === null || t.tool_calls === 0;
       if (violated && attempts < opts.maxDispatchAttempts) {
-        console.log(`    [RETRY] attempt ${attempts}: zero tool calls — answer has no provenance, re-dispatching...`);
+        const reason = t === null ? 'no telemetry (subprocess likely crashed)' : 'zero tool calls — answer has no provenance';
+        console.log(`    [RETRY] attempt ${attempts}: ${reason}, re-dispatching...`);
         continue;
       }
 
