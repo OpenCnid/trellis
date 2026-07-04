@@ -4,6 +4,18 @@ import threading
 from neo4j import GraphDatabase
 import psycopg2
 
+# --- TREC rubric: single source of truth -------------------------------
+# The rubric prompt is versioned text shared between the RLM agent (which
+# embeds it in classification prompts) and the Phase 5 verifier (which
+# re-checks cached beliefs against the same text). Every derived-insight
+# write is stamped with the version it was written under; a version bump
+# routes older edges into the verifier's mandatory re-check tier.
+_RUBRIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "trec_rubric.json")
+with open(_RUBRIC_PATH, "r", encoding="utf-8") as _rubric_file:
+    _RUBRIC = json.load(_rubric_file)
+RUBRIC_VERSION = _RUBRIC["version"]
+RUBRIC_TEXT = _RUBRIC["rubric"]
+
 # Counts every database tool invocation made from the REPL. An RLM answer
 # produced with zero tool calls has no provenance and is treated as a
 # protocol violation by the benchmark runner.
@@ -51,41 +63,119 @@ class TrellisNeo4j:
         except Exception as e:
             raise RuntimeError(f"Neo4jError while executing Cypher: {e}") from e
 
-    def write_derived_insight(self, subject: str, verb: str, obj: str, sourceNodeIds: list) -> str:
+    # Architecture Invariant 4 (Flywheel Exception): derived facts are
+    # written as whitelisted [DERIVED_INSIGHT] edges carrying spatial
+    # provenance. This is the ONLY mutation path in the sandbox — both the
+    # single and bulk write methods funnel through this one UNWIND query.
+    _WRITE_INSIGHT_QUERY = """
+    UNWIND $facts AS f
+    MERGE (s:Entity {name: toLower(f.subject)})
+    MERGE (o:Entity {name: toLower(f.obj)})
+    MERGE (s)-[r:DERIVED_INSIGHT {verb: toLower(f.verb)}]->(o)
+    SET s.sourceNodeIds = coalesce(s.sourceNodeIds, []) + [x IN f.sourceNodeIds WHERE NOT x IN coalesce(s.sourceNodeIds, [])],
+        o.sourceNodeIds = coalesce(o.sourceNodeIds, []) + [x IN f.sourceNodeIds WHERE NOT x IN coalesce(o.sourceNodeIds, [])],
+        r.rederivedAt = CASE WHEN coalesce(r.contested, false) THEN timestamp() ELSE r.rederivedAt END,
+        r.sourceNodeIds = [x IN coalesce(r.sourceNodeIds, []) + [y IN f.sourceNodeIds WHERE NOT y IN coalesce(r.sourceNodeIds, [])]
+                           WHERE NOT x IN coalesce(r.orphanedSourceIds, [])],
+        r.contested = false,
+        r.derivedAt = coalesce(r.derivedAt, timestamp()),
+        r.rubricVersion = $rubricVersion,
+        r.confidence = CASE WHEN f.confidence IS NULL THEN r.confidence ELSE f.confidence END
+    RETURN s.name AS subject, r.verb AS verb, o.name AS object, r.confidence AS confidence
+    """
+
+    @staticmethod
+    def _normalize_fact(fact) -> dict:
+        """
+        Accepts a fact as either a dict (subject/verb/obj/sourceNodeIds/
+        confidence keys) or a (subject, verb, obj, sourceNodeIds[, confidence])
+        sequence, validates it, and returns the canonical dict form.
+        """
+        if isinstance(fact, dict):
+            subject = fact.get("subject")
+            verb = fact.get("verb")
+            obj = fact.get("obj")
+            sourceNodeIds = fact.get("sourceNodeIds")
+            confidence = fact.get("confidence")
+        elif isinstance(fact, (list, tuple)):
+            if len(fact) == 4:
+                subject, verb, obj, sourceNodeIds = fact
+                confidence = None
+            elif len(fact) == 5:
+                subject, verb, obj, sourceNodeIds, confidence = fact
+            else:
+                raise ValueError("Each fact must be (subject, verb, obj, sourceNodeIds[, confidence]) or an equivalent dict.")
+        else:
+            raise ValueError("Each fact must be a dict or a (subject, verb, obj, sourceNodeIds[, confidence]) sequence.")
+
+        if not subject or not verb or not obj:
+            raise ValueError("Each fact requires non-empty subject, verb, and obj.")
+        if not sourceNodeIds:
+            raise ValueError("Provenance Violation: every derived insight requires the sourceNodeIds (AST hashes) that led to the deduction.")
+        if confidence is not None:
+            confidence = float(confidence)
+            if not 0.0 <= confidence <= 1.0:
+                raise ValueError(f"confidence must be between 0.0 and 1.0, got {confidence}.")
+        return {
+            "subject": str(subject),
+            "verb": str(verb),
+            "obj": str(obj),
+            "sourceNodeIds": list(sourceNodeIds),
+            "confidence": confidence,
+        }
+
+    def _run_insight_writes(self, facts: list) -> str:
+        try:
+            with self.driver.session() as session:
+                result = session.run(self._WRITE_INSIGHT_QUERY, facts=facts, rubricVersion=RUBRIC_VERSION)
+                return json.dumps([record.data() for record in result])
+        except Exception as e:
+            raise RuntimeError(f"Neo4jError while writing derived insight: {e}") from e
+
+    def write_derived_insight(self, subject: str, verb: str, obj: str, sourceNodeIds: list, confidence: float = None) -> str:
         """
         The ONLY permitted write operation. Allows the RLM to append derived insights
         to the belief state graph, linking them to specific AST nodes (sourceNodeIds).
 
+        `confidence` (optional, 0.0-1.0) is the sub-LLM's self-reported
+        probability that the derivation is correct. It is stored on the
+        edge and drives Phase 5 verification routing: low-confidence edges
+        are re-checked eagerly, high-confidence edges are sampled. Writes
+        without confidence are treated as low-confidence by the verifier.
+        Every write is also stamped with the current rubric version and a
+        derivedAt timestamp (first derivation only).
+
         Re-deriving a contested fact (one quarantined by the Phase 4
         invalidation sweep because its source bytes were orphaned by a
-        document update) restores it to trusted state: the contested flag
-        clears, orphaned hashes are dropped from live provenance, and
-        orphanedSourceIds/rederivedAt remain as audit history.
+        document update, or disputed by the Phase 5 verifier) restores it
+        to trusted state: the contested flag clears, orphaned hashes are
+        dropped from live provenance, and orphanedSourceIds/rederivedAt
+        remain as audit history.
         """
         _count_tool_call()
-        if not sourceNodeIds:
-            raise ValueError("Provenance Violation: write_derived_insight requires the sourceNodeIds (AST hashes) that led to the deduction.")
-        # Architecture Invariant 4 (Flywheel Exception): derived facts are
-        # written as whitelisted [DERIVED_INSIGHT] edges carrying spatial
-        # provenance. This is the ONLY mutation path in the sandbox.
-        query = """
-        MERGE (s:Entity {name: toLower($subject)})
-        MERGE (o:Entity {name: toLower($obj)})
-        MERGE (s)-[r:DERIVED_INSIGHT {verb: toLower($verb)}]->(o)
-        SET s.sourceNodeIds = coalesce(s.sourceNodeIds, []) + [x IN $sourceNodeIds WHERE NOT x IN coalesce(s.sourceNodeIds, [])],
-            o.sourceNodeIds = coalesce(o.sourceNodeIds, []) + [x IN $sourceNodeIds WHERE NOT x IN coalesce(o.sourceNodeIds, [])],
-            r.rederivedAt = CASE WHEN coalesce(r.contested, false) THEN timestamp() ELSE r.rederivedAt END,
-            r.sourceNodeIds = [x IN coalesce(r.sourceNodeIds, []) + [y IN $sourceNodeIds WHERE NOT y IN coalesce(r.sourceNodeIds, [])]
-                               WHERE NOT x IN coalesce(r.orphanedSourceIds, [])],
-            r.contested = false
-        RETURN s.name AS subject, r.verb AS verb, o.name AS object
+        fact = self._normalize_fact({
+            "subject": subject, "verb": verb, "obj": obj,
+            "sourceNodeIds": sourceNodeIds, "confidence": confidence,
+        })
+        return self._run_insight_writes([fact])
+
+    def write_derived_insights(self, facts: list) -> str:
         """
-        try:
-            with self.driver.session() as session:
-                result = session.run(query, subject=subject, verb=verb, obj=obj, sourceNodeIds=sourceNodeIds)
-                return json.dumps([record.data() for record in result])
-        except Exception as e:
-            raise RuntimeError(f"Neo4jError while writing derived insight: {e}") from e
+        Bulk variant of write_derived_insight: writes a list of facts in a
+        single Cypher UNWIND round trip. Each fact is either a dict with
+        keys subject, verb, obj, sourceNodeIds, and optional confidence,
+        or a (subject, verb, obj, sourceNodeIds[, confidence]) tuple.
+
+        Use this for sweep-sized writes (e.g. caching a whole
+        classification batch): it collapses N MERGE round trips into one.
+        Semantics per fact are identical to write_derived_insight,
+        including the un-contest-on-rederive behavior.
+        """
+        _count_tool_call()
+        if not facts or not isinstance(facts, (list, tuple)):
+            raise ValueError("write_derived_insights requires a non-empty list of facts.")
+        normalized = [self._normalize_fact(f) for f in facts]
+        return self._run_insight_writes(normalized)
 
     def close(self):
         self.driver.close()
