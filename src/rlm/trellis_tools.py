@@ -63,17 +63,51 @@ class TrellisNeo4j:
         except Exception as e:
             raise RuntimeError(f"Neo4jError while executing Cypher: {e}") from e
 
+    # Entity kinds (Phase 5 Milestone 2): every flywheel-written node
+    # carries a `kind` so the verifier can find classification beliefs
+    # structurally instead of by regex-matching names. The writer knows
+    # what it is writing — has_category implies question -> category_label,
+    # mentions implies question -> concept — so kinds are inferred from
+    # the verb unless the caller supplies subject_kind / object_kind
+    # explicitly. A specific kind is never downgraded back to 'generic'.
+    ENTITY_KINDS = ("question", "category_label", "concept", "generic")
+    _KIND_INFERENCE = {
+        "has_category": ("question", "category_label"),
+        "mentions": ("question", "concept"),
+    }
+
     # Architecture Invariant 4 (Flywheel Exception): derived facts are
     # written as whitelisted [DERIVED_INSIGHT] edges carrying spatial
     # provenance. This is the ONLY mutation path in the sandbox — both the
     # single and bulk write methods funnel through this one UNWIND query.
+    #
+    # Node updates mirror the edge's un-contest-on-rederive semantics
+    # (closing the Phase 4 asymmetry where re-derivation un-contested the
+    # edge but left its endpoint nodes quarantined): orphaned hashes are
+    # dropped from node provenance, contested clears once no orphaned
+    # provenance remains, and contestedAt/orphanedSourceIds stay behind
+    # as audit history.
     _WRITE_INSIGHT_QUERY = """
     UNWIND $facts AS f
     MERGE (s:Entity {name: toLower(f.subject)})
     MERGE (o:Entity {name: toLower(f.obj)})
     MERGE (s)-[r:DERIVED_INSIGHT {verb: toLower(f.verb)}]->(o)
-    SET s.sourceNodeIds = coalesce(s.sourceNodeIds, []) + [x IN f.sourceNodeIds WHERE NOT x IN coalesce(s.sourceNodeIds, [])],
-        o.sourceNodeIds = coalesce(o.sourceNodeIds, []) + [x IN f.sourceNodeIds WHERE NOT x IN coalesce(o.sourceNodeIds, [])],
+    SET s.kind = CASE
+            WHEN f.subject_kind IS NULL THEN s.kind
+            WHEN f.subject_kind = 'generic' AND NOT coalesce(s.kind, 'generic') = 'generic' THEN s.kind
+            ELSE f.subject_kind END,
+        o.kind = CASE
+            WHEN f.object_kind IS NULL THEN o.kind
+            WHEN f.object_kind = 'generic' AND NOT coalesce(o.kind, 'generic') = 'generic' THEN o.kind
+            ELSE f.object_kind END,
+        s.rederivedAt = CASE WHEN coalesce(s.contested, false) THEN timestamp() ELSE s.rederivedAt END,
+        o.rederivedAt = CASE WHEN coalesce(o.contested, false) THEN timestamp() ELSE o.rederivedAt END,
+        s.sourceNodeIds = [x IN coalesce(s.sourceNodeIds, []) + [y IN f.sourceNodeIds WHERE NOT y IN coalesce(s.sourceNodeIds, [])]
+                           WHERE NOT x IN coalesce(s.orphanedSourceIds, [])],
+        o.sourceNodeIds = [x IN coalesce(o.sourceNodeIds, []) + [y IN f.sourceNodeIds WHERE NOT y IN coalesce(o.sourceNodeIds, [])]
+                           WHERE NOT x IN coalesce(o.orphanedSourceIds, [])],
+        s.contested = false,
+        o.contested = false,
         r.rederivedAt = CASE WHEN coalesce(r.contested, false) THEN timestamp() ELSE r.rederivedAt END,
         r.sourceNodeIds = [x IN coalesce(r.sourceNodeIds, []) + [y IN f.sourceNodeIds WHERE NOT y IN coalesce(r.sourceNodeIds, [])]
                            WHERE NOT x IN coalesce(r.orphanedSourceIds, [])],
@@ -84,19 +118,26 @@ class TrellisNeo4j:
     RETURN s.name AS subject, r.verb AS verb, o.name AS object, r.confidence AS confidence
     """
 
-    @staticmethod
-    def _normalize_fact(fact) -> dict:
+    @classmethod
+    def _normalize_fact(cls, fact) -> dict:
         """
         Accepts a fact as either a dict (subject/verb/obj/sourceNodeIds/
-        confidence keys) or a (subject, verb, obj, sourceNodeIds[, confidence])
-        sequence, validates it, and returns the canonical dict form.
+        confidence/subject_kind/object_kind keys) or a
+        (subject, verb, obj, sourceNodeIds[, confidence]) sequence,
+        validates it, and returns the canonical dict form. Entity kinds
+        default to the verb-based inference table, falling back to
+        'generic' for verbs the protocol does not recognize.
         """
+        subject_kind = None
+        object_kind = None
         if isinstance(fact, dict):
             subject = fact.get("subject")
             verb = fact.get("verb")
             obj = fact.get("obj")
             sourceNodeIds = fact.get("sourceNodeIds")
             confidence = fact.get("confidence")
+            subject_kind = fact.get("subject_kind")
+            object_kind = fact.get("object_kind")
         elif isinstance(fact, (list, tuple)):
             if len(fact) == 4:
                 subject, verb, obj, sourceNodeIds = fact
@@ -116,12 +157,22 @@ class TrellisNeo4j:
             confidence = float(confidence)
             if not 0.0 <= confidence <= 1.0:
                 raise ValueError(f"confidence must be between 0.0 and 1.0, got {confidence}.")
+
+        inferred = cls._KIND_INFERENCE.get(str(verb).lower(), ("generic", "generic"))
+        subject_kind = subject_kind if subject_kind is not None else inferred[0]
+        object_kind = object_kind if object_kind is not None else inferred[1]
+        for kind in (subject_kind, object_kind):
+            if kind not in cls.ENTITY_KINDS:
+                raise ValueError(f"Invalid entity kind '{kind}': must be one of {', '.join(cls.ENTITY_KINDS)}.")
+
         return {
             "subject": str(subject),
             "verb": str(verb),
             "obj": str(obj),
             "sourceNodeIds": list(sourceNodeIds),
             "confidence": confidence,
+            "subject_kind": subject_kind,
+            "object_kind": object_kind,
         }
 
     def _run_insight_writes(self, facts: list) -> str:
@@ -132,7 +183,8 @@ class TrellisNeo4j:
         except Exception as e:
             raise RuntimeError(f"Neo4jError while writing derived insight: {e}") from e
 
-    def write_derived_insight(self, subject: str, verb: str, obj: str, sourceNodeIds: list, confidence: float = None) -> str:
+    def write_derived_insight(self, subject: str, verb: str, obj: str, sourceNodeIds: list, confidence: float = None,
+                              subject_kind: str = None, object_kind: str = None) -> str:
         """
         The ONLY permitted write operation. Allows the RLM to append derived insights
         to the belief state graph, linking them to specific AST nodes (sourceNodeIds).
@@ -145,17 +197,24 @@ class TrellisNeo4j:
         Every write is also stamped with the current rubric version and a
         derivedAt timestamp (first derivation only).
 
+        `subject_kind` / `object_kind` (optional) stamp the endpoint
+        Entity nodes with what they ARE (question | category_label |
+        concept | generic). For has_category and mentions writes the
+        kinds are inferred automatically; supply them explicitly only
+        for other verbs where 'generic' would be wrong.
+
         Re-deriving a contested fact (one quarantined by the Phase 4
         invalidation sweep because its source bytes were orphaned by a
         document update, or disputed by the Phase 5 verifier) restores it
-        to trusted state: the contested flag clears, orphaned hashes are
-        dropped from live provenance, and orphanedSourceIds/rederivedAt
-        remain as audit history.
+        to trusted state: the contested flag clears on the edge AND its
+        endpoint nodes, orphaned hashes are dropped from live provenance,
+        and orphanedSourceIds/rederivedAt remain as audit history.
         """
         _count_tool_call()
         fact = self._normalize_fact({
             "subject": subject, "verb": verb, "obj": obj,
             "sourceNodeIds": sourceNodeIds, "confidence": confidence,
+            "subject_kind": subject_kind, "object_kind": object_kind,
         })
         return self._run_insight_writes([fact])
 
@@ -163,8 +222,9 @@ class TrellisNeo4j:
         """
         Bulk variant of write_derived_insight: writes a list of facts in a
         single Cypher UNWIND round trip. Each fact is either a dict with
-        keys subject, verb, obj, sourceNodeIds, and optional confidence,
-        or a (subject, verb, obj, sourceNodeIds[, confidence]) tuple.
+        keys subject, verb, obj, sourceNodeIds, and optional confidence /
+        subject_kind / object_kind, or a
+        (subject, verb, obj, sourceNodeIds[, confidence]) tuple.
 
         Use this for sweep-sized writes (e.g. caching a whole
         classification batch): it collapses N MERGE round trips into one.

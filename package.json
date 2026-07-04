@@ -15,6 +15,8 @@
     "oolong:flywheel-prep": "tsx scripts/prepare_oolong_flywheel.ts",
     "oolong:benchmark": "tsx src/benchmarks/oolong_runner.ts",
     "test:confidence-writes": "tsx scripts/test_confidence_writes.ts",
+    "test:entity-kinds": "tsx scripts/test_entity_kinds.ts",
+    "migrate:entity-kinds": "tsx scripts/migrate_entity_kinds.ts",
     "test:versioned-ingest": "tsx scripts/test_versioned_ingest.ts",
     "test:invalidation-sweep": "tsx scripts/test_invalidation_sweep.ts",
     "drill:mutate": "tsx scripts/mutate_oolong_dataset.ts",
