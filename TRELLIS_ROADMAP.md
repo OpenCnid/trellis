@@ -2,6 +2,8 @@
 
 *Generated from a code-led review of the repository (July 2026). File and line references point at the current state of `master`-derived code in this working tree.*
 
+*Status: Phase 1 (Foundations & Portability — short-term items 3.1 #1–3 and #7) is complete and verified. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
+
 ---
 
 ## 1. Architecture Overview
@@ -73,15 +75,15 @@ Trellis is a provenance-preserving GraphRAG system. Its central design commitmen
 
 Ordered roughly by severity.
 
-**T1 — No test suite.** `package.json:10` is the npm default stub (`echo "Error: no test specified" && exit 1`). There is no unit test framework anywhere in the repo. The scripts under `scripts/` (`test_e2e_rlm.ts`, `run_adversarial_tests.ts`, etc.) are manual end-to-end probes that require live Docker infrastructure and an OpenAI key — they are not automated, not assertion-based, and not CI-runnable. Several modules are pure functions that could be tested today with zero infrastructure: [parser.ts](src/core/ast/parser.ts), [corpus.ts](src/benchmarks/oolong/corpus.ts), and the parse/score functions in [oolong_runner.ts:76-94](src/benchmarks/oolong_runner.ts:76) and [rlm_client.ts:32-58](src/benchmarks/oolong/rlm_client.ts:32).
+**T1 — No test suite.** *Resolved (July 2026) — see §5.* `package.json:10` was the npm default stub (`echo "Error: no test specified" && exit 1`). There is no unit test framework anywhere in the repo. The scripts under `scripts/` (`test_e2e_rlm.ts`, `run_adversarial_tests.ts`, etc.) are manual end-to-end probes that require live Docker infrastructure and an OpenAI key — they are not automated, not assertion-based, and not CI-runnable. Several modules are pure functions that could be tested today with zero infrastructure: [parser.ts](src/core/ast/parser.ts), [corpus.ts](src/benchmarks/oolong/corpus.ts), and the parse/score functions in [oolong_runner.ts:76-94](src/benchmarks/oolong_runner.ts:76) and [rlm_client.ts:32-58](src/benchmarks/oolong/rlm_client.ts:32).
 
 **T2 — Extraction granularity is wrong for markdown ingestion.** [server.ts:78](src/api/server.ts:78) selects "leaf nodes" as any node with string content. In a remark AST, leaves are inline tokens (`text`, `inlineCode`, …), not blocks — so `Globex **acquired** Initech` fans out as three separate extraction jobs (`"Globex "`, `"acquired"`, `" Initech"`), none of which contains the full relationship. Extraction should operate at block level (paragraph/heading) with concatenated child text, as [corpus.ts:27-30](src/benchmarks/oolong/corpus.ts:27) already does via `nodeText()`. This directly degrades graph quality for any formatted document.
 
-**T3 — Runtime dependency misclassification.** `ioredis` is in `devDependencies` ([package.json:41](package.json:41)) but is imported at runtime by [server.ts:183](src/api/server.ts:183), [queue.ts:2](src/workers/queue.ts:2), and [rlm_worker.ts:5](src/workers/rlm_worker.ts:5). A production install with `--omit=dev` will not start. Conversely, `@types/*`, `typescript`, and `tsx` sit in `dependencies`.
+**T3 — Runtime dependency misclassification.** *Resolved (July 2026) — see §5.* `ioredis` was in `devDependencies` ([package.json:41](package.json:41)) but is imported at runtime by [server.ts:183](src/api/server.ts:183), [queue.ts:2](src/workers/queue.ts:2), and [rlm_worker.ts:5](src/workers/rlm_worker.ts:5). A production install with `--omit=dev` will not start. Conversely, `@types/*`, `typescript`, and `tsx` sit in `dependencies`.
 
-**T4 — The repo violates its own configuration invariant.** [.agents/AGENT_CODING_GUIDELINES.md:13](.agents/AGENT_CODING_GUIDELINES.md) mandates a schema-validated config object exported from `src/config/index.ts`; that file does not exist. Instead, connection details and passwords are hardcoded: Postgres and Neo4j credentials in [db.ts:5-17](src/config/db.ts:5), Redis host/port in [queue.ts:4-8](src/workers/queue.ts:4) and duplicated in [server.ts:201-204](src/api/server.ts:201) and [rlm_worker.ts:7-10](src/workers/rlm_worker.ts:7). The Python tools ([trellis_tools.py:22-26](src/rlm/trellis_tools.py:22)) do read env vars, so the two halves of the system configure differently.
+**T4 — The repo violates its own configuration invariant.** *Resolved (July 2026) — see §5.* [.agents/AGENT_CODING_GUIDELINES.md:13](.agents/AGENT_CODING_GUIDELINES.md) mandates a schema-validated config object exported from `src/config/index.ts`; that file did not exist. Instead, connection details and passwords are hardcoded: Postgres and Neo4j credentials in [db.ts:5-17](src/config/db.ts:5), Redis host/port in [queue.ts:4-8](src/workers/queue.ts:4) and duplicated in [server.ts:201-204](src/api/server.ts:201) and [rlm_worker.ts:7-10](src/workers/rlm_worker.ts:7). The Python tools ([trellis_tools.py:22-26](src/rlm/trellis_tools.py:22)) do read env vars, so the two halves of the system configure differently.
 
-**T5 — Machine-specific path hardcoded in the RLM worker.** [rlm_worker.ts:25](src/workers/rlm_worker.ts:25) sets `PYTHONPATH` to `C:\Users\Darian\AppData\Roaming\Python\Python313\site-packages`. The RLM pipeline cannot run on any other machine without editing source. The bare `python` executable name is also platform-dependent.
+**T5 — Machine-specific path hardcoded in the RLM worker.** *Resolved (July 2026) — see §5.* [rlm_worker.ts:25](src/workers/rlm_worker.ts:25) set `PYTHONPATH` to `C:\Users\Darian\AppData\Roaming\Python\Python313\site-packages`. The RLM pipeline cannot run on any other machine without editing source. The bare `python` executable name is also platform-dependent.
 
 **T6 — No authentication, rate limiting, or concurrency control on the API.** All three endpoints are unauthenticated. `/api/rlm-stream` is the sharpest edge: each GET spawns a Python process that makes paid LLM calls and holds database connections ([server.ts:186-239](src/api/server.ts:186)). An unauthenticated caller can generate unbounded cost and process load. There is also no cap on concurrent RLM jobs beyond BullMQ's default worker concurrency.
 
@@ -100,9 +102,9 @@ Ordered roughly by severity.
 
 **T11 — Per-row inserts and per-job enqueues in the hot ingestion path.** [server.ts:62-68](src/api/server.ts:62) inserts AST nodes one query at a time inside a transaction, and [server.ts:79-84](src/api/server.ts:79) enqueues extraction jobs one `await` at a time. For large documents this is a straightforward N-round-trip bottleneck; multi-row `INSERT ... UNNEST` and `queue.addBulk()` are drop-in improvements. The same per-row pattern exists in [ingest_oolong_dataset.ts:36-42](scripts/ingest_oolong_dataset.ts:36), where it is more defensible (batch sizes of 40) but still doubles as an example.
 
-**T12 — Document membership is not modeled.** `ast_nodes.document_id` is set once and `ON CONFLICT (id) DO NOTHING` ([server.ts:63-67](src/api/server.ts:63)) means a node shared by two documents (identical content) keeps whichever document ingested it first. Content addressing makes node reuse across documents *expected*, so membership needs a join table (`document_nodes(document_id, node_id)`) rather than a column.
+**T12 — Document membership is not modeled.** *Resolved prior to this review's publication (Phase 4 versioned-ingest work) — see §5.* `ast_nodes.document_id` is set once and `ON CONFLICT (id) DO NOTHING` ([server.ts:63-67](src/api/server.ts:63)) means a node shared by two documents (identical content) keeps whichever document ingested it first. Content addressing makes node reuse across documents *expected*, so membership needs a join table (`document_nodes(document_id, node_id)`) rather than a column.
 
-**T13 — Hash preimage lacks canonical encoding.** [parser.ts:20-31](src/core/ast/parser.ts:20) builds the hash input by joining `type`, `content`, `JSON.stringify(metadata)`, and concatenated child hashes with `:` delimiters. Because none of the segments are length-prefixed, distinct `(type, content, metadata)` combinations can in principle produce identical preimages. Practical risk is low (types come from a fixed vocabulary), but a Merkle-integrity system should use an unambiguous encoding (length-prefixed segments or canonical JSON of the full tuple). Also, `if (content)` treats empty-string content as absent — a falsy check where an `!== undefined` check is meant.
+**T13 — Hash preimage lacks canonical encoding.** *Open by design for now; current behavior is pinned by unit tests — see §5.* [parser.ts:20-31](src/core/ast/parser.ts:20) builds the hash input by joining `type`, `content`, `JSON.stringify(metadata)`, and concatenated child hashes with `:` delimiters. Because none of the segments are length-prefixed, distinct `(type, content, metadata)` combinations can in principle produce identical preimages. Practical risk is low (types come from a fixed vocabulary), but a Merkle-integrity system should use an unambiguous encoding (length-prefixed segments or canonical JSON of the full tuple). Also, `if (content)` treats empty-string content as absent — a falsy check where an `!== undefined` check is meant.
 
 **T14 — No embedding/queue hygiene.**
 - No pgvector index (HNSW/IVFFlat) is created in [init_db.ts:10-18](src/config/init_db.ts:10); the vector fallback is a sequential scan. Fine at current scale, a cliff later.
@@ -122,13 +124,13 @@ Ordered roughly by severity.
 
 ### 3.1 Short-Term (immediate fixes, low-hanging fruit)
 
-1. **Fix dependency classification** (T3): move `ioredis` to `dependencies`; move `@types/*`, `typescript`, `tsx` to `devDependencies`.
-2. **Remove the hardcoded PYTHONPATH** (T5): pass it via env/config, resolve the Python executable per platform, and fail with a clear message if the `rlms` package is missing.
-3. **Create `src/config/index.ts`** (T4): a Zod-validated config object (DB hosts, credentials, Redis, model name, ports) read once from env, consumed by `db.ts`, `queue.ts`, `server.ts`, and exported to the Python side via env vars. This also collapses the model-string duplication (T17).
+1. ~~**Fix dependency classification** (T3)~~ — **done** (July 2026): `ioredis` moved to `dependencies`; `@types/*`, `typescript`, `tsx` moved to `devDependencies`.
+2. ~~**Remove the hardcoded PYTHONPATH** (T5)~~ — **done** (July 2026): interpreter comes from `PYTHON_EXECUTABLE` (platform-aware default), `PYTHONPATH` is an optional passthrough, and a missing `rlms` package produces an actionable error.
+3. ~~**Create `src/config/index.ts`** (T4)~~ — **done** (July 2026): Zod-validated config read once from env, consumed by `db.ts`, `queue.ts`, `server.ts`, and the workers; Neo4j/Postgres settings are forwarded to the spawned Python process. Also collapsed the model-string duplication (part of T17).
 4. **Validate LLM responses** (T8): replace `JSON.parse(rawContent)` with `GraphSchema.parse(...)` / `ConflictEvaluationSchema.parse(...)` and route failures through the job-retry path.
 5. **Fix the supervisor bugs** (T10): link the `Conflict` node to the two relationships it explains, replace `"\\n"` with `"\n"`, and replace `id()` with `elementId()`.
 6. **Log dropped actions in the extraction worker** (T9).
-7. **Stand up a unit test harness** (T1): vitest or node:test over the pure modules — parser hashing determinism (including the empty-content and delimiter edge cases from T13), `buildCorpus` round-trip failures, `parsePredictedPairs`/`scoreF1`, and the SSE extractors in `rlm_client.ts`. No infrastructure required; wire into `npm test`.
+7. ~~**Stand up a unit test harness** (T1)~~ — **done** (July 2026): vitest wired into `npm test`; 45 tests over parser hashing determinism (including the T13 empty-content and delimiter edge cases, pinned as current behavior), `buildCorpus` round trips, `parsePredictedPairs`/`scoreF1`/`estimateCost`, and the SSE extractors in `rlm_client.ts`. No infrastructure required.
 8. **Correct the README bounding-box claim** (T17).
 
 ### 3.2 Medium-Term (correctness, performance, robustness)
@@ -163,3 +165,23 @@ Ordered roughly by severity.
 | 4 | Sandbox + API hardening (3.2 #2–3) | Required before any non-local deployment |
 | 5 | Queue/retry hygiene + supervisor fixes | Reliability of the async tier |
 | 6 | Document-update pipeline (3.3 #1) | The architecture's core promise; largest single work item |
+
+---
+
+## 5. Progress Log
+
+### July 2026 — Phase 1: Foundations & Portability (items 3.1 #1–3, #7)
+
+Completed as three commits, each verified before the next was started (module smoke-loads, ad-hoc `tsc --noEmit` typecheck, and the unit suite).
+
+1. **T3 resolved** — `fix: classify runtime and dev dependencies correctly`. `ioredis` is a runtime dependency; `@types/*`, `typescript`, and `tsx` are dev-only. A `--omit=dev` production install can now start.
+2. **T4 + T5 resolved** — `feat: unified Zod-validated configuration module`. `src/config/index.ts` reads and validates the environment exactly once; invalid values fail fast with a readable error. Defaults match the docker-compose development stack, so a bare local run needs no `.env`. All hardcoded Postgres/Neo4j/Redis values, the API port, the extraction-model string, and the Python interpreter selection now flow from this module. `rlm_worker.ts` forwards `NEO4J_URI`/`NEO4J_USER`/`NEO4J_PASSWORD`/`PG_DSN` to the spawned agent so the TypeScript and Python halves configure from one source. Spawn failures and a missing `rlms` package produce actionable error messages.
+3. **T1 resolved** — `test: add vitest unit-test harness for the pure modules`. `npm test` runs 45 assertions across `parser.ts`, `scoring.ts`, `rlm_client.ts`, and `corpus.ts` with no database, Docker, or API key. Failure detection was verified with a deliberate negative-control test.
+
+**Findings recorded during this work:**
+
+- **T12 was already resolved** by the Phase 4 versioned-ingest work before this phase began: `documents` and `document_nodes` tables exist ([init_db.ts](src/config/init_db.ts)), `/ingest` records per-version membership and runs Merkle diffs, and orphaned provenance triggers invalidation sweeps. `ast_nodes.document_id` remains as a non-authoritative column, documented as such in `init_db.ts`.
+- **New issue found and fixed: ioredis version split.** `bullmq` pins `ioredis@5.10.1` exactly, while the app declared `^5.11.1`; npm therefore installed two copies whose TypeScript types are nominally incompatible. The app now pins `5.10.1` to match. If bullmq's pin moves, the two declarations must move together.
+- **T13 is deliberately left open.** Changing the hash preimage (empty-content falsy check, unprefixed `:` delimiters) invalidates every hash already stored in `ast_nodes`, so the fix requires a re-hash migration story. Until then, the current behavior is pinned by tests in [parser.test.ts](src/core/ast/parser.test.ts) so any accidental change to the preimage fails the suite.
+
+**Still open** (unchanged by this phase): T6 (API authentication/rate limiting), T7 (transport-level read-only Cypher sessions; APOC), T8 (Zod validation of LLM responses), T9 (dropped-action logging), T10 (supervisor defects), T11 (ingestion batching), T14 (queue hygiene, pgvector index, upload cleanup, graceful shutdown), T16 (structured logging/metrics), and the T17 README bounding-box correction.
