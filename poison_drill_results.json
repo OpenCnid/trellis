@@ -1,9 +1,14 @@
 {
   "benchmark": "OOLONG-Pairs Poisoning Drill (Phase 5)",
-  "mode": "dress_rehearsal_oracle",
+  "mode": "real_sub_llm",
   "dataset": "oolong-pairs-trec-synthetic-v1-drill-v2",
-  "model": "ground-truth oracle (LLM-free)",
-  "generated_at": "2026-07-04T03:03:09.103Z",
+  "model": "gpt-5.4-2026-03-05",
+  "generated_at": "2026-07-04T08:18:08.190Z",
+  "real_act1_baseline": {
+    "mean_f1": 0.95,
+    "total_subcalls": 1,
+    "total_cost_usd": 0.8781324999999999
+  },
   "poison": {
     "count": 11,
     "seed": 4242,
@@ -92,7 +97,7 @@
         }
       ],
       "recovery": {
-        "disputed_rederived": 0,
+        "disputed_rederived": -1,
         "recovery_bulk_calls": 0,
         "questions_missing_effective_category": 0,
         "effective_mismatches_vs_truth": 11,
@@ -258,6 +263,408 @@
             "predicted_pairs": 16,
             "truth_pairs": 16
           }
+        ],
+        "real_query_telemetry": [
+          {
+            "index": 1,
+            "city": "cairo",
+            "phase": "post",
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16,
+            "input_tokens": 12887,
+            "output_tokens": 744,
+            "total_tokens": 13631,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.0396575,
+            "duration_s": 11.037,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 2,
+            "city": "dublin",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 3301,
+            "output_tokens": 1203,
+            "total_tokens": 4504,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.020282500000000002,
+            "duration_s": 11.556,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 3,
+            "city": "havana",
+            "phase": "post",
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16,
+            "input_tokens": 3301,
+            "output_tokens": 1921,
+            "total_tokens": 5222,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.027462499999999997,
+            "duration_s": 14.591,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 4,
+            "city": "lima",
+            "phase": "post",
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16,
+            "input_tokens": 8562,
+            "output_tokens": 1204,
+            "total_tokens": 9766,
+            "subcall_count": 0,
+            "tool_calls": 3,
+            "iterations": 2,
+            "cost_usd": 0.033445,
+            "duration_s": 12.091,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 5,
+            "city": "mumbai",
+            "phase": "post",
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 6,
+            "truth_pairs": 8,
+            "input_tokens": 3301,
+            "output_tokens": 1208,
+            "total_tokens": 4509,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0203325,
+            "duration_s": 11.034,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 6,
+            "city": "nairobi",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 13382,
+            "output_tokens": 759,
+            "total_tokens": 14141,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.041045,
+            "duration_s": 11.021,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 7,
+            "city": "oslo",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 6,
+            "truth_pairs": 6,
+            "input_tokens": 19509,
+            "output_tokens": 929,
+            "total_tokens": 20438,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 4,
+            "cost_usd": 0.058062499999999996,
+            "duration_s": 12.156,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 8,
+            "city": "paris",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 18792,
+            "output_tokens": 1019,
+            "total_tokens": 19811,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 4,
+            "cost_usd": 0.05717,
+            "duration_s": 18.85,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 9,
+            "city": "prague",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8,
+            "input_tokens": 18003,
+            "output_tokens": 890,
+            "total_tokens": 18893,
+            "subcall_count": 0,
+            "tool_calls": 3,
+            "iterations": 4,
+            "cost_usd": 0.053907500000000004,
+            "duration_s": 13.152,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 10,
+            "city": "quito",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 3300,
+            "output_tokens": 2147,
+            "total_tokens": 5447,
+            "subcall_count": 0,
+            "tool_calls": 4,
+            "iterations": 1,
+            "cost_usd": 0.02972,
+            "duration_s": 14.645,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 11,
+            "city": "seoul",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 8722,
+            "output_tokens": 1249,
+            "total_tokens": 9971,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.034295,
+            "duration_s": 12.563,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 12,
+            "city": "tokyo",
+            "phase": "post",
+            "precision": 0.8,
+            "recall": 0.8,
+            "f1": 0.8000000000000002,
+            "predicted_pairs": 20,
+            "truth_pairs": 20,
+            "input_tokens": 3301,
+            "output_tokens": 1225,
+            "total_tokens": 4526,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0205025,
+            "duration_s": 11.63,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 13,
+            "city": "vienna",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 3301,
+            "output_tokens": 1156,
+            "total_tokens": 4457,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.019812499999999997,
+            "duration_s": 11.053,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 14,
+            "city": "zagreb",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 12,
+            "truth_pairs": 12,
+            "input_tokens": 14315,
+            "output_tokens": 1319,
+            "total_tokens": 15634,
+            "subcall_count": 0,
+            "tool_calls": 3,
+            "iterations": 3,
+            "cost_usd": 0.0489775,
+            "duration_s": 13.62,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 15,
+            "city": "cairo",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16,
+            "input_tokens": 12534,
+            "output_tokens": 743,
+            "total_tokens": 13277,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.038765,
+            "duration_s": 11.023,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 16,
+            "city": "dublin",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 12540,
+            "output_tokens": 686,
+            "total_tokens": 13226,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.03821,
+            "duration_s": 11.009,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 17,
+            "city": "havana",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16,
+            "input_tokens": 3301,
+            "output_tokens": 1416,
+            "total_tokens": 4717,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0224125,
+            "duration_s": 12.57,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 18,
+            "city": "lima",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 12,
+            "truth_pairs": 16,
+            "input_tokens": 3301,
+            "output_tokens": 1121,
+            "total_tokens": 4422,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0194625,
+            "duration_s": 11.034,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 19,
+            "city": "mumbai",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 0.75,
+            "f1": 0.8571428571428571,
+            "predicted_pairs": 6,
+            "truth_pairs": 8,
+            "input_tokens": 3301,
+            "output_tokens": 1368,
+            "total_tokens": 4669,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0219325,
+            "duration_s": 11.544,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 20,
+            "city": "nairobi",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 8423,
+            "output_tokens": 1226,
+            "total_tokens": 9649,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.0333175,
+            "duration_s": 12.599,
+            "dispatch_attempts": 1,
+            "error": null
+          }
         ]
       }
     },
@@ -289,9 +696,9 @@
       "false_disputes": 0,
       "false_dispute_rate": 0,
       "total_classified": 525,
-      "total_subcalls": 0,
-      "verification_cost_usd": 0,
-      "cost_per_100_beliefs_per_sweep_usd": 0,
+      "total_subcalls": 62,
+      "verification_cost_usd": 0.160575,
+      "cost_per_100_beliefs_per_sweep_usd": 0.0011772360703812316,
       "sweep_trajectory": [
         {
           "sweep": 1,
@@ -300,7 +707,7 @@
           "newly_detected": 1,
           "cumulative_detected": 1,
           "recall": 0.09090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 2,
@@ -309,7 +716,7 @@
           "newly_detected": 0,
           "cumulative_detected": 1,
           "recall": 0.09090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 3,
@@ -318,7 +725,7 @@
           "newly_detected": 1,
           "cumulative_detected": 2,
           "recall": 0.18181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 4,
@@ -327,7 +734,7 @@
           "newly_detected": 3,
           "cumulative_detected": 5,
           "recall": 0.45454545454545453,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 5,
@@ -336,7 +743,7 @@
           "newly_detected": 1,
           "cumulative_detected": 6,
           "recall": 0.5454545454545454,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 6,
@@ -345,7 +752,7 @@
           "newly_detected": 0,
           "cumulative_detected": 6,
           "recall": 0.5454545454545454,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 7,
@@ -354,7 +761,7 @@
           "newly_detected": 1,
           "cumulative_detected": 7,
           "recall": 0.6363636363636364,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 8,
@@ -363,7 +770,7 @@
           "newly_detected": 1,
           "cumulative_detected": 8,
           "recall": 0.7272727272727273,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 9,
@@ -372,7 +779,7 @@
           "newly_detected": 0,
           "cumulative_detected": 8,
           "recall": 0.7272727272727273,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 10,
@@ -381,7 +788,7 @@
           "newly_detected": 1,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 11,
@@ -390,7 +797,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 12,
@@ -399,7 +806,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 13,
@@ -408,7 +815,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 14,
@@ -417,7 +824,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 15,
@@ -426,7 +833,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 16,
@@ -435,7 +842,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 17,
@@ -444,7 +851,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 18,
@@ -453,7 +860,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 19,
@@ -462,7 +869,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 20,
@@ -471,7 +878,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 21,
@@ -480,7 +887,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 22,
@@ -489,7 +896,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 23,
@@ -498,7 +905,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 24,
@@ -507,7 +914,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 25,
@@ -516,7 +923,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 26,
@@ -525,7 +932,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 27,
@@ -534,7 +941,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 28,
@@ -543,7 +950,7 @@
           "newly_detected": 0,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 29,
@@ -552,7 +959,7 @@
           "newly_detected": 1,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 30,
@@ -561,7 +968,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 31,
@@ -570,7 +977,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 32,
@@ -579,7 +986,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 33,
@@ -588,7 +995,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 34,
@@ -597,7 +1004,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 35,
@@ -606,7 +1013,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 36,
@@ -615,7 +1022,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 37,
@@ -624,7 +1031,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 38,
@@ -633,7 +1040,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 39,
@@ -642,7 +1049,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 40,
@@ -651,7 +1058,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 41,
@@ -660,7 +1067,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 42,
@@ -669,7 +1076,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 43,
@@ -678,7 +1085,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 44,
@@ -687,7 +1094,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 45,
@@ -696,7 +1103,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 46,
@@ -705,7 +1112,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 47,
@@ -714,7 +1121,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 48,
@@ -723,7 +1130,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 49,
@@ -732,7 +1139,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 50,
@@ -741,7 +1148,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 51,
@@ -750,7 +1157,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 52,
@@ -759,7 +1166,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 53,
@@ -768,7 +1175,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 54,
@@ -777,7 +1184,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 55,
@@ -786,7 +1193,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 56,
@@ -795,7 +1202,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 57,
@@ -804,7 +1211,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 58,
@@ -813,7 +1220,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 59,
@@ -822,7 +1229,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 60,
@@ -831,7 +1238,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 61,
@@ -840,7 +1247,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 62,
@@ -849,12 +1256,12 @@
           "newly_detected": 1,
           "cumulative_detected": 11,
           "recall": 1,
-          "subcalls": 0
+          "subcalls": 1
         }
       ],
       "recovery": {
-        "disputed_rederived": 11,
-        "recovery_bulk_calls": 1,
+        "disputed_rederived": -1,
+        "recovery_bulk_calls": 0,
         "questions_missing_effective_category": 0,
         "effective_mismatches_vs_truth": 0,
         "mean_f1": 1,
@@ -1018,6 +1425,408 @@
             "f1": 1,
             "predicted_pairs": 16,
             "truth_pairs": 16
+          }
+        ],
+        "real_query_telemetry": [
+          {
+            "index": 1,
+            "city": "cairo",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 29235,
+            "output_tokens": 2186,
+            "total_tokens": 31421,
+            "subcall_count": 1,
+            "tool_calls": 6,
+            "iterations": 5,
+            "cost_usd": 0.0949475,
+            "duration_s": 20.331,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 2,
+            "city": "dublin",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 8653,
+            "output_tokens": 1276,
+            "total_tokens": 9929,
+            "subcall_count": 0,
+            "tool_calls": 4,
+            "iterations": 2,
+            "cost_usd": 0.0343925,
+            "duration_s": 12.114,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 3,
+            "city": "havana",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 8834,
+            "output_tokens": 1451,
+            "total_tokens": 10285,
+            "subcall_count": 0,
+            "tool_calls": 4,
+            "iterations": 2,
+            "cost_usd": 0.036595,
+            "duration_s": 13.086,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 4,
+            "city": "lima",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 3301,
+            "output_tokens": 1233,
+            "total_tokens": 4534,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.020582499999999997,
+            "duration_s": 11.525,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 5,
+            "city": "mumbai",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8,
+            "input_tokens": 8597,
+            "output_tokens": 1094,
+            "total_tokens": 9691,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.0324325,
+            "duration_s": 12.056,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 6,
+            "city": "nairobi",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 14645,
+            "output_tokens": 963,
+            "total_tokens": 15608,
+            "subcall_count": 0,
+            "tool_calls": 4,
+            "iterations": 3,
+            "cost_usd": 0.0462425,
+            "duration_s": 16.126,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 7,
+            "city": "oslo",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 6,
+            "truth_pairs": 6,
+            "input_tokens": 13529,
+            "output_tokens": 1303,
+            "total_tokens": 14832,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.0468525,
+            "duration_s": 13.577,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 8,
+            "city": "paris",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 3301,
+            "output_tokens": 1599,
+            "total_tokens": 4900,
+            "subcall_count": 0,
+            "tool_calls": 4,
+            "iterations": 1,
+            "cost_usd": 0.0242425,
+            "duration_s": 15.142,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 9,
+            "city": "prague",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8,
+            "input_tokens": 8571,
+            "output_tokens": 1409,
+            "total_tokens": 9980,
+            "subcall_count": 0,
+            "tool_calls": 3,
+            "iterations": 2,
+            "cost_usd": 0.03551750000000001,
+            "duration_s": 13.056,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 10,
+            "city": "quito",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 3300,
+            "output_tokens": 1229,
+            "total_tokens": 4529,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.020540000000000003,
+            "duration_s": 11.049,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 11,
+            "city": "seoul",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 12905,
+            "output_tokens": 694,
+            "total_tokens": 13599,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.0392025,
+            "duration_s": 12.072,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 12,
+            "city": "tokyo",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 20,
+            "truth_pairs": 20,
+            "input_tokens": 8813,
+            "output_tokens": 1419,
+            "total_tokens": 10232,
+            "subcall_count": 0,
+            "tool_calls": 3,
+            "iterations": 2,
+            "cost_usd": 0.0362225,
+            "duration_s": 12.579,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 13,
+            "city": "vienna",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 3301,
+            "output_tokens": 1189,
+            "total_tokens": 4490,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0201425,
+            "duration_s": 12.096,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 14,
+            "city": "zagreb",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 12,
+            "truth_pairs": 12,
+            "input_tokens": 13212,
+            "output_tokens": 736,
+            "total_tokens": 13948,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.040389999999999995,
+            "duration_s": 11.55,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 15,
+            "city": "cairo",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 20140,
+            "output_tokens": 951,
+            "total_tokens": 21091,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 4,
+            "cost_usd": 0.05986000000000001,
+            "duration_s": 12.557,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 16,
+            "city": "dublin",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 12909,
+            "output_tokens": 831,
+            "total_tokens": 13740,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.0405825,
+            "duration_s": 11.204,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 17,
+            "city": "havana",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 8493,
+            "output_tokens": 1153,
+            "total_tokens": 9646,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.0327625,
+            "duration_s": 12.567,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 18,
+            "city": "lima",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 3301,
+            "output_tokens": 1356,
+            "total_tokens": 4657,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0218125,
+            "duration_s": 11.51,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 19,
+            "city": "mumbai",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8,
+            "input_tokens": 8486,
+            "output_tokens": 1188,
+            "total_tokens": 9674,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.033095,
+            "duration_s": 11.557,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 20,
+            "city": "nairobi",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 13008,
+            "output_tokens": 733,
+            "total_tokens": 13741,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.039850000000000003,
+            "duration_s": 11.488,
+            "dispatch_attempts": 1,
+            "error": null
           }
         ]
       }
@@ -1050,9 +1859,9 @@
       "false_disputes": 0,
       "false_dispute_rate": 0,
       "total_classified": 350,
-      "total_subcalls": 0,
-      "verification_cost_usd": 0,
-      "cost_per_100_beliefs_per_sweep_usd": 0,
+      "total_subcalls": 18,
+      "verification_cost_usd": 0.0882275,
+      "cost_per_100_beliefs_per_sweep_usd": 0.0022279671717171717,
       "sweep_trajectory": [
         {
           "sweep": 1,
@@ -1061,7 +1870,7 @@
           "newly_detected": 1,
           "cumulative_detected": 1,
           "recall": 0.09090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 2,
@@ -1070,7 +1879,7 @@
           "newly_detected": 0,
           "cumulative_detected": 1,
           "recall": 0.09090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 3,
@@ -1079,7 +1888,7 @@
           "newly_detected": 2,
           "cumulative_detected": 3,
           "recall": 0.2727272727272727,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 4,
@@ -1088,7 +1897,7 @@
           "newly_detected": 1,
           "cumulative_detected": 4,
           "recall": 0.36363636363636365,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 5,
@@ -1097,7 +1906,7 @@
           "newly_detected": 1,
           "cumulative_detected": 5,
           "recall": 0.45454545454545453,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 6,
@@ -1106,7 +1915,7 @@
           "newly_detected": 2,
           "cumulative_detected": 7,
           "recall": 0.6363636363636364,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 7,
@@ -1115,7 +1924,7 @@
           "newly_detected": 0,
           "cumulative_detected": 7,
           "recall": 0.6363636363636364,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 8,
@@ -1124,7 +1933,7 @@
           "newly_detected": 0,
           "cumulative_detected": 7,
           "recall": 0.6363636363636364,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 9,
@@ -1133,7 +1942,7 @@
           "newly_detected": 0,
           "cumulative_detected": 7,
           "recall": 0.6363636363636364,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 10,
@@ -1142,7 +1951,7 @@
           "newly_detected": 0,
           "cumulative_detected": 7,
           "recall": 0.6363636363636364,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 11,
@@ -1151,7 +1960,7 @@
           "newly_detected": 2,
           "cumulative_detected": 9,
           "recall": 0.8181818181818182,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 12,
@@ -1160,7 +1969,7 @@
           "newly_detected": 1,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 13,
@@ -1169,7 +1978,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 14,
@@ -1178,7 +1987,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 15,
@@ -1187,7 +1996,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 16,
@@ -1196,7 +2005,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 17,
@@ -1205,7 +2014,7 @@
           "newly_detected": 0,
           "cumulative_detected": 10,
           "recall": 0.9090909090909091,
-          "subcalls": 0
+          "subcalls": 1
         },
         {
           "sweep": 18,
@@ -1214,15 +2023,15 @@
           "newly_detected": 1,
           "cumulative_detected": 11,
           "recall": 1,
-          "subcalls": 0
+          "subcalls": 1
         }
       ],
       "recovery": {
-        "disputed_rederived": 11,
-        "recovery_bulk_calls": 1,
+        "disputed_rederived": -1,
+        "recovery_bulk_calls": 0,
         "questions_missing_effective_category": 0,
         "effective_mismatches_vs_truth": 0,
-        "mean_f1": 1,
+        "mean_f1": 0.9,
         "queries": [
           {
             "index": 1,
@@ -1384,6 +2193,408 @@
             "predicted_pairs": 16,
             "truth_pairs": 16
           }
+        ],
+        "real_query_telemetry": [
+          {
+            "index": 1,
+            "city": "cairo",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 13925,
+            "output_tokens": 1426,
+            "total_tokens": 15351,
+            "subcall_count": 1,
+            "tool_calls": 3,
+            "iterations": 3,
+            "cost_usd": 0.0490725,
+            "duration_s": 14.331,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 2,
+            "city": "dublin",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 12861,
+            "output_tokens": 753,
+            "total_tokens": 13614,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.0396825,
+            "duration_s": 10.581,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 3,
+            "city": "havana",
+            "phase": "post",
+            "precision": 0,
+            "recall": 0,
+            "f1": 0,
+            "predicted_pairs": 0,
+            "truth_pairs": 16,
+            "input_tokens": 3301,
+            "output_tokens": 1284,
+            "total_tokens": 4585,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0210925,
+            "duration_s": 11.564,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 4,
+            "city": "lima",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 13275,
+            "output_tokens": 824,
+            "total_tokens": 14099,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.0414275,
+            "duration_s": 11.549,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 5,
+            "city": "mumbai",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8,
+            "input_tokens": 3301,
+            "output_tokens": 1174,
+            "total_tokens": 4475,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.019992499999999996,
+            "duration_s": 11.03,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 6,
+            "city": "nairobi",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 8585,
+            "output_tokens": 1347,
+            "total_tokens": 9932,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.034932500000000005,
+            "duration_s": 12.565,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 7,
+            "city": "oslo",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 6,
+            "truth_pairs": 6,
+            "input_tokens": 12819,
+            "output_tokens": 673,
+            "total_tokens": 13492,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.0387775,
+            "duration_s": 9.997,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 8,
+            "city": "paris",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 14775,
+            "output_tokens": 1089,
+            "total_tokens": 15864,
+            "subcall_count": 0,
+            "tool_calls": 4,
+            "iterations": 3,
+            "cost_usd": 0.047827499999999995,
+            "duration_s": 12.034,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 9,
+            "city": "prague",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8,
+            "input_tokens": 18702,
+            "output_tokens": 913,
+            "total_tokens": 19615,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 4,
+            "cost_usd": 0.055885,
+            "duration_s": 12.575,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 10,
+            "city": "quito",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 8330,
+            "output_tokens": 1225,
+            "total_tokens": 9555,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.03307500000000001,
+            "duration_s": 12.1,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 11,
+            "city": "seoul",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 3301,
+            "output_tokens": 1075,
+            "total_tokens": 4376,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0190025,
+            "duration_s": 10.559,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 12,
+            "city": "tokyo",
+            "phase": "post",
+            "precision": 0,
+            "recall": 0,
+            "f1": 0,
+            "predicted_pairs": 0,
+            "truth_pairs": 20,
+            "input_tokens": 3301,
+            "output_tokens": 1128,
+            "total_tokens": 4429,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 1,
+            "cost_usd": 0.0195325,
+            "duration_s": 10.489,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 13,
+            "city": "vienna",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 8415,
+            "output_tokens": 1177,
+            "total_tokens": 9592,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.0328075,
+            "duration_s": 11.579,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 14,
+            "city": "zagreb",
+            "phase": "post",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 12,
+            "truth_pairs": 12,
+            "input_tokens": 3301,
+            "output_tokens": 1382,
+            "total_tokens": 4683,
+            "subcall_count": 0,
+            "tool_calls": 4,
+            "iterations": 1,
+            "cost_usd": 0.0220725,
+            "duration_s": 12.071,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 15,
+            "city": "cairo",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 7860,
+            "output_tokens": 743,
+            "total_tokens": 8603,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.02708,
+            "duration_s": 10.013,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 16,
+            "city": "dublin",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 9,
+            "truth_pairs": 9,
+            "input_tokens": 8164,
+            "output_tokens": 1134,
+            "total_tokens": 9298,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.03175,
+            "duration_s": 11.536,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 17,
+            "city": "havana",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 8423,
+            "output_tokens": 1384,
+            "total_tokens": 9807,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.0348975,
+            "duration_s": 12.587,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 18,
+            "city": "lima",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 19494,
+            "output_tokens": 1206,
+            "total_tokens": 20700,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 4,
+            "cost_usd": 0.060795,
+            "duration_s": 14.622,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 19,
+            "city": "mumbai",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 8,
+            "truth_pairs": 8,
+            "input_tokens": 12491,
+            "output_tokens": 683,
+            "total_tokens": 13174,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 3,
+            "cost_usd": 0.0380575,
+            "duration_s": 10.526,
+            "dispatch_attempts": 1,
+            "error": null
+          },
+          {
+            "index": 20,
+            "city": "nairobi",
+            "phase": "post_repeat",
+            "precision": 1,
+            "recall": 1,
+            "f1": 1,
+            "predicted_pairs": 16,
+            "truth_pairs": 16,
+            "input_tokens": 9328,
+            "output_tokens": 1875,
+            "total_tokens": 11203,
+            "subcall_count": 0,
+            "tool_calls": 2,
+            "iterations": 2,
+            "cost_usd": 0.042069999999999996,
+            "duration_s": 15.658,
+            "dispatch_attempts": 1,
+            "error": null
+          }
         ]
       }
     }
@@ -1399,8 +2610,8 @@
     "post_recovery_f1_by_policy": {
       "mandatory-only": 0.9328571428571429,
       "p=0.05": 1,
-      "p=0.10": 1
+      "p=0.10": 0.9
     },
-    "total_verification_cost_usd": 0
+    "total_verification_cost_usd": 0.24880249999999998
   }
 }

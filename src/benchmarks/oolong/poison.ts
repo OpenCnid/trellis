@@ -104,6 +104,97 @@ export async function seedVerifiedCache(
   }
 }
 
+/** Deletes every has_category edge for the dataset's questions — used to
+ *  force a genuinely cold start before a REAL (non-oracle) Act 1
+ *  warm-up, so the agent's sub-LLM confidences are its own, not a
+ *  carry-over from a prior run. */
+export async function wipeHasCategoryEdges(driver: Driver, dataset: OolongDataset): Promise<number> {
+  const session = driver.session();
+  try {
+    const res = await session.executeWrite(tx =>
+      tx.run(
+        `MATCH (s:Entity)-[r:DERIVED_INSIGHT {verb: 'has_category'}]->()
+         WHERE s.name IN $ids
+         DELETE r RETURN count(r) AS wiped`,
+        { ids: dataset.records.map(r => r.id) }
+      )
+    );
+    return res.records[0].get('wiped').toNumber();
+  } finally {
+    await session.close();
+  }
+}
+
+export interface BeliefSnapshotEntry {
+  id: string;
+  label: string;
+  confidence: number | null;
+  rubricVersion: number | null;
+  sourceNodeIds: string[];
+}
+
+/** Captures the has_category belief exactly as a real Act 1 left it —
+ *  genuine sub-LLM confidences and all — so every policy experiment in
+ *  the drill can start from the identical real-warm-up state without
+ *  re-paying for a fresh cold classification pass per policy. */
+export async function snapshotBeliefs(driver: Driver, dataset: OolongDataset): Promise<BeliefSnapshotEntry[]> {
+  const session = driver.session();
+  try {
+    const res = await session.executeRead(tx =>
+      tx.run(
+        `MATCH (s:Entity)-[r:DERIVED_INSIGHT {verb: 'has_category'}]->(o:Entity)
+         WHERE s.name IN $ids AND coalesce(r.contested, false) = false
+         RETURN s.name AS id, o.name AS label, r.confidence AS confidence,
+                r.rubricVersion AS rubricVersion, r.sourceNodeIds AS sourceNodeIds`,
+        { ids: dataset.records.map(r => r.id) }
+      )
+    );
+    return res.records.map(rec => ({
+      id: rec.get('id'),
+      label: rec.get('label'),
+      confidence: rec.get('confidence') == null ? null : Number(rec.get('confidence')),
+      rubricVersion: rec.get('rubricVersion') == null ? null : Number(rec.get('rubricVersion')),
+      sourceNodeIds: (rec.get('sourceNodeIds') as string[] | null) ?? []
+    }));
+  } finally {
+    await session.close();
+  }
+}
+
+const RESTORE_CYPHER = `
+  UNWIND $beliefs AS b
+  MATCH (s:Entity {name: b.id})
+  OPTIONAL MATCH (s)-[old:DERIVED_INSIGHT {verb: 'has_category'}]->()
+  DELETE old
+  WITH s, b
+  MERGE (o:Entity {name: b.label}) SET o.kind = 'category_label'
+  MERGE (s)-[r:DERIVED_INSIGHT {verb: 'has_category'}]->(o)
+  SET r.confidence = b.confidence,
+      r.rubricVersion = b.rubricVersion,
+      r.sourceNodeIds = b.sourceNodeIds,
+      r.verified_count = 0,
+      r.contested = false,
+      r.derivedAt = timestamp()
+  RETURN count(r) AS restored
+`;
+
+/** Resets every dataset question's has_category edge to a captured
+ *  snapshot — the real-Act-1 analog of seedVerifiedCache's oracle seed,
+ *  giving each policy experiment an identical real-warm-up starting
+ *  point without re-running the paid cold sequence per policy. */
+export async function restoreBeliefsFromSnapshot(
+  driver: Driver,
+  snapshot: BeliefSnapshotEntry[]
+): Promise<{ restored: number }> {
+  const session = driver.session();
+  try {
+    const res = await session.executeWrite(tx => tx.run(RESTORE_CYPHER, { beliefs: snapshot }));
+    return { restored: res.records[0].get('restored').toNumber() };
+  } finally {
+    await session.close();
+  }
+}
+
 // The flip preserves everything that makes the belief look legitimate:
 // the original edge's provenance (bytes still live — Merkle-valid) and
 // derivedAt. Only the target label and the (high) confidence change,

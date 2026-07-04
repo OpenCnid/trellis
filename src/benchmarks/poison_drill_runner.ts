@@ -6,7 +6,11 @@ import { OolongDataset, OolongDatasetSchema } from './oolong/schema';
 import { QueryTelemetry, cityTruth, executeScoredQuery, pairKey, scoreF1 } from './oolong/scoring';
 import {
   PoisonManifest,
+  BeliefSnapshotEntry,
   seedVerifiedCache,
+  wipeHasCategoryEdges,
+  snapshotBeliefs,
+  restoreBeliefsFromSnapshot,
   poisonCache,
   auditPoisonDetection,
   effectiveCategories
@@ -227,9 +231,9 @@ async function scoreSequenceFromCache(dataset: OolongDataset): Promise<RecoveryR
   };
 }
 
-async function runRealSequence(dataset: OolongDataset, logPrefix: string): Promise<QueryTelemetry[]> {
+async function runRealSequence(dataset: OolongDataset, phases: [string, string], logPrefix: string): Promise<QueryTelemetry[]> {
   const categoryOf = new Map(dataset.records.map(r => [r.id, r.category as string]));
-  const sequence = buildSequence(dataset, ['post', 'post_repeat']);
+  const sequence = buildSequence(dataset, phases);
   fs.mkdirSync(LOGS_DIR, { recursive: true });
   const rows: QueryTelemetry[] = [];
   for (let i = 0; i < sequence.length; i++) {
@@ -247,18 +251,55 @@ async function runRealSequence(dataset: OolongDataset, logPrefix: string): Promi
   return rows;
 }
 
+interface RealAct1Result {
+  sequence: { mean_f1: number; total_subcalls: number; total_cost_usd: number };
+  snapshot: BeliefSnapshotEntry[];
+}
+
+// Real (non-oracle) Act 1: wipes any existing has_category cache so the
+// agent classifies genuinely cold, runs the real cold+warm 20/26-query
+// sequence through the live RLM agent (server + rlm_worker must be up),
+// and snapshots the resulting beliefs — real sub-LLM confidences and
+// all. Every policy experiment then restores this SAME snapshot before
+// poisoning, so all three policies start from an identical real warm-up
+// without re-paying for a fresh cold classification pass per policy.
+async function runRealColdWarmup(dataset: OolongDataset): Promise<RealAct1Result> {
+  console.log('\n=== Real Act 1: cold warm-up (genuine sub-LLM confidences) ===');
+  const wiped = await wipeHasCategoryEdges(neo4jDriver, dataset);
+  console.log(`  Wiped ${wiped} pre-existing has_category edge(s) for a genuinely cold start.`);
+  const rows = await runRealSequence(dataset, ['cold', 'warm'], 'poison_act1_real');
+  const meanF1 = rows.reduce((s, q) => s + q.f1, 0) / rows.length;
+  const totalSubcalls = rows.reduce((s, q) => s + q.subcall_count, 0);
+  const totalCost = rows.reduce((s, q) => s + q.cost_usd, 0);
+  console.log(`  Real Act 1 complete: mean F1 ${meanF1.toFixed(3)}, ${totalSubcalls} sub-call(s), cost $${totalCost.toFixed(4)}`);
+
+  const snapshot = await snapshotBeliefs(neo4jDriver, dataset);
+  const withConfidence = snapshot.filter(b => b.confidence != null).length;
+  console.log(`  Snapshotted ${snapshot.length} beliefs (${withConfidence} carrying real confidence) for reuse across policies.`);
+  if (snapshot.length !== dataset.records.length) {
+    console.log(`  WARNING: snapshot covers ${snapshot.length}/${dataset.records.length} questions — some may still be missing an effective category.`);
+  }
+  return { sequence: { mean_f1: meanF1, total_subcalls: totalSubcalls, total_cost_usd: totalCost }, snapshot };
+}
+
 async function runPolicyExperiment(
   dataset: OolongDataset,
   spec: PolicySpec,
   policyIndex: number,
   rehearsal: boolean,
-  withRecovery: boolean
+  withRecovery: boolean,
+  realSnapshot: BeliefSnapshotEntry[] | null
 ): Promise<{ result: PolicyResult; manifest: PoisonManifest }> {
   console.log(`\n=== Policy: ${spec.name} ===`);
 
   // Acts 1 + 2: identical starting state per policy (same seeds).
-  const seeded = await seedVerifiedCache(neo4jDriver, dataset, { confidence: SEED_CONFIDENCE });
-  console.log(`  Act 1 (seeded warm-up): wiped ${seeded.wiped}, seeded ${seeded.seeded} beliefs @ confidence ${SEED_CONFIDENCE}`);
+  if (realSnapshot) {
+    const { restored } = await restoreBeliefsFromSnapshot(neo4jDriver, realSnapshot);
+    console.log(`  Act 1 (restored from real warm-up snapshot): ${restored} beliefs, genuine sub-LLM confidences`);
+  } else {
+    const seeded = await seedVerifiedCache(neo4jDriver, dataset, { confidence: SEED_CONFIDENCE });
+    console.log(`  Act 1 (seeded warm-up): wiped ${seeded.wiped}, seeded ${seeded.seeded} beliefs @ confidence ${SEED_CONFIDENCE}`);
+  }
   const manifest = await poisonCache(neo4jDriver, dataset, {
     count: POISON_COUNT, seed: POISON_SEED, confidence: POISON_CONFIDENCE
   });
@@ -358,7 +399,7 @@ async function runPolicyExperiment(
     } else {
       // Real mode: the agent itself re-derives contested beliefs during
       // the sequence (lazy recovery — the Phase 4 proven path).
-      const rows = await runRealSequence(dataset, `poison_act4_${spec.name.replace(/[^a-z0-9]/gi, '_')}`);
+      const rows = await runRealSequence(dataset, ['post', 'post_repeat'], `poison_act4_${spec.name.replace(/[^a-z0-9]/gi, '_')}`);
       const scored = await scoreSequenceFromCache(dataset);
       scored.disputed_rederived = -1; // re-derived by the agent, count in telemetry
       scored.mean_f1 = rows.reduce((s, q) => s + q.f1, 0) / rows.length;
@@ -385,6 +426,12 @@ async function main(): Promise<void> {
   console.log(`Corpus: ${dataset.name} (${dataset.records.length} questions) | policies: ${policies.map(p => p.name).join(', ')}`);
   console.log('======================================================');
 
+  // Real mode: one paid cold warm-up, snapshotted, then reused as the
+  // identical Act-1 starting point for every policy (see
+  // runRealColdWarmup's docstring for why — avoids re-paying for a
+  // fresh cold classification pass per policy).
+  const realAct1 = rehearsal ? null : await runRealColdWarmup(dataset);
+
   const results: PolicyResult[] = [];
   let manifest: PoisonManifest | null = null;
   for (let i = 0; i < policies.length; i++) {
@@ -392,7 +439,7 @@ async function main(): Promise<void> {
     // Recovery is meaningful where detection succeeded; run it for the
     // sampled policies and (honestly) for mandatory-only to show the
     // failure it leaves behind.
-    const { result, manifest: m } = await runPolicyExperiment(dataset, spec, i, rehearsal, true);
+    const { result, manifest: m } = await runPolicyExperiment(dataset, spec, i, rehearsal, true, realAct1?.snapshot ?? null);
     manifest = m;
     results.push(result);
   }
@@ -405,6 +452,7 @@ async function main(): Promise<void> {
     dataset: dataset.name,
     model: rehearsal ? 'ground-truth oracle (LLM-free)' : 'gpt-5.4-2026-03-05',
     generated_at: new Date().toISOString(),
+    real_act1_baseline: realAct1 ? realAct1.sequence : null,
     poison: {
       count: POISON_COUNT,
       seed: POISON_SEED,
