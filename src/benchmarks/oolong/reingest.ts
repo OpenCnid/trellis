@@ -70,8 +70,12 @@ async function persistVersion(docKey: string, rootHash: string, allNodes: Return
 // Question node itself is never left pointing at dead bytes. Categories
 // are STRIPPED (drill state: classification is the flywheel's job — the
 // re-ingest must not leak ground truth for exactly the mutated rows).
-// Old REFERENCES edges keep their dead provenance on purpose: the sweep
-// contests them, which is the quarantine story working as designed.
+// REFERENCES edges of changed records get the new paragraph hash
+// appended; since the sweep receives diff.added as its fresh set, these
+// re-derived edges keep their recovery (dead hashes move into
+// orphanedSourceIds, contested stays clear) — the same order-independent
+// semantics production's extraction worker gets. Facts NOT re-anchored
+// here (cached has_category insights) are quarantined as before.
 async function refreshSemanticLayer(changed: BoundRecord[], stripCategory: boolean): Promise<void> {
   if (changed.length === 0) return;
 
@@ -152,7 +156,13 @@ export async function reingestDataset(dataset: OolongDataset, opts: ReingestOpti
 
   let diff: MerkleDiff | null = null;
   let changed: BoundRecord[] = [];
-  let sweep: SweepResult = { contestedNodes: 0, contestedRelationships: 0, batches: 0 };
+  let sweep: SweepResult = {
+    contestedNodes: 0,
+    contestedRelationships: 0,
+    survivedNodes: 0,
+    survivedRelationships: 0,
+    batches: 0
+  };
   let addedLeaves = 0;
 
   if (registration.priorRootHash) {
@@ -165,7 +175,12 @@ export async function reingestDataset(dataset: OolongDataset, opts: ReingestOpti
     changed = corpus.bound.filter(b => addedSet.has(b.paragraph.id) || addedSet.has(b.heading.id));
     await refreshSemanticLayer(changed, stripCategory);
     if (diff.orphaned.length > 0) {
-      sweep = await sweepOrphanedProvenance(neo4jDriver, diff.orphaned);
+      // diff.added is the fresh set: facts the refresh above already
+      // re-anchored to this version's live bytes (Question nodes,
+      // refreshed REFERENCES edges) survive the sweep; stale cached
+      // beliefs (has_category insights citing dead hashes) are
+      // quarantined. Mirrors what /ingest passes in production.
+      sweep = await sweepOrphanedProvenance(neo4jDriver, diff.orphaned, diff.added);
     }
   }
   // Adopt path (fromVersion === null): the corpus was already ingested

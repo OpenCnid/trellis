@@ -61,7 +61,7 @@ Executes a graph traversal for a specific entity, finding all immediate 1-hop re
 
 **Query Parameters:**
 - `entity` (string, required): The name of the entity to query.
-- `includeContested` (optional, default `false`): contested relationships — facts whose source bytes were orphaned by a document re-ingest and quarantined by the invalidation sweep — are excluded from results by default. Pass `true` to inspect the quarantined belief history (each contested edge carries `contested`, `contestedAt`, and `orphanedSourceIds`).
+- `includeContested` (optional, default `false`): contested relationships — facts whose source bytes were orphaned by a document re-ingest and quarantined by the invalidation sweep — are excluded from results by default. Pass `true` to inspect the quarantined belief history (each contested edge carries `contested`, `contestedAt`, and `orphanedSourceIds`). A quarantined fact returns to default results once it is re-derived from live bytes — re-extracted by a re-ingest or re-written by the RLM — with the orphaned hashes retained in `orphanedSourceIds` as audit history.
 
 **Example Request:**
 ```bash
