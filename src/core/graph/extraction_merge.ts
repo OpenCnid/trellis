@@ -60,6 +60,7 @@ export const ACTION_MERGE_CYPHER = `
     r.orphanedSourceIds = CASE WHEN r.orphanedSourceIds IS NULL THEN NULL
                                ELSE [h IN r.orphanedSourceIds WHERE NOT h IN act.sourceNodeIds] END,
     r.contested = false
+  RETURN act.id AS id
 `;
 
 export interface EnrichedAction {
@@ -73,19 +74,30 @@ export interface EnrichedAction {
   objectId: string;
 }
 
+export interface MergeResult {
+  /**
+   * act.id values that survived both endpoint MATCHes and reached the MERGE.
+   * An action absent from this list was silently filtered by the Cypher
+   * because no Entity node matched its subject or object name — the caller
+   * is responsible for logging the difference (Guideline 1).
+   */
+  mergedActionIds: string[];
+}
+
 /** Merges one extraction job's entities and actions in a single transaction. */
 export async function mergeExtractedGraph(
   driver: Driver,
   entities: Entity[],
   actions: EnrichedAction[]
-): Promise<void> {
+): Promise<MergeResult> {
   const session = driver.session();
   try {
     const tx = session.beginTransaction();
     try {
       await tx.run(ENTITY_MERGE_CYPHER, { entities });
-      await tx.run(ACTION_MERGE_CYPHER, { actions });
+      const actionResult = await tx.run(ACTION_MERGE_CYPHER, { actions });
       await tx.commit();
+      return { mergedActionIds: actionResult.records.map(r => r.get('id') as string) };
     } catch (err) {
       await tx.rollback();
       throw err;
