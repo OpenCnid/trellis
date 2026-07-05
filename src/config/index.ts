@@ -27,6 +27,23 @@ const EnvSchema = z.object({
 
   PORT: z.coerce.number().int().positive().default(3000),
 
+  // API authentication (T6). When set, every endpoint requires the key
+  // via the x-api-key header, an Authorization: Bearer token, or the
+  // api_key query parameter (EventSource cannot set headers). When unset
+  // the API is open — acceptable only for local development; the server
+  // logs a warning at startup.
+  API_KEY: z.string().optional(),
+
+  // /api/rlm-stream protection (T6): each stream spawns a Python process
+  // that makes paid LLM calls, so both live connections and queue backlog
+  // are capped. Requests beyond either limit receive 429.
+  RLM_MAX_CONCURRENT_STREAMS: z.coerce.number().int().positive().default(4),
+  RLM_QUEUE_MAX_DEPTH: z.coerce.number().int().positive().default(32),
+
+  // Ingestion size limits (T6): raw markdown body and PDF upload caps.
+  INGEST_MAX_BODY_MB: z.coerce.number().positive().default(5),
+  INGEST_MAX_UPLOAD_MB: z.coerce.number().positive().default(25),
+
   // Model used for structured extraction, contradiction evaluation, and
   // rubric verification.
   EXTRACTION_MODEL: z.string().default('gpt-5.4-2026-03-05'),
@@ -68,6 +85,15 @@ export const config = {
   },
   api: {
     port: env.PORT,
+    apiKey: env.API_KEY,
+  },
+  rlmStream: {
+    maxConcurrentStreams: env.RLM_MAX_CONCURRENT_STREAMS,
+    maxQueueDepth: env.RLM_QUEUE_MAX_DEPTH,
+  },
+  ingest: {
+    maxBodyMb: env.INGEST_MAX_BODY_MB,
+    maxUploadMb: env.INGEST_MAX_UPLOAD_MB,
   },
   llm: {
     extractionModel: env.EXTRACTION_MODEL,

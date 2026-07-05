@@ -19,11 +19,12 @@ services:
     container_name: trellis-neo4j
     environment:
       NEO4J_AUTH: neo4j/trellis_password
-      # Allow APOC and setting specific memory constraints if needed later
-      NEO4J_apoc_export_file_enabled: "true"
-      NEO4J_apoc_import_file_enabled: "true"
-      NEO4J_apoc_import_file_use__neo4j__config: "true"
-      NEO4J_PLUGINS: '["apoc"]'
+      # APOC was dropped (T7): nothing in the codebase calls apoc.*, and
+      # its procedures were the main way to mutate the graph without a
+      # Cypher keyword the RLM sandbox blocklist would catch. If a future
+      # feature needs APOC, re-add the plugin together with a
+      # dbms.security.procedures.allowlist restricted to the procedures
+      # actually used.
     ports:
       - "7474:7474" # HTTP
       - "7687:7687" # Bolt
