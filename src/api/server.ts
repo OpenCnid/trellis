@@ -14,6 +14,11 @@ import fs from 'fs/promises';
 import OpenAI from 'openai';
 import { apiKeyMiddleware } from './auth.js';
 import { StreamGate } from './stream_gate.js';
+import { buildExtractionJobs, persistAstNodes } from '../core/ast/persist.js';
+import {
+  installShutdownSignalHandlers,
+  shutdownCoordinator,
+} from '../core/runtime/shutdown.js';
 
 const execFileAsync = util.promisify(execFile);
 
@@ -93,13 +98,7 @@ app.post('/ingest', uploadPdf, async (req, res) => {
     const client = await pgPool.connect();
     try {
       await client.query('BEGIN');
-      for (const node of allNodes) {
-        await client.query(`
-          INSERT INTO ast_nodes (id, document_id, data)
-          VALUES ($1, $2, $3)
-          ON CONFLICT (id) DO NOTHING
-        `, [node.id, rootNode.id, JSON.stringify(node)]);
-      }
+      await persistAstNodes(client, rootNode.id, allNodes);
       await recordDocumentNodes(client, rootNode.id, allNodes.map(n => n.id));
       registration = await registerDocumentVersion(client, docKey, rootNode.id);
       await client.query('COMMIT');
@@ -150,11 +149,8 @@ app.post('/ingest', uploadPdf, async (req, res) => {
       console.log(`[Ingest] ${docKey} v${registration.version}: queued invalidation sweep for ${diff.orphaned.length} orphaned node(s).`);
     }
 
-    for (const { block, text } of extractionBlocks) {
-      await extractionQueue.add('extract', {
-        astNodeId: block.id,
-        text
-      });
+    if (extractionBlocks.length > 0) {
+      await extractionQueue.addBulk(buildExtractionJobs(extractionBlocks));
     }
 
     // 5. Respond with 202 Accepted, the Root AST Node ID, and diff telemetry
@@ -247,7 +243,7 @@ app.get('/retrieve', async (req, res) => {
         SELECT id, data->>'content' as content 
         FROM ast_nodes 
         WHERE embedding IS NOT NULL
-        ORDER BY embedding <=> $1 
+        ORDER BY embedding <=> $1::vector
         LIMIT 3;
       `, [JSON.stringify(queryEmbedding)]);
       provenance = pgRes.rows;
@@ -380,6 +376,11 @@ app.use((err: any, _req: express.Request, res: express.Response, next: express.N
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(config.api.port, () => {
+export const server = app.listen(config.api.port, () => {
   console.log(`Trellis API Server running on port ${config.api.port}`);
 });
+
+installShutdownSignalHandlers();
+shutdownCoordinator.register('api.server', 100, () => new Promise<void>((resolve, reject) => {
+  server.close(error => error ? reject(error) : resolve());
+}));

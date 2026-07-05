@@ -34,3 +34,16 @@ export const ConflictEvaluationSchema = z.object({
 });
 
 export type ConflictEvaluation = z.infer<typeof ConflictEvaluationSchema>;
+
+// Strict structured-output shape for one verification classifier batch.
+// Array entries avoid dynamic JSON-schema keys and make every answer validate
+// before the worker is allowed to update belief state.
+export const VerificationResponseSchema = z.object({
+  results: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    confidence: z.number().min(0).max(1),
+  })),
+});
+
+export type VerificationResponse = z.infer<typeof VerificationResponseSchema>;

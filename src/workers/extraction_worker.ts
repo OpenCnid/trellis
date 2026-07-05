@@ -9,6 +9,11 @@ import { resolveExtractedGraph } from '../core/graph/resolve_actions.js';
 import { parseLlmResponse } from '../core/llm/boundary.js';
 import { isAstNodeLive } from '../core/ast/registry.js';
 import { config } from '../config/index.js';
+import { withWorkerRetryPolicy } from '../core/async/retry.js';
+import {
+  installShutdownSignalHandlers,
+  shutdownCoordinator,
+} from '../core/runtime/shutdown.js';
 
 const openai = new OpenAI();
 
@@ -122,7 +127,18 @@ async function processJob(job: Job) {
   }
 }
 
-export const worker = new Worker('extraction_queue', processJob, connectionParams);
+export const worker = new Worker(
+  'extraction_queue',
+  job => withWorkerRetryPolicy(
+    {
+      worker: 'extraction',
+      jobId: job.id,
+      attempt: job.attemptsMade + 1,
+    },
+    () => processJob(job)
+  ),
+  connectionParams
+);
 
 worker.on('completed', job => {
   console.log(`[Job ${job.id}] Finished.`);
@@ -133,3 +149,6 @@ worker.on('failed', (job, err) => {
 });
 
 console.log("Extraction Worker started and listening for jobs...");
+
+installShutdownSignalHandlers();
+shutdownCoordinator.register('worker.extraction', 80, () => worker.close());
