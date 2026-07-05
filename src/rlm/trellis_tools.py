@@ -1,7 +1,7 @@
 import os
 import json
 import threading
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase, READ_ACCESS, WRITE_ACCESS
 import psycopg2
 
 # --- TREC rubric: single source of truth -------------------------------
@@ -42,21 +42,26 @@ class TrellisNeo4j:
         Executes a read-only Cypher query against the Trellis Knowledge Graph.
         """
         _count_tool_call()
-        # Read-only enforcement block
+        # Fast-fail courtesy check (T7): catches the obvious mutations with
+        # a readable error before a round trip. NOT the security boundary —
+        # keyword-evading writes (e.g. procedure calls) slip past a regex.
         forbidden_keywords = ["CREATE", "MERGE", "DELETE", "SET", "DROP", "REMOVE", "DETACH"]
         upper_query = query.upper()
         for keyword in forbidden_keywords:
-            # Basic check for token isolation (e.g. not matching 'SECRETARY')
-            # A more robust check might use regex \bKEYWORD\b
             import re
             if re.search(r'\b' + keyword + r'\b', upper_query):
                 raise ValueError(f"Security Violation: Mutation keyword '{keyword}' blocked. Use write_derived_insight for writing.")
-        
+
         # Database errors must RAISE so the REPL surfaces a real Python
         # traceback that the RLM loop intercepts and feeds back to the
         # agent for self-correction (Evaluation-as-a-Loop).
+        #
+        # The authoritative read-only enforcement is transport-level (T7):
+        # default_access_mode=READ makes the server itself reject any write
+        # in this session, including write *procedures* whose names contain
+        # no blocked keyword (verified live by scripts/test_rlm_sandbox.py).
         try:
-            with self.driver.session() as session:
+            with self.driver.session(default_access_mode=READ_ACCESS) as session:
                 result = session.run(query)
                 records = [record.data() for record in result]
                 return json.dumps(records)
@@ -176,8 +181,10 @@ class TrellisNeo4j:
         }
 
     def _run_insight_writes(self, facts: list) -> str:
+        # The single whitelisted write path opens its session with explicit
+        # WRITE access; every other session in this sandbox is READ (T7).
         try:
-            with self.driver.session() as session:
+            with self.driver.session(default_access_mode=WRITE_ACCESS) as session:
                 result = session.run(self._WRITE_INSIGHT_QUERY, facts=facts, rubricVersion=RUBRIC_VERSION)
                 return json.dumps([record.data() for record in result])
         except Exception as e:

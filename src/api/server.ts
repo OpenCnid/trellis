@@ -10,16 +10,48 @@ import multer from 'multer';
 import { execFile } from 'child_process';
 import util from 'util';
 import path from 'path';
+import fs from 'fs/promises';
 import OpenAI from 'openai';
+import { apiKeyMiddleware } from './auth.js';
+import { StreamGate } from './stream_gate.js';
 
 const execFileAsync = util.promisify(execFile);
-const upload = multer({ dest: 'uploads/' });
+
+// Upload limits (T6): PDFs only, size-capped, single file. The parsed
+// upload is deleted after the request (see the /ingest finally block).
+const upload = multer({
+  dest: 'uploads/',
+  limits: { fileSize: config.ingest.maxUploadMb * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    const isPdf =
+      file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
+    if (isPdf) return cb(null, true);
+    cb(new Error('Only PDF uploads are accepted'));
+  },
+});
+
+// Maps multer failures to proper client errors instead of a generic 500.
+function uploadPdf(req: express.Request, res: express.Response, next: express.NextFunction) {
+  upload.single('file')(req, res, (err: unknown) => {
+    if (!err) return next();
+    if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: `Upload exceeds the ${config.ingest.maxUploadMb} MB limit` });
+    }
+    return res.status(400).json({ error: err instanceof Error ? err.message : 'Invalid upload' });
+  });
+}
 
 const app = express();
-// Only accept raw text/markdown if content-type is text/*
-app.use(express.text({ type: ['text/*', 'application/json', 'application/x-www-form-urlencoded'] }));
+// Authentication before body parsing: unauthorized requests are refused
+// before any bytes are buffered or databases touched.
+app.use(apiKeyMiddleware(config.api.apiKey));
+// Only accept raw text/markdown if content-type is text/*; size-capped (T6).
+app.use(express.text({
+  type: ['text/*', 'application/json', 'application/x-www-form-urlencoded'],
+  limit: `${config.ingest.maxBodyMb}mb`,
+}));
 
-app.post('/ingest', upload.single('file'), async (req, res) => {
+app.post('/ingest', uploadPdf, async (req, res) => {
   try {
     let rootNode: ASTNode;
     
@@ -140,6 +172,13 @@ app.post('/ingest', upload.single('file'), async (req, res) => {
   } catch (error: any) {
     console.error("Error during ingestion:", error);
     res.status(500).json({ error: error.message });
+  } finally {
+    // Uploads are parse-once inputs; never let them accumulate (T6).
+    if (req.file) {
+      await fs.unlink(req.file.path).catch(err =>
+        console.warn(`[Ingest] Failed to delete upload ${req.file?.path}: ${err.message}`)
+      );
+    }
   }
 });
 
@@ -237,10 +276,39 @@ app.get('/retrieve', async (req, res) => {
 import IORedis from 'ioredis';
 import crypto from 'crypto';
 
+// Admission control for RLM streams (T6): each stream ultimately spawns
+// a Python process making paid LLM calls, so both the number of live SSE
+// connections (per-process gate) and the rlm_queue backlog (shared
+// backstop) are bounded. Rejected requests get 429 before any resource
+// is allocated.
+const rlmStreamGate = new StreamGate(config.rlmStream.maxConcurrentStreams);
+
 app.get('/api/rlm-stream', async (req, res) => {
   const query = req.query.query;
   if (!query || typeof query !== 'string') {
     return res.status(400).send('Expected query parameter');
+  }
+
+  const release = rlmStreamGate.tryAcquire();
+  if (!release) {
+    return res.status(429).json({
+      error: `Too many concurrent RLM streams (limit ${rlmStreamGate.limit}); retry later.`,
+    });
+  }
+
+  let queueDepth: number;
+  try {
+    queueDepth = await rlmQueue.getWaitingCount();
+  } catch (err) {
+    release();
+    console.error('Failed to read rlm_queue depth:', err);
+    return res.status(503).json({ error: 'Queue unavailable; retry later.' });
+  }
+  if (queueDepth >= config.rlmStream.maxQueueDepth) {
+    release();
+    return res.status(429).json({
+      error: `RLM queue is full (${queueDepth} waiting, limit ${config.rlmStream.maxQueueDepth}); retry later.`,
+    });
   }
 
   // Set up SSE headers
@@ -259,15 +327,21 @@ app.get('/api/rlm-stream', async (req, res) => {
 
   const channel = `rlm-stream:${jobId}`;
 
-  redisSubscriber.subscribe(channel, (err, count) => {
+  redisSubscriber.subscribe(channel, (err) => {
     if (err) {
       console.error('Failed to subscribe to redis channel:', err);
       res.end();
       return;
     }
-    
-    // Once subscribed, enqueue the job
-    rlmQueue.add('rlm_job', { query, jobId });
+
+    // Once subscribed, enqueue the job. A failed enqueue must reach the
+    // client — previously it was fire-and-forget and the SSE stream hung
+    // forever with no event.
+    rlmQueue.add('rlm_job', { query, jobId }).catch(enqueueErr => {
+      console.error(`Failed to enqueue RLM job ${jobId}:`, enqueueErr);
+      res.write(`data: ${JSON.stringify({ type: 'error', content: 'Failed to enqueue RLM job; retry later.' })}\n\n`);
+      res.end();
+    });
   });
 
   redisSubscriber.on('message', (subChannel, message) => {
@@ -282,7 +356,10 @@ app.get('/api/rlm-stream', async (req, res) => {
     }
   });
 
-  req.on('close', () => {
+  // 'close' on the response fires for both client aborts and normal ends,
+  // so the gate slot and the Redis subscriber are always reclaimed.
+  res.on('close', () => {
+    release();
     try {
       redisSubscriber.unsubscribe(channel).catch(() => {});
       redisSubscriber.quit().catch(() => {});
@@ -290,6 +367,17 @@ app.get('/api/rlm-stream', async (req, res) => {
       // ignore
     }
   });
+});
+
+// Body-size violations from express.text surface here; everything else
+// unexpected becomes a JSON 500 instead of the default HTML error page.
+app.use((err: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (res.headersSent) return next(err);
+  if (err?.type === 'entity.too.large') {
+    return res.status(413).json({ error: `Request body exceeds the ${config.ingest.maxBodyMb} MB limit` });
+  }
+  console.error('[API] Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(config.api.port, () => {

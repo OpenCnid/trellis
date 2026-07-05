@@ -2,6 +2,27 @@
 
 The Trellis Engine exposes a RESTful API to ingest documents into the deterministic pipeline and retrieve semantic graphs accompanied by physical provenance.
 
+## 0. Authentication and Limits
+
+When the `API_KEY` environment variable is set, **every endpoint** requires the key, supplied by any one of:
+
+- `x-api-key: <key>` header
+- `Authorization: Bearer <key>` header
+- `?api_key=<key>` query parameter (for `EventSource`/SSE clients, which cannot set headers)
+
+Requests without a matching key receive `401`. When `API_KEY` is unset the API is open — acceptable only for local development; the server logs a warning at startup.
+
+**Size limits** (both configurable via environment):
+
+| Limit | Default | Env var | Response when exceeded |
+|---|---|---|---|
+| Raw ingest body | 5 MB | `INGEST_MAX_BODY_MB` | `413` |
+| PDF upload | 25 MB | `INGEST_MAX_UPLOAD_MB` | `413` |
+
+Uploads must be PDFs (`400` otherwise) and are deleted from `uploads/` after parsing.
+
+**RLM stream admission** (see §3): concurrent SSE streams are capped per process (`RLM_MAX_CONCURRENT_STREAMS`, default 4) and requests are refused while the `rlm_queue` backlog exceeds `RLM_QUEUE_MAX_DEPTH` (default 32); both cases return `429`.
+
 ## 1. Ingestion Endpoint
 
 ### `POST /ingest`
@@ -107,10 +128,17 @@ Initiates an asynchronous Trellis RLM Agent execution to resolve physical contra
 
 **Query Parameters:**
 - `query` (string, required): The prompt for the agent.
+- `api_key` (required when `API_KEY` is configured): see §0 — `EventSource` cannot set headers.
+
+**Responses:**
+- `200` — SSE stream begins.
+- `401` — missing/invalid API key (when configured).
+- `429` — concurrency cap or queue-depth limit reached; retry later.
+- `503` — the job queue is unreachable.
 
 **Example Request:**
 ```bash
-curl -N -X GET "http://localhost:3000/api/rlm-stream?query=Find%20the%20contradiction"
+curl -N -X GET "http://localhost:3000/api/rlm-stream?query=Find%20the%20contradiction&api_key=$TRELLIS_API_KEY"
 ```
 
 **Example Stream Output:**
