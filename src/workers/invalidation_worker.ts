@@ -1,7 +1,8 @@
 import { Worker, Job } from 'bullmq';
 import { connectionParams } from './queue.js';
-import { neo4jDriver } from '../config/db.js';
+import { neo4jDriver, pgPool } from '../config/db.js';
 import { sweepOrphanedProvenance } from '../core/graph/invalidation.js';
+import { findGloballyOrphanedAstNodeIds } from '../core/ast/registry.js';
 import { withWorkerRetryPolicy } from '../core/async/retry.js';
 import {
   installShutdownSignalHandlers,
@@ -31,7 +32,31 @@ async function processJob(job: Job<InvalidationJobData>) {
     `[Sweep ${job.id}] ${docKey} v${oldVersion}→v${newVersion}: sweeping ${orphanedHashes.length} orphaned hash(es)...`
   );
 
-  const result = await sweepOrphanedProvenance(neo4jDriver, orphanedHashes, freshHashes ?? []);
+  // A Merkle diff is document-local, but content hashes are global. Recheck
+  // at worker execution time so queue lag cannot quarantine a hash that is
+  // still present in another document's latest version.
+  const globallyOrphaned = await findGloballyOrphanedAstNodeIds(pgPool, orphanedHashes);
+  const globallyOrphanedSet = new Set(globallyOrphaned);
+  const retainedByOtherDocuments = orphanedHashes.filter(hash => !globallyOrphanedSet.has(hash));
+  if (retainedByOtherDocuments.length > 0) {
+    console.warn(JSON.stringify({
+      event: 'invalidation.shared_sources_retained',
+      jobId: job.id,
+      docKey,
+      oldVersion,
+      newVersion,
+      candidateCount: orphanedHashes.length,
+      retainedCount: retainedByOtherDocuments.length,
+      retainedHashes: retainedByOtherDocuments.slice(0, 20),
+      retainedHashesTruncated: retainedByOtherDocuments.length > 20,
+    }));
+  }
+
+  const result = await sweepOrphanedProvenance(
+    neo4jDriver,
+    globallyOrphaned,
+    freshHashes ?? []
+  );
 
   console.log(
     `[Sweep ${job.id}] ${docKey} v${newVersion}: contested ${result.contestedNodes} node(s) and ` +

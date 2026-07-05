@@ -59,14 +59,13 @@ export async function recordDocumentNodes(
 // (legacy/unversioned ingests, direct benchmark writes) are treated as
 // live — they can never be orphaned, so quarantine semantics don't apply.
 //
-// The extraction worker gates its graph writes on this: a queue-lagged
-// job whose block was superseded by a newer re-ingest before the job ran
-// must not re-derive facts from bytes the quarantine sweep is (or has
-// already finished) contesting. A sub-millisecond check-then-write window
-// remains if a re-ingest of the same document lands between this check
-// and the merge; the racing sweep closes it whenever the sweep's Cypher
-// executes after the merge (the common case, since the sweep is enqueued
-// in the same request that orphans the block).
+// The extraction worker checks this before its paid completion, then uses
+// it on both sides of the Neo4j merge. The pre-merge check narrows the
+// cross-store check/write window; the post-merge check applies a
+// compensating quarantine if a re-ingest committed during the write, so
+// dead-source facts cannot remain trusted after the job settles.
+// PostgreSQL and Neo4j do not share a transaction, so atomic visibility
+// during the brief merge/post-check interval is not claimed.
 export async function isAstNodeLive(db: Pool | PoolClient, nodeId: string): Promise<boolean> {
   const res = await db.query(
     `SELECT
@@ -82,4 +81,39 @@ export async function isAstNodeLive(db: Pool | PoolClient, nodeId: string): Prom
   );
   const row = res.rows[0] as { tracked: boolean; live: boolean };
   return !row.tracked || row.live;
+}
+
+/**
+ * Reduces one document's Merkle orphan candidates to hashes that are absent
+ * from the latest version of every registered document.
+ *
+ * A content-addressed block can belong to multiple documents. The per-document
+ * diff is therefore only a candidate set: quarantining a shared hash while it
+ * remains in another document's latest version would incorrectly mark live
+ * semantic evidence as dead. WITH ORDINALITY preserves input order for stable
+ * job telemetry and tests.
+ */
+export async function findGloballyOrphanedAstNodeIds(
+  db: Pool | PoolClient,
+  candidateIds: readonly string[]
+): Promise<string[]> {
+  if (candidateIds.length === 0) return [];
+  const result = await db.query(
+    `SELECT candidate.node_id
+     FROM unnest($1::varchar[]) WITH ORDINALITY AS candidate(node_id, ordinal)
+     WHERE NOT EXISTS (
+       SELECT 1
+       FROM document_nodes dn
+       JOIN documents d ON d.root_hash = dn.root_hash
+       WHERE dn.node_id = candidate.node_id
+         AND d.version = (
+           SELECT max(v.version)
+           FROM documents v
+           WHERE v.doc_key = d.doc_key
+         )
+     )
+     ORDER BY candidate.ordinal`,
+    [candidateIds]
+  );
+  return result.rows.map((row: { node_id: string }) => row.node_id);
 }

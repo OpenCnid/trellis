@@ -89,9 +89,10 @@ class TrellisNeo4j:
     # Node updates mirror the edge's un-contest-on-rederive semantics
     # (closing the Phase 4 asymmetry where re-derivation un-contested the
     # edge but left its endpoint nodes quarantined): orphaned hashes are
-    # dropped from node provenance, contested clears once no orphaned
-    # provenance remains, and contestedAt/orphanedSourceIds stay behind
-    # as audit history.
+    # dropped from node provenance and contested clears on re-derivation.
+    # An incoming hash that was previously orphaned
+    # is resurrected (document revert): it moves back to sourceNodeIds,
+    # matching extraction_merge.ts. Other orphan history remains.
     _WRITE_INSIGHT_QUERY = """
     UNWIND $facts AS f
     MERGE (s:Entity {name: toLower(f.subject)})
@@ -107,15 +108,24 @@ class TrellisNeo4j:
             ELSE f.object_kind END,
         s.rederivedAt = CASE WHEN coalesce(s.contested, false) THEN timestamp() ELSE s.rederivedAt END,
         o.rederivedAt = CASE WHEN coalesce(o.contested, false) THEN timestamp() ELSE o.rederivedAt END,
-        s.sourceNodeIds = [x IN coalesce(s.sourceNodeIds, []) + [y IN f.sourceNodeIds WHERE NOT y IN coalesce(s.sourceNodeIds, [])]
-                           WHERE NOT x IN coalesce(s.orphanedSourceIds, [])],
-        o.sourceNodeIds = [x IN coalesce(o.sourceNodeIds, []) + [y IN f.sourceNodeIds WHERE NOT y IN coalesce(o.sourceNodeIds, [])]
-                           WHERE NOT x IN coalesce(o.orphanedSourceIds, [])],
+        s.sourceNodeIds = [x IN coalesce(s.sourceNodeIds, [])
+                           WHERE NOT x IN f.sourceNodeIds
+                             AND NOT x IN coalesce(s.orphanedSourceIds, [])] + f.sourceNodeIds,
+        s.orphanedSourceIds = CASE WHEN s.orphanedSourceIds IS NULL THEN NULL
+                                   ELSE [x IN s.orphanedSourceIds WHERE NOT x IN f.sourceNodeIds] END,
+        o.sourceNodeIds = [x IN coalesce(o.sourceNodeIds, [])
+                           WHERE NOT x IN f.sourceNodeIds
+                             AND NOT x IN coalesce(o.orphanedSourceIds, [])] + f.sourceNodeIds,
+        o.orphanedSourceIds = CASE WHEN o.orphanedSourceIds IS NULL THEN NULL
+                                   ELSE [x IN o.orphanedSourceIds WHERE NOT x IN f.sourceNodeIds] END,
         s.contested = false,
         o.contested = false,
         r.rederivedAt = CASE WHEN coalesce(r.contested, false) THEN timestamp() ELSE r.rederivedAt END,
-        r.sourceNodeIds = [x IN coalesce(r.sourceNodeIds, []) + [y IN f.sourceNodeIds WHERE NOT y IN coalesce(r.sourceNodeIds, [])]
-                           WHERE NOT x IN coalesce(r.orphanedSourceIds, [])],
+        r.sourceNodeIds = [x IN coalesce(r.sourceNodeIds, [])
+                           WHERE NOT x IN f.sourceNodeIds
+                             AND NOT x IN coalesce(r.orphanedSourceIds, [])] + f.sourceNodeIds,
+        r.orphanedSourceIds = CASE WHEN r.orphanedSourceIds IS NULL THEN NULL
+                                   ELSE [x IN r.orphanedSourceIds WHERE NOT x IN f.sourceNodeIds] END,
         r.contested = false,
         r.derivedAt = coalesce(r.derivedAt, timestamp()),
         r.rubricVersion = $rubricVersion,
@@ -215,7 +225,9 @@ class TrellisNeo4j:
         document update, or disputed by the Phase 5 verifier) restores it
         to trusted state: the contested flag clears on the edge AND its
         endpoint nodes, orphaned hashes are dropped from live provenance,
-        and orphanedSourceIds/rederivedAt remain as audit history.
+        and orphanedSourceIds/rederivedAt remain as audit history. If a
+        reverted document makes an old hash live again, re-citing that hash
+        moves it out of orphanedSourceIds and back into sourceNodeIds.
         """
         _count_tool_call()
         fact = self._normalize_fact({
@@ -300,15 +312,10 @@ class TrellisPostgres:
             query_embedding = embed_res.data[0].embedding
             
             with self.conn.cursor() as cur:
-                # Use pgvector's <=> operator for cosine distance
+                # The schema function owns pgvector cosine ordering so the
+                # Python and TypeScript clients cannot drift.
                 cur.execute(
-                    """
-                    SELECT id, data->>'content' as content 
-                    FROM ast_nodes 
-                    WHERE embedding IS NOT NULL
-                    ORDER BY embedding <=> %s::vector 
-                    LIMIT 3;
-                    """,
+                    "SELECT id, content FROM search_ast_nodes(%s::vector, 3)",
                     (json.dumps(query_embedding),)
                 )
                 results = cur.fetchall()

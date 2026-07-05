@@ -32,7 +32,7 @@ Accepts a raw Markdown string, parses it into a Merkle-hashed AST, persists it t
 - `Content-Type: text/markdown` or `text/plain`
 
 **Query Parameters:**
-- `doc_key` (optional): a stable identity for the document across versions. Re-ingesting under the same `doc_key` registers a new version and runs a Merkle diff against the previous one: unchanged subtrees are skipped entirely, only genuinely new leaf nodes are queued for extraction, and vanished node hashes are reported as `orphaned` (input to the Phase 4 invalidation sweep). Without `doc_key`, the root hash is used as the key and every ingest is version 1 of its own document. For multipart PDF uploads, `doc_key` may alternatively be sent as a form field.
+- `doc_key` (optional): a stable identity for the document across versions. Re-ingesting under the same `doc_key` registers a new version and runs a Merkle diff against the previous one: unchanged subtrees are skipped entirely, only genuinely new block-level nodes are queued for extraction, and vanished node hashes are reported as per-document `orphaned` candidates. The invalidation worker filters those candidates against every document's latest version before quarantining semantic facts, so content shared by another live document is retained. Without `doc_key`, the root hash is used as the key and every ingest is version 1 of its own document. For multipart PDF uploads, `doc_key` may alternatively be sent as a form field.
 
 **Request Body:**
 Raw Markdown text.
@@ -58,7 +58,7 @@ Globex recently completed a hostile takeover of Initech."
   "diff": null
 }
 ```
-*Note: The HTTP `202 Accepted` indicates the document was parsed and stored, and the extraction jobs have been placed in the BullMQ queue. Extraction fans out one job per block-level node (paragraph, heading, list item, code block, or PDF element) carrying the block's full reconstructed inline text; `blocksQueued` counts those jobs, while `totalNodes` counts every stored AST node including inline leaves.*
+*Note: Before returning `202 Accepted`, ingestion reads every just-written AST row back inside the same PostgreSQL transaction, re-derives its ID through the parser's existing hash authority, and compares the complete stored payload. A missing or mismatched row rolls the version back. The response then indicates that the verified physical version was committed and the extraction jobs were placed in BullMQ. Extraction fans out one job per block-level node (paragraph, heading, list item, code block, or PDF element) carrying the block's full reconstructed inline text; `blocksQueued` counts those jobs, while `totalNodes` counts every stored AST node including inline leaves.*
 
 On a re-ingest under an existing `doc_key`, `diff` reports the Merkle delta and `blocksQueued` counts only blocks new to this version — a byte-identical re-ingest queues zero jobs:
 ```json
@@ -82,7 +82,7 @@ Executes a graph traversal for a specific entity, finding all immediate 1-hop re
 
 **Query Parameters:**
 - `entity` (string, required): The name of the entity to query.
-- `includeContested` (optional, default `false`): contested relationships — facts whose source bytes were orphaned by a document re-ingest and quarantined by the invalidation sweep — are excluded from results by default. Pass `true` to inspect the quarantined belief history (each contested edge carries `contested`, `contestedAt`, and `orphanedSourceIds`). A quarantined fact returns to default results once it is re-derived from live bytes — re-extracted by a re-ingest or re-written by the RLM — with the orphaned hashes retained in `orphanedSourceIds` as audit history.
+- `includeContested` (optional, default `false`): contested relationships — facts whose source bytes were orphaned by a document re-ingest and quarantined by the invalidation sweep — are excluded from results by default. Pass `true` to inspect the quarantined belief history (each contested edge carries `contested`, `contestedAt`, and `orphanedSourceIds`). A quarantined fact returns to default results once it is re-derived from live bytes — re-extracted by a re-ingest or re-written by the RLM. Dead hashes remain in `orphanedSourceIds`; if a document revert makes the identical hash live again, re-derivation moves that hash back to `sourceNodeIds`.
 
 **Example Request:**
 ```bash

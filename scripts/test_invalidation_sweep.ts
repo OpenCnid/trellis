@@ -6,6 +6,7 @@ import { diffVersions } from '../src/core/ast/diff';
 import { registerDocumentVersion, recordDocumentNodes } from '../src/core/ast/registry';
 import { sweepOrphanedProvenance } from '../src/core/graph/invalidation';
 import { pgPool, neo4jDriver } from '../src/config/db';
+import { config, pgDsn } from '../src/config';
 
 // Phase 4 Milestone 3 verification: the quarantine sweep, end to end.
 //
@@ -76,11 +77,15 @@ async function writeInsightsViaPython(writes: Array<{ subject: string; verb: str
     "    print(t.write_derived_insight(a['subject'], a['verb'], a['obj'], a['sourceNodeIds']))",
     't.close()'
   ].join('\n');
-  const { stdout } = await execFileAsync('python', ['-c', py, JSON.stringify(writes)], {
+  const { stdout } = await execFileAsync(config.python.executable, ['-c', py, JSON.stringify(writes)], {
     cwd: path.resolve('src/rlm'),
     env: {
       ...process.env,
-      PYTHONPATH: 'C:\\Users\\Darian\\AppData\\Roaming\\Python\\Python313\\site-packages',
+      ...(config.python.pythonPath ? { PYTHONPATH: config.python.pythonPath } : {}),
+      NEO4J_URI: config.neo4j.uri,
+      NEO4J_USER: config.neo4j.user,
+      NEO4J_PASSWORD: config.neo4j.password,
+      PG_DSN: pgDsn(),
       PYTHONIOENCODING: 'utf-8'
     }
   });
@@ -200,6 +205,23 @@ async function main(): Promise<void> {
     check('re-derived fact carries ONLY live provenance', b2?.sourceNodeIds, [newDoomedHash]);
     check('audit history retained (orphanedSourceIds)', b2?.orphanedSourceIds, [doomedHash]);
     check('rederivedAt is set', b2?.rederivedAt != null, true);
+
+    // 7. Revert to v1, then re-cite the resurrected old hash through the
+    // real Python writer. Before the Session 2 fix, _WRITE_INSIGHT_QUERY
+    // filtered this incoming hash against orphanedSourceIds, cleared
+    // contested, and left the fact with no live provenance.
+    const v3 = await ingestVersion(V1_MARKDOWN);
+    v3.allNodes.forEach(n => seenNodeIds.add(n.id));
+    rootHashes.push(v3.rootNode.id);
+    const diff3 = await diffVersions(pgPool, v3.registration.priorRootHash!, v3.rootNode.id);
+    await sweepOrphanedProvenance(neo4jDriver, diff3.orphaned, [doomedHash]);
+    await writeInsightsViaPython([
+      { subject: `${TOKEN}-qB`, verb: 'HAS_CATEGORY', obj: `${TOKEN}-hum`, sourceNodeIds: [doomedHash] }
+    ]);
+    const b3 = await edgeState(`${TOKEN}-qB`);
+    check('reverted RLM fact is no longer contested', b3?.contested, false);
+    check('RLM writer resurrects the reverted hash as live provenance', b3?.sourceNodeIds, [doomedHash]);
+    check('RLM writer removes the resurrected hash from orphan audit', b3?.orphanedSourceIds, [newDoomedHash]);
   } finally {
     await cleanup(rootHashes, [...seenNodeIds]);
   }
