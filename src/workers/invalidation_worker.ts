@@ -2,6 +2,11 @@ import { Worker, Job } from 'bullmq';
 import { connectionParams } from './queue.js';
 import { neo4jDriver } from '../config/db.js';
 import { sweepOrphanedProvenance } from '../core/graph/invalidation.js';
+import { withWorkerRetryPolicy } from '../core/async/retry.js';
+import {
+  installShutdownSignalHandlers,
+  shutdownCoordinator,
+} from '../core/runtime/shutdown.js';
 
 // Phase 4 Milestone 3: consumes the orphan set produced by a versioned
 // re-ingest (/ingest with a doc_key) and quarantines every semantic
@@ -40,7 +45,14 @@ async function processJob(job: Job<InvalidationJobData>) {
 
 export const invalidationWorker = new Worker<InvalidationJobData>(
   'invalidation_queue',
-  processJob,
+  job => withWorkerRetryPolicy(
+    {
+      worker: 'invalidation',
+      jobId: job.id,
+      attempt: job.attemptsMade + 1,
+    },
+    () => processJob(job)
+  ),
   connectionParams
 );
 
@@ -53,3 +65,10 @@ invalidationWorker.on('failed', (job, err) => {
 });
 
 console.log('Invalidation Worker started and listening for jobs...');
+
+installShutdownSignalHandlers();
+shutdownCoordinator.register(
+  'worker.invalidation',
+  80,
+  () => invalidationWorker.close()
+);

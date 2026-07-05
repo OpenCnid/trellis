@@ -3,6 +3,10 @@ import * as path from 'path';
 import type { Driver } from 'neo4j-driver';
 import type { Pool } from 'pg';
 import { config } from '../../config/index.js';
+import { zodResponseFormat } from 'openai/helpers/zod';
+import { parseLlmResponse } from '../llm/boundary.js';
+import { VerificationResponseSchema } from './schemas.js';
+import { indexVerificationResponse } from './verification_response.js';
 
 // Phase 5 Milestone 3: the verification layer.
 //
@@ -217,27 +221,33 @@ export function makeOpenAIClassifier(model = config.llm.extractionModel): Classi
     const completion = await openai.chat.completions.create({
       model,
       messages: [
-        { role: 'system', content: 'You are a strict TREC question-classification engine. You answer ONLY with the requested JSON object.' },
-        { role: 'user', content: `${RUBRIC_TEXT}\n\nQuestions:\n${JSON.stringify(payload)}` }
+        {
+          role: 'system',
+          content:
+            'You are a strict TREC question-classification engine. Return one result for every supplied id.',
+        },
+        {
+          role: 'user',
+          content:
+            `${RUBRIC_TEXT}\n\nQuestions:\n${JSON.stringify(payload)}\n\n` +
+            'Return results as objects with id, label, and confidence (0 to 1).',
+        }
       ],
-      response_format: { type: 'json_object' },
+      response_format: zodResponseFormat(
+        VerificationResponseSchema,
+        'verification_results'
+      ),
       temperature: 0.1
     });
-    const raw = completion.choices[0].message.content;
-    if (!raw) throw new Error('No content returned from verification sub-LLM');
-    const parsed = JSON.parse(raw) as Record<string, { label?: string; confidence?: number } | string>;
-    const results: Record<string, { label: string; confidence: number }> = {};
-    for (const [id, value] of Object.entries(parsed)) {
-      if (typeof value === 'string') {
-        // Tolerate a legacy bare-label reply.
-        results[id] = { label: value.toLowerCase(), confidence: 0.5 };
-      } else if (value && typeof value.label === 'string') {
-        results[id] = {
-          label: value.label.toLowerCase(),
-          confidence: typeof value.confidence === 'number' ? Math.max(0, Math.min(1, value.confidence)) : 0.5
-        };
-      }
-    }
+    const parsed = parseLlmResponse(
+      VerificationResponseSchema,
+      completion.choices[0].message.content,
+      'verification classifier batch'
+    );
+    const results = indexVerificationResponse(
+      payload.map(question => question.id),
+      parsed
+    );
     return {
       results,
       usage: {

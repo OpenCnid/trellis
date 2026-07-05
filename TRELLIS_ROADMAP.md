@@ -100,23 +100,23 @@ Ordered roughly by severity.
 - Detection treats *any* same-verb fan-out as a candidate contradiction ("acquired X" and "acquired Y" is normal), relying on the LLM to filter — workable, but every false candidate costs a paid completion.
 - The supervisor is also not wired into `start_all.ts` and only runs via the manual trigger script.
 
-**T11 — Per-row inserts and per-job enqueues in the hot ingestion path.** [server.ts:62-68](src/api/server.ts:62) inserts AST nodes one query at a time inside a transaction, and [server.ts:79-84](src/api/server.ts:79) enqueues extraction jobs one `await` at a time. For large documents this is a straightforward N-round-trip bottleneck; multi-row `INSERT ... UNNEST` and `queue.addBulk()` are drop-in improvements. The same per-row pattern exists in [ingest_oolong_dataset.ts:36-42](scripts/ingest_oolong_dataset.ts:36), where it is more defensible (batch sizes of 40) but still doubles as an example.
+**T11 — Per-row inserts and per-job enqueues in the hot ingestion path.** *Resolved (July 4, 2026) — see §5.* [server.ts:62-68](src/api/server.ts:62) inserted AST nodes one query at a time inside a transaction, and [server.ts:79-84](src/api/server.ts:79) enqueued extraction jobs one `await` at a time. For large documents this was a straightforward N-round-trip bottleneck. The production path now uses one multi-row `INSERT ... UNNEST` and one `queue.addBulk()` call. The benchmark ingester retains its small, verification-oriented batches.
 
 **T12 — Document membership is not modeled.** *Resolved prior to this review's publication (Phase 4 versioned-ingest work) — see §5.* `ast_nodes.document_id` is set once and `ON CONFLICT (id) DO NOTHING` ([server.ts:63-67](src/api/server.ts:63)) means a node shared by two documents (identical content) keeps whichever document ingested it first. Content addressing makes node reuse across documents *expected*, so membership needs a join table (`document_nodes(document_id, node_id)`) rather than a column.
 
 **T13 — Hash preimage lacks canonical encoding.** *Open by design for now; current behavior is pinned by unit tests — see §5.* [parser.ts:20-31](src/core/ast/parser.ts:20) builds the hash input by joining `type`, `content`, `JSON.stringify(metadata)`, and concatenated child hashes with `:` delimiters. Because none of the segments are length-prefixed, distinct `(type, content, metadata)` combinations can in principle produce identical preimages. Practical risk is low (types come from a fixed vocabulary), but a Merkle-integrity system should use an unambiguous encoding (length-prefixed segments or canonical JSON of the full tuple). Also, `if (content)` treats empty-string content as absent — a falsy check where an `!== undefined` check is meant.
 
-**T14 — No embedding/queue hygiene.**
-- No pgvector index (HNSW/IVFFlat) is created in [init_db.ts:10-18](src/config/init_db.ts:10); the vector fallback is a sequential scan. Fine at current scale, a cliff later.
-- Queues are created with default job options — no `attempts`, no backoff, no `removeOnComplete` ([queue.ts:11-13](src/workers/queue.ts:11)), so a transient OpenAI 502 fails the job permanently (contrary to Guideline 5) and completed jobs accumulate in Redis.
+**T14 — No embedding/queue hygiene.** *Resolved (July 4, 2026) — see §5.*
+- ~~No pgvector index; vector fallback is a sequential scan.~~ A partial cosine HNSW index is now created idempotently with the schema.
+- ~~Queues lack retry and retention policy.~~ Background queues use bounded exponential retries, permanent OpenAI 4xx failures stop immediately, and completed/failed history is bounded by age and count. The interactive RLM queue retains the history bounds but deliberately has no automatic retries.
 - ~~Uploaded PDF files land in `uploads/` via multer ([server.ts:12](src/api/server.ts:12)) with no size/type limit and are never deleted.~~ *Resolved with T6 (July 4, 2026): PDF-only, size-capped, deleted after parsing.*
-- No graceful shutdown anywhere: workers and pools are never closed on SIGTERM.
+- ~~No graceful shutdown.~~ SIGINT/SIGTERM now stop API admission, close workers, publishers and queues, then drain PostgreSQL/Neo4j clients in phase order.
 
-**T15 — Duplicated helpers and drift between pipelines.** `flattenAST` exists twice ([server.ts:19-27](src/api/server.ts:19) and [corpus.ts:32-38](src/benchmarks/oolong/corpus.ts:32)); the vector-search SQL exists in both [server.ts:153-159](src/api/server.ts:153) and [trellis_tools.py:138-146](src/rlm/trellis_tools.py:138) (the TS version omits the `::vector` cast the Python version includes). The main `/ingest` path and the OOLONG ingestion loop are parallel implementations of "persist an AST" with different guarantees — the verified-loop pattern lives only in the benchmark script.
+**T15 — Duplicated helpers and drift between pipelines.** The traversal-helper duplication was resolved with T2. The vector-search SQL still exists in both [server.ts](src/api/server.ts) and [trellis_tools.py](src/rlm/trellis_tools.py), although both now use the same explicit `::vector` cast. The main `/ingest` path and the OOLONG ingestion loop remain parallel implementations of "persist an AST" with different guarantees — the verified-loop pattern lives only in the benchmark script.
 
-**T16 — Observability is `console.log`.** No structured logging, no log levels, no metrics/counters (queue depth, extraction failure rate, LLM token spend). The runbook exists but the signals it would need are not emitted. The fire-and-forget `rlmQueue.add` inside the subscribe callback ([server.ts:216](src/api/server.ts:216)) also swallows enqueue failures — the SSE client would hang with no event.
+**T16 — Observability is `console.log`.** No unified structured logger, log levels, or metrics/counters (queue depth, extraction failure rate, LLM token spend). The runbook exists but the signals it would need are not emitted. Critical transition/error sites increasingly emit single-line JSON events, including enqueue failures and retry classification, but the instrumentation remains incomplete.
 
-**T17 — Minor documentation drift.** [README.md:6](README.md:6) states bounding boxes are tracked "for every node," but only the PDF path populates them ([parser.ts:57-79](src/core/ast/parser.ts:57)); markdown nodes carry no geometry. The extraction model string (`gpt-5.4-2026-03-05`) is hardcoded in three files rather than configured.
+**T17 — Minor documentation drift.** *Resolved (July 4, 2026) — see §5.* [README.md:6](README.md:6) now limits the bounding-box claim to PDF nodes whose parser output supplies coordinates; markdown nodes are explicitly documented as geometry-free. The extraction model had already been consolidated into validated configuration.
 
 ---
 
@@ -131,16 +131,16 @@ Ordered roughly by severity.
 5. ~~**Fix the supervisor bugs** (T10)~~ — **done** (July 4, 2026): the `Conflict` node is linked to the subject and both branch objects with provenance on every created node/edge, text fragments join with real newlines, detection orders by `elementId()`, and the supervisor worker starts with `start_all.ts`. Cypher and pure helpers live in `src/core/graph/conflict_resolution.ts`.
 6. ~~**Log dropped actions in the extraction worker** (T9)~~ — **done** (July 4, 2026): unresolved endpoints are logged at resolution time (`src/core/graph/resolve_actions.ts`) and the merge Cypher returns the merged action ids so Cypher-level drops are detected and logged post-merge.
 7. ~~**Stand up a unit test harness** (T1)~~ — **done** (July 4, 2026): vitest wired into `npm test`; 45 tests over parser hashing determinism (including the T13 empty-content and delimiter edge cases, pinned as current behavior), `buildCorpus` round trips, `parsePredictedPairs`/`scoreF1`/`estimateCost`, and the SSE extractors in `rlm_client.ts`. No infrastructure required.
-8. **Correct the README bounding-box claim** (T17).
+8. ~~**Correct the README bounding-box claim** (T17)~~ — **done** (July 4, 2026): README now distinguishes PDF geometry from geometry-free markdown nodes.
 
 ### 3.2 Medium-Term (correctness, performance, robustness)
 
 1. ~~**Fix extraction granularity** (T2)~~ — **done** (July 4, 2026): `/ingest` fans out block-level nodes (paragraph, heading, list item, code, PDF element) with reconstructed inline text via the new `src/core/ast/traverse.ts`, which also consolidates the duplicated `flattenAST`/`nodeText` (the traversal-helper half of T15). See §5.
 2. ~~**Harden the RLM sandbox** (T7)~~ — **done** (July 4, 2026): `run_cypher` sessions open with `default_access_mode=READ` (server-enforced; blocklist retained as fast-fail courtesy), `write_derived_insight` uses an explicit WRITE session, APOC dropped from the compose file. Verified live by `npm run test:rlm-sandbox`.
 3. ~~**Add API protection** (T6)~~ — **done** (July 4, 2026): API-key middleware (header / Bearer / query param), concurrency cap + queue-depth limit on `/api/rlm-stream` (429), body and upload size limits (413), PDF-only uploads with post-parse cleanup. Verified live by `npm run test:api-hardening`.
-4. **Queue hygiene** (T14): configure `attempts`/exponential backoff and `removeOnComplete`/`removeOnAge` defaults; classify errors (retryable 5xx/timeout vs. permanent 4xx) per Guideline 5; add graceful shutdown (close workers, drain pools) on SIGTERM.
-5. **Model document membership properly** (T12): introduce `document_nodes(document_id, node_id)` and backfill; this is prerequisite work for the update/re-ingest story the Merkle design exists to support.
-6. **Batch the ingestion hot path** (T11): multi-row inserts and `addBulk` in `/ingest`.
+4. ~~**Queue hygiene** (T14)~~ — **done** (July 4, 2026): bounded retry/retention defaults, typed permanent-vs-transient OpenAI error classification, phase-ordered SIGINT/SIGTERM shutdown, and a cosine HNSW index.
+5. ~~**Model document membership properly** (T12)~~ — **done prior to this roadmap review**: version membership is represented by `documents` and `document_nodes`; see §5 Phase 1 findings.
+6. ~~**Batch the ingestion hot path** (T11)~~ — **done** (July 4, 2026): `/ingest` uses a single `UNNEST` insert for AST nodes and `addBulk` for extraction fan-out.
 7. **Promote the verified-ingestion loop from the benchmark script into the main pipeline** (T15): the write → read-back → re-derive pattern in `ingest_oolong_dataset.ts` is the architecture's stated invariant; `/ingest` should get the same guarantee (as an async post-write verification job if latency matters).
 8. **Integration tests against Docker infrastructure**: a compose-based CI job running `init_db` + a small ingest + retrieve round trip, plus the corpus binding validation. The e2e probe scripts can be converted into assertion-based tests incrementally.
 9. **Structured logging and basic metrics** (T16): pino (or similar) with job IDs as correlation keys; counters for extraction failures, dropped actions, LLM tokens, queue depth.
@@ -264,3 +264,26 @@ The supervisor's Cypher and pure helpers moved into [src/core/graph/conflict_res
 **Tests:** 19 new unit assertions ([auth.test.ts](src/api/auth.test.ts): constant-time validation incl. length mismatch, key extraction precedence, middleware 401/pass-through; [stream_gate.test.ts](src/api/stream_gate.test.ts): cap admission, release semantics, double-release guard) — suite total 123, all passing offline. Live: `npm run test:api-hardening` boots the real server with a key and asserts 401s on all endpoints, 202 authorized ingest (via header and Bearer), 413 oversize body, and 400 non-PDF upload — designed to queue zero extraction jobs and make zero LLM calls (the probe document is a lone thematic break). `npm run test:rlm-sandbox` covers T7 (4 checks).
 
 **Deliberately not done here:** per-key rate limiting/quotas (single shared key only), TLS termination, and horizontal-scale coordination of the stream gate (each process enforces its own cap; the queue-depth check is the shared backstop) — all deployment-story items for 3.3 #5. The RLM write-path resurrection alignment (PR #17 residual 3) remains open: this change touched `trellis_tools.py`'s session modes only, not the `_WRITE_INSIGHT_QUERY` provenance semantics, which deserve their own belief-state test pass.
+
+### July 4, 2026 — Async reliability and ingestion batching (items 3.1 #8, 3.2 #4 and #6 — T17, T14, T11)
+
+**T14 resolved.** Queue behavior is now bounded and failure-aware:
+
+- Background queues retain three attempts with exponential backoff. Typed OpenAI connection failures, HTTP 408/409/429, and 5xx responses retry; typed permanent 4xx responses become BullMQ `UnrecoverableError` and skip wasteful remaining attempts. Classification uses SDK error types and status fields, never message substrings. Structural `LlmResponseError` and unknown infrastructure failures remain retryable under the bounded policy.
+- Every queue now bounds completed and failed history by both age and count. The limits are Zod-validated configuration. `rlm_queue` gets retention but still no automatic retries because an SSE client owns re-dispatch and a background retry would spend tokens without a listener.
+- A phase-ordered shutdown coordinator handles SIGINT/SIGTERM: stop API admission, wait for workers, close the RLM publisher and BullMQ queues/connection, then drain PostgreSQL and Neo4j clients. Registration is shared by combined and single-process entry points.
+- Database initialization creates a partial cosine HNSW index over non-null `ast_nodes.embedding` values. The TypeScript vector query now uses the same explicit `::vector` cast as the Python path.
+
+**T11 resolved.** `/ingest` replaces one PostgreSQL call per AST node with one aligned-array `INSERT ... UNNEST`, and replaces one BullMQ call per extraction block with `queue.addBulk()`. Transaction boundaries, immutable hash identity, version membership, diff filtering, and per-block job payloads are unchanged.
+
+**Boundary and no-loss findings fixed while completing the retry path.**
+
+- The verification classifier was the one worker-consumed LLM completion still using raw `JSON.parse` despite the earlier T8 record. It now requests strict structured output and crosses `parseLlmResponse(VerificationResponseSchema, ...)`; malformed or partial batches fail into the bounded retry flow instead of silently dropping answers.
+- Supervisor resolution transaction failures were logged and swallowed, allowing the scan job to report success after losing a conflict transition. They now fail the job and enter the same retry policy.
+- `scripts/start_all.ts` now starts the verification worker, so the unified process consumes every declared production queue.
+
+**T17 resolved.** README now states that bounding boxes are preserved for PDF nodes only when parser coordinates exist; markdown nodes do not carry geometry.
+
+**Tests:** 29 new offline assertions cover typed retry decisions and BullMQ conversion, RLM retry exclusion plus retention defaults, one-round-trip AST persistence and bulk-job payloads, shutdown ordering/idempotence/failure continuation, strict verification payload/coverage validation, and HNSW schema presence. Suite total: 152 passing.
+
+**Deliberately not included:** structured logging/metrics (T16), the provenance residuals from the belief-recovery entry, verified production ingestion (T15), CI/container packaging, entity resolution, benchmark expansion, and hash-preimage changes (T13).

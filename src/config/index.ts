@@ -25,6 +25,13 @@ const EnvSchema = z.object({
   REDIS_HOST: z.string().default('127.0.0.1'),
   REDIS_PORT: z.coerce.number().int().positive().default(6379),
 
+  // BullMQ history is retained for diagnosis but bounded by both age and
+  // count. Age is in seconds, matching BullMQ's KeepJobs contract.
+  QUEUE_COMPLETED_RETENTION_SECONDS: z.coerce.number().int().positive().default(3600),
+  QUEUE_COMPLETED_RETENTION_COUNT: z.coerce.number().int().positive().default(1000),
+  QUEUE_FAILED_RETENTION_SECONDS: z.coerce.number().int().positive().default(604800),
+  QUEUE_FAILED_RETENTION_COUNT: z.coerce.number().int().positive().default(5000),
+
   PORT: z.coerce.number().int().positive().default(3000),
 
   // API authentication (T6). When set, every endpoint requires the key
@@ -82,6 +89,12 @@ export const config = {
   redis: {
     host: env.REDIS_HOST,
     port: env.REDIS_PORT,
+  },
+  queueRetention: {
+    completedAgeSeconds: env.QUEUE_COMPLETED_RETENTION_SECONDS,
+    completedCount: env.QUEUE_COMPLETED_RETENTION_COUNT,
+    failedAgeSeconds: env.QUEUE_FAILED_RETENTION_SECONDS,
+    failedCount: env.QUEUE_FAILED_RETENTION_COUNT,
   },
   api: {
     port: env.PORT,

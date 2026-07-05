@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
 import { parseLlmResponse, LlmResponseError } from './boundary';
-import { GraphSchema, ConflictEvaluationSchema } from '../graph/schemas';
+import {
+  GraphSchema,
+  ConflictEvaluationSchema,
+  VerificationResponseSchema,
+} from '../graph/schemas';
 
 // Helper: run parseLlmResponse and return the thrown LlmResponseError,
 // asserting that it threw at all and with the right type.
@@ -40,6 +44,31 @@ describe('parseLlmResponse', () => {
     });
     const evaluation = parseLlmResponse(ConflictEvaluationSchema, raw, 'test');
     expect(evaluation.isContradiction).toBe(true);
+  });
+
+  it('validates the verification worker response map', () => {
+    const answers = parseLlmResponse(
+      VerificationResponseSchema,
+      JSON.stringify({
+        results: [
+          { id: 'q1', label: 'HUM', confidence: 0.91 },
+          { id: 'q2', label: 'LOC', confidence: 0.84 },
+        ],
+      }),
+      'verification batch'
+    );
+    expect(answers.results[0]).toEqual({ id: 'q1', label: 'HUM', confidence: 0.91 });
+    expect(answers.results[1].label).toBe('LOC');
+  });
+
+  it('rejects malformed verification answers instead of dropping them', () => {
+    const err = expectBoundaryError(() => parseLlmResponse(
+      VerificationResponseSchema,
+      JSON.stringify({ results: [{ id: 'q1', confidence: 0.9 }] }),
+      'verification batch'
+    ));
+    expect(err.stage).toBe('schema');
+    expect(err.message).toContain('results.0.label');
   });
 
   it('throws stage=empty for null content (nullable OpenAI response)', () => {

@@ -26,7 +26,7 @@ Uploads must be PDFs (`400` otherwise) and are deleted from `uploads/` after par
 ## 1. Ingestion Endpoint
 
 ### `POST /ingest`
-Accepts a raw Markdown string, parses it into a Merkle-hashed AST, persists it to PostgreSQL, and queues the leaf nodes for background LLM extraction.
+Accepts a raw Markdown string, parses it into a Merkle-hashed AST, persists it to PostgreSQL, and queues block-level nodes for background LLM extraction.
 
 **Headers:**
 - `Content-Type: text/markdown` or `text/plain`

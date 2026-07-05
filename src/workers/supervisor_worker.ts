@@ -12,6 +12,11 @@ import {
 } from '../core/graph/conflict_resolution.js';
 import { parseLlmResponse, LlmResponseError } from '../core/llm/boundary.js';
 import { config } from '../config/index.js';
+import { withWorkerRetryPolicy } from '../core/async/retry.js';
+import {
+  installShutdownSignalHandlers,
+  shutdownCoordinator,
+} from '../core/runtime/shutdown.js';
 
 const openai = new OpenAI();
 
@@ -114,6 +119,7 @@ async function processJob(job: Job) {
         } catch (err) {
           await tx.rollback();
           console.error("Resolution transaction failed:", err);
+          throw err;
         }
       }
     }
@@ -129,7 +135,18 @@ async function processJob(job: Job) {
   }
 }
 
-export const worker = new Worker('supervisor_queue', processJob, connectionParams);
+export const worker = new Worker(
+  'supervisor_queue',
+  job => withWorkerRetryPolicy(
+    {
+      worker: 'supervisor',
+      jobId: job.id,
+      attempt: job.attemptsMade + 1,
+    },
+    () => processJob(job)
+  ),
+  connectionParams
+);
 
 worker.on('completed', job => {
   console.log(`[Job ${job.id}] Scan complete.`);
@@ -140,3 +157,6 @@ worker.on('failed', (job, err) => {
 });
 
 console.log("Supervisor Worker started and listening for jobs...");
+
+installShutdownSignalHandlers();
+shutdownCoordinator.register('worker.supervisor', 80, () => worker.close());

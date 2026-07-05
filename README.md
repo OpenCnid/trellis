@@ -3,8 +3,8 @@
 Trellis is a Deterministic Spatial Reasoning Engine designed for enterprise knowledge. Standard GraphRAG (like Microsoft's implementation) extracts semantic entities but destroys the physical geometry of the source document, causing it to break when documents are updated. Trellis solves this by replacing standard, lossy GraphRAG with a mathematically rigorous architecture that maps the amorphous reasoning of Large Language Models directly to an immutable, Merkle-hashed coordinate system.
 
 ## Overview
-1. **The Physical Layer (AST):** Markdown documents are parsed into an Abstract Syntax Tree. Each node is given a deterministic SHA-256 Merkle-tree hash based on its content and children. We preserve physical geometry by tracking Spatial Bounding Boxes for every node.
-2. **The Semantic Layer (Knowledge Graph):** LLMs process leaf nodes via asynchronous workers to extract strict Entities and Actions using Zod. We employ a pgvector hybrid fallback for robust similarity matching when topological traversal isn't enough.
+1. **The Physical Layer (AST):** Markdown documents are parsed into an Abstract Syntax Tree. Each node is given a deterministic SHA-256 Merkle-tree hash based on its content and children. PDF nodes preserve Spatial Bounding Boxes when the parser supplies coordinates; Markdown nodes do not carry geometry.
+2. **The Semantic Layer (Knowledge Graph):** LLMs process block-level nodes via asynchronous workers to extract strict Entities and Actions using Zod. We employ a pgvector hybrid fallback for robust similarity matching when topological traversal isn't enough.
 3. **The Bridge (RLM Harness):** Extracted entities point directly back to the physical AST Node IDs. We use a Recursive Language Model (RLM) agent with a secure Python REPL to autonomously traverse the graph and resolve physical data contradictions safely.
 
 ## Prerequisites
@@ -41,14 +41,13 @@ Trellis is a Deterministic Spatial Reasoning Engine designed for enterprise know
 
 To run the Trellis pipeline locally, you need to boot the ingestion server and the background workers. The easiest way to start all components simultaneously is using our unified startup script:
 
-1. **Start all services (Server, Extraction Worker, RLM Worker):**
+1. **Start the API and all background workers:**
    ```bash
    npx tsx scripts/start_all.ts
    ```
 
 *(Alternatively, you can run them individually)*:
 - **API Server:** `npx tsx src/api/server.ts` (Starts on port `3000`)
-- **Extraction Worker:** `npx tsx src/workers/extraction_worker.ts`
-- **RLM Worker:** `npx tsx src/workers/rlm_worker.ts`
+- **Individual workers:** run the corresponding module under `src/workers/` with `npx tsx`.
 
 For integration details on hitting the endpoints, see the [API Reference](API_REFERENCE.md).

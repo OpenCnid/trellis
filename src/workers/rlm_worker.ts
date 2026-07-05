@@ -4,6 +4,10 @@ import { spawn } from 'child_process';
 import path from 'path';
 import IORedis from 'ioredis';
 import { config, pgDsn } from '../config/index.js';
+import {
+  installShutdownSignalHandlers,
+  shutdownCoordinator,
+} from '../core/runtime/shutdown.js';
 
 const redisPublisher = new IORedis({
   host: config.redis.host,
@@ -78,4 +82,10 @@ rlmWorker.on('completed', job => {
 
 rlmWorker.on('failed', (job, err) => {
   console.log(`RLM Job ${job?.id} has failed with ${err.message}`);
+});
+
+installShutdownSignalHandlers();
+shutdownCoordinator.register('worker.rlm', 80, () => rlmWorker.close());
+shutdownCoordinator.register('redis.rlm_publisher', 60, async () => {
+  await redisPublisher.quit();
 });

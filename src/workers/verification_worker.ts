@@ -7,6 +7,11 @@ import {
   makeOpenAIClassifier,
   makeOracleClassifier
 } from '../core/graph/verification.js';
+import { withWorkerRetryPolicy } from '../core/async/retry.js';
+import {
+  installShutdownSignalHandlers,
+  shutdownCoordinator,
+} from '../core/runtime/shutdown.js';
 
 // Phase 5 Milestone 3: consumes a sampled batch of cached has_category
 // beliefs (enqueued by the sweep scheduler, scripts/verify_sweep.ts) and
@@ -52,7 +57,14 @@ async function processJob(job: Job<VerificationJobData>) {
 
 export const verificationWorker = new Worker<VerificationJobData>(
   'verification_queue',
-  processJob,
+  job => withWorkerRetryPolicy(
+    {
+      worker: 'verification',
+      jobId: job.id,
+      attempt: job.attemptsMade + 1,
+    },
+    () => processJob(job)
+  ),
   connectionParams
 );
 
@@ -65,3 +77,10 @@ verificationWorker.on('failed', (job, err) => {
 });
 
 console.log('Verification Worker started and listening for jobs...');
+
+installShutdownSignalHandlers();
+shutdownCoordinator.register(
+  'worker.verification',
+  80,
+  () => verificationWorker.close()
+);
