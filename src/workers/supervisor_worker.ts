@@ -2,20 +2,22 @@ import { Worker, Job } from 'bullmq';
 import { connectionParams } from './queue.js';
 import { neo4jDriver, pgPool } from '../config/db.js';
 import OpenAI from 'openai';
-import { z } from 'zod';
 import { zodResponseFormat } from 'openai/helpers/zod';
+import { ConflictEvaluationSchema, ConflictEvaluation } from '../core/graph/schemas.js';
+import { parseLlmResponse, LlmResponseError } from '../core/llm/boundary.js';
 import { config } from '../config/index.js';
 
 const openai = new OpenAI();
 
-const ConflictEvaluationSchema = z.object({
-  isContradiction: z.boolean(),
-  reasoning: z.string(),
-  resolutionType: z.enum(['COMPLEMENTARY', 'TEMPORAL_UPDATE', 'DIRECT_CONFLICT'])
-});
-
 async function processJob(job: Job) {
   console.log(`[Job ${job.id}] Scanning for graph conflicts...`);
+
+  // Structurally invalid evaluations are logged per candidate pair and the
+  // scan continues (one bad completion must not block the other pairs), but
+  // any failure still fails the job at the end so BullMQ's retry flow
+  // re-evaluates the affected pairs — their belief_state is still NULL, so
+  // the detection query picks them up again.
+  let invalidEvaluations = 0;
 
   const session = neo4jDriver.session();
   try {
@@ -71,11 +73,30 @@ async function processJob(job: Job) {
         temperature: 0.1,
       });
 
-      const rawContent = completion.choices[0].message.content;
-      if (!rawContent) continue;
-      
-      const evaluation = JSON.parse(rawContent);
-      
+      let evaluation: ConflictEvaluation;
+      try {
+        evaluation = parseLlmResponse(
+          ConflictEvaluationSchema,
+          completion.choices[0].message.content,
+          `conflict evaluation (job ${job.id})`
+        );
+      } catch (err) {
+        if (err instanceof LlmResponseError) {
+          invalidEvaluations++;
+          console.warn(JSON.stringify({
+            event: 'supervisor.evaluation_invalid',
+            jobId: job.id,
+            r1ElementId: r1.elementId,
+            r2ElementId: r2.elementId,
+            stage: err.stage,
+            detail: err.message,
+            rawSnippet: err.rawSnippet,
+          }));
+          continue;
+        }
+        throw err;
+      }
+
       if (evaluation.isContradiction) {
         console.log(`[Job ${job.id}] Contradiction detected! Branching into Belief States...`);
         // Step C: Resolution
@@ -113,6 +134,13 @@ async function processJob(job: Job) {
     }
   } finally {
     await session.close();
+  }
+
+  if (invalidEvaluations > 0) {
+    throw new Error(
+      `${invalidEvaluations} conflict evaluation(s) returned structurally invalid LLM responses; ` +
+      `failing the job so the retry flow re-evaluates the affected pairs.`
+    );
   }
 }
 

@@ -5,9 +5,10 @@ import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { GraphSchema, Graph } from '../core/graph/schemas.js';
 import { mergeExtractedGraph } from '../core/graph/extraction_merge.js';
+import { resolveExtractedGraph } from '../core/graph/resolve_actions.js';
+import { parseLlmResponse } from '../core/llm/boundary.js';
 import { isAstNodeLive } from '../core/ast/registry.js';
 import { config } from '../config/index.js';
-import * as crypto from 'crypto';
 
 const openai = new OpenAI();
 
@@ -40,39 +41,56 @@ async function processJob(job: Job) {
     temperature: 0.1,
   });
 
-  const rawContent = completion.choices[0].message.content;
-  if (!rawContent) throw new Error("No content returned from LLM");
-  
-  const graph: Graph = JSON.parse(rawContent);
+  // A structurally invalid completion throws LlmResponseError here, failing
+  // the job into BullMQ's retry flow — a fresh completion usually parses.
+  const graph: Graph = parseLlmResponse(
+    GraphSchema,
+    completion.choices[0].message.content,
+    `extraction job ${job.id} (AST node ${astNodeId})`
+  );
 
-  // 2. Resolve UUIDs to global deterministic hashes
-  const localToGlobalMap = new Map<string, string>();
-  const entityNameMap = new Map<string, string>();
-  
-  for (const ent of graph.entities) {
-    const globalId = crypto.createHash('sha256').update(ent.name.toLowerCase()).digest('hex');
-    localToGlobalMap.set(ent.id, globalId);
-    entityNameMap.set(ent.id, ent.name);
-    ent.id = globalId; // Replace the entity's ID with globalId
+  // 2. Resolve local UUIDs to global deterministic hashes. Unresolved
+  // endpoints are still submitted (the raw id doubles as a name that can
+  // match a pre-existing entity) but never dropped silently.
+  const { entities, actions, unresolved } = resolveExtractedGraph(graph);
+  for (const u of unresolved) {
+    console.warn(JSON.stringify({
+      event: 'extraction.unresolved_action_endpoint',
+      jobId: job.id,
+      astNodeId,
+      actionId: u.actionId,
+      verb: u.verb,
+      subjectId: u.subjectId,
+      objectId: u.objectId,
+      unresolved: u.unresolved,
+    }));
   }
-
-  const enrichedActions = graph.actions.map(act => {
-    return {
-      ...act,
-      subjectId: localToGlobalMap.get(act.subjectId) || act.subjectId,
-      objectId: localToGlobalMap.get(act.objectId) || act.objectId,
-      subjectName: entityNameMap.get(act.subjectId) || act.subjectId,
-      objectName: entityNameMap.get(act.objectId) || act.objectId
-    };
-  });
 
   // 3. Database Insertion (Neo4j). The merge Cypher lives in
   // extraction_merge.ts; its ON MATCH clauses re-derive quarantined facts
   // (contested clears, dead provenance stays in orphanedSourceIds as
   // audit) with semantics that commute with the invalidation sweep.
   try {
-    await mergeExtractedGraph(neo4jDriver, graph.entities, enrichedActions);
-    console.log(`[Job ${job.id}] Successfully merged ${graph.entities.length} entities and ${enrichedActions.length} actions into Neo4j.`);
+    const merge = await mergeExtractedGraph(neo4jDriver, entities, actions);
+    const mergedIds = new Set(merge.mergedActionIds);
+    const droppedActions = actions.filter(a => !mergedIds.has(a.id));
+    for (const a of droppedActions) {
+      console.warn(JSON.stringify({
+        event: 'extraction.action_dropped',
+        jobId: job.id,
+        astNodeId,
+        actionId: a.id,
+        verb: a.verb,
+        subjectName: a.subjectName,
+        objectName: a.objectName,
+        reason: 'no Entity node matched the subject or object name during merge',
+      }));
+    }
+    console.log(
+      `[Job ${job.id}] Merged ${entities.length} entities and ` +
+      `${actions.length - droppedActions.length}/${actions.length} actions into Neo4j` +
+      (droppedActions.length > 0 ? ` (${droppedActions.length} dropped, see warnings).` : '.')
+    );
   } catch (error) {
     console.error(`[Job ${job.id}] Error during Neo4j transaction`, error);
     throw error;
@@ -107,7 +125,7 @@ async function processJob(job: Job) {
 export const worker = new Worker('extraction_queue', processJob, connectionParams);
 
 worker.on('completed', job => {
-  console.log(`[Job ${job.id}] Finished perfectly.`);
+  console.log(`[Job ${job.id}] Finished.`);
 });
 
 worker.on('failed', (job, err) => {
