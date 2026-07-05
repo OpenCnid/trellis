@@ -4,6 +4,12 @@ import { neo4jDriver, pgPool } from '../config/db.js';
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { ConflictEvaluationSchema, ConflictEvaluation } from '../core/graph/schemas.js';
+import {
+  CONFLICT_ANOMALY_CYPHER,
+  CONFLICT_RESOLUTION_CYPHER,
+  conflictResolutionParams,
+  joinAstTexts,
+} from '../core/graph/conflict_resolution.js';
 import { parseLlmResponse, LlmResponseError } from '../core/llm/boundary.js';
 import { config } from '../config/index.js';
 
@@ -22,16 +28,7 @@ async function processJob(job: Job) {
   const session = neo4jDriver.session();
   try {
     // Step A: Detection
-    const anomalyQuery = `
-      MATCH (subj:Entity)-[r1:ACTION]->(obj1:Entity)
-      MATCH (subj)-[r2:ACTION]->(obj2:Entity)
-      WHERE r1.verb = r2.verb AND id(obj1) < id(obj2)
-      // Ensure they don't already have a belief state to avoid infinite loops
-      AND r1.belief_state IS NULL AND r2.belief_state IS NULL
-      RETURN subj, r1, obj1, r2, obj2
-    `;
-    
-    const result = await session.run(anomalyQuery);
+    const result = await session.run(CONFLICT_ANOMALY_CYPHER);
     
     for (const record of result.records) {
       const r1 = record.get('r1');
@@ -50,11 +47,11 @@ async function processJob(job: Job) {
       try {
         if (sourceNodeIds1.length > 0) {
           const res1 = await pgClient.query('SELECT data FROM ast_nodes WHERE id = ANY($1)', [sourceNodeIds1]);
-          text1 = res1.rows.map(row => row.data.value || row.data.text || JSON.stringify(row.data)).join("\\n");
+          text1 = joinAstTexts(res1.rows);
         }
         if (sourceNodeIds2.length > 0) {
           const res2 = await pgClient.query('SELECT data FROM ast_nodes WHERE id = ANY($1)', [sourceNodeIds2]);
-          text2 = res2.rows.map(row => row.data.value || row.data.text || JSON.stringify(row.data)).join("\\n");
+          text2 = joinAstTexts(res2.rows);
         }
       } finally {
         pgClient.release();
@@ -99,31 +96,19 @@ async function processJob(job: Job) {
 
       if (evaluation.isContradiction) {
         console.log(`[Job ${job.id}] Contradiction detected! Branching into Belief States...`);
-        // Step C: Resolution
+        // Step C: Resolution — branch belief states and record the
+        // reasoning as a Conflict node linked to the entities it explains
+        // (Cypher and provenance semantics in conflict_resolution.ts).
         const tx = session.beginTransaction();
         try {
-          const resolutionQuery = `
-            MATCH (subj:Entity)-[r1:ACTION]->(obj1:Entity)
-            MATCH (subj)-[r2:ACTION]->(obj2:Entity)
-            WHERE elementId(r1) = $r1Id AND elementId(r2) = $r2Id
-            
-            // Create conflict node
-            CREATE (c:Conflict { reasoning: $reasoning })
-            
-            // Create contradictions edges
-            MERGE (obj1)-[:CONTRADICTS]->(obj2)
-            
-            // Assign belief states
-            SET r1.belief_state = 'Belief A'
-            SET r2.belief_state = 'Belief B'
-          `;
-          
-          await tx.run(resolutionQuery, {
+          await tx.run(CONFLICT_RESOLUTION_CYPHER, conflictResolutionParams({
             r1Id: r1.elementId,
             r2Id: r2.elementId,
-            reasoning: evaluation.reasoning
-          });
-          
+            evaluation,
+            r1SourceNodeIds: sourceNodeIds1,
+            r2SourceNodeIds: sourceNodeIds2,
+          }));
+
           await tx.commit();
           console.log(`[Job ${job.id}] Successfully branched belief states.`);
         } catch (err) {
