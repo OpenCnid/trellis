@@ -9,7 +9,7 @@ async function initializeDatabases() {
   try {
     const pgClient = await pgPool.connect();
     await pgClient.query(POSTGRES_SCHEMA_SQL);
-    console.log("[PASS] PostgreSQL: tables and vector/membership indexes created/verified.");
+    console.log("[PASS] PostgreSQL: tables, indexes, and search functions created/verified.");
     pgClient.release();
   } catch (err: any) {
     console.error(`[FAIL] PostgreSQL Error: ${err.message}`);

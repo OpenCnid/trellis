@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 import type { PoolClient } from 'pg';
 import { parseMarkdownToAST } from './parser';
 import { flattenAST } from './traverse';
-import { buildExtractionJobs, persistAstNodes } from './persist';
+import {
+  assertPersistedAstNodes,
+  buildExtractionJobs,
+  persistAstNodes,
+  verifyPersistedAstNodes,
+} from './persist';
 
 describe('persistAstNodes', () => {
   it('writes every AST node through one UNNEST query', async () => {
@@ -45,5 +50,53 @@ describe('buildExtractionJobs', () => {
         },
       },
     ]);
+  });
+});
+
+describe('verified AST persistence', () => {
+  it('reads every expected row back in one query and accepts exact parser output', async () => {
+    const root = parseMarkdownToAST('# Heading\n\nBody.');
+    const nodes = flattenAST(root);
+    const query = vi.fn().mockResolvedValue({
+      rows: nodes.map(node => ({ id: node.id, data: structuredClone(node) })),
+    });
+    const client = { query } as unknown as PoolClient;
+
+    await verifyPersistedAstNodes(client, nodes);
+
+    expect(query).toHaveBeenCalledTimes(1);
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('SELECT id, data FROM ast_nodes');
+    expect(params).toEqual([nodes.map(node => node.id)]);
+  });
+
+  it('rejects a write-back with a missing expected row', () => {
+    const root = parseMarkdownToAST('Body.');
+    const nodes = flattenAST(root);
+
+    expect(() => assertPersistedAstNodes(nodes, [
+      { id: root.id, data: structuredClone(root) },
+    ])).toThrow(/missing after write-back/);
+  });
+
+  it('rejects a stored payload whose parser preimage no longer produces its id', () => {
+    const root = parseMarkdownToAST('Body.');
+    const nodes = flattenAST(root);
+    const rows = nodes.map(node => ({ id: node.id, data: structuredClone(node) }));
+    const textRow = rows.find(row => row.data.type === 'text')!;
+    textRow.data.content = 'tampered';
+
+    expect(() => assertPersistedAstNodes(nodes, rows)).toThrow(/re-derived id/);
+  });
+
+  it('rejects payload drift even when the current hash preimage ignores the extra field', () => {
+    const root = parseMarkdownToAST('Body.');
+    const nodes = flattenAST(root);
+    const rows = nodes.map(node => ({
+      id: node.id,
+      data: { ...structuredClone(node), unexpected: true },
+    }));
+
+    expect(() => assertPersistedAstNodes(nodes, rows)).toThrow(/payload differs/);
   });
 });

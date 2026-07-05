@@ -8,6 +8,8 @@ import { mergeExtractedGraph } from '../core/graph/extraction_merge.js';
 import { resolveExtractedGraph } from '../core/graph/resolve_actions.js';
 import { parseLlmResponse } from '../core/llm/boundary.js';
 import { isAstNodeLive } from '../core/ast/registry.js';
+import { mergeWithAstLivenessFence } from '../core/graph/extraction_liveness.js';
+import { sweepOrphanedProvenance, type SweepResult } from '../core/graph/invalidation.js';
 import { config } from '../config/index.js';
 import { withWorkerRetryPolicy } from '../core/async/retry.js';
 import {
@@ -26,9 +28,13 @@ async function processJob(job: Job) {
   // contesting, and pay an LLM call for it. Skipping keeps the merge's
   // "incoming provenance is live" invariant (see extraction_merge.ts).
   if (!(await isAstNodeLive(pgPool, astNodeId))) {
-    console.log(
-      `[Job ${job.id}] AST Node ${astNodeId} is no longer in any document's latest version — skipping (superseded by a newer re-ingest).`
-    );
+    const compensation = await sweepOrphanedProvenance(neo4jDriver, [astNodeId]);
+    console.warn(JSON.stringify({
+      event: 'extraction.superseded_before_start',
+      jobId: job.id,
+      astNodeId,
+      compensation,
+    }));
     return;
   }
 
@@ -76,7 +82,25 @@ async function processJob(job: Job) {
   // (contested clears, dead provenance stays in orphanedSourceIds as
   // audit) with semantics that commute with the invalidation sweep.
   try {
-    const merge = await mergeExtractedGraph(neo4jDriver, entities, actions);
+    let compensation: SweepResult | undefined;
+    const mergeOutcome = await mergeWithAstLivenessFence(
+      () => isAstNodeLive(pgPool, astNodeId),
+      () => mergeExtractedGraph(neo4jDriver, entities, actions),
+      async () => {
+        compensation = await sweepOrphanedProvenance(neo4jDriver, [astNodeId]);
+      }
+    );
+    if (mergeOutcome.status === 'skipped') {
+      console.warn(JSON.stringify({
+        event: 'extraction.superseded_before_merge',
+        jobId: job.id,
+        astNodeId,
+        compensation,
+      }));
+      return;
+    }
+
+    const merge = mergeOutcome.value;
     const mergedIds = new Set(merge.mergedActionIds);
     const droppedActions = actions.filter(a => !mergedIds.has(a.id));
     for (const a of droppedActions) {
@@ -96,8 +120,17 @@ async function processJob(job: Job) {
       `${actions.length - droppedActions.length}/${actions.length} actions into Neo4j` +
       (droppedActions.length > 0 ? ` (${droppedActions.length} dropped, see warnings).` : '.')
     );
+    if (mergeOutcome.status === 'compensated') {
+      console.warn(JSON.stringify({
+        event: 'extraction.raced_invalidation_compensated',
+        jobId: job.id,
+        astNodeId,
+        compensation,
+      }));
+      return;
+    }
   } catch (error) {
-    console.error(`[Job ${job.id}] Error during Neo4j transaction`, error);
+    console.error(`[Job ${job.id}] Error during liveness-fenced Neo4j merge`, error);
     throw error;
   }
 

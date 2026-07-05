@@ -2,9 +2,15 @@ import * as crypto from 'crypto';
 import { parseMarkdownToAST, ASTNode } from '../src/core/ast/parser';
 import { collectExtractionBlocks } from '../src/core/ast/traverse';
 import { diffVersions } from '../src/core/ast/diff';
-import { registerDocumentVersion, recordDocumentNodes, isAstNodeLive } from '../src/core/ast/registry';
+import {
+  findGloballyOrphanedAstNodeIds,
+  registerDocumentVersion,
+  recordDocumentNodes,
+  isAstNodeLive,
+} from '../src/core/ast/registry';
 import { sweepOrphanedProvenance } from '../src/core/graph/invalidation';
 import { mergeExtractedGraph, EnrichedAction } from '../src/core/graph/extraction_merge';
+import { mergeWithAstLivenessFence } from '../src/core/graph/extraction_liveness';
 import { pgPool, neo4jDriver } from '../src/config/db';
 import type { Entity } from '../src/core/graph/schemas';
 
@@ -48,11 +54,14 @@ const SUBJ_A = `${TOKEN}-globex`;
 const OBJ_A = `${TOKEN}-initech`;
 const SUBJ_B = `${TOKEN}-hooli`;
 const OBJ_B = `${TOKEN}-piedpiper`;
+const SUBJ_RACE = `${TOKEN}-race-subject`;
+const OBJ_RACE = `${TOKEN}-race-object`;
+const SHARED_DOC_KEY = `${TOKEN}-shared-document`;
 
 const v1Markdown = `${SUBJ_A} acquired ${OBJ_A} in 2024.\n\n${SUBJ_B} acquired ${OBJ_B} in 2024.`;
 const v2Markdown = `${SUBJ_A} acquired ${OBJ_A} in 2025.\n\n${SUBJ_B} acquired ${OBJ_B} in 2025.`;
 
-async function ingestVersion(markdown: string) {
+async function ingestVersion(markdown: string, docKey: string = TOKEN) {
   const rootNode = parseMarkdownToAST(markdown);
   const allNodes = flattenAST(rootNode);
   const client = await pgPool.connect();
@@ -65,7 +74,7 @@ async function ingestVersion(markdown: string) {
       );
     }
     await recordDocumentNodes(client, rootNode.id, allNodes.map(n => n.id));
-    const registration = await registerDocumentVersion(client, TOKEN, rootNode.id);
+    const registration = await registerDocumentVersion(client, docKey, rootNode.id);
     await client.query('COMMIT');
     // Paragraph block hashes in document order — the extraction units.
     const blocks = collectExtractionBlocks(rootNode).map(b => b.id);
@@ -143,7 +152,7 @@ async function cleanup(rootHashes: string[], nodeIds: string[]): Promise<void> {
   const client = await pgPool.connect();
   try {
     await client.query('BEGIN');
-    await client.query('DELETE FROM documents WHERE doc_key = $1', [TOKEN]);
+    await client.query('DELETE FROM documents WHERE doc_key = ANY($1)', [[TOKEN, SHARED_DOC_KEY]]);
     await client.query('DELETE FROM document_nodes WHERE root_hash = ANY($1)', [rootHashes]);
     await client.query('DELETE FROM ast_nodes WHERE id = ANY($1)', [nodeIds]);
     await client.query('COMMIT');
@@ -237,6 +246,44 @@ async function main(): Promise<void> {
     check('superseded v1 block is dead', await isAstNodeLive(pgPool, blockA1), false);
     check('current v2 block is live', await isAstNodeLive(pgPool, blockA2), true);
     check('registry-unknown hash is treated as live (unversioned ingest)', await isAstNodeLive(pgPool, 'no-such-hash'), true);
+
+    // 4a. Deterministic cross-store race: source is live immediately before
+    // merge and dead immediately after. The real merge plus compensating
+    // sweep must leave no trusted fact backed by the dead hash.
+    {
+      const { entities, actions } = extractionOf(SUBJ_RACE, OBJ_RACE, blockA1);
+      let checkCount = 0;
+      const outcome = await mergeWithAstLivenessFence(
+        async () => ++checkCount === 1,
+        () => mergeExtractedGraph(neo4jDriver, entities, actions),
+        async () => {
+          await sweepOrphanedProvenance(neo4jDriver, [blockA1]);
+        }
+      );
+      check('liveness fence reports a compensated race', outcome.status, 'compensated');
+      check('racing dead-source fact ends contested', (await factState(SUBJ_RACE, OBJ_RACE))?.contested, true);
+    }
+
+    // 4b. Global liveness: blockA1 is dead for TOKEN but becomes live again
+    // when a different document's latest version contains the same bytes.
+    // blockB1 remains globally dead, so only it may reach the sweep.
+    const shared = await ingestVersion(
+      `${SUBJ_A} acquired ${OBJ_A} in 2024.`,
+      SHARED_DOC_KEY
+    );
+    shared.allNodes.forEach(n => seenNodeIds.add(n.id));
+    rootHashes.push(shared.rootNode.id);
+    check('shared block is live through another document', await isAstNodeLive(pgPool, blockA1), true);
+    const globalOrphans = await findGloballyOrphanedAstNodeIds(pgPool, [blockA1, blockB1]);
+    check('global orphan filter retains shared hash only', globalOrphans, [blockB1]);
+    {
+      const { entities, actions } = extractionOf(SUBJ_A, OBJ_A, blockA1);
+      await mergeExtractedGraph(neo4jDriver, entities, actions);
+      await sweepOrphanedProvenance(neo4jDriver, globalOrphans);
+    }
+    const sharedState = (await factState(SUBJ_A, OBJ_A))!;
+    check('shared-source fact stays uncontested', sharedState.contested, false);
+    check('shared live hash remains active provenance', sharedState.sourceNodeIds.includes(blockA1), true);
 
     // 5. Revert: v3 restores the v1 bytes — blockA1's hash is live again
     const v3 = await ingestVersion(v1Markdown);

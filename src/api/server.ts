@@ -14,7 +14,11 @@ import fs from 'fs/promises';
 import OpenAI from 'openai';
 import { apiKeyMiddleware } from './auth.js';
 import { StreamGate } from './stream_gate.js';
-import { buildExtractionJobs, persistAstNodes } from '../core/ast/persist.js';
+import {
+  buildExtractionJobs,
+  persistAstNodes,
+  verifyPersistedAstNodes,
+} from '../core/ast/persist.js';
 import {
   installShutdownSignalHandlers,
   shutdownCoordinator,
@@ -99,6 +103,10 @@ app.post('/ingest', uploadPdf, async (req, res) => {
     try {
       await client.query('BEGIN');
       await persistAstNodes(client, rootNode.id, allNodes);
+      // T15 verified ingestion: read the immutable rows back and re-derive
+      // every id through parser.ts before registry state can commit. A
+      // missing/corrupt/conflicting row rolls the entire version back.
+      await verifyPersistedAstNodes(client, allNodes);
       await recordDocumentNodes(client, rootNode.id, allNodes.map(n => n.id));
       registration = await registerDocumentVersion(client, docKey, rootNode.id);
       await client.query('COMMIT');
@@ -239,13 +247,10 @@ app.get('/retrieve', async (req, res) => {
       });
       const queryEmbedding = embedRes.data[0].embedding;
 
-      const pgRes = await pgClient.query(`
-        SELECT id, data->>'content' as content 
-        FROM ast_nodes 
-        WHERE embedding IS NOT NULL
-        ORDER BY embedding <=> $1::vector
-        LIMIT 3;
-      `, [JSON.stringify(queryEmbedding)]);
+      const pgRes = await pgClient.query(
+        'SELECT id, content FROM search_ast_nodes($1::vector, 3)',
+        [JSON.stringify(queryEmbedding)]
+      );
       provenance = pgRes.rows;
     } else {
       const pgRes = await pgClient.query(`

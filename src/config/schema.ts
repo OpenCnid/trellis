@@ -34,4 +34,22 @@ export const POSTGRES_SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_ast_nodes_embedding_hnsw
     ON ast_nodes USING hnsw (embedding vector_cosine_ops)
     WHERE embedding IS NOT NULL;
+  -- T15: both the TypeScript API and Python RLM client call this function,
+  -- keeping cosine ordering, null filtering and result shape in one schema
+  -- definition instead of maintaining parallel queries across languages.
+  CREATE OR REPLACE FUNCTION search_ast_nodes(
+    query_embedding vector(1536),
+    match_count INTEGER DEFAULT 3
+  )
+  RETURNS TABLE (id VARCHAR, content TEXT)
+  LANGUAGE SQL
+  STABLE
+  PARALLEL SAFE
+  AS $function$
+    SELECT a.id, a.data->>'content' AS content
+    FROM ast_nodes a
+    WHERE a.embedding IS NOT NULL
+    ORDER BY a.embedding <=> query_embedding
+    LIMIT match_count
+  $function$;
 `;

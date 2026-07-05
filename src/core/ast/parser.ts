@@ -39,6 +39,19 @@ function createASTNode(type: string, content?: string, children?: ASTNode[], met
   };
 }
 
+/**
+ * Re-derives an AST node id through the parser's existing hash authority.
+ *
+ * This intentionally delegates to createASTNode so persistence verification
+ * cannot drift from the current preimage behavior. In particular, the T13
+ * empty-content and delimiter quirks remain unchanged and pinned by tests.
+ */
+export function rederiveAstNodeId(
+  node: Pick<ASTNode, 'type' | 'content' | 'children' | 'metadata'>
+): string {
+  return createASTNode(node.type, node.content, node.children, node.metadata).id;
+}
+
 function processMarkdownNode(node: any): ASTNode {
   if (!node.children || node.children.length === 0) {
     const content = node.value || '';
