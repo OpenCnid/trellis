@@ -1,0 +1,5 @@
+{
+  "name": "repo-ingest-fixture",
+  "retries": 3,
+  "features": ["snapshot", "tombstone"]
+}

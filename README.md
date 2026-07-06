@@ -146,6 +146,46 @@ The entrypoint replaces itself with Node after initialization, so
 #21's phase-ordered shutdown closes admission, workers, queues, and database
 clients.
 
+## Repository ingestion
+
+Whole-codebase ingestion (Session 8) turns one repository snapshot into a
+bounded sequence of per-file document ingests through the same verified
+service as `POST /ingest` — never one giant request or transaction:
+
+```bash
+npm run repo:ingest -- --repo-key my-repo --root /path/to/checkout --extract none
+```
+
+- **File set:** `git ls-files` (tracked files) by default;
+  `--include-untracked` adds untracked files that `.gitignore` does not
+  exclude. Paths are normalized POSIX-relative; absolute paths, `..`
+  traversal, symlinks, vendor/generated directories (`node_modules/`,
+  `dist/`, …), files over `--max-file-bytes` (default 2 MiB), binaries,
+  and unsupported extensions are skipped with deterministic reason counts.
+- **Languages:** TypeScript/JavaScript (`@babel/parser`) and Python
+  (stdlib `ast` via the pinned interpreter) produce code-aware Merkle
+  ASTs whose extraction blocks are top-level functions, classes with
+  per-method child blocks, and bounded chunks for imports/trivia — each
+  block's content is the exact source bytes. Markdown keeps the existing
+  parser; common configuration/text formats use an opaque-text fallback.
+- **Identity and deletion:** each file is one document
+  (`repo:<repo-key>:<relative-path>`), so commit-to-commit edits are
+  per-file Merkle diffs. Snapshots are recorded in PostgreSQL and only
+  published after every file succeeds; a path present in the previous
+  published snapshot but absent now receives a tombstone version, which
+  quarantines (never deletes) the semantic facts its bytes evidenced. A
+  rename is a tombstone plus a new document. Re-running an unchanged
+  snapshot is an auditable no-op. A partial failure exits nonzero and
+  leaves the previous snapshot effective.
+- **Cost:** `--extract none` (default) performs zero paid work — no
+  extraction or embedding jobs. `--extract changed` requires an explicit
+  positive `--max-blocks` budget plus `--confirm-extraction`, and the CLI
+  prints the exact files/bytes/blocks/paid-job bound before any write
+  (`--dry-run` stops there).
+
+Live coverage: `npm run test:repo-ingest` (zero LLM calls). Details and
+measured results: `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`.
+
 ## Benchmarks
 
 The OOLONG-Pairs harness ships two committed, seeded corpora:
@@ -224,6 +264,7 @@ npm run test:belief-recovery
 npm run test:invalidation-sweep
 npm run test:entity-resolution
 npm run test:benchmark-hardening
+npm run test:repo-ingest
 ```
 
 See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts.

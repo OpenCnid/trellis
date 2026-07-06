@@ -34,6 +34,8 @@
     "resolve:sweep": "tsx scripts/resolve_sweep.ts",
     "test:entity-resolution": "tsx scripts/test_entity_resolution.ts",
     "migrate:entity-kinds": "tsx scripts/migrate_entity_kinds.ts",
+    "repo:ingest": "tsx scripts/ingest_repository.ts",
+    "test:repo-ingest": "tsx scripts/test_repo_ingest.ts",
     "test:versioned-ingest": "tsx scripts/test_versioned_ingest.ts",
     "test:invalidation-sweep": "tsx scripts/test_invalidation_sweep.ts",
     "test:belief-recovery": "tsx scripts/test_belief_recovery.ts",
@@ -53,6 +55,7 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "@babel/parser": "^8.0.0",
     "bullmq": "^5.79.2",
     "dotenv": "16.6.1",
     "express": "^5.2.1",

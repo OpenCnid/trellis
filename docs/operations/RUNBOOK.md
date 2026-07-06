@@ -300,6 +300,7 @@ Two registries, one per process:
 | Invalidation behavior | `trellis_invalidation_candidate_hashes_total`, `trellis_invalidation_retained_shared_hashes_total`, `trellis_invalidation_contested_total{kind}`, `trellis_invalidation_survived_total{kind}`, `trellis_invalidation_sweep_batches_total` |
 | Verification outcomes | `trellis_verification_beliefs_total{result}` (`classified`, `agreed`, `disputed`, `skipped_no_text`, `skipped_no_answer`) |
 | Entity-resolution outcomes | `trellis_resolution_candidates_total`, `trellis_resolution_pairs_total{verdict}` (`same`, `distinct`, `skipped_no_text`, `skipped_no_answer`) |
+| Repository snapshot runs | `trellis_repo_snapshots_total{result}` (`published`, `failed`), `trellis_repo_files_total{outcome,language}` (`ingested`/`unchanged`/`tombstoned` by source language), `trellis_repo_skipped_files_total{reason}`, `trellis_repo_blocks_total{stage}` (`eligible`, `queued`) |
 | LLM spend | `trellis_llm_calls_total{operation,model}`, `trellis_llm_input_tokens_total`, `trellis_llm_output_tokens_total`, `trellis_llm_embedding_tokens_total` (operations: `extraction`, `extraction_embedding`, `supervision`, `verification`, `resolution`) |
 | RLM agent cost/health | `trellis_rlm_runs_total{exit_status}`, `trellis_rlm_input_tokens_total`, `trellis_rlm_output_tokens_total`, `trellis_rlm_subcalls_total`, `trellis_rlm_tool_calls_total`, `trellis_rlm_duration_seconds`, `trellis_rlm_telemetry_malformed_total` |
 

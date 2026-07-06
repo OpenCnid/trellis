@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { ensureNeo4jConstraints, NEO4J_CONSTRAINT_CYPHER, BootstrapDriver } from './neo4j_bootstrap';
+import {
+  ensureNeo4jConstraints,
+  NEO4J_CONSTRAINT_CYPHER,
+  NEO4J_NAME_INDEX_CYPHER,
+  BootstrapDriver,
+} from './neo4j_bootstrap';
 
 // Pins the concurrent-bootstrap fix: both app containers run db:init
 // against a fresh graph simultaneously, and concurrent CREATE
@@ -42,18 +47,18 @@ function makeFakeDriver(behavior: { failuresBeforeSuccess?: number } = {}) {
 }
 
 describe('ensureNeo4jConstraints', () => {
-  it('runs the Entity uniqueness constraint through executeWrite and closes the session', async () => {
+  it('runs the constraint and the name index through executeWrite and closes the session', async () => {
     const { driver, calls } = makeFakeDriver();
     await ensureNeo4jConstraints(driver);
-    expect(calls.executeWrite).toBe(1);
-    expect(calls.ranQueries).toEqual([NEO4J_CONSTRAINT_CYPHER]);
+    expect(calls.executeWrite).toBe(2);
+    expect(calls.ranQueries).toEqual([NEO4J_CONSTRAINT_CYPHER, NEO4J_NAME_INDEX_CYPHER]);
     expect(calls.closed).toBe(1);
   });
 
   it('survives transient deadlocks because the managed transaction retries them', async () => {
     const { driver, calls } = makeFakeDriver({ failuresBeforeSuccess: 2 });
     await expect(ensureNeo4jConstraints(driver)).resolves.toBeUndefined();
-    expect(calls.ranQueries).toEqual([NEO4J_CONSTRAINT_CYPHER]);
+    expect(calls.ranQueries).toEqual([NEO4J_CONSTRAINT_CYPHER, NEO4J_NAME_INDEX_CYPHER]);
     expect(calls.closed).toBe(1);
   });
 
@@ -69,8 +74,10 @@ describe('ensureNeo4jConstraints', () => {
     expect(calls.closed).toBe(1);
   });
 
-  it('constraint text is the idempotent IF NOT EXISTS form', () => {
+  it('constraint and index text are the idempotent IF NOT EXISTS forms', () => {
     expect(NEO4J_CONSTRAINT_CYPHER).toContain('IF NOT EXISTS');
     expect(NEO4J_CONSTRAINT_CYPHER).toContain('(e:Entity) REQUIRE e.id IS UNIQUE');
+    expect(NEO4J_NAME_INDEX_CYPHER).toContain('IF NOT EXISTS');
+    expect(NEO4J_NAME_INDEX_CYPHER).toContain('FOR (e:Entity) ON (e.name)');
   });
 });

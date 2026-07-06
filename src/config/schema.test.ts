@@ -22,4 +22,15 @@ describe('PostgreSQL schema', () => {
     expect(POSTGRES_SCHEMA_SQL).toContain('FUNCTION search_ast_nodes');
     expect(POSTGRES_SCHEMA_SQL).toContain('ORDER BY a.embedding <=> query_embedding');
   });
+
+  it('records repository snapshot membership idempotently (Session 8)', () => {
+    // Both tables use IF NOT EXISTS and run inside the same advisory-lock
+    // script, so concurrent bootstraps stay safe. published_at is nullable:
+    // an unpublished snapshot must never become the deletion baseline.
+    expect(POSTGRES_SCHEMA_SQL).toContain('CREATE TABLE IF NOT EXISTS repository_snapshots');
+    expect(POSTGRES_SCHEMA_SQL).toContain('CREATE TABLE IF NOT EXISTS repository_snapshot_paths');
+    expect(POSTGRES_SCHEMA_SQL).toContain('published_at TIMESTAMPTZ,');
+    expect(POSTGRES_SCHEMA_SQL).toContain('PRIMARY KEY (repo_key, snapshot_seq, path)');
+    expect(POSTGRES_SCHEMA_SQL).toMatch(/REFERENCES repository_snapshots \(repo_key, snapshot_seq\)/);
+  });
 });

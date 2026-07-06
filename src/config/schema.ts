@@ -41,6 +41,30 @@ export const POSTGRES_SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_ast_nodes_embedding_hnsw
     ON ast_nodes USING hnsw (embedding vector_cosine_ops)
     WHERE embedding IS NOT NULL;
+  -- Session 8: repository snapshot membership. Only PUBLISHED snapshots
+  -- are effective; the pipeline creates the snapshot row first, ingests
+  -- per file, and stamps published_at atomically with the path rows, so
+  -- a partial failure leaves the previous snapshot as the deletion
+  -- baseline and never marks unprocessed paths deleted.
+  CREATE TABLE IF NOT EXISTS repository_snapshots (
+    repo_key VARCHAR NOT NULL,
+    snapshot_seq INTEGER NOT NULL,
+    started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    published_at TIMESTAMPTZ,
+    summary JSONB,
+    PRIMARY KEY (repo_key, snapshot_seq)
+  );
+  CREATE TABLE IF NOT EXISTS repository_snapshot_paths (
+    repo_key VARCHAR NOT NULL,
+    snapshot_seq INTEGER NOT NULL,
+    path VARCHAR NOT NULL,
+    doc_key VARCHAR NOT NULL,
+    root_hash VARCHAR NOT NULL,
+    outcome VARCHAR NOT NULL,
+    PRIMARY KEY (repo_key, snapshot_seq, path),
+    FOREIGN KEY (repo_key, snapshot_seq)
+      REFERENCES repository_snapshots (repo_key, snapshot_seq)
+  );
   -- T15: both the TypeScript API and Python RLM client call this function,
   -- keeping cosine ordering, null filtering and result shape in one schema
   -- definition instead of maintaining parallel queries across languages.
