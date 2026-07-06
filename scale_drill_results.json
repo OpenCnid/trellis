@@ -1,0 +1,527 @@
+{
+  "schemaVersion": 1,
+  "runDate": "2026-07-06",
+  "costPolicy": {
+    "llmCalls": 0,
+    "paidCallsPermitted": false,
+    "pseudoExtraction": true
+  },
+  "environment": {
+    "node": "v20.19.2",
+    "platform": "win32-x64",
+    "databases": {
+      "postgres": "PostgreSQL 16.14 (Debian 16.14-1.pgdg12+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+      "neo4j": "Neo4j Kernel 5.11.0"
+    }
+  },
+  "config": {
+    "seed": 20260706,
+    "documents": 300,
+    "blocksPerDocument": 20,
+    "entityPoolSize": 96,
+    "citations": 6000,
+    "samplePoints": [
+      50,
+      150,
+      300
+    ],
+    "sweepOrphanSetSizes": [
+      1,
+      50,
+      500
+    ],
+    "sweepRepetitions": 3,
+    "mergeProbeRepetitions": 5,
+    "modifiedDocuments": 12,
+    "actualSweepBatchSize": 10
+  },
+  "mentionDistribution": {
+    "hubDocuments": [
+      {
+        "name": "trellis-scale-s7-<token>-entity-001",
+        "count": 286
+      },
+      {
+        "name": "trellis-scale-s7-<token>-entity-002",
+        "count": 258
+      },
+      {
+        "name": "trellis-scale-s7-<token>-entity-003",
+        "count": 212
+      },
+      {
+        "name": "trellis-scale-s7-<token>-entity-004",
+        "count": 200
+      },
+      {
+        "name": "trellis-scale-s7-<token>-entity-005",
+        "count": 193
+      }
+    ],
+    "tailDocuments": [
+      {
+        "name": "trellis-scale-s7-<token>-entity-085",
+        "count": 23
+      },
+      {
+        "name": "trellis-scale-s7-<token>-entity-077",
+        "count": 21
+      },
+      {
+        "name": "trellis-scale-s7-<token>-entity-086",
+        "count": 21
+      },
+      {
+        "name": "trellis-scale-s7-<token>-entity-087",
+        "count": 20
+      },
+      {
+        "name": "trellis-scale-s7-<token>-entity-092",
+        "count": 19
+      }
+    ]
+  },
+  "samples": [
+    {
+      "documentCount": 50,
+      "semanticFacts": {
+        "nodes": 1096,
+        "relationships": 1000,
+        "total": 2096
+      },
+      "sourceNodeIds": {
+        "nodes": {
+          "Entity": {
+            "count": 1096,
+            "min": 1,
+            "max": 47,
+            "mean": 1.8248175182481752,
+            "p50": 1,
+            "p95": 6
+          }
+        },
+        "relationships": {
+          "ACTION": {
+            "count": 1000,
+            "min": 1,
+            "max": 1,
+            "mean": 1,
+            "p50": 1,
+            "p95": 1
+          }
+        }
+      },
+      "mergeLatencyMs": {
+        "allDocuments": {
+          "count": 50,
+          "min": 22.21239999999989,
+          "max": 119.95349999999985,
+          "mean": 43.103348000000025,
+          "p50": 40.18109999999979,
+          "p95": 67.40290000000005
+        },
+        "documentsContainingHub": {
+          "count": 47,
+          "min": 22.21239999999989,
+          "max": 119.95349999999985,
+          "mean": 43.179287234042576,
+          "p50": 40.18109999999979,
+          "p95": 67.40290000000005
+        }
+      },
+      "sameGraphMergeProbeLatencyMs": {
+        "repetitions": 5,
+        "hubSourceNodeIds": 47,
+        "hub": {
+          "count": 5,
+          "min": 6.402599999999438,
+          "max": 74.4973,
+          "mean": 21.50847999999969,
+          "p50": 8.94459999999981,
+          "p95": 74.4973
+        },
+        "singleSourceDetail": {
+          "count": 5,
+          "min": 6.595000000000255,
+          "max": 15.063599999999497,
+          "mean": 9.194999999999709,
+          "p50": 8.269999999999527,
+          "p95": 15.063599999999497
+        }
+      },
+      "hub": {
+        "name": "trellis-scale-s7-<token>-entity-001",
+        "documentsMentioning": 47,
+        "sourceNodeIds": 47
+      },
+      "noHitSweepLatency": [
+        {
+          "orphanSetSize": 1,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 13.670600000000377,
+            "max": 17.379300000000512,
+            "mean": 15.8100333333338,
+            "p50": 16.380200000000514,
+            "p95": 17.379300000000512
+          }
+        },
+        {
+          "orphanSetSize": 50,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 14.188200000000506,
+            "max": 104.61729999999989,
+            "mean": 44.70750000000013,
+            "p50": 15.317000000000007,
+            "p95": 104.61729999999989
+          }
+        },
+        {
+          "orphanSetSize": 500,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 15.395899999999529,
+            "max": 117.85989999999947,
+            "mean": 50.033766666666146,
+            "p50": 16.845499999999447,
+            "p95": 117.85989999999947
+          }
+        }
+      ]
+    },
+    {
+      "documentCount": 150,
+      "semanticFacts": {
+        "nodes": 3096,
+        "relationships": 3000,
+        "total": 6096
+      },
+      "sourceNodeIds": {
+        "nodes": {
+          "Entity": {
+            "count": 3096,
+            "min": 1,
+            "max": 144,
+            "mean": 1.937984496124031,
+            "p50": 1,
+            "p95": 1
+          }
+        },
+        "relationships": {
+          "ACTION": {
+            "count": 3000,
+            "min": 1,
+            "max": 1,
+            "mean": 1,
+            "p50": 1,
+            "p95": 1
+          }
+        }
+      },
+      "mergeLatencyMs": {
+        "allDocuments": {
+          "count": 100,
+          "min": 62.79979999999978,
+          "max": 196.91510000000017,
+          "mean": 103.32477900000004,
+          "p50": 98.16460000000006,
+          "p95": 146.52089999999953
+        },
+        "documentsContainingHub": {
+          "count": 97,
+          "min": 62.79979999999978,
+          "max": 196.91510000000017,
+          "mean": 102.90322061855672,
+          "p50": 98.16460000000006,
+          "p95": 146.52089999999953
+        }
+      },
+      "sameGraphMergeProbeLatencyMs": {
+        "repetitions": 5,
+        "hubSourceNodeIds": 144,
+        "hub": {
+          "count": 5,
+          "min": 6.1710000000020955,
+          "max": 13.223799999999756,
+          "mean": 8.173020000000543,
+          "p50": 6.662599999999657,
+          "p95": 13.223799999999756
+        },
+        "singleSourceDetail": {
+          "count": 5,
+          "min": 5.650499999999738,
+          "max": 6.179700000000594,
+          "mean": 5.8894800000001855,
+          "p50": 5.918000000001484,
+          "p95": 6.179700000000594
+        }
+      },
+      "hub": {
+        "name": "trellis-scale-s7-<token>-entity-001",
+        "documentsMentioning": 144,
+        "sourceNodeIds": 144
+      },
+      "noHitSweepLatency": [
+        {
+          "orphanSetSize": 1,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 11.680700000000797,
+            "max": 12.01510000000053,
+            "mean": 11.88410000000052,
+            "p50": 11.956500000000233,
+            "p95": 12.01510000000053
+          }
+        },
+        {
+          "orphanSetSize": 50,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 16.214899999999034,
+            "max": 19.548900000001595,
+            "mean": 17.755833333333914,
+            "p50": 17.503700000001118,
+            "p95": 19.548900000001595
+          }
+        },
+        {
+          "orphanSetSize": 500,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 14.337100000000646,
+            "max": 16.311100000002625,
+            "mean": 15.52140000000145,
+            "p50": 15.916000000001077,
+            "p95": 16.311100000002625
+          }
+        }
+      ]
+    },
+    {
+      "documentCount": 300,
+      "semanticFacts": {
+        "nodes": 6096,
+        "relationships": 6000,
+        "total": 12096
+      },
+      "sourceNodeIds": {
+        "nodes": {
+          "Entity": {
+            "count": 6096,
+            "min": 1,
+            "max": 286,
+            "mean": 1.968503937007874,
+            "p50": 1,
+            "p95": 1
+          }
+        },
+        "relationships": {
+          "ACTION": {
+            "count": 6000,
+            "min": 1,
+            "max": 1,
+            "mean": 1,
+            "p50": 1,
+            "p95": 1
+          }
+        }
+      },
+      "mergeLatencyMs": {
+        "allDocuments": {
+          "count": 150,
+          "min": 140.6408999999985,
+          "max": 303.47810000000027,
+          "mean": 210.02127799999994,
+          "p50": 204.76829999999973,
+          "p95": 275.9531999999963
+        },
+        "documentsContainingHub": {
+          "count": 142,
+          "min": 140.6408999999985,
+          "max": 303.47810000000027,
+          "mean": 211.53266619718303,
+          "p50": 207.08729999999923,
+          "p95": 275.9531999999963
+        }
+      },
+      "sameGraphMergeProbeLatencyMs": {
+        "repetitions": 5,
+        "hubSourceNodeIds": 286,
+        "hub": {
+          "count": 5,
+          "min": 7.647400000001653,
+          "max": 57.52780000000348,
+          "mean": 17.757080000001586,
+          "p50": 7.724999999998545,
+          "p95": 57.52780000000348
+        },
+        "singleSourceDetail": {
+          "count": 5,
+          "min": 7.590700000000652,
+          "max": 9.645199999999022,
+          "mean": 8.421979999999166,
+          "p50": 7.778099999995902,
+          "p95": 9.645199999999022
+        }
+      },
+      "hub": {
+        "name": "trellis-scale-s7-<token>-entity-001",
+        "documentsMentioning": 286,
+        "sourceNodeIds": 286
+      },
+      "noHitSweepLatency": [
+        {
+          "orphanSetSize": 1,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 15.103399999999965,
+            "max": 16.308899999996356,
+            "mean": 15.67946666666588,
+            "p50": 15.626100000001315,
+            "p95": 16.308899999996356
+          }
+        },
+        {
+          "orphanSetSize": 50,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 21.577400000001944,
+            "max": 106.77670000000217,
+            "mean": 50.05436666666841,
+            "p50": 21.809000000001106,
+            "p95": 106.77670000000217
+          }
+        },
+        {
+          "orphanSetSize": 500,
+          "repetitions": 3,
+          "durationMs": {
+            "count": 3,
+            "min": 17.747500000004948,
+            "max": 91.4291000000012,
+            "mean": 42.57266666666934,
+            "p50": 18.541400000001886,
+            "p95": 91.4291000000012
+          }
+        }
+      ]
+    }
+  ],
+  "retrieval": {
+    "hub": {
+      "latencyMs": {
+        "count": 4,
+        "min": 121.2297000000035,
+        "max": 124.4852000000028,
+        "mean": 123.19897500000297,
+        "p50": 123.34380000000237,
+        "p95": 124.4852000000028
+      },
+      "graphRows": 286,
+      "provenanceRows": 286
+    },
+    "tail": {
+      "latencyMs": {
+        "count": 4,
+        "min": 10.803500000001804,
+        "max": 11.395400000001246,
+        "mean": 11.027750000001106,
+        "p50": 10.823499999998603,
+        "p95": 11.395400000001246
+      },
+      "graphRows": 19,
+      "provenanceRows": 19
+    }
+  },
+  "aliasContextFetch": {
+    "hub": {
+      "sourceNodeIds": 286,
+      "latencyMs": {
+        "count": 4,
+        "min": 4.320099999997183,
+        "max": 4.809699999997974,
+        "mean": 4.5523749999974825,
+        "p50": 4.464599999999336,
+        "p95": 4.809699999997974
+      }
+    },
+    "tail": {
+      "sourceNodeIds": 19,
+      "latencyMs": {
+        "count": 4,
+        "min": 0.7273000000059255,
+        "max": 1.0308999999979278,
+        "mean": 0.8393750000013824,
+        "p50": 0.7899000000033993,
+        "p95": 1.0308999999979278
+      }
+    }
+  },
+  "modificationSweep": {
+    "orphanCandidates": 60,
+    "globallyOrphaned": 60,
+    "freshHashes": 24,
+    "result": {
+      "contestedNodes": 12,
+      "contestedRelationships": 12,
+      "survivedNodes": 35,
+      "survivedRelationships": 12,
+      "batches": 6,
+      "durationMs": 174.58209999999963,
+      "batchDurationsMs": [
+        28.014899999994668,
+        26.488500000006752,
+        26.443799999993644,
+        26.571499999998196,
+        39.837100000004284,
+        27.17559999999503
+      ]
+    },
+    "batchLatencyMs": {
+      "count": 6,
+      "min": 26.443799999993644,
+      "max": 39.837100000004284,
+      "mean": 29.08856666666543,
+      "p50": 26.571499999998196,
+      "p95": 39.837100000004284
+    },
+    "correctness": {
+      "checkedFacts": 48,
+      "contestedFacts": 24,
+      "survivedFacts": 24
+    }
+  },
+  "migrationDecision": {
+    "justified": false,
+    "hubArraysInThousands": false,
+    "superlinearSweep": false,
+    "maxSourceNodeIds": 286,
+    "arrayThreshold": 1000,
+    "arrayHeadroom": 714,
+    "factGrowth": 5.770992366412214,
+    "sweepLatencyGrowth": 1.423842789057981,
+    "superlinearMultiplier": 1.5,
+    "reasons": [
+      "maximum sourceNodeIds cardinality 286 remained below 1000; sweep latency growth 1.42x did not exceed the gate"
+    ]
+  },
+  "cleanup": {
+    "graphNodesRemoved": 6108,
+    "documentVersionsRemoved": 312,
+    "documentMembershipsRemoved": 12792,
+    "astRowsRemoved": 12360,
+    "seededGraphNodesRemaining": 0,
+    "seededDocumentsRemaining": 0,
+    "seededAstRowsRemaining": 0,
+    "preExistingAstRowsPreserved": 0
+  }
+}

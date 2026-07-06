@@ -29,6 +29,10 @@ export interface SweepResult {
   survivedNodes: number;
   survivedRelationships: number;
   batches: number;
+  /** Monotonic wall time including session close; benchmark telemetry only. */
+  durationMs: number;
+  /** Monotonic wall time for each node+relationship Cypher batch. */
+  batchDurationsMs: number[];
 }
 
 // Bounds the size of the orphan-hash parameter per Cypher call.
@@ -88,20 +92,28 @@ export async function sweepOrphanedProvenance(
   driver: Driver,
   orphanedHashes: string[],
   freshHashes: string[] = [],
-  batchSize: number = SWEEP_BATCH_SIZE
+  batchSize: number = SWEEP_BATCH_SIZE,
+  clock: () => number = () => performance.now()
 ): Promise<SweepResult> {
+  const startedAt = clock();
   const result: SweepResult = {
     contestedNodes: 0,
     contestedRelationships: 0,
     survivedNodes: 0,
     survivedRelationships: 0,
-    batches: 0
+    batches: 0,
+    durationMs: 0,
+    batchDurationsMs: []
   };
-  if (orphanedHashes.length === 0) return result;
+  if (orphanedHashes.length === 0) {
+    result.durationMs = clock() - startedAt;
+    return result;
+  }
 
   const session = driver.session();
   try {
     for (let i = 0; i < orphanedHashes.length; i += batchSize) {
+      const batchStartedAt = clock();
       const orphaned = orphanedHashes.slice(i, i + batchSize);
       const params = { orphaned, fresh: freshHashes };
       const nodeRes = await session.executeWrite(tx => tx.run(CONTEST_NODES_CYPHER, params));
@@ -111,9 +123,11 @@ export async function sweepOrphanedProvenance(
       result.contestedRelationships += relRes.records[0].get('contested').toNumber();
       result.survivedRelationships += relRes.records[0].get('survived').toNumber();
       result.batches++;
+      result.batchDurationsMs.push(clock() - batchStartedAt);
     }
   } finally {
     await session.close();
   }
+  result.durationMs = clock() - startedAt;
   return result;
 }

@@ -2,7 +2,7 @@
 
 *Generated from a code-led review of the repository (July 4, 2026). File and line references point at the current state of `master`-derived code in this working tree.*
 
-*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), and Session 6 benchmark maturity (3.3 #3) are complete and verified. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
+*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), and Session 7's semantic-provenance scale gate are complete and verified. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
 
 ---
 
@@ -171,7 +171,7 @@ Ordered roughly by severity.
 1. ~~**The document-update story.**~~ **Done (Phase 4, hardened July 5, 2026):** versioned ingestion computes a Merkle set diff, extracts only new block hashes, reduces document-local orphan candidates against global latest-version membership, and quarantines rather than deletes semantic facts whose provenance died. Cross-store extraction races are fenced and compensated. The Update Drill measured selective reprocessing, invalidation recall/precision, and recovery; see the Phase 4 PRD and §5.
 2. ~~**Entity resolution beyond exact-name identity.**~~ **Done (Session 5, July 6, 2026):** entity identity stays `SHA-256(lowercased name)` and the extraction merge is untouched; equivalence is an overlay belief. Deterministic lexical candidate generation ([alias_candidates.ts](src/core/graph/alias_candidates.ts): token containment, acronym, near-identity edit distance; same-kind `generic`/`concept` pairs only — `question`/`category_label` are excluded so flywheel exact-id lookups are unaffected) plus batched LLM adjudication behind the Zod boundary ([alias_resolution.ts](src/core/graph/alias_resolution.ts), `resolution_queue`, `scripts/resolve_sweep.ts`) records `SAME_AS`/`DISTINCT_FROM` verdict edges with union provenance. The verdicts inherit the existing quarantine machinery, and `GET /retrieve` expands one non-contested `SAME_AS` hop at `RESOLUTION_MIN_CONFIDENCE` with per-fact alias attribution (`?resolveAliases=false` opts out). Embedding-similarity candidate generation remains a documented follow-up (entity names carry no embeddings today). See §5.
 3. ~~**Benchmark maturity.**~~ **Done (Session 6, July 6, 2026):** dataset v2 (`oolong-pairs-trec-synthetic-v2`, [data/oolong_pairs_dataset_hard.json](data/oolong_pairs_dataset_hard.json), seeded pure generator [generate_v2.ts](src/benchmarks/oolong/generate_v2.ts)) breaks the substring-scan shortcut with paraphrased city mentions (canonical token never in the text — pinned by unit test), near-miss questions name-dropping unannotated cities, and non-question prose distractors ingested as `:Passage` nodes that can never pair. The harness CLIs take `--dataset` (default v1), the runner derives its sequence from the dataset and writes non-v1 results to a separate file, and cache-audit accuracy became a first-class metric shared by the audit CLI, the runner's results block, and the poison drill ([cache_audit.ts](src/benchmarks/oolong/cache_audit.ts)). v1, its committed results, and the drills are untouched. Real TREC import (needs paid annotation), adversarial soft-label corpora, embedding-based retrieval difficulty, and 10k+ scale sweeps remain future work; a paid v2 benchmark run awaits owner approval. See §5.
-4. **Scalability of the semantic layer.** Entity `sourceNodeIds` arrays grow unboundedly under the append-only `ON MATCH` pattern ([extraction_worker.ts:63](src/workers/extraction_worker.ts:63)); heavily-referenced entities will accumulate thousands of array elements on a single node property. Consider provenance as first-class edges (`(:Entity)-[:EVIDENCED_BY]->(:ASTRef)`) once documents number in the hundreds. Similarly, add the HNSW index and evaluate embedding at block rather than inline-leaf granularity.
+4. **Scalability of the semantic layer.** Entity `sourceNodeIds` arrays remain unbounded under the append-only `ON MATCH` pattern, but Session 7 measured the real headroom before changing storage. A deterministic 300-document × 20-block drill produced 6,096 semantic nodes and 6,000 relationships: the largest node array was 286, every relationship array remained at 1, and fixed-50-hash median sweep latency grew only 1.42x while semantic facts grew 5.77x. The migration gate therefore stayed closed. Keep arrays until an observed run reaches 1,000 live hashes on one fact or fixed-orphan-set median sweep latency grows more than 1.5 times semantic-fact growth; then migrate node scan anchors to `(:ASTRef {hash})` / `[:EVIDENCED_BY]`, retaining relationship arrays unless their own measurements change. See [the scale report](docs/benchmarks/SCALE_PROVENANCE_REPORT.md) and §5. HNSW and block-level embedding granularity already shipped under T14/T2.
 5. ~~**Deployment and community readiness.**~~ **Backend deployment/CI done (July 5, 2026); license done (July 6, 2026):** the backend has a compiled non-root Node/Python image, health-gated project-scoped Compose topology, pinned runtime manifests, documented environment/startup contracts, isolated zero-LLM CI, and an MIT license selected by OpenCnid. The frontend remains intentionally excluded from backend containerization, and its Next.js convention note remains in [src/frontend/AGENTS.md](src/frontend/AGENTS.md).
 
 6. **Whole-codebase ingestion.** A stated future direction is consuming entire repositories. Decision recorded July 4, 2026: this is a pipeline feature, **not** a relaxation of the T6 per-request limits. The natural unit is one document per source file (`doc_key` = repo-relative path), so per-file Merkle diffs drive incremental re-extraction commit-to-commit — exactly what the physical layer was built for — fed by a batch client/CLI rather than one giant request. A single-blob upload of a repo would defeat per-file identity, diff granularity, and the streaming-free `express.text`/single-transaction ingest (the whole body is buffered in memory and inserted row-by-row). Individual source files fit comfortably inside the 5 MB default (generated artifacts that don't should be excluded, or the env knob raised). Prerequisites before this feature: T11 batching (multi-row inserts + `addBulk` for thousands-of-files fan-out), the rest of T14 (queue hygiene at that job volume), a code-aware parser path (tree-sitter or similar — extraction blocks should be functions/classes, not markdown paragraphs), and extraction cost controls (tiered/selective extraction; one LLM call per block across a 50k-file repo is cost-prohibitive). If a convenience archive-upload endpoint is added, the upload allowlist expands to zip/tar with decompressed-size and entry-count guards (zip bombs) — independent of the per-request caps, which stay small on purpose (each request's body is held fully in memory).
@@ -185,8 +185,9 @@ Ordered roughly by severity.
 | ~~1~~ | ~~Structured logging and basic metrics (3.2 #9 / T16)~~ | **Done (July 6, 2026)** — split-process logs/metrics shipped; see §5 |
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
-| 1 | Semantic provenance scaling (3.3 #4) | Replace unbounded source arrays only when scale measurements justify the migration |
-| 2 | Whole-codebase ingestion (3.3 #6) | Builds on the update pipeline but still needs a code-aware parser and extraction-cost controls |
+| ~~4~~ | ~~Semantic provenance scale gate (3.3 #4 measurement)~~ | **Measured (Session 7, July 6, 2026)** — migration not justified at 300 documents; explicit 1,000-source/superlinear triggers recorded; see §5 |
+| 1 | Whole-codebase ingestion (3.3 #6) | Builds on the update pipeline but still needs a code-aware parser, repository manifest/deletion semantics, and extraction-cost controls |
+| 2 | Conditional provenance storage migration (3.3 #4) | Re-run after repository ingestion reaches the recorded trigger; do not migrate arrays on extrapolation alone |
 
 ---
 
@@ -415,4 +416,95 @@ The saturated v1 benchmark (F1 = 1.0 on all 20 queries; every city mention a lit
 
 **Deliberately not included:** real TREC import (needs a paid, non-deterministic annotation pass — recorded as future work in `docs/benchmarks/CRITIQUE_AND_FUTURE.md` §3.3), adversarial soft-label corpora, embedding-based candidate generation or retrieval changes, RLM prompt/protocol changes, 10k+ scale sweeps, provenance-scaling migrations (3.3 #4, next session), and T13 re-hashing.
 
-**Still open:** T13's migration-dependent hash preimage, benchmark/scale maturity, semantic provenance scaling, whole-codebase ingestion, and frontend deployment.
+**Still open:** T13's migration-dependent hash preimage, semantic provenance scaling behind its measured trigger, whole-codebase ingestion, and frontend deployment.
+
+### July 6, 2026 — Session 7: semantic-provenance scale gate (item 3.3 #4 measurement)
+
+Session 7 implemented the roadmap's measurement-first gate and did **not**
+migrate provenance storage because the observed arrays and sweep curve stayed
+below the declared thresholds.
+
+**Deterministic corpus and production-path drill.** New pure module
+[generate_scale_corpus.ts](src/benchmarks/scale/generate_scale_corpus.ts)
+uses seed `20260706` and weighted sampling without replacement from 96 shared
+entities. The default 300 documents contain 20 paragraph/extraction blocks
+each (6,000 citations); one shared entity plus one unique detail per block
+grows both hub arrays and total graph size without repeating a hub inside one
+document. The five most frequent entities occur in 286/258/212/200/193
+documents and the five least frequent in 23/21/21/20/19, pinned by tests.
+`scripts/scale_provenance_drill.ts` (`npm run drill:scale`) drives every
+document through `persistAstNodes` + read-back/re-hash verification,
+`recordDocumentNodes`, `registerDocumentVersion`, and
+`mergeExtractedGraph`; no extraction worker or OpenAI client is invoked.
+
+**Measurements.** New pure
+[statistics.ts](src/benchmarks/scale/statistics.ts) defines nearest-rank
+percentiles and the predeclared gate: migrate if an observed fact reaches
+1,000 live source hashes, or fixed-orphan-set median sweep latency grows by
+more than 1.5 times semantic-fact growth. At 50/150/300 documents the graph
+held 2,096/6,096/12,096 semantic facts; maximum node arrays were 47/144/286,
+node means 1.82/1.94/1.97, and every `ACTION` array remained exactly 1.
+Fixed-50-hash sweep medians were 15.32/17.50/21.81 ms: 1.42x latency growth
+against 5.77x fact growth. The gate stayed closed with 714 entries of array
+headroom. `scale_drill_results.json` preserves every raw min/mean/p50/p95 and
+[SCALE_PROVENANCE_REPORT.md](docs/benchmarks/SCALE_PROVENANCE_REPORT.md)
+records the decision and trigger.
+
+**Merge, retrieval, and context evidence.** Whole-document merge p50 grew
+40.18 → 98.16 → 204.77 ms as the graph grew, but same-graph no-op probes at
+300 documents measured 7.72 ms for the 286-source hub and 7.78 ms for a
+one-source detail. Array union is therefore not the observed merge bottleneck.
+`ENTITY_MERGE_CYPHER` matches `Entity.name`, while bootstrap constrains only
+`Entity.id`; the report records name-lookup/index profiling as a prerequisite
+for repository-scale semantic enqueue rather than misattributing graph-size
+growth to arrays. Real authenticated `/retrieve` p50 was 123.34 ms for the hub
+(286 graph/provenance rows) versus 10.82 ms for the 19-source tail;
+`fetchEntitySnippets` p50 was 4.46 versus 0.79 ms.
+
+**Scale correctness and cleanup.** Twelve documents were re-ingested with two
+changed blocks each: one re-derived the same fact from fresh bytes and one
+replaced the semantic object. Global liveness retained all 60 orphan
+candidates; the real sweep processed six 10-hash batches in 174.58 ms
+(batch p50/p95 26.57/39.84 ms). Its counters were 12 contested nodes, 12
+contested relationships, 35 fresh-surviving nodes, and 12
+fresh-surviving relationships. Forty-eight explicit fact-state checks passed:
+24 quarantined single-source details/edges and 24 fresh-surviving details/edges,
+including live-source removal and orphan audit preservation. Cleanup removed
+6,108 token-scoped graph nodes, 312 document versions, 12,792 membership rows,
+and 12,360 new AST rows, then asserted zero seeded graph/document/AST residue;
+pre-existing candidates are snapshotted and never deleted.
+
+**Defect found and fixed along the way.** The first live smoke run launched two
+`executeRead` calls concurrently on one Neo4j session while collecting node
+and relationship cardinalities. Neo4j rejected the second managed transaction
+with "session with ongoing work." The reads are now serialized on that
+session. The smoke run also established that reduced corpora may not mention
+every 96-member tail; the comparison now selects the rarest actually observed
+entity. The corrected 12-document smoke completed 48/48 state checks and
+zero-residue cleanup before the full run.
+
+**Verification (all commands run, zero LLM calls end to end).** `npm ci`
+installed 311 locked packages with 0 vulnerabilities. `npm test` = **294
+passing across 40 files** (baseline 283/37; +11 assertions covering corpus
+determinism/default shape/pinned Zipf distribution, percentile and aggregation
+arithmetic, both migration-gate branches/headroom, and injectable end-to-end
+plus per-batch sweep timing). `npm run build`, `npm run python:check`, and
+`docker compose --profile test config --quiet` pass. `npm run drill:scale`
+produced the committed numbers above in 57.2 seconds with zero seeded residue.
+Live zero-LLM regressions passed: `test:benchmark-hardening` (24),
+`test:entity-resolution` (33), `test:api-hardening` (18),
+`test:rlm-sandbox` (4), `test:belief-recovery` (30), and
+`test:invalidation-sweep` (17). The isolated `trellis-s7-integration` Compose
+project passed all 9 assertions, then removed only its own containers and
+volumes. `git diff --check` passes.
+
+**Cost and decision:** zero paid calls. No `ASTRef`/`EVIDENCED_BY` nodes,
+backfill, dual-write path, or relationship reification shipped: doing so with
+max cardinality 286 and a sublinear measured sweep curve would violate the
+measurement gate. Relationship arrays are especially unindicted (max 1).
+
+**Still open:** T13's migration-dependent hash preimage; conditional semantic
+provenance migration after an observed threshold crossing; whole-codebase
+ingestion (Session 8); frontend deployment. The scale measurement phase is
+complete, but roadmap item 3.3 #4 remains unstruck until a justified migration
+actually ships.

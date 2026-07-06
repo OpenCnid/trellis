@@ -177,6 +177,19 @@ overwrite the committed v1 `benchmark_results.json` with another corpus's
 results. Benchmark runs make paid LLM calls — see
 `docs/benchmarks/CRITIQUE_AND_FUTURE.md` before running.
 
+The semantic-provenance scale drill is deterministic and makes no LLM calls.
+It writes 300 synthetic versioned documents through the physical registry and
+the production graph merge, measures provenance cardinality and the real
+sweep/retrieval/context-fetch paths, verifies quarantine and fresh-survival
+behavior after 12 re-ingests, writes `scale_drill_results.json`, and removes
+only its token-scoped state:
+
+```bash
+npm run drill:scale
+# Optional shape overrides:
+npm run drill:scale -- --documents 150 --blocks 20 --seed 20260706
+```
+
 ## Verification
 
 Offline checks require no Docker or API key:
@@ -187,10 +200,11 @@ npm run build
 npm run python:check
 ```
 
-The deterministic Compose round trip starts only the API—never the workers—
-and does not receive `OPENAI_API_KEY`. It ingests a lone thematic break
-(zero extraction jobs), verifies PostgreSQL document membership, seeds one
-provenance-bearing Neo4j relationship, and retrieves it through the API:
+The deterministic Compose round trip starts the API and workers with a
+non-secret placeholder key but queues no paid work. It ingests a lone thematic
+break (zero extraction jobs), verifies PostgreSQL document membership, seeds
+one provenance-bearing Neo4j relationship, checks both metrics surfaces, and
+retrieves the relationship through the API:
 
 ```bash
 docker compose --profile test up --build --abort-on-container-exit --exit-code-from integration integration

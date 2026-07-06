@@ -7,7 +7,7 @@ COPY package.json package-lock.json tsconfig.build.json ./
 # redis-memory-server PoC dependency compiling a Redis binary in this stage.
 RUN npm ci --ignore-scripts
 COPY src ./src
-COPY scripts/start_all.ts scripts/start_workers.ts scripts/test_compose_roundtrip.ts ./scripts/
+COPY scripts/start_all.ts scripts/start_workers.ts scripts/scale_provenance_drill.ts scripts/test_compose_roundtrip.ts ./scripts/
 RUN npm run build
 
 FROM node:22-bookworm-slim AS node-production
