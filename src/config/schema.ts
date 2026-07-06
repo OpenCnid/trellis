@@ -1,4 +1,11 @@
 export const POSTGRES_SCHEMA_SQL = `
+  -- The API and worker containers both run this idempotent bootstrap on
+  -- startup. IF NOT EXISTS does not make concurrent DDL safe (two
+  -- simultaneous CREATE EXTENSION calls race on pg_extension's unique
+  -- index), so the whole script — one implicit transaction under the
+  -- simple query protocol — is serialized by a transaction-scoped
+  -- advisory lock that releases automatically on commit or error.
+  SELECT pg_advisory_xact_lock(hashtext('trellis_schema_init'));
   CREATE EXTENSION IF NOT EXISTS vector;
   CREATE TABLE IF NOT EXISTS ast_nodes (
     id VARCHAR PRIMARY KEY,
