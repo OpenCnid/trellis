@@ -21,8 +21,7 @@ bytes:
 - Docker Desktop with Compose v2
 - `OPENAI_API_KEY` when running LLM workers
 
-No repository license has been selected yet. The `package.json` ISC value is a
-legacy package stub, not an OpenCnid license decision.
+Trellis Engine is open source under the [MIT License](LICENSE).
 
 ## Bare-host development
 

@@ -2,7 +2,7 @@
 
 *Generated from a code-led review of the repository (July 4, 2026). File and line references point at the current state of `master`-derived code in this working tree.*
 
-*Status: Phase 1 (Foundations & Portability — short-term items 3.1 #1–3 and #7) and Session 3 deployment/CI readiness are complete and verified. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
+*Status: Foundations, update/invalidation correctness, belief verification, and Session 3 deployment/CI readiness are complete and verified. Session 4 targets structured logging and basic metrics (T16). See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
 
 ---
 
@@ -12,30 +12,45 @@ Trellis is a provenance-preserving GraphRAG system. Its central design commitmen
 
 ### 1.1 Components and Data Flow
 
-```
-                       ┌────────────────────────────────────────────┐
- Markdown / PDF ──►    │ Express API (src/api/server.ts, port 3000) │
-                       └───────┬────────────────────────┬───────────┘
-                               │ POST /ingest           │ GET /retrieve, /api/rlm-stream
-                               ▼                        ▼
-                   remark / unstructured.io      Neo4j 1-hop traversal
-                   Merkle-hashed AST             + Postgres provenance lookup
-                   (src/core/ast/parser.ts)      + pgvector fallback
-                               │
-                               ▼
-                   PostgreSQL (ast_nodes: id, document_id, JSONB, vector(1536))
-                               │
-                               ▼ fan-out per leaf node
-                   BullMQ / Redis (src/workers/queue.ts)
-                               │
-              ┌────────────────┼──────────────────────┐
-              ▼                ▼                      ▼
-   extraction_worker    rlm_worker             supervisor_worker
-   (LLM structured      (spawns Python RLM     (contradiction scan →
-    entity/action        agent, streams         LLM evaluation →
-    extraction →         stdout via Redis       belief-state branching)
-    Neo4j MERGE +        pub/sub → SSE)
-    pgvector embed)
+```mermaid
+flowchart TD
+    Input["Markdown or PDF"] --> API["Express API<br/>src/api/server.ts"]
+
+    API -->|"POST /ingest"| Parse["remark or unstructured.io<br/>Merkle-hashed immutable AST"]
+    Parse --> Verify["Bulk persist + transactional read-back<br/>hash and payload verification"]
+    Verify --> PG[("PostgreSQL + pgvector<br/>AST nodes, document versions,<br/>version membership, embeddings")]
+    Verify --> Diff["Register version + Merkle diff"]
+    Diff -->|"new block hashes"| EQ["extraction_queue"]
+    Diff -->|"globally dead hash candidates"| IQ["invalidation_queue"]
+
+    EQ --> EW["Extraction worker<br/>LLM structured extraction<br/>liveness-fenced graph merge<br/>embedding write"]
+    IQ --> IW["Invalidation worker<br/>global liveness reduction<br/>provenance quarantine"]
+    EW --> Neo[("Neo4j<br/>entities, relationships,<br/>belief and provenance state")]
+    IW --> Neo
+
+    SQ["supervisor_queue"] --> SW["Supervisor worker<br/>contradiction evaluation<br/>belief-state branching"]
+    VQ["verification_queue"] --> VW["Verification worker<br/>sampled belief re-check<br/>trust accrual or quarantine"]
+    SW --> Neo
+    VW --> Neo
+    VW --> PG
+
+    API -->|"GET /retrieve"| Retrieve["Neo4j traversal<br/>PostgreSQL provenance join<br/>pgvector fallback"]
+    Neo --> Retrieve
+    PG --> Retrieve
+    Retrieve --> API
+
+    API -->|"GET /api/rlm-stream"| RQ["rlm_queue"]
+    RQ --> RW["RLM worker<br/>Python recursive-LM process"]
+    RW --> Tools["Read-only Neo4j/PostgreSQL tools<br/>one provenance-required graph write path"]
+    Tools --> Neo
+    Tools --> PG
+    RW -->|"Redis pub/sub"| SSE["SSE stream to client"]
+
+    Redis[("Redis + BullMQ")] --- EQ
+    Redis --- IQ
+    Redis --- SQ
+    Redis --- VQ
+    Redis --- RQ
 ```
 
 **Storage tiers:**
@@ -149,11 +164,11 @@ Ordered roughly by severity.
 
 ### 3.3 Long-Term (strategic direction)
 
-1. **The document-update story.** The Merkle architecture's motivating claim (README: GraphRAG "breaks when documents are updated") is not yet exercised: there is no re-ingest/diff path that detects changed subtrees by hash, prunes semantic facts whose `sourceNodeIds` no longer exist, and re-extracts only changed blocks. This is the feature the physical layer was built for and should anchor the next phase. It depends on T12 (membership) and a garbage-collection policy for orphaned graph facts.
+1. ~~**The document-update story.**~~ **Done (Phase 4, hardened July 5, 2026):** versioned ingestion computes a Merkle set diff, extracts only new block hashes, reduces document-local orphan candidates against global latest-version membership, and quarantines rather than deletes semantic facts whose provenance died. Cross-store extraction races are fenced and compensated. The Update Drill measured selective reprocessing, invalidation recall/precision, and recovery; see the Phase 4 PRD and §5.
 2. **Entity resolution beyond exact-name identity.** Entity IDs are `SHA-256(lowercased name)` ([extraction_worker.ts:37](src/workers/extraction_worker.ts:37)), so "Globex" and "Globex Corporation" are permanently distinct nodes. Aliasing/canonicalization (embedding-similarity candidate generation + LLM adjudication, recorded as `SAME_AS` edges with provenance) is the natural fit for the existing supervisor pattern.
 3. **Benchmark maturity.** The committed results show F1 = 1.0 on all 20 queries — the synthetic template dataset is saturated and no longer discriminates. Next iterations: real TREC questions, paraphrased/indirect city mentions (breaking the substring-scan shortcut in the flywheel protocol), distractor documents, and adversarial cache poisoning (the `audit_flywheel_cache.ts` accuracy check becomes a first-class metric). `docs/benchmarks/CRITIQUE_AND_FUTURE.md` already acknowledges this direction; the runner infrastructure is ready for it.
 4. **Scalability of the semantic layer.** Entity `sourceNodeIds` arrays grow unboundedly under the append-only `ON MATCH` pattern ([extraction_worker.ts:63](src/workers/extraction_worker.ts:63)); heavily-referenced entities will accumulate thousands of array elements on a single node property. Consider provenance as first-class edges (`(:Entity)-[:EVIDENCED_BY]->(:ASTRef)`) once documents number in the hundreds. Similarly, add the HNSW index and evaluate embedding at block rather than inline-leaf granularity.
-5. **Deployment and community readiness.** ~~CI, a backend Dockerfile, deterministic Compose integration coverage, and `.env.example` were missing.~~ **Deployment/CI portion done (July 5, 2026):** the backend now has a compiled non-root Node/Python image, health-gated project-scoped Compose topology, pinned runtime manifests, documented environment/startup contracts, and isolated zero-LLM CI. **Still open:** OpenCnid's repository license decision; the `package.json` ISC stub remains unchanged and no `LICENSE` is inferred. The frontend is intentionally excluded from this containerization scope, and its Next.js convention note remains in [src/frontend/AGENTS.md](src/frontend/AGENTS.md).
+5. ~~**Deployment and community readiness.**~~ **Backend deployment/CI done (July 5, 2026); license done (July 6, 2026):** the backend has a compiled non-root Node/Python image, health-gated project-scoped Compose topology, pinned runtime manifests, documented environment/startup contracts, isolated zero-LLM CI, and an MIT license selected by OpenCnid. The frontend remains intentionally excluded from backend containerization, and its Next.js convention note remains in [src/frontend/AGENTS.md](src/frontend/AGENTS.md).
 
 6. **Whole-codebase ingestion.** A stated future direction is consuming entire repositories. Decision recorded July 4, 2026: this is a pipeline feature, **not** a relaxation of the T6 per-request limits. The natural unit is one document per source file (`doc_key` = repo-relative path), so per-file Merkle diffs drive incremental re-extraction commit-to-commit — exactly what the physical layer was built for — fed by a batch client/CLI rather than one giant request. A single-blob upload of a repo would defeat per-file identity, diff granularity, and the streaming-free `express.text`/single-transaction ingest (the whole body is buffered in memory and inserted row-by-row). Individual source files fit comfortably inside the 5 MB default (generated artifacts that don't should be excluded, or the env knob raised). Prerequisites before this feature: T11 batching (multi-row inserts + `addBulk` for thousands-of-files fan-out), the rest of T14 (queue hygiene at that job volume), a code-aware parser path (tree-sitter or similar — extraction blocks should be functions/classes, not markdown paragraphs), and extraction cost controls (tiered/selective extraction; one LLM call per block across a 50k-file repo is cost-prohibitive). If a convenience archive-upload endpoint is added, the upload allowlist expands to zip/tar with decompressed-size and entry-count guards (zip bombs) — independent of the per-request caps, which stay small on purpose (each request's body is held fully in memory).
 
@@ -163,12 +178,11 @@ Ordered roughly by severity.
 
 | Order | Item | Rationale |
 |---|---|---|
-| 1 | Config module + dependency fixes (3.1 #1–3) | Unblocks running on any machine; everything else builds on it |
-| 2 | Unit test harness (3.1 #7) | Cheap now, protects every later refactor |
-| 3 | Extraction granularity fix (3.2 #1) | Highest impact on output quality; currently produces fragmented graphs for real markdown |
-| 4 | Sandbox + API hardening (3.2 #2–3) | Required before any non-local deployment |
-| 5 | Queue/retry hygiene + supervisor fixes | Reliability of the async tier |
-| 6 | Document-update pipeline (3.3 #1) | The architecture's core promise; largest single work item |
+| 1 | Structured logging and basic metrics (3.2 #9 / T16) | The runbook lacks reliable signals for the distributed API/worker topology; this is the last open medium-term item |
+| 2 | Entity resolution beyond exact-name identity (3.3 #2) | Improves graph correctness for aliases without changing the immutable physical layer |
+| 3 | Benchmark maturity and scale evidence (3.3 #3) | The synthetic benchmark is saturated; larger, adversarial corpora should guide later scalability work |
+| 4 | Semantic provenance scaling (3.3 #4) | Replace unbounded source arrays only when scale measurements justify the migration |
+| 5 | Whole-codebase ingestion (3.3 #6) | Builds on the update pipeline but still needs a code-aware parser and extraction-cost controls |
 
 ---
 
@@ -317,4 +331,14 @@ The backend now has a reproducible production and CI path without changing the P
 
 **Verification:** `npm ci`; `npm test` (170 passing across 22 files); `npm run build`; `npm run python:check`; `docker compose --profile test config --quiet`; `docker build --tag trellis-backend:session3 .`; a disposable image check verified UID 1000, no TypeScript dev dependency, no Torch package, and Python runtime imports; the isolated Compose integration completed five assertions and removed only its project-scoped containers/volumes; `npm run test:api-hardening` passed 11 checks; `npm run test:rlm-sandbox` passed 4 checks. `git diff --check` passes.
 
-**License gate:** OpenCnid's choice is still pending. No `LICENSE` file was added and the package metadata stub was not used to infer one.
+**License gate at that session boundary:** OpenCnid's choice was still pending, so no license was inferred during Session 3. OpenCnid selected MIT on July 6, 2026; see the next entry.
+
+### July 6, 2026 — Session 4 direction, documentation reconciliation, and MIT license
+
+- Session 4 is scoped to the final open medium-term roadmap item: structured logging and basic metrics (T16). The handoff requires correlation fields across API requests and BullMQ jobs, counters for failures/dropped transitions/LLM usage, queue-depth gauges, and an explicit cross-process metrics design because API and workers run in separate containers.
+- The component diagram in §1.1 now uses Mermaid and includes the version/diff/invalidation path, verification worker, RLM tool boundary, all five queues, and the split physical/semantic stores.
+- The stale long-term document-update entry and suggested sequencing table now reflect the shipped Phase 4/5 and deployment work instead of re-proposing it.
+- The operations runbook now uses project-scoped `docker compose` commands, removes assumptions about fixed container names, and replaces broad Redis destruction advice with scoped diagnosis and recovery guidance.
+- OpenCnid selected the MIT License. A repository `LICENSE` was added, package metadata was aligned to `MIT`, and the README's pending-license statement was removed.
+
+**Still open:** T16 implementation, T13's migration-dependent hash preimage, entity resolution, benchmark/scale maturity, semantic provenance scaling, whole-codebase ingestion, and frontend deployment.
