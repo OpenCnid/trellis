@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": ".",
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": true,
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "scripts/start_all.ts",
+    "scripts/start_workers.ts",
+    "scripts/test_compose_roundtrip.ts"
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "src/frontend/**"
+  ]
+}

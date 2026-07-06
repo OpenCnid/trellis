@@ -2,9 +2,23 @@
 
 The Trellis Engine exposes a RESTful API to ingest documents into the deterministic pipeline and retrieve semantic graphs accompanied by physical provenance.
 
-## 0. Authentication and Limits
+## 0. Health, Authentication, and Limits
 
-When the `API_KEY` environment variable is set, **every endpoint** requires the key, supplied by any one of:
+### `GET /healthz`
+
+Returns the unauthenticated process-liveness contract:
+
+```json
+{ "status": "ok", "scope": "liveness" }
+```
+
+This endpoint deliberately does not query PostgreSQL, Neo4j, or Redis.
+Dependency readiness is established before startup by the failing schema
+bootstrap and Compose service-health conditions. Keeping liveness separate
+avoids restarting the application during a transient dependency outage.
+
+When the `API_KEY` environment variable is set, every endpoint except
+`/healthz` requires the key, supplied by any one of:
 
 - `x-api-key: <key>` header
 - `Authorization: Bearer <key>` header

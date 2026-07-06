@@ -1,43 +1,62 @@
 import { pgPool, neo4jDriver } from './db.js';
 import { POSTGRES_SCHEMA_SQL } from './schema.js';
+import { runInitializationTasks } from '../core/runtime/database_init.js';
 
-async function initializeDatabases() {
-  console.log("Initializing database schemas...");
-  let success = true;
+async function initializeDatabases(): Promise<void> {
+  console.log('Initializing database schemas...');
 
-  // Initialize PostgreSQL
-  try {
-    const pgClient = await pgPool.connect();
-    await pgClient.query(POSTGRES_SCHEMA_SQL);
-    console.log("[PASS] PostgreSQL: tables, indexes, and search functions created/verified.");
-    pgClient.release();
-  } catch (err: any) {
-    console.error(`[FAIL] PostgreSQL Error: ${err.message}`);
-    success = false;
+  const initialization = await runInitializationTasks([
+    {
+      name: 'postgres',
+      run: async () => {
+        const client = await pgPool.connect();
+        try {
+          await client.query(POSTGRES_SCHEMA_SQL);
+          console.log('[PASS] PostgreSQL: tables, indexes, and search functions created/verified.');
+        } finally {
+          client.release();
+        }
+      },
+    },
+    {
+      name: 'neo4j',
+      run: async () => {
+        const session = neo4jDriver.session();
+        try {
+          await session.run(
+            'CREATE CONSTRAINT IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE'
+          );
+          console.log('[PASS] Neo4j: Entity ID uniqueness constraint created/verified.');
+        } finally {
+          await session.close();
+        }
+      },
+    },
+  ]);
+
+  const cleanup = await runInitializationTasks([
+    { name: 'postgres.close', run: () => pgPool.end() },
+    { name: 'neo4j.close', run: () => neo4jDriver.close() },
+  ]);
+  const failures = [...initialization.failures, ...cleanup.failures];
+
+  if (failures.length === 0) {
+    console.log('Schemas successfully initialized on all databases.');
+    return;
   }
 
-  // Initialize Neo4j
-  try {
-    const session = neo4jDriver.session();
-    await session.run(`
-      CREATE CONSTRAINT IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE;
-    `);
-    console.log("[PASS] Neo4j: Entity ID uniqueness constraint created/verified.");
-    await session.close();
-  } catch (err: any) {
-    console.error(`[FAIL] Neo4j Error: ${err.message}`);
-    success = false;
-  }
-
-  if (success) {
-    console.log("\nSchemas successfully initialized on all databases.");
-  } else {
-    console.log("\nSchema initialization failed.");
-  }
-
-  await pgPool.end();
-  await neo4jDriver.close();
-  process.exit(0);
+  console.warn(JSON.stringify({
+    event: 'database.initialization_incomplete',
+    failures,
+  }));
+  process.exitCode = 1;
 }
 
-initializeDatabases();
+void initializeDatabases().catch(error => {
+  console.warn(JSON.stringify({
+    event: 'database.initialization_crashed',
+    errorType: error instanceof Error ? error.name : typeof error,
+    message: error instanceof Error ? error.message : String(error),
+  }));
+  process.exitCode = 1;
+});

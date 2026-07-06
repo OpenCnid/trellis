@@ -1,48 +1,137 @@
-version: '3.8'
+x-app-environment: &app-environment
+  PG_HOST: postgres
+  PG_PORT: "5432"
+  PG_USER: trellis_user
+  PG_PASSWORD: trellis_password
+  PG_DATABASE: trellis_db
+  NEO4J_URI: bolt://neo4j:7687
+  NEO4J_USER: neo4j
+  NEO4J_PASSWORD: trellis_password
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  QUEUE_COMPLETED_RETENTION_SECONDS: "3600"
+  QUEUE_COMPLETED_RETENTION_COUNT: "1000"
+  QUEUE_FAILED_RETENTION_SECONDS: "604800"
+  QUEUE_FAILED_RETENTION_COUNT: "5000"
+  PORT: "3000"
+  API_KEY: ${API_KEY:-trellis-local-development-key}
+  RLM_MAX_CONCURRENT_STREAMS: "4"
+  RLM_QUEUE_MAX_DEPTH: "32"
+  INGEST_MAX_BODY_MB: "5"
+  INGEST_MAX_UPLOAD_MB: "25"
+  EXTRACTION_MODEL: ${EXTRACTION_MODEL:-gpt-5.4-2026-03-05}
+  PYTHON_EXECUTABLE: python3
+
+x-app-build: &app-build
+  context: .
+  dockerfile: Dockerfile
+
+x-database-dependencies: &database-dependencies
+  postgres:
+    condition: service_healthy
+  neo4j:
+    condition: service_healthy
+  redis:
+    condition: service_healthy
 
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: trellis-postgres
     environment:
       POSTGRES_USER: trellis_user
       POSTGRES_PASSWORD: trellis_password
       POSTGRES_DB: trellis_db
     ports:
-      - "5433:5432"
+      - "127.0.0.1:${TRELLIS_POSTGRES_HOST_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trellis_user -d trellis_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     restart: unless-stopped
 
   neo4j:
     image: neo4j:5.11
-    container_name: trellis-neo4j
     environment:
       NEO4J_AUTH: neo4j/trellis_password
-      # APOC was dropped (T7): nothing in the codebase calls apoc.*, and
-      # its procedures were the main way to mutate the graph without a
-      # Cypher keyword the RLM sandbox blocklist would catch. If a future
-      # feature needs APOC, re-add the plugin together with a
-      # dbms.security.procedures.allowlist restricted to the procedures
-      # actually used.
+      # APOC remains intentionally absent; see the T7 roadmap entry.
     ports:
-      - "7474:7474" # HTTP
-      - "7687:7687" # Bolt
+      - "127.0.0.1:${TRELLIS_NEO4J_HTTP_HOST_PORT:-7474}:7474"
+      - "127.0.0.1:${TRELLIS_NEO4J_BOLT_HOST_PORT:-7687}:7687"
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
       - neo4j_import:/var/lib/neo4j/import
       - neo4j_plugins:/plugins
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p trellis_password 'RETURN 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 18
+      start_period: 30s
     restart: unless-stopped
 
   redis:
     image: redis:7
-    container_name: trellis-redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${TRELLIS_REDIS_HOST_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
     restart: unless-stopped
+
+  backend:
+    image: ${TRELLIS_IMAGE:-trellis-backend:local}
+    build: *app-build
+    environment: *app-environment
+    command: ["node", "dist/src/api/server.js"]
+    ports:
+      - "127.0.0.1:${TRELLIS_API_HOST_PORT:-3000}:3000"
+    depends_on: *database-dependencies
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/healthz').then(r => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1));"
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  workers:
+    image: ${TRELLIS_IMAGE:-trellis-backend:local}
+    build: *app-build
+    environment:
+      <<: *app-environment
+      # Safe only as a startup placeholder. A real key is required before
+      # enqueueing paid work or deploying outside local development.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-development-only-not-a-real-key}
+    command: ["node", "dist/scripts/start_workers.js"]
+    depends_on: *database-dependencies
+    restart: unless-stopped
+
+  integration:
+    profiles: ["test"]
+    image: ${TRELLIS_IMAGE:-trellis-backend:local}
+    build: *app-build
+    environment:
+      <<: *app-environment
+      API_BASE_URL: http://backend:3000
+    command: ["node", "dist/scripts/test_compose_roundtrip.js"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: "no"
 
 volumes:
   postgres_data:

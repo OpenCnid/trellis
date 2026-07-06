@@ -7,6 +7,17 @@
     "doc": "docs"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx scripts/start_all.ts",
+    "dev:api": "tsx src/api/server.ts",
+    "dev:workers": "tsx scripts/start_workers.ts",
+    "db:init:dev": "tsx src/config/init_db.ts",
+    "db:init": "node dist/src/config/init_db.js",
+    "start": "node dist/scripts/start_all.js",
+    "start:api": "node dist/src/api/server.js",
+    "start:workers": "node dist/scripts/start_workers.js",
+    "python:check": "python scripts/check_python_runtime.py",
+    "test:roundtrip": "node dist/scripts/test_compose_roundtrip.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "oolong:generate": "tsx scripts/generate_oolong_dataset.ts",
@@ -38,6 +49,7 @@
   "type": "commonjs",
   "dependencies": {
     "bullmq": "^5.79.2",
+    "dotenv": "16.6.1",
     "express": "^5.2.1",
     "ioredis": "5.10.1",
     "multer": "^2.2.0",

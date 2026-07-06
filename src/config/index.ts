@@ -1,3 +1,4 @@
+import './environment.js';
 import { z } from 'zod';
 
 // Single source of truth for runtime configuration (Guideline:
@@ -34,11 +35,11 @@ const EnvSchema = z.object({
 
   PORT: z.coerce.number().int().positive().default(3000),
 
-  // API authentication (T6). When set, every endpoint requires the key
-  // via the x-api-key header, an Authorization: Bearer token, or the
-  // api_key query parameter (EventSource cannot set headers). When unset
-  // the API is open — acceptable only for local development; the server
-  // logs a warning at startup.
+  // API authentication (T6). When set, every operational endpoint requires
+  // the key via the x-api-key header, an Authorization: Bearer token, or the
+  // api_key query parameter (EventSource cannot set headers). /healthz is an
+  // explicit unauthenticated liveness exception. When unset the API is open
+  // — acceptable only for local development; the server logs a warning.
   API_KEY: z.string().optional(),
 
   // /api/rlm-stream protection (T6): each stream spawns a Python process

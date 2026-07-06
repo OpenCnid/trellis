@@ -1,0 +1,14 @@
+# Import-time dependencies for unstructured's explicitly selected
+# partition_pdf(strategy="fast") path. Hi-res model frameworks are excluded.
+huggingface-hub==1.22.0
+matplotlib==3.11.0
+onnx==1.22.0
+onnxruntime==1.27.0
+opencv-python-headless==4.13.0.92
+pandas==3.0.3
+pdf2image==1.17.0
+pdfminer.six==20260107
+pi-heif==1.4.0
+pypdf==6.14.2
+pypdfium2==5.11.0
+scipy==1.17.1
