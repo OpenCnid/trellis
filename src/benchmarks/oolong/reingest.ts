@@ -161,7 +161,9 @@ export async function reingestDataset(dataset: OolongDataset, opts: ReingestOpti
     contestedRelationships: 0,
     survivedNodes: 0,
     survivedRelationships: 0,
-    batches: 0
+    batches: 0,
+    durationMs: 0,
+    batchDurationsMs: []
   };
   let addedLeaves = 0;
 
