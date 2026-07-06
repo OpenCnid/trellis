@@ -1,0 +1,3100 @@
+{
+  "name": "oolong-pairs-trec-synthetic-v2",
+  "seed": 43,
+  "records": [
+    {
+      "id": "q_1001",
+      "text": "In which year did Vienna host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1002",
+      "text": "Who established the first printing press in the capital of Austria?",
+      "category": "HUM",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "the capital of Austria"
+      ]
+    },
+    {
+      "id": "q_1003",
+      "text": "What is the expanded form of SONAR?",
+      "category": "ABBR",
+      "concepts": [
+        "sonar"
+      ],
+      "surface_forms": [
+        "SONAR"
+      ]
+    },
+    {
+      "id": "q_1004",
+      "text": "Why does Dublin experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1005",
+      "text": "Which body of water lies nearest to Vienna?",
+      "category": "LOC",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1006",
+      "text": "Which nation contains Zagreb?",
+      "category": "LOC",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1007",
+      "text": "Which body of water lies nearest to the city on the Han River?",
+      "category": "LOC",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "the city on the Han River"
+      ]
+    },
+    {
+      "id": "q_1008",
+      "text": "What is the expanded form of SCUBA?",
+      "category": "ABBR",
+      "concepts": [
+        "scuba"
+      ],
+      "surface_forms": [
+        "SCUBA"
+      ]
+    },
+    {
+      "id": "q_1009",
+      "text": "Which beverage is Zagreb celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1010",
+      "text": "What is the expanded form of OPEC?",
+      "category": "ABBR",
+      "concepts": [
+        "opec"
+      ],
+      "surface_forms": [
+        "OPEC"
+      ]
+    },
+    {
+      "id": "q_1011",
+      "text": "Which body of water lies nearest to Lima?",
+      "category": "LOC",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1012",
+      "text": "How do bees navigate to flowers?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1013",
+      "text": "Which novelist wrote the book \"Prague\"?",
+      "category": "HUM",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_1014",
+      "text": "What is the expanded form of INTERPOL?",
+      "category": "ABBR",
+      "concepts": [
+        "interpol"
+      ],
+      "surface_forms": [
+        "INTERPOL"
+      ]
+    },
+    {
+      "id": "q_1015",
+      "text": "In which year did Zagreb host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1016",
+      "text": "Who served as mayor of Paris in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1017",
+      "text": "Who served as mayor of Lima in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1018",
+      "text": "Why does Prague experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "Prague"
+      ]
+    },
+    {
+      "id": "q_1019",
+      "text": "Why does Tokyo experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1020",
+      "text": "Who established the first printing press in the Japanese capital?",
+      "category": "HUM",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "the Japanese capital"
+      ]
+    },
+    {
+      "id": "q_1021",
+      "text": "What explains the rapid growth of Oslo after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1022",
+      "text": "Which sculptor created the central fountain of the city on the Han River?",
+      "category": "HUM",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "the city on the Han River"
+      ]
+    },
+    {
+      "id": "q_1023",
+      "text": "How many metro lines serve Paris?",
+      "category": "NUM",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1024",
+      "text": "Which sculptor created the central fountain of Quito?",
+      "category": "HUM",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1025",
+      "text": "How many metro lines serve Oslo?",
+      "category": "NUM",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1026",
+      "text": "How many residents does Quito have?",
+      "category": "NUM",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1027",
+      "text": "Which body of water lies nearest to Paris?",
+      "category": "LOC",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1028",
+      "text": "On which continent does Havana lie?",
+      "category": "LOC",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1029",
+      "text": "What is the expanded form of UNICEF?",
+      "category": "ABBR",
+      "concepts": [
+        "unicef"
+      ],
+      "surface_forms": [
+        "UNICEF"
+      ]
+    },
+    {
+      "id": "q_1030",
+      "text": "Which sculptor created the central fountain of the French capital?",
+      "category": "HUM",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "the French capital"
+      ]
+    },
+    {
+      "id": "q_1031",
+      "text": "Where was the opera \"Cairo\" first performed?",
+      "category": "LOC",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_1032",
+      "text": "Who established the first printing press in Cairo?",
+      "category": "HUM",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1033",
+      "text": "How many metro lines serve Havana?",
+      "category": "NUM",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1034",
+      "text": "Which body of water lies nearest to the capital of Croatia?",
+      "category": "LOC",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "the capital of Croatia"
+      ]
+    },
+    {
+      "id": "q_1035",
+      "text": "Which body of water lies nearest to the Czech capital?",
+      "category": "LOC",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "the Czech capital"
+      ]
+    },
+    {
+      "id": "q_1036",
+      "text": "Who served as mayor of Mumbai in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1037",
+      "text": "Which beverage is Seoul celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1038",
+      "text": "Which shipping firm registered the vessel \"Seoul\" in Vienna?",
+      "category": "ENTY",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ],
+      "distractor_mentions": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_1039",
+      "text": "Which body of water lies nearest to Oslo?",
+      "category": "LOC",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1040",
+      "text": "Which nation contains Paris?",
+      "category": "LOC",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1041",
+      "text": "Who established the first printing press in Paris?",
+      "category": "HUM",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1042",
+      "text": "How does a suspension bridge carry its load?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1043",
+      "text": "In which year did Cairo host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1044",
+      "text": "Who composed the waltz \"Cairo\"?",
+      "category": "HUM",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_1045",
+      "text": "Which sculptor created the central fountain of Nairobi?",
+      "category": "HUM",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1046",
+      "text": "How many metro lines serve Dublin?",
+      "category": "NUM",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1047",
+      "text": "Which beverage is Oslo celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1048",
+      "text": "What is the expanded form of GDP?",
+      "category": "ABBR",
+      "concepts": [
+        "gdp"
+      ],
+      "surface_forms": [
+        "GDP"
+      ]
+    },
+    {
+      "id": "q_1049",
+      "text": "Which sculptor created the central fountain of Lima?",
+      "category": "HUM",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1050",
+      "text": "What bird appears on the official seal of Tokyo?",
+      "category": "ENTY",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1051",
+      "text": "In which year did Paris host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1052",
+      "text": "Which shipping firm registered the vessel \"Prague\" in Zagreb?",
+      "category": "ENTY",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ],
+      "distractor_mentions": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_1053",
+      "text": "On which continent does the Cuban capital lie?",
+      "category": "LOC",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "the Cuban capital"
+      ]
+    },
+    {
+      "id": "q_1054",
+      "text": "Which body of water lies nearest to the largest city on Honshu?",
+      "category": "LOC",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "the largest city on Honshu"
+      ]
+    },
+    {
+      "id": "q_1055",
+      "text": "What bird appears on the official seal of Dublin?",
+      "category": "ENTY",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1056",
+      "text": "Which nation contains Mumbai?",
+      "category": "LOC",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1057",
+      "text": "In which gallery hangs the painting \"Lima\"?",
+      "category": "LOC",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_1058",
+      "text": "Which novelist wrote the book \"Mumbai\"?",
+      "category": "HUM",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "mumbai"
+      ]
+    },
+    {
+      "id": "q_1059",
+      "text": "Who established the first printing press in Dublin?",
+      "category": "HUM",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1060",
+      "text": "How many metro lines serve Prague?",
+      "category": "NUM",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "Prague"
+      ]
+    },
+    {
+      "id": "q_1061",
+      "text": "Which beverage is Prague celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "Prague"
+      ]
+    },
+    {
+      "id": "q_1062",
+      "text": "What bird appears on the official seal of Havana?",
+      "category": "ENTY",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1063",
+      "text": "Which airline operates the \"Lima Express\" service out of Mumbai?",
+      "category": "ENTY",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ],
+      "distractor_mentions": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_1064",
+      "text": "Which sculptor created the central fountain of Oslo?",
+      "category": "HUM",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1065",
+      "text": "On which continent does Cairo lie?",
+      "category": "LOC",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1066",
+      "text": "In which gallery hangs the painting \"Vienna\"?",
+      "category": "LOC",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "vienna"
+      ]
+    },
+    {
+      "id": "q_1067",
+      "text": "Where was the opera \"Paris\" first performed?",
+      "category": "LOC",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_1068",
+      "text": "What is the expanded form of NASA?",
+      "category": "ABBR",
+      "concepts": [
+        "nasa"
+      ],
+      "surface_forms": [
+        "NASA"
+      ]
+    },
+    {
+      "id": "q_1069",
+      "text": "What bird appears on the official seal of Paris?",
+      "category": "ENTY",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1070",
+      "text": "Which nation contains the city formerly called Bombay?",
+      "category": "LOC",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "the city formerly called Bombay"
+      ]
+    },
+    {
+      "id": "q_1071",
+      "text": "Who established the first printing press in the capital of Cuba?",
+      "category": "HUM",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "the capital of Cuba"
+      ]
+    },
+    {
+      "id": "q_1072",
+      "text": "Which sculptor created the central fountain of the city formerly called Bombay?",
+      "category": "HUM",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "the city formerly called Bombay"
+      ]
+    },
+    {
+      "id": "q_1073",
+      "text": "In which gallery hangs the painting \"Nairobi\"?",
+      "category": "LOC",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "nairobi"
+      ]
+    },
+    {
+      "id": "q_1074",
+      "text": "Which sculptor created the central fountain of Mumbai?",
+      "category": "HUM",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1075",
+      "text": "Which nation contains Oslo?",
+      "category": "LOC",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1076",
+      "text": "Which nation contains Seoul?",
+      "category": "LOC",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1077",
+      "text": "What bird appears on the official seal of Quito?",
+      "category": "ENTY",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1078",
+      "text": "How many residents does Oslo have?",
+      "category": "NUM",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1079",
+      "text": "Why does Oslo experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1080",
+      "text": "Which sculptor created the central fountain of Havana?",
+      "category": "HUM",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1081",
+      "text": "What is the expanded form of UNHCR?",
+      "category": "ABBR",
+      "concepts": [
+        "unhcr"
+      ],
+      "surface_forms": [
+        "UNHCR"
+      ]
+    },
+    {
+      "id": "q_1082",
+      "text": "What is the expanded form of HTTP?",
+      "category": "ABBR",
+      "concepts": [
+        "http"
+      ],
+      "surface_forms": [
+        "HTTP"
+      ]
+    },
+    {
+      "id": "q_1083",
+      "text": "What causes ocean currents?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1084",
+      "text": "What is the expanded form of MIDI?",
+      "category": "ABBR",
+      "concepts": [
+        "midi"
+      ],
+      "surface_forms": [
+        "MIDI"
+      ]
+    },
+    {
+      "id": "q_1085",
+      "text": "Which sculptor created the central fountain of Zagreb?",
+      "category": "HUM",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1086",
+      "text": "Which nation contains the capital of Peru?",
+      "category": "LOC",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "the capital of Peru"
+      ]
+    },
+    {
+      "id": "q_1087",
+      "text": "Who served as mayor of the capital of Kenya in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "the capital of Kenya"
+      ]
+    },
+    {
+      "id": "q_1088",
+      "text": "Which body of water lies nearest to Havana?",
+      "category": "LOC",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1089",
+      "text": "Which body of water lies nearest to Cairo?",
+      "category": "LOC",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1090",
+      "text": "What explains the rapid growth of Tokyo after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1091",
+      "text": "How many metro lines serve Nairobi?",
+      "category": "NUM",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1092",
+      "text": "How many residents does Seoul have?",
+      "category": "NUM",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1093",
+      "text": "Which nation contains Prague?",
+      "category": "LOC",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "Prague"
+      ]
+    },
+    {
+      "id": "q_1094",
+      "text": "Which beverage is Nairobi celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1095",
+      "text": "Who established the first printing press in Vienna?",
+      "category": "HUM",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1096",
+      "text": "Who established the first printing press in the Czech capital?",
+      "category": "HUM",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "the Czech capital"
+      ]
+    },
+    {
+      "id": "q_1097",
+      "text": "Which shipping firm registered the vessel \"Quito\" in Havana?",
+      "category": "ENTY",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ],
+      "distractor_mentions": [
+        "quito"
+      ]
+    },
+    {
+      "id": "q_1098",
+      "text": "How many residents does Lima have?",
+      "category": "NUM",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1099",
+      "text": "Who established the first printing press in the Peruvian capital?",
+      "category": "HUM",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "the Peruvian capital"
+      ]
+    },
+    {
+      "id": "q_1100",
+      "text": "What is the expanded form of RADAR?",
+      "category": "ABBR",
+      "concepts": [
+        "radar"
+      ],
+      "surface_forms": [
+        "RADAR"
+      ]
+    },
+    {
+      "id": "q_1101",
+      "text": "Which sculptor created the central fountain of Vienna?",
+      "category": "HUM",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1102",
+      "text": "Which novelist wrote the book \"Zagreb\"?",
+      "category": "HUM",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_1103",
+      "text": "Who established the first printing press in the Norwegian capital?",
+      "category": "HUM",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "the Norwegian capital"
+      ]
+    },
+    {
+      "id": "q_1104",
+      "text": "How does yeast leaven dough?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1105",
+      "text": "Which beverage is Mumbai celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1106",
+      "text": "In which year did Quito host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1107",
+      "text": "Which airline operates the \"Cairo Express\" service out of Quito?",
+      "category": "ENTY",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ],
+      "distractor_mentions": [
+        "cairo"
+      ]
+    },
+    {
+      "id": "q_1108",
+      "text": "How do glaciers shape valleys?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1109",
+      "text": "How many residents does Havana have?",
+      "category": "NUM",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1110",
+      "text": "What bird appears on the official seal of Lima?",
+      "category": "ENTY",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1111",
+      "text": "Which nation contains Vienna?",
+      "category": "LOC",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1112",
+      "text": "What bird appears on the official seal of Vienna?",
+      "category": "ENTY",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1113",
+      "text": "Which nation contains Lima?",
+      "category": "LOC",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1114",
+      "text": "What explains the rapid growth of Zagreb after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1115",
+      "text": "Who established the first printing press in the Egyptian capital?",
+      "category": "HUM",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "the Egyptian capital"
+      ]
+    },
+    {
+      "id": "q_1116",
+      "text": "Who composed the waltz \"Lima\"?",
+      "category": "HUM",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "lima"
+      ]
+    },
+    {
+      "id": "q_1117",
+      "text": "Who served as mayor of the capital of Croatia in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "the capital of Croatia"
+      ]
+    },
+    {
+      "id": "q_1118",
+      "text": "Who established the first printing press in Lima?",
+      "category": "HUM",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1119",
+      "text": "Why is seawater salty?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1120",
+      "text": "What bird appears on the official seal of Mumbai?",
+      "category": "ENTY",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1121",
+      "text": "What bird appears on the official seal of Cairo?",
+      "category": "ENTY",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1122",
+      "text": "In which year did Oslo host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1123",
+      "text": "Why does Vienna experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1124",
+      "text": "In which year did Prague host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "Prague"
+      ]
+    },
+    {
+      "id": "q_1125",
+      "text": "What bird appears on the official seal of Zagreb?",
+      "category": "ENTY",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1126",
+      "text": "Who composed the waltz \"Seoul\"?",
+      "category": "HUM",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "seoul"
+      ]
+    },
+    {
+      "id": "q_1127",
+      "text": "Who established the first printing press in Nairobi?",
+      "category": "HUM",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1128",
+      "text": "Which beverage is Quito celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1129",
+      "text": "In which year did Seoul host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1130",
+      "text": "Why does Seoul experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1131",
+      "text": "Which body of water lies nearest to Seoul?",
+      "category": "LOC",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1132",
+      "text": "How many residents does Cairo have?",
+      "category": "NUM",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1133",
+      "text": "Who served as mayor of Prague in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "Prague"
+      ]
+    },
+    {
+      "id": "q_1134",
+      "text": "Why does Zagreb experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1135",
+      "text": "Which sculptor created the central fountain of Dublin?",
+      "category": "HUM",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1136",
+      "text": "What produces the northern lights?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1137",
+      "text": "Which body of water lies nearest to Quito?",
+      "category": "LOC",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1138",
+      "text": "Which beverage is Vienna celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1139",
+      "text": "On which continent does Paris lie?",
+      "category": "LOC",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1140",
+      "text": "Why do stars twinkle?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1141",
+      "text": "How many residents does Nairobi have?",
+      "category": "NUM",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1142",
+      "text": "In which year did Lima host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1143",
+      "text": "On which continent does Oslo lie?",
+      "category": "LOC",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1144",
+      "text": "Which nation contains the capital of Ecuador?",
+      "category": "LOC",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "the capital of Ecuador"
+      ]
+    },
+    {
+      "id": "q_1145",
+      "text": "Which shipping firm registered the vessel \"Paris\" in Tokyo?",
+      "category": "ENTY",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ],
+      "distractor_mentions": [
+        "paris"
+      ]
+    },
+    {
+      "id": "q_1146",
+      "text": "Where was the opera \"Prague\" first performed?",
+      "category": "LOC",
+      "concepts": [],
+      "surface_forms": [],
+      "distractor_mentions": [
+        "prague"
+      ]
+    },
+    {
+      "id": "q_1147",
+      "text": "What explains the rapid growth of Vienna after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1148",
+      "text": "Which body of water lies nearest to the Egyptian capital?",
+      "category": "LOC",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "the Egyptian capital"
+      ]
+    },
+    {
+      "id": "q_1149",
+      "text": "What explains the rapid growth of Mumbai after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1150",
+      "text": "Which beverage is Havana celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1151",
+      "text": "Who established the first printing press in Quito?",
+      "category": "HUM",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1152",
+      "text": "On which continent does Seoul lie?",
+      "category": "LOC",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1153",
+      "text": "What explains the rapid growth of Seoul after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1154",
+      "text": "How many metro lines serve Seoul?",
+      "category": "NUM",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1155",
+      "text": "Why does Paris experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1156",
+      "text": "What bird appears on the official seal of Oslo?",
+      "category": "ENTY",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1157",
+      "text": "In which year did Tokyo host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1158",
+      "text": "Which nation contains Dublin?",
+      "category": "LOC",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1159",
+      "text": "On which continent does the Austrian capital lie?",
+      "category": "LOC",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "the Austrian capital"
+      ]
+    },
+    {
+      "id": "q_1160",
+      "text": "Who served as mayor of Cairo in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1161",
+      "text": "Which nation contains the city on the Liffey?",
+      "category": "LOC",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "the city on the Liffey"
+      ]
+    },
+    {
+      "id": "q_1162",
+      "text": "How many residents does Tokyo have?",
+      "category": "NUM",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1163",
+      "text": "Who served as mayor of Tokyo in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1164",
+      "text": "What makes a desert form?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1165",
+      "text": "Which sculptor created the central fountain of Tokyo?",
+      "category": "HUM",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1166",
+      "text": "Who served as mayor of Quito in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1167",
+      "text": "On which continent does Lima lie?",
+      "category": "LOC",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1168",
+      "text": "On which continent does Prague lie?",
+      "category": "LOC",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "Prague"
+      ]
+    },
+    {
+      "id": "q_1169",
+      "text": "Which sculptor created the central fountain of Seoul?",
+      "category": "HUM",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1170",
+      "text": "What is the expanded form of LASER?",
+      "category": "ABBR",
+      "concepts": [
+        "laser"
+      ],
+      "surface_forms": [
+        "LASER"
+      ]
+    },
+    {
+      "id": "q_1171",
+      "text": "What is the expanded form of DNA?",
+      "category": "ABBR",
+      "concepts": [
+        "dna"
+      ],
+      "surface_forms": [
+        "DNA"
+      ]
+    },
+    {
+      "id": "q_1172",
+      "text": "How is glass made from sand?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1173",
+      "text": "Who served as mayor of Seoul in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1174",
+      "text": "How many residents does Mumbai have?",
+      "category": "NUM",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1175",
+      "text": "How many metro lines serve Tokyo?",
+      "category": "NUM",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1176",
+      "text": "How many residents does Zagreb have?",
+      "category": "NUM",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1177",
+      "text": "How many metro lines serve Zagreb?",
+      "category": "NUM",
+      "concepts": [
+        "zagreb"
+      ],
+      "surface_forms": [
+        "Zagreb"
+      ]
+    },
+    {
+      "id": "q_1178",
+      "text": "Which airline operates the \"Oslo Express\" service out of Tokyo?",
+      "category": "ENTY",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ],
+      "distractor_mentions": [
+        "oslo"
+      ]
+    },
+    {
+      "id": "q_1179",
+      "text": "How many metro lines serve Vienna?",
+      "category": "NUM",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ]
+    },
+    {
+      "id": "q_1180",
+      "text": "What is the expanded form of UNESCO?",
+      "category": "ABBR",
+      "concepts": [
+        "unesco"
+      ],
+      "surface_forms": [
+        "UNESCO"
+      ]
+    },
+    {
+      "id": "q_1181",
+      "text": "Which beverage is Dublin celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1182",
+      "text": "In which year did Mumbai host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1183",
+      "text": "Who established the first printing press in the capital of Ecuador?",
+      "category": "HUM",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "the capital of Ecuador"
+      ]
+    },
+    {
+      "id": "q_1184",
+      "text": "Why does ice float on water?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1185",
+      "text": "Why does Havana experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1186",
+      "text": "Who established the first printing press in Tokyo?",
+      "category": "HUM",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1187",
+      "text": "What explains the rapid growth of Paris after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1188",
+      "text": "Why do metals conduct electricity?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1189",
+      "text": "On which continent does Quito lie?",
+      "category": "LOC",
+      "concepts": [
+        "quito"
+      ],
+      "surface_forms": [
+        "Quito"
+      ]
+    },
+    {
+      "id": "q_1190",
+      "text": "What bird appears on the official seal of Prague?",
+      "category": "ENTY",
+      "concepts": [
+        "prague"
+      ],
+      "surface_forms": [
+        "Prague"
+      ]
+    },
+    {
+      "id": "q_1191",
+      "text": "Who served as mayor of Oslo in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "Oslo"
+      ]
+    },
+    {
+      "id": "q_1192",
+      "text": "Which beverage is Lima celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1193",
+      "text": "How does a battery store energy?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1194",
+      "text": "Which body of water lies nearest to the capital of Norway?",
+      "category": "LOC",
+      "concepts": [
+        "oslo"
+      ],
+      "surface_forms": [
+        "the capital of Norway"
+      ]
+    },
+    {
+      "id": "q_1195",
+      "text": "Which beverage is Tokyo celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1196",
+      "text": "How many metro lines serve Cairo?",
+      "category": "NUM",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1197",
+      "text": "Which body of water lies nearest to the capital of Kenya?",
+      "category": "LOC",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "the capital of Kenya"
+      ]
+    },
+    {
+      "id": "q_1198",
+      "text": "Why does Lima experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "lima"
+      ],
+      "surface_forms": [
+        "Lima"
+      ]
+    },
+    {
+      "id": "q_1199",
+      "text": "On which continent does Nairobi lie?",
+      "category": "LOC",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1200",
+      "text": "Which body of water lies nearest to Nairobi?",
+      "category": "LOC",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1201",
+      "text": "In which year did Havana host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1202",
+      "text": "Which beverage is Paris celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "q_1203",
+      "text": "What keeps a satellite in orbit?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    },
+    {
+      "id": "q_1204",
+      "text": "On which continent does Mumbai lie?",
+      "category": "LOC",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1205",
+      "text": "What explains the rapid growth of Dublin after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1206",
+      "text": "Which sculptor created the central fountain of the city on the Liffey?",
+      "category": "HUM",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "the city on the Liffey"
+      ]
+    },
+    {
+      "id": "q_1207",
+      "text": "Who served as mayor of Dublin in the 1980s?",
+      "category": "HUM",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1208",
+      "text": "What is the expanded form of NATO?",
+      "category": "ABBR",
+      "concepts": [
+        "nato"
+      ],
+      "surface_forms": [
+        "NATO"
+      ]
+    },
+    {
+      "id": "q_1209",
+      "text": "On which continent does Tokyo lie?",
+      "category": "LOC",
+      "concepts": [
+        "tokyo"
+      ],
+      "surface_forms": [
+        "Tokyo"
+      ]
+    },
+    {
+      "id": "q_1210",
+      "text": "What explains the rapid growth of Havana after 1950?",
+      "category": "DESC",
+      "concepts": [
+        "havana"
+      ],
+      "surface_forms": [
+        "Havana"
+      ]
+    },
+    {
+      "id": "q_1211",
+      "text": "Who established the first printing press in Mumbai?",
+      "category": "HUM",
+      "concepts": [
+        "mumbai"
+      ],
+      "surface_forms": [
+        "Mumbai"
+      ]
+    },
+    {
+      "id": "q_1212",
+      "text": "How many residents does Dublin have?",
+      "category": "NUM",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1213",
+      "text": "Which beverage is Cairo celebrated for?",
+      "category": "ENTY",
+      "concepts": [
+        "cairo"
+      ],
+      "surface_forms": [
+        "Cairo"
+      ]
+    },
+    {
+      "id": "q_1214",
+      "text": "Which body of water lies nearest to Dublin?",
+      "category": "LOC",
+      "concepts": [
+        "dublin"
+      ],
+      "surface_forms": [
+        "Dublin"
+      ]
+    },
+    {
+      "id": "q_1215",
+      "text": "Why does Nairobi experience frequent fog?",
+      "category": "DESC",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1216",
+      "text": "Which airline operates the \"Zagreb Express\" service out of Vienna?",
+      "category": "ENTY",
+      "concepts": [
+        "vienna"
+      ],
+      "surface_forms": [
+        "Vienna"
+      ],
+      "distractor_mentions": [
+        "zagreb"
+      ]
+    },
+    {
+      "id": "q_1217",
+      "text": "On which continent does the city on the Seine lie?",
+      "category": "LOC",
+      "concepts": [
+        "paris"
+      ],
+      "surface_forms": [
+        "the city on the Seine"
+      ]
+    },
+    {
+      "id": "q_1218",
+      "text": "What bird appears on the official seal of Seoul?",
+      "category": "ENTY",
+      "concepts": [
+        "seoul"
+      ],
+      "surface_forms": [
+        "Seoul"
+      ]
+    },
+    {
+      "id": "q_1219",
+      "text": "In which year did Nairobi host its first trade fair?",
+      "category": "NUM",
+      "concepts": [
+        "nairobi"
+      ],
+      "surface_forms": [
+        "Nairobi"
+      ]
+    },
+    {
+      "id": "q_1220",
+      "text": "What causes thunder?",
+      "category": "DESC",
+      "concepts": [],
+      "surface_forms": []
+    }
+  ],
+  "distractor_passages": [
+    {
+      "id": "p_1001",
+      "text": "Freight volumes between Nairobi and Paris doubled after the two cities opened a direct rail link.",
+      "surface_forms": [
+        "nairobi",
+        "paris"
+      ]
+    },
+    {
+      "id": "p_1002",
+      "text": "The morning bulletin reported clear skies over Nairobi while Seoul recorded heavy rain.",
+      "surface_forms": [
+        "nairobi",
+        "seoul"
+      ]
+    },
+    {
+      "id": "p_1003",
+      "text": "Delegates from Havana and Prague signed a sister-city agreement at a ceremony broadcast in both regions.",
+      "surface_forms": [
+        "havana",
+        "prague"
+      ]
+    },
+    {
+      "id": "p_1004",
+      "text": "A shipping consortium moved its regional office from Prague to Tokyo citing lower harbor fees.",
+      "surface_forms": [
+        "prague",
+        "tokyo"
+      ]
+    },
+    {
+      "id": "p_1005",
+      "text": "Freight volumes between Lima and Paris doubled after the two cities opened a direct rail link.",
+      "surface_forms": [
+        "lima",
+        "paris"
+      ]
+    },
+    {
+      "id": "p_1006",
+      "text": "The morning bulletin reported clear skies over Lima while Vienna recorded heavy rain.",
+      "surface_forms": [
+        "lima",
+        "vienna"
+      ]
+    },
+    {
+      "id": "p_1007",
+      "text": "Delegates from Paris and Prague signed a sister-city agreement at a ceremony broadcast in both regions.",
+      "surface_forms": [
+        "paris",
+        "prague"
+      ]
+    },
+    {
+      "id": "p_1008",
+      "text": "A shipping consortium moved its regional office from Quito to Vienna citing lower harbor fees.",
+      "surface_forms": [
+        "quito",
+        "vienna"
+      ]
+    },
+    {
+      "id": "p_1009",
+      "text": "Freight volumes between Cairo and Oslo doubled after the two cities opened a direct rail link.",
+      "surface_forms": [
+        "cairo",
+        "oslo"
+      ]
+    },
+    {
+      "id": "p_1010",
+      "text": "The morning bulletin reported clear skies over Prague while Quito recorded heavy rain.",
+      "surface_forms": [
+        "prague",
+        "quito"
+      ]
+    },
+    {
+      "id": "p_1011",
+      "text": "Delegates from Nairobi and Vienna signed a sister-city agreement at a ceremony broadcast in both regions.",
+      "surface_forms": [
+        "nairobi",
+        "vienna"
+      ]
+    },
+    {
+      "id": "p_1012",
+      "text": "A shipping consortium moved its regional office from Cairo to Lima citing lower harbor fees.",
+      "surface_forms": [
+        "cairo",
+        "lima"
+      ]
+    },
+    {
+      "id": "p_1013",
+      "text": "Freight volumes between Lima and Oslo doubled after the two cities opened a direct rail link.",
+      "surface_forms": [
+        "lima",
+        "oslo"
+      ]
+    },
+    {
+      "id": "p_1014",
+      "text": "The morning bulletin reported clear skies over Cairo while Seoul recorded heavy rain.",
+      "surface_forms": [
+        "cairo",
+        "seoul"
+      ]
+    },
+    {
+      "id": "p_1015",
+      "text": "Delegates from Mumbai and Vienna signed a sister-city agreement at a ceremony broadcast in both regions.",
+      "surface_forms": [
+        "mumbai",
+        "vienna"
+      ]
+    },
+    {
+      "id": "p_1016",
+      "text": "A shipping consortium moved its regional office from Paris to Vienna citing lower harbor fees.",
+      "surface_forms": [
+        "paris",
+        "vienna"
+      ]
+    },
+    {
+      "id": "p_1017",
+      "text": "Freight volumes between Mumbai and Prague doubled after the two cities opened a direct rail link.",
+      "surface_forms": [
+        "mumbai",
+        "prague"
+      ]
+    },
+    {
+      "id": "p_1018",
+      "text": "The morning bulletin reported clear skies over Quito while Seoul recorded heavy rain.",
+      "surface_forms": [
+        "quito",
+        "seoul"
+      ]
+    },
+    {
+      "id": "p_1019",
+      "text": "Delegates from Dublin and Mumbai signed a sister-city agreement at a ceremony broadcast in both regions.",
+      "surface_forms": [
+        "dublin",
+        "mumbai"
+      ]
+    },
+    {
+      "id": "p_1020",
+      "text": "A shipping consortium moved its regional office from Havana to Mumbai citing lower harbor fees.",
+      "surface_forms": [
+        "havana",
+        "mumbai"
+      ]
+    }
+  ],
+  "ground_truth": {
+    "loc_hum_shared_concept_pairs": [
+      [
+        "q_1005",
+        "q_1002"
+      ],
+      [
+        "q_1005",
+        "q_1095"
+      ],
+      [
+        "q_1005",
+        "q_1101"
+      ],
+      [
+        "q_1006",
+        "q_1085"
+      ],
+      [
+        "q_1006",
+        "q_1117"
+      ],
+      [
+        "q_1007",
+        "q_1022"
+      ],
+      [
+        "q_1007",
+        "q_1169"
+      ],
+      [
+        "q_1007",
+        "q_1173"
+      ],
+      [
+        "q_1011",
+        "q_1017"
+      ],
+      [
+        "q_1011",
+        "q_1049"
+      ],
+      [
+        "q_1011",
+        "q_1099"
+      ],
+      [
+        "q_1011",
+        "q_1118"
+      ],
+      [
+        "q_1027",
+        "q_1016"
+      ],
+      [
+        "q_1027",
+        "q_1030"
+      ],
+      [
+        "q_1027",
+        "q_1041"
+      ],
+      [
+        "q_1028",
+        "q_1071"
+      ],
+      [
+        "q_1028",
+        "q_1080"
+      ],
+      [
+        "q_1034",
+        "q_1085"
+      ],
+      [
+        "q_1034",
+        "q_1117"
+      ],
+      [
+        "q_1035",
+        "q_1096"
+      ],
+      [
+        "q_1035",
+        "q_1133"
+      ],
+      [
+        "q_1039",
+        "q_1064"
+      ],
+      [
+        "q_1039",
+        "q_1103"
+      ],
+      [
+        "q_1039",
+        "q_1191"
+      ],
+      [
+        "q_1040",
+        "q_1016"
+      ],
+      [
+        "q_1040",
+        "q_1030"
+      ],
+      [
+        "q_1040",
+        "q_1041"
+      ],
+      [
+        "q_1053",
+        "q_1071"
+      ],
+      [
+        "q_1053",
+        "q_1080"
+      ],
+      [
+        "q_1054",
+        "q_1020"
+      ],
+      [
+        "q_1054",
+        "q_1163"
+      ],
+      [
+        "q_1054",
+        "q_1165"
+      ],
+      [
+        "q_1054",
+        "q_1186"
+      ],
+      [
+        "q_1056",
+        "q_1036"
+      ],
+      [
+        "q_1056",
+        "q_1072"
+      ],
+      [
+        "q_1056",
+        "q_1074"
+      ],
+      [
+        "q_1056",
+        "q_1211"
+      ],
+      [
+        "q_1065",
+        "q_1032"
+      ],
+      [
+        "q_1065",
+        "q_1115"
+      ],
+      [
+        "q_1065",
+        "q_1160"
+      ],
+      [
+        "q_1070",
+        "q_1036"
+      ],
+      [
+        "q_1070",
+        "q_1072"
+      ],
+      [
+        "q_1070",
+        "q_1074"
+      ],
+      [
+        "q_1070",
+        "q_1211"
+      ],
+      [
+        "q_1075",
+        "q_1064"
+      ],
+      [
+        "q_1075",
+        "q_1103"
+      ],
+      [
+        "q_1075",
+        "q_1191"
+      ],
+      [
+        "q_1076",
+        "q_1022"
+      ],
+      [
+        "q_1076",
+        "q_1169"
+      ],
+      [
+        "q_1076",
+        "q_1173"
+      ],
+      [
+        "q_1086",
+        "q_1017"
+      ],
+      [
+        "q_1086",
+        "q_1049"
+      ],
+      [
+        "q_1086",
+        "q_1099"
+      ],
+      [
+        "q_1086",
+        "q_1118"
+      ],
+      [
+        "q_1088",
+        "q_1071"
+      ],
+      [
+        "q_1088",
+        "q_1080"
+      ],
+      [
+        "q_1089",
+        "q_1032"
+      ],
+      [
+        "q_1089",
+        "q_1115"
+      ],
+      [
+        "q_1089",
+        "q_1160"
+      ],
+      [
+        "q_1093",
+        "q_1096"
+      ],
+      [
+        "q_1093",
+        "q_1133"
+      ],
+      [
+        "q_1111",
+        "q_1002"
+      ],
+      [
+        "q_1111",
+        "q_1095"
+      ],
+      [
+        "q_1111",
+        "q_1101"
+      ],
+      [
+        "q_1113",
+        "q_1017"
+      ],
+      [
+        "q_1113",
+        "q_1049"
+      ],
+      [
+        "q_1113",
+        "q_1099"
+      ],
+      [
+        "q_1113",
+        "q_1118"
+      ],
+      [
+        "q_1131",
+        "q_1022"
+      ],
+      [
+        "q_1131",
+        "q_1169"
+      ],
+      [
+        "q_1131",
+        "q_1173"
+      ],
+      [
+        "q_1137",
+        "q_1024"
+      ],
+      [
+        "q_1137",
+        "q_1151"
+      ],
+      [
+        "q_1137",
+        "q_1166"
+      ],
+      [
+        "q_1137",
+        "q_1183"
+      ],
+      [
+        "q_1139",
+        "q_1016"
+      ],
+      [
+        "q_1139",
+        "q_1030"
+      ],
+      [
+        "q_1139",
+        "q_1041"
+      ],
+      [
+        "q_1143",
+        "q_1064"
+      ],
+      [
+        "q_1143",
+        "q_1103"
+      ],
+      [
+        "q_1143",
+        "q_1191"
+      ],
+      [
+        "q_1144",
+        "q_1024"
+      ],
+      [
+        "q_1144",
+        "q_1151"
+      ],
+      [
+        "q_1144",
+        "q_1166"
+      ],
+      [
+        "q_1144",
+        "q_1183"
+      ],
+      [
+        "q_1148",
+        "q_1032"
+      ],
+      [
+        "q_1148",
+        "q_1115"
+      ],
+      [
+        "q_1148",
+        "q_1160"
+      ],
+      [
+        "q_1152",
+        "q_1022"
+      ],
+      [
+        "q_1152",
+        "q_1169"
+      ],
+      [
+        "q_1152",
+        "q_1173"
+      ],
+      [
+        "q_1158",
+        "q_1059"
+      ],
+      [
+        "q_1158",
+        "q_1135"
+      ],
+      [
+        "q_1158",
+        "q_1206"
+      ],
+      [
+        "q_1158",
+        "q_1207"
+      ],
+      [
+        "q_1159",
+        "q_1002"
+      ],
+      [
+        "q_1159",
+        "q_1095"
+      ],
+      [
+        "q_1159",
+        "q_1101"
+      ],
+      [
+        "q_1161",
+        "q_1059"
+      ],
+      [
+        "q_1161",
+        "q_1135"
+      ],
+      [
+        "q_1161",
+        "q_1206"
+      ],
+      [
+        "q_1161",
+        "q_1207"
+      ],
+      [
+        "q_1167",
+        "q_1017"
+      ],
+      [
+        "q_1167",
+        "q_1049"
+      ],
+      [
+        "q_1167",
+        "q_1099"
+      ],
+      [
+        "q_1167",
+        "q_1118"
+      ],
+      [
+        "q_1168",
+        "q_1096"
+      ],
+      [
+        "q_1168",
+        "q_1133"
+      ],
+      [
+        "q_1189",
+        "q_1024"
+      ],
+      [
+        "q_1189",
+        "q_1151"
+      ],
+      [
+        "q_1189",
+        "q_1166"
+      ],
+      [
+        "q_1189",
+        "q_1183"
+      ],
+      [
+        "q_1194",
+        "q_1064"
+      ],
+      [
+        "q_1194",
+        "q_1103"
+      ],
+      [
+        "q_1194",
+        "q_1191"
+      ],
+      [
+        "q_1197",
+        "q_1045"
+      ],
+      [
+        "q_1197",
+        "q_1087"
+      ],
+      [
+        "q_1197",
+        "q_1127"
+      ],
+      [
+        "q_1199",
+        "q_1045"
+      ],
+      [
+        "q_1199",
+        "q_1087"
+      ],
+      [
+        "q_1199",
+        "q_1127"
+      ],
+      [
+        "q_1200",
+        "q_1045"
+      ],
+      [
+        "q_1200",
+        "q_1087"
+      ],
+      [
+        "q_1200",
+        "q_1127"
+      ],
+      [
+        "q_1204",
+        "q_1036"
+      ],
+      [
+        "q_1204",
+        "q_1072"
+      ],
+      [
+        "q_1204",
+        "q_1074"
+      ],
+      [
+        "q_1204",
+        "q_1211"
+      ],
+      [
+        "q_1209",
+        "q_1020"
+      ],
+      [
+        "q_1209",
+        "q_1163"
+      ],
+      [
+        "q_1209",
+        "q_1165"
+      ],
+      [
+        "q_1209",
+        "q_1186"
+      ],
+      [
+        "q_1214",
+        "q_1059"
+      ],
+      [
+        "q_1214",
+        "q_1135"
+      ],
+      [
+        "q_1214",
+        "q_1206"
+      ],
+      [
+        "q_1214",
+        "q_1207"
+      ],
+      [
+        "q_1217",
+        "q_1016"
+      ],
+      [
+        "q_1217",
+        "q_1030"
+      ],
+      [
+        "q_1217",
+        "q_1041"
+      ]
+    ]
+  }
+}

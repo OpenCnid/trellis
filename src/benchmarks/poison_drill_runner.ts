@@ -15,6 +15,7 @@ import {
   auditPoisonDetection,
   effectiveCategories
 } from './oolong/poison';
+import { auditFlywheelCache, CacheAuditResult } from './oolong/cache_audit';
 import {
   defaultPolicy,
   runVerificationSweep,
@@ -114,6 +115,12 @@ interface PolicyResult {
   max_lifetime_reads: number | null;
   false_disputes: number;
   false_dispute_rate: number;
+  // Session 6: cache accuracy from the shared audit module
+  // (cache_audit.ts) over EFFECTIVE (non-contested) beliefs — the same
+  // implementation the benchmark runner and audit CLI use, so poison
+  // recall and cache accuracy can never drift apart.
+  cache_audit_post_poison: CacheAuditResult;
+  cache_audit_post_detection: CacheAuditResult;
   total_classified: number;
   total_subcalls: number;
   verification_cost_usd: number;
@@ -304,6 +311,8 @@ async function runPolicyExperiment(
     count: POISON_COUNT, seed: POISON_SEED, confidence: POISON_CONFIDENCE
   });
   console.log(`  Act 2 (poison): flipped ${manifest.poisoned.length} labels in place @ confidence ${POISON_CONFIDENCE} (seed ${manifest.seed})`);
+  const cacheAuditPostPoison = await auditFlywheelCache(neo4jDriver, dataset);
+  console.log(`  Act 2 cache audit: accuracy ${cacheAuditPostPoison.accuracy?.toFixed(3) ?? 'n/a'} (${cacheAuditPostPoison.wrong} wrong of ${cacheAuditPostPoison.cached} served)`);
 
   // Act 3: detection sweeps.
   const oracle: Record<string, string> = {};
@@ -349,6 +358,7 @@ async function runPolicyExperiment(
   }
 
   const finalAudit = await auditPoisonDetection(neo4jDriver, dataset, manifest);
+  const cacheAuditPostDetection = await auditFlywheelCache(neo4jDriver, dataset);
   const lifetimes: Record<string, number | null> = {};
   for (const p of manifest.poisoned) lifetimes[p.id] = detectedAt.get(p.id) ?? null;
   const detectedLifetimes = [...detectedAt.values()];
@@ -370,6 +380,8 @@ async function runPolicyExperiment(
     max_lifetime_reads: detectedLifetimes.length ? Math.max(...detectedLifetimes) * QUERIES_PER_INTERVAL : null,
     false_disputes: finalAudit.false_disputes,
     false_dispute_rate: finalAudit.false_disputes / finalAudit.clean_beliefs,
+    cache_audit_post_poison: cacheAuditPostPoison,
+    cache_audit_post_detection: cacheAuditPostDetection,
     total_classified: totalClassified,
     total_subcalls: totalSubcalls,
     verification_cost_usd: verificationCost,
@@ -380,7 +392,8 @@ async function runPolicyExperiment(
   console.log(
     `  Act 3 done: recall ${result.detection_recall.toFixed(3)} after ${sweepsRun} sweep(s)` +
     (result.expected_sweep_bound ? ` (expected bound ~${result.expected_sweep_bound})` : '') +
-    `, false disputes ${result.false_disputes}, classified ${totalClassified}`
+    `, false disputes ${result.false_disputes}, classified ${totalClassified}` +
+    `, effective-cache accuracy ${cacheAuditPostDetection.accuracy?.toFixed(3) ?? 'n/a'}`
   );
 
   // Act 4: recovery + the standard sequence.
@@ -469,6 +482,8 @@ async function main(): Promise<void> {
         r.expected_sweep_bound !== null && r.sweeps_to_full_detection <= 2 * r.expected_sweep_bound
       ),
       max_false_dispute_rate: Math.max(...results.map(r => r.false_dispute_rate)),
+      cache_accuracy_post_poison_by_policy: Object.fromEntries(results.map(r => [r.policy, r.cache_audit_post_poison.accuracy])),
+      cache_accuracy_post_detection_by_policy: Object.fromEntries(results.map(r => [r.policy, r.cache_audit_post_detection.accuracy])),
       post_recovery_f1_by_policy: Object.fromEntries(results.map(r => [r.policy, r.recovery?.mean_f1 ?? null])),
       total_verification_cost_usd: results.reduce((s, r) => s + r.verification_cost_usd, 0)
     }

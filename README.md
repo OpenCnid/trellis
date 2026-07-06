@@ -146,6 +146,37 @@ The entrypoint replaces itself with Node after initialization, so
 #21's phase-ordered shutdown closes admission, workers, queues, and database
 clients.
 
+## Benchmarks
+
+The OOLONG-Pairs harness ships two committed, seeded corpora:
+
+- `data/oolong_pairs_dataset.json` — v1 (`oolong-pairs-trec-synthetic-v1`),
+  the saturated baseline behind the committed `benchmark_results.json`.
+  Never regenerated; the update/poison drills reference it (and the update
+  drill's mutated byte-version at `data/oolong_pairs_dataset_v2.json`).
+- `data/oolong_pairs_dataset_hard.json` — v2
+  (`oolong-pairs-trec-synthetic-v2`, `npm run oolong:generate:v2`), the
+  anti-shortcut corpus: paraphrased city mentions that never contain the
+  canonical token, near-miss questions that name-drop unannotated cities,
+  and non-question prose distractors ingested as `:Passage` nodes.
+
+The harness CLIs accept `--dataset <path>` and default to v1:
+
+```bash
+npm run oolong:ingest -- --dataset data/oolong_pairs_dataset_hard.json
+npm run oolong:pairs -- --dataset data/oolong_pairs_dataset_hard.json
+tsx scripts/audit_flywheel_cache.ts --dataset data/oolong_pairs_dataset_hard.json
+npm run oolong:benchmark -- --dataset data/oolong_pairs_dataset_hard.json
+```
+
+A benchmark run appends a post-warm `cache_audit` block (shared with the
+audit CLI and the poison drill via `src/benchmarks/oolong/cache_audit.ts`)
+to its results. Runs against a non-v1 dataset write
+`benchmark_results_v2.json` (or `--results <path>`); the runner refuses to
+overwrite the committed v1 `benchmark_results.json` with another corpus's
+results. Benchmark runs make paid LLM calls — see
+`docs/benchmarks/CRITIQUE_AND_FUTURE.md` before running.
+
 ## Verification
 
 Offline checks require no Docker or API key:
@@ -177,6 +208,8 @@ npm run test:api-hardening
 npm run test:rlm-sandbox
 npm run test:belief-recovery
 npm run test:invalidation-sweep
+npm run test:entity-resolution
+npm run test:benchmark-hardening
 ```
 
 See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts.
