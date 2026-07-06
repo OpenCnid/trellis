@@ -80,7 +80,11 @@ immutable, content-addressed physical location in source material.
    - `document_nodes` stores per-root membership and supports global source
      liveness checks.
    - Schema bootstrap is serialized by `pg_advisory_xact_lock` (both app
-     containers run the idempotent `db:init` concurrently).
+     containers run the idempotent `db:init` concurrently); the Neo4j
+     constraint bootstrap runs through `executeWrite`
+     (`src/config/neo4j_bootstrap.ts`) so concurrent fresh-graph starts
+     retry the transient label-lock deadlock instead of failing the
+     container (defect found by Session 6's CI).
 2. **Neo4j — semantic and belief layer**
    - `Entity` and `Conflict` nodes plus `ACTION`, `CONTRADICTS`,
      `DERIVED_INSIGHT`, `SAME_AS`/`DISTINCT_FROM`, and conflict-link edges.
@@ -161,7 +165,7 @@ Repository state at handoff creation:
 
 - `master`: `5f8d96b` (PR #27) plus the Session 6 benchmark-maturity PR that
   ships this file.
-- Offline baseline: `npm test` = **279 passing across 36 files**.
+- Offline baseline: `npm test` = **283 passing across 37 files**.
 - `npm run build` and `npm run python:check` pass.
 - Live zero-LLM checks: `npm run test:benchmark-hardening` (24 checks),
   `npm run test:entity-resolution` (33 checks), `npm run test:api-hardening`
@@ -382,7 +386,7 @@ npm run test:invalidation-sweep
 git diff --check
 ```
 
-The baseline is 279 tests and may only increase.
+The baseline is 283 tests and may only increase.
 
 Update:
 
