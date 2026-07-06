@@ -22,8 +22,8 @@ async function waitForServer(child: ChildProcess, timeoutMs = 30000): Promise<vo
   while (Date.now() < deadline) {
     if (child.exitCode !== null) throw new Error(`Server exited early with code ${child.exitCode}`);
     try {
-      await fetch(`${BASE}/retrieve`);
-      return; // any HTTP response means the listener is up
+      const response = await fetch(`${BASE}/healthz`);
+      if (response.ok) return;
     } catch {
       await new Promise(r => setTimeout(r, 250));
     }
@@ -48,8 +48,15 @@ async function main() {
     await waitForServer(server);
     console.log('Server is up. Running checks...\n');
 
+    // --- Unauthenticated liveness exception ---
+    let res = await fetch(`${BASE}/healthz`);
+    const health: any = await res.json();
+    check('GET /healthz without key -> 200', res.status === 200, `got ${res.status}`);
+    check('GET /healthz is explicitly liveness-only', health.scope === 'liveness',
+      `scope=${health.scope}`);
+
     // --- Authentication ---
-    let res = await fetch(`${BASE}/retrieve?entity=probe`);
+    res = await fetch(`${BASE}/retrieve?entity=probe`);
     check('GET /retrieve without key -> 401', res.status === 401, `got ${res.status}`);
 
     res = await fetch(`${BASE}/retrieve?entity=probe`, { headers: { 'x-api-key': 'wrong-key' } });

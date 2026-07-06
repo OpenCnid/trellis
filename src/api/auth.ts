@@ -39,9 +39,10 @@ export function extractApiKey(req: {
 }
 
 /**
- * Express middleware guarding every endpoint. With no configured key it
- * degrades to a pass-through (local development); with one, requests
- * without a matching key get 401 before any body parsing or DB access.
+ * Express middleware guarding every operational endpoint after /healthz.
+ * With no configured key it degrades to a pass-through (local development);
+ * with one, requests without a matching key get 401 before any body parsing
+ * or DB access.
  */
 export function apiKeyMiddleware(expectedKey: string | undefined) {
   if (!expectedKey) {

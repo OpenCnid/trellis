@@ -23,6 +23,7 @@ import {
   installShutdownSignalHandlers,
   shutdownCoordinator,
 } from '../core/runtime/shutdown.js';
+import { healthHandler } from './health.js';
 
 const execFileAsync = util.promisify(execFile);
 
@@ -51,6 +52,9 @@ function uploadPdf(req: express.Request, res: express.Response, next: express.Ne
 }
 
 const app = express();
+// Unauthenticated process liveness for container orchestration. This is
+// intentionally not dependency readiness; schema bootstrap gates startup.
+app.get('/healthz', (_req, res) => healthHandler(res));
 // Authentication before body parsing: unauthorized requests are refused
 // before any bytes are buffered or databases touched.
 app.use(apiKeyMiddleware(config.api.apiKey));

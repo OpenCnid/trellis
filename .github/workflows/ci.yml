@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Install Python runtime
+        run: |
+          python -m pip install --requirement requirements.txt --requirement requirements-pdf-fast.txt
+          python -m pip install --no-deps --requirement requirements-pdf-fast-nodeps.txt
+      - run: npm run python:check
+
+  image:
+    runs-on: ubuntu-latest
+    needs: offline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: trellis-backend:ci
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: image
+    env:
+      COMPOSE_PROJECT_NAME: trellis-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      TRELLIS_IMAGE: trellis-backend:ci-${{ github.run_id }}-${{ github.run_attempt }}
+      TRELLIS_POSTGRES_HOST_PORT: "0"
+      TRELLIS_NEO4J_HTTP_HOST_PORT: "0"
+      TRELLIS_NEO4J_BOLT_HOST_PORT: "0"
+      TRELLIS_REDIS_HOST_PORT: "0"
+      TRELLIS_API_HOST_PORT: "0"
+      API_KEY: trellis-ci-integration-key
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose model
+        run: docker compose --profile test config --quiet
+      - name: Run zero-LLM round trip
+        run: docker compose --profile test up --build --abort-on-container-exit --exit-code-from integration integration
+      - name: Show Compose logs
+        if: always()
+        run: docker compose --profile test logs --no-color
+      - name: Remove isolated project and volumes
+        if: always()
+        run: docker compose --profile test down --volumes --remove-orphans

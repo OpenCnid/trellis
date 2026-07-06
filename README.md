@@ -1,53 +1,166 @@
 # Trellis Engine
 
-Trellis is a Deterministic Spatial Reasoning Engine designed for enterprise knowledge. Standard GraphRAG (like Microsoft's implementation) extracts semantic entities but destroys the physical geometry of the source document, causing it to break when documents are updated. Trellis solves this by replacing standard, lossy GraphRAG with a mathematically rigorous architecture that maps the amorphous reasoning of Large Language Models directly to an immutable, Merkle-hashed coordinate system.
+Trellis is OpenCnid's provenance-preserving GraphRAG engine. It is an original
+codebase and is unrelated to other projects named Trellis.
 
-## Overview
-1. **The Physical Layer (AST):** Markdown documents are parsed into an Abstract Syntax Tree. Each node is given a deterministic SHA-256 Merkle-tree hash based on its content and children. PDF nodes preserve Spatial Bounding Boxes when the parser supplies coordinates; Markdown nodes do not carry geometry.
-2. **The Semantic Layer (Knowledge Graph):** LLMs process block-level nodes via asynchronous workers to extract strict Entities and Actions using Zod. We employ a pgvector hybrid fallback for robust similarity matching when topological traversal isn't enough.
-3. **The Bridge (RLM Harness):** Extracted entities point directly back to the physical AST Node IDs. We use a Recursive Language Model (RLM) agent with a secure Python REPL to autonomously traverse the graph and resolve physical data contradictions safely.
+Every semantic fact remains traceable to immutable, content-addressed source
+bytes:
+
+1. **Physical layer:** Markdown or PDF input becomes a SHA-256 Merkle AST in
+   PostgreSQL/pgvector. PDF nodes retain bounding boxes when the parser
+   provides them; Markdown nodes do not carry geometry.
+2. **Semantic layer:** asynchronous workers extract Neo4j entities and
+   relationships whose `sourceNodeIds` point back to AST hashes.
+3. **Async/RLM layer:** Redis/BullMQ isolates retryable LLM work, and the
+   Python RLM traverses both stores through provenance-aware tools.
 
 ## Prerequisites
-- Node.js (v18+)
-- Docker Desktop (ensure the WSL 2 backend is running)
-- An OpenAI API Key (`OPENAI_API_KEY`)
 
-## Local Setup
+- Node.js 22
+- Python 3.11+ for bare-host RLM/PDF execution
+- Docker Desktop with Compose v2
+- `OPENAI_API_KEY` when running LLM workers
 
-1. **Clone the repository and install dependencies:**
-   ```bash
-   npm install
-   ```
+No repository license has been selected yet. The `package.json` ISC value is a
+legacy package stub, not an OpenCnid license decision.
 
-2. **Configure Environment:**
-   Set your OpenAI API key in your environment or a `.env` file:
-   ```bash
-   OPENAI_API_KEY=your_api_key_here
-   ```
+## Bare-host development
 
-3. **Start the Infrastructure:**
-   Spin up the Three-Tier database architecture (PostgreSQL, Neo4j, Redis) using Docker Compose:
-   ```bash
-   docker-compose up -d
-   ```
+Install the locked Node dependencies and create local configuration:
 
-4. **Initialize Databases:**
-   Lock in the database schemas and uniqueness constraints:
-   ```bash
-   npx tsx src/config/init_db.ts
-   ```
+```bash
+npm ci
+cp .env.example .env
+```
 
-## Running the Engine
+`src/config/environment.ts` loads `.env` once, then
+`src/config/index.ts` validates all TypeScript configuration with Zod.
+Existing shell values take precedence over `.env`. Set real `API_KEY` and
+`OPENAI_API_KEY` values before non-local or paid-worker use.
 
-To run the Trellis pipeline locally, you need to boot the ingestion server and the background workers. The easiest way to start all components simultaneously is using our unified startup script:
+Start only the databases on Docker and initialize their schemas:
 
-1. **Start the API and all background workers:**
-   ```bash
-   npx tsx scripts/start_all.ts
-   ```
+```bash
+docker compose up -d postgres neo4j redis
+npm run db:init:dev
+```
 
-*(Alternatively, you can run them individually)*:
-- **API Server:** `npx tsx src/api/server.ts` (Starts on port `3000`)
-- **Individual workers:** run the corresponding module under `src/workers/` with `npx tsx`.
+Run the API and all workers:
 
-For integration details on hitting the endpoints, see the [API Reference](API_REFERENCE.md).
+```bash
+npm run dev
+```
+
+API-only and worker-only development entrypoints are also available:
+
+```bash
+npm run dev:api
+npm run dev:workers
+```
+
+## Production build
+
+The checked-in build configuration emits CommonJS under `dist/`; `tsx` and
+TypeScript remain development-only dependencies.
+
+```bash
+npm ci
+npm run build
+npm run db:init
+npm start
+```
+
+`npm start` launches the API and every worker. `npm run start:api` and
+`npm run start:workers` run split production processes.
+
+The Python manifests separate direct application dependencies from the
+reviewed imports needed by `partition_pdf(strategy="fast")`. Fast mode does
+not ship the multi-gigabyte Torch/transformer stack used only by hi-res
+inference:
+
+```bash
+python -m pip install --requirement requirements.txt --requirement requirements-pdf-fast.txt
+python -m pip install --no-deps --requirement requirements-pdf-fast-nodeps.txt
+npm run python:check
+```
+
+## Containers
+
+Compose uses its normal `.env` interpolation path and supplies explicit
+service-DNS connection values inside containers. The bare-host defaults in
+`src/config/index.ts` remain unchanged.
+
+```bash
+cp .env.example .env
+# Set API_KEY and OPENAI_API_KEY in .env before non-local use.
+docker compose up --build -d
+docker compose ps
+```
+
+The application image:
+
+- compiles TypeScript in a build stage and installs production Node modules
+  only in the runtime;
+- includes the pinned Python RLM/PDF environment and PDF system packages;
+- runs as the non-root `node` user with a writable `uploads/` directory;
+- waits on healthy PostgreSQL, Neo4j, and Redis services;
+- runs idempotent schema initialization before `exec`-ing Node.
+
+Compose runs API and workers as separate services from the same image.
+Removing fixed container names keeps containers and named volumes scoped to
+the Compose project. Host ports can be overridden with
+`TRELLIS_*_HOST_PORT`; setting them to `0` lets Docker allocate isolated CI
+ports.
+
+### Health and shutdown
+
+`GET /healthz` is an unauthenticated, liveness-only endpoint:
+
+```bash
+curl http://localhost:3000/healthz
+# {"status":"ok","scope":"liveness"}
+```
+
+Dependency readiness is established by Compose health conditions and the
+failing schema bootstrap. Database outages do not intentionally trigger
+container restart loops through `/healthz`.
+
+The entrypoint replaces itself with Node after initialization, so
+`docker compose stop` delivers SIGTERM directly to the application and PR
+#21's phase-ordered shutdown closes admission, workers, queues, and database
+clients.
+
+## Verification
+
+Offline checks require no Docker or API key:
+
+```bash
+npm test
+npm run build
+npm run python:check
+```
+
+The deterministic Compose round trip starts only the API—never the workers—
+and does not receive `OPENAI_API_KEY`. It ingests a lone thematic break
+(zero extraction jobs), verifies PostgreSQL document membership, seeds one
+provenance-bearing Neo4j relationship, and retrieves it through the API:
+
+```bash
+docker compose --profile test up --build --abort-on-container-exit --exit-code-from integration integration
+docker compose --profile test down --volumes --remove-orphans
+```
+
+Use a unique `COMPOSE_PROJECT_NAME` and host ports set to `0` when running this
+beside another stack. The GitHub Actions workflow does this automatically and
+removes only its isolated project and volumes.
+
+Existing live, zero-LLM checks:
+
+```bash
+npm run test:api-hardening
+npm run test:rlm-sandbox
+npm run test:belief-recovery
+npm run test:invalidation-sweep
+```
+
+See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts.
