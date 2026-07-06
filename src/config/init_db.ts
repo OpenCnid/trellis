@@ -1,5 +1,6 @@
 import { pgPool, neo4jDriver } from './db.js';
 import { POSTGRES_SCHEMA_SQL } from './schema.js';
+import { ensureNeo4jConstraints } from './neo4j_bootstrap.js';
 import { runInitializationTasks } from '../core/runtime/database_init.js';
 import { loggerFor } from '../core/observability/logger.js';
 
@@ -24,15 +25,10 @@ async function initializeDatabases(): Promise<void> {
     {
       name: 'neo4j',
       run: async () => {
-        const session = neo4jDriver.session();
-        try {
-          await session.run(
-            'CREATE CONSTRAINT IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE'
-          );
-          log.info({ event: 'database.neo4j_constraints_ready' });
-        } finally {
-          await session.close();
-        }
+        // executeWrite retries transient deadlocks — both containers
+        // bootstrap a fresh graph concurrently (see neo4j_bootstrap.ts).
+        await ensureNeo4jConstraints(neo4jDriver);
+        log.info({ event: 'database.neo4j_constraints_ready' });
       },
     },
   ]);

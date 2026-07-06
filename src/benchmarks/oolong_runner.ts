@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { OolongDatasetSchema } from './oolong/schema';
+import { neo4jDriver } from '../config/db';
+import { resolveDatasetPath, loadDataset } from './oolong/dataset_cli';
+import { auditFlywheelCache } from './oolong/cache_audit';
 import { QueryTelemetry, cityTruth, executeScoredQuery } from './oolong/scoring';
 
 // Task 2c: OOLONG-Pairs Metrics and Evaluation Runner.
@@ -11,14 +13,40 @@ import { QueryTelemetry, cityTruth, executeScoredQuery } from './oolong/scoring'
 //   Queries 15-20: repeats of the first 6 cities (warm — cached
 //                  classifications should collapse sub-call count and cost).
 // Scores every answer with the Set-based F1 metric against ground truth
-// and writes benchmark_results.json at the repo root.
+// and writes the results file at the repo root.
 //
 // Scoring, query construction, and the dispatch/retry loop live in
 // ./oolong/scoring.ts, shared with the Phase 4 Update Drill runner.
+//
+// Session 6: `--dataset <path>` selects the corpus (default v1); the
+// city list and sequence derive from the dataset. Results for a
+// non-v1 dataset land in benchmark_results_v2.json (or --results
+// <path>) — the committed v1 benchmark_results.json is never
+// overwritten by another corpus's run. After the query sequence the
+// runner appends a post-warm cache-audit block (shared pure module) so
+// cache trustworthiness is a first-class result, not an out-of-band
+// script.
 
-const DATASET_PATH = path.join(__dirname, '..', '..', 'data', 'oolong_pairs_dataset.json');
-const RESULTS_PATH = path.join(__dirname, '..', '..', 'benchmark_results.json');
-const LOGS_DIR = path.join(__dirname, '..', '..', 'benchmark_logs');
+const V1_DATASET_NAME = 'oolong-pairs-trec-synthetic-v1';
+const REPO_ROOT = path.join(__dirname, '..', '..');
+const LOGS_DIR = path.join(REPO_ROOT, 'benchmark_logs');
+
+function resolveResultsPath(argv: string[], datasetName: string): string {
+  const index = argv.indexOf('--results');
+  const explicit = index !== -1 ? argv[index + 1] : undefined;
+  if (index !== -1 && (!explicit || explicit.startsWith('--'))) {
+    throw new Error('--results requires a path argument');
+  }
+  const resolved = explicit
+    ? path.resolve(explicit)
+    : path.join(REPO_ROOT, datasetName === V1_DATASET_NAME ? 'benchmark_results.json' : 'benchmark_results_v2.json');
+  if (datasetName !== V1_DATASET_NAME && resolved === path.join(REPO_ROOT, 'benchmark_results.json')) {
+    throw new Error(
+      `Refusing to write ${resolved} for dataset "${datasetName}" — benchmark_results.json records the committed v1 baseline.`
+    );
+  }
+  return resolved;
+}
 const WARM_REPEATS = 6;
 const QUERY_TIMEOUT_MS = 20 * 60 * 1000;
 // A run that never touched either database is a protocol violation (the
@@ -34,7 +62,12 @@ async function main(): Promise<void> {
   console.log('Task 2c: OOLONG-Pairs Benchmark Runner (20 queries)');
   console.log('======================================================');
 
-  const dataset = OolongDatasetSchema.parse(JSON.parse(fs.readFileSync(DATASET_PATH, 'utf8')));
+  const argv = process.argv.slice(2);
+  const datasetPath = resolveDatasetPath(argv);
+  const dataset = loadDataset(datasetPath);
+  const resultsPath = resolveResultsPath(argv, dataset.name);
+  console.log(`Dataset: ${dataset.name} (${datasetPath})`);
+  console.log(`Results: ${resultsPath}`);
   const categoryOf = new Map(dataset.records.map(r => [r.id, r.category as string]));
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 
@@ -92,15 +125,22 @@ async function main(): Promise<void> {
     total_cost_usd: results.reduce((s, r) => s + r.cost_usd, 0)
   };
 
+  // Post-warm cache audit (zero-LLM graph read): how trustworthy is
+  // the classification cache the warm phase just leaned on? Shares its
+  // implementation with scripts/audit_flywheel_cache.ts and the poison
+  // drill (cache_audit.ts).
+  const cacheAudit = await auditFlywheelCache(neo4jDriver, dataset);
+
   const report = {
     benchmark: 'OOLONG-Pairs (Spatial Flywheel)',
     dataset: dataset.name,
     model: 'gpt-5.4-2026-03-05',
     generated_at: new Date().toISOString(),
     queries: results,
-    summary
+    summary,
+    cache_audit: cacheAudit
   };
-  fs.writeFileSync(RESULTS_PATH, JSON.stringify(report, null, 2) + '\n');
+  fs.writeFileSync(resultsPath, JSON.stringify(report, null, 2) + '\n');
 
   // Final table
   const header = ['#', 'City', 'Phase', 'F1', 'Tokens', 'Subcalls', 'Cost($)', 'Time(s)'];
@@ -121,12 +161,19 @@ async function main(): Promise<void> {
   console.log(`  Mean cost:      cold $${summary.mean_cost_usd_cold.toFixed(4)}  ->  warm $${summary.mean_cost_usd_warm.toFixed(4)}`);
   console.log(`  Mean tokens:    cold ${Math.round(summary.mean_tokens_cold)}  ->  warm ${Math.round(summary.mean_tokens_warm)}`);
   console.log(`  Total run cost: $${summary.total_cost_usd.toFixed(4)}`);
-  console.log(`\nReport written to ${RESULTS_PATH}`);
+  console.log('\nPost-warm cache audit (effective has_category beliefs):');
+  console.log(`  Cached ${cacheAudit.cached} | correct ${cacheAudit.correct} | wrong ${cacheAudit.wrong} | unknown ${cacheAudit.unknown}`);
+  console.log(`  Accuracy: ${cacheAudit.accuracy === null ? 'n/a (cache empty)' : cacheAudit.accuracy.toFixed(4)}`);
+  console.log(`\nReport written to ${resultsPath}`);
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch(err => {
+  .then(async () => {
+    await neo4jDriver.close();
+    process.exit(0);
+  })
+  .catch(async err => {
     console.error(`BENCHMARK RUNNER FAILED: ${err.message}`);
+    await neo4jDriver.close().catch(() => {});
     process.exit(1);
   });

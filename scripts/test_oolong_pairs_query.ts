@@ -1,8 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import { z } from 'zod';
 import { neo4jDriver } from '../src/config/db';
-import { OolongDatasetSchema } from '../src/benchmarks/oolong/schema';
+import { resolveDatasetPath, loadDataset } from '../src/benchmarks/oolong/dataset_cli';
 
 // Task 2a: Topological Traversal Query Test.
 //
@@ -10,8 +8,11 @@ import { OolongDatasetSchema } from '../src/benchmarks/oolong/schema';
 // :Concept node — the quadratic OOLONG-Pairs task collapsed into a
 // single graph traversal — and cross-checks the result against the
 // dataset's ground-truth answer key.
-
-const DATASET_PATH = path.join(__dirname, '..', 'data', 'oolong_pairs_dataset.json');
+//
+// Session 6: `--dataset <path>` selects the corpus (default v1), and
+// the traversal is scoped to that dataset's question ids so v1 and the
+// v2 anti-shortcut corpus can coexist in one graph without polluting
+// each other's answer keys.
 
 // Boundary validation for what comes back from the database
 const PairRowSchema = z.object({
@@ -27,20 +28,23 @@ async function main(): Promise<void> {
   console.log('Task 2a: Topological Traversal Query Test (LOC-HUM pairs)');
   console.log('======================================================');
 
-  const dataset = OolongDatasetSchema.parse(JSON.parse(fs.readFileSync(DATASET_PATH, 'utf8')));
+  const datasetPath = resolveDatasetPath(process.argv.slice(2));
+  const dataset = loadDataset(datasetPath);
   const truth = new Set(
     dataset.ground_truth.loc_hum_shared_concept_pairs.map(([loc, hum]) => pairKey(loc, hum))
   );
-  console.log(`Ground truth loaded: ${truth.size} expected LOC-HUM pairs.`);
+  console.log(`Dataset: ${dataset.name}. Ground truth loaded: ${truth.size} expected LOC-HUM pairs.`);
 
+  const questionIds = dataset.records.map(r => r.id);
   const session = neo4jDriver.session();
   let rows: z.infer<typeof PairRowSchema>[];
   try {
     const result = await session.run(`
       MATCH (a:Question {category: 'LOC'})-[:REFERENCES]->(c:Concept)<-[:REFERENCES]-(b:Question {category: 'HUM'})
+      WHERE a.id IN $questionIds AND b.id IN $questionIds
       RETURN a.id AS locId, b.id AS humId, collect(DISTINCT c.name) AS sharedConcepts
       ORDER BY locId, humId
-    `);
+    `, { questionIds });
     rows = result.records.map(r =>
       PairRowSchema.parse({
         locId: r.get('locId'),
