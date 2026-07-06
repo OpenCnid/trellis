@@ -5,20 +5,24 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–5 are complete and merged:
+Sessions 1–6 are complete and merged:
 
 - PR #21 — async reliability and batch ingestion.
 - PR #22 — provenance liveness closure and verified production ingestion.
 - PR #23 — deployment and CI readiness.
 - PR #25 — structured logging and Prometheus metrics (T16).
-- Session 5 — entity resolution beyond exact-name identity (`SAME_AS` overlay
-  beliefs); merged via the PR that shipped this file (see `git log -- HANDOFF.md`).
+- PR #27 — entity resolution beyond exact-name identity (`SAME_AS` overlay
+  beliefs, Session 5).
+- Session 6 — benchmark maturity (anti-shortcut dataset v2 + first-class
+  cache-audit metric); merged via the PR that shipped this file (see
+  `git log -- HANDOFF.md`).
 
 OpenCnid selected the MIT License on July 6, 2026.
 
 Your objective is to study the current code and `TRELLIS_ROADMAP.md`, present a
-concrete design, and then implement **Session 6: benchmark maturity (roadmap
-item 3.3 #3)**. Do not re-plan or re-implement completed work.
+concrete design, and then implement **Session 7: semantic provenance scaling
+(roadmap item 3.3 #4)** — measurement first, migration only if the
+measurements justify it. Do not re-plan or re-implement completed work.
 
 ---
 
@@ -98,6 +102,23 @@ immutable, content-addressed physical location in source material.
      quarantines like any belief. `GET /retrieve` expands one non-contested
      `SAME_AS` hop at `RESOLUTION_MIN_CONFIDENCE` (default 0.8) with
      per-fact `viaAlias` attribution; `?resolveAliases=false` opts out.
+   - **Benchmark corpora (Session 6):** the OOLONG harness ships two seeded
+     corpora — v1 (`data/oolong_pairs_dataset.json`, the saturated baseline
+     behind the committed `benchmark_results.json`) and the anti-shortcut v2
+     (`data/oolong_pairs_dataset_hard.json`,
+     `oolong-pairs-trec-synthetic-v2`, pure generator
+     `src/benchmarks/oolong/generate_v2.ts`): paraphrased city mentions that
+     never contain the canonical token, near-miss questions name-dropping
+     unannotated cities, and prose distractors ingested as `:Passage` nodes
+     (provenance, no category, no `REFERENCES` — never pairable). Harness
+     CLIs take `--dataset` (default v1,
+     `src/benchmarks/oolong/dataset_cli.ts`); the runner writes non-v1
+     results to `benchmark_results_v2.json` and refuses to overwrite v1's.
+     Cache-audit accuracy is a first-class metric
+     (`src/benchmarks/oolong/cache_audit.ts`) shared by the audit CLI, the
+     runner's results block, and the poison drill. v2 question ids are
+     `q_1001..q_1220` — disjoint from v1 but still `q_\d+`-shaped, so both
+     corpora coexist in one graph and stay invisible to alias resolution.
 3. **Redis + BullMQ — asynchronous layer**
    - `extraction_queue`, `rlm_queue`, `supervisor_queue`,
      `invalidation_queue`, `verification_queue`, and `resolution_queue`.
@@ -112,7 +133,7 @@ immutable, content-addressed physical location in source material.
      an internal listener on `WORKER_METRICS_PORT` (9464, never published to
      the host) with scrape-time queue-depth gauges registered in
      `src/workers/metrics_server.ts`.
-   - **Anything Session 6 adds must follow this style**; benchmark runners
+   - **Anything Session 7 adds must follow this style**; benchmark runners
      and maintenance CLIs may keep human-formatted console output.
 
 `POST /ingest` parses Markdown/PDF into a Merkle AST, bulk-persists it, reads
@@ -138,13 +159,14 @@ The backend and workers run as **separate Node processes/containers**.
 
 Repository state at handoff creation:
 
-- `master`: `e9fe06e` (PR #26) plus the Session 5 entity-resolution PR that
+- `master`: `5f8d96b` (PR #27) plus the Session 6 benchmark-maturity PR that
   ships this file.
-- Offline baseline: `npm test` = **247 passing across 33 files**.
+- Offline baseline: `npm test` = **279 passing across 36 files**.
 - `npm run build` and `npm run python:check` pass.
-- Live zero-LLM checks: `npm run test:entity-resolution` (33 checks),
-  `npm run test:api-hardening` (18 checks), `npm run test:rlm-sandbox`
-  (4 checks), `npm run test:belief-recovery`, `npm run test:invalidation-sweep`.
+- Live zero-LLM checks: `npm run test:benchmark-hardening` (24 checks),
+  `npm run test:entity-resolution` (33 checks), `npm run test:api-hardening`
+  (18 checks), `npm run test:rlm-sandbox` (4 checks),
+  `npm run test:belief-recovery`, `npm run test:invalidation-sweep`.
 - The isolated Compose integration (`scripts/test_compose_roundtrip.ts`, 9
   assertions) starts the API and workers with no OpenAI key and asserts
   metrics auth/exposition, worker-listener reachability, queue gauges for
@@ -165,35 +187,43 @@ docker compose config --quiet
 
 Work on a feature branch and target `master`.
 
-## 3. Session 6 problem statement
+## 3. Session 7 problem statement
 
-The committed `benchmark_results.json` shows F1 = 1.0 on all 20 queries with
-mean sub-calls falling 0.36 (cold) → 0 (warm): the benchmark proves the
-flywheel works but no longer discriminates. Why it is saturated:
+Provenance is stored as unbounded array properties, and the machinery that
+reads them scales with graph size times array length:
 
-- `data/oolong_pairs_dataset.json` (`oolong-pairs-trec-synthetic-v1`, seed
-  42, 220 records: 50 LOC + 50 HUM + 35 NUM + 35 ENTY + 35 DESC + 15 ABBR)
-  is generated by `scripts/generate_oolong_dataset.ts` from roughly four
-  templates per category crossed with 14 cities. Template questions are
-  trivially classifiable and trivially groupable.
-- Every city mention is the **literal capitalized city name** embedded in
-  the question text, and `concepts: [city]` repeats it. An agent can satisfy
-  the OOLONG-Pairs query by substring-scanning question text — the shortcut
-  the roadmap calls out — without ever consulting cached classifications.
-- There are no distractors: no question mentions a city it is not annotated
-  with, no near-miss surface forms, and no non-question prose competes.
-- Cache trustworthiness is measured only out-of-band:
-  `scripts/audit_flywheel_cache.ts` prints accuracy to stdout, and the
-  poison drill (`src/benchmarks/oolong/poison.ts`,
-  `src/benchmarks/poison_drill_runner.ts`) measures detection recall — but
-  `benchmark_results.json` records neither. The roadmap says the cache-audit
-  accuracy becomes a first-class metric.
+- **Append-only unions.** `ENTITY_MERGE_CYPHER` and `ACTION_MERGE_CYPHER`
+  (`src/core/graph/extraction_merge.ts`) union every incoming live block
+  hash into `sourceNodeIds` on `ON MATCH`. The RLM write path
+  (`_WRITE_INSIGHT_QUERY` in `src/rlm/trellis_tools.py`) does the same for
+  `DERIVED_INSIGHT` edges and both endpoint nodes, `SAME_AS`/`DISTINCT_FROM`
+  verdicts carry the union of both endpoints' provenance
+  (`alias_resolution.ts`), and the OOLONG ingester appends per-batch to
+  `Concept.sourceNodeIds`. A hub entity mentioned once per document
+  accumulates one hash per mentioning block, forever. `orphanedSourceIds`
+  audit arrays additionally grow monotonically and are never pruned (by
+  design — but they multiply the property payload).
+- **The sweep is a full-graph scan.** `CONTEST_NODES_CYPHER` /
+  `CONTEST_RELS_CYPHER` (`src/core/graph/invalidation.ts`) run label-less
+  `MATCH (n)` / `MATCH ()-[r]->()` with
+  `any(h IN n.sourceNodeIds WHERE h IN $orphaned)` per 500-hash orphan
+  batch. No index can serve array-membership predicates, so each re-ingest
+  pays O(batches × (V + E) × mean array length).
+- **Retrieval and adjudication read whole arrays.** `GET /retrieve`
+  (`src/api/server.ts`) unions `sourceNodeIds` across the traversal and
+  joins them to `ast_nodes`; alias adjudication fetches snippet text for
+  every id in each endpoint's array (`fetchEntitySnippets` in
+  `alias_resolution.ts`).
+- **The roadmap's stated bar (3.3 #4):** consider provenance as first-class
+  edges (`(:Entity)-[:EVIDENCED_BY]->(:ASTRef)`) once documents number in
+  the hundreds — and "replace unbounded source arrays only when scale
+  measurements justify the migration" (§4 sequencing rationale). No such
+  measurements exist yet: nothing in the repo ingests hundreds of documents
+  or measures sweep/merge/retrieval cost as arrays grow.
 
-`docs/benchmarks/CRITIQUE_AND_FUTURE.md` already acknowledges this
-direction. The runner infrastructure (shared scoring in
-`src/benchmarks/oolong/scoring.ts`, verify-as-you-go ingestion in
-`scripts/ingest_oolong_dataset.ts`, dress-rehearsal seeding in `poison.ts`)
-is ready for a harder corpus.
+So Session 7 is measurement-first: build the scale evidence, then migrate
+only what the evidence indicts — or record, with numbers, that the migration
+is not yet justified and what threshold would justify it.
 
 ## 4. Required design
 
@@ -201,131 +231,139 @@ Present the exact design after inspecting the files in §5, then implement it.
 This is the recommended architecture; deviations require a concrete reason
 and equivalent tests.
 
-### 4.1 Dataset v2 (deterministic, harder, versioned)
+### 4.1 Milestone A — deterministic scale drill (zero-LLM, required)
 
-- A new seeded generator (extend `scripts/generate_oolong_dataset.ts` with a
-  version flag or add a sibling script) emitting
-  `data/oolong_pairs_dataset_v2.json` with `name:
-  'oolong-pairs-trec-synthetic-v2'`. **Never overwrite or regenerate v1** —
-  the committed `benchmark_results.json`, the drills, and
-  `audit_flywheel_cache.ts` reference it.
-- **Paraphrased/indirect mentions:** a deterministic per-city alias table
-  (e.g. "the French capital", "the city on the Seine" for paris) so a
-  scored fraction of LOC/HUM questions mention the city only indirectly.
-  `concepts` keeps the canonical city (ground truth stays derivable
-  offline); a new schema field records the surface form used. The
-  anti-shortcut property — the paraphrased text does not contain the
-  canonical city token — must be pinned by a unit test.
-- **Distractors:** (a) questions using a city surface form while annotated
-  with a *different* concept or none (near-miss records), and (b)
-  non-question prose paragraphs mentioning city surface forms, ingested as
-  part of the corpus but never valid pair members. Extend
-  `OolongRecordSchema`/`buildCorpus` (`src/benchmarks/oolong/schema.ts`,
-  `corpus.ts`) minimally and keep the heading+paragraph binding round trip
-  verifiable.
-- `ground_truth.loc_hum_shared_concept_pairs` derives exactly as v1: LOC ×
-  HUM pairs sharing a concept annotation.
+- A pure seeded corpus generator (e.g.
+  `src/benchmarks/scale/generate_scale_corpus.ts`): N synthetic markdown
+  documents (target ≥ 300, tunable) × ~15–25 blocks, mentioning a fixed
+  entity pool with a skewed (Zipf-like) distribution so a few hub entities
+  appear in most documents and a long tail appears rarely. Deterministic:
+  same seed → byte-identical corpus; unit-test the mention distribution.
+- A drill runner (e.g. `scripts/scale_provenance_drill.ts`, npm script
+  `drill:scale`) that drives the corpus through the REAL machinery with no
+  LLM: physical writes + `registerDocumentVersion` + `recordDocumentNodes`
+  (the pattern in `scripts/test_entity_resolution.ts`'s `ingestVersion`),
+  then deterministic pseudo-extractions through `mergeExtractedGraph` — the
+  same code path production extraction uses.
+- Measurements (committed as `scale_drill_results.json` + a
+  `docs/benchmarks/SCALE_PROVENANCE_REPORT.md` summarizing them):
+  - `sourceNodeIds` cardinality distribution per label/edge type (max, p95,
+    mean) as document count grows (sample at e.g. 50/150/300 docs);
+  - merge latency for hub entities as their arrays grow (the ON MATCH list
+    comprehension is O(existing × incoming));
+  - sweep latency vs. graph size and orphan-set size: re-ingest K modified
+    documents, time `sweepOrphanedProvenance` end to end and per batch;
+  - `/retrieve` latency for a hub entity vs. a tail entity;
+  - alias adjudication context-fetch cost for hub entities (the snippet
+    fetch iterates the whole array).
+  Timing helpers should be pure/injectable where practical; the numbers in
+  the report must come from the live drill against the compose stack.
+- Cleanup: the drill must remove everything it created (token-prefixed
+  names/doc keys, tracked AST rows — follow `test_benchmark_hardening.ts`'s
+  pre-snapshot pattern).
 
-### 4.2 Harness generalization
+### 4.2 Milestone B — migration, gated on A's evidence
 
-- `scripts/ingest_oolong_dataset.ts`, `scripts/prepare_oolong_flywheel.ts`,
-  and `scripts/audit_flywheel_cache.ts` currently hardcode the v1 path;
-  accept a `--dataset <path>` flag defaulting to v1 so both corpora work.
-  The verify-as-you-go ingestion loop and the deterministic
-  `(:Question)-[:REFERENCES]->(:Concept)` edges (built from annotations,
-  zero LLM) are unchanged in kind.
-- `buildQuery` in `scoring.ts` keeps naming the canonical city — the
-  difficulty moves into the corpus, not the query string. The runner
-  (`src/benchmarks/oolong_runner.ts`) derives its city list and sequence
-  from the dataset it is pointed at; results for v2 land in a separate
-  results file (e.g. `benchmark_results_v2.json`), never overwriting v1's.
+- **Decision gate (record it in the roadmap either way):** migrate only if
+  Milestone A shows superlinear sweep cost or hub arrays in the thousands at
+  realistic document counts. If the evidence does not indict the arrays,
+  record the measured headroom and the threshold that would trigger the
+  migration, regenerate this file for the next objective, and stop — that is
+  a valid, complete Session 7.
+- If migrating, the recommended shape is **provenance as first-class edges**:
+  `(:ASTRef {hash})` nodes (unique-constrained) with
+  `(fact)-[:EVIDENCED_BY {orphaned, orphanedAt}]->(:ASTRef)` edges replacing
+  array membership for *scan* purposes. The sweep becomes an indexed anchor
+  lookup (`MATCH (ref:ASTRef) WHERE ref.hash IN $orphaned`) plus an edge
+  traversal — no full-graph scan. Keep the quarantine state machine
+  semantics of `provenance.ts` (contested/fresh-survival/audit history/
+  commuting transitions) — its unit tests are the spec; extend them rather
+  than weakening them. Relationships cannot carry `EVIDENCED_BY` edges
+  (Neo4j has no edges on edges), so relationship provenance needs an
+  explicit decision: keep arrays on edges (measure whether edges are a
+  minority of hub growth first) or reify hot edges as nodes. Do not guess:
+  choose from A's numbers.
+- Any migration ships with: an idempotent backfill script for existing
+  graphs (`scripts/migrate_provenance_refs.ts`), dual-form consistency
+  checks during the transition, updated Cypher pins in the unit suite
+  (deliberate, reviewed pin changes — the old pins encode the old storage,
+  not the invariant), and a re-run of Milestone A's drill demonstrating the
+  improvement with before/after numbers in the report.
 
-### 4.3 Cache-audit accuracy as a first-class metric
+### 4.3 Cost policy (explicit)
 
-- Extract the audit logic from `scripts/audit_flywheel_cache.ts` into a pure
-  module (e.g. `src/benchmarks/oolong/cache_audit.ts`) returning
-  `{ cached, correct, wrong, unknown, accuracy }` given the dataset truth
-  and the cached rows; the script becomes a thin caller.
-- The benchmark runner appends a post-warm cache-audit block to its results
-  summary, and the poison drill reuses the same module so "poison recall"
-  and "cache accuracy" are computed by one implementation.
-
-### 4.4 Cost policy (explicit)
-
-- Everything above is implementable and verifiable **zero-LLM**: generation
-  is seeded, ingestion is deterministic, cache seeding uses
-  `seedVerifiedCache` (`poison.ts`), and scoring is pure.
-- A paid 20-query benchmark run against v2 is **not part of acceptance**.
-  If run at all, it requires explicit approval from the repository owner
-  first, with a cost estimate derived from the v1 telemetry in
-  `benchmark_results.json`; record actual spend in the roadmap entry.
+- Everything above is implementable and verifiable **zero-LLM**: the drill
+  uses deterministic pseudo-extractions and the real merge/sweep/retrieve
+  paths. No paid LLM calls are part of Session 7 acceptance. A paid
+  benchmark run (v1 or v2) still requires explicit owner approval per the
+  Session 6 cost policy, with an estimate derived from the v1 telemetry in
+  `benchmark_results.json`.
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `TRELLIS_ROADMAP.md`, especially §3.3 #3, §4, and §5.
+- `TRELLIS_ROADMAP.md`, especially §3.3 #4, §4, and the Session 5/6 §5
+  entries.
 - `.agents/AGENT_CODING_GUIDELINES.md`.
-- `docs/benchmarks/CRITIQUE_AND_FUTURE.md` (the critique this session
-  answers) and any benchmark spec under `docs/benchmarks/`.
-- `scripts/generate_oolong_dataset.ts` (v1 generator; templates, seed,
-  ground-truth derivation), `data/oolong_pairs_dataset.json`.
-- `src/benchmarks/oolong/schema.ts` (Zod boundary), `corpus.ts` (markdown
-  binding round trip), `scoring.ts` (`buildQuery`, `cityTruth`,
-  `parsePredictedPairs`, `scoreF1`, `executeScoredQuery`).
-- `src/benchmarks/oolong_runner.ts` (20-query sequence and results shape),
-  `benchmark_results.json` (the saturated baseline).
-- `scripts/ingest_oolong_dataset.ts` (verify-as-you-go loop),
-  `scripts/prepare_oolong_flywheel.ts`, `scripts/audit_flywheel_cache.ts`.
-- `src/benchmarks/oolong/poison.ts` (`seedVerifiedCache`, `poisonCache`,
-  `auditPoisonDetection`) and `src/benchmarks/poison_drill_runner.ts`.
-- `scripts/test_oolong_pairs_query.ts` (the deterministic zero-LLM pairs
-  check to generalize).
-- `src/core/graph/entity_kinds.ts` — v2 questions/labels must land in the
-  `question`/`category_label` kinds exactly like v1, keeping them invisible
-  to Session 5's alias candidate generation.
+- `src/core/graph/extraction_merge.ts` (both merge Cyphers and their ON
+  MATCH array unions), `src/core/graph/provenance.ts` and
+  `provenance.test.ts` (the state-machine spec any migration must honor).
+- `src/core/graph/invalidation.ts` (the full-scan sweep Cyphers,
+  `SWEEP_BATCH_SIZE`).
+- `src/core/ast/registry.ts` (`registerDocumentVersion`,
+  `recordDocumentNodes`, `isAstNodeLive`, global liveness reduction) and
+  `src/core/ast/diff.ts`.
+- `src/api/server.ts` (`GET /retrieve` provenance join and alias
+  expansion), `src/core/graph/alias_resolution.ts`
+  (`fetchEntitySnippets` iterates whole arrays; verdict union
+  provenance).
+- `src/rlm/trellis_tools.py` (`_WRITE_INSIGHT_QUERY` — the Python half of
+  every provenance union; any storage change must update it in lockstep).
+- `scripts/test_entity_resolution.ts` (`ingestVersion` — the zero-LLM
+  versioned-ingest pattern the drill should reuse) and
+  `scripts/test_benchmark_hardening.ts` (pre-snapshot cleanup pattern).
+- `src/config/init_db.ts` (where any new constraint/index bootstrap lives)
+  and `src/core/observability/metrics.ts` (if the sweep gains new
+  counters/durations, follow the house style).
+- `scripts/test_belief_recovery.ts` and `scripts/test_invalidation_sweep.ts`
+  (the suites that pin quarantine/recovery behavior and must stay green
+  through any migration).
 
-Prefer pure helpers: the generator's record builders, the alias table, and
-the cache-audit computation should be importable and unit-testable without
-databases.
+Prefer pure helpers: the corpus generator, the mention-distribution math,
+and any percentile/timing aggregation should be importable and
+unit-testable without databases.
 
 ## 6. Test strategy and acceptance
 
-Test first. No paid LLM calls are permitted for Session 6 acceptance —
-drills use the oracle seeding path; a real v2 benchmark run is out of scope
-without explicit owner approval (§4.4).
+Test first. No paid LLM calls are permitted for Session 7 acceptance.
 
 Offline tests should cover:
 
-- v2 generator determinism: two runs produce byte-identical output; the
-  dataset validates against the extended Zod schema;
-- the anti-shortcut pin: every paraphrased record's text does NOT contain
-  its canonical city token (case-insensitive), and at least a known count
-  of such records exist;
-- distractor records: near-miss and prose distractors are never members of
-  `ground_truth.loc_hum_shared_concept_pairs`;
-- ground-truth derivation: pair counts match a hand-computed fixture for a
-  small seeded sample;
-- `buildCorpus` binding round trip for the v2 record shapes;
-- the pure cache-audit module: correct/wrong/unknown/accuracy arithmetic,
-  including empty-cache and unknown-id cases;
-- scoring stays shared: `parsePredictedPairs`/`scoreF1` behavior unchanged
-  (existing tests keep passing).
+- scale-corpus generator determinism (two runs byte-identical) and the
+  mention distribution (hub entities appear in a pinned share of documents,
+  tail entities in a pinned smaller share, for the default seed);
+- percentile/aggregation helpers used by the report;
+- if Milestone B proceeds: the new Cypher pins (ASTRef anchor lookup, edge
+  creation, orphaned-flag transitions), provenance state-machine tests
+  extended to the new storage (including the fresh-survival race and
+  commutativity), and backfill idempotence logic in pure form;
+- existing suites unchanged: `provenance.test.ts` semantics stay green
+  (update pins only where storage deliberately changed).
 
 Live zero-LLM coverage (compose stack, no OpenAI key):
 
-- ingest the v2 corpus through the verify-as-you-go loop via the new
-  `--dataset` flag; hash round trip and constraint verification pass;
-- the deterministic pairs query (generalized
-  `scripts/test_oolong_pairs_query.ts` or a v2 sibling) returns exactly the
-  v2 ground truth from `REFERENCES` edges;
-- `seedVerifiedCache` + the cache-audit module report accuracy 1.0 on a
-  clean seed; `poisonCache` + the audit reflect the flipped labels;
-- v2 question/label entities carry kinds `question`/`category_label`, and
-  Session 5's `selectResolutionCandidates` proposes zero pairs among them;
-- clean up all seeded state.
-
-Existing suites must stay green.
+- the scale drill runs end to end at the default document count, writes
+  `scale_drill_results.json`, and cleans up all seeded state (pre-existing
+  rows preserved — pre-snapshot pattern);
+- sweep correctness at scale: re-ingest K modified documents, assert the
+  same facts are contested/survived as the small-scale suites predict
+  (correctness, not just latency);
+- if Milestone B proceeds: `test:belief-recovery`,
+  `test:invalidation-sweep`, `test:entity-resolution`, and
+  `test:benchmark-hardening` all pass against the new storage, plus a
+  before/after drill comparison demonstrating the improvement;
+- existing suites must stay green either way.
 
 Required close-out:
 
@@ -335,6 +373,7 @@ npm run build
 npm run python:check
 docker compose --profile test config --quiet
 # Run the isolated zero-LLM Compose integration.
+npm run test:benchmark-hardening
 npm run test:entity-resolution
 npm run test:api-hardening
 npm run test:rlm-sandbox
@@ -343,54 +382,62 @@ npm run test:invalidation-sweep
 git diff --check
 ```
 
-The baseline is 247 tests and may only increase.
+The baseline is 279 tests and may only increase.
 
 Update:
 
-- README/benchmark docs for the v2 dataset, flags, and results file.
-- `docs/benchmarks/CRITIQUE_AND_FUTURE.md`: mark what v2 answers, note what
-  remains (real TREC import, embedding-based retrieval difficulty).
-- `TRELLIS_ROADMAP.md`: mark 3.3 #3 complete only after acceptance; add a
-  full-dated §5 progress entry with exact checks/counts (and paid spend if
-  an approved run happened).
-- **`HANDOFF.md`: regenerate for Session 7 per §0.** Per the current
-  sequencing table the next objective is semantic provenance scaling
-  (3.3 #4), unless this session surfaces something that should jump the
-  queue.
+- `docs/benchmarks/SCALE_PROVENANCE_REPORT.md` (new) and README if the
+  drill gains an npm script.
+- `TRELLIS_ROADMAP.md`: mark 3.3 #4 complete only after acceptance — or, if
+  the decision gate says "not yet", record the measured evidence and the
+  trigger threshold, and strike the item only when the migration actually
+  ships; add a full-dated §5 progress entry with exact checks/counts either
+  way.
+- **`HANDOFF.md`: regenerate for Session 8 per §0.** Per the current
+  sequencing table the next objective is whole-codebase ingestion (3.3 #6),
+  unless this session surfaces something that should jump the queue.
 
 ## 7. Guardrails
 
 1. Never mutate an AST. T13's current hash preimage is pinned; changing it
    requires a re-hash migration and is out of scope.
-2. Never merge, rename, or delete Entity nodes; `globalEntityId`, both merge
-   Cyphers, and the Session 5 verdict-edge semantics are pinned by tests.
-3. Preserve provenance on every semantic node and edge; the v2 corpus flows
-   through the same verified ingestion and quarantine machinery as v1.
+2. Never merge, rename, or delete Entity nodes; `globalEntityId` and the
+   Session 5 verdict-edge semantics are pinned by tests. The merge Cyphers
+   may change form in Milestone B, but their provenance *semantics*
+   (`provenance.ts` state machine, commuting transitions, audit history)
+   are the invariant — change pins deliberately and extend the semantic
+   tests, never delete them.
+3. Preserve provenance on every semantic node and edge; any new storage
+   form must keep every fact traceable to content-addressed AST hashes and
+   keep quarantine/recovery behavior equivalent (proven by the existing
+   live suites).
 4. Validate every dataset file and LLM response at the existing Zod
    boundaries; all LLM calls remain inside BullMQ workers or the RLM
    process.
-5. Never overwrite dataset v1, its committed `benchmark_results.json`, or
-   the drills that reference them; v2 is additive and separately versioned.
-6. Keep benchmark question/label entities in the `question`/
-   `category_label` kinds so alias resolution structurally ignores them.
-7. No paid LLM calls without explicit owner approval; deterministic/oracle
-   paths are the acceptance surface.
+5. Never overwrite dataset v1, dataset v2
+   (`data/oolong_pairs_dataset_hard.json`), the committed
+   `benchmark_results.json`, or the drill files that reference them.
+6. Migration is gated on measurement: do not ship Milestone B without
+   Milestone A's committed numbers indicting the arrays, and record the
+   decision either way in the roadmap.
+7. No paid LLM calls without explicit owner approval; deterministic paths
+   are the acceptance surface.
 8. Follow the T16 observability house style for anything operational; no
-   high-cardinality metric labels.
+   high-cardinality metric labels (AST hashes and entity names never
+   become label values).
 9. Keep the API and worker process split; use project-scoped Compose
-   commands and never remove another stack's volumes.
+   commands and never remove another stack's volumes. The scale drill
+   cleans up everything it seeds.
 10. Close of work uses a feature branch, a PR to `master`, plain engineering
     prose, and no AI attribution or generated-by trailers. Finish by
     regenerating this file per §0 — the loop is part of acceptance.
 
 ## 8. Explicit exclusions
 
-Do not include: importing real TREC questions (the OOLONG-Pairs task needs
-per-question concept annotations that real TREC lacks; an annotation pass
-would be paid and non-deterministic — record it as future work instead);
-embedding-based candidate generation or retrieval changes; RLM prompt/agent
-protocol changes beyond what the harder corpus itself exercises; automatic
-entity merging; provenance-scaling migrations (3.3 #4, next session);
-whole-codebase ingestion; frontend work; Kubernetes/cloud deployment;
-external observability vendors; T13 re-hashing; paid benchmark runs as an
-acceptance requirement.
+Do not include: whole-codebase ingestion (3.3 #6, next in sequence);
+embedding-granularity or vector-index changes (already shipped with T2/T14);
+benchmark corpus v3, real TREC import, or paid benchmark runs; RLM
+prompt/agent protocol changes; automatic entity merging; T13 re-hashing;
+pruning or truncating `orphanedSourceIds` audit history (audit preservation
+is the point — reify it if it must move, never drop it); frontend work;
+Kubernetes/cloud deployment; external observability vendors.
