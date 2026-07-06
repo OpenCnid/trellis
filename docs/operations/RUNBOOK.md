@@ -140,6 +140,13 @@ BullMQ orchestrates the LLM extraction workers. If jobs are failing or stuck, Re
 docker compose exec redis redis-cli ping
 ```
 
+**Check queue depth without redis-cli** (T16): scrape the worker metrics
+listener from inside the Compose network:
+
+```bash
+docker compose exec workers node -e "fetch('http://127.0.0.1:9464/metrics').then(r => r.text()).then(t => console.log(t.split('\n').filter(l => l.startsWith('trellis_queue_jobs')).join('\n')))"
+```
+
 **Common BullMQ Issues:**
 - **Jobs waiting:** verify that `workers` is running, then inspect its logs.
 - **Retries:** typed OpenAI connection errors, 408/409/429, and 5xx failures
@@ -237,14 +244,76 @@ docker compose --profile test down --volumes --remove-orphans
 
 Use a unique `COMPOSE_PROJECT_NAME` when another Trellis stack is running.
 
-## 7. Session 4 observability target
+## 7. Observability (T16)
 
-T16 remains implementation work. Session 4 will replace operational
-`console.*` output with structured JSON logs and add process-appropriate
-metrics for API requests, BullMQ jobs, retries/failures, dropped transitions,
-LLM token usage, verification/invalidation outcomes, and queue depth.
+### 7.1 Structured logs
 
-Until those metrics ship, rely on Compose service health, BullMQ state, the
-machine-readable JSON events already emitted at critical transitions, and the
-database audits above. Do not document a `/metrics` endpoint as available
-until its contract and authentication are implemented and tested.
+Every operational log line is one JSON object on stdout. Stable fields:
+`level`, `time`, `service` (`api`/`workers` under Compose), `event`
+(dot-namespaced, greppable), and — when applicable — `worker`, `queue`,
+`jobId`, `attempt`, `requestId`, `docKey`, `version`, `astNodeId`, and a
+serialized `err` (`type`/`message`/`stack`). `LOG_LEVEL` (default `info`)
+controls verbosity. Request bodies, source text, prompts, SSE query
+content, embeddings, and secrets are never logged.
+
+Trace one request end to end: take `requestId` from the API's
+`http.request_completed` log line or the `x-request-id` response header
+the client received, then:
+
+```bash
+docker compose logs backend workers | grep '"requestId":"<id>"'
+```
+
+Key events: `ingest.accepted`, `ingest.failed`, `extraction.started`,
+`extraction.merged`, `extraction.unresolved_action_endpoint`,
+`extraction.action_dropped`, `extraction.superseded_before_start`,
+`extraction.superseded_before_merge`,
+`extraction.raced_invalidation_compensated`,
+`invalidation.sweep_completed`, `invalidation.shared_sources_retained`,
+`supervisor.evaluation_invalid`, `verification.belief_disputed`,
+`rlm.telemetry`, `rlm.telemetry_malformed`, `worker.error_classified`,
+`runtime.shutdown_started` / `runtime.shutdown_completed`.
+
+### 7.2 Metrics topology
+
+Two registries, one per process:
+
+- **API**: `GET /metrics` on the API port, authenticated by `API_KEY`
+  like every operational endpoint.
+- **Workers**: unauthenticated internal listener on `WORKER_METRICS_PORT`
+  (default `9464`). Compose does not publish it to the host; scrape it
+  from the Compose network (`http://workers:9464/metrics`).
+
+`/healthz` remains liveness-only and carries no metrics.
+
+### 7.3 Metric catalog and diagnostic queries
+
+| Question | Metric |
+|---|---|
+| Request/error rate per route | `trellis_http_requests_total{method,route,status_class}`, `trellis_http_request_duration_seconds` |
+| Failure/retry rate per worker | `trellis_jobs_total{queue,worker,outcome}` with outcomes `started`, `completed`, `failed_retryable`, `failed_exhausted`, `failed_unrecoverable`; `trellis_job_duration_seconds` |
+| Queue backlog | `trellis_queue_jobs{queue,state}` for all five queues, states `waiting`/`active`/`delayed`/`failed`; read failures in `trellis_queue_depth_read_failures_total{queue}` |
+| Unresolved/dropped actions | `trellis_extraction_unresolved_endpoints_total`, `trellis_extraction_dropped_actions_total` |
+| Superseded/compensated extractions | `trellis_extraction_superseded_total{stage}` (`before_start`, `before_merge`, `post_merge_compensated`) |
+| Invalidation behavior | `trellis_invalidation_candidate_hashes_total`, `trellis_invalidation_retained_shared_hashes_total`, `trellis_invalidation_contested_total{kind}`, `trellis_invalidation_survived_total{kind}`, `trellis_invalidation_sweep_batches_total` |
+| Verification outcomes | `trellis_verification_beliefs_total{result}` (`classified`, `agreed`, `disputed`, `skipped_no_text`, `skipped_no_answer`) |
+| LLM spend | `trellis_llm_calls_total{operation,model}`, `trellis_llm_input_tokens_total`, `trellis_llm_output_tokens_total`, `trellis_llm_embedding_tokens_total` (operations: `extraction`, `extraction_embedding`, `supervision`, `verification`) |
+| RLM agent cost/health | `trellis_rlm_runs_total{exit_status}`, `trellis_rlm_input_tokens_total`, `trellis_rlm_output_tokens_total`, `trellis_rlm_subcalls_total`, `trellis_rlm_tool_calls_total`, `trellis_rlm_duration_seconds`, `trellis_rlm_telemetry_malformed_total` |
+
+Example PromQL once a scraper is attached:
+
+```promql
+# Extraction failure ratio over 15 minutes
+sum(rate(trellis_jobs_total{worker="extraction",outcome=~"failed_.*"}[15m]))
+/ sum(rate(trellis_jobs_total{worker="extraction",outcome="started"}[15m]))
+
+# Tokens spent per operation over the last hour
+sum by (operation) (increase(trellis_llm_input_tokens_total[1h]) + increase(trellis_llm_output_tokens_total[1h]))
+
+# Sustained extraction backlog
+trellis_queue_jobs{queue="extraction_queue",state="waiting"} > 100
+```
+
+Label discipline: job IDs, request IDs, document keys, AST hashes, entity
+names, and error messages appear only in logs, never as metric labels.
+High-cardinality label growth in a scrape is a regression — report it.

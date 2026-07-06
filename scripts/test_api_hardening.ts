@@ -41,7 +41,8 @@ async function main() {
     }
   );
   let serverLog = '';
-  server.stdout?.on('data', d => { serverLog += d.toString(); });
+  let serverStdout = '';
+  server.stdout?.on('data', d => { serverLog += d.toString(); serverStdout += d.toString(); });
   server.stderr?.on('data', d => { serverLog += d.toString(); });
 
   try {
@@ -101,6 +102,45 @@ async function main() {
     form.append('file', new Blob(['not a pdf'], { type: 'text/plain' }), 'notes.txt');
     res = await fetch(`${BASE}/ingest`, { method: 'POST', headers: { 'x-api-key': KEY }, body: form });
     check('POST /ingest with non-PDF upload -> 400', res.status === 400, `got ${res.status}`);
+
+    // --- T16: metrics endpoint authentication and exposition ---
+    res = await fetch(`${BASE}/metrics`);
+    check('GET /metrics without key -> 401', res.status === 401, `got ${res.status}`);
+
+    res = await fetch(`${BASE}/metrics`, { headers: { 'x-api-key': KEY } });
+    const metricsText = res.status === 200 ? await res.text() : '';
+    check('GET /metrics with key -> 200', res.status === 200, `got ${res.status}`);
+    check('metrics exposition is Prometheus text',
+      (res.headers.get('content-type') ?? '').includes('text/plain'),
+      `content-type=${res.headers.get('content-type')}`);
+    check('request counters include this session\'s authorized ingest',
+      /trellis_http_requests_total\{method="POST",route="\/ingest",status_class="2xx"\} [1-9]/.test(metricsText),
+      'counter series missing');
+    check('401s are counted without leaking paths into labels',
+      /trellis_http_requests_total\{method="GET",route="\/retrieve",status_class="4xx"\} [1-9]/.test(metricsText),
+      'counter series missing');
+
+    // --- T16: every server stdout line is one parseable JSON object ---
+    // (startup banner, request logs, warnings — no human-formatted lines
+    // left on the operational path).
+    const stdoutLines = serverStdout.split('\n').filter(line => line.trim().length > 0);
+    const unparseable = stdoutLines.filter(line => {
+      try {
+        const parsed = JSON.parse(line);
+        return typeof parsed !== 'object' || parsed === null;
+      } catch {
+        return true;
+      }
+    });
+    check('server stdout is JSON-only during startup and request handling',
+      stdoutLines.length > 0 && unparseable.length === 0,
+      `${unparseable.length} unparseable of ${stdoutLines.length}: ${unparseable[0]?.slice(0, 120) ?? ''}`);
+    const events = stdoutLines.flatMap(line => {
+      try { return [JSON.parse(line).event]; } catch { return []; }
+    });
+    check('startup and request events are present',
+      events.includes('api.started') && events.includes('http.request_completed'),
+      `events=${events.slice(0, 10).join(',')}`);
   } finally {
     server.kill();
   }

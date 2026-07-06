@@ -38,9 +38,9 @@ describe('ShutdownCoordinator', () => {
   });
 
   it('logs a failed close and continues draining lower phases', async () => {
-    const log = vi.fn();
+    const warn = vi.fn();
     const databaseClose = vi.fn().mockResolvedValue(undefined);
-    const coordinator = new ShutdownCoordinator(log);
+    const coordinator = new ShutdownCoordinator(warn);
     coordinator.register('worker', 20, async () => { throw new Error('close failed'); });
     coordinator.register('database', 10, databaseClose);
 
@@ -48,7 +48,7 @@ describe('ShutdownCoordinator', () => {
 
     expect(result.failures).toEqual(['worker']);
     expect(databaseClose).toHaveBeenCalledOnce();
-    expect(JSON.parse(log.mock.calls[0][0])).toMatchObject({
+    expect(warn.mock.calls[0][0]).toMatchObject({
       event: 'runtime.shutdown_task_failed',
       resource: 'worker',
       signal: 'SIGTERM',

@@ -7,12 +7,24 @@ export interface ExtractionJobInput {
   text: string;
 }
 
+/**
+ * Correlation context threaded from the ingest request into each queued
+ * job so worker logs can answer which request/version produced a failed
+ * or dropped job. Optional: jobs queued before these fields existed (or
+ * enqueued by scripts) still process.
+ */
+export interface IngestJobContext {
+  requestId?: string;
+  docKey?: string;
+  version?: number;
+}
+
 export interface ExtractionJob {
   name: 'extract';
   data: {
     astNodeId: string;
     text: string;
-  };
+  } & IngestJobContext;
 }
 
 /**
@@ -124,13 +136,15 @@ export async function verifyPersistedAstNodes(
 }
 
 export function buildExtractionJobs(
-  blocks: readonly ExtractionJobInput[]
+  blocks: readonly ExtractionJobInput[],
+  context: IngestJobContext = {}
 ): ExtractionJob[] {
   return blocks.map(({ block, text }) => ({
     name: 'extract',
     data: {
       astNodeId: block.id,
       text,
+      ...context,
     },
   }));
 }

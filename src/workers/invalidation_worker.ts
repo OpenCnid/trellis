@@ -8,11 +8,17 @@ import {
   installShutdownSignalHandlers,
   shutdownCoordinator,
 } from '../core/runtime/shutdown.js';
+import { loggerFor } from '../core/observability/logger.js';
+import { getMetrics } from '../core/observability/metrics.js';
+import { instrumentWorker } from '../core/observability/worker_metrics.js';
 
 // Phase 4 Milestone 3: consumes the orphan set produced by a versioned
 // re-ingest (/ingest with a doc_key) and quarantines every semantic
 // fact whose provenance points at bytes that no longer exist in the
 // document's current version.
+
+const log = loggerFor({ worker: 'invalidation', queue: 'invalidation_queue' });
+const metrics = getMetrics();
 
 export interface InvalidationJobData {
   docKey: string;
@@ -24,13 +30,25 @@ export interface InvalidationJobData {
   // racing extraction job and must not be quarantined. Optional so
   // sweep jobs enqueued before this field existed still process.
   freshHashes?: string[];
+  // Ingest request correlation (optional; see persist.ts IngestJobContext).
+  requestId?: string;
 }
 
 async function processJob(job: Job<InvalidationJobData>) {
-  const { docKey, oldVersion, newVersion, orphanedHashes, freshHashes } = job.data;
-  console.log(
-    `[Sweep ${job.id}] ${docKey} v${oldVersion}→v${newVersion}: sweeping ${orphanedHashes.length} orphaned hash(es)...`
-  );
+  const { docKey, oldVersion, newVersion, orphanedHashes, freshHashes, requestId } = job.data;
+  const jobLog = log.child({
+    jobId: job.id,
+    attempt: job.attemptsMade + 1,
+    docKey,
+    version: newVersion,
+    ...(requestId && { requestId }),
+  });
+  metrics.invalidationCandidateHashesTotal.inc(orphanedHashes.length);
+  jobLog.info({
+    event: 'invalidation.sweep_started',
+    oldVersion,
+    candidateCount: orphanedHashes.length,
+  });
 
   // A Merkle diff is document-local, but content hashes are global. Recheck
   // at worker execution time so queue lag cannot quarantine a hash that is
@@ -39,17 +57,16 @@ async function processJob(job: Job<InvalidationJobData>) {
   const globallyOrphanedSet = new Set(globallyOrphaned);
   const retainedByOtherDocuments = orphanedHashes.filter(hash => !globallyOrphanedSet.has(hash));
   if (retainedByOtherDocuments.length > 0) {
-    console.warn(JSON.stringify({
+    metrics.invalidationRetainedSharedHashesTotal.inc(retainedByOtherDocuments.length);
+    jobLog.warn({
       event: 'invalidation.shared_sources_retained',
-      jobId: job.id,
-      docKey,
       oldVersion,
       newVersion,
       candidateCount: orphanedHashes.length,
       retainedCount: retainedByOtherDocuments.length,
       retainedHashes: retainedByOtherDocuments.slice(0, 20),
       retainedHashesTruncated: retainedByOtherDocuments.length > 20,
-    }));
+    });
   }
 
   const result = await sweepOrphanedProvenance(
@@ -58,13 +75,19 @@ async function processJob(job: Job<InvalidationJobData>) {
     freshHashes ?? []
   );
 
-  console.log(
-    `[Sweep ${job.id}] ${docKey} v${newVersion}: contested ${result.contestedNodes} node(s) and ` +
-    `${result.contestedRelationships} relationship(s) across ${result.batches} batch(es)` +
-    `${result.survivedNodes + result.survivedRelationships > 0
-      ? `; ${result.survivedNodes} node(s) and ${result.survivedRelationships} relationship(s) kept fresh provenance and escaped quarantine`
-      : ''}.`
-  );
+  metrics.invalidationContestedTotal.inc({ kind: 'node' }, result.contestedNodes);
+  metrics.invalidationContestedTotal.inc({ kind: 'relationship' }, result.contestedRelationships);
+  metrics.invalidationSurvivedTotal.inc({ kind: 'node' }, result.survivedNodes);
+  metrics.invalidationSurvivedTotal.inc({ kind: 'relationship' }, result.survivedRelationships);
+  metrics.invalidationSweepBatchesTotal.inc(result.batches);
+  jobLog.info({
+    event: 'invalidation.sweep_completed',
+    contestedNodes: result.contestedNodes,
+    contestedRelationships: result.contestedRelationships,
+    survivedNodes: result.survivedNodes,
+    survivedRelationships: result.survivedRelationships,
+    batches: result.batches,
+  });
   return result;
 }
 
@@ -80,16 +103,17 @@ export const invalidationWorker = new Worker<InvalidationJobData>(
   ),
   connectionParams
 );
+instrumentWorker(invalidationWorker, { worker: 'invalidation', queue: 'invalidation_queue' }, metrics);
 
 invalidationWorker.on('completed', job => {
-  console.log(`[Sweep ${job.id}] Finished.`);
+  log.info({ event: 'invalidation.job_completed', jobId: job.id });
 });
 
 invalidationWorker.on('failed', (job, err) => {
-  console.log(`[Sweep ${job?.id}] Failed: ${err.message}`);
+  log.warn({ event: 'invalidation.job_failed', jobId: job?.id, err });
 });
 
-console.log('Invalidation Worker started and listening for jobs...');
+log.info({ event: 'invalidation.worker_started' });
 
 installShutdownSignalHandlers();
 shutdownCoordinator.register(

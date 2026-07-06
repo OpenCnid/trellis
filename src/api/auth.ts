@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
+import { loggerFor } from '../core/observability/logger.js';
 
 // API-key authentication (T6). Deliberately minimal: one shared key,
 // checked with a constant-time comparison. When no key is configured the
@@ -46,9 +47,10 @@ export function extractApiKey(req: {
  */
 export function apiKeyMiddleware(expectedKey: string | undefined) {
   if (!expectedKey) {
-    console.warn(
-      '[Auth] API_KEY is not set — the API is UNAUTHENTICATED. This is acceptable only for local development; set API_KEY before any non-local deployment.'
-    );
+    loggerFor({ component: 'api' }).warn({
+      event: 'auth.unauthenticated_mode',
+      msg: 'API_KEY is not set — the API is UNAUTHENTICATED. This is acceptable only for local development; set API_KEY before any non-local deployment.',
+    });
     return (_req: Request, _res: Response, next: NextFunction) => next();
   }
   return (req: Request, res: Response, next: NextFunction) => {

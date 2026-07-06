@@ -35,6 +35,24 @@ const EnvSchema = z.object({
 
   PORT: z.coerce.number().int().positive().default(3000),
 
+  // Structured logging (T16). Every operational log line is one JSON
+  // object on stdout/stderr at or above this level.
+  LOG_LEVEL: z
+    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
+    .default('info'),
+
+  // Which process this is, as a stable `service` correlation field on
+  // every log line. Compose sets `api` and `workers` per container; the
+  // unified local entrypoint keeps the default.
+  TRELLIS_SERVICE: z.string().min(1).default('trellis'),
+
+  // Worker-process metrics listener (T16). The API serves authenticated
+  // /metrics from its own registry; workers run in a separate container,
+  // so they expose an internal HTTP listener that Compose deliberately
+  // does not publish to the host.
+  WORKER_METRICS_PORT: z.coerce.number().int().positive().default(9464),
+  WORKER_METRICS_HOST: z.string().min(1).default('0.0.0.0'),
+
   // API authentication (T6). When set, every operational endpoint requires
   // the key via the x-api-key header, an Authorization: Bearer token, or the
   // api_key query parameter (EventSource cannot set headers). /healthz is an
@@ -100,6 +118,14 @@ export const config = {
   api: {
     port: env.PORT,
     apiKey: env.API_KEY,
+  },
+  log: {
+    level: env.LOG_LEVEL,
+  },
+  service: env.TRELLIS_SERVICE,
+  workerMetrics: {
+    port: env.WORKER_METRICS_PORT,
+    host: env.WORKER_METRICS_HOST,
   },
   rlmStream: {
     maxConcurrentStreams: env.RLM_MAX_CONCURRENT_STREAMS,

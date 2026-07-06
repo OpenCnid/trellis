@@ -37,6 +37,20 @@ Uploads must be PDFs (`400` otherwise) and are deleted from `uploads/` after par
 
 **RLM stream admission** (see §3): concurrent SSE streams are capped per process (`RLM_MAX_CONCURRENT_STREAMS`, default 4) and requests are refused while the `rlm_queue` backlog exceeds `RLM_QUEUE_MAX_DEPTH` (default 32); both cases return `429`.
 
+### `GET /metrics`
+
+Prometheus text exposition (`text/plain; version=0.0.4`) for the **API process**: request counters/durations by method, normalized route, and status class, LLM usage recorded in this process, and default Node.js process metrics. Authentication follows §0 — when `API_KEY` is set, an unauthenticated scrape receives `401`.
+
+```bash
+curl -H "x-api-key: $TRELLIS_API_KEY" http://localhost:3000/metrics
+```
+
+Route labels come from a fixed table (`/ingest`, `/retrieve`, `/api/rlm-stream`, `/healthz`, `/metrics`); any other path is labeled `unmatched`, so entity names, document keys, and query strings never become label values.
+
+**Worker metrics are separate.** The worker container serves its own registry — BullMQ job outcomes, queue depth gauges for all five queues, extraction/invalidation/verification transition counters, LLM token spend, and RLM telemetry — on an internal HTTP listener (`WORKER_METRICS_PORT`, default `9464`, unauthenticated by design). Docker Compose does not publish that port to the host; it is reachable only on the Compose network (e.g. `http://workers:9464/metrics` from a sibling service or future scraper). See `docs/operations/RUNBOOK.md` §7 for the metric catalog.
+
+Every request also produces one structured JSON log line (`event: "http.request_completed"`) carrying a generated `requestId`, which is returned to the client as the `x-request-id` response header; `/ingest` threads that `requestId` (with `docKey` and `version`) into the extraction and invalidation jobs it queues, so worker logs correlate back to the originating request.
+
 ## 1. Ingestion Endpoint
 
 ### `POST /ingest`

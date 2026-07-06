@@ -3,7 +3,7 @@ import { runInitializationTasks } from './database_init';
 
 describe('runInitializationTasks', () => {
   it('runs every initializer and reports failures for a nonzero bootstrap exit', async () => {
-    const events: string[] = [];
+    const events: Record<string, unknown>[] = [];
     const second = vi.fn(async () => undefined);
 
     const result = await runInitializationTasks([
@@ -14,11 +14,11 @@ describe('runInitializationTasks', () => {
         },
       },
       { name: 'neo4j', run: second },
-    ], line => events.push(line));
+    ], fields => events.push(fields));
 
     expect(second).toHaveBeenCalledOnce();
     expect(result).toEqual({ failures: ['postgres'] });
-    expect(events.map(line => JSON.parse(line))).toContainEqual({
+    expect(events).toContainEqual({
       event: 'database.initialization_failed',
       resource: 'postgres',
       errorType: 'Error',

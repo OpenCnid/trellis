@@ -37,6 +37,15 @@ cp .env.example .env
 Existing shell values take precedence over `.env`. Set real `API_KEY` and
 `OPENAI_API_KEY` values before non-local or paid-worker use.
 
+Observability (T16): operational processes emit one JSON log line per
+event on stdout, filtered by `LOG_LEVEL` (default `info`) and stamped
+with `TRELLIS_SERVICE` (Compose sets `api`/`workers` per container). The
+API serves authenticated Prometheus metrics at `GET /metrics`; the worker
+process serves its own registry — including queue-depth gauges — on an
+internal listener at `WORKER_METRICS_PORT` (default `9464`,
+`WORKER_METRICS_HOST` default `0.0.0.0`) that Compose does not publish to
+the host. See `API_REFERENCE.md` §0 and `docs/operations/RUNBOOK.md` §7.
+
 Start only the databases on Docker and initialize their schemas:
 
 ```bash
