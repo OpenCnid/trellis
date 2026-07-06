@@ -33,6 +33,9 @@ export const rlmQueue = new Queue('rlm_queue', {
 export const supervisorQueue = new Queue('supervisor_queue', queueOptions);
 export const invalidationQueue = new Queue('invalidation_queue', queueOptions);
 export const verificationQueue = new Queue('verification_queue', queueOptions);
+// Alias adjudication is idempotent (verdict edges MERGE on the pair), so
+// the standard retrying defaults apply.
+export const resolutionQueue = new Queue('resolution_queue', queueOptions);
 
 installShutdownSignalHandlers();
 shutdownCoordinator.register('bullmq.queues', 40, async () => {
@@ -42,6 +45,7 @@ shutdownCoordinator.register('bullmq.queues', 40, async () => {
     supervisorQueue.close(),
     invalidationQueue.close(),
     verificationQueue.close(),
+    resolutionQueue.close(),
   ]);
   await connection.quit();
 });

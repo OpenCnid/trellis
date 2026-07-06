@@ -5,19 +5,20 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–4 are complete and merged:
+Sessions 1–5 are complete and merged:
 
 - PR #21 — async reliability and batch ingestion.
 - PR #22 — provenance liveness closure and verified production ingestion.
 - PR #23 — deployment and CI readiness.
 - PR #25 — structured logging and Prometheus metrics (T16).
+- Session 5 — entity resolution beyond exact-name identity (`SAME_AS` overlay
+  beliefs); merged via the PR that shipped this file (see `git log -- HANDOFF.md`).
 
 OpenCnid selected the MIT License on July 6, 2026.
 
 Your objective is to study the current code and `TRELLIS_ROADMAP.md`, present a
-concrete design, and then implement **Session 5: entity resolution beyond
-exact-name identity (roadmap item 3.3 #2)**. Do not re-plan or re-implement
-completed work.
+concrete design, and then implement **Session 6: benchmark maturity (roadmap
+item 3.3 #3)**. Do not re-plan or re-implement completed work.
 
 ---
 
@@ -78,20 +79,30 @@ immutable, content-addressed physical location in source material.
      containers run the idempotent `db:init` concurrently).
 2. **Neo4j — semantic and belief layer**
    - `Entity` and `Conflict` nodes plus `ACTION`, `CONTRADICTS`,
-     `DERIVED_INSIGHT`, and conflict-link edges.
+     `DERIVED_INSIGHT`, `SAME_AS`/`DISTINCT_FROM`, and conflict-link edges.
    - Semantic nodes and edges carry `sourceNodeIds`.
    - `contested`, `contestedAt`, `contestedReason`, `orphanedSourceIds`, and
      `rederivedAt` form an audit-preserving quarantine/recovery state machine
      (`src/core/graph/provenance.ts` specifies it; the invalidation sweep and
-     both write paths implement commuting transitions).
+     every write path implement commuting transitions).
    - Entities carry a `kind` namespace: `question`, `category_label`,
      `concept`, `generic` (`src/core/graph/entity_kinds.ts`). Flywheel
      beliefs also carry confidence, rubric version, and verification state.
+   - **Entity resolution (Session 5):** identity is still
+     `SHA-256(lowercase(name))` and is never rewritten. Equivalence is an
+     overlay belief: deterministic lexical candidates
+     (`src/core/graph/alias_candidates.ts`, kinds `generic`/`concept` only)
+     are adjudicated by the resolution worker into
+     `SAME_AS`/`DISTINCT_FROM` verdict edges with union provenance
+     (`src/core/graph/alias_resolution.ts`), which the existing sweep
+     quarantines like any belief. `GET /retrieve` expands one non-contested
+     `SAME_AS` hop at `RESOLUTION_MIN_CONFIDENCE` (default 0.8) with
+     per-fact `viaAlias` attribution; `?resolveAliases=false` opts out.
 3. **Redis + BullMQ — asynchronous layer**
    - `extraction_queue`, `rlm_queue`, `supervisor_queue`,
-     `invalidation_queue`, and `verification_queue`.
+     `invalidation_queue`, `verification_queue`, and `resolution_queue`.
    - Redis pub/sub streams Python RLM stdout/stderr to SSE clients.
-4. **Observability (T16, new in Session 4)**
+4. **Observability (T16)**
    - `src/core/observability/` is the house style: pino JSON logging (one
      object per line, validated `LOG_LEVEL`, `TRELLIS_SERVICE` process tag,
      child-logger correlation fields `service`/`worker`/`queue`/`jobId`/
@@ -101,12 +112,8 @@ immutable, content-addressed physical location in source material.
      an internal listener on `WORKER_METRICS_PORT` (9464, never published to
      the host) with scrape-time queue-depth gauges registered in
      `src/workers/metrics_server.ts`.
-   - `/ingest` generates a `requestId` (returned as `x-request-id`) and
-     threads it with `docKey`/`version` into job payloads.
-   - **Anything Session 5 adds must follow this style**: child logger with
-     bindings, `instrumentWorker` on any new BullMQ worker, LLM usage
-     recorded via `recordLlmCall` with a fixed `operation` label, no
-     high-cardinality metric labels.
+   - **Anything Session 6 adds must follow this style**; benchmark runners
+     and maintenance CLIs may keep human-formatted console output.
 
 `POST /ingest` parses Markdown/PDF into a Merkle AST, bulk-persists it, reads
 it back and re-derives every hash inside the transaction, registers document
@@ -119,10 +126,11 @@ liveness gate plus pre/post-merge fencing and compensating quarantine.
 The RLM sandbox uses server-enforced read-only Neo4j sessions for arbitrary
 Cypher and one explicit provenance-required write path. The verification
 worker independently rechecks sampled cached beliefs, accrues trust on
-agreement, and reuses the quarantine path on disagreement — its
-sweep-selects/worker-burns-down split and its zero-LLM oracle classifier
-(`makeOracleClassifier` in `src/core/graph/verification.ts`) are the pattern
-Session 5 should mirror.
+agreement, and reuses the quarantine path on disagreement. The verification
+and resolution subsystems share one shape — a sweep script selects and
+enqueues, a worker burns the batch down, and a ground-truth oracle
+(`makeOracleClassifier` in `verification.ts`, `makeOracleAdjudicator` in
+`alias_resolution.ts`) replaces the sub-LLM in zero-cost drills.
 
 The backend and workers run as **separate Node processes/containers**.
 
@@ -130,16 +138,17 @@ The backend and workers run as **separate Node processes/containers**.
 
 Repository state at handoff creation:
 
-- `master` merge commit: `12bedea` (PR #25).
-- Offline baseline: `npm test` = **207 passing across 30 files**.
+- `master`: `e9fe06e` (PR #26) plus the Session 5 entity-resolution PR that
+  ships this file.
+- Offline baseline: `npm test` = **247 passing across 33 files**.
 - `npm run build` and `npm run python:check` pass.
-- Live zero-LLM checks: `npm run test:api-hardening` (18 checks),
-  `npm run test:rlm-sandbox` (4 checks), `npm run test:belief-recovery`,
-  `npm run test:invalidation-sweep`.
+- Live zero-LLM checks: `npm run test:entity-resolution` (33 checks),
+  `npm run test:api-hardening` (18 checks), `npm run test:rlm-sandbox`
+  (4 checks), `npm run test:belief-recovery`, `npm run test:invalidation-sweep`.
 - The isolated Compose integration (`scripts/test_compose_roundtrip.ts`, 9
-  assertions) starts the API **and workers** with no OpenAI key and asserts
-  metrics auth/exposition, worker-listener reachability, queue gauges, and
-  the `/healthz` contract.
+  assertions) starts the API and workers with no OpenAI key and asserts
+  metrics auth/exposition, worker-listener reachability, queue gauges for
+  all six queues, and the `/healthz` contract.
 - CI (Node 22): offline tests/build/Python checks, image build, isolated
   Compose zero-LLM integration.
 
@@ -156,25 +165,35 @@ docker compose config --quiet
 
 Work on a feature branch and target `master`.
 
-## 3. Session 5 problem statement
+## 3. Session 6 problem statement
 
-Entity identity is exact-name identity. `globalEntityId` in
-`src/core/graph/resolve_actions.ts` is `SHA-256(lowercase(name))`, and
-`ENTITY_MERGE_CYPHER` in `src/core/graph/extraction_merge.ts` merges on
-`{name: toLower(ent.name)}`. Consequences:
+The committed `benchmark_results.json` shows F1 = 1.0 on all 20 queries with
+mean sub-calls falling 0.36 (cold) → 0 (warm): the benchmark proves the
+flywheel works but no longer discriminates. Why it is saturated:
 
-- "Globex" and "Globex Corporation" are permanently distinct `Entity` nodes;
-  facts land on whichever surface form each extraction emitted.
-- `GET /retrieve?entity=Globex` cannot see actions recorded against
-  "globex corporation", and vice versa — the graph silently under-reports.
-- The supervisor's contradiction detection only compares same-subject
-  fan-outs, so cross-alias contradictions are structurally invisible.
+- `data/oolong_pairs_dataset.json` (`oolong-pairs-trec-synthetic-v1`, seed
+  42, 220 records: 50 LOC + 50 HUM + 35 NUM + 35 ENTY + 35 DESC + 15 ABBR)
+  is generated by `scripts/generate_oolong_dataset.ts` from roughly four
+  templates per category crossed with 14 cities. Template questions are
+  trivially classifiable and trivially groupable.
+- Every city mention is the **literal capitalized city name** embedded in
+  the question text, and `concepts: [city]` repeats it. An agent can satisfy
+  the OOLONG-Pairs query by substring-scanning question text — the shortcut
+  the roadmap calls out — without ever consulting cached classifications.
+- There are no distractors: no question mentions a city it is not annotated
+  with, no near-miss surface forms, and no non-question prose competes.
+- Cache trustworthiness is measured only out-of-band:
+  `scripts/audit_flywheel_cache.ts` prints accuracy to stdout, and the
+  poison drill (`src/benchmarks/oolong/poison.ts`,
+  `src/benchmarks/poison_drill_runner.ts`) measures detection recall — but
+  `benchmark_results.json` records neither. The roadmap says the cache-audit
+  accuracy becomes a first-class metric.
 
-The roadmap (3.3 #2) prescribes the direction: aliasing/canonicalization with
-candidate generation plus LLM adjudication, recorded as `SAME_AS` edges with
-provenance — an overlay belief, never a merge. Entity nodes, their ids, and
-the extraction merge are load-bearing and pinned by tests; identity stays
-immutable while equivalence becomes a first-class, quarantinable belief.
+`docs/benchmarks/CRITIQUE_AND_FUTURE.md` already acknowledges this
+direction. The runner infrastructure (shared scoring in
+`src/benchmarks/oolong/scoring.ts`, verify-as-you-go ingestion in
+`scripts/ingest_oolong_dataset.ts`, dress-rehearsal seeding in `poison.ts`)
+is ready for a harder corpus.
 
 ## 4. Required design
 
@@ -182,151 +201,131 @@ Present the exact design after inspecting the files in §5, then implement it.
 This is the recommended architecture; deviations require a concrete reason
 and equivalent tests.
 
-### 4.1 Identity invariants
+### 4.1 Dataset v2 (deterministic, harder, versioned)
 
-- `globalEntityId` and both merge Cyphers are unchanged. No Entity node is
-  ever merged, renamed, or deleted by resolution.
-- `SAME_AS` is an equivalence **claim** between two existing entities,
-  carrying the same audit machinery as every other belief: `sourceNodeIds`,
-  and therefore automatic quarantine by the existing invalidation sweep when
-  its provenance dies. Do not build new quarantine machinery — inherit it,
-  and prove the inheritance in tests.
+- A new seeded generator (extend `scripts/generate_oolong_dataset.ts` with a
+  version flag or add a sibling script) emitting
+  `data/oolong_pairs_dataset_v2.json` with `name:
+  'oolong-pairs-trec-synthetic-v2'`. **Never overwrite or regenerate v1** —
+  the committed `benchmark_results.json`, the drills, and
+  `audit_flywheel_cache.ts` reference it.
+- **Paraphrased/indirect mentions:** a deterministic per-city alias table
+  (e.g. "the French capital", "the city on the Seine" for paris) so a
+  scored fraction of LOC/HUM questions mention the city only indirectly.
+  `concepts` keeps the canonical city (ground truth stays derivable
+  offline); a new schema field records the surface form used. The
+  anti-shortcut property — the paraphrased text does not contain the
+  canonical city token — must be pinned by a unit test.
+- **Distractors:** (a) questions using a city surface form while annotated
+  with a *different* concept or none (near-miss records), and (b)
+  non-question prose paragraphs mentioning city surface forms, ingested as
+  part of the corpus but never valid pair members. Extend
+  `OolongRecordSchema`/`buildCorpus` (`src/benchmarks/oolong/schema.ts`,
+  `corpus.ts`) minimally and keep the heading+paragraph binding round trip
+  verifiable.
+- `ground_truth.loc_hum_shared_concept_pairs` derives exactly as v1: LOC ×
+  HUM pairs sharing a concept annotation.
 
-### 4.2 Candidate generation (deterministic, LLM-free)
+### 4.2 Harness generalization
 
-- New pure module, e.g. `src/core/graph/alias_candidates.ts`: given
-  `(name, kind)` pairs, propose candidate pairs via lexical signals —
-  normalized token containment ("globex" ⊂ "globex corporation"),
-  acronym/initialism match, and a near-identity edit-distance guard. Fully
-  unit-testable with zero infrastructure.
-- **Kind discipline:** only pair entities of the same `kind`, and only kinds
-  `generic` and `concept`. Never propose candidates involving `question` or
-  `category_label` entities — those namespaces are structural, and the
-  OOLONG flywheel depends on exact-id lookups.
-- Canonical pair ordering (lexicographically smaller entity id first) so the
-  candidate set and the edge direction are deterministic and deduplicated.
-- Selection runs in a sweep script (`scripts/resolve_sweep.ts`, npm script
-  `resolve:sweep`) that reads entities from Neo4j, excludes pairs already
-  carrying a non-contested verdict edge, caps the batch
-  (`RESOLUTION_MAX_PAIRS_PER_SWEEP`, suggested default 200), and enqueues one
-  job — the verification sweep's exact shape.
-- Embedding-based candidate generation is a documented follow-up, not part
-  of this session (entity names carry no embeddings today).
+- `scripts/ingest_oolong_dataset.ts`, `scripts/prepare_oolong_flywheel.ts`,
+  and `scripts/audit_flywheel_cache.ts` currently hardcode the v1 path;
+  accept a `--dataset <path>` flag defaulting to v1 so both corpora work.
+  The verify-as-you-go ingestion loop and the deterministic
+  `(:Question)-[:REFERENCES]->(:Concept)` edges (built from annotations,
+  zero LLM) are unchanged in kind.
+- `buildQuery` in `scoring.ts` keeps naming the canonical city — the
+  difficulty moves into the corpus, not the query string. The runner
+  (`src/benchmarks/oolong_runner.ts`) derives its city list and sequence
+  from the dataset it is pointed at; results for v2 land in a separate
+  results file (e.g. `benchmark_results_v2.json`), never overwriting v1's.
 
-### 4.3 Adjudication (LLM, batched, validated)
+### 4.3 Cache-audit accuracy as a first-class metric
 
-- New `resolution_queue` and `src/workers/resolution_worker.ts` following the
-  verification worker skeleton. The queue uses the standard retrying job
-  options (adjudication is idempotent); it joins `queue.ts`,
-  `scripts/start_workers.ts`, the queue-gauge list in
-  `src/workers/metrics_server.ts`, and shutdown registration.
-- `AliasAdjudicationSchema` in `src/core/graph/schemas.ts` (structured
-  output): per pair `sameEntity: boolean`, `confidence: 0..1`, bounded
-  `reasoning`. Every completion crosses `parseLlmResponse`.
-- Prompt context per pair: both names, types, kinds, and **bounded** source
-  text snippets fetched via each entity's live `sourceNodeIds` (the
-  supervisor's `joinAstTexts` pattern). Never whole documents.
-- `makeOracleAdjudicator` mirroring `makeOracleClassifier`: a ground-truth
-  pair→verdict map for zero-LLM live drills.
+- Extract the audit logic from `scripts/audit_flywheel_cache.ts` into a pure
+  module (e.g. `src/benchmarks/oolong/cache_audit.ts`) returning
+  `{ cached, correct, wrong, unknown, accuracy }` given the dataset truth
+  and the cached rows; the script becomes a thin caller.
+- The benchmark runner appends a post-warm cache-audit block to its results
+  summary, and the poison drill reuses the same module so "poison recall"
+  and "cache accuracy" are computed by one implementation.
 
-### 4.4 Verdict edges
+### 4.4 Cost policy (explicit)
 
-- Positive: `(a)-[:SAME_AS]->(b)` in canonical id order. Negative:
-  `(a)-[:DISTINCT_FROM]->(b)` — recording negatives prevents re-paying for
-  the same pair on every sweep.
-- Both carry: `confidence`, `adjudicatedAt`, `method` (`llm`/`oracle`),
-  `model`, bounded `reasoning`, and `sourceNodeIds` = the union of both
-  endpoints' live provenance at adjudication time.
-- When provenance dies, the sweep contests the verdict edge like any belief;
-  a contested pair becomes re-adjudicable on a later sweep — arbitration by
-  re-derivation, consistent with the rest of the system.
-
-### 4.5 Retrieval integration
-
-- `GET /retrieve` expands the seed entity across non-contested `SAME_AS`
-  edges with `confidence >= RESOLUTION_MIN_CONFIDENCE` (suggested default
-  0.8) — one alias hop — before the existing traversal, unions provenance,
-  and attributes which alias contributed each fact in the response shape.
-- `?resolveAliases=false` opts out; `includeContested` semantics stay
-  orthogonal and unchanged.
-- Route metric labels are untouched (fixed route table).
-
-### 4.6 Configuration and observability
-
-- New config through `src/config/index.ts` only:
-  `RESOLUTION_MIN_CONFIDENCE`, `RESOLUTION_MAX_PAIRS_PER_SWEEP`,
-  `RESOLUTION_BATCH_SIZE` (pairs per completion, suggested default 25).
-- Worker instrumentation per the T16 house style: child logger
-  (`worker: 'resolution'`), `instrumentWorker`, `recordLlmCall` with
-  `operation: 'resolution'`, events such as `resolution.sweep_started`,
-  `resolution.sweep_completed`, `resolution.alias_recorded`,
-  `resolution.pair_distinct`, plus counters (suggested:
-  `trellis_resolution_pairs_total{verdict}`,
-  `trellis_resolution_candidates_total`). Entity names belong in logs, never
-  in metric labels.
+- Everything above is implementable and verifiable **zero-LLM**: generation
+  is seeded, ingestion is deterministic, cache seeding uses
+  `seedVerifiedCache` (`poison.ts`), and scoring is pure.
+- A paid 20-query benchmark run against v2 is **not part of acceptance**.
+  If run at all, it requires explicit approval from the repository owner
+  first, with a cost estimate derived from the v1 telemetry in
+  `benchmark_results.json`; record actual spend in the roadmap entry.
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `TRELLIS_ROADMAP.md`, especially §2.2, §3.3 #2, §4, and §5.
+- `TRELLIS_ROADMAP.md`, especially §3.3 #3, §4, and §5.
 - `.agents/AGENT_CODING_GUIDELINES.md`.
-- `src/core/graph/resolve_actions.ts` (identity), `extraction_merge.ts`
-  (merge semantics), `entity_kinds.ts` (kind namespace), `provenance.ts` and
-  `invalidation.ts` (quarantine machinery `SAME_AS` must inherit),
-  `verification.ts` (sweep/worker/oracle pattern), `schemas.ts`,
-  `conflict_resolution.ts` (`joinAstTexts`).
-- `src/workers/verification_worker.ts` (the skeleton to mirror), `queue.ts`,
-  `job_options.ts`, `metrics_server.ts`.
-- `src/api/server.ts` (`/retrieve` traversal and response shape).
-- `src/core/observability/` (house style to reuse, not extend ad hoc).
-- `src/config/index.ts`, `.env.example`, `docker-compose.yml`, CI.
-- `scripts/verify_sweep.ts` and `scripts/test_verification_sweep.ts` (the
-  sweep-script and live-drill shapes to mirror).
-- `API_REFERENCE.md`, `docs/operations/RUNBOOK.md`.
+- `docs/benchmarks/CRITIQUE_AND_FUTURE.md` (the critique this session
+  answers) and any benchmark spec under `docs/benchmarks/`.
+- `scripts/generate_oolong_dataset.ts` (v1 generator; templates, seed,
+  ground-truth derivation), `data/oolong_pairs_dataset.json`.
+- `src/benchmarks/oolong/schema.ts` (Zod boundary), `corpus.ts` (markdown
+  binding round trip), `scoring.ts` (`buildQuery`, `cityTruth`,
+  `parsePredictedPairs`, `scoreF1`, `executeScoredQuery`).
+- `src/benchmarks/oolong_runner.ts` (20-query sequence and results shape),
+  `benchmark_results.json` (the saturated baseline).
+- `scripts/ingest_oolong_dataset.ts` (verify-as-you-go loop),
+  `scripts/prepare_oolong_flywheel.ts`, `scripts/audit_flywheel_cache.ts`.
+- `src/benchmarks/oolong/poison.ts` (`seedVerifiedCache`, `poisonCache`,
+  `auditPoisonDetection`) and `src/benchmarks/poison_drill_runner.ts`.
+- `scripts/test_oolong_pairs_query.ts` (the deterministic zero-LLM pairs
+  check to generalize).
+- `src/core/graph/entity_kinds.ts` — v2 questions/labels must land in the
+  `question`/`category_label` kinds exactly like v1, keeping them invisible
+  to Session 5's alias candidate generation.
 
-Prefer pure helpers and dependency injection so candidate generation,
-adjudication mapping, and Cypher parameter building are offline-testable
-without importing worker modules that open database or Redis connections.
+Prefer pure helpers: the generator's record builders, the alias table, and
+the cache-audit computation should be importable and unit-testable without
+databases.
 
 ## 6. Test strategy and acceptance
 
-Test first. No paid LLM calls are permitted for Session 5 verification —
-adjudication in tests uses the oracle.
+Test first. No paid LLM calls are permitted for Session 6 acceptance —
+drills use the oracle seeding path; a real v2 benchmark run is out of scope
+without explicit owner approval (§4.4).
 
 Offline tests should cover:
 
-- candidate generation: token containment, acronym matching, edit-distance
-  guard, same-kind restriction, exclusion of `question`/`category_label`,
-  canonical ordering, cap determinism, purity;
-- `AliasAdjudicationSchema` validation through `parseLlmResponse` (empty /
-  json / schema failure stages);
-- verdict-edge Cypher parameter building: canonical direction, provenance
-  union, positive vs negative edge type, bounded reasoning;
-- retrieval expansion query: pins that the Cypher filters on non-contested +
-  confidence threshold and that `resolveAliases=false` bypasses expansion;
-- oracle adjudicator behavior (including pairs absent from the truth map);
-- resolution worker metrics/log events via injected fakes;
-- queue-gauge coverage for the sixth queue.
+- v2 generator determinism: two runs produce byte-identical output; the
+  dataset validates against the extended Zod schema;
+- the anti-shortcut pin: every paraphrased record's text does NOT contain
+  its canonical city token (case-insensitive), and at least a known count
+  of such records exist;
+- distractor records: near-miss and prose distractors are never members of
+  `ground_truth.loc_hum_shared_concept_pairs`;
+- ground-truth derivation: pair counts match a hand-computed fixture for a
+  small seeded sample;
+- `buildCorpus` binding round trip for the v2 record shapes;
+- the pure cache-audit module: correct/wrong/unknown/accuracy arithmetic,
+  including empty-cache and unknown-id cases;
+- scoring stays shared: `parsePredictedPairs`/`scoreF1` behavior unchanged
+  (existing tests keep passing).
 
-Live zero-LLM coverage (new `npm run test:entity-resolution`, compose-stack
-style like `test_belief_recovery.ts`):
+Live zero-LLM coverage (compose stack, no OpenAI key):
 
-- seed `globex` and `globex corporation` entities with distinct facts and
-  real provenance; run the sweep + worker with the oracle adjudicator;
-- assert the `SAME_AS` edge exists with canonical direction, confidence, and
-  union provenance;
-- assert `GET /retrieve?entity=Globex` now returns the alias's facts with
-  union provenance and alias attribution, and that `resolveAliases=false`
-  restores the old behavior;
-- orphan one endpoint's provenance through the existing invalidation path
-  and assert the `SAME_AS` edge is contested and expansion stops —
-  quarantine inheritance proven live;
-- clean up all seeded state; zero extraction jobs, zero LLM calls.
+- ingest the v2 corpus through the verify-as-you-go loop via the new
+  `--dataset` flag; hash round trip and constraint verification pass;
+- the deterministic pairs query (generalized
+  `scripts/test_oolong_pairs_query.ts` or a v2 sibling) returns exactly the
+  v2 ground truth from `REFERENCES` edges;
+- `seedVerifiedCache` + the cache-audit module report accuracy 1.0 on a
+  clean seed; `poisonCache` + the audit reflect the flipped labels;
+- v2 question/label entities carry kinds `question`/`category_label`, and
+  Session 5's `selectResolutionCandidates` proposes zero pairs among them;
+- clean up all seeded state.
 
-Existing suites must stay green: the OOLONG benchmark scripts' exact-id
-lookups must be unaffected (`question`/`category_label` exclusion is the
-mechanism).
+Existing suites must stay green.
 
 Required close-out:
 
@@ -344,50 +343,54 @@ npm run test:invalidation-sweep
 git diff --check
 ```
 
-The baseline is 207 tests and may only increase.
+The baseline is 247 tests and may only increase.
 
 Update:
 
-- `.env.example` and README for new configuration.
-- `API_REFERENCE.md` for the `/retrieve` alias parameters and response
-  attribution.
-- `docs/operations/RUNBOOK.md`: six queues, new metrics and events in the §7
-  catalog.
-- `TRELLIS_ROADMAP.md`: mark 3.3 #2 complete only after acceptance; add a
-  full-dated §5 progress entry with exact checks/counts.
-- **`HANDOFF.md`: regenerate for Session 6 per §0.** Per the current
-  sequencing table the next objective is benchmark maturity (3.3 #3), unless
-  this session surfaces something that should jump the queue.
+- README/benchmark docs for the v2 dataset, flags, and results file.
+- `docs/benchmarks/CRITIQUE_AND_FUTURE.md`: mark what v2 answers, note what
+  remains (real TREC import, embedding-based retrieval difficulty).
+- `TRELLIS_ROADMAP.md`: mark 3.3 #3 complete only after acceptance; add a
+  full-dated §5 progress entry with exact checks/counts (and paid spend if
+  an approved run happened).
+- **`HANDOFF.md`: regenerate for Session 7 per §0.** Per the current
+  sequencing table the next objective is semantic provenance scaling
+  (3.3 #4), unless this session surfaces something that should jump the
+  queue.
 
 ## 7. Guardrails
 
 1. Never mutate an AST. T13's current hash preimage is pinned; changing it
    requires a re-hash migration and is out of scope.
-2. Never merge, rename, or delete Entity nodes. `globalEntityId` and both
-   merge Cyphers are pinned; `SAME_AS` is an overlay belief, not a rewrite.
-3. Preserve provenance on every new edge; verdict edges must be contestable
-   by the existing sweep with zero new quarantine machinery.
-4. Validate every LLM response at the existing Zod boundary; all LLM calls
-   remain inside BullMQ workers.
-5. Never adjudicate across kinds or touch the `question`/`category_label`
-   namespaces; benchmark exact-id lookups must be unaffected.
-6. Preserve the RLM queue's no-automatic-retry rule; the resolution queue
-   uses the standard retrying defaults.
-7. Follow the T16 observability house style for everything new; no
-   high-cardinality metric labels (entity names stay in logs).
-8. Keep the API and worker process split; use project-scoped Compose
+2. Never merge, rename, or delete Entity nodes; `globalEntityId`, both merge
+   Cyphers, and the Session 5 verdict-edge semantics are pinned by tests.
+3. Preserve provenance on every semantic node and edge; the v2 corpus flows
+   through the same verified ingestion and quarantine machinery as v1.
+4. Validate every dataset file and LLM response at the existing Zod
+   boundaries; all LLM calls remain inside BullMQ workers or the RLM
+   process.
+5. Never overwrite dataset v1, its committed `benchmark_results.json`, or
+   the drills that reference them; v2 is additive and separately versioned.
+6. Keep benchmark question/label entities in the `question`/
+   `category_label` kinds so alias resolution structurally ignores them.
+7. No paid LLM calls without explicit owner approval; deterministic/oracle
+   paths are the acceptance surface.
+8. Follow the T16 observability house style for anything operational; no
+   high-cardinality metric labels.
+9. Keep the API and worker process split; use project-scoped Compose
    commands and never remove another stack's volumes.
-9. Close of work uses a feature branch, a PR to `master`, plain engineering
-   prose, and no AI attribution or generated-by trailers.
-10. Finish by regenerating this file per §0 — the loop is part of acceptance.
+10. Close of work uses a feature branch, a PR to `master`, plain engineering
+    prose, and no AI attribution or generated-by trailers. Finish by
+    regenerating this file per §0 — the loop is part of acceptance.
 
 ## 8. Explicit exclusions
 
-Do not include: automatic entity merging or canonical-node rewriting;
-embedding-based candidate generation (documented follow-up); coreference/NLP
-libraries; changes to `globalEntityId` or the extraction merge; RLM prompt
-changes to exploit `SAME_AS` (follow-up once edges exist in production
-graphs); verification-worker spot-checks of `SAME_AS` beliefs (natural later
-extension of the existing sampler); benchmark corpus expansion; T13
-re-hashing; whole-codebase ingestion; frontend work; Kubernetes/cloud
-deployment; external observability vendors; paid benchmark runs.
+Do not include: importing real TREC questions (the OOLONG-Pairs task needs
+per-question concept annotations that real TREC lacks; an annotation pass
+would be paid and non-deterministic — record it as future work instead);
+embedding-based candidate generation or retrieval changes; RLM prompt/agent
+protocol changes beyond what the harder corpus itself exercises; automatic
+entity merging; provenance-scaling migrations (3.3 #4, next session);
+whole-codebase ingestion; frontend work; Kubernetes/cloud deployment;
+external observability vendors; T13 re-hashing; paid benchmark runs as an
+acceptance requirement.

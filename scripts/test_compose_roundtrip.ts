@@ -208,6 +208,7 @@ async function main(): Promise<void> {
     'supervisor_queue',
     'invalidation_queue',
     'verification_queue',
+    'resolution_queue',
   ]) {
     assert.match(
       workerMetricsText,

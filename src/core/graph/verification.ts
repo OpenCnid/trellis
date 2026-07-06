@@ -149,7 +149,8 @@ export async function selectVerificationCandidates(
 // --- Live text fetch ---------------------------------------------------------
 // AST rows store the node subtree as JSON; the human-readable text lives
 // on descendant text nodes. Walk the subtree and collect content.
-function collectText(node: unknown): string[] {
+// Exported for reuse by the alias-resolution context fetch.
+export function collectText(node: unknown): string[] {
   if (!node || typeof node !== 'object') return [];
   const acc: string[] = [];
   const n = node as { content?: unknown; children?: unknown[] };

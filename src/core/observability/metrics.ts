@@ -43,6 +43,10 @@ export interface TrellisMetrics {
   // Verification sweep outcomes.
   verificationBeliefsTotal: Counter<'result'>;
 
+  // Entity-resolution sweep outcomes.
+  resolutionCandidatesTotal: Counter<string>;
+  resolutionPairsTotal: Counter<'verdict'>;
+
   // LLM spend by operation/model (never by prompt or document).
   llmCallsTotal: Counter<'operation' | 'model'>;
   llmInputTokensTotal: Counter<'operation' | 'model'>;
@@ -150,6 +154,20 @@ export function createMetrics(registry: Registry): TrellisMetrics {
         'Verification sweep results: classified, agreed, disputed, '
         + 'skipped_no_text, skipped_no_answer.',
       labelNames: ['result'],
+      registers: [registry],
+    }),
+
+    resolutionCandidatesTotal: new Counter({
+      name: 'trellis_resolution_candidates_total',
+      help: 'Candidate alias pairs received by resolution jobs.',
+      registers: [registry],
+    }),
+    resolutionPairsTotal: new Counter({
+      name: 'trellis_resolution_pairs_total',
+      help:
+        'Alias adjudication verdicts: same, distinct, skipped_no_text, '
+        + 'skipped_no_answer.',
+      labelNames: ['verdict'],
       registers: [registry],
     }),
 

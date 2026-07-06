@@ -38,12 +38,14 @@ describe('collectQueueDepths', () => {
     await collectQueueDepths(metrics, [
       fakeQueue('extraction_queue', { waiting: 4, active: 1, delayed: 0, failed: 2 }),
       fakeQueue('rlm_queue', { waiting: 0 }),
+      fakeQueue('resolution_queue', { waiting: 5 }),
     ], log);
 
     const text = await metrics.registry.metrics();
     expect(text).toContain('trellis_queue_jobs{queue="extraction_queue",state="waiting"} 4');
     expect(text).toContain('trellis_queue_jobs{queue="extraction_queue",state="failed"} 2');
     expect(text).toContain('trellis_queue_jobs{queue="rlm_queue",state="active"} 0');
+    expect(text).toContain('trellis_queue_jobs{queue="resolution_queue",state="waiting"} 5');
   });
 
   it('isolates a Redis read failure to its queue with a warning and failure counter', async () => {

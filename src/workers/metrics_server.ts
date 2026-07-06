@@ -3,6 +3,7 @@ import { config } from '../config/index.js';
 import {
   extractionQueue,
   invalidationQueue,
+  resolutionQueue,
   rlmQueue,
   supervisorQueue,
   verificationQueue,
@@ -28,7 +29,7 @@ const metrics = getMetrics();
 
 registerQueueDepthCollection(
   metrics,
-  [extractionQueue, rlmQueue, supervisorQueue, invalidationQueue, verificationQueue],
+  [extractionQueue, rlmQueue, supervisorQueue, invalidationQueue, verificationQueue, resolutionQueue],
   log
 );
 
