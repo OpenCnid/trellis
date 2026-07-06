@@ -4,6 +4,7 @@ import { config } from '../src/config/index.js';
 import { neo4jDriver, pgPool } from '../src/config/db.js';
 
 const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:3000';
+const workerMetricsBaseUrl = process.env.WORKER_METRICS_BASE_URL ?? 'http://127.0.0.1:9464';
 const token = `ci-roundtrip-${randomUUID()}`;
 const documentKey = `${token}-document`;
 const subject = `${token}-subject`;
@@ -157,6 +158,70 @@ async function main(): Promise<void> {
   assert.deepEqual(retrieval.graph[0].r.sourceNodeIds, [rootId]);
   assert.ok(retrieval.provenance.some(row => row.id === rootId));
   console.log('[PASS] API retrieve joined semantic fact to physical provenance');
+
+  // --- T16: API metrics endpoint (authentication, content type, counters) ---
+  if (config.api.apiKey) {
+    const unauthenticated = await fetch(`${apiBaseUrl}/metrics`);
+    assert.equal(unauthenticated.status, 401);
+    console.log('[PASS] GET /metrics without key -> 401');
+  }
+  const metricsResponse = await fetch(`${apiBaseUrl}/metrics`, { headers: apiHeaders() });
+  assert.equal(metricsResponse.status, 200);
+  assert.ok(
+    (metricsResponse.headers.get('content-type') ?? '').includes('text/plain'),
+    'metrics exposition must be Prometheus text'
+  );
+  const metricsText = await metricsResponse.text();
+  assert.match(
+    metricsText,
+    /trellis_http_requests_total\{method="POST",route="\/ingest",status_class="2xx"\} [1-9]/,
+    'the deterministic ingest must be visible in API request counters'
+  );
+  assert.match(
+    metricsText,
+    /trellis_http_requests_total\{method="GET",route="\/retrieve",status_class="2xx"\} [1-9]/
+  );
+  console.log('[PASS] authenticated API metrics expose request counters for this round trip');
+
+  // --- T16: worker metrics listener on the internal Compose network ---
+  // The workers container publishes no host port; this service reaches it
+  // by service DNS. Retry briefly: workers may still be booting.
+  let workerMetricsText: string | undefined;
+  const deadline = Date.now() + 60_000;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(`${workerMetricsBaseUrl}/metrics`);
+      if (response.status === 200) {
+        assert.ok((response.headers.get('content-type') ?? '').includes('text/plain'));
+        workerMetricsText = await response.text();
+        break;
+      }
+    } catch {
+      // listener not up yet
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  assert.ok(workerMetricsText, 'worker metrics listener was not reachable on the internal network');
+  for (const queue of [
+    'extraction_queue',
+    'rlm_queue',
+    'supervisor_queue',
+    'invalidation_queue',
+    'verification_queue',
+  ]) {
+    assert.match(
+      workerMetricsText,
+      new RegExp(`trellis_queue_jobs\\{queue="${queue}",state="waiting"\\} \\d`),
+      `queue depth gauge missing for ${queue}`
+    );
+  }
+  assert.ok(workerMetricsText.includes('trellis_jobs_total'), 'worker job counters must be registered');
+  console.log('[PASS] worker metrics reachable internally with live queue depth gauges');
+
+  const healthAfter = await fetch(`${apiBaseUrl}/healthz`);
+  assert.equal(healthAfter.status, 200);
+  assert.deepEqual(await healthAfter.json(), { status: 'ok', scope: 'liveness' });
+  console.log('[PASS] /healthz contract unchanged after metrics rollout');
 }
 
 void main()

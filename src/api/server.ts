@@ -24,8 +24,19 @@ import {
   shutdownCoordinator,
 } from '../core/runtime/shutdown.js';
 import { healthHandler } from './health.js';
+import { loggerFor, type Logger } from '../core/observability/logger.js';
+import { getMetrics } from '../core/observability/metrics.js';
+import { httpMetricsMiddleware, normalizeRoute } from '../core/observability/http_metrics.js';
 
 const execFileAsync = util.promisify(execFile);
+
+const log = loggerFor({ component: 'api' });
+const metrics = getMetrics();
+
+/** Request-scoped child logger bound by the observability middleware. */
+function requestLogger(res: express.Response): Logger {
+  return (res.locals.log as Logger | undefined) ?? log;
+}
 
 // Upload limits (T6): PDFs only, size-capped, single file. The parsed
 // upload is deleted after the request (see the /ingest finally block).
@@ -52,12 +63,53 @@ function uploadPdf(req: express.Request, res: express.Response, next: express.Ne
 }
 
 const app = express();
+// Observability first (T16): every request — including 401s — is counted
+// by method/normalized route/status class and carries a requestId that
+// ingest threads into queued jobs. Query strings and bodies are never
+// logged; /healthz is excluded from request logs so container health
+// probes do not flood stdout (it is still counted in metrics).
+app.use(httpMetricsMiddleware(metrics));
+app.use((req, res, next) => {
+  const requestId = crypto.randomUUID();
+  res.locals.requestId = requestId;
+  res.locals.log = log.child({ requestId });
+  res.set('x-request-id', requestId);
+  if (req.path !== '/healthz') {
+    const startedAt = process.hrtime.bigint();
+    res.on('finish', () => {
+      requestLogger(res).info({
+        event: 'http.request_completed',
+        method: req.method,
+        route: normalizeRoute(req.path),
+        status: res.statusCode,
+        durationMs: Number(process.hrtime.bigint() - startedAt) / 1e6,
+      });
+    });
+  }
+  next();
+});
 // Unauthenticated process liveness for container orchestration. This is
 // intentionally not dependency readiness; schema bootstrap gates startup.
 app.get('/healthz', (_req, res) => healthHandler(res));
 // Authentication before body parsing: unauthorized requests are refused
 // before any bytes are buffered or databases touched.
 app.use(apiKeyMiddleware(config.api.apiKey));
+// Prometheus exposition for the API process (T16). Behind the API key
+// like every operational endpoint; the worker container serves its own
+// registry on the internal WORKER_METRICS_PORT listener.
+app.get('/metrics', async (_req, res) => {
+  try {
+    const body = await metrics.registry.metrics();
+    res.set('Content-Type', metrics.registry.contentType);
+    res.send(body);
+  } catch (error) {
+    requestLogger(res).warn({
+      event: 'metrics.exposition_failed',
+      err: error instanceof Error ? error : new Error(String(error)),
+    });
+    res.status(500).json({ error: 'Metrics collection failed' });
+  }
+});
 // Only accept raw text/markdown if content-type is text/*; size-capped (T6).
 app.use(express.text({
   type: ['text/*', 'application/json', 'application/x-www-form-urlencoded'],
@@ -144,6 +196,7 @@ app.post('/ingest', uploadPdf, async (req, res) => {
         text.trim().length > 0 && (!addedSet || addedSet.has(block.id))
       );
 
+    const requestId = res.locals.requestId as string | undefined;
     if (diff && diff.orphaned.length > 0) {
       // Quarantine sweep (Milestone 3): facts derived from bytes that
       // vanished in this version get contested by the worker. The queued
@@ -156,14 +209,36 @@ app.post('/ingest', uploadPdf, async (req, res) => {
         oldVersion: registration.version - 1,
         newVersion: registration.version,
         orphanedHashes: diff.orphaned,
-        freshHashes: extractionBlocks.map(({ block }) => block.id)
+        freshHashes: extractionBlocks.map(({ block }) => block.id),
+        requestId,
       });
-      console.log(`[Ingest] ${docKey} v${registration.version}: queued invalidation sweep for ${diff.orphaned.length} orphaned node(s).`);
+      requestLogger(res).info({
+        event: 'ingest.invalidation_queued',
+        docKey,
+        version: registration.version,
+        orphanedCount: diff.orphaned.length,
+      });
     }
 
     if (extractionBlocks.length > 0) {
-      await extractionQueue.addBulk(buildExtractionJobs(extractionBlocks));
+      await extractionQueue.addBulk(buildExtractionJobs(extractionBlocks, {
+        requestId,
+        docKey,
+        version: registration.version,
+      }));
     }
+
+    requestLogger(res).info({
+      event: 'ingest.accepted',
+      docKey: registration.docKey,
+      version: registration.version,
+      rootId: rootNode.id,
+      totalNodes: allNodes.length,
+      blocksQueued: extractionBlocks.length,
+      diff: diff
+        ? { added: diff.added.length, orphaned: diff.orphaned.length, retained: diff.retained.length }
+        : null,
+    });
 
     // 5. Respond with 202 Accepted, the Root AST Node ID, and diff telemetry
     res.status(202).json({
@@ -178,13 +253,13 @@ app.post('/ingest', uploadPdf, async (req, res) => {
         : null
     });
   } catch (error: any) {
-    console.error("Error during ingestion:", error);
+    requestLogger(res).error({ event: 'ingest.failed', err: error });
     res.status(500).json({ error: error.message });
   } finally {
     // Uploads are parse-once inputs; never let them accumulate (T6).
     if (req.file) {
       await fs.unlink(req.file.path).catch(err =>
-        console.warn(`[Ingest] Failed to delete upload ${req.file?.path}: ${err.message}`)
+        requestLogger(res).warn({ event: 'ingest.upload_cleanup_failed', err })
       );
     }
   }
@@ -229,7 +304,10 @@ app.get('/retrieve', async (req, res) => {
       neighbor.sourceNodeIds?.forEach((id: string) => sourceNodeIds.add(id));
     }
   } catch (error) {
-    console.error("Neo4j retrieve error:", error);
+    requestLogger(res).error({
+      event: 'retrieve.neo4j_failed',
+      err: error instanceof Error ? error : new Error(String(error)),
+    });
     return res.status(500).json({ error: 'Neo4j retrieve error' });
   } finally {
     await session.close();
@@ -242,7 +320,7 @@ app.get('/retrieve', async (req, res) => {
 
   try {
     if (idsArray.length === 0) {
-      console.log(`[Retrieve] No graph matches for '${entityName}'. Triggering Vector Fallback.`);
+      requestLogger(res).info({ event: 'retrieve.vector_fallback', entity: entityName });
       fallback_active = true;
       const openai = new OpenAI();
       const embedRes = await openai.embeddings.create({
@@ -265,7 +343,10 @@ app.get('/retrieve', async (req, res) => {
       provenance = pgRes.rows;
     }
   } catch (error) {
-    console.error("Postgres retrieve error:", error);
+    requestLogger(res).error({
+      event: 'retrieve.postgres_failed',
+      err: error instanceof Error ? error : new Error(String(error)),
+    });
     return res.status(500).json({ error: 'Postgres retrieve error' });
   } finally {
     pgClient.release();
@@ -306,7 +387,11 @@ app.get('/api/rlm-stream', async (req, res) => {
     queueDepth = await rlmQueue.getWaitingCount();
   } catch (err) {
     release();
-    console.error('Failed to read rlm_queue depth:', err);
+    requestLogger(res).error({
+      event: 'rlm_stream.queue_depth_unavailable',
+      queue: 'rlm_queue',
+      err: err instanceof Error ? err : new Error(String(err)),
+    });
     return res.status(503).json({ error: 'Queue unavailable; retry later.' });
   }
   if (queueDepth >= config.rlmStream.maxQueueDepth) {
@@ -334,7 +419,12 @@ app.get('/api/rlm-stream', async (req, res) => {
 
   redisSubscriber.subscribe(channel, (err) => {
     if (err) {
-      console.error('Failed to subscribe to redis channel:', err);
+      // The SSE query content is deliberately never logged.
+      requestLogger(res).error({
+        event: 'rlm_stream.subscribe_failed',
+        jobId,
+        err,
+      });
       res.end();
       return;
     }
@@ -343,7 +433,12 @@ app.get('/api/rlm-stream', async (req, res) => {
     // client — previously it was fire-and-forget and the SSE stream hung
     // forever with no event.
     rlmQueue.add('rlm_job', { query, jobId }).catch(enqueueErr => {
-      console.error(`Failed to enqueue RLM job ${jobId}:`, enqueueErr);
+      requestLogger(res).error({
+        event: 'rlm_stream.enqueue_failed',
+        queue: 'rlm_queue',
+        jobId,
+        err: enqueueErr instanceof Error ? enqueueErr : new Error(String(enqueueErr)),
+      });
       res.write(`data: ${JSON.stringify({ type: 'error', content: 'Failed to enqueue RLM job; retry later.' })}\n\n`);
       res.end();
     });
@@ -381,12 +476,15 @@ app.use((err: any, _req: express.Request, res: express.Response, next: express.N
   if (err?.type === 'entity.too.large') {
     return res.status(413).json({ error: `Request body exceeds the ${config.ingest.maxBodyMb} MB limit` });
   }
-  console.error('[API] Unhandled error:', err);
+  requestLogger(res).error({
+    event: 'api.unhandled_error',
+    err: err instanceof Error ? err : new Error(String(err)),
+  });
   res.status(500).json({ error: 'Internal server error' });
 });
 
 export const server = app.listen(config.api.port, () => {
-  console.log(`Trellis API Server running on port ${config.api.port}`);
+  log.info({ event: 'api.started', port: config.api.port });
 });
 
 installShutdownSignalHandlers();

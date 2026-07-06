@@ -1,9 +1,12 @@
 import { pgPool, neo4jDriver } from './db.js';
 import { POSTGRES_SCHEMA_SQL } from './schema.js';
 import { runInitializationTasks } from '../core/runtime/database_init.js';
+import { loggerFor } from '../core/observability/logger.js';
+
+const log = loggerFor({ component: 'database_init' });
 
 async function initializeDatabases(): Promise<void> {
-  console.log('Initializing database schemas...');
+  log.info({ event: 'database.initialization_started' });
 
   const initialization = await runInitializationTasks([
     {
@@ -12,7 +15,7 @@ async function initializeDatabases(): Promise<void> {
         const client = await pgPool.connect();
         try {
           await client.query(POSTGRES_SCHEMA_SQL);
-          console.log('[PASS] PostgreSQL: tables, indexes, and search functions created/verified.');
+          log.info({ event: 'database.postgres_schema_ready' });
         } finally {
           client.release();
         }
@@ -26,7 +29,7 @@ async function initializeDatabases(): Promise<void> {
           await session.run(
             'CREATE CONSTRAINT IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE'
           );
-          console.log('[PASS] Neo4j: Entity ID uniqueness constraint created/verified.');
+          log.info({ event: 'database.neo4j_constraints_ready' });
         } finally {
           await session.close();
         }
@@ -41,22 +44,22 @@ async function initializeDatabases(): Promise<void> {
   const failures = [...initialization.failures, ...cleanup.failures];
 
   if (failures.length === 0) {
-    console.log('Schemas successfully initialized on all databases.');
+    log.info({ event: 'database.initialization_completed' });
     return;
   }
 
-  console.warn(JSON.stringify({
+  log.warn({
     event: 'database.initialization_incomplete',
     failures,
-  }));
+  });
   process.exitCode = 1;
 }
 
 void initializeDatabases().catch(error => {
-  console.warn(JSON.stringify({
+  log.warn({
     event: 'database.initialization_crashed',
     errorType: error instanceof Error ? error.name : typeof error,
     message: error instanceof Error ? error.message : String(error),
-  }));
+  });
   process.exitCode = 1;
 });

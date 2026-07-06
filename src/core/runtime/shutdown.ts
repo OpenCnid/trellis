@@ -1,5 +1,8 @@
+import { rootLogger } from '../observability/logger.js';
+
 export type ShutdownSignal = 'SIGINT' | 'SIGTERM';
 export type ShutdownTask = () => void | Promise<void>;
+export type StructuredEmit = (fields: Record<string, unknown>) => void;
 
 interface RegisteredTask {
   name: string;
@@ -22,7 +25,7 @@ export class ShutdownCoordinator {
   private shutdownPromise: Promise<ShutdownResult> | undefined;
 
   constructor(
-    private readonly warn: (line: string) => void = console.warn
+    private readonly warn: StructuredEmit = fields => rootLogger().warn(fields)
   ) {}
 
   register(name: string, phase: number, close: ShutdownTask): void {
@@ -50,13 +53,13 @@ export class ShutdownCoordinator {
           await task.close();
         } catch (error) {
           failures.push(task.name);
-          this.warn(JSON.stringify({
+          this.warn({
             event: 'runtime.shutdown_task_failed',
             signal,
             resource: task.name,
             errorType: error instanceof Error ? error.name : typeof error,
             message: error instanceof Error ? error.message : String(error),
-          }));
+          });
         }
       }));
     }
@@ -71,13 +74,13 @@ export function installShutdownSignalHandlers(): void {
   if (signalHandlersInstalled) return;
   signalHandlersInstalled = true;
   const handle = (signal: ShutdownSignal) => {
-    console.log(JSON.stringify({ event: 'runtime.shutdown_started', signal }));
+    rootLogger().info({ event: 'runtime.shutdown_started', signal });
     void shutdownCoordinator.shutdown(signal).then(result => {
-      console.log(JSON.stringify({
+      rootLogger().info({
         event: 'runtime.shutdown_completed',
         signal: result.signal,
         failures: result.failures,
-      }));
+      });
       if (result.failures.length > 0) process.exitCode = 1;
     });
   };

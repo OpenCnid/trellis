@@ -53,13 +53,13 @@ describe('classifyWorkerError', () => {
 describe('withWorkerRetryPolicy', () => {
   it('preserves retryable errors so BullMQ can apply normal backoff', async () => {
     const error = apiError(502);
-    const log = vi.fn();
+    const emit = vi.fn();
     await expect(withWorkerRetryPolicy(
       { worker: 'extraction', jobId: '7', attempt: 1 },
       async () => { throw error; },
-      log
+      emit
     )).rejects.toBe(error);
-    expect(JSON.parse(log.mock.calls[0][0])).toMatchObject({
+    expect(emit.mock.calls[0][0]).toMatchObject({
       event: 'worker.error_classified',
       retryable: true,
       worker: 'extraction',
@@ -69,13 +69,13 @@ describe('withWorkerRetryPolicy', () => {
   });
 
   it('converts permanent errors to BullMQ UnrecoverableError', async () => {
-    const log = vi.fn();
+    const emit = vi.fn();
     await expect(withWorkerRetryPolicy(
       { worker: 'verification', jobId: '9', attempt: 2 },
       async () => { throw apiError(401); },
-      log
+      emit
     )).rejects.toBeInstanceOf(UnrecoverableError);
-    expect(JSON.parse(log.mock.calls[0][0])).toMatchObject({
+    expect(emit.mock.calls[0][0]).toMatchObject({
       retryable: false,
       status: 401,
     });

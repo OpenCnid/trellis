@@ -51,6 +51,22 @@ describe('buildExtractionJobs', () => {
       },
     ]);
   });
+
+  it('threads ingest correlation context into every job payload', () => {
+    const root = parseMarkdownToAST('Globex **acquired** Initech.');
+    const block = root.children![0];
+    const [job] = buildExtractionJobs(
+      [{ block, text: 'Globex acquired Initech.' }],
+      { requestId: 'req-1', docKey: 'globex-report', version: 3 }
+    );
+    expect(job.data).toEqual({
+      astNodeId: block.id,
+      text: 'Globex acquired Initech.',
+      requestId: 'req-1',
+      docKey: 'globex-report',
+      version: 3,
+    });
+  });
 });
 
 describe('verified AST persistence', () => {
