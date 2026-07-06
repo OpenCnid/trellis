@@ -46,6 +46,14 @@ internal listener at `WORKER_METRICS_PORT` (default `9464`,
 `WORKER_METRICS_HOST` default `0.0.0.0`) that Compose does not publish to
 the host. See `API_REFERENCE.md` §0 and `docs/operations/RUNBOOK.md` §7.
 
+Entity resolution (Session 5): `npm run resolve:sweep` proposes lexical
+alias candidates and the resolution worker adjudicates them into
+`SAME_AS`/`DISTINCT_FROM` overlay edges; `GET /retrieve` expands across
+non-contested `SAME_AS` edges at or above `RESOLUTION_MIN_CONFIDENCE`
+(default `0.8`; opt out per request with `?resolveAliases=false`).
+`RESOLUTION_MAX_PAIRS_PER_SWEEP` (default `200`) caps each sweep's batch
+and `RESOLUTION_BATCH_SIZE` (default `25`) sets pairs per LLM completion.
+
 Start only the databases on Docker and initialize their schemas:
 
 ```bash

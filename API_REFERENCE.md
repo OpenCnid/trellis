@@ -111,6 +111,11 @@ Executes a graph traversal for a specific entity, finding all immediate 1-hop re
 **Query Parameters:**
 - `entity` (string, required): The name of the entity to query.
 - `includeContested` (optional, default `false`): contested relationships — facts whose source bytes were orphaned by a document re-ingest and quarantined by the invalidation sweep — are excluded from results by default. Pass `true` to inspect the quarantined belief history (each contested edge carries `contested`, `contestedAt`, and `orphanedSourceIds`). A quarantined fact returns to default results once it is re-derived from live bytes — re-extracted by a re-ingest or re-written by the RLM. Dead hashes remain in `orphanedSourceIds`; if a document revert makes the identical hash live again, re-derivation moves that hash back to `sourceNodeIds`.
+- `resolveAliases` (optional, default `true`): the seed entity is expanded one hop across non-contested `SAME_AS` edges whose `confidence` is at or above `RESOLUTION_MIN_CONFIDENCE` before the traversal, so facts recorded against an adjudicated alias (e.g. "globex" vs "globex corporation") are returned together with union provenance. Pass `false` to query the exact-name entity only. `includeContested` never relaxes the expansion filter — a contested equivalence does not widen results.
+
+**Response fields (alias resolution):**
+- `resolvedAliases`: the aliases the seed expanded across, as `{ name, confidence }` objects (empty when expansion is disabled or no qualifying `SAME_AS` edge exists).
+- each `graph` entry carries `viaAlias`: the (lowercased) name of the seed-or-alias entity whose neighborhood produced that fact, so alias-contributed facts are attributable.
 
 **Example Request:**
 ```bash
@@ -135,7 +140,8 @@ curl -X GET "http://localhost:3000/retrieve?entity=Globex%20Corporation"
         "name": "initech",
         "id": "4cdc1a42...",
         "type": "Company"
-      }
+      },
+      "viaAlias": "globex corporation"
     }
   ],
   "provenance": [
@@ -143,6 +149,10 @@ curl -X GET "http://localhost:3000/retrieve?entity=Globex%20Corporation"
       "id": "2cc45731...",
       "content": "Globex recently completed a hostile takeover of Initech."
     }
+  ],
+  "fallback_active": false,
+  "resolvedAliases": [
+    { "name": "globex", "confidence": 0.93 }
   ]
 }
 ```

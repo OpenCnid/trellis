@@ -47,3 +47,20 @@ export const VerificationResponseSchema = z.object({
 });
 
 export type VerificationResponse = z.infer<typeof VerificationResponseSchema>;
+
+// Strict structured-output shape for one alias-adjudication batch
+// (Session 5 entity resolution). One verdict per candidate pair, keyed by
+// the canonical pairId the worker submitted, so every answer validates
+// before any SAME_AS/DISTINCT_FROM edge is written. Reasoning length is
+// bounded at edge-write time (buildVerdictParams), not here — a schema
+// max() would turn a verbose-but-correct completion into a retry.
+export const AliasAdjudicationSchema = z.object({
+  results: z.array(z.object({
+    pairId: z.string(),
+    sameEntity: z.boolean(),
+    confidence: z.number().min(0).max(1),
+    reasoning: z.string(),
+  })),
+});
+
+export type AliasAdjudication = z.infer<typeof AliasAdjudicationSchema>;

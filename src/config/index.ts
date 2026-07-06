@@ -74,6 +74,13 @@ const EnvSchema = z.object({
   // rubric verification.
   EXTRACTION_MODEL: z.string().default('gpt-5.4-2026-03-05'),
 
+  // Entity resolution (Session 5). SAME_AS edges below the confidence
+  // floor exist but do not expand /retrieve; the sweep cap bounds
+  // adjudication spend per run; the batch size is pairs per completion.
+  RESOLUTION_MIN_CONFIDENCE: z.coerce.number().min(0).max(1).default(0.8),
+  RESOLUTION_MAX_PAIRS_PER_SWEEP: z.coerce.number().int().positive().default(200),
+  RESOLUTION_BATCH_SIZE: z.coerce.number().int().positive().default(25),
+
   // Interpreter used to spawn the RLM agent and the PDF parser. On
   // Windows the launcher is conventionally `python`; elsewhere `python3`.
   PYTHON_EXECUTABLE: z
@@ -137,6 +144,11 @@ export const config = {
   },
   llm: {
     extractionModel: env.EXTRACTION_MODEL,
+  },
+  resolution: {
+    minConfidence: env.RESOLUTION_MIN_CONFIDENCE,
+    maxPairsPerSweep: env.RESOLUTION_MAX_PAIRS_PER_SWEEP,
+    batchSize: env.RESOLUTION_BATCH_SIZE,
   },
   python: {
     executable: env.PYTHON_EXECUTABLE,

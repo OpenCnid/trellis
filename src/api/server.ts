@@ -24,6 +24,7 @@ import {
   shutdownCoordinator,
 } from '../core/runtime/shutdown.js';
 import { healthHandler } from './health.js';
+import { expandAliases, type ResolvedAlias } from '../core/graph/alias_resolution.js';
 import { loggerFor, type Logger } from '../core/observability/logger.js';
 import { getMetrics } from '../core/observability/metrics.js';
 import { httpMetricsMiddleware, normalizeRoute } from '../core/observability/http_metrics.js';
@@ -275,29 +276,47 @@ app.get('/retrieve', async (req, res) => {
   // from retrieval by default; pass ?includeContested=true to inspect
   // the quarantined belief history.
   const includeContested = req.query.includeContested === 'true';
+  // Alias expansion (Session 5): the seed entity is widened across
+  // non-contested SAME_AS edges at or above RESOLUTION_MIN_CONFIDENCE —
+  // one hop — before the traversal. ?resolveAliases=false opts out.
+  // includeContested does NOT relax the expansion filter: a contested
+  // equivalence never silently widens a result set.
+  const resolveAliases = req.query.resolveAliases !== 'false';
 
   const session = neo4jDriver.session();
   let sourceNodeIds = new Set<string>();
   let graphData: any[] = [];
+  let resolvedAliases: ResolvedAlias[] = [];
   try {
+    if (resolveAliases) {
+      resolvedAliases = await expandAliases(
+        neo4jDriver,
+        entityName,
+        config.resolution.minConfidence
+      );
+    }
+    const aliasNames = resolvedAliases.map(alias => alias.name);
+    // viaAlias attributes each fact to the seed-or-alias entity whose
+    // neighborhood produced it, so callers can tell alias-contributed
+    // facts from the seed's own.
     const neoRes = await session.run(`
       MATCH (e:Entity)-[rel:ACTION|CONTRADICTS]-(neighbor:Entity)
-      WHERE e.name = toLower($entityName)
+      WHERE (e.name = toLower($entityName) OR e.name IN $aliasNames)
         AND ($includeContested OR coalesce(rel.contested, false) = false)
-      RETURN e, rel, neighbor
+      RETURN e, rel, neighbor, e.name AS viaAlias
       UNION
       MATCH (e:Entity)-[:ACTION|CONTRADICTS]-(neighbor:Entity)-[rel:CONTRADICTS]-(neighbor_of_neighbor:Entity)
-      WHERE e.name = toLower($entityName)
+      WHERE (e.name = toLower($entityName) OR e.name IN $aliasNames)
         AND ($includeContested OR coalesce(rel.contested, false) = false)
-      RETURN neighbor AS e, rel, neighbor_of_neighbor AS neighbor
-    `, { entityName, includeContested });
+      RETURN neighbor AS e, rel, neighbor_of_neighbor AS neighbor, e.name AS viaAlias
+    `, { entityName, aliasNames, includeContested });
 
     for (const record of neoRes.records) {
       const e = record.get('e').properties;
       const rRaw = record.get('rel');
       const r = { type: rRaw.type, ...rRaw.properties };
       const neighbor = record.get('neighbor').properties;
-      graphData.push({ e, r, neighbor });
+      graphData.push({ e, r, neighbor, viaAlias: record.get('viaAlias') });
 
       e.sourceNodeIds?.forEach((id: string) => sourceNodeIds.add(id));
       r.sourceNodeIds?.forEach((id: string) => sourceNodeIds.add(id));
@@ -355,7 +374,8 @@ app.get('/retrieve', async (req, res) => {
   return res.json({
     graph: graphData,
     provenance,
-    fallback_active
+    fallback_active,
+    resolvedAliases
   });
 });
 

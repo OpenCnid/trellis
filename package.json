@@ -30,6 +30,8 @@
     "test:entity-kinds": "tsx scripts/test_entity_kinds.ts",
     "test:verification-sweep": "tsx scripts/test_verification_sweep.ts",
     "verify:sweep": "tsx scripts/verify_sweep.ts",
+    "resolve:sweep": "tsx scripts/resolve_sweep.ts",
+    "test:entity-resolution": "tsx scripts/test_entity_resolution.ts",
     "migrate:entity-kinds": "tsx scripts/migrate_entity_kinds.ts",
     "test:versioned-ingest": "tsx scripts/test_versioned_ingest.ts",
     "test:invalidation-sweep": "tsx scripts/test_invalidation_sweep.ts",
