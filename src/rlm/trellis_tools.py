@@ -1,8 +1,15 @@
 import os
 import json
+import re
 import threading
 from neo4j import GraphDatabase, READ_ACCESS, WRITE_ACCESS
 import psycopg2
+
+# Session 14 (design record §10.2): an AST hash is 64 lowercase hex chars
+# (SHA-256 via digest('hex')). Tier-3 identifiers (uuids, module names)
+# are structurally disjoint from this shape, so nothing scratch-shaped
+# can ever be written as provenance.
+AST_HASH_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 # --- TREC rubric: single source of truth -------------------------------
 # The rubric prompt is versioned text shared between the RLM agent (which
@@ -30,12 +37,19 @@ def get_tool_call_count() -> int:
     return _tool_call_stats["count"]
 
 class TrellisNeo4j:
-    def __init__(self):
+    def __init__(self, ast_existence_check=None):
         # Retrieve config from environment variables
         uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
         user = os.getenv("NEO4J_USER", "neo4j")
         password = os.getenv("NEO4J_PASSWORD", "trellis_password")
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
+        # Session 14 hardening: a callable taking a list of hashes and
+        # returning a JSON list of the MISSING ones (the shape of
+        # TrellisPostgres.ast_hashes_exist). When wired, every insight
+        # write verifies its cited hashes exist in ast_nodes BEFORE the
+        # WRITE session opens — "an AST hash means verified ingested
+        # bytes" becomes enforcement, not convention.
+        self._ast_existence_check = ast_existence_check
 
     def run_cypher(self, query: str) -> str:
         """
@@ -168,6 +182,19 @@ class TrellisNeo4j:
             raise ValueError("Each fact requires non-empty subject, verb, and obj.")
         if not sourceNodeIds:
             raise ValueError("Provenance Violation: every derived insight requires the sourceNodeIds (AST hashes) that led to the deduction.")
+        for node_id in sourceNodeIds:
+            if not isinstance(node_id, str) or not AST_HASH_PATTERN.match(node_id):
+                # Bounded echo: enough to identify the offender, never an
+                # unbounded payload in the raised message.
+                echo = repr(node_id)
+                if len(echo) > 80:
+                    echo = echo[:80] + "..."
+                raise ValueError(
+                    f"Provenance Violation: sourceNodeIds element {echo} is not an AST hash "
+                    f"(64 lowercase hex chars). Workspace segment ids, question ids, and any "
+                    f"other identifiers are never provenance — cite the AST hashes the data "
+                    f"actually came from."
+                )
         if confidence is not None:
             confidence = float(confidence)
             if not 0.0 <= confidence <= 1.0:
@@ -190,9 +217,31 @@ class TrellisNeo4j:
             "object_kind": object_kind,
         }
 
+    def _verify_hashes_exist(self, facts: list) -> None:
+        """Session 14 (§10.2): the deduped union of the batch's cited
+        hashes must exist in ast_nodes before any write happens. Fail
+        fast, no partial write. An infrastructure failure from the
+        checker (e.g. Postgres down) propagates as a RuntimeError — it is
+        never reported as a provenance verdict."""
+        if self._ast_existence_check is None:
+            return
+        union = sorted({h for fact in facts for h in fact["sourceNodeIds"]})
+        missing = json.loads(self._ast_existence_check(union))
+        if missing:
+            shown = ", ".join(missing[:5])
+            more = f" (+{len(missing) - 5} more)" if len(missing) > 5 else ""
+            raise ValueError(
+                f"Provenance Violation: {len(missing)} cited sourceNodeIds hash(es) do not "
+                f"exist in ast_nodes: {shown}{more}. Only hashes of verified ingested bytes "
+                f"are provenance; nothing was written."
+            )
+
     def _run_insight_writes(self, facts: list) -> str:
         # The single whitelisted write path opens its session with explicit
         # WRITE access; every other session in this sandbox is READ (T7).
+        # Existence enforcement runs first: no write session opens for a
+        # batch citing unknown hashes.
+        self._verify_hashes_exist(facts)
         try:
             with self.driver.session(default_access_mode=WRITE_ACCESS) as session:
                 result = session.run(self._WRITE_INSIGHT_QUERY, facts=facts, rubricVersion=RUBRIC_VERSION)
@@ -292,6 +341,26 @@ class TrellisPostgres:
             # feedback loop.
             self.conn.rollback()
             raise RuntimeError(f"PostgresError while fetching AST texts: {e}") from e
+
+    def ast_hashes_exist(self, hashes: list) -> str:
+        """Returns a JSON list of the hashes that do NOT exist in
+        ast_nodes (empty list means all exist). Write-path plumbing for
+        the Session 14 provenance existence check — deliberately not
+        counted as a database tool call: reading it never satisfies the
+        provenance protocol, and the write it guards already counts."""
+        if not hashes:
+            return "[]"
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id FROM ast_nodes WHERE id = ANY(%s)",
+                    (list(hashes),)
+                )
+                found = {row[0] for row in cur.fetchall()}
+                return json.dumps([h for h in hashes if h not in found])
+        except Exception as e:
+            self.conn.rollback()
+            raise RuntimeError(f"PostgresError while checking AST hash existence: {e}") from e
 
     def vector_search(self, query: str) -> str:
         """

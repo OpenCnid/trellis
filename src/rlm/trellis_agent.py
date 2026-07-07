@@ -103,9 +103,11 @@ def main():
     parser.add_argument("--max-iterations", type=int, default=5, help="Max root REPL iterations")
     args = parser.parse_args()
 
-    # Initialize tools
-    neo4j_tool = TrellisNeo4j()
+    # Initialize tools. The Neo4j write path verifies cited AST hashes
+    # against ast_nodes through the Postgres tool (Session 14 §10.2) —
+    # unconditional, no toggle.
     postgres_tool = TrellisPostgres()
+    neo4j_tool = TrellisNeo4j(ast_existence_check=postgres_tool.ast_hashes_exist)
     mcp_tool = None
 
     print(f"Starting RLM Agent for query: '{args.query}'", flush=True)
