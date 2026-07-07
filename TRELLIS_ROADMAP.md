@@ -176,6 +176,8 @@ Ordered roughly by severity.
 
 6. ~~**Whole-codebase ingestion.**~~ **Done (Session 8, July 6, 2026):** one repository snapshot is a bounded sequence of per-file verified ingests (`repo:<key>:<path>` doc keys) through the extracted `src/core/ingestion/` service, with code-aware TypeScript/JavaScript/Python parsing, durable PostgreSQL snapshot membership, tombstone-based deletion/rename semantics that quarantine through the existing invalidation sweep, and a zero-paid-work default (`--extract none`; `changed` requires an explicit budget plus confirmation). The measured `Entity.name` merge index shipped alongside (recorded separately from the still-open 3.3 #4 gate). See §5 and `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`. The original decision record follows. Decision recorded July 4, 2026: this is a pipeline feature, **not** a relaxation of the T6 per-request limits. The natural unit is one document per source file (`doc_key` = repo-relative path), so per-file Merkle diffs drive incremental re-extraction commit-to-commit — exactly what the physical layer was built for — fed by a batch client/CLI rather than one giant request. A single-blob upload of a repo would defeat per-file identity, diff granularity, and the streaming-free `express.text`/single-transaction ingest (the whole body is buffered in memory and inserted row-by-row). Individual source files fit comfortably inside the 5 MB default (generated artifacts that don't should be excluded, or the env knob raised). Prerequisites before this feature: T11 batching (multi-row inserts + `addBulk` for thousands-of-files fan-out), the rest of T14 (queue hygiene at that job volume), a code-aware parser path (tree-sitter or similar — extraction blocks should be functions/classes, not markdown paragraphs), and extraction cost controls (tiered/selective extraction; one LLM call per block across a 50k-file repo is cost-prohibitive). If a convenience archive-upload endpoint is added, the upload allowlist expands to zip/tar with decompressed-size and entry-count guards (zip bombs) — independent of the per-request caps, which stay small on purpose (each request's body is held fully in memory).
 
+7. **Agentic orchestration loop (owner-directed, July 6, 2026).** Trellis must be able to work agentically: an external loop that accepts a goal, decomposes it into tasks, and mediates execution until the goal completes or a bound is hit. The loop is driven by the same LLM under a different (orchestrator) system prompt — plain structured chat completions crossing the T8 `parseLlmResponse` boundary, never a second REPL (the rlms `custom_system_prompt` replaces the REPL protocol prompt, so the orchestrator persona must not be routed through rlms). The RLM becomes a reusable single-task sub-agent: one `rlm_queue` job per task, one process per run exactly as today, so a goal can dispatch many RLM runs and aggregate their `FINAL_ANSWER:` results and `TRELLIS_TELEMETRY:` spend. Hard per-goal bounds on orchestrator iterations, dispatched tasks, and tokens; all LLM calls stay inside workers; the orchestrator itself never writes to the graph — `write_derived_insight` remains the single agent write path. Zero-LLM acceptance via a deterministic oracle planner plus stubbed task execution over the real queue/stream plumbing. Scheduled as Session 9; see §4 and `HANDOFF.md`.
+
 ---
 
 ## 4. Suggested Sequencing
@@ -187,8 +189,10 @@ Ordered roughly by severity.
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
 | ~~4~~ | ~~Semantic provenance scale gate (3.3 #4 measurement)~~ | **Measured (Session 7, July 6, 2026)** — migration not justified at 300 documents; explicit 1,000-source/superlinear triggers recorded; see §5 |
 | ~~5~~ | ~~Whole-codebase ingestion (3.3 #6)~~ | **Done (Session 8, July 6, 2026)** — code-aware per-file snapshots with tombstone deletion, zero-paid-work default, and the measured Entity.name merge index; see §5 |
-| 1 | Frontend deployment and community readiness remainder (3.3 #5 residue) | The backend is containerized and CI-covered; the Next.js frontend still has no production build, container, API-key handling, or CI coverage |
-| 2 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| 1 | Agentic orchestration loop (3.3 #7) | Owner-directed priority (July 6, 2026), jumping the sequencing default: an external goal loop mediated by the same LLM under an orchestrator system prompt, with the RLM as a reusable single-task sub-agent |
+| 2 | Frontend deployment and community readiness remainder (3.3 #5 residue) | Deferred from the Session 9 default by the owner redirect — the Next.js frontend still has no production build, container, API-key handling, or CI coverage |
+| 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
+| 4 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 
 ---
 
@@ -661,3 +665,27 @@ a second snapshot against an empty tree tombstoned all 22 documents and the
 real invalidation worker swept the globally dead code hashes, quarantining
 the pilot-derived facts (mixed-provenance demo entities like `initech` stay
 conservatively contested until next re-derived — the standard lazy recovery).
+
+### July 6, 2026 — Session 9 redirected: agentic orchestration loop (3.3 #7)
+
+The owner redirected the next session away from the sequencing default
+(frontend deployment) to a new capability: Trellis must be able to work
+agentically. The direction, recorded as roadmap item 3.3 #7 and the rewritten
+`HANDOFF.md`:
+
+- an **external agentic loop** that accepts a goal, decomposes it into tasks,
+  dispatches them, evaluates results, and iterates;
+- the loop is **mediated by the same LLM under a different system prompt**
+  (an orchestrator persona making structured decisions through the existing
+  T8 Zod boundary — not a second rlms REPL, whose `custom_system_prompt`
+  would replace the execution protocol);
+- the **RLM becomes its own reusable agent**: today `rlm_worker.ts` spawns
+  `trellis_agent.py` once per `rlm_queue` job with exactly one query, and its
+  `FINAL_ANSWER:`/`TRELLIS_TELEMETRY:` stdout contract is already
+  machine-parseable — the loop reuses that as the single-task sub-agent so
+  one goal can perform more than one task.
+
+Frontend deployment is deferred to the next sequencing row, not dropped; the
+repository-extraction prerequisites from the pilot follow it. No code changed
+in this entry — it records the priority decision and the handoff rewrite so
+the next session starts with zero external context.
