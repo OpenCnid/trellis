@@ -2,7 +2,7 @@
 
 *Generated from a code-led review of the repository (July 4, 2026). File and line references point at the current state of `master`-derived code in this working tree.*
 
-*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), and Session 7's semantic-provenance scale gate are complete and verified. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
+*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), Session 7's semantic-provenance scale gate, and Session 8 whole-codebase ingestion (3.3 #6, including the measured Entity.name merge index) are complete and verified. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds, and Session 8's post-index re-measurement kept the gate closed. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
 
 ---
 
@@ -174,7 +174,7 @@ Ordered roughly by severity.
 4. **Scalability of the semantic layer.** Entity `sourceNodeIds` arrays remain unbounded under the append-only `ON MATCH` pattern, but Session 7 measured the real headroom before changing storage. A deterministic 300-document × 20-block drill produced 6,096 semantic nodes and 6,000 relationships: the largest node array was 286, every relationship array remained at 1, and fixed-50-hash median sweep latency grew only 1.42x while semantic facts grew 5.77x. The migration gate therefore stayed closed. Keep arrays until an observed run reaches 1,000 live hashes on one fact or fixed-orphan-set median sweep latency grows more than 1.5 times semantic-fact growth; then migrate node scan anchors to `(:ASTRef {hash})` / `[:EVIDENCED_BY]`, retaining relationship arrays unless their own measurements change. See [the scale report](docs/benchmarks/SCALE_PROVENANCE_REPORT.md) and §5. HNSW and block-level embedding granularity already shipped under T14/T2.
 5. ~~**Deployment and community readiness.**~~ **Backend deployment/CI done (July 5, 2026); license done (July 6, 2026):** the backend has a compiled non-root Node/Python image, health-gated project-scoped Compose topology, pinned runtime manifests, documented environment/startup contracts, isolated zero-LLM CI, and an MIT license selected by OpenCnid. The frontend remains intentionally excluded from backend containerization, and its Next.js convention note remains in [src/frontend/AGENTS.md](src/frontend/AGENTS.md).
 
-6. **Whole-codebase ingestion.** A stated future direction is consuming entire repositories. Decision recorded July 4, 2026: this is a pipeline feature, **not** a relaxation of the T6 per-request limits. The natural unit is one document per source file (`doc_key` = repo-relative path), so per-file Merkle diffs drive incremental re-extraction commit-to-commit — exactly what the physical layer was built for — fed by a batch client/CLI rather than one giant request. A single-blob upload of a repo would defeat per-file identity, diff granularity, and the streaming-free `express.text`/single-transaction ingest (the whole body is buffered in memory and inserted row-by-row). Individual source files fit comfortably inside the 5 MB default (generated artifacts that don't should be excluded, or the env knob raised). Prerequisites before this feature: T11 batching (multi-row inserts + `addBulk` for thousands-of-files fan-out), the rest of T14 (queue hygiene at that job volume), a code-aware parser path (tree-sitter or similar — extraction blocks should be functions/classes, not markdown paragraphs), and extraction cost controls (tiered/selective extraction; one LLM call per block across a 50k-file repo is cost-prohibitive). If a convenience archive-upload endpoint is added, the upload allowlist expands to zip/tar with decompressed-size and entry-count guards (zip bombs) — independent of the per-request caps, which stay small on purpose (each request's body is held fully in memory).
+6. ~~**Whole-codebase ingestion.**~~ **Done (Session 8, July 6, 2026):** one repository snapshot is a bounded sequence of per-file verified ingests (`repo:<key>:<path>` doc keys) through the extracted `src/core/ingestion/` service, with code-aware TypeScript/JavaScript/Python parsing, durable PostgreSQL snapshot membership, tombstone-based deletion/rename semantics that quarantine through the existing invalidation sweep, and a zero-paid-work default (`--extract none`; `changed` requires an explicit budget plus confirmation). The measured `Entity.name` merge index shipped alongside (recorded separately from the still-open 3.3 #4 gate). See §5 and `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`. The original decision record follows. Decision recorded July 4, 2026: this is a pipeline feature, **not** a relaxation of the T6 per-request limits. The natural unit is one document per source file (`doc_key` = repo-relative path), so per-file Merkle diffs drive incremental re-extraction commit-to-commit — exactly what the physical layer was built for — fed by a batch client/CLI rather than one giant request. A single-blob upload of a repo would defeat per-file identity, diff granularity, and the streaming-free `express.text`/single-transaction ingest (the whole body is buffered in memory and inserted row-by-row). Individual source files fit comfortably inside the 5 MB default (generated artifacts that don't should be excluded, or the env knob raised). Prerequisites before this feature: T11 batching (multi-row inserts + `addBulk` for thousands-of-files fan-out), the rest of T14 (queue hygiene at that job volume), a code-aware parser path (tree-sitter or similar — extraction blocks should be functions/classes, not markdown paragraphs), and extraction cost controls (tiered/selective extraction; one LLM call per block across a 50k-file repo is cost-prohibitive). If a convenience archive-upload endpoint is added, the upload allowlist expands to zip/tar with decompressed-size and entry-count guards (zip bombs) — independent of the per-request caps, which stay small on purpose (each request's body is held fully in memory).
 
 ---
 
@@ -186,8 +186,9 @@ Ordered roughly by severity.
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
 | ~~4~~ | ~~Semantic provenance scale gate (3.3 #4 measurement)~~ | **Measured (Session 7, July 6, 2026)** — migration not justified at 300 documents; explicit 1,000-source/superlinear triggers recorded; see §5 |
-| 1 | Whole-codebase ingestion (3.3 #6) | Builds on the update pipeline but still needs a code-aware parser, repository manifest/deletion semantics, and extraction-cost controls |
-| 2 | Conditional provenance storage migration (3.3 #4) | Re-run after repository ingestion reaches the recorded trigger; do not migrate arrays on extrapolation alone |
+| ~~5~~ | ~~Whole-codebase ingestion (3.3 #6)~~ | **Done (Session 8, July 6, 2026)** — code-aware per-file snapshots with tombstone deletion, zero-paid-work default, and the measured Entity.name merge index; see §5 |
+| 1 | Frontend deployment and community readiness remainder (3.3 #5 residue) | The backend is containerized and CI-covered; the Next.js frontend still has no production build, container, API-key handling, or CI coverage |
+| 2 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 
 ---
 
@@ -508,3 +509,127 @@ provenance migration after an observed threshold crossing; whole-codebase
 ingestion (Session 8); frontend deployment. The scale measurement phase is
 complete, but roadmap item 3.3 #4 remains unstruck until a justified migration
 actually ships.
+
+### July 6, 2026 — Session 8: whole-codebase ingestion (item 3.3 #6)
+
+One repository snapshot is now a bounded sequence of per-source-file verified
+ingests with incremental diff/deletion semantics and zero paid work by
+default. Full details and measurements: `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`.
+
+**Verified ingest service extracted.** The exact `POST /ingest` transaction
+(`flattenAST` → `persistAstNodes` → read-back re-hash verification →
+`recordDocumentNodes` → `registerDocumentVersion`) moved into
+[src/core/ingestion/ingest_document.ts](src/core/ingestion/ingest_document.ts)
+with the Merkle diff relocated *inside* the transaction, so an
+over-budget extraction plan rolls the whole version back before any queue
+write. Extraction policy is explicit ([plan_ingest.ts](src/core/ingestion/plan_ingest.ts)):
+`none` (repository default — persist/diff/queue invalidation with an empty
+fresh set, so dead facts quarantine conservatively) or `changed`
+(pre-Session-8 behavior, optionally bounded by a hard `maxBlocks` budget
+rejected before enqueue). The API is now a thin parse/validate/delegate layer
+with unchanged defaults; its response gains `blocksEligible` and
+`extractionPolicy`. Tombstones are ordinary verified ingests of a
+deterministic empty root under policy `none`.
+
+**Code-aware immutable AST.** [source_parser.ts](src/core/ast/source_parser.ts)
+dispatches by an explicit extension/filename table: TypeScript/JavaScript via
+`@babel/parser` (new production dependency; pure JS, deterministic), Python
+via the stdlib `ast` module spawned through the pinned interpreter
+([scripts/parse_python_source.py](scripts/parse_python_source.py), output
+Zod-validated), Markdown unchanged on the T13 preimage, and a named
+opaque-text fallback for configuration formats. Extraction blocks are
+top-level functions, classes as containers with per-method child blocks, and
+bounded chunks for imports/trivia; `collectExtractionBlocks` selects them
+explicitly. Block content is the exact source slice — concatenated leaf
+contents must reproduce the file byte-for-byte or the file is skipped with a
+typed `coverage_error` — and parser ranges are ephemeral: nothing positional
+is persisted, `rederiveAstNodeId` stays authoritative, and a live check
+verified a stored `code_function` payload re-derives its Merkle id.
+
+**Repository snapshots and deletion.** [src/core/repository/](src/core/repository/)
+adds pure path safety (rejecting absolute/`..`/NUL/backslash paths; symlinks
+skipped unfollowed; vendor/generated directories excluded), `git ls-files -z`
+enumeration via `execFile` argument vectors, a pure manifest diff, and durable
+snapshot membership in PostgreSQL (`repository_snapshots` +
+`repository_snapshot_paths`, idempotent DDL under the existing advisory-lock
+bootstrap). Only *published* snapshots are effective; publication is atomic
+with the path rows and happens only after every file ingest and tombstone
+succeeds, so a partial failure exits nonzero, leaves the previous snapshot as
+the deletion baseline, and never marks unprocessed paths deleted. A removed
+or no-longer-acceptable path tombstones through the service; a rename is
+tombstone + new doc key (`repo:<repo-key>:<relative-path>`), with physical
+root hashes deduplicating across the rename. Unchanged files (matching root
+hash in the prior published snapshot) are recorded without new versions, so
+an unchanged rerun is an auditable no-op.
+
+**CLI, cost, and observability.** `npm run repo:ingest`
+([scripts/ingest_repository.ts](scripts/ingest_repository.ts)) defaults to
+`--extract none` and prints files/bytes/languages/skip counts and the exact
+paid-job upper bound before any write (`--dry-run` stops there);
+`--extract changed` demands a positive `--max-blocks` and
+`--confirm-extraction`, is serialized so the running budget is exact, and the
+plan is rejected before the snapshot row exists if the upper bound exceeds
+the budget. File concurrency and total bytes in flight are bounded
+(client-side pipeline; T6 request limits untouched). New bounded-label
+metrics: `trellis_repo_snapshots_total{result}`,
+`trellis_repo_files_total{outcome,language}`,
+`trellis_repo_skipped_files_total{reason}`, `trellis_repo_blocks_total{stage}`,
+plus `repo.*` structured log events. Repo keys, paths, and hashes never
+become label values.
+
+**Entity.name merge index (measured, then shipped).** `EXPLAIN` confirmed the
+Session 7 suspicion: `ENTITY_MERGE_CYPHER`'s name `MERGE` ran as
+NodeByLabelScan (only `Entity.id` was constrained). An idempotent
+`entity_name_index` was added to
+[neo4j_bootstrap.ts](src/config/neo4j_bootstrap.ts) under the same
+`executeWrite` retry contract (unit-pinned). Re-running `drill:scale` on the
+same machine: whole-document merge p50 went from 50.51/95.58/175.92 ms at
+50/150/300 documents (no index, measured the same day) to a flat
+13.77/13.24/14.82 ms — an 11.9x improvement at 300 documents that removes the
+graph-size dependence, exonerating provenance arrays as Session 7
+hypothesized. The 3.3 #4 gate stays closed: max cardinality 286 and sweep
+growth 1.88x versus 5.77x fact growth (recorded separately from this index —
+a name index is not an `ASTRef` migration).
+
+**Defects found and fixed along the way:** (1) the first snapshot-sequence
+insert used `$1` both as a bare SELECT output and a `repo_key` comparison, so
+PostgreSQL failed with "inconsistent types deduced for parameter $1" —
+caught by the live drill's first CLI run, fixed with explicit `::varchar`
+casts; (2) drill assertions initially relied on PostgreSQL `ORDER BY`
+(case-insensitive collation) and JSONB key order — fixed by canonical JS
+sorting in the test.
+
+**Verification (all commands run, zero LLM calls end to end).** Offline:
+`npm test` = **345 passing across 44 files** (baseline 294/40; +51 covering
+the new repository snapshot schema pins,
+the ingest planner/executor transaction-order pins, policy and budget
+semantics, tombstone planning, source-parser determinism/coverage/minimal
+diffs for TS and Python (spawning the real interpreter), typed skips,
+markdown preimage equivalence, chunk bounding, path/repo-key/manifest/scanner
+rules, snapshot orchestration incl. partial-failure atomicity and budget
+threading, bounded concurrency/byte-gate primitives, repo metric label pins,
+and the two-statement Neo4j bootstrap). `npm run build`,
+`npm run python:check`, `docker compose --profile test config --quiet` pass;
+`git diff --check` clean. Live zero-LLM: new `npm run test:repo-ingest`
+(**45 checks** — CLI fresh snapshot with pinned skip counts
+binary/oversize/unsupported/vendor/symlink, verified membership, zero Redis
+extraction jobs, no-op rerun, minimal one-method diff, delete/rename
+tombstones with quarantine + shared-provenance survival via global liveness,
+forced-failure atomicity and recovery). `npm run drill:scale` closed its gate
+with zero residue. Existing suites stayed green: `test:benchmark-hardening`
+(24), `test:entity-resolution` (33), `test:api-hardening` (18),
+`test:rlm-sandbox` (4), `test:belief-recovery` (30),
+`test:invalidation-sweep` (17). The isolated `trellis-s8-integration` Compose
+project passed 9/9 and removed only its own containers and volumes (the
+image now ships `parse_python_source.py` and the compiled repository CLI).
+
+**Deliberately not included:** real paid repository extraction (requires
+owner approval with a printed block count), cloning/fetching remote
+repositories, zip/tar upload endpoints, more languages than
+TS/JS/Python/Markdown/opaque-text, generated/vendor/binary ingestion,
+`ASTRef` migration (gate closed), T13 re-hashing, RLM prompt changes, and
+frontend work.
+
+**Still open:** T13's migration-dependent hash preimage; conditional 3.3 #4
+migration behind its unchanged trigger; frontend deployment and community
+readiness remainder (3.3 #5 residue) — the Session 9 target.

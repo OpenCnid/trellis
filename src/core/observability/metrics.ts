@@ -47,6 +47,14 @@ export interface TrellisMetrics {
   resolutionCandidatesTotal: Counter<string>;
   resolutionPairsTotal: Counter<'verdict'>;
 
+  // Repository snapshot ingestion (Session 8). Labels are bounded
+  // outcome/reason/language enums; repo keys, paths, and AST hashes
+  // never become label values.
+  repoSnapshotsTotal: Counter<'result'>;
+  repoFilesTotal: Counter<'outcome' | 'language'>;
+  repoSkippedFilesTotal: Counter<'reason'>;
+  repoBlocksTotal: Counter<'stage'>;
+
   // LLM spend by operation/model (never by prompt or document).
   llmCallsTotal: Counter<'operation' | 'model'>;
   llmInputTokensTotal: Counter<'operation' | 'model'>;
@@ -168,6 +176,33 @@ export function createMetrics(registry: Registry): TrellisMetrics {
         'Alias adjudication verdicts: same, distinct, skipped_no_text, '
         + 'skipped_no_answer.',
       labelNames: ['verdict'],
+      registers: [registry],
+    }),
+
+    repoSnapshotsTotal: new Counter({
+      name: 'trellis_repo_snapshots_total',
+      help: 'Repository snapshot runs: published or failed.',
+      labelNames: ['result'],
+      registers: [registry],
+    }),
+    repoFilesTotal: new Counter({
+      name: 'trellis_repo_files_total',
+      help:
+        'Repository file outcomes (ingested, unchanged, tombstoned) by '
+        + 'source language.',
+      labelNames: ['outcome', 'language'],
+      registers: [registry],
+    }),
+    repoSkippedFilesTotal: new Counter({
+      name: 'trellis_repo_skipped_files_total',
+      help: 'Repository files excluded from ingestion by typed skip reason.',
+      labelNames: ['reason'],
+      registers: [registry],
+    }),
+    repoBlocksTotal: new Counter({
+      name: 'trellis_repo_blocks_total',
+      help: 'Extraction blocks per snapshot run by stage (eligible, queued).',
+      labelNames: ['stage'],
       registers: [registry],
     }),
 

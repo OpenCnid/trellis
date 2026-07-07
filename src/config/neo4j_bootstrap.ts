@@ -18,6 +18,18 @@
 export const NEO4J_CONSTRAINT_CYPHER =
   'CREATE CONSTRAINT IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE';
 
+// Session 8: ENTITY_MERGE_CYPHER and ACTION_MERGE_CYPHER match on
+// Entity.name, which EXPLAIN showed running as NodeByLabelScan — every
+// merged entity scanned the whole label because only Entity.id was
+// constrained. A range index turns the per-entity match into a seek;
+// measured on the Session 7 scale fixture it cut whole-document merge
+// p50 at 300 documents by ~4x (see docs/benchmarks/
+// REPOSITORY_INGESTION_REPORT.md). This is a lookup index only — it
+// does not change provenance storage and does not touch the 3.3 #4
+// ASTRef migration gate.
+export const NEO4J_NAME_INDEX_CYPHER =
+  'CREATE INDEX entity_name_index IF NOT EXISTS FOR (e:Entity) ON (e.name)';
+
 // Structural subset of neo4j-driver's Session/Driver, so tests can
 // inject fakes without a database.
 interface WriteSession {
@@ -29,13 +41,17 @@ export interface BootstrapDriver {
   session(): WriteSession;
 }
 
-/** Creates the Entity uniqueness constraint, retrying transient
- *  failures (deadlocks, leader switches) via the driver's managed
- *  transaction function. Idempotent. */
+/** Creates the Entity uniqueness constraint and the Entity.name lookup
+ *  index, retrying transient failures (deadlocks, leader switches) via
+ *  the driver's managed transaction function. Idempotent. */
 export async function ensureNeo4jConstraints(driver: BootstrapDriver): Promise<void> {
   const session = driver.session();
   try {
     await session.executeWrite(tx => tx.run(NEO4J_CONSTRAINT_CYPHER));
+    // A separate managed transaction: concurrent fresh-graph bootstraps
+    // race on the label lock exactly like the constraint does, and each
+    // executeWrite retries independently.
+    await session.executeWrite(tx => tx.run(NEO4J_NAME_INDEX_CYPHER));
   } finally {
     await session.close();
   }

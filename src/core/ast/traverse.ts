@@ -29,17 +29,29 @@ export function nodeText(node: ASTNode): string {
 // (text, strong, emphasis, inlineCode) are never emitted on their own.
 const MARKDOWN_BLOCK_TYPES = new Set(['paragraph', 'heading', 'listItem', 'code']);
 
+// Code-aware block types (Session 8, source_parser.ts). Functions,
+// methods, bounded module chunks, and opaque-text chunks are explicit
+// extraction units; code_class is deliberately absent — it is a
+// container whose methods and header/attribute chunks are the units, so
+// class bytes are never extracted twice.
+const CODE_BLOCK_TYPES = new Set([
+  'code_function',
+  'code_method',
+  'code_chunk',
+  'opaque_text',
+]);
+
 /**
  * Selects the AST nodes that should each become one extraction job
  * (roadmap T2). For markdown these are the top-most block-level nodes;
- * containers (root, list, blockquote) are traversed through. Childless
- * nodes that carry content (PDF elements from unstructured.io, html
- * blocks) are extraction units as-is. Childless nodes without content
- * (thematicBreak, break, image) are skipped — they still participate in
- * Merkle hashing and persistence, just not in extraction.
+ * containers (root, list, blockquote, code_class) are traversed through.
+ * Childless nodes that carry content (PDF elements from unstructured.io,
+ * html blocks) are extraction units as-is. Childless nodes without
+ * content (thematicBreak, break, image) are skipped — they still
+ * participate in Merkle hashing and persistence, just not in extraction.
  */
 export function collectExtractionBlocks(node: ASTNode, acc: ASTNode[] = []): ASTNode[] {
-  if (MARKDOWN_BLOCK_TYPES.has(node.type)) {
+  if (MARKDOWN_BLOCK_TYPES.has(node.type) || CODE_BLOCK_TYPES.has(node.type)) {
     acc.push(node);
     return acc;
   }

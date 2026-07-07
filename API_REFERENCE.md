@@ -82,7 +82,9 @@ Globex recently completed a hostile takeover of Initech."
   "docKey": "globex-report",
   "version": 1,
   "totalNodes": 5,
+  "blocksEligible": 2,
   "blocksQueued": 2,
+  "extractionPolicy": "changed",
   "diff": null
 }
 ```
@@ -96,10 +98,40 @@ On a re-ingest under an existing `doc_key`, `diff` reports the Merkle delta and 
   "docKey": "globex-report",
   "version": 2,
   "totalNodes": 5,
+  "blocksEligible": 1,
   "blocksQueued": 1,
+  "extractionPolicy": "changed",
   "diff": { "added": 3, "orphaned": 3, "retained": 2 }
 }
 ```
+
+Since Session 8 the endpoint is a thin parse/validate/delegate layer over
+the verified ingest service (`src/core/ingestion/`), which also powers
+the repository CLI. `blocksEligible` reports what a `changed` extraction
+policy would pay for; the API always uses `changed` with no budget, so
+`blocksQueued` equals `blocksEligible` — the repository CLI defaults to
+`none`, queuing nothing.
+
+---
+
+## 1b. Repository Ingestion CLI
+
+Whole-codebase ingestion is a client-side pipeline over per-file
+`doc_key` ingests, not an API endpoint — the T6 request limits are
+deliberately unchanged. See the README's "Repository ingestion" section
+and `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`:
+
+```bash
+npm run repo:ingest -- --repo-key my-repo --root /path/to/checkout --extract none
+```
+
+Each accepted file becomes one document (`repo:<repo-key>:<path>`) parsed
+with a code-aware parser (TypeScript/JavaScript/Python/Markdown, plus an
+opaque-text fallback for configuration formats). Snapshots are recorded
+in PostgreSQL; a path missing from the next snapshot receives a tombstone
+version whose invalidation sweep quarantines the facts it evidenced.
+Extraction is opt-in (`--extract changed --max-blocks <n>
+--confirm-extraction`) and prints the exact paid-job bound before writing.
 
 ---
 

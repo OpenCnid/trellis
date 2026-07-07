@@ -7,7 +7,7 @@ COPY package.json package-lock.json tsconfig.build.json ./
 # redis-memory-server PoC dependency compiling a Redis binary in this stage.
 RUN npm ci --ignore-scripts
 COPY src ./src
-COPY scripts/start_all.ts scripts/start_workers.ts scripts/scale_provenance_drill.ts scripts/test_compose_roundtrip.ts ./scripts/
+COPY scripts/start_all.ts scripts/start_workers.ts scripts/scale_provenance_drill.ts scripts/test_compose_roundtrip.ts scripts/ingest_repository.ts ./scripts/
 RUN npm run build
 
 FROM node:22-bookworm-slim AS node-production
@@ -51,7 +51,7 @@ COPY src/rlm/trellis_agent.py src/rlm/trellis_tools.py src/rlm/trec_rubric.json 
 # must exist at both the Python (src/rlm) and compiled-Node (dist/src/rlm)
 # paths or the worker process crashes at import.
 COPY src/rlm/trec_rubric.json ./dist/src/rlm/
-COPY scripts/parse_pdf.py scripts/check_python_runtime.py ./scripts/
+COPY scripts/parse_pdf.py scripts/parse_python_source.py scripts/check_python_runtime.py ./scripts/
 COPY scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
 
 RUN mkdir -p uploads \

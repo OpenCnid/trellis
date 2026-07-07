@@ -17,7 +17,9 @@ function generateHash(data: string): string {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
-function createASTNode(type: string, content?: string, children?: ASTNode[], metadata?: ASTNode['metadata']): ASTNode {
+// Exported since Session 8 so the code-aware source parser constructs its
+// nodes through the same pinned hash authority. The preimage is unchanged.
+export function createASTNode(type: string, content?: string, children?: ASTNode[], metadata?: ASTNode['metadata']): ASTNode {
   let hashData = type;
   if (content) {
     hashData += `:${content}`;

@@ -1,8 +1,5 @@
 import express from 'express';
 import { parseMarkdownToAST, parseUnstructuredJSONToAST, ASTNode } from '../core/ast/parser.js';
-import { flattenAST, nodeText, collectExtractionBlocks } from '../core/ast/traverse.js';
-import { diffVersions, MerkleDiff } from '../core/ast/diff.js';
-import { registerDocumentVersion, recordDocumentNodes, VersionRegistration } from '../core/ast/registry.js';
 import { pgPool, neo4jDriver } from '../config/db.js';
 import { config } from '../config/index.js';
 import { extractionQueue, rlmQueue, invalidationQueue } from '../workers/queue.js';
@@ -14,11 +11,7 @@ import fs from 'fs/promises';
 import OpenAI from 'openai';
 import { apiKeyMiddleware } from './auth.js';
 import { StreamGate } from './stream_gate.js';
-import {
-  buildExtractionJobs,
-  persistAstNodes,
-  verifyPersistedAstNodes,
-} from '../core/ast/persist.js';
+import { ingestDocument } from '../core/ingestion/ingest_document.js';
 import {
   installShutdownSignalHandlers,
   shutdownCoordinator,
@@ -143,9 +136,6 @@ app.post('/ingest', uploadPdf, async (req, res) => {
       rootNode = parseMarkdownToAST(markdown);
     }
     
-    // Flatten AST
-    const allNodes = flattenAST(rootNode);
-
     // Document identity (Phase 4): a doc_key ties versions of the same
     // document together. Without one, the root hash is the key — every
     // anonymous ingest is version 1 of its own document.
@@ -154,105 +144,26 @@ app.post('/ingest', uploadPdf, async (req, res) => {
       : (req.file && typeof (req.body as any)?.doc_key === 'string' ? (req.body as any).doc_key : undefined);
     const docKey = docKeyRaw?.trim() || rootNode.id;
 
-    // 2. Persist AST + version membership + registry row in one transaction
-    let registration: VersionRegistration;
-    const client = await pgPool.connect();
-    try {
-      await client.query('BEGIN');
-      await persistAstNodes(client, rootNode.id, allNodes);
-      // T15 verified ingestion: read the immutable rows back and re-derive
-      // every id through parser.ts before registry state can commit. A
-      // missing/corrupt/conflicting row rolls the entire version back.
-      await verifyPersistedAstNodes(client, allNodes);
-      await recordDocumentNodes(client, rootNode.id, allNodes.map(n => n.id));
-      registration = await registerDocumentVersion(client, docKey, rootNode.id);
-      await client.query('COMMIT');
-    } catch (dbErr) {
-      await client.query('ROLLBACK');
-      throw dbErr;
-    } finally {
-      client.release();
-    }
-
-    // 3. Merkle diff against the prior version. Shared subtree hashes are
-    // skipped entirely; only genuinely new leaf nodes enter the
-    // extraction queue. Byte-identical re-ingest yields an empty diff
-    // and queues nothing.
-    let diff: MerkleDiff | null = null;
-    if (registration.priorRootHash) {
-      diff = await diffVersions(pgPool, registration.priorRootHash, rootNode.id);
-    }
-
-    // 4. One extraction job per block-level node (T2). Blocks
-    // (paragraph, heading, list item, code, PDF element) carry their
-    // full reconstructed inline text, so `Globex **acquired** Initech`
-    // is one extraction unit instead of three inline fragments. On
-    // re-ingest only blocks new to this version are queued — a changed
-    // inline leaf changes its parent block's Merkle hash, so the block
-    // lands in diff.added.
-    const addedSet = diff ? new Set(diff.added) : null;
-    const extractionBlocks = collectExtractionBlocks(rootNode)
-      .map(block => ({ block, text: nodeText(block) }))
-      .filter(({ block, text }) =>
-        text.trim().length > 0 && (!addedSet || addedSet.has(block.id))
-      );
-
-    const requestId = res.locals.requestId as string | undefined;
-    if (diff && diff.orphaned.length > 0) {
-      // Quarantine sweep (Milestone 3): facts derived from bytes that
-      // vanished in this version get contested by the worker. The queued
-      // extraction blocks travel along as the sweep's fresh set: the
-      // sweep and the extraction jobs race, and a fact re-extracted from
-      // this version's live bytes must stay recovered whichever write
-      // lands last (src/core/graph/provenance.ts).
-      await invalidationQueue.add('sweep', {
+    // The verified ingest transaction, Merkle diff, invalidation enqueue,
+    // and extraction fan-out live in the ingest service (Session 8), which
+    // the repository CLI shares. The API keeps its pre-Session-8 policy:
+    // extract every changed block, no budget.
+    const result = await ingestDocument(
+      {
+        pgPool,
+        queues: { extraction: extractionQueue, invalidation: invalidationQueue },
+        log: requestLogger(res),
+      },
+      {
+        rootNode,
         docKey,
-        oldVersion: registration.version - 1,
-        newVersion: registration.version,
-        orphanedHashes: diff.orphaned,
-        freshHashes: extractionBlocks.map(({ block }) => block.id),
-        requestId,
-      });
-      requestLogger(res).info({
-        event: 'ingest.invalidation_queued',
-        docKey,
-        version: registration.version,
-        orphanedCount: diff.orphaned.length,
-      });
-    }
+        extractionPolicy: { mode: 'changed' },
+        requestId: res.locals.requestId as string | undefined,
+      }
+    );
 
-    if (extractionBlocks.length > 0) {
-      await extractionQueue.addBulk(buildExtractionJobs(extractionBlocks, {
-        requestId,
-        docKey,
-        version: registration.version,
-      }));
-    }
-
-    requestLogger(res).info({
-      event: 'ingest.accepted',
-      docKey: registration.docKey,
-      version: registration.version,
-      rootId: rootNode.id,
-      totalNodes: allNodes.length,
-      blocksQueued: extractionBlocks.length,
-      diff: diff
-        ? { added: diff.added.length, orphaned: diff.orphaned.length, retained: diff.retained.length }
-        : null,
-    });
-
-    // 5. Respond with 202 Accepted, the Root AST Node ID, and diff telemetry
-    res.status(202).json({
-      message: 'Accepted',
-      rootId: rootNode.id,
-      docKey: registration.docKey,
-      version: registration.version,
-      totalNodes: allNodes.length,
-      blocksQueued: extractionBlocks.length,
-      diff: diff
-        ? { added: diff.added.length, orphaned: diff.orphaned.length, retained: diff.retained.length }
-        : null
-    });
+    // Respond with 202 Accepted, the Root AST Node ID, and diff telemetry
+    res.status(202).json({ message: 'Accepted', ...result });
   } catch (error: any) {
     requestLogger(res).error({ event: 'ingest.failed', err: error });
     res.status(500).json({ error: error.message });
