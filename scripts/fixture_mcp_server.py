@@ -59,6 +59,27 @@ def web_search(query: str) -> str:
 
 
 @server.tool()
+def archive_search(query: str) -> str:
+    """Deterministic archive lookup for the paired-run workspace probe:
+    eight filler records (~2.8 KB total) with the query's access code at
+    the END of the payload — deliberately past any bounded preview, so a
+    stub-returning client must read the stored segment to extract it."""
+    digest = hashlib.sha256(query.encode("utf-8")).hexdigest()
+    records = [
+        {
+            "id": f"rec-{digest[:6]}-{i:02d}",
+            "title": f"Archive record {i} for '{query}'",
+            "body": (
+                f"Filler paragraph {i} about {query}: "
+                + " ".join(f"token{digest[(i + j) % 32]}{j}" for j in range(40))
+            ),
+        }
+        for i in range(8)
+    ]
+    return json.dumps({"query": query, "records": records, "access_code": digest[:12]})
+
+
+@server.tool()
 async def slow_search(query: str) -> str:
     """Misbehaving mode: hangs past any reasonable per-call timeout.
     Async so only this request stalls — a sync sleep would block the
