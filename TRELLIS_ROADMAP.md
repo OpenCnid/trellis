@@ -1,8 +1,8 @@
 # Trellis Engine — Technical Roadmap
 
-*Generated from a code-led review of the repository (July 4, 2026). File and line references point at the current state of `master`-derived code in this working tree.*
+*Generated from a code-led review of the repository (July 4, 2026). File and line references point at the current state of `master`-derived code in this working tree. §1 (architecture overview) was refreshed July 7, 2026 (Session 13) to match the post-Session-12 code; the living session-to-session mental model remains `HANDOFF.md` §1.*
 
-*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), Session 7's semantic-provenance scale gate, Session 8 whole-codebase ingestion (3.3 #6, including the measured Entity.name merge index), Session 9's agentic orchestration loop (3.3 #7), Session 10's MCP tool surface for the RLM sub-agent (3.3 #8 first slice), Session 11's A2A server surface over the goal loop (3.3 #8 second slice), and Session 12's remote MCP transports with the containerized tool-server pattern (3.3 #8 third slice, closing the item's recorded scope) are complete and verified. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds, and Session 8's post-index re-measurement kept the gate closed. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
+*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), Session 7's semantic-provenance scale gate, Session 8 whole-codebase ingestion (3.3 #6, including the measured Entity.name merge index), Session 9's agentic orchestration loop (3.3 #7), Session 10's MCP tool surface for the RLM sub-agent (3.3 #8 first slice), Session 11's A2A server surface over the goal loop (3.3 #8 second slice), and Session 12's remote MCP transports with the containerized tool-server pattern (3.3 #8 third slice, closing the item's recorded scope) are complete and verified. Session 13 (July 7, 2026) was an owner-directed documentation, context-alignment, and architectural-consolidation session: the workspace/modules design record (`docs/architecture/WORKSPACE_AND_MODULES.md`) and canonical glossary (`docs/GLOSSARY.md`) landed, this file's §1 drift was corrected, and the frontend deployment moved to Session 14 — see §5. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds, and Session 8's post-index re-measurement kept the gate closed. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
 
 ---
 
@@ -44,10 +44,14 @@ flowchart TD
 
     API -->|"GET /api/rlm-stream"| RQ["rlm_queue"]
     RQ --> RW["RLM worker<br/>Python recursive-LM process"]
-    RW --> Tools["Read-only Neo4j/PostgreSQL tools<br/>one provenance-required graph write path"]
+    RW --> Tools["Read-only Neo4j/PostgreSQL tools<br/>optional operator-configured MCP client<br/>one provenance-required graph write path"]
     Tools --> Neo
     Tools --> PG
     RW -->|"Redis pub/sub"| SSE["SSE stream to client"]
+
+    API -->|"GET /api/agent-stream<br/>POST /a2a/v1 (opt-in)"| AQ["agent_queue"]
+    AQ --> AW["Agent worker<br/>orchestrator decision loop<br/>tool-free planner"]
+    AW -->|"one rlm_queue job per task"| RQ
 
     Redis[("Redis + BullMQ")] --- EQ
     Redis --- IQ
@@ -55,6 +59,7 @@ flowchart TD
     Redis --- VQ
     Redis --- RSQ
     Redis --- RQ
+    Redis --- AQ
 ```
 
 **Storage tiers:**
@@ -63,9 +68,9 @@ flowchart TD
 |---|---|---|
 | PostgreSQL + pgvector | Physical layer: immutable AST nodes keyed by SHA-256 Merkle hash, plus embeddings | `ast_nodes(id, document_id, data JSONB, embedding vector(1536))` |
 | Neo4j | Semantic layer: `Entity`, `Question`, `Concept` nodes; `ACTION`, `REFERENCES`, `CONTRADICTS`, `DERIVED_INSIGHT` edges, all carrying `sourceNodeIds` back-references | Uniqueness constraints on `Entity.id`, `Question.id`, `Concept.id` |
-| Redis | BullMQ job queues (`extraction_queue`, `rlm_queue`, `supervisor_queue`) and pub/sub channels for SSE streaming | — |
+| Redis | BullMQ job queues (`extraction_queue`, `rlm_queue`, `supervisor_queue`, `invalidation_queue`, `verification_queue`, `resolution_queue`, `agent_queue`), pub/sub channels for SSE streaming, and TTL-bounded A2A task records (`a2a:task:<id>`) | — |
 
-**The RLM harness** ([src/rlm/trellis_agent.py](src/rlm/trellis_agent.py)) wraps the `rlms` recursive-LM library with two injected tools: a keyword-guarded read-only Neo4j client and a Postgres AST reader ([src/rlm/trellis_tools.py](src/rlm/trellis_tools.py)). The agent's only permitted graph write is `write_derived_insight`, which caches deduced facts as `DERIVED_INSIGHT` edges with mandatory provenance — the "flywheel" that makes repeat queries cheaper.
+**The RLM harness** ([src/rlm/trellis_agent.py](src/rlm/trellis_agent.py)) wraps the `rlms` recursive-LM library with three injected tool surfaces: a read-only Neo4j client (transport-enforced `default_access_mode=READ`; the keyword blocklist is a fast-fail courtesy only) and a Postgres AST reader ([src/rlm/trellis_tools.py](src/rlm/trellis_tools.py)), plus — only when the operator configures servers in `TRELLIS_MCP_SERVERS` — an allowlisted, time- and size-bounded MCP client ([src/rlm/trellis_mcp.py](src/rlm/trellis_mcp.py), Sessions 10/12) whose results never satisfy the provenance requirement. The agent's only permitted graph write is `write_derived_insight`/`write_derived_insights`, which caches deduced facts as `DERIVED_INSIGHT` edges with mandatory provenance — the "flywheel" that makes repeat queries cheaper. Since Session 9 the RLM also serves as the reusable single-task sub-agent of the agentic goal loop (`src/core/agent/`, `agent_queue`), whose orchestrator is a tool-free planner that dispatches ordinary `rlm_queue` jobs; since Session 11 external agents can dispatch goals over A2A (`POST /a2a/v1`, opt-in).
 
 **The OOLONG-Pairs benchmark** (`src/benchmarks/`, `scripts/`) is a self-contained evaluation harness: a seeded deterministic dataset generator, a verify-as-you-go ingestion loop, a cache-stripping prep script, and a 20-query runner that scores set-based F1 and measures the cold→warm cost collapse. The committed [benchmark_results.json](benchmark_results.json) shows F1 = 1.0 on all 20 queries with mean sub-calls dropping from 0.36 (cold) to 0 (warm).
 
@@ -1215,3 +1220,74 @@ repository-extraction prerequisites; conditional 3.3 #4 migration behind
 its unchanged trigger; T13's migration-dependent hash preimage. The
 recorded 3.3 #8 scope is exhausted; further external-tool work is a new
 owner direction.
+
+### July 7, 2026 — Session 13: documentation, context alignment, and architectural consolidation (owner-directed)
+
+The owner redirected Session 13 from the frontend deployment (which moves
+to Session 14, unchanged in scope) to a documentation and
+context-engineering session. Origin: a one-shot design study (July 7,
+2026) that assessed an explicit working memory for the RLM, was steered
+by the owner toward harness-captured search/MCP results and the
+compositional-intelligence direction, and closed with a
+Document-Driven-Design audit of this repository's docs. No code changed;
+`npm test` remained 485 passing across 57 files before and after.
+
+**Landed:**
+
+- **`docs/architecture/WORKSPACE_AND_MODULES.md`** — the design record
+  (design only; nothing implemented). Contents: the four governing
+  axioms with an anti-drift mandate; the two flywheels (knowledge —
+  shipped; capability — designed) and the momentum law with its
+  governing condition; the three-tier trust model; the Tier-3 workspace
+  contract (mechanical harness capture of external-tool results into
+  uuid-delimited, origin-stamped segments; stub returns;
+  plan-in-workspace; a JSON-serializable data-not-objects contract; the
+  verified `rlms==0.1.3` rebind-vs-mutate exception semantics; bounds
+  and byte-identical injection gating); cross-task workspace lineage
+  (serialize → park in TTL-bounded goal-scoped Redis → seed at spawn;
+  the orchestrator routes by reference and stays tool-free — explicitly
+  not a live blackboard, matching the batch-independence rule); the
+  operator-gated promotion path (workspace segment → verified ingest →
+  citable AST bytes, inheriting the update/quarantine machinery for
+  refreshed external content); the L0–L3 self-editing capability ladder
+  (L1 runtime config mutation FORBIDDEN, L2 hot-patching REJECTED, L3
+  staged self-modification through the verified pipeline APPROVED as
+  the capability flywheel's mechanism); the kernel/userspace boundary;
+  the module manifest/registry/composition/gates design with module #0
+  (extracting the hardcoded spatial-flywheel protocol behind a
+  byte-identical composed-prompt pin); provenance-boundary enforcement
+  (identifier disjointness plus the recorded `_normalize_fact`
+  hardening: `^[0-9a-f]{64}$` format check and `ast_nodes` existence
+  check — a severable pre-existing gap, writable-hallucinated-hash
+  today); a six-step implementation sequence; a corrections ledger; and
+  explicit exclusions.
+- **`docs/GLOSSARY.md`** — canonical one-line definitions for the
+  load-bearing terms (RLM = Recursive Language Model; provenance /
+  `sourceNodeIds`; contested/quarantine; both flywheels;
+  workspace/segment; graph-addressing vs. graph-addressed; the
+  promotion path; kernel vs. userspace; module #0; addendum
+  conventions), with a stated authority hierarchy: code > glossary >
+  prose. Motivated by observed semantic drift in summarization
+  pipelines during the design study (an "RLM" mis-expansion and an
+  inverted reliability causality, both recorded in the design record's
+  corrections ledger).
+- **§1 drift fixes in this file** (the architecture overview had
+  fossilized at its July 4 generation date while §3/§5 stayed current):
+  the RLM harness paragraph now records three injected tool surfaces
+  (read-only Neo4j, Postgres AST reader, operator-configured MCP) plus
+  the Session 9/11 agentic and A2A surfaces; the §1.1 diagram gains
+  `agent_queue`, the agent worker, and the A2A entry point; the storage
+  table's Redis row lists all seven queues and the TTL-bounded A2A task
+  records. The header now dates the §1 refresh and names `HANDOFF.md`
+  §1 as the living mental model.
+- **`HANDOFF.md`** — session list extended with Session 13 and its
+  deliverable; the objective, problem statement, and acceptance
+  language renumbered to Session 14 (frontend deployment, scope
+  untouched).
+
+**Sequencing note:** the design record's build items (workspace,
+write-path hardening, module registry + module #0, lineage, promotion
+path, first flywheel turn) are recorded as design only. Their adoption
+into §3.3/§4 sequencing relative to Session 14 (frontend) and the
+repository-extraction prerequisites is an owner decision to be recorded
+here when taken.

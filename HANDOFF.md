@@ -5,7 +5,7 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–12 are complete and merged:
+Sessions 1–13 are complete and merged:
 
 - PR #21 — async reliability and batch ingestion.
 - PR #22 — provenance liveness closure and verified production ingestion.
@@ -78,11 +78,32 @@ Sessions 1–12 are complete and merged:
   would have crashed at import. Zero-paid acceptance:
   `npm run test:rlm-mcp` (86 checks) + the 10-assertion Compose
   integration. The recorded 3.3 #8 scope is exhausted.
+- Session 13 (July 7, 2026, branch `d/musing-wilbur-5bf4b2`) —
+  documentation, context alignment, and architectural consolidation
+  (owner-redirected; the frontend deployment moved to Session 14). The
+  primary deliverable is the design record
+  `docs/architecture/WORKSPACE_AND_MODULES.md`: the three-tier trust
+  model, the Tier-3 workspace contract (harness-captured, origin-stamped,
+  uuid-delimited segments; stub returns; plan-in-workspace; the
+  data-not-objects contract and the verified rlms rebind-vs-mutate
+  exception semantics), cross-task workspace lineage (serialize → park →
+  seed; explicitly not a blackboard), the promotion path, the L0–L3
+  self-editing capability ladder (L1/L2 forbidden; L3 — staged
+  self-modification through the verified pipeline — is the capability
+  flywheel's mechanism), the kernel/userspace boundary, the module
+  manifest/registry/gates design with module #0 (extracting the
+  spatial-flywheel protocol), and a six-step implementation sequence.
+  DESIGN ONLY — none of it is implemented. Alongside it:
+  `docs/GLOSSARY.md` (canonical one-line definitions; authority
+  hierarchy code > glossary > prose) and the `TRELLIS_ROADMAP.md` §1
+  drift fixes (three injected tool surfaces, all seven queues,
+  `agent_queue` in the diagram). No code changes; offline suite
+  unchanged at 485.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
 Your objective is to study the current code and `TRELLIS_ROADMAP.md`, present a
-concrete design, and then implement **Session 13: the frontend deployment and
+concrete design, and then implement **Session 14: the frontend deployment and
 community-readiness remainder (3.3 #5 residue)** — a production build,
 container, and CI coverage for the Next.js frontend, plus an API-key story
 that never hands the operator's backend key to the browser — without touching
@@ -338,7 +359,7 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 13 problem statement
+## 3. Session 14 problem statement
 
 The backend has been deployable since Session 3; the frontend never
 caught up. Three concrete gaps, all recorded under roadmap 3.3 #5:
@@ -361,7 +382,7 @@ caught up. Three concrete gaps, all recorded under roadmap 3.3 #5:
   `.github/workflows/ci.yml`, and the Compose test profile proves
   nothing about the frontend.
 
-Session 13 gives the frontend the same deployment discipline the
+Session 14 gives the frontend the same deployment discipline the
 backend has: reproducible build, non-root container, health check,
 key-safe backend access, and zero-LLM CI proof.
 
@@ -469,7 +490,7 @@ Inspect before editing:
 ## 6. Test strategy and acceptance
 
 Test first. No paid LLM calls and no external network access are
-permitted for Session 13 acceptance.
+permitted for Session 14 acceptance.
 
 Offline tests must cover:
 
