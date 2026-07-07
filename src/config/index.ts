@@ -5,6 +5,11 @@ import {
   resolveMcpCredentialEnv,
   serializeMcpServers,
 } from './mcp_servers.js';
+import {
+  loadModules,
+  parseModuleSelection,
+  serializeModuleSelection,
+} from './modules.js';
 
 // Single source of truth for runtime configuration (Guideline:
 // .agents/AGENT_CODING_GUIDELINES.md). The environment is read exactly
@@ -150,6 +155,14 @@ const EnvSchema = z.object({
   // error in the REPL rather than silently truncating stored state.
   // Forwarded to the spawned agent by buildAgentEnv and re-validated in
   // Python (src/rlm/trellis_workspace.py) with identical maxima.
+  // Module registry selection for the RLM sub-agent (Session 15;
+  // design record §9). Unset means the default selection (module #0,
+  // spatial-flywheel — the composed prompt is byte-identical to the
+  // pre-Session-15 monolith); a JSON array of registered module names
+  // selects exactly those; [] composes no modules. Validated fail-fast
+  // below via src/config/modules.ts.
+  TRELLIS_MODULES: z.string().optional(),
+
   TRELLIS_WORKSPACE_MAX_SEGMENTS: z.coerce.number().int().positive().max(1024).default(128),
   TRELLIS_WORKSPACE_MAX_BYTES: z.coerce
     .number()
@@ -182,6 +195,13 @@ const env = parsed.data;
 // a missing secret is a startup error, not a mid-run tool failure.
 const mcpServers = parseMcpServers(env.TRELLIS_MCP_SERVERS);
 const mcpCredentialEnv = resolveMcpCredentialEnv(mcpServers, process.env);
+
+// Module selection and registry validate fail-fast too (Session 15): a
+// process whose prompt surface cannot be composed must not run. The
+// loaded manifests are validated here; composition itself happens in
+// the Python agent from the same repository files.
+const moduleSelection = parseModuleSelection(env.TRELLIS_MODULES);
+const loadedModules = loadModules(moduleSelection);
 
 export const config = {
   postgres: {
@@ -261,6 +281,12 @@ export const config = {
      * by buildAgentEnv; values never appear in logs or serializations.
      */
     credentialEnv: mcpCredentialEnv,
+  },
+  modules: {
+    selection: moduleSelection,
+    /** Canonical selection JSON forwarded to the spawned agent. */
+    selectionJson: serializeModuleSelection(moduleSelection),
+    loaded: loadedModules,
   },
   workspace: {
     maxSegments: env.TRELLIS_WORKSPACE_MAX_SEGMENTS,

@@ -86,6 +86,14 @@ export interface AgentEnvConfig {
    * validated bounds (the TRELLIS_MCP_SERVERS discipline).
    */
   workspace?: { maxSegments: number; maxBytes: number };
+  /**
+   * Canonical module-selection JSON (Session 15,
+   * config.modules.selectionJson). Always the validated serialization —
+   * a raw inherited TRELLIS_MODULES can never leak through; when
+   * omitted, any inherited value is stripped and the child applies its
+   * own default selection.
+   */
+  modulesJson?: string;
 }
 
 /**
@@ -120,6 +128,11 @@ export function buildAgentEnv(
   } else {
     delete env.TRELLIS_WORKSPACE_MAX_SEGMENTS;
     delete env.TRELLIS_WORKSPACE_MAX_BYTES;
+  }
+  if (cfg.modulesJson !== undefined) {
+    env.TRELLIS_MODULES = cfg.modulesJson;
+  } else {
+    delete env.TRELLIS_MODULES;
   }
   // Explicitly set the credential variables the registry names, so the
   // forwarding contract holds regardless of what the base env carries.

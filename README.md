@@ -349,6 +349,32 @@ drill configures:
 npm run test:rlm-mcp
 ```
 
+## Modules (protocol registry)
+
+The RLM's cognitive protocols are composed from a versioned module
+registry (Session 15; design record §9). A module lives under
+`modules/<name>/` as a `module.json` manifest plus a brace-free
+addendum text file; the composed system prompt is kernel base +
+selected module addenda + workflow rules. This kernel edition supports
+**protocol modules only** — manifests declaring tools are rejected.
+
+Selection is operator-owned via `TRELLIS_MODULES`: unset loads the
+default selection (`["spatial-flywheel"]` — module #0, the extracted
+spatial-flywheel protocol), which composes a prompt **byte-identical**
+to the pre-extraction monolith (pinned by hash); a JSON array selects
+exactly those registered modules (max 4); `[]` composes none. Both the
+Node config (fail-fast at startup) and the Python agent (defensively,
+at spawn) validate the same files with identical bounds. Addendum files
+carry no literal braces (the rlms `.format()` contract); rubric text
+enters through the single `<<TRELLIS_RUBRIC>>` substitution token.
+Module #0 carries empty research provenance (it predates the promotion
+path); the manifest-as-graph-entity representation for research-change
+contestation lands with the first research-bearing module.
+
+```bash
+npm run test:modules
+```
+
 Real networked or metered MCP servers (an actual web-search provider) are
 owner-approved runs: print the configured allowlist first and record the
 observed `mcp_calls`.
@@ -435,6 +461,7 @@ npm run test:repo-ingest
 npm run test:agent-loop
 npm run test:rlm-mcp
 npm run test:rlm-workspace
+npm run test:modules
 npm run test:a2a
 ```
 

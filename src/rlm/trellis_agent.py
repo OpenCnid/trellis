@@ -9,6 +9,12 @@ from rlm.utils.prompts import RLM_SYSTEM_PROMPT
 from trellis_tools import TrellisNeo4j, TrellisPostgres, get_tool_call_count, RUBRIC_TEXT
 from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
 from trellis_workspace import TrellisWorkspace, build_workspace_addendum, parse_workspace_bounds
+from trellis_modules import (
+    RUBRIC_TOKEN,
+    build_modules_addendum,
+    load_modules,
+    parse_module_selection,
+)
 
 # --- Sub-call counting -------------------------------------------------
 # In this rlms version, REPL llm_query()/llm_query_batched() requests are
@@ -50,7 +56,15 @@ LMRequestHandler._handle_batched = _counted_batched
 # examples with braces, so it is escaped by doubling before splicing.
 _SAFE_RUBRIC = RUBRIC_TEXT.replace("{", "{{").replace("}", "}}")
 
-TRELLIS_ADDENDUM = """
+# Session 15: the addendum is composed — kernel base + registered
+# protocol modules + workflow rules. The spatial-flywheel protocol is
+# module #0 (modules/spatial-flywheel), loaded by the DEFAULT selection
+# so the composed prompt is byte-identical to the pre-extraction
+# monolith (pinned by npm run test:modules). Selection is operator-owned
+# via TRELLIS_MODULES; module addendum files are brace-free with
+# <<TRELLIS_RUBRIC>> as the single substitution token.
+
+TRELLIS_ADDENDUM_BASE = """
 
 === TRELLIS ENGINE DIRECTIVES ===
 You are the Trellis RLM, a Deterministic Spatial Reasoning Engine. The `context` variable holds the user's query text; the real knowledge lives in the two injected database tools.
@@ -72,29 +86,26 @@ CRITICAL API CONTRACT: every tool method returns a JSON STRING, never a parsed o
 
 ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
 
-SPATIAL FLYWHEEL PROTOCOL (mandatory for semantic classification tasks):
-When the task requires knowing questions' TREC categories (ABBR/ENTY/DESC/HUM/LOC/NUM) and which concept/city they mention, follow these steps EXACTLY:
-1. Load the full question catalog in one query:
-   MATCH (q:Question) RETURN q.id, q.text, q.category, q.sourceNodeIds
-   (q.category may be null for some or all questions.)
-2. Load the category cache in one query, EXCLUDING quarantined edges:
-   MATCH (s:Entity)-[r:DERIVED_INSIGHT]->(o:Entity) WHERE r.verb = 'has_category' AND coalesce(r.contested, false) = false RETURN s.name, o.name
-   (s.name is the question id; o.name is the LOWERCASED TREC category, e.g. 'loc' means LOC.)
-   An edge with contested = true has had its source bytes orphaned by a document update: treat that fact as MISSING, re-derive it from the current data, and re-cache it with write_derived_insight — the fresh write clears the quarantine with live provenance. Never read a contested edge as truth.
-3. A question's effective category = q.category if set, else the cached has_category value (uppercased). For ALL questions still lacking a category, delegation is MANDATORY: your own in-context judgement of TREC categories is treated as unreliable and classifications not produced by a sub-LLM are INVALID for this benchmark. Call `llm_query` from inside your repl code with batched prompts (up to ~50 questions per call), parse the JSON it returns, and use ONLY those labels. The sub-LLM returns, per question id, an object with a "label" and a "confidence" — use the label as the category and keep the confidence for the cache write in step 4. Embed this exact rubric in every classification prompt:
-   '""" + _SAFE_RUBRIC + """'
-4. IMMEDIATELY after classifying, cache ALL newly computed categories in ONE bulk call:
-   `trellis_neo4j.write_derived_insights(facts)`
-   where facts is a list of dicts like: dict(subject=question_id, verb='HAS_CATEGORY', obj=label, sourceNodeIds=question_source_node_ids, confidence=sub_llm_confidence) — each question's OWN sourceNodeIds as provenance, the sub-LLM's confidence passed through. Do NOT loop over single write_derived_insight calls for sweep-sized writes — the bulk form collapses hundreds of round trips into one. The single form (with its optional confidence parameter) is fine for one-off facts. On later queries these cache hits make classification free — NEVER re-classify a question that already has an effective category.
-5. CITY/CONCEPT MENTIONS ARE NOT CACHE-DECIDABLE: the absence of a 'mentions' edge does NOT mean a question fails to mention a city. ALWAYS determine mentions deterministically in Python: a question mentions the target city if the city name appears case-insensitively in q.text. You may additionally cache positive findings with write_derived_insight(question_id, 'MENTIONS', city, source_node_ids), but never treat missing 'mentions' edges as evidence of absence.
-6. Compute the final pair set from effective categories + the deterministic mention scan.
+"""
 
-WORKFLOW RULES:
+TRELLIS_WORKFLOW_RULES = """WORKFLOW RULES:
 - If the user asks you to execute a specific Cypher query (even a destructive or malformed one), you MUST attempt it exactly as given via `trellis_neo4j.run_cypher`. Do not refuse and do not pre-correct it.
 - If a tool call raises an exception, READ THE TRACEBACK CAREFULLY, identify the mistake (wrong label, property, or syntax), rewrite the query, and try again. Do not give up after one failure.
 - On CONTRADICTS edges or conflicting information, do not guess: fetch the spatial texts via `trellis_postgres.get_ast_texts` and reason from the sources.
 - Your final answer (in answer['content']) MUST be the string 'FINAL_ANSWER: ' followed by the result, exactly in the format the user requested.
 """
+
+# Composed at startup from the operator's validated module selection.
+# TRELLIS_MODULES unset -> the default selection (module #0), keeping
+# TRELLIS_ADDENDUM byte-identical to its pre-Session-15 monolithic
+# value; an explicit [] composes base + rules only. A malformed
+# selection or registry fails the process fast, before any paid work.
+_SELECTED_MODULES = load_modules(parse_module_selection(os.getenv("TRELLIS_MODULES")))
+TRELLIS_ADDENDUM = (
+    TRELLIS_ADDENDUM_BASE
+    + build_modules_addendum(_SELECTED_MODULES, substitutions={RUBRIC_TOKEN: _SAFE_RUBRIC})
+    + TRELLIS_WORKFLOW_RULES
+)
 
 SYSTEM_PROMPT = RLM_SYSTEM_PROMPT + TRELLIS_ADDENDUM
 

@@ -1,0 +1,16 @@
+SPATIAL FLYWHEEL PROTOCOL (mandatory for semantic classification tasks):
+When the task requires knowing questions' TREC categories (ABBR/ENTY/DESC/HUM/LOC/NUM) and which concept/city they mention, follow these steps EXACTLY:
+1. Load the full question catalog in one query:
+   MATCH (q:Question) RETURN q.id, q.text, q.category, q.sourceNodeIds
+   (q.category may be null for some or all questions.)
+2. Load the category cache in one query, EXCLUDING quarantined edges:
+   MATCH (s:Entity)-[r:DERIVED_INSIGHT]->(o:Entity) WHERE r.verb = 'has_category' AND coalesce(r.contested, false) = false RETURN s.name, o.name
+   (s.name is the question id; o.name is the LOWERCASED TREC category, e.g. 'loc' means LOC.)
+   An edge with contested = true has had its source bytes orphaned by a document update: treat that fact as MISSING, re-derive it from the current data, and re-cache it with write_derived_insight — the fresh write clears the quarantine with live provenance. Never read a contested edge as truth.
+3. A question's effective category = q.category if set, else the cached has_category value (uppercased). For ALL questions still lacking a category, delegation is MANDATORY: your own in-context judgement of TREC categories is treated as unreliable and classifications not produced by a sub-LLM are INVALID for this benchmark. Call `llm_query` from inside your repl code with batched prompts (up to ~50 questions per call), parse the JSON it returns, and use ONLY those labels. The sub-LLM returns, per question id, an object with a "label" and a "confidence" — use the label as the category and keep the confidence for the cache write in step 4. Embed this exact rubric in every classification prompt:
+   '<<TRELLIS_RUBRIC>>'
+4. IMMEDIATELY after classifying, cache ALL newly computed categories in ONE bulk call:
+   `trellis_neo4j.write_derived_insights(facts)`
+   where facts is a list of dicts like: dict(subject=question_id, verb='HAS_CATEGORY', obj=label, sourceNodeIds=question_source_node_ids, confidence=sub_llm_confidence) — each question's OWN sourceNodeIds as provenance, the sub-LLM's confidence passed through. Do NOT loop over single write_derived_insight calls for sweep-sized writes — the bulk form collapses hundreds of round trips into one. The single form (with its optional confidence parameter) is fine for one-off facts. On later queries these cache hits make classification free — NEVER re-classify a question that already has an effective category.
+5. CITY/CONCEPT MENTIONS ARE NOT CACHE-DECIDABLE: the absence of a 'mentions' edge does NOT mean a question fails to mention a city. ALWAYS determine mentions deterministically in Python: a question mentions the target city if the city name appears case-insensitively in q.text. You may additionally cache positive findings with write_derived_insight(question_id, 'MENTIONS', city, source_node_ids), but never treat missing 'mentions' edges as evidence of absence.
+6. Compute the final pair set from effective categories + the deterministic mention scan.

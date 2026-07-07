@@ -1,0 +1,12 @@
+{
+  "name": "spatial-flywheel",
+  "version": 1,
+  "purpose": "Cache-first TREC classification and deterministic mention analysis via the spatial flywheel protocol.",
+  "research": { "sourceNodeIds": [] },
+  "addendum": "addendum.txt",
+  "tools": [],
+  "bounds": { "addendumMaxBytes": 8192 },
+  "acceptance": { "zeroPaid": "npm run test:modules" },
+  "status": "active",
+  "kernelCompat": 1
+}

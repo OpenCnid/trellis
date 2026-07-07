@@ -15,6 +15,7 @@ PYTHON_FILES = [
     RLM_DIR / "trellis_tools.py",
     RLM_DIR / "trellis_mcp.py",
     RLM_DIR / "trellis_workspace.py",
+    RLM_DIR / "trellis_modules.py",
     ROOT / "scripts" / "parse_pdf.py",
     ROOT / "scripts" / "fixture_mcp_server.py",
     ROOT / "scripts" / "compose_mcp_probe.py",
@@ -36,6 +37,7 @@ def main() -> None:
         "trellis_tools",
         "trellis_mcp",
         "trellis_workspace",
+        "trellis_modules",
         "trellis_agent",
     ):
         importlib.import_module(module_name)
@@ -44,7 +46,14 @@ def main() -> None:
     if not rubric.is_file():
         raise FileNotFoundError(f"Missing runtime asset: {rubric}")
 
-    print("Python runtime syntax, imports, and rubric asset verified.")
+    # The default module selection must be loadable (Session 15): a
+    # missing or malformed module #0 breaks every default agent run.
+    module0 = ROOT / "modules" / "spatial-flywheel"
+    for asset in (module0 / "module.json", module0 / "addendum.txt"):
+        if not asset.is_file():
+            raise FileNotFoundError(f"Missing runtime asset: {asset}")
+
+    print("Python runtime syntax, imports, rubric, and module assets verified.")
 
 
 if __name__ == "__main__":

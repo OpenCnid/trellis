@@ -1,7 +1,9 @@
 # Workspace and Modules — Design Record
 
-*Status: approved design; §11 steps 1–2 implemented (Session 14, July 7,
-2026), steps 3–6 open. Origin: the owner-directed design study of July 7,
+*Status: approved design; §11 steps 1–3 implemented (Sessions 14–15,
+July 7, 2026; the step-1 paired-run probe is measured — see
+docs/benchmarks/WORKSPACE_PROBE_REPORT.md), steps 4–6 open. Origin: the
+owner-directed design study of July 7,
 2026 (a one-shot session outside the numbered HANDOFF loop). All code claims
 verified against `master` at `c3b4c39` (485/485 offline tests) and the
 installed `rlms==0.1.3` package source. Nothing described here is
@@ -484,10 +486,13 @@ of every mechanism; paid runs only as small owner-approved behavioral probes.
    Zero-paid acceptance: `npm run test:rlm-workspace` (64 checks) proves
    capture, stamping, stub shape, bounds, byte-identical gating, and the
    direct-`LocalREPL` rlms==0.1.3 semantics pin. The paid paired-run probe
-   (owner-approved: a sequential multi-step task, paired runs with/without
-   the addendum, measuring repeated tool calls, end-of-run workspace
-   well-formedness, and answer correctness) remains open — it is a
-   behavioral measurement, not an acceptance gate. This is the module R&D
+   was owner-approved and MEASURED (July 7, 2026 —
+   [docs/benchmarks/WORKSPACE_PROBE_REPORT.md](../benchmarks/WORKSPACE_PROBE_REPORT.md)):
+   both arms answered correctly; the workspace arm made exactly the
+   minimum 4 external calls with a well-formed end-of-run snapshot,
+   while the legacy arm repeated every external call (8 vs 4) — the
+   scrollback-as-memory failure mode §4.3 predicts, observed directly.
+   n=1 per arm; directional, not statistical. This is the module R&D
    bench everything later uses.
 2. **Write-path hardening** (§10.2) — **DONE (Session 14, July 7, 2026;
    shipped first, as sequenced).** Format check in `_normalize_fact`
@@ -497,10 +502,21 @@ of every mechanism; paid runs only as small owner-approved behavioral probes.
    test:rlm-sandbox` (21 checks) pins malformed shapes, unknown-hash
    rejection with bounded lists, deduped-union-once, and the
    infrastructure-failure/provenance-verdict distinction.
-3. **Module registry + module #0** (§9.1, §9.5) — registry schema, loader,
-   composition rules, and the spatial-flywheel extraction with a
-   byte-identical composed-prompt pin. Includes the manifest-as-graph-entity
-   representation so research-change contestation (§9.4) has its substrate.
+3. **Module registry + module #0** (§9.1, §9.5) — **DONE (Session 15,
+   July 7, 2026), with one recorded deferral.** Registry schema
+   (`modules/<name>/module.json` + brace-free addendum file; Zod in
+   `src/config/modules.ts`, Python twin `src/rlm/trellis_modules.py`),
+   operator-owned selection (`TRELLIS_MODULES`; default = module #0;
+   max 4 per run; protocol modules only — manifests declaring tools are
+   rejected by this kernel edition), composition base + Σ addenda +
+   workflow rules with the `<<TRELLIS_RUBRIC>>` substitution token, and
+   the spatial-flywheel extraction pinned BYTE-IDENTICAL by sha256
+   (`npm run test:modules`, 27 checks). **Deferred:** the
+   manifest-as-graph-entity representation (§9.4) — module #0 cites no
+   research `sourceNodeIds` (it predates the promotion path, step 5),
+   so the entity would be empty and unreachable by the sweep; the
+   representation lands with the first research-bearing module
+   (steps 5–6), where it has something to contest.
 4. **Workspace lineage** (§5) — serialize/park/seed across tasks;
    orchestrator routes by reference; oracle drills extended to seeded runs.
 5. **Promotion path** (§6) — operator-gated segment→ingest with URL doc

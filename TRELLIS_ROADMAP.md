@@ -201,9 +201,11 @@ Ordered roughly by severity.
 | ~~8~~ | ~~A2A server surface (3.3 #8, second slice)~~ | **Done (Session 11, July 7, 2026)** — Trellis serves A2A v1.0 over the goal loop behind the existing gates and bounds, zero-paid acceptance; see §5 |
 | ~~9~~ | ~~MCP tool-surface expansion (3.3 #8 continuation)~~ | **Done (Session 12, July 7, 2026)** — remote Streamable HTTP transports with env-referenced credentials, redaction, and the containerized tool-server pattern; the recorded 3.3 #8 scope is exhausted; see §5 |
 | ~~10~~ | ~~Kernel hardening and the Tier-3 workspace (design record §11, steps 2 + 1)~~ | **Done (Session 14, July 7, 2026)** — `sourceNodeIds` format + `ast_nodes` existence enforcement at the single write path, then the harness-captured in-REPL workspace (origin-stamped uuid segments, stub returns, plan-in-workspace, byte-identical gating); see §5 |
-| 1 | Remaining design-record steps (§11 steps 3–6: module registry + module #0, workspace lineage, promotion path, first flywheel turn) | Owner-sequenced after Session 14 — order to be recorded here when directed |
-| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
-| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| ~~11~~ | ~~Module registry + module #0 (design record §11 step 3)~~ | **Done (Session 15, July 7, 2026)** — owner directed the step 3 → step 4 order on July 7, 2026 (PR #40 discussion); protocol-module registry, operator-owned `TRELLIS_MODULES` selection, spatial-flywheel extraction behind a byte-identical composed-prompt pin; the §9.4 graph representation is explicitly deferred to the first research-bearing module; the owner-approved paired-run workspace probe was also measured this session; see §5 |
+| 1 | Workspace lineage (design record §11 step 4) | **Session 16, owner-directed July 7, 2026** — serialize/park/seed across a goal's tasks: goal-scoped TTL-bounded Redis parking, orchestrator routes by reference, oracle drills extended to seeded runs |
+| 2 | Remaining design-record steps (§11 steps 5–6: promotion path, first flywheel turn) | Owner-sequenced after Session 16 |
+| 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
+| 4 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -1443,3 +1445,97 @@ the tuple-returning internal `call` seam.
 **Not run (owner-gated):** the design record §11 step-1 paired-run
 behavioral probe is PAID and remains proposed-not-executed; see the PR
 for the cost estimate.
+
+### July 7, 2026 — The paired-run workspace probe (design record §11 step 1, owner-approved paid run)
+
+Executed after the owner approved the PR #40 proposal. Full protocol
+and results: `docs/benchmarks/WORKSPACE_PROBE_REPORT.md`. One
+sequential four-fetch task against the deterministic fixture (new
+`archive_search` tool: ~3.9 KB payloads with the needed access code at
+the END, past the 500-char stub preview), two runs identical except the
+workspace; driver `scripts/probe_workspace_paired.py` (wrapper
+`scripts/probe_workspace_paired.ts` — deliberately no npm alias; it is
+the owner-gated paid path and joins no acceptance suite).
+
+Results: both arms answered correctly. The workspace arm made exactly
+the minimum 4 external calls (zero repeats) with a well-formed
+end-of-run snapshot (4 uuid segments, wrapper-owned origin stamps, all
+codes captured; `workspace_ops` 16, `workspace_bytes` 15,531); the
+legacy arm made 8 — **every external call repeated** — the
+scrollback-as-memory failure mode the design record predicts, observed
+directly. Token cost comparable (14,221/1,035 vs 12,764/867
+input/output). n=1 per arm: directional evidence, not statistics. The
+probe was executed twice end-to-end (a log-capture defect in the first
+execution's shell pipeline — an early-terminating `Select-Object` —
+truncated the measurement JSON; both executions' answers were correct);
+total spend ≈55K input / ≈4K output tokens, inside the approved
+envelope.
+
+### July 7, 2026 — Session 15: module registry + module #0 (design record §11 step 3, owner-directed)
+
+The owner recorded the Session 15 direction on the PR #40 discussion:
+design-record step 3, then step 4 as Session 16. Step 3 shipped on
+branch `session-15-probe-and-modules` together with the probe above.
+
+**The registry (design record §9.1–§9.3).** A module is a versioned
+document-plus-assets artifact under `modules/<name>/`: a `module.json`
+manifest (name charset `^[a-z][a-z0-9_-]*$`, integer version, purpose,
+`research.sourceNodeIds` AST-hash list, bare-filename `addendum`,
+`tools` — must be empty: this kernel edition supports PROTOCOL MODULES
+only, the §9.3 first class — hard-capped `bounds.addendumMaxBytes`
+default 8192/cap 16384, `status` active|contested|retired with only
+`active` composable, `kernelCompat: 1`) plus a brace-free addendum text
+file. Validators are bound-for-bound twins: `src/config/modules.ts`
+(Zod, strict schema, fail-fast at config load — a process that cannot
+compose its prompt surface must not run) and
+`src/rlm/trellis_modules.py` (defensive re-validation at agent spawn).
+Both normalize CRLF→LF so composition is byte-stable across checkout
+conventions.
+
+**Selection and composition (§9.2).** `TRELLIS_MODULES` is
+operator-owned (Guardrail 5): unset → the DEFAULT selection
+`["spatial-flywheel"]`; a JSON array → exactly that selection (max 4 per
+run, duplicates rejected); `[]` → no modules. `buildAgentEnv` always
+forwards the canonical validated serialization — a raw inherited value
+can never leak through (unit-pinned). The composed addendum is
+`TRELLIS_ADDENDUM_BASE` + Σ module addenda (each normalized to end with
+one blank line, selection order) + `TRELLIS_WORKFLOW_RULES`; rubric
+text enters through the single `<<TRELLIS_RUBRIC>>` substitution token,
+replaced with the escape-doubled `_SAFE_RUBRIC`, and composition
+re-verifies brace-freedom after substitution.
+
+**Module #0 (§9.5).** The spatial-flywheel protocol was extracted from
+the `TRELLIS_ADDENDUM` monolith MECHANICALLY (a script split the live
+string and proved recomposition byte-identical before any source edit)
+into `modules/spatial-flywheel/`. The pin of record: with the default
+selection, sha256(SYSTEM_PROMPT) equals the recorded pre-extraction
+value `abb945a6…f9b2` — the loader proved itself with zero behavior
+change. The Docker image ships `modules/` and `trellis_modules.py`;
+`python:check` verifies the module assets.
+
+**Deferred with reason (§9.4):** the manifest-as-graph-entity
+representation. Module #0 cites no research `sourceNodeIds` (it
+predates the promotion path), so its graph entity would be empty and
+unreachable by the invalidation sweep; the representation lands with
+the first research-bearing module (steps 5–6), where contestation has a
+substrate. Recorded in the design record §11 step 3.
+
+**Acceptance (July 7, 2026, all zero-paid):** `npm test` = 513 passing
+across 59 files (was 493/58; new `modules.test.ts` + the
+`modulesJson` forwarding pin in `rlm_job.test.ts`); `npm run build`,
+`npm run python:check` (now also validating module assets) green; NEW
+`npm run test:modules` = 27 checks (selection twins, module #0
+validation, the Node↔Python byte-identical addendum hash pin,
+composition normalization, unescaped-brace rejection, the
+byte-identical composed-prompt pin, the empty-selection pin);
+`test:rlm-workspace` 64, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
+`test:agent-loop` 23, `test:a2a` 46, `test:api-hardening` 18,
+`test:invalidation-sweep` 17, `test:belief-recovery` 30,
+`test:entity-resolution` 34, `test:benchmark-hardening` 24,
+`test:repo-ingest` 45 — unchanged and green; `npm run drill:scale` gate
+CLOSED (max provenance 286, sweep growth 2.26x this run — run-to-run
+variance across 1.63x/1.85x/2.26x, all far under the superlinear
+trigger); the isolated Compose integration
+(`trellis-s15-integration`, host ports 0) rebuilt the image with
+`modules/` + `trellis_modules.py` and passed 10/10. No defects found in
+existing code this session.
