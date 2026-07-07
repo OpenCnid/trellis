@@ -301,3 +301,98 @@ worker's Prometheus registry under `operation="orchestration"`.
 ```bash
 curl -N "http://localhost:3000/api/agent-stream?goal=Answer%20these%20two%20questions%20and%20reconcile%20them&api_key=$TRELLIS_API_KEY"
 ```
+
+---
+
+## 5. A2A Server Surface (Agent Interoperability)
+
+Session 11 exposes the goal loop of §4 to external agents through the
+[A2A protocol](https://a2a-protocol.org/) (Agent2Agent, Linux
+Foundation), **spec v1.0.0, JSON-RPC binding**. The surface is **off by
+default**: with `TRELLIS_A2A_ENABLED` unset, neither route below exists
+and the API is byte-identical to a pre-Session-11 process. One A2A task
+is one agentic goal — same queue, same admission gates, same hard
+per-goal bounds; the message text is the only payload that enters the
+loop.
+
+### `GET /.well-known/agent-card.json`
+
+The spec discovery path. Served **without** authentication (a client
+must be able to learn which security scheme the RPC endpoint requires);
+the card carries only public contract — name, description, the JSONRPC
+interface URL (`A2A_AGENT_URL`), the streaming capability, the
+`x-api-key` security scheme declaration (when `API_KEY` is configured),
+and the single `goal-execution` skill.
+
+### `POST /a2a/v1`
+
+The single JSON-RPC 2.0 endpoint (`Content-Type: application/json`),
+behind the §0 API key (`401` without it). Clients **must** send
+`A2A-Version: 1.0` (header, or `?A2A-Version=1.0`): the spec requires an
+absent value to be interpreted as protocol 0.3, which this server
+declines with `VersionNotSupportedError`.
+
+| Method | Behavior |
+|---|---|
+| `SendMessage` | Dispatches the message text as one goal. Blocking by default (the response returns the terminal task); `configuration.returnImmediately: true` returns the `TASK_STATE_SUBMITTED` task for polling. |
+| `SendStreamingMessage` | Same dispatch; responds with an SSE stream of JSON-RPC responses, each wrapping one `StreamResponse` — the initial task, `TASK_STATE_WORKING` status updates as the loop iterates, the final answer as an `artifactUpdate` (`lastChunk: true`), then the terminal status, after which the stream closes. |
+| `GetTask` | Returns the task from its Redis-backed record. Records are TTL-bounded (`A2A_TASK_TTL_SECONDS`, default 3600); an expired or unknown id returns `TaskNotFoundError` (`-32001`). |
+| `CancelTask` | Always declined with `TaskNotCancelableError` (`-32002`) — the goal loop has no abort path; a dispatched goal runs to its bounded end. |
+
+State mapping: goal completion → `TASK_STATE_COMPLETED` with one text
+artifact carrying the final answer; a typed goal failure (§4 failure
+kinds) → `TASK_STATE_FAILED` with `kind: reason` as the status message.
+
+Declines and errors: push-notification config methods →
+`PushNotificationNotSupportedError` (`-32003`); `ListTasks`,
+`SubscribeToTask`, `GetExtendedAgentCard` → `UnsupportedOperationError`
+(`-32004`); non-text parts → `ContentTypeNotSupportedError` (`-32005`);
+multi-turn `taskId` references and client-provided `contextId` values →
+`-32004` (goals are one-shot); malformed JSON / envelope / params →
+`-32700` / `-32600` / `-32602`; unknown methods → `-32601`.
+
+**Admission and bounds.** A2A dispatch shares the §4 gates: the
+concurrent-goal cap (`AGENT_MAX_CONCURRENT_GOALS`) is one gate across
+both surfaces, the `agent_queue` backlog cap applies, and every
+per-goal bound holds unchanged. Over-limit requests receive HTTP `429`
+carrying a JSON-RPC error body with a `RATE_LIMITED` detail. No A2A
+parameter can name a tool, raise a bound, or reach the RLM/MCP layer.
+
+**Drills.** `metadata.oracle` on `SendMessage` carries a scripted
+decision sequence for zero-LLM drills and is rejected (`-32602`) unless
+`AGENT_ORACLE_ENABLED=true` — the same posture as the §4 `oracle`
+parameter. `npm run test:a2a` exercises the full surface with zero paid
+calls.
+
+**Example (blocking send):**
+```bash
+curl -s http://localhost:3000/a2a/v1 \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: $TRELLIS_API_KEY" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "jsonrpc": "2.0", "id": 1, "method": "SendMessage",
+    "params": {
+      "message": {
+        "messageId": "msg-1", "role": "ROLE_USER",
+        "parts": [{"text": "Summarize what the graph knows about Globex."}]
+      }
+    }
+  }'
+```
+
+```json
+{
+  "jsonrpc": "2.0", "id": 1,
+  "result": {
+    "task": {
+      "id": "6f4c…", "contextId": "a81b…",
+      "status": {"state": "TASK_STATE_COMPLETED", "timestamp": "2026-07-07T10:08:31.576Z"},
+      "artifacts": [{
+        "artifactId": "artifact-6f4c…", "name": "goal-answer",
+        "parts": [{"text": "Globex acquired Initech in 2024. …"}]
+      }]
+    }
+  }
+}
+```

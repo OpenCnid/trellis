@@ -2,7 +2,7 @@
 
 *Generated from a code-led review of the repository (July 4, 2026). File and line references point at the current state of `master`-derived code in this working tree.*
 
-*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), Session 7's semantic-provenance scale gate, Session 8 whole-codebase ingestion (3.3 #6, including the measured Entity.name merge index), Session 9's agentic orchestration loop (3.3 #7), and Session 10's MCP tool surface for the RLM sub-agent (3.3 #8 first slice) are complete and verified. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds, and Session 8's post-index re-measurement kept the gate closed. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
+*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), Session 7's semantic-provenance scale gate, Session 8 whole-codebase ingestion (3.3 #6, including the measured Entity.name merge index), Session 9's agentic orchestration loop (3.3 #7), Session 10's MCP tool surface for the RLM sub-agent (3.3 #8 first slice), and Session 11's A2A server surface over the goal loop (3.3 #8 second slice) are complete and verified. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds, and Session 8's post-index re-measurement kept the gate closed. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
 
 ---
 
@@ -178,7 +178,7 @@ Ordered roughly by severity.
 
 7. ~~**Agentic orchestration loop (owner-directed, July 6, 2026).**~~ **Done (Session 9, July 7, 2026):** `GET /api/agent-stream` accepts one goal; the `agent_queue` worker runs an orchestrator (same LLM, planner system prompt, plain structured chat completions through the T8 boundary — never an rlms REPL) whose Zod-validated decisions dispatch single-task RLM runs as ordinary `rlm_queue` jobs, observe their new `TRELLIS_RESULT` envelopes, and iterate until finish/fail or a hard bound trips (`AGENT_MAX_ITERATIONS_PER_GOAL`/`AGENT_MAX_TASKS_PER_GOAL`/`AGENT_MAX_CONCURRENT_TASKS`/`AGENT_TASK_MAX_ITERATIONS`, all single-digit-capped). Task failures and protocol violations are observations for the next decision; every other exit is a typed streamed failure. The orchestrator never writes to the graph; acceptance was zero-LLM (oracle decisions + stubbed tasks over the real queues, pub/sub, and API — `npm run test:agent-loop`). See §5. The original direction follows. Trellis must be able to work agentically: an external loop that accepts a goal, decomposes it into tasks, and mediates execution until the goal completes or a bound is hit. The loop is driven by the same LLM under a different (orchestrator) system prompt — plain structured chat completions crossing the T8 `parseLlmResponse` boundary, never a second REPL (the rlms `custom_system_prompt` replaces the REPL protocol prompt, so the orchestrator persona must not be routed through rlms). The RLM becomes a reusable single-task sub-agent: one `rlm_queue` job per task, one process per run exactly as today, so a goal can dispatch many RLM runs and aggregate their `FINAL_ANSWER:` results and `TRELLIS_TELEMETRY:` spend. Hard per-goal bounds on orchestrator iterations, dispatched tasks, and tokens; all LLM calls stay inside workers; the orchestrator itself never writes to the graph — `write_derived_insight` remains the single agent write path. Zero-LLM acceptance via a deterministic oracle planner plus stubbed task execution over the real queue/stream plumbing. Scheduled as Session 9; see §4 and `HANDOFF.md`.
 
-8. **External tool integration for the RLM sub-agent (owner-directed, July 7, 2026).** **First slice — the MCP client surface — done (Session 10, July 7, 2026):** the RLM gains an operator-configured stdio MCP client (`TRELLIS_MCP_SERVERS` → `src/rlm/trellis_mcp.py`, injected as `trellis_mcp` via `custom_tools`), with allowlist-before-I/O enforcement, per-call timeouts, size-capped results, a separate `mcp_calls` telemetry counter that never satisfies the database-provenance requirement, and zero-paid acceptance against a local deterministic fixture server (`npm run test:rlm-mcp`). See §5. **The item stays open** for the recorded continuation: tool-surface expansion (more tools/transports, containerized servers) and A2A interoperability — sequencing row 2. The original direction follows. With the agentic loop in place (3.3 #7), the sub-agent's world is still exactly two injected database tools — it can decompose goals but every task bottoms out in graph/AST lookups. The owner directed that Trellis now gain external tools, **MCP (Model Context Protocol) first**, with web search as the first concrete tool and A2A (agent-to-agent) interoperability as a follow-on direction across future sessions. The extension point already exists: `trellis_agent.py` injects tools via rlms `custom_tools`, and `trellis_tools.py` shows the wrapper discipline (JSON-string returns, tool-call counting, exceptions that surface real tracebacks into the REPL). Hard invariants: MCP servers and their tool allowlists come from operator-validated configuration only — never from job payloads and never chosen freely by the model; MCP calls do NOT satisfy the database-provenance requirement (`TRELLIS_PROTOCOL_VIOLATION` stays keyed to database tool calls) and MCP output can never be passed as `sourceNodeIds` — external content earns citability only by round-tripping through the verified ingest path to become content-addressed AST bytes; responses are size-capped and time-bounded; acceptance is zero-paid against a local deterministic fixture MCP server. Scheduled as Session 10; see §4 and `HANDOFF.md`.
+8. **External tool integration for the RLM sub-agent (owner-directed, July 7, 2026).** **First slice — the MCP client surface — done (Session 10, July 7, 2026):** the RLM gains an operator-configured stdio MCP client (`TRELLIS_MCP_SERVERS` → `src/rlm/trellis_mcp.py`, injected as `trellis_mcp` via `custom_tools`), with allowlist-before-I/O enforcement, per-call timeouts, size-capped results, a separate `mcp_calls` telemetry counter that never satisfies the database-provenance requirement, and zero-paid acceptance against a local deterministic fixture server (`npm run test:rlm-mcp`). See §5. **Second slice — the A2A server surface — done (Session 11, July 7, 2026):** Trellis serves the Agent2Agent protocol (spec v1.0.0, JSON-RPC binding) over the existing goal loop — `TRELLIS_A2A_ENABLED` (default off, byte-identical API when unset) mounts the well-known Agent Card and one JSON-RPC endpoint whose `SendMessage`/`SendStreamingMessage`/`GetTask`/`CancelTask` dispatch goals through the same admission gates and per-goal bounds as `/api/agent-stream`, with TTL-bounded Redis task records and zero-paid acceptance (`npm run test:a2a`). See §5. **The item stays open** for the recorded continuation: MCP tool-surface expansion (remote/HTTP transports and their auth story, containerized tool servers) — sequencing row 1. The original direction follows. With the agentic loop in place (3.3 #7), the sub-agent's world is still exactly two injected database tools — it can decompose goals but every task bottoms out in graph/AST lookups. The owner directed that Trellis now gain external tools, **MCP (Model Context Protocol) first**, with web search as the first concrete tool and A2A (agent-to-agent) interoperability as a follow-on direction across future sessions. The extension point already exists: `trellis_agent.py` injects tools via rlms `custom_tools`, and `trellis_tools.py` shows the wrapper discipline (JSON-string returns, tool-call counting, exceptions that surface real tracebacks into the REPL). Hard invariants: MCP servers and their tool allowlists come from operator-validated configuration only — never from job payloads and never chosen freely by the model; MCP calls do NOT satisfy the database-provenance requirement (`TRELLIS_PROTOCOL_VIOLATION` stays keyed to database tool calls) and MCP output can never be passed as `sourceNodeIds` — external content earns citability only by round-tripping through the verified ingest path to become content-addressed AST bytes; responses are size-capped and time-bounded; acceptance is zero-paid against a local deterministic fixture MCP server. Scheduled as Session 10; see §4 and `HANDOFF.md`.
 
 ---
 
@@ -193,7 +193,8 @@ Ordered roughly by severity.
 | ~~5~~ | ~~Whole-codebase ingestion (3.3 #6)~~ | **Done (Session 8, July 6, 2026)** — code-aware per-file snapshots with tombstone deletion, zero-paid-work default, and the measured Entity.name merge index; see §5 |
 | ~~6~~ | ~~Agentic orchestration loop (3.3 #7)~~ | **Done (Session 9, July 7, 2026)** — goal loop over the RLM as a reusable single-task sub-agent, zero-LLM acceptance; see §5 |
 | ~~7~~ | ~~MCP tool integration for the RLM (3.3 #8, first slice)~~ | **Done (Session 10, July 7, 2026)** — operator-configured stdio MCP client for the sub-agent with fixture-server zero-paid acceptance; see §5 |
-| 1 | Tool-surface expansion and A2A interop (3.3 #8 continuation) | Owner-directed follow-on: more MCP tools/transports and agent-to-agent interoperability, scoped per session after the MCP foundation lands |
+| ~~8~~ | ~~A2A server surface (3.3 #8, second slice)~~ | **Done (Session 11, July 7, 2026)** — Trellis serves A2A v1.0 over the goal loop behind the existing gates and bounds, zero-paid acceptance; see §5 |
+| 1 | MCP tool-surface expansion (3.3 #8 continuation) | Owner-directed follow-on: remote/HTTP MCP transports with their auth story, containerized tool servers |
 | 3 | Frontend deployment and community readiness remainder (3.3 #5 residue) | Twice deferred by owner redirects — the Next.js frontend still has no production build, container, API-key handling, or CI coverage |
 | 4 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
 | 5 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
@@ -951,3 +952,126 @@ Compose; vendor-specific web-search integrations.
 frontend deployment (3.3 #5 residue); repository-extraction
 prerequisites; conditional 3.3 #4 migration behind its unchanged trigger;
 T13's migration-dependent hash preimage.
+
+### July 7, 2026 — Session 11: the A2A server surface over the goal loop (3.3 #8, second slice)
+
+Trellis is now dispatchable by external agents through a standards
+surface: the Agent2Agent protocol, served directly over the Session 9
+goal loop. One A2A task is one agentic goal — a second door into the
+same room, never a bypass.
+
+**Protocol version pinned.** Built against **A2A specification v1.0.0**
+(a2a-protocol.org / a2aproject/A2A; verified against
+`specification/a2a.proto` and the §9 JSON-RPC binding before any wire
+shape was written, per the handoff's do-not-build-from-memory rule).
+v1.0 differs materially from the 2025 0.x line: PascalCase JSON-RPC
+methods (`SendMessage`, `GetTask`, …), ProtoJSON serialization
+(`TASK_STATE_*`/`ROLE_*` enums, camelCase fields, no `kind`
+discriminators), the well-known card at `/.well-known/agent-card.json`,
+blocking-by-default `SendMessage` with `configuration.returnImmediately`,
+and a mandate that an absent `A2A-Version` header be interpreted as a
+0.3 client (declined here with `VersionNotSupportedError`, supported
+version advertised in the error detail). **SDK decision:** the official
+`@a2a-js/sdk` (evaluated at 0.3.13) still implements the 0.3.x wire
+format and brings its own Express app/executor/task-store machinery that
+would bypass the `StreamGate` admission pattern and the Zod boundary
+discipline — not adopted. The v1.0 subset is hand-rolled with Zod at the
+boundary; **zero new dependencies** in either language.
+
+**The surface** (`src/api/a2a.ts` + pure modules in `src/core/a2a/`;
+mounted by `server.ts` only when `TRELLIS_A2A_ENABLED=true`, default
+false, with the API byte-identical when unset — drill-pinned):
+
+- `GET /.well-known/agent-card.json` — the Agent Card
+  (`agent_card.ts`), served before the API-key middleware because
+  discovery is how a client learns the required scheme; it carries only
+  public contract (name/description/URL from validated config, JSONRPC
+  1.0 interface, streaming capability, the `x-api-key` scheme
+  declaration, one `goal-execution` skill). No-secret-leak pinned by
+  unit test and drill.
+- `POST /a2a/v1` — one JSON-RPC endpoint behind the existing API key.
+  Every envelope and parameter crosses Zod schemas (`protocol.ts`) with
+  the spec's error vocabulary: -32700/-32600/-32601/-32602 for transport
+  failures, -32001 TaskNotFound, -32002 TaskNotCancelable (the loop has
+  no abort path; cancel is always declined), -32003 for push-notification
+  methods, -32004 for `ListTasks`/`SubscribeToTask`/`GetExtendedAgentCard`
+  and for multi-turn `taskId`/client `contextId` attempts (goals are
+  one-shot), -32005 for non-text parts, -32009 for version mismatches.
+  Inbound size caps: ≤8 text parts, ≤32 KiB goal text.
+- Dispatch shares the `/api/agent-stream` admission verbatim — the SAME
+  `StreamGate` instance (one concurrent-goal cap across both surfaces)
+  plus the `agent_queue` depth backstop; over-limit requests get HTTP
+  429 carrying a JSON-RPC error body with a `RATE_LIMITED` detail. The
+  concatenated message text is the only payload that enters the loop;
+  oracle scripts ride only in `metadata.oracle` and only when
+  `AGENT_ORACLE_ENABLED=true` (rejected with -32602 otherwise — the
+  Session 9 SSE posture exactly).
+- Task state is a TTL-bounded Redis record (`a2a:task:<goalId>`,
+  `A2A_TASK_TTL_SECONDS`, default 3600) maintained by a per-goal
+  server-side recorder subscribed to the existing
+  `agent-stream:<goalId>` channel (subscribe-then-enqueue). The pure
+  state machine and all wire rendering live in `task_record.ts`:
+  SUBMITTED → WORKING on progress events → COMPLETED with one text
+  artifact (`lastChunk: true` on the stream) or FAILED carrying the
+  typed `kind: reason` as the status message — every goal lifecycle
+  path and all five `GoalFailureKind`s pinned exhaustively by unit test.
+  `SendMessage` blocks on the terminal event per spec (or returns the
+  SUBMITTED task under `returnImmediately`); `SendStreamingMessage`
+  streams JSON-RPC-enveloped `StreamResponse` frames and closes on the
+  terminal status; `GetTask` renders the record. The recorder reclaims
+  its subscriber and gate slot at the record TTL if a goal somehow
+  outlives it (`a2a.recorder_ceiling`).
+- Observability (T16): `trellis_a2a_requests_total{method}` (fixed
+  vocabulary + `declined`/`invalid`) and
+  `trellis_a2a_tasks_total{outcome}` in the API process; `a2a.*` events
+  carry ids, states, and codes only — message content and artifacts
+  never reach labels or logs.
+
+**Defect found and fixed along the way:** the first live run wedged
+every blocking send — the recorder issued its Redis `SUBSCRIBE` after an
+unrelated `await` (the initial record write), which can land the
+subscribe mid ready-check on a fresh ioredis connection; the connection
+then loops on "Connection in subscriber mode" reconnects and delivers no
+events. Fixed by subscribing in the same tick the connection is created
+(the SSE endpoints' existing discipline) and writing the initial record
+after the subscription is confirmed; recorder/store connections also
+gained error listeners so transient connection errors cannot become
+unhandled-error noise.
+
+**Verification (all commands run, zero paid calls, no external
+network).** Offline: `npm test` = **468 passing across 57 files**
+(baseline 419/53; +49: A2A config validation via the reset-modules
+pattern, the JSON-RPC envelope/params/version/method-classification
+boundary, the exhaustive goal→task translation and stream-frame
+rendering, Agent Card shape + no-secret-leak, and the a2a metric label
+pins). `npm run build`, `npm run python:check`,
+`docker compose --profile test config --quiet`, and `git diff --check`
+pass. New live suite: `npm run test:a2a` = **46 checks** across three
+server postures (disabled-default: routes absent; drill: discovery,
+auth, version negotiation, the full malformed-JSON-RPC matrix, blocking
+send with the answer artifact, returnImmediately + GetTask polling
+across the lifecycle, the SSE stream from SUBMITTED task through
+artifactUpdate/lastChunk to terminal status, a concurrency-bound trip
+surfacing as TASK_STATE_FAILED with the typed reason, CancelTask/GetTask
+error codes, 429 saturation with a JSON-RPC body, and API-process
+metrics with no goal-text leakage; enabled-without-oracle: drill
+metadata rejected before enqueue). Regression: `npm run test:agent-loop`
+(23) green and untouched. Existing live suites stayed green:
+`test:rlm-mcp` (46), `test:repo-ingest` (45), `test:benchmark-hardening`
+(24), `test:entity-resolution` (33), `test:api-hardening` (18),
+`test:rlm-sandbox` (4), `test:belief-recovery` (30),
+`test:invalidation-sweep` (17). `npm run drill:scale` closed its gate
+(max cardinality 286, sweep growth 1.23x, zero residue). The isolated
+`trellis-s11-integration` Compose project passed its 9 assertions and
+removed only its own containers and volumes.
+
+**Deliberately not included (HANDOFF §8):** Trellis as an A2A *client*;
+push notifications/webhooks; goal cancellation mid-flight; multi-turn
+`input-required` interactions; MCP transport expansion (the recorded
+next slice); exposing MCP through A2A in any form; authentication
+schemes beyond the existing API key (OAuth is follow-on); frontend work.
+
+**Still open:** the 3.3 #8 continuation (MCP remote/HTTP transports and
+containerized tool servers); frontend deployment (3.3 #5 residue);
+repository-extraction prerequisites; conditional 3.3 #4 migration behind
+its unchanged trigger; T13's migration-dependent hash preimage.

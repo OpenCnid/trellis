@@ -43,6 +43,7 @@
     "test:rlm-mcp": "tsx scripts/test_rlm_mcp.ts",
     "test:api-hardening": "tsx scripts/test_api_hardening.ts",
     "test:agent-loop": "tsx scripts/test_agent_loop.ts",
+    "test:a2a": "tsx scripts/test_a2a.ts",
     "test:benchmark-hardening": "tsx scripts/test_benchmark_hardening.ts",
     "drill:mutate": "tsx scripts/mutate_oolong_dataset.ts",
     "drill:reingest": "tsx scripts/reingest_oolong_dataset.ts",
