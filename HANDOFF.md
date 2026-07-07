@@ -80,7 +80,8 @@ Sessions 1–13 are complete and merged:
   integration. The recorded 3.3 #8 scope is exhausted.
 - Session 13 (July 7, 2026, branch `d/musing-wilbur-5bf4b2`) —
   documentation, context alignment, and architectural consolidation
-  (owner-redirected; the frontend deployment moved to Session 14). The
+  (owner-redirected; the frontend deployment is deferred — unscheduled,
+  scope preserved in roadmap §3.3 #5). The
   primary deliverable is the design record
   `docs/architecture/WORKSPACE_AND_MODULES.md`: the three-tier trust
   model, the Tier-3 workspace contract (harness-captured, origin-stamped,
@@ -97,19 +98,27 @@ Sessions 1–13 are complete and merged:
   `docs/GLOSSARY.md` (canonical one-line definitions; authority
   hierarchy code > glossary > prose) and the `TRELLIS_ROADMAP.md` §1
   drift fixes (three injected tool surfaces, all seven queues,
-  `agent_queue` in the diagram). No code changes; offline suite
-  unchanged at 485.
+  `agent_queue` in the diagram). A close-out sweep in the same session
+  scoped Session 14 (§3–§6 below), recorded the frontend deferral, and
+  aligned README with the July 7 baseline (agency-layer summary,
+  single-source-of-truth pointer, `test:a2a` added to its live-check
+  list). No code changes; offline suite unchanged at 485.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is to study the current code and `TRELLIS_ROADMAP.md`, present a
-concrete design, and then implement **Session 14: the frontend deployment and
-community-readiness remainder (3.3 #5 residue)** — a production build,
-container, and CI coverage for the Next.js frontend, plus an API-key story
-that never hands the operator's backend key to the browser — without touching
-the backend's contracts. Repository-scale extraction prerequisites are the
-recorded following item — not this session unless the owner redirects. Do not
-re-plan or re-implement completed work.
+Your objective is to study the current code, `TRELLIS_ROADMAP.md`, and the
+design record `docs/architecture/WORKSPACE_AND_MODULES.md` (sovereign on
+`master`, with `docs/GLOSSARY.md`; authority: code > glossary > prose),
+present a concrete design, and then implement **Session 14: kernel hardening
+and the Tier-3 workspace** — design-record §11 steps 2 and 1, in that order,
+on one branch and one PR: first the `sourceNodeIds` format + existence
+checks at the single write path, then the harness-captured in-REPL workspace
+with origin-stamped segments and stub returns. The frontend deployment
+(3.3 #5 residue) is DEFERRED by owner direction — unscheduled, scope
+preserved in the roadmap; do not pick it up. Design-record steps 3–6 are
+owner-sequenced after this session. Do not re-plan or re-implement completed
+work. RLM expands exclusively to Recursive Language Model (the MIT CSAIL
+formulation).
 
 ---
 
@@ -321,8 +330,8 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the Session 12 PR merge (branch `session-12-mcp-http`; use
-  `git log -- HANDOFF.md` to identify it).
+- `master`: the Session 13 close-out merge (use `git log -- HANDOFF.md`
+  to identify it; Session 13 landed as two squash-merged PRs).
 - Offline baseline: `npm test` = 485 passing across 57 files.
 - `npm run build` and `npm run python:check` pass.
 - `npm run drill:scale`: gate CLOSED at max provenance 286; sweep growth
@@ -353,164 +362,173 @@ Fresh worktrees do not contain `node_modules`. Start with:
  npm run build
  npm run python:check
  docker compose config --quiet
- # The frontend has its own package tree:
- cd src/frontend && npm ci && npm run build && cd ../..
 ```
 
 Work on a feature branch and target `master`.
 
 ## 3. Session 14 problem statement
 
-The backend has been deployable since Session 3; the frontend never
-caught up. Three concrete gaps, all recorded under roadmap 3.3 #5:
+Two gaps, both recorded in `docs/architecture/WORKSPACE_AND_MODULES.md`
+(the normative design; §ref markers below point into it):
 
-- **No production build or container.** `src/frontend/package.json` has
-  `next build`/`next start` scripts, but nothing in the repository runs
-  them: CI never installs the frontend tree, `docker-compose.yml` has
-  no frontend service, and the backend image deliberately excludes the
-  frontend (recorded in the Session 3 §5 entry). A `next build`
-  regression would land silently today.
-- **The API-key story is a dev-only hole.** `next.config.ts` proxies
-  `/api/:path*` straight to the backend with no key. Next rewrites
-  cannot inject headers, so any deployment with `API_KEY` set (i.e.,
-  every real deployment) gets 401s from the browser. Handing the
-  backend key to the browser (`NEXT_PUBLIC_*`) is not acceptable — the
-  key gates paid endpoints (`/api/rlm-stream`, `/api/agent-stream`,
-  `/a2a/v1`) the page never uses. The key must live server-side, and
-  the browser must reach exactly the endpoints the page needs.
-- **No CI coverage.** Neither `next build` nor `eslint` runs in
-  `.github/workflows/ci.yml`, and the Compose test profile proves
-  nothing about the frontend.
+- **The single write path enforces provenance only for non-emptiness
+  (§10.2).** `_normalize_fact` in `src/rlm/trellis_tools.py` accepts any
+  non-empty list as `sourceNodeIds`: a hallucinated 64-hex string, a
+  uuid, or `q_0001` writes into the graph as if it were verified
+  provenance. "An AST hash means verified ingested bytes" is convention,
+  not enforcement — a live defect today, independent of any workspace.
+- **External tool results evaporate (§3, §4).** An MCP result transits
+  `call_tool`'s return value into stdout scrollback exactly once;
+  nothing captures it, later turns cannot re-read it without re-calling,
+  `llm_query` fan-out over accumulated findings is impossible, and the
+  RLM has no Tier-3 working state at all — no plan object, no
+  origin-stamped findings, no self-notes surviving a turn.
 
-Session 14 gives the frontend the same deployment discipline the
-backend has: reproducible build, non-root container, health check,
-key-safe backend access, and zero-LLM CI proof.
+Session 14 closes both, hardening first, so Tier 3 lands into a system
+where a scratch-shaped identifier cannot be written as provenance even
+by a defective future change.
 
 ## 4. Required design
 
-Present the exact design after inspecting §5, then implement it.
-Deviations require a concrete reason and equivalent tests. Read
-`src/frontend/AGENTS.md` first — Next.js 16 conventions may differ from
-training data; consult `node_modules/next/dist/docs/` (after the
-frontend `npm ci`) for route handlers, `output: 'standalone'`, and
-config behavior before writing Next-specific code.
+The design record is normative; deviations require a concrete reason and
+equivalent tests, recorded in the roadmap §5 entry.
 
-### 4.1 Key-safe backend access: a server-side proxy route
+### 4.1 Write-path hardening (first commit; design record §10.2)
 
-- Replace the dev rewrite as the production path with a Next route
-  handler (e.g. `src/frontend/src/app/api/[...path]/route.ts`) that
-  forwards ONLY an allowlisted set of backend endpoints — `/retrieve`
-  is the only one the page uses today (plus `/healthz` if the container
-  health check goes through the app) — and injects `x-api-key` from
-  server-side env. Everything outside the allowlist returns 404 without
-  touching the backend. The key must never appear in client-delivered
-  JS, page props, or response/error bodies — assert this in the drill.
-- The backend base URL and key come from server env (suggested:
-  `TRELLIS_BACKEND_URL`, default `http://localhost:3000` for bare-host
-  dev, the Compose service DNS in the container; reuse `API_KEY` or
-  name a frontend-scoped variable — decide and document). Prefer ONE
-  code path: the handler serves both dev and prod so the two cannot
-  diverge; drop the rewrite if the handler fully replaces it.
-- Keep it pure where possible: an allowlist/URL-mapping helper testable
-  without a running server, following the repo's pure-helper convention.
+- `TrellisPostgres` gains `ast_hashes_exist(hashes)` → JSON list of
+  MISSING hashes, one `SELECT id FROM ast_nodes WHERE id = ANY(%s)`,
+  rollback-on-error mirroring `get_ast_texts`. Internal write-path use
+  does not increment the model tool-call counter (leave every existing
+  `_count_tool_call()` placement untouched).
+- `_normalize_fact` rejects any `sourceNodeIds` element not matching
+  `^[0-9a-f]{64}$` (lowercase — AST ids come from `digest('hex')`) with
+  a readable `Provenance Violation` error carrying a bounded echo.
+- `TrellisNeo4j.__init__` accepts an `ast_existence_check` callable;
+  `_run_insight_writes` verifies the deduped union of the batch's hashes
+  BEFORE opening the WRITE session; unknown hashes raise with a bounded
+  list (first 5 + total count). Fail fast, no partial write, no config
+  toggle — enforcement is unconditional. Wire the injection in
+  `trellis_agent.py`. Distinguish infrastructure failure (raise as
+  such) from verified-absent (provenance violation).
 
-### 4.2 Production build and container
+### 4.2 The workspace holder (design record §4, all eight subsections)
 
-- Set `output: 'standalone'` in `next.config.ts` and add a
-  `src/frontend/Dockerfile` (multi-stage: `npm ci` + `next build` on
-  `node:22-bookworm-slim`, then copy `.next/standalone` +
-  `.next/static` + `public` into a non-root runtime stage; the backend
-  `Dockerfile` shows the house style — non-root `node` user,
-  HEALTHCHECK, pinned base). The frontend stays OUT of the backend
-  image, as recorded in Session 3.
-- Compose: a `frontend` service (its own build context `src/frontend`),
-  loopback-published port (default 3001, env-tunable like the other
-  host ports), env wiring for the backend URL + key, health check,
-  `depends_on` backend healthy. Decide whether it joins the default
-  profile or an opt-in profile; either is defensible — record the
-  choice.
+- New `src/rlm/trellis_workspace.py`: a holder object injected via rlms
+  `custom_tools` as `trellis_workspace` (persists in REPL globals by
+  construction — Appendix A). Inner state is a plain JSON-serializable
+  dict (`version`, `plan`, `notes`, `segments`) — the data-not-objects
+  contract. Methods return JSON STRINGS and raise real exceptions:
+  `read()` (bounded index: ids/origins/sizes/plan/notes, never full
+  contents), `segment(id)` (full content), `set_plan(plan)`,
+  `add_note(text)`, `drop(id)`, `snapshot()` (canonical JSON; the
+  future lineage seam), and harness-side
+  `capture(server, tool, args_hash, content, truncated)` → creates a
+  uuid4 segment stamped with `origin`/`fetchedAt`/`bytes`/`truncated`
+  (+ `goalId`/`taskId` when present) and returns the stub. Stamps are
+  wrapper-owned; the model can never forge them.
+- Budget errors raise (`WorkspaceBudgetError` with current usage and a
+  `drop()` hint); stored state is never silently truncated.
 
-### 4.3 CI and the Compose proof
+### 4.3 Capture and stub returns (design record §4.1, §4.3)
 
-- CI: a frontend job (or steps) running `npm ci`, `eslint`, and
-  `next build` in `src/frontend` on Node 22 — fail on lint or build
-  errors. Cache per the existing workflow's style.
-- Extend the Compose test profile so the integration proves the
-  frontend serves: fetch the frontend root (200, expected page markers)
-  and a proxied `/api/retrieve` for the entity the round trip already
-  seeds — asserting the proxy injected the key (the Compose backend has
-  `API_KEY` set) and the response carries the seeded provenance. Also
-  assert a non-allowlisted path (e.g. `/api/metrics`) returns 404
-  through the proxy, and that no fetched body contains the key value.
+- `TrellisMcp(servers, workspace=None)`. In `call_tool`, after the
+  existing truncation: with a workspace attached, deposit the result and
+  return the stub
+  `{"server","tool","segmentId","bytes","truncated","preview"}`
+  (preview ≤ 500 chars); with no workspace, the legacy full-result
+  return is byte-identical (pinned). A capture that trips the budget
+  raises before returning; the result is discarded deterministically.
 
-### 4.4 Observability and docs
+### 4.4 Gating and the addendum (design record §4.7)
 
-- The frontend needs no Prometheus registry this session; its logs are
-  Next's defaults. Do NOT log the API key anywhere; if the proxy logs
-  requests, follow the T16 rule (no query content, no key material).
-- Update README (frontend build/deploy/env contract),
-  `docs/operations/RUNBOOK.md` (a frontend section: deploy, diagnose
-  401 vs 404 through the proxy, rotate the key), `.env.example` for new
-  variables, and `API_REFERENCE.md` only if a client-visible contract
-  changes (it should not — the proxy forwards `/retrieve` verbatim).
+- New `--goal-id` CLI arg on `trellis_agent.py`; `buildAgentArgs`
+  forwards it when `job.goalId` exists. Inject the workspace + its
+  addendum only when MCP servers are configured OR `--goal-id` is
+  present; otherwise prompt and behavior are byte-identical (pinned,
+  the empty-registry MCP precedent). The addendum is brace-free
+  (`dict(...)` example syntax), instructs rebind-for-atomic-updates,
+  and restates the hard rule: workspace ids/content never satisfy
+  provenance.
 
-### 4.5 Zero-paid acceptance
+### 4.5 Bounds and configuration (design record §4.7)
 
-- Everything here is zero-LLM by construction: the page and proxy touch
-  `/retrieve` only. The Compose integration extension must keep its
-  no-`OPENAI_API_KEY` assertion intact. Frontend unit coverage (the
-  allowlist helper) joins `npm test` only if the helper lives outside
-  the frontend tree — otherwise give the frontend its own minimal test
-  script and run it in CI; prefer whichever keeps `npm test`'s
-  zero-config invariant intact. Record the choice.
+- `TRELLIS_WORKSPACE_MAX_SEGMENTS` (default 128, hard cap 1024) and
+  `TRELLIS_WORKSPACE_MAX_BYTES` (default 4 MB, hard cap 32 MB),
+  Zod-validated in `src/config/index.ts`, forwarded by `buildAgentEnv`
+  (stripped when unset), re-validated defensively in Python with the
+  same maxima.
+
+### 4.6 Telemetry (design record §4.8)
+
+- `TRELLIS_TELEMETRY` gains `workspace_ops`, `workspace_segments`,
+  `workspace_bytes` — counts only; workspace content never appears in
+  logs or metric labels (T16). The provenance protocol is unchanged:
+  zero DATABASE tool calls is still `TRELLIS_PROTOCOL_VIOLATION`
+  regardless of workspace or MCP activity.
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `TRELLIS_ROADMAP.md` §3.3 #5, §4, and the Session 3/12 §5 entries;
-  `.agents/AGENT_CODING_GUIDELINES.md`; `src/frontend/AGENTS.md` (the
-  Next.js version warning) and `node_modules/next/dist/docs/` after the
-  frontend `npm ci`.
-- `src/frontend/next.config.ts` (the dev rewrite to replace),
-  `src/frontend/src/components/SplitPaneViewer.tsx` (the only backend
-  consumer: `/api/retrieve?entity=...`), `src/frontend/package.json`.
-- `Dockerfile` (house style for the frontend image),
-  `docker-compose.yml` (service/profile/env conventions; the
-  `mcp-fixture` entrypoint-override precedent),
-  `scripts/test_compose_roundtrip.ts` (the integration to extend — it
-  already seeds a provenance-bearing entity the frontend proxy can
-  fetch).
-- `.github/workflows/ci.yml` (job layout, Node 22, the isolated Compose
-  invocation), `src/api/auth.ts` (what the backend accepts:
-  `x-api-key` / Bearer / `api_key` query param).
-- `docs/operations/RUNBOOK.md` and README's frontend/deployment
-  sections.
+- `docs/architecture/WORKSPACE_AND_MODULES.md` §4, §10.2, §11 steps 1–2,
+  Appendix A; `docs/GLOSSARY.md`; `.agents/AGENT_CODING_GUIDELINES.md`.
+- `src/rlm/trellis_tools.py` (`_normalize_fact`, `_run_insight_writes`,
+  session access modes), `src/rlm/trellis_mcp.py` (`call_tool`,
+  `truncate_result`, the addendum builder and its brace discipline),
+  `src/rlm/trellis_agent.py` (tool construction, gating, telemetry
+  payload, the `.format()` brace contract comment block).
+- `src/workers/rlm_job.ts` (`buildAgentArgs`/`buildAgentEnv` — pure,
+  unit-pinned), `src/config/index.ts` (validated config; AGENT_* bound
+  style), `src/config/mcp_servers.ts` (bounds discipline to mirror).
+- The installed rlms package (`rlm/environments/local_repl.py` — locate
+  with `python -c "import rlm, os; print(os.path.dirname(rlm.__file__))"`)
+  for the persistence/scaffold/exception semantics pinned in Appendix A.
+- Test patterns: `scripts/test_rlm_mcp.ts` + `scripts/test_rlm_mcp.py`
+  (fixture-driven Python drill with a Node runner),
+  `scripts/test_rlm_sandbox.ts` + `.py` (live write-path probes),
+  `scripts/fixture_mcp_server.py` (the only MCP server acceptance ever
+  configures).
 
 ## 6. Test strategy and acceptance
 
-Test first. No paid LLM calls and no external network access are
-permitted for Session 14 acceptance.
+Test first. No paid LLM calls and no external network in acceptance.
 
-Offline tests must cover:
+Offline (joins `npm test`, baseline 485):
 
-- the proxy allowlist mapping (pure helper): allowlisted path →
-  backend URL, non-allowlisted → rejection, no key material in any
-  returned structure;
-- existing `npm test` unchanged and green (485 baseline; grows only if
-  helpers land in the main tree — record either way);
-- `next build` and `eslint` passing in `src/frontend` (CI-enforced).
+- `rlm_job`: `--goal-id` forwarded when present, absent otherwise;
+  workspace env vars forwarded when configured, stripped when not.
+- config: workspace bounds validated with defaults and hard-cap
+  rejection.
 
-Live zero-LLM coverage (local stack; Compose):
+New live zero-paid drill `npm run test:rlm-workspace`
+(`scripts/test_rlm_workspace.ts` driving `scripts/test_rlm_workspace.py`
+against the fixture server):
 
-- the extended Compose integration: frontend root serves 200 with
-  expected markers; proxied `/api/retrieve` returns the seeded entity's
-  graph + provenance (proving key injection); a non-allowlisted proxy
-  path → 404; no fetched body contains the key value; the existing 10
-  assertions unchanged.
-- regression: every suite in the §2 list stays green, including
-  `test:rlm-mcp` (86) and `test:a2a` (46); `drill:scale` still closes
-  its gate.
+- capture fires from inside `call_tool`; stub shape and preview bound;
+  origin stamps present and unforgeable;
+- segment ids are uuid-shaped and FAIL `^[0-9a-f]{64}$` (structural
+  disjointness pin);
+- budget exhaustion raises with usage; `drop()` recovers;
+- gated-off runs: prompt byte-identical AND `call_tool` return
+  byte-identical to pre-Session-14;
+- direct-`LocalREPL` semantics pin against the installed rlms==0.1.3:
+  persistence across `execute_code`, scaffold restore leaves
+  `trellis_workspace` intact, rebind-vs-mutate on exception (in-place
+  mutation persists, rebinding is lost), underscore names do not
+  persist. An rlms upgrade that changes namespace semantics must fail
+  this drill loudly.
+
+Extend `npm run test:rlm-sandbox` with the hardening checks: malformed
+hash rejected (uppercase hex, 63 chars, uuid-shaped, `q_0001`);
+well-formed-but-unknown hash rejected with bounded message; real
+ingested hash still writes (and cleans up); bulk variant validates the
+deduped union once.
+
+The design record §11 step-1 paired-run behavioral probe (sequential
+multi-step task, workspace on/off, measuring repeated tool calls and
+end-of-run workspace well-formedness) is PAID and requires explicit
+owner approval — propose it with a cost estimate; do not run it
+unprompted. It is not an acceptance gate.
 
 Required close-out:
 
@@ -518,18 +536,18 @@ Required close-out:
  npm test
  npm run build
  npm run python:check
- (cd src/frontend && npm ci && npx eslint . && npm run build)
  docker compose --profile test config --quiet
  # Run the isolated zero-LLM Compose integration (unique project name).
+ npm run test:rlm-workspace
  npm run test:rlm-mcp
- npm run test:a2a
+ npm run test:rlm-sandbox
  npm run test:agent-loop
+ npm run test:a2a
  npm run drill:scale
  npm run test:repo-ingest
  npm run test:benchmark-hardening
  npm run test:entity-resolution
  npm run test:api-hardening
- npm run test:rlm-sandbox
  npm run test:belief-recovery
  npm run test:invalidation-sweep
  git diff --check
@@ -537,95 +555,82 @@ Required close-out:
 
 Update:
 
-- README (frontend build/deploy/env), `docs/operations/RUNBOOK.md`
-  (frontend operations), `.env.example` (new frontend variables),
-  `.github/workflows/ci.yml`.
-- `TRELLIS_ROADMAP.md`: mark 3.3 #5 fully done only after acceptance
-  (the license half closed July 6, 2026; this closes the frontend
-  half); add a full-dated §5 entry with exact commands/counts and any
-  defects found.
-- `HANDOFF.md`: regenerate for the next objective per §0 — the next
-  unstruck sequencing row is repository-scale extraction prerequisites
-  (scanner test/fixture exclusion plus a code-tuned extraction prompt
-  with generic-identifier suppression, per the recorded pilot
-  findings), unless something discovered this session should jump the
-  queue.
+- `TRELLIS_ROADMAP.md`: full-dated §5 entry with exact commands, counts,
+  and any defects found; record design-record §11 steps 1–2 as complete
+  only after acceptance.
+- `docs/architecture/WORKSPACE_AND_MODULES.md`: mark §11 steps 1–2 done
+  (dated), leaving steps 3–6 open.
+- README (workspace env vars + a short External tools note that results
+  are captured into the workspace when active), `.env.example`
+  (workspace bounds), `API_REFERENCE.md` only if a client-visible
+  contract changes (it should not — the SSE and queue contracts are
+  untouched).
+- `HANDOFF.md`: regenerate per §0. The next objective is owner-directed:
+  design-record step 3 (module registry + module #0), step 4 (workspace
+  lineage), or the deferred frontend — do not assume; ask via the PR or
+  pick up the owner's recorded direction.
 
 ## 7. Guardrails
 
-1. Never mutate an AST. The T13 hash preimage is pinned; `rederiveAstNodeId`
-   stays authoritative; nothing positional is ever persisted as identity.
-2. Never merge, rename, or delete Entity nodes. Equivalence stays an overlay
-   belief; semantic identity and `SAME_AS` behavior stay pinned.
+1. Never mutate an AST. The T13 hash preimage is pinned;
+   `rederiveAstNodeId` stays authoritative; nothing positional is ever
+   persisted as identity.
+2. Never merge, rename, or delete Entity nodes. Equivalence stays an
+   overlay belief.
 3. Preserve provenance on every semantic node and edge.
-   `write_derived_insight` remains the single agent write path, still
-   requiring live AST provenance. MCP output is research context and can
-   never be passed as `sourceNodeIds`; external content earns citability
-   only through the verified ingest path.
-4. The backend API key never reaches the browser: not via
-   `NEXT_PUBLIC_*`, not in client bundles, not in page props, not in
-   proxied response or error bodies. The proxy forwards an explicit
-   endpoint allowlist and nothing else — in particular the paid
-   endpoints (`/api/rlm-stream`, `/api/agent-stream`, `/a2a/v1`) and
-   `/metrics` stay unreachable through it unless the owner directs
-   otherwise.
+   `write_derived_insight` remains the single agent write path — after
+   this session it also enforces hash format and existence. Workspace
+   ids/content and MCP output can never be passed as `sourceNodeIds`;
+   external content earns citability only through the verified ingest
+   path.
+4. Tier 3 never satisfies the provenance protocol: an answer with zero
+   database tool calls emits `TRELLIS_PROTOCOL_VIOLATION` no matter how
+   many workspace or MCP operations occurred.
 5. Operator control is absolute for the RLM tool surface: servers,
-   URLs, transports, tool allowlists, timeouts, size caps, and
-   credential *references* come from `TRELLIS_MCP_SERVERS` only;
-   credential *values* come from named env vars resolved by the worker.
-   No inbound payload or model completion may alter any of it.
-   Credential values never appear in logs, labels, prompts,
-   serializations, or raised errors (the Session 12 redaction
-   guarantee).
-6. Every external interaction is bounded: per-call timeouts and size
-   caps hold over stdio and HTTP; connects are bounded; A2A task
-   records keep their TTL; the frontend proxy must pass through the
-   backend's own limits, not add unbounded buffering or retries.
-7. Validate at every boundary: the registry crosses identical Zod and
-   Python validators; inbound A2A JSON-RPC crosses its Zod schemas; all
-   LLM calls remain inside BullMQ workers or the RLM process; the
-   orchestrator stays tool-free; the `AGENT_ORACLE_ENABLED=false` and
-   `TRELLIS_A2A_ENABLED=false` defaults stay pinned.
-8. Default to zero paid work and zero external network in acceptance.
-   The frontend work is zero-LLM by construction — keep it that way
-   (the proxy never exposes paid endpoints; the Compose integration
-   keeps its no-`OPENAI_API_KEY` assertion; fixture servers remain the
-   only MCP servers acceptance configures).
-9. Do not break existing consumers: the backend API contract
-   (`API_REFERENCE.md`) is untouched; the backend image and its Compose
-   services keep their shape (the frontend gets its OWN image);
-   pre-Session-12 `TRELLIS_MCP_SERVERS` values parse identically, the
-   `/api/agent-stream` SSE contract and the A2A v1.0 surface are
-   untouched, and pre-Session-9 `rlm_queue` payloads still process.
+   tools, bounds, and credential references come from validated config
+   only; no inbound payload or model completion may alter any of it.
+   The workspace adds no such path. L1 (runtime config mutation) and
+   L2 (runtime code hot-patching) remain forbidden.
+6. Every external interaction is bounded; workspace writes are bounded
+   by validated config and raise on budget — never silent truncation of
+   stored state.
+7. Validate at every boundary: workspace bounds cross Zod and Python
+   validators; all LLM calls stay inside BullMQ workers or the RLM
+   process; the orchestrator stays tool-free; `AGENT_ORACLE_ENABLED`
+   and `TRELLIS_A2A_ENABLED` defaults stay pinned false.
+8. Default to zero paid work and zero external network in acceptance;
+   the fixture server remains the only MCP server acceptance
+   configures; the paired-run probe is owner-gated.
+9. Do not break existing consumers: with no workspace attached,
+   `call_tool` returns and the system prompt are byte-identical;
+   pre-Session-9 `rlm_queue` payloads still process; the
+   `/api/agent-stream` SSE contract, the A2A v1.0 surface, and the
+   backend API contract are untouched; the backend API key still never
+   reaches any client bundle.
 10. Respect the rlms prompt contract: extend `RLM_SYSTEM_PROMPT`, never
     replace it; no literal curly braces in anything rlms formats
-    (double them); the generated MCP addendum stays structurally
-    brace-free and never carries URLs or credentials.
-11. Follow the T16 observability house style. Queries, goals, message
-    content, artifacts, tool arguments, results, server commands, URLs,
-    credentials, API keys, paths, hashes, and entity names never become
-    metric label values or log content.
-12. Keep API and worker processes split; use project-scoped Compose
-    commands; never remove another stack's volumes; fixtures and drills
-    clean up only token-scoped or pre-snapshotted state.
+    (addendum examples use `dict(...)` syntax); no rlms library
+    modifications — the workspace is injected `custom_tools` state.
+11. Follow the T16 observability house style: workspace content,
+    queries, tool arguments/results, hashes, and credentials never
+    become metric label values or log content; telemetry carries counts
+    only.
+12. Keep API and worker processes split; project-scoped Compose
+    commands; fixtures and drills clean up only token-scoped or
+    pre-snapshotted state.
 13. Ship one feature branch and one PR to `master`, plain engineering
-    prose, with no AI attribution or generated-by trailers. Regenerate this
-    file in the same PR.
+    prose, no AI attribution or generated-by trailers. Regenerate this
+    file in the same PR. RLM expands exclusively to Recursive Language
+    Model.
 
 ## 8. Explicit exclusions
 
-Do not include: new frontend features, redesigns, or component work
-beyond what the proxy/build requires (the page's function stays
-exactly: search an entity, view graph + provenance); authentication FOR
-the frontend itself (user logins, sessions — the page stays as open as
-the operator's network makes it; only the backend-key handling is in
-scope); exposing `/api/rlm-stream`, `/api/agent-stream`, `/a2a/v1`, or
-`/metrics` through the proxy; server-side rendering of graph data or
-any backend contract change; frontend Prometheus metrics; E2E browser
-automation (the Compose proof is HTTP-level); MCP or A2A work of any
-kind (the recorded 3.3 #8 scope is exhausted — new tools, OAuth flows,
-Trellis as an MCP server or A2A client are new owner directions, not
-remainders); repository-extraction prerequisites (the next sequencing
-row); `ASTRef`/`EVIDENCED_BY` migration (gate closed at 286); T13
-re-hashing; rlms library modifications; paid LLM calls or external
-network access as acceptance checks.
+Do not include: frontend work of any kind (deferred, unscheduled —
+scope preserved in roadmap §3.3 #5); workspace lineage / Redis parking
+(design record §11 step 4); the promotion path (step 5); the module
+registry or module #0 (step 3); the first flywheel turn (step 6);
+orchestrator tools or transcript changes; rlms `compaction` enablement;
+new MCP servers, transports, or OAuth flows; A2A changes; repository-
+extraction prerequisites; `ASTRef`/`EVIDENCED_BY` migration (gate closed
+at 286); T13 re-hashing; rlms library modifications; paid LLM calls or
+external network access as acceptance checks.

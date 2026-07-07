@@ -12,7 +12,20 @@ bytes:
 2. **Semantic layer:** asynchronous workers extract Neo4j entities and
    relationships whose `sourceNodeIds` point back to AST hashes.
 3. **Async/RLM layer:** Redis/BullMQ isolates retryable LLM work, and the
-   Python RLM traverses both stores through provenance-aware tools.
+   Python RLM (Recursive Language Model) traverses both stores through
+   provenance-aware tools, with `write_derived_insight` as the single
+   provenance-required write path.
+4. **Agency layer:** an agentic goal loop decomposes one goal into many
+   RLM runs behind hard bounds (a tool-free orchestrator plans; only the
+   RLM touches data); external agents can dispatch goals over A2A
+   (opt-in), and the RLM can call operator-configured external tools
+   over MCP — whose results are research context only, never provenance.
+
+This list is a high-level summary. The living architectural mental model
+— the single source of truth a session loads first — is `HANDOFF.md` §1;
+forward design lives in `docs/architecture/WORKSPACE_AND_MODULES.md`, and
+canonical terminology in `docs/GLOSSARY.md` (authority: code > glossary >
+prose).
 
 ## Prerequisites
 
@@ -397,6 +410,7 @@ npm run test:benchmark-hardening
 npm run test:repo-ingest
 npm run test:agent-loop
 npm run test:rlm-mcp
+npm run test:a2a
 ```
 
 See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts.
