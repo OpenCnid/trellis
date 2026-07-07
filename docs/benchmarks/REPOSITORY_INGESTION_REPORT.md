@@ -106,14 +106,59 @@ migration shipped.
 ## 4. Cost
 
 Zero paid LLM or embedding calls in every Session 8 acceptance command.
-The repository CLI's `--extract changed` path exists but was exercised
-only with deterministic unit fixtures and budget-rejection tests. A real
-extraction run over a repository requires owner approval after the CLI
-prints its exact block count; estimate one paid chat completion plus one
-embedding call per block from the committed benchmark telemetry
-(`benchmark_results.json` token counts) before approving.
+The repository CLI's `--extract changed` path was exercised in
+acceptance only with deterministic unit fixtures and budget-rejection
+tests. A real extraction run over a repository requires owner approval
+after the CLI prints its exact block count; estimate one paid chat
+completion plus one embedding call per block from committed telemetry
+before approving. One such owner-approved pilot ran after the session's
+acceptance closed — see §5.
 
-## 5. Verification summary
+## 5. Owner-approved extraction pilot (post-acceptance, July 6, 2026)
+
+After acceptance, the owner approved one bounded real-extraction pilot:
+`repo:ingest --root src/core/graph --repo-key trellis-graph-pilot
+--extract changed --max-blocks 150 --confirm-extraction` (22 TypeScript
+files, 112 blocks, budget 150).
+
+**Pipeline:** 112/112 extraction jobs completed with zero failures, zero
+dropped actions, and zero unresolved endpoints in ~6 minutes.
+**Spend:** 112 `gpt-5.4-2026-03-05` completions (57,323 input / 46,862
+output tokens) and 112 `text-embedding-3-small` calls (28,618 tokens).
+Output tokens nearly matched input, so extraction cost is
+completion-heavy; a full self-ingest (2,532 blocks) extrapolates to
+roughly 1.3M input + 1.1M output tokens.
+
+**Graph produced:** 340 entities and 318 relationships carrying pilot
+provenance. Genuine API-level facts appeared
+(`generatealiascandidates --[constrains_by]-> entity kind`,
+`globalentityid --[uses]-> sha-256 hash`), alongside three problems that
+are prerequisites for any repository-scale extraction:
+
+1. **Test-fixture contamination.** `alias_candidates.test.ts` fixture
+   strings produced `globex corporation --[acquired]-> initech`, and
+   name-based entity identity merged those onto the pre-existing demo
+   entities — fictional facts from test files gain real-looking
+   provenance. The scanner needs a test/fixture exclusion before any
+   full-repo `changed` run.
+2. **Generic-identifier hubs.** The top pilot entity was literally
+   `entity` (14 sources), with `name`, `id`, and `action` close behind.
+   At repo scale these become mega-hubs — and a spurious fast path to
+   the 3.3 #4 migration trigger.
+3. **Prompt mismatch.** The extraction prompt targets "macro-level
+   business entities"; on source code it improvises
+   (`organization --[is_default_type_for]-> organization`). A code-tuned
+   extraction prompt with generic-identifier suppression is needed.
+
+**Cleanup:** the pilot repo key was tombstoned through a second snapshot
+(zero accepted files → 22 tombstones) and the invalidation worker swept
+the globally dead code-block hashes, quarantining the pilot-derived
+facts. Per the conservative mixed-provenance rule, pre-existing demo
+entities that had absorbed pilot provenance (e.g. `initech`) are
+contested until next re-derived from live bytes — the standard lazy
+recovery path.
+
+## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).
 - `npm run build`, `npm run python:check`,

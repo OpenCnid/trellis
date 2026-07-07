@@ -633,3 +633,31 @@ frontend work.
 **Still open:** T13's migration-dependent hash preimage; conditional 3.3 #4
 migration behind its unchanged trigger; frontend deployment and community
 readiness remainder (3.3 #5 residue) — the Session 9 target.
+
+### July 6, 2026 — Owner-approved extraction pilot on real code (post-Session-8)
+
+With Session 8 acceptance closed, the owner approved one bounded paid pilot:
+`repo:ingest --root src/core/graph --repo-key trellis-graph-pilot --extract
+changed --max-blocks 150 --confirm-extraction` — 22 TypeScript files, 112
+blocks. The pipeline was flawless (112/112 jobs, zero failures, zero
+dropped/unresolved actions; 57,323 input / 46,862 output `gpt-5.4` tokens
+plus 28,618 embedding tokens), producing 340 entities and 318 relationships
+with pilot provenance, including genuine API-level facts.
+
+**Findings recorded as prerequisites for repository-scale extraction:**
+(1) *test-fixture contamination* — fixture strings in `alias_candidates.test.ts`
+produced `globex corporation --[acquired]-> initech` and name-based identity
+merged it onto the pre-existing demo entities, so the scanner needs a
+test/fixture exclusion; (2) *generic-identifier hubs* — `entity` (14
+sources), `name`, `id`, `action` will become mega-hubs at repo scale and a
+spurious fast path to the 3.3 #4 trigger; (3) *prompt mismatch* — the
+business-tuned extraction prompt improvises on source code, so a code-tuned
+prompt with generic-identifier suppression is needed. These are the natural
+Session 10 objective after the frontend session; details in
+`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5.
+
+The pilot was then cleaned up through the shipped deletion protocol itself:
+a second snapshot against an empty tree tombstoned all 22 documents and the
+real invalidation worker swept the globally dead code hashes, quarantining
+the pilot-derived facts (mixed-provenance demo entities like `initech` stay
+conservatively contested until next re-derived — the standard lazy recovery).
