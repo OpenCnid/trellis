@@ -2,7 +2,9 @@ import express from 'express';
 import { parseMarkdownToAST, parseUnstructuredJSONToAST, ASTNode } from '../core/ast/parser.js';
 import { pgPool, neo4jDriver } from '../config/db.js';
 import { config } from '../config/index.js';
-import { extractionQueue, rlmQueue, invalidationQueue } from '../workers/queue.js';
+import { extractionQueue, rlmQueue, invalidationQueue, agentQueue } from '../workers/queue.js';
+import { OracleScriptSchema, type OracleScript } from '../core/agent/oracle.js';
+import { isTerminalAgentEvent } from '../core/agent/goal_loop.js';
 import multer from 'multer';
 import { execFile } from 'child_process';
 import util from 'util';
@@ -389,6 +391,126 @@ app.get('/api/rlm-stream', async (req, res) => {
 
   // 'close' on the response fires for both client aborts and normal ends,
   // so the gate slot and the Redis subscriber are always reclaimed.
+  res.on('close', () => {
+    release();
+    try {
+      redisSubscriber.unsubscribe(channel).catch(() => {});
+      redisSubscriber.quit().catch(() => {});
+    } catch (e) {
+      // ignore
+    }
+  });
+});
+
+// Admission control for agentic goals (Session 9): a goal drives one or
+// more RLM runs plus orchestrator completions, so live goal streams and
+// the agent_queue backlog are both bounded, mirroring /api/rlm-stream.
+const agentStreamGate = new StreamGate(config.agent.maxConcurrentGoals);
+
+app.get('/api/agent-stream', async (req, res) => {
+  const goal = req.query.goal;
+  if (!goal || typeof goal !== 'string') {
+    return res.status(400).send('Expected goal parameter');
+  }
+
+  // Zero-LLM dress-rehearsal scripts are an explicit opt-in surface;
+  // production deployments only accept goals.
+  let oracle: OracleScript | undefined;
+  if (typeof req.query.oracle === 'string') {
+    if (!config.agent.oracleEnabled) {
+      return res.status(400).json({ error: 'Oracle scripts are disabled (set AGENT_ORACLE_ENABLED=true for drills)' });
+    }
+    let parsedOracle: unknown;
+    try {
+      parsedOracle = JSON.parse(req.query.oracle);
+    } catch {
+      return res.status(400).json({ error: 'oracle parameter is not valid JSON' });
+    }
+    const validated = OracleScriptSchema.safeParse(parsedOracle);
+    if (!validated.success) {
+      return res.status(400).json({ error: 'oracle parameter failed validation' });
+    }
+    oracle = validated.data;
+  }
+
+  const release = agentStreamGate.tryAcquire();
+  if (!release) {
+    return res.status(429).json({
+      error: `Too many concurrent agent goals (limit ${agentStreamGate.limit}); retry later.`,
+    });
+  }
+
+  let queueDepth: number;
+  try {
+    queueDepth = await agentQueue.getWaitingCount();
+  } catch (err) {
+    release();
+    requestLogger(res).error({
+      event: 'agent_stream.queue_depth_unavailable',
+      queue: 'agent_queue',
+      err: err instanceof Error ? err : new Error(String(err)),
+    });
+    return res.status(503).json({ error: 'Queue unavailable; retry later.' });
+  }
+  if (queueDepth >= config.agent.maxQueueDepth) {
+    release();
+    return res.status(429).json({
+      error: `Agent queue is full (${queueDepth} waiting, limit ${config.agent.maxQueueDepth}); retry later.`,
+    });
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  res.flushHeaders();
+
+  const goalId = crypto.randomUUID();
+  const redisSubscriber = new IORedis({
+    host: config.redis.host,
+    port: config.redis.port,
+  });
+
+  const channel = `agent-stream:${goalId}`;
+
+  redisSubscriber.subscribe(channel, (err) => {
+    if (err) {
+      // The goal text is deliberately never logged.
+      requestLogger(res).error({
+        event: 'agent_stream.subscribe_failed',
+        goalId,
+        err,
+      });
+      res.end();
+      return;
+    }
+
+    // Subscribe-then-enqueue, same as the RLM stream: a failed enqueue
+    // must reach the client instead of hanging the stream forever.
+    agentQueue.add('agent_goal', { goal, goalId, ...(oracle && { oracle }) }).catch(enqueueErr => {
+      requestLogger(res).error({
+        event: 'agent_stream.enqueue_failed',
+        queue: 'agent_queue',
+        goalId,
+        err: enqueueErr instanceof Error ? enqueueErr : new Error(String(enqueueErr)),
+      });
+      res.write(`data: ${JSON.stringify({ type: 'error', content: 'Failed to enqueue agent goal; retry later.' })}\n\n`);
+      res.end();
+    });
+  });
+
+  redisSubscriber.on('message', (subChannel, message) => {
+    if (subChannel === channel) {
+      res.write(`data: ${message}\n\n`);
+      try {
+        if (isTerminalAgentEvent(JSON.parse(message))) res.end();
+      } catch {
+        // A malformed event is forwarded as-is; the stream stays open.
+      }
+    }
+  });
+
   res.on('close', () => {
     release();
     try {

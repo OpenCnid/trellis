@@ -66,6 +66,29 @@ const EnvSchema = z.object({
   RLM_MAX_CONCURRENT_STREAMS: z.coerce.number().int().positive().default(4),
   RLM_QUEUE_MAX_DEPTH: z.coerce.number().int().positive().default(32),
 
+  // Agentic orchestration bounds (Session 9). Every agentic goal is
+  // hard-bounded: decision rounds per goal, total dispatched tasks per
+  // goal, tasks per decision batch (run concurrently), and the per-task
+  // RLM iteration ceiling forwarded as --max-iterations. Defaults are
+  // deliberately small — a goal that trips a bound ends as a typed,
+  // streamed failure, never an unbounded loop.
+  AGENT_MAX_ITERATIONS_PER_GOAL: z.coerce.number().int().positive().max(9).default(4),
+  AGENT_MAX_TASKS_PER_GOAL: z.coerce.number().int().positive().max(9).default(8),
+  AGENT_MAX_CONCURRENT_TASKS: z.coerce.number().int().positive().max(9).default(2),
+  AGENT_TASK_MAX_ITERATIONS: z.coerce.number().int().positive().max(9).default(5),
+
+  // /api/agent-stream admission (mirrors the RLM stream protection):
+  // live goal streams and agent_queue backlog are both capped; requests
+  // beyond either limit receive 429.
+  AGENT_MAX_CONCURRENT_GOALS: z.coerce.number().int().positive().default(2),
+  AGENT_QUEUE_MAX_DEPTH: z.coerce.number().int().positive().default(8),
+
+  // Zero-LLM dress-rehearsal switch: when 'true', /api/agent-stream
+  // accepts an `oracle` script (scripted decisions + stubbed tasks, the
+  // resolution-oracle precedent) so the loop is drillable with zero paid
+  // work. Off by default so the production surface only accepts goals.
+  AGENT_ORACLE_ENABLED: z.enum(['true', 'false']).default('false'),
+
   // Ingestion size limits (T6): raw markdown body and PDF upload caps.
   INGEST_MAX_BODY_MB: z.coerce.number().positive().default(5),
   INGEST_MAX_UPLOAD_MB: z.coerce.number().positive().default(25),
@@ -137,6 +160,15 @@ export const config = {
   rlmStream: {
     maxConcurrentStreams: env.RLM_MAX_CONCURRENT_STREAMS,
     maxQueueDepth: env.RLM_QUEUE_MAX_DEPTH,
+  },
+  agent: {
+    maxIterationsPerGoal: env.AGENT_MAX_ITERATIONS_PER_GOAL,
+    maxTasksPerGoal: env.AGENT_MAX_TASKS_PER_GOAL,
+    maxConcurrentTasks: env.AGENT_MAX_CONCURRENT_TASKS,
+    taskMaxIterations: env.AGENT_TASK_MAX_ITERATIONS,
+    maxConcurrentGoals: env.AGENT_MAX_CONCURRENT_GOALS,
+    maxQueueDepth: env.AGENT_QUEUE_MAX_DEPTH,
+    oracleEnabled: env.AGENT_ORACLE_ENABLED === 'true',
   },
   ingest: {
     maxBodyMb: env.INGEST_MAX_BODY_MB,

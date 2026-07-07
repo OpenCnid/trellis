@@ -163,10 +163,27 @@ def main():
             # answer has no provenance and the runner should re-dispatch.
             print("TRELLIS_PROTOCOL_VIOLATION: zero database tool calls — answer has no provenance.", flush=True)
 
+        # Session 9: one machine-readable result envelope for the
+        # orchestrator, alongside the prose FINAL_ANSWER convention the
+        # benchmark client scrapes. The answer is the text after the last
+        # FINAL_ANSWER marker (matching the benchmark client's
+        # lastIndexOf extraction); a zero-tool-call answer is reported as
+        # a protocol violation so the goal loop can react to it.
+        marker = "FINAL_ANSWER:"
+        answer = response.rsplit(marker, 1)[-1].strip() if marker in response else response.strip()
+        result_payload = {
+            "status": "protocol_violation" if get_tool_call_count() == 0 else "ok",
+            "answer": answer,
+            "toolCalls": get_tool_call_count(),
+        }
+        print(f"TRELLIS_RESULT: {json.dumps(result_payload)}", flush=True)
+
     except BaseException as e:
         import traceback
         print(f"RLM Execution Error: {type(e).__name__} - {str(e)}", flush=True)
         traceback.print_exc()
+        result_payload = {"status": "error", "answer": None, "toolCalls": get_tool_call_count()}
+        print(f"TRELLIS_RESULT: {json.dumps(result_payload)}", flush=True)
         exit_code = 1
     finally:
         neo4j_tool.close()

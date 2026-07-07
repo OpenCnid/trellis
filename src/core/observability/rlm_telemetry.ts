@@ -9,6 +9,8 @@
 // thrown — telemetry problems must not corrupt the client stream or turn
 // a successful RLM answer into a failure.
 
+import { BoundedLineScanner } from './line_scanner.js';
+
 const TELEMETRY_PREFIX = 'TRELLIS_TELEMETRY:';
 
 // One telemetry payload is well under 8 KiB today; 64 KiB leaves room
@@ -65,52 +67,29 @@ export function parseTelemetryLine(line: string): TelemetryEvent {
 /**
  * Bounded incremental line scanner for the RLM stdout stream. feed()
  * with each chunk as it arrives; flush() once at process exit for a
- * final line without a trailing newline.
+ * final line without a trailing newline. The buffering itself lives in
+ * the shared BoundedLineScanner (line_scanner.ts), which the Session 9
+ * result-envelope scanner (rlm_result.ts) reuses.
  */
 export class RlmTelemetryScanner {
-  private buffer = '';
-  /** Set when the current (still unterminated) line already overflowed. */
-  private discardingOversizedLine = false;
+  private readonly lines: BoundedLineScanner;
 
   constructor(
-    private readonly onEvent: (event: TelemetryEvent) => void,
-    private readonly maxLineBytes: number = DEFAULT_MAX_LINE_BYTES
-  ) {}
+    onEvent: (event: TelemetryEvent) => void,
+    maxLineBytes: number = DEFAULT_MAX_LINE_BYTES
+  ) {
+    this.lines = new BoundedLineScanner(line => {
+      if (!line.startsWith(TELEMETRY_PREFIX)) return;
+      onEvent(parseTelemetryLine(line));
+    }, maxLineBytes);
+  }
 
   feed(chunk: string): void {
-    this.buffer += chunk;
-    let newlineIndex: number;
-    while ((newlineIndex = this.buffer.indexOf('\n')) !== -1) {
-      const line = this.buffer.slice(0, newlineIndex);
-      this.buffer = this.buffer.slice(newlineIndex + 1);
-      if (this.discardingOversizedLine) {
-        // The tail of a line whose head was already dropped.
-        this.discardingOversizedLine = false;
-        continue;
-      }
-      this.scanLine(line);
-    }
-    if (this.buffer.length > this.maxLineBytes) {
-      // Unterminated line beyond any plausible telemetry record: drop it
-      // now so a chatty agent cannot grow the buffer without bound, and
-      // remember to discard the rest of the line when it finally ends.
-      this.buffer = '';
-      this.discardingOversizedLine = true;
-    }
+    this.lines.feed(chunk);
   }
 
   /** Handles a final partial line at stream end. */
   flush(): void {
-    if (!this.discardingOversizedLine && this.buffer.length > 0) {
-      this.scanLine(this.buffer);
-    }
-    this.buffer = '';
-    this.discardingOversizedLine = false;
-  }
-
-  private scanLine(line: string): void {
-    const trimmed = line.replace(/\r$/, '');
-    if (!trimmed.startsWith(TELEMETRY_PREFIX)) return;
-    this.onEvent(parseTelemetryLine(trimmed));
+    this.lines.flush();
   }
 }

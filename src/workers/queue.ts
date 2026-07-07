@@ -36,6 +36,13 @@ export const verificationQueue = new Queue('verification_queue', queueOptions);
 // Alias adjudication is idempotent (verdict edges MERGE on the pair), so
 // the standard retrying defaults apply.
 export const resolutionQueue = new Queue('resolution_queue', queueOptions);
+// Agentic goals (Session 9) follow the rlm_queue interactive precedent:
+// an interrupted goal streams to a live SSE client and must not silently
+// re-run paid orchestrator/sub-agent work with no listener.
+export const agentQueue = new Queue('agent_queue', {
+  connection,
+  defaultJobOptions: buildInteractiveJobOptions(config.queueRetention),
+});
 
 installShutdownSignalHandlers();
 shutdownCoordinator.register('bullmq.queues', 40, async () => {
@@ -46,6 +53,7 @@ shutdownCoordinator.register('bullmq.queues', 40, async () => {
     invalidationQueue.close(),
     verificationQueue.close(),
     resolutionQueue.close(),
+    agentQueue.close(),
   ]);
   await connection.quit();
 });
