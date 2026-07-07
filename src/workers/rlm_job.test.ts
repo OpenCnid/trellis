@@ -108,6 +108,27 @@ describe('buildAgentEnv', () => {
     const env = buildAgentEnv({ TRELLIS_MCP_SERVERS: '[]' }, CFG);
     expect('TRELLIS_MCP_SERVERS' in env).toBe(false);
   });
+
+  it('forwards exactly the resolved credential variables (Session 12)', () => {
+    const env = buildAgentEnv(
+      { PATH: '/bin' },
+      { ...CFG, mcpCredentialEnv: { MCP_REMOTE_TOKEN: 'secret-value' } }
+    );
+    expect(env.MCP_REMOTE_TOKEN).toBe('secret-value');
+  });
+
+  it('resolved credentials win over a stale inherited value of the same name', () => {
+    const env = buildAgentEnv(
+      { MCP_REMOTE_TOKEN: 'stale' },
+      { ...CFG, mcpCredentialEnv: { MCP_REMOTE_TOKEN: 'fresh' } }
+    );
+    expect(env.MCP_REMOTE_TOKEN).toBe('fresh');
+  });
+
+  it('adds nothing when the registry names no credentials', () => {
+    const env = buildAgentEnv({ PATH: '/bin' }, { ...CFG, mcpCredentialEnv: {} });
+    expect(Object.keys(env)).not.toContain('MCP_REMOTE_TOKEN');
+  });
 });
 
 describe('buildAgentArgs', () => {

@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import path from 'node:path';
 import { config } from '../src/config/index.js';
 import { neo4jDriver, pgPool } from '../src/config/db.js';
+import { parseMcpServers, serializeMcpServers } from '../src/config/mcp_servers.js';
 
 const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:3000';
 const workerMetricsBaseUrl = process.env.WORKER_METRICS_BASE_URL ?? 'http://127.0.0.1:9464';
@@ -223,6 +226,55 @@ async function main(): Promise<void> {
   assert.equal(healthAfter.status, 200);
   assert.deepEqual(await healthAfter.json(), { status: 'ok', scope: 'liveness' });
   console.log('[PASS] /healthz contract unchanged after metrics rollout');
+
+  // --- Session 12: the containerized MCP tool-server pattern ---
+  // The mcp-fixture service runs on the project network with no host
+  // port; the registry is built with the production Zod helpers and the
+  // credential travels only as an env var reference. Set MCP_FIXTURE_URL
+  // (the Compose test profile does) to exercise this section.
+  const mcpFixtureUrl = process.env.MCP_FIXTURE_URL;
+  if (mcpFixtureUrl) {
+    const registry = parseMcpServers(JSON.stringify([
+      {
+        transport: 'http',
+        name: 'composefixture',
+        url: mcpFixtureUrl,
+        tools: ['web_search'],
+        timeoutMs: 15_000,
+        auth: { kind: 'bearer', valueEnv: 'MCP_FIXTURE_TOKEN' },
+      },
+    ]));
+    const probe = path.resolve('scripts/compose_mcp_probe.py');
+    const probeDeadline = Date.now() + 60_000;
+    let probeOutput = '';
+    let probeCode = -1;
+    // The fixture service has no health check; retry while it boots.
+    for (;;) {
+      const result = await new Promise<{ code: number; output: string }>((resolve, reject) => {
+        const child = spawn(config.python.executable, [probe], {
+          env: {
+            ...process.env,
+            TRELLIS_MCP_SERVERS: serializeMcpServers(registry)!,
+            PYTHONUNBUFFERED: '1',
+          },
+        });
+        let output = '';
+        child.stdout.on('data', chunk => { output += chunk.toString(); });
+        child.stderr.on('data', chunk => { output += chunk.toString(); });
+        child.on('error', reject);
+        child.on('close', code => resolve({ code: code ?? 1, output }));
+      });
+      probeCode = result.code;
+      probeOutput = result.output;
+      if (probeCode === 0 || Date.now() > probeDeadline) break;
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+    assert.equal(probeCode, 0, `MCP probe failed:\n${probeOutput}`);
+    assert.ok(probeOutput.includes('COMPOSE_MCP_PROBE_OK'), `unexpected probe output:\n${probeOutput}`);
+    console.log('[PASS] containerized MCP fixture reachable over Streamable HTTP with env-referenced credential');
+  } else {
+    console.log('[SKIP] MCP_FIXTURE_URL unset — containerized MCP fixture check skipped');
+  }
 }
 
 void main()

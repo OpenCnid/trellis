@@ -2,7 +2,7 @@
 
 *Generated from a code-led review of the repository (July 4, 2026). File and line references point at the current state of `master`-derived code in this working tree.*
 
-*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), Session 7's semantic-provenance scale gate, Session 8 whole-codebase ingestion (3.3 #6, including the measured Entity.name merge index), Session 9's agentic orchestration loop (3.3 #7), Session 10's MCP tool surface for the RLM sub-agent (3.3 #8 first slice), and Session 11's A2A server surface over the goal loop (3.3 #8 second slice) are complete and verified. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds, and Session 8's post-index re-measurement kept the gate closed. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
+*Status: Foundations, update/invalidation correctness, belief verification, Session 3 deployment/CI readiness, Session 4 structured logging/metrics (T16), Session 5 entity resolution (3.3 #2), Session 6 benchmark maturity (3.3 #3), Session 7's semantic-provenance scale gate, Session 8 whole-codebase ingestion (3.3 #6, including the measured Entity.name merge index), Session 9's agentic orchestration loop (3.3 #7), Session 10's MCP tool surface for the RLM sub-agent (3.3 #8 first slice), Session 11's A2A server surface over the goal loop (3.3 #8 second slice), and Session 12's remote MCP transports with the containerized tool-server pattern (3.3 #8 third slice, closing the item's recorded scope) are complete and verified. The Session 7 measurements did not justify a storage migration; item 3.3 #4 remains open behind explicit observed thresholds, and Session 8's post-index re-measurement kept the gate closed. Every short- and medium-term roadmap item is closed. See §5 Progress Log for what was fixed, what was found along the way, and what remains open.*
 
 ---
 
@@ -178,7 +178,7 @@ Ordered roughly by severity.
 
 7. ~~**Agentic orchestration loop (owner-directed, July 6, 2026).**~~ **Done (Session 9, July 7, 2026):** `GET /api/agent-stream` accepts one goal; the `agent_queue` worker runs an orchestrator (same LLM, planner system prompt, plain structured chat completions through the T8 boundary — never an rlms REPL) whose Zod-validated decisions dispatch single-task RLM runs as ordinary `rlm_queue` jobs, observe their new `TRELLIS_RESULT` envelopes, and iterate until finish/fail or a hard bound trips (`AGENT_MAX_ITERATIONS_PER_GOAL`/`AGENT_MAX_TASKS_PER_GOAL`/`AGENT_MAX_CONCURRENT_TASKS`/`AGENT_TASK_MAX_ITERATIONS`, all single-digit-capped). Task failures and protocol violations are observations for the next decision; every other exit is a typed streamed failure. The orchestrator never writes to the graph; acceptance was zero-LLM (oracle decisions + stubbed tasks over the real queues, pub/sub, and API — `npm run test:agent-loop`). See §5. The original direction follows. Trellis must be able to work agentically: an external loop that accepts a goal, decomposes it into tasks, and mediates execution until the goal completes or a bound is hit. The loop is driven by the same LLM under a different (orchestrator) system prompt — plain structured chat completions crossing the T8 `parseLlmResponse` boundary, never a second REPL (the rlms `custom_system_prompt` replaces the REPL protocol prompt, so the orchestrator persona must not be routed through rlms). The RLM becomes a reusable single-task sub-agent: one `rlm_queue` job per task, one process per run exactly as today, so a goal can dispatch many RLM runs and aggregate their `FINAL_ANSWER:` results and `TRELLIS_TELEMETRY:` spend. Hard per-goal bounds on orchestrator iterations, dispatched tasks, and tokens; all LLM calls stay inside workers; the orchestrator itself never writes to the graph — `write_derived_insight` remains the single agent write path. Zero-LLM acceptance via a deterministic oracle planner plus stubbed task execution over the real queue/stream plumbing. Scheduled as Session 9; see §4 and `HANDOFF.md`.
 
-8. **External tool integration for the RLM sub-agent (owner-directed, July 7, 2026).** **First slice — the MCP client surface — done (Session 10, July 7, 2026):** the RLM gains an operator-configured stdio MCP client (`TRELLIS_MCP_SERVERS` → `src/rlm/trellis_mcp.py`, injected as `trellis_mcp` via `custom_tools`), with allowlist-before-I/O enforcement, per-call timeouts, size-capped results, a separate `mcp_calls` telemetry counter that never satisfies the database-provenance requirement, and zero-paid acceptance against a local deterministic fixture server (`npm run test:rlm-mcp`). See §5. **Second slice — the A2A server surface — done (Session 11, July 7, 2026):** Trellis serves the Agent2Agent protocol (spec v1.0.0, JSON-RPC binding) over the existing goal loop — `TRELLIS_A2A_ENABLED` (default off, byte-identical API when unset) mounts the well-known Agent Card and one JSON-RPC endpoint whose `SendMessage`/`SendStreamingMessage`/`GetTask`/`CancelTask` dispatch goals through the same admission gates and per-goal bounds as `/api/agent-stream`, with TTL-bounded Redis task records and zero-paid acceptance (`npm run test:a2a`). See §5. **The item stays open** for the recorded continuation: MCP tool-surface expansion (remote/HTTP transports and their auth story, containerized tool servers) — sequencing row 1. The original direction follows. With the agentic loop in place (3.3 #7), the sub-agent's world is still exactly two injected database tools — it can decompose goals but every task bottoms out in graph/AST lookups. The owner directed that Trellis now gain external tools, **MCP (Model Context Protocol) first**, with web search as the first concrete tool and A2A (agent-to-agent) interoperability as a follow-on direction across future sessions. The extension point already exists: `trellis_agent.py` injects tools via rlms `custom_tools`, and `trellis_tools.py` shows the wrapper discipline (JSON-string returns, tool-call counting, exceptions that surface real tracebacks into the REPL). Hard invariants: MCP servers and their tool allowlists come from operator-validated configuration only — never from job payloads and never chosen freely by the model; MCP calls do NOT satisfy the database-provenance requirement (`TRELLIS_PROTOCOL_VIOLATION` stays keyed to database tool calls) and MCP output can never be passed as `sourceNodeIds` — external content earns citability only by round-tripping through the verified ingest path to become content-addressed AST bytes; responses are size-capped and time-bounded; acceptance is zero-paid against a local deterministic fixture MCP server. Scheduled as Session 10; see §4 and `HANDOFF.md`.
+8. **External tool integration for the RLM sub-agent (owner-directed, July 7, 2026).** **First slice — the MCP client surface — done (Session 10, July 7, 2026):** the RLM gains an operator-configured stdio MCP client (`TRELLIS_MCP_SERVERS` → `src/rlm/trellis_mcp.py`, injected as `trellis_mcp` via `custom_tools`), with allowlist-before-I/O enforcement, per-call timeouts, size-capped results, a separate `mcp_calls` telemetry counter that never satisfies the database-provenance requirement, and zero-paid acceptance against a local deterministic fixture server (`npm run test:rlm-mcp`). See §5. **Second slice — the A2A server surface — done (Session 11, July 7, 2026):** Trellis serves the Agent2Agent protocol (spec v1.0.0, JSON-RPC binding) over the existing goal loop — `TRELLIS_A2A_ENABLED` (default off, byte-identical API when unset) mounts the well-known Agent Card and one JSON-RPC endpoint whose `SendMessage`/`SendStreamingMessage`/`GetTask`/`CancelTask` dispatch goals through the same admission gates and per-goal bounds as `/api/agent-stream`, with TTL-bounded Redis task records and zero-paid acceptance (`npm run test:a2a`). See §5. **Third slice — remote MCP transports and the containerized tool-server pattern — done (Session 12, July 7, 2026):** the registry became a union discriminated on `transport` (`stdio` stays the default; pre-Session-12 values parse unchanged) with an `http` variant carrying a Streamable HTTP URL (spec 2025-06-18; https required for public hosts, plain http only for loopback/RFC1918/dot-free private hosts) and an operator-owned auth story — `auth.valueEnv` NAMES a credential env var, the worker resolves it fail-fast at startup and forwards exactly the named variables, and every raised tool error is scrubbed of credential values before it reaches the model-visible REPL. Same allowlist/timeout/size-cap machinery over both transports; a containerized tool server (own Compose service, project network, no host port, bearer auth) is the demonstrated deployment shape; zero-paid acceptance grew to 86 fixture checks plus the containerized-fixture Compose assertion. **The recorded 3.3 #8 scope is now exhausted** — the shipped surface covers MCP client (stdio + Streamable HTTP + auth + containerized servers) and the A2A server; anything further (new tools, OAuth flows for MCP, Trellis as an A2A client or MCP server) is a new owner direction, not a recorded remainder. See §5. The original direction follows. With the agentic loop in place (3.3 #7), the sub-agent's world is still exactly two injected database tools — it can decompose goals but every task bottoms out in graph/AST lookups. The owner directed that Trellis now gain external tools, **MCP (Model Context Protocol) first**, with web search as the first concrete tool and A2A (agent-to-agent) interoperability as a follow-on direction across future sessions. The extension point already exists: `trellis_agent.py` injects tools via rlms `custom_tools`, and `trellis_tools.py` shows the wrapper discipline (JSON-string returns, tool-call counting, exceptions that surface real tracebacks into the REPL). Hard invariants: MCP servers and their tool allowlists come from operator-validated configuration only — never from job payloads and never chosen freely by the model; MCP calls do NOT satisfy the database-provenance requirement (`TRELLIS_PROTOCOL_VIOLATION` stays keyed to database tool calls) and MCP output can never be passed as `sourceNodeIds` — external content earns citability only by round-tripping through the verified ingest path to become content-addressed AST bytes; responses are size-capped and time-bounded; acceptance is zero-paid against a local deterministic fixture MCP server. Scheduled as Session 10; see §4 and `HANDOFF.md`.
 
 ---
 
@@ -194,10 +194,10 @@ Ordered roughly by severity.
 | ~~6~~ | ~~Agentic orchestration loop (3.3 #7)~~ | **Done (Session 9, July 7, 2026)** — goal loop over the RLM as a reusable single-task sub-agent, zero-LLM acceptance; see §5 |
 | ~~7~~ | ~~MCP tool integration for the RLM (3.3 #8, first slice)~~ | **Done (Session 10, July 7, 2026)** — operator-configured stdio MCP client for the sub-agent with fixture-server zero-paid acceptance; see §5 |
 | ~~8~~ | ~~A2A server surface (3.3 #8, second slice)~~ | **Done (Session 11, July 7, 2026)** — Trellis serves A2A v1.0 over the goal loop behind the existing gates and bounds, zero-paid acceptance; see §5 |
-| 1 | MCP tool-surface expansion (3.3 #8 continuation) | Owner-directed follow-on: remote/HTTP MCP transports with their auth story, containerized tool servers |
-| 3 | Frontend deployment and community readiness remainder (3.3 #5 residue) | Twice deferred by owner redirects — the Next.js frontend still has no production build, container, API-key handling, or CI coverage |
-| 4 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
-| 5 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| ~~9~~ | ~~MCP tool-surface expansion (3.3 #8 continuation)~~ | **Done (Session 12, July 7, 2026)** — remote Streamable HTTP transports with env-referenced credentials, redaction, and the containerized tool-server pattern; the recorded 3.3 #8 scope is exhausted; see §5 |
+| 1 | Frontend deployment and community readiness remainder (3.3 #5 residue) | Twice deferred by owner redirects — the Next.js frontend still has no production build, container, API-key handling, or CI coverage |
+| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
+| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 
 ---
 
@@ -1075,3 +1075,143 @@ schemes beyond the existing API key (OAuth is follow-on); frontend work.
 containerized tool servers); frontend deployment (3.3 #5 residue);
 repository-extraction prerequisites; conditional 3.3 #4 migration behind
 its unchanged trigger; T13's migration-dependent hash preimage.
+
+### July 7, 2026 — Session 12: remote MCP transports and the containerized tool-server pattern (3.3 #8, third and closing slice)
+
+The RLM's external tool surface was stdio-only: every MCP server had to
+be a spawnable child inside the worker container. Session 12 moves the
+*transport*, not the capabilities — the same allowlist-before-I/O,
+per-call timeout, size-cap, and provenance-split discipline now holds
+for tool servers reached over the network.
+
+**Spec/SDK state verified before designing (recorded per the handoff):**
+the pinned `mcp==1.12.4` SDK ships
+`mcp.client.streamable_http.streamablehttp_client(url, headers, timeout,
+sse_read_timeout, auth)` and speaks MCP protocol revision **2025-06-18**,
+under which Streamable HTTP is the current remote transport and HTTP+SSE
+is deprecated (and deliberately unsupported here). FastMCP serves
+`streamable-http` natively with a `streamable_http_app()` ASGI export;
+DNS-rebinding protection defaults off in this SDK version, so a
+Compose-internal Host header needs no extra settings. **No SDK bump was
+needed**: `requirements.txt`, the Docker image, and `python:check` stay
+on `mcp==1.12.4`.
+
+**The registry union.** `src/config/mcp_servers.ts` became a Zod union
+discriminated on `transport`: the pre-Session-12 shape is
+`{transport:'stdio', name, command, tools, timeoutMs, maxResultBytes}`
+with `stdio` filled in when the field is absent (every existing registry
+parses unchanged — unit-pinned, including the explicit-vs-defaulted
+equivalence); the new variant is `{transport:'http', name, url, tools,
+timeoutMs, maxResultBytes, auth?}`. URL posture, enforced identically in
+Zod and the Python twin: `https://` always; plain `http://` only for
+loopback, RFC1918, or dot-free (Compose/LAN service DNS) hosts, so a
+credential is never sent in cleartext across a public network
+(`isPrivateMcpHost` / `_is_private_mcp_host`, pinned host-by-host on
+both sides including the 172.16/12 boundary octets).
+
+**The operator-owned auth story.** `auth: {kind: 'bearer' | 'header',
+header?, valueEnv}` — the registry carries a credential REFERENCE (an
+environment variable name matching `^[A-Z][A-Z0-9_]*$`), never a value.
+The new pure `resolveMcpCredentialEnv` resolves the named variables at
+config load: a registry naming an unset variable fails startup with an
+error that names the variable and the server, never a value (the
+Guardrail-5 fail-fast posture). `buildAgentEnv` gained an explicit
+`mcpCredentialEnv` map so the spawned agent receives exactly the named
+variables (unit-pinned, including the stale-inherited-value override);
+the Python side re-resolves from its own environment at construction,
+before any I/O. **Redaction guarantee:** every resolved secret is
+registered the moment it exists, and every exception crossing into the
+model-visible REPL is scrubbed (`[REDACTED]`) — auth-failure drills
+assert the secret is absent from raised errors, `list_tools()`, the
+prompt addendum, and the canonical serialization. anyio's
+`ExceptionGroup` wrapper is flattened (`_describe_exception`) so a 401
+or connect refusal stays diagnosable instead of reading "unhandled
+errors in a TaskGroup".
+
+**One connection machinery, two dial functions.** In
+`src/rlm/trellis_mcp.py` the per-server long-lived asyncio task,
+handshake-once, allowlist, double timeout bound, truncation, and
+close-in-`finally` machinery is untouched; the only transport-aware seam
+is the new `_dial` async context manager (`stdio_client` vs
+`streamablehttp_client` with the resolved auth header and a bounded
+connect). An unreachable URL fails the run in seconds with a readable
+startup error. `build_mcp_addendum` output is transport-blind
+(names/tools/bounds only — never a URL or credential; empty-registry
+byte-identity unchanged).
+
+**The containerized tool-server pattern.**
+`scripts/fixture_mcp_server.py` gained `--transport streamable-http
+--host --port` plus an auth mode (`--auth-token-env` — the expected
+token arrives via environment, never argv; a Starlette middleware over
+`streamable_http_app()` returns 401 before any MCP handling). Compose
+gained the `mcp-fixture` service under the `test` profile: own service
+on the project network, no host-published port, bearer auth via env
+reference, and — because a tool server needs no Trellis databases — an
+entrypoint override that bypasses the image's schema bootstrap. The
+integration builds its registry with the production Zod helpers and
+probes the service through `scripts/compose_mcp_probe.py`. README and
+RUNBOOK §8 document this as the deployment shape for operator-owned
+tool servers.
+
+**Observability decision (recorded per the handoff):**
+`trellis_rlm_mcp_calls_total` **stays label-free**. A `transport` label
+would require extending the `TRELLIS_TELEMETRY` wire line to split the
+per-run count for a distinction the operator already knows from their
+own registry; not worth the surface. The `rlm.mcp` event still carries
+counts only.
+
+**Defects found and fixed along the way:** (1) **the Docker image never
+shipped `trellis_mcp.py`** — the Session 10 Dockerfile copies
+`trellis_agent.py`/`trellis_tools.py` but not the module
+`trellis_agent.py` has imported unconditionally since Session 10, so
+every containerized RLM run would have crashed at import; the Compose
+integration never runs an RLM job, which is how it slipped through.
+Fixed (the image now also carries the fixture and probe for the test
+profile), and the new containerized-fixture assertion imports the module
+in-container so a regression cannot slip through silently again.
+(2) The first containerized-fixture run failed because the fixture
+inherited the image's schema-bootstrap entrypoint, spent ~65 s failing
+to reach databases it does not need, and died before serving — fixed
+with the entrypoint override now recorded in the compose file as part of
+the pattern.
+
+**Verification (all commands run, zero paid calls, no external
+network — loopback and Compose-internal traffic only).** Offline:
+`npm test` = **485 passing across 57 files** (baseline 468/57; +17: the
+transport union incl. stdio-default backward compatibility, URL/auth
+validation and rejection matrices, the private-host posture pinned
+host-by-host, `resolveMcpCredentialEnv` exact-map/fail-fast/shared-var
+behavior, secret-never-serialized, and the `buildAgentEnv` credential
+passthrough pins). `npm run build`, `npm run python:check` (now also
+compiles the probe), `docker compose --profile test config --quiet`, and
+`git diff --check` pass. `npm run test:rlm-mcp` = **86 checks**
+(baseline 46; the Python twin matrices for the http variant; a mixed
+five-server stdio+HTTP registry — including a credentialed server —
+handshaking in one client; deterministic canned search byte-identical
+across transports; allowlist rejection before I/O, the 2 s per-call
+timeout, and the 512-byte truncation cap all holding over HTTP; auth
+success; wrong-credential failing fast (0.3 s) with a readable 401 and
+both token values absent from the error; unset-`valueEnv` failing before
+any I/O; an unreachable URL failing in 2.3 s; addendum and `list_tools`
+carrying no URL or credential material). The isolated
+`trellis-s12-mcp` Compose project passed **10 assertions** (the 9
+existing plus the containerized credentialed fixture probe) and removed
+only its own containers and volumes. Regression, all green:
+`test:a2a` (46), `test:agent-loop` (23), `test:repo-ingest` (45),
+`test:benchmark-hardening` (24), `test:entity-resolution` (33),
+`test:api-hardening` (18), `test:rlm-sandbox` (4),
+`test:belief-recovery` (30), `test:invalidation-sweep` (17).
+`npm run drill:scale` closed its gate (max cardinality 286, sweep
+growth 1.63x against 5.77x fact growth, zero residue).
+
+**Deliberately not included (HANDOFF §8):** new tools or tool semantics;
+OAuth flows for MCP servers (bearer/header env-referenced credentials
+only); the deprecated HTTP+SSE transport; MCP server auto-discovery or
+registry fetching; Trellis as an MCP server or A2A client; exposing MCP
+through A2A; new RLM write paths; orchestrator tools; frontend work.
+
+**Still open:** frontend deployment (3.3 #5 residue — sequencing row 1);
+repository-extraction prerequisites; conditional 3.3 #4 migration behind
+its unchanged trigger; T13's migration-dependent hash preimage. The
+recorded 3.3 #8 scope is exhausted; further external-tool work is a new
+owner direction.

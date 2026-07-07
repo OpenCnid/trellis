@@ -342,37 +342,57 @@ Label discipline: job IDs, request IDs, document keys, AST hashes, entity
 names, and error messages appear only in logs, never as metric labels.
 High-cardinality label growth in a scrape is a regression — report it.
 
-## 8. External MCP tool servers (Session 10)
+## 8. External MCP tool servers (Sessions 10 and 12)
 
 The RLM sub-agent's external tool surface comes from `TRELLIS_MCP_SERVERS`
-(a JSON array of `{name, command, tools, timeoutMs, maxResultBytes}`),
-validated at worker startup and re-validated by the spawned agent. Unset
-means no external tools. Each server is a stdio child of the RLM process,
-spawned from the configured argument vector — never a shell string — and
-only allowlisted tools are callable. Details: README §External tools (MCP).
+(a JSON array of servers, `transport: "stdio"` — the default — or
+`"http"`), validated at worker startup and re-validated by the spawned
+agent. Unset means no external tools. A stdio server is a child of the
+RLM process spawned from the configured argument vector — never a shell
+string; an http server is dialed over the MCP Streamable HTTP transport,
+optionally with a credential referenced by env-var name
+(`auth.valueEnv`). Only allowlisted tools are callable on either
+transport. Details: README §External tools (MCP).
 
 **A worker refuses to start after setting the variable**: the registry is
-invalid — the startup error names the offending field. Fix the JSON; do
-not work around it by moving the value into a job payload (payloads carry
-nothing MCP-shaped by design).
+invalid, or it names a credential env var that is not set — the startup
+error names the offending field or variable (never a credential value).
+Fix the JSON or set the variable; do not work around it by moving the
+value into a job payload (payloads carry nothing MCP-shaped by design).
 
 **MCP server misbehaving** — symptoms and containment:
 
 - *Hangs*: each call is bounded by the server's `timeoutMs`; the REPL sees
   a raised timeout error and the run continues. A server that hangs its
-  handshake at spawn fails the run after 30 s with a readable error.
+  handshake (spawn or dial) fails the run after 30 s with a readable
+  error.
+- *Unreachable URL* (http): the run fails fast at connect with a readable
+  startup error naming the server. Check the service is up and the URL in
+  your registry (errors name the server; the URL lives in your config).
+- *Expired or wrong credential* (http): the server answers 401/403; the
+  run fails at handshake with the status visible. The credential value
+  itself is scrubbed to `[REDACTED]` in every raised error — the
+  *redaction guarantee*: credential values never appear in logs, metrics,
+  prompts, stdout, or error text. Rotate the value in the env var the
+  registry names; the registry itself never changes for a rotation.
 - *Oversized results*: truncated at `maxResultBytes` with an explicit
   `TRELLIS_MCP_TRUNCATED` marker in the tool result.
 - *Dies at startup or mid-run*: the run fails (startup) or subsequent
-  calls raise (mid-run); the agent's stderr carries the child's stderr.
+  calls raise (mid-run); a stdio child's stderr lands on the agent's
+  stderr.
 - *Runaway usage*: watch `trellis_rlm_mcp_calls_total` and the per-run
   `rlm.mcp` event. Spend on a *metered* server is bounded per call, not
   per run — if a server bills per request, watch this counter closely.
 
 Diagnosis: reproduce with the deterministic fixture
-(`npm run test:rlm-mcp` — handshake, allowlist, timeout, truncation, and
-shutdown checks against `scripts/fixture_mcp_server.py`). If the fixture
-suite passes, the defect is in the configured server, not the client.
+(`npm run test:rlm-mcp` — handshake, allowlist, timeout, truncation,
+auth success/failure with redaction, and shutdown checks against
+`scripts/fixture_mcp_server.py` over stdio and loopback Streamable
+HTTP). If the fixture suite passes, the defect is in the configured
+server, not the client. For a containerized tool server, the working
+pattern is the `mcp-fixture` service in `docker-compose.yml` (test
+profile): own service on the project network, no host port, bearer token
+via env-var reference.
 
 MCP calls never satisfy the database-provenance requirement: `mcp_calls`
 is separate from `tool_calls` in `TRELLIS_TELEMETRY`, and a run with zero

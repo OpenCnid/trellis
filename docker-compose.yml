@@ -127,6 +127,34 @@ services:
     depends_on: *database-dependencies
     restart: unless-stopped
 
+  # Session 12: the containerized tool-server pattern. An MCP server runs
+  # as its own service on the project network — its own image/command, no
+  # host port — and the RLM reaches it over the Streamable HTTP transport
+  # through the validated registry. Operators deploy their own tool
+  # servers the same way (see README §External tools). The fixture
+  # requires a bearer token so the integration also proves the
+  # credential-by-env-reference path end to end. Test profile only.
+  mcp-fixture:
+    profiles: ["test"]
+    image: ${TRELLIS_IMAGE:-trellis-backend:local}
+    build: *app-build
+    environment:
+      MCP_FIXTURE_TOKEN: compose-fixture-token
+    # A tool server needs no Trellis databases: bypass the image's
+    # schema-bootstrap entrypoint and run the server directly.
+    entrypoint: ["python3"]
+    command:
+      - scripts/fixture_mcp_server.py
+      - --transport
+      - streamable-http
+      - --host
+      - 0.0.0.0
+      - --port
+      - "9500"
+      - --auth-token-env
+      - MCP_FIXTURE_TOKEN
+    restart: "no"
+
   integration:
     profiles: ["test"]
     image: ${TRELLIS_IMAGE:-trellis-backend:local}
@@ -136,6 +164,12 @@ services:
       TRELLIS_SERVICE: integration
       API_BASE_URL: http://backend:3000
       WORKER_METRICS_BASE_URL: http://workers:9464
+      # The containerized MCP fixture (Session 12): the integration
+      # builds the registry with the production Zod helpers and probes
+      # the service over the project network. The token matches the
+      # mcp-fixture service environment above.
+      MCP_FIXTURE_URL: http://mcp-fixture:9500/mcp
+      MCP_FIXTURE_TOKEN: compose-fixture-token
     command: ["node", "dist/scripts/test_compose_roundtrip.js"]
     depends_on:
       backend:
@@ -144,6 +178,8 @@ services:
       # reachable on the internal network; the probe document queues no
       # extraction jobs, so no worker makes an LLM call.
       workers:
+        condition: service_started
+      mcp-fixture:
         condition: service_started
     restart: "no"
 

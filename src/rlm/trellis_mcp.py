@@ -14,11 +14,15 @@ by its own `_count_mcp_call()` — never `_count_tool_call()` — so
 TRELLIS_PROTOCOL_VIOLATION stays keyed to database tool calls, and MCP
 output can never satisfy or masquerade as `sourceNodeIds` provenance.
 
-Transport: stdio only. Each configured server is spawned as a child of
-the RLM process from an explicit argument vector (never a shell string),
-handshaken once at construction, and closed in the agent's `finally`.
-anyio cancel scopes are task-bound, so each connection lives inside one
-long-lived asyncio task that opens and closes its own contexts.
+Transports (Session 12): `stdio` servers are spawned as children of the
+RLM process from an explicit argument vector (never a shell string);
+`http` servers are dialed over the MCP Streamable HTTP transport, with an
+optional operator-owned credential resolved from an environment variable
+the registry names (the value never sits in the registry, the prompt, or
+any error message — see _scrub). Either way the server is handshaken once
+at construction and closed in the agent's `finally`. anyio cancel scopes
+are task-bound, so each connection lives inside one long-lived asyncio
+task that opens and closes its own contexts.
 """
 
 import asyncio
@@ -27,25 +31,54 @@ import os
 import re
 import threading
 from concurrent.futures import TimeoutError as FuturesTimeoutError
+from contextlib import asynccontextmanager
 from datetime import timedelta
+from urllib.parse import urlsplit
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from mcp.client.streamable_http import streamablehttp_client
 
 # --- Registry validation (must mirror src/config/mcp_servers.ts) --------
 
 # Names appear verbatim in the rlms-formatted system prompt addendum, so
 # the charset structurally excludes braces and whitespace tricks.
 MCP_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9_-]*$")
+MCP_VALUE_ENV_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
+MCP_HEADER_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9-]*$")
 MCP_MAX_SERVERS = 8
 MCP_TIMEOUT_MS_MAX = 300_000
 MCP_TIMEOUT_MS_DEFAULT = 10_000
 MCP_MAX_RESULT_BYTES_MAX = 4 * 1024 * 1024
 MCP_MAX_RESULT_BYTES_DEFAULT = 64 * 1024
+MCP_URL_MAX_LENGTH = 2048
 
-# Handshake ceiling for a configured server that spawns but never
-# completes initialize(); independent of the per-call timeout.
+# Handshake ceiling for a configured server that spawns (or dials) but
+# never completes initialize(); independent of the per-call timeout.
 MCP_CONNECT_TIMEOUT_S = 30.0
+
+
+def _is_private_mcp_host(hostname):
+    """Twin of isPrivateMcpHost in src/config/mcp_servers.ts: plain http
+    is acceptable only where traffic cannot leave operator-controlled
+    networks — loopback, RFC1918, or dot-free (Compose/LAN DNS) hosts."""
+    host = (hostname or "").lower().strip("[]")
+    if host in ("localhost", "::1"):
+        return True
+    octets = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", host)
+    if octets:
+        parts = [int(p) for p in octets.groups()]
+        if any(p > 255 for p in parts):
+            return False
+        a, b = parts[0], parts[1]
+        if a in (127, 10):
+            return True
+        if a == 192 and b == 168:
+            return True
+        if a == 172 and 16 <= b <= 31:
+            return True
+        return False
+    return "." not in host
 
 
 def _require_name(value, what):
@@ -91,14 +124,11 @@ def parse_mcp_config(raw):
             raise ValueError(f"Invalid TRELLIS_MCP_SERVERS: duplicate server name {name!r}.")
         seen_names.add(name)
 
-        command = entry.get("command")
-        if (
-            not isinstance(command, list)
-            or len(command) == 0
-            or not all(isinstance(part, str) and part for part in command)
-        ):
+        # A missing `transport` is the pre-Session-12 stdio shape.
+        transport = entry.get("transport", "stdio")
+        if transport not in ("stdio", "http"):
             raise ValueError(
-                f"Invalid TRELLIS_MCP_SERVERS: server {name!r} command must be a non-empty array of non-empty strings."
+                f"Invalid TRELLIS_MCP_SERVERS: server {name!r} transport must be 'stdio' or 'http', got {transport!r}."
             )
 
         tools = entry.get("tools")
@@ -108,16 +138,89 @@ def parse_mcp_config(raw):
             )
         tools = [_require_name(tool, "tool name") for tool in tools]
 
-        servers.append({
+        server = {
+            "transport": transport,
             "name": name,
-            "command": list(command),
             "tools": tools,
             "timeoutMs": _require_bounded_int(entry, "timeoutMs", MCP_TIMEOUT_MS_DEFAULT, MCP_TIMEOUT_MS_MAX),
             "maxResultBytes": _require_bounded_int(
                 entry, "maxResultBytes", MCP_MAX_RESULT_BYTES_DEFAULT, MCP_MAX_RESULT_BYTES_MAX
             ),
-        })
+        }
+
+        if transport == "stdio":
+            command = entry.get("command")
+            if (
+                not isinstance(command, list)
+                or len(command) == 0
+                or not all(isinstance(part, str) and part for part in command)
+            ):
+                raise ValueError(
+                    f"Invalid TRELLIS_MCP_SERVERS: server {name!r} command must be a non-empty array of non-empty strings."
+                )
+            server["command"] = list(command)
+        else:
+            server["url"] = _require_http_url(entry.get("url"), name)
+            auth = entry.get("auth")
+            if auth is not None:
+                server["auth"] = _require_auth(auth, name)
+
+        servers.append(server)
     return servers
+
+
+def _require_http_url(url, server_name):
+    """Twin of the Zod url validation: http(s) only, and plain http only
+    for private-network hosts (see _is_private_mcp_host)."""
+    if not isinstance(url, str) or not 1 <= len(url) <= MCP_URL_MAX_LENGTH:
+        raise ValueError(
+            f"Invalid TRELLIS_MCP_SERVERS: server {server_name!r} url must be a string of at most {MCP_URL_MAX_LENGTH} chars."
+        )
+    parts = urlsplit(url)
+    if parts.scheme not in ("http", "https") or not parts.hostname:
+        raise ValueError(
+            f"Invalid TRELLIS_MCP_SERVERS: server {server_name!r} url must be a valid http(s) URL."
+        )
+    if parts.scheme == "http" and not _is_private_mcp_host(parts.hostname):
+        raise ValueError(
+            f"Invalid TRELLIS_MCP_SERVERS: server {server_name!r}: plain http is allowed only for "
+            "loopback, RFC1918, or dot-free (private-network) hosts; use https."
+        )
+    return url
+
+
+def _require_auth(auth, server_name):
+    """Twin of McpAuthSchema: the registry carries a credential REFERENCE
+    (an environment variable name), never a value."""
+    if not isinstance(auth, dict):
+        raise ValueError(f"Invalid TRELLIS_MCP_SERVERS: server {server_name!r} auth must be an object.")
+    kind = auth.get("kind")
+    if kind not in ("bearer", "header"):
+        raise ValueError(
+            f"Invalid TRELLIS_MCP_SERVERS: server {server_name!r} auth kind must be 'bearer' or 'header'."
+        )
+    header = auth.get("header")
+    if kind == "header":
+        if not isinstance(header, str) or not 1 <= len(header) <= 64 or not MCP_HEADER_PATTERN.match(header):
+            raise ValueError(
+                f"Invalid TRELLIS_MCP_SERVERS: server {server_name!r} auth kind 'header' requires a header "
+                f"name matching {MCP_HEADER_PATTERN.pattern}."
+            )
+    elif header is not None:
+        raise ValueError(
+            f"Invalid TRELLIS_MCP_SERVERS: server {server_name!r} auth kind 'bearer' sends the "
+            "Authorization header; do not set 'header'."
+        )
+    value_env = auth.get("valueEnv")
+    if not isinstance(value_env, str) or not 1 <= len(value_env) <= 128 or not MCP_VALUE_ENV_PATTERN.match(value_env):
+        raise ValueError(
+            f"Invalid TRELLIS_MCP_SERVERS: server {server_name!r} auth valueEnv must name an environment "
+            f"variable matching {MCP_VALUE_ENV_PATTERN.pattern}."
+        )
+    result = {"kind": kind, "valueEnv": value_env}
+    if kind == "header":
+        result["header"] = header
+    return result
 
 
 # --- MCP usage counting (separate from database tool calls) -------------
@@ -133,6 +236,74 @@ def _count_mcp_call():
 
 def get_mcp_call_count() -> int:
     return _mcp_call_stats["count"]
+
+
+# --- Credential redaction (Session 12) -----------------------------------
+#
+# Raised tool errors are model-visible (the REPL reads them to
+# self-correct) and the agent's stdout is published to the SSE stream, so
+# any exception text that crosses out of this module is scrubbed of every
+# resolved credential value first. Registration is append-only: scrubbing
+# a secret from a message that never contained it is free, missing one is
+# a leak.
+
+_redaction_lock = threading.Lock()
+_redaction_secrets = []
+
+
+def _register_secret(value):
+    with _redaction_lock:
+        if value and value not in _redaction_secrets:
+            _redaction_secrets.append(value)
+
+
+def _scrub(text):
+    result = str(text)
+    with _redaction_lock:
+        for secret in _redaction_secrets:
+            result = result.replace(secret, "[REDACTED]")
+    return result
+
+
+def _describe_exception(e):
+    """anyio task groups wrap the real failure in ExceptionGroups whose
+    str() is just 'unhandled errors in a TaskGroup' — surface the leaf
+    exceptions so a 401 or connect refusal stays diagnosable."""
+    if isinstance(e, BaseExceptionGroup):
+        leaves = []
+
+        def _walk(group):
+            for sub in group.exceptions:
+                if isinstance(sub, BaseExceptionGroup):
+                    _walk(sub)
+                else:
+                    leaves.append(sub)
+
+        _walk(e)
+        if leaves:
+            return "; ".join(f"{type(leaf).__name__}: {leaf}" for leaf in leaves)
+    return str(e)
+
+
+def resolve_mcp_auth(cfg):
+    """Resolves an http server's credential from the environment variable
+    the registry names. Returns the extra request headers (or None).
+    Missing variable -> readable error BEFORE any I/O, naming the
+    variable, never a value. The resolved value is registered for
+    redaction the moment it exists."""
+    auth = cfg.get("auth")
+    if auth is None:
+        return None
+    value = os.environ.get(auth["valueEnv"], "")
+    if value == "":
+        raise ValueError(
+            f"MCP server '{cfg['name']}' auth names environment variable "
+            f"'{auth['valueEnv']}', which is not set for this process."
+        )
+    _register_secret(value)
+    if auth["kind"] == "bearer":
+        return {"Authorization": f"Bearer {value}"}
+    return {auth["header"]: value}
 
 
 # --- Pure helpers --------------------------------------------------------
@@ -194,21 +365,55 @@ def _render_content(blocks) -> str:
 
 # --- Connection lifecycle -------------------------------------------------
 
+@asynccontextmanager
+async def _dial(cfg, headers):
+    """The single transport-aware seam: yields (read_stream, write_stream)
+    for either transport. Everything else — handshake-once, allowlist,
+    timeouts, truncation, shutdown — is transport-agnostic."""
+    if cfg["transport"] == "http":
+        # Streamable HTTP (MCP spec 2025-06-18; the deprecated HTTP+SSE
+        # transport is deliberately unsupported). The connect itself is
+        # bounded here; the sync side's MCP_CONNECT_TIMEOUT_S ready-wait
+        # is the backstop.
+        async with streamablehttp_client(
+            cfg["url"],
+            headers=headers,
+            timeout=timedelta(seconds=MCP_CONNECT_TIMEOUT_S),
+        ) as (read_stream, write_stream, _get_session_id):
+            yield read_stream, write_stream
+    else:
+        params = StdioServerParameters(
+            command=cfg["command"][0],
+            args=cfg["command"][1:],
+        )
+        async with stdio_client(params) as (read_stream, write_stream):
+            yield read_stream, write_stream
+
+
 class _McpServerConnection:
-    """One configured server. The stdio transport and session contexts are
+    """One configured server. The transport and session contexts are
     entered and exited inside a single long-lived asyncio task (`_run`),
     because anyio cancel scopes must open and close in the same task; the
     synchronous REPL thread only ever schedules coroutines onto the loop
     and waits on thread-safe events/futures."""
 
-    def __init__(self, cfg, loop):
+    def __init__(self, cfg, loop, headers=None):
         self._cfg = cfg
         self._loop = loop
+        self._headers = headers
         self._ready = threading.Event()
         self._startup_error = None
         self._session = None
         self._stop = None
         self._task = None
+
+    def _startup_hint(self):
+        # Errors name the server, never the URL or a credential: raised
+        # messages are model-visible and stdout is published (Guardrail 11
+        # keeps URLs and secrets out of every observable channel).
+        if self._cfg["transport"] == "http":
+            return "transport: http"
+        return f"command: {self._cfg['command'][0]}"
 
     def start(self):
         self._task = asyncio.run_coroutine_threadsafe(self._run(), self._loop)
@@ -216,21 +421,18 @@ class _McpServerConnection:
             self._task.cancel()
             raise RuntimeError(
                 f"MCP server '{self._cfg['name']}' did not complete its handshake "
-                f"within {MCP_CONNECT_TIMEOUT_S}s (command: {self._cfg['command'][0]})."
+                f"within {MCP_CONNECT_TIMEOUT_S}s ({self._startup_hint()})."
             )
         if self._startup_error is not None:
             raise RuntimeError(
-                f"MCP server '{self._cfg['name']}' failed to start: {self._startup_error}"
-            ) from self._startup_error
+                f"MCP server '{self._cfg['name']}' failed to start: "
+                f"{_scrub(_describe_exception(self._startup_error))}"
+            ) from None
 
     async def _run(self):
         self._stop = asyncio.Event()
         try:
-            params = StdioServerParameters(
-                command=self._cfg["command"][0],
-                args=self._cfg["command"][1:],
-            )
-            async with stdio_client(params) as (read_stream, write_stream):
+            async with _dial(self._cfg, self._headers) as (read_stream, write_stream):
                 async with ClientSession(read_stream, write_stream) as session:
                     await session.initialize()
                     self._session = session
@@ -269,9 +471,16 @@ class _McpServerConnection:
                 f"MCP call '{self._cfg['name']}.{tool}' timed out after {timeout_ms}ms."
             ) from None
         except Exception as e:
-            raise RuntimeError(f"MCP call '{self._cfg['name']}.{tool}' failed: {e}") from e
+            # Scrubbed and unchained: transport-layer exception text (and
+            # its __cause__ repr) must never carry a credential into the
+            # model-visible REPL error.
+            raise RuntimeError(
+                f"MCP call '{self._cfg['name']}.{tool}' failed: {_scrub(_describe_exception(e))}"
+            ) from None
 
-        rendered = _render_content(getattr(result, "content", None))
+        # Rendered content is scrubbed on both paths: a server echoing a
+        # credential back must not put it into model context or stdout.
+        rendered = _scrub(_render_content(getattr(result, "content", None)))
         if getattr(result, "isError", False):
             raise RuntimeError(
                 f"MCP tool error from '{self._cfg['name']}.{tool}': {truncate_result(rendered, 2000)}"
@@ -305,8 +514,13 @@ class TrellisMcp:
         self._thread.start()
         self._connections = {}
         try:
+            # Credentials resolve for every server BEFORE any connection
+            # is dialed: a registry naming a missing env var fails fast
+            # with zero I/O, and every secret is registered for redaction
+            # before it can appear in any connect-time error.
+            headers_by_name = {name: resolve_mcp_auth(cfg) for name, cfg in self._servers.items()}
             for name, cfg in self._servers.items():
-                connection = _McpServerConnection(cfg, self._loop)
+                connection = _McpServerConnection(cfg, self._loop, headers=headers_by_name[name])
                 connection.start()
                 self._connections[name] = connection
         except BaseException:

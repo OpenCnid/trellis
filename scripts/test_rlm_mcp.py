@@ -86,6 +86,85 @@ expect_raises(
     ValueError, "duplicate",
 )
 
+# --- 1b. Session 12 twins: the http transport variant ----------------------
+print("\n[1b] parse_mcp_config http variant (twins of the Zod union)")
+
+check(
+    "missing transport defaults to stdio (pre-Session-12 registries parse unchanged)",
+    parse_mcp_config(json.dumps([valid_entry]))[0]["transport"] == "stdio",
+)
+expect_raises(
+    "unknown transport rejected",
+    lambda: parse_mcp_config(json.dumps([{**valid_entry, "transport": "sse"}])),
+    ValueError, "transport",
+)
+
+valid_http = {"transport": "http", "name": "remote", "url": "https://tools.example.com/mcp", "tools": ["t"]}
+parsed_http = parse_mcp_config(json.dumps([valid_http]))
+check(
+    "valid http server parses with default bounds",
+    parsed_http[0]["url"] == valid_http["url"] and parsed_http[0]["timeoutMs"] == 10_000,
+)
+expect_raises(
+    "http server without a url rejected",
+    lambda: parse_mcp_config(json.dumps([{k: v for k, v in valid_http.items() if k != "url"}])),
+    ValueError, "url",
+)
+for bad_url in ("ftp://x.example.com/mcp", "not a url", ""):
+    expect_raises(
+        f"bad url {bad_url[:20]!r} rejected",
+        lambda u=bad_url: parse_mcp_config(json.dumps([{**valid_http, "url": u}])),
+        ValueError,
+    )
+for private_url in (
+    "http://127.0.0.1:8765/mcp",
+    "http://localhost/mcp",
+    "http://10.1.2.3/mcp",
+    "http://192.168.0.9/mcp",
+    "http://172.31.0.1/mcp",
+    "http://mcp-fixture:9500/mcp",
+):
+    check(
+        f"plain http allowed for private host {private_url}",
+        parse_mcp_config(json.dumps([{**valid_http, "url": private_url}]))[0]["url"] == private_url,
+    )
+for public_url in ("http://tools.example.com/mcp", "http://8.8.8.8/mcp", "http://172.32.0.1/mcp"):
+    expect_raises(
+        f"plain http rejected for public host {public_url}",
+        lambda u=public_url: parse_mcp_config(json.dumps([{**valid_http, "url": u}])),
+        ValueError, "plain http",
+    )
+check(
+    "bearer auth parses carrying only the env var NAME",
+    parse_mcp_config(json.dumps([{**valid_http, "auth": {"kind": "bearer", "valueEnv": "MY_TOKEN"}}]))[0]["auth"]
+    == {"kind": "bearer", "valueEnv": "MY_TOKEN"},
+)
+check(
+    "header auth parses with its header name",
+    parse_mcp_config(
+        json.dumps([{**valid_http, "auth": {"kind": "header", "header": "x-api-key", "valueEnv": "MY_TOKEN"}}])
+    )[0]["auth"]
+    == {"kind": "header", "valueEnv": "MY_TOKEN", "header": "x-api-key"},
+)
+for bad_auth in (
+    {"kind": "header", "valueEnv": "TOKEN"},                       # header kind without a header name
+    {"kind": "bearer", "header": "x-api-key", "valueEnv": "TOKEN"},  # bearer with a header name
+    {"kind": "bearer", "valueEnv": "lowercase"},                   # not an env var name
+    {"kind": "basic", "valueEnv": "TOKEN"},                        # unsupported kind
+    {"kind": "header", "header": "x api key", "valueEnv": "TOKEN"},  # header charset
+    {"kind": "bearer"},                                            # no credential reference
+):
+    expect_raises(
+        f"bad auth {bad_auth} rejected",
+        lambda a=bad_auth: parse_mcp_config(json.dumps([{**valid_http, "auth": a}])),
+        ValueError,
+    )
+expect_raises(
+    "duplicate names across transports rejected",
+    lambda: parse_mcp_config(json.dumps([valid_entry, {**valid_http, "name": valid_entry["name"]}])),
+    ValueError, "duplicate",
+)
+
 # --- 2. Prompt addendum hygiene -------------------------------------------
 print("\n[2] prompt addendum")
 
@@ -101,7 +180,9 @@ check(
 registry_json = os.environ.get("TRELLIS_MCP_SERVERS")
 check("wrapper forwarded TRELLIS_MCP_SERVERS", bool(registry_json))
 servers = parse_mcp_config(registry_json)
-check("forwarded registry passes Python re-validation (cross-language contract)", len(servers) == 2)
+check("forwarded mixed registry passes Python re-validation (cross-language contract)",
+      len(servers) == 5
+      and {s["transport"] for s in servers} == {"stdio", "http"})
 
 addendum = build_mcp_addendum(servers)
 stripped = addendum.replace("{{", "").replace("}}", "")
@@ -111,6 +192,11 @@ check("addendum lists every configured server and allowlisted tool",
       all(s["name"] in addendum for s in servers)
       and all(tool in addendum for s in servers for tool in s["tools"]))
 check("addendum states the provenance contract", "sourceNodeIds" in addendum and "NEVER" in addendum)
+check("addendum never carries URLs or credential material (Session 12)",
+      "http://" not in addendum and "https://" not in addendum
+      and "127.0.0.1" not in addendum
+      and os.environ["MCP_HTTP_SEARCH_TOKEN"] not in addendum
+      and "MCP_HTTP_SEARCH_TOKEN" not in addendum)
 
 # --- 3. Pure result truncation --------------------------------------------
 print("\n[3] result truncation")
@@ -123,21 +209,26 @@ snowman = truncate_result("☃" * 10, 4)  # 3 UTF-8 bytes each: cap splits a cod
 check("truncation never splits a UTF-8 code point",
       snowman.startswith("☃") and "TRELLIS_MCP_TRUNCATED" in snowman)
 
-# --- 4. The client against the live fixture server ------------------------
-print("\n[4] fixture server: handshake, calls, bounds, isolation, shutdown")
+# --- 4. The client against the live fixture servers ------------------------
+print("\n[4] fixture servers: handshake, calls, bounds, isolation, shutdown")
 
 by_name = {s["name"]: s for s in servers}
-check("registry has the expected servers", set(by_name) == {"websearch", "misbehaving"})
+check("registry has the expected servers",
+      set(by_name) == {"websearch", "misbehaving", "httpsearch", "httpmisbehaving", "authsearch"})
 
 started = time.time()
 client = TrellisMcp(servers)
 try:
-    check(f"both servers handshake once at construction ({time.time() - started:.1f}s)", True)
+    check(f"all five servers (stdio + http, incl. credentialed) handshake once at construction ({time.time() - started:.1f}s)", True)
 
     surface = json.loads(client.list_tools())
     check("list_tools reports the configured surface as JSON",
-          {entry["server"] for entry in surface} == {"websearch", "misbehaving"}
+          {entry["server"] for entry in surface} == set(by_name)
           and all(isinstance(entry["tools"], list) for entry in surface))
+    surface_text = client.list_tools()
+    check("list_tools never exposes URLs or credentials",
+          "http://" not in surface_text and "127.0.0.1" not in surface_text
+          and os.environ["MCP_HTTP_SEARCH_TOKEN"] not in surface_text)
 
     first = client.call_tool("websearch", "web_search", {"query": "trellis provenance"})
     second = client.call_tool("websearch", "web_search", {"query": "trellis provenance"})
@@ -177,6 +268,34 @@ try:
           "TRELLIS_MCP_TRUNCATED" in oversized
           and len(oversized.encode("utf-8")) <= cap + 128)
 
+    # --- Session 12: the same guarantees over Streamable HTTP -----------
+    http_first = client.call_tool("httpsearch", "web_search", {"query": "trellis provenance"})
+    check("http web_search returns the same canned deterministic payload as stdio",
+          json.loads(json.loads(http_first)["result"]) == json.loads(json.loads(first)["result"]))
+
+    auth_result = client.call_tool("authsearch", "web_search", {"query": "credentialed"})
+    check("credentialed http server works when the named env var holds the right token",
+          json.loads(json.loads(auth_result)["result"])["query"] == "credentialed")
+
+    expect_raises("allowlist rejection before I/O holds for http servers",
+                  lambda: client.call_tool("httpsearch", "oversized_search", {"query": "x"}),
+                  ValueError, "not allowlisted")
+
+    http_slow_started = time.time()
+    expect_raises("per-call timeout trips over http",
+                  lambda: client.call_tool("httpmisbehaving", "slow_search", {"query": "x"}),
+                  RuntimeError, "timed out")
+    http_slow_elapsed = time.time() - http_slow_started
+    http_timeout_s = by_name["httpmisbehaving"]["timeoutMs"] / 1000.0
+    check(f"http timeout tripped near the configured bound ({http_slow_elapsed:.1f}s)",
+          http_timeout_s * 0.5 <= http_slow_elapsed <= http_timeout_s + 3.0)
+
+    http_oversized = json.loads(client.call_tool("httpmisbehaving", "oversized_search", {"query": "x"}))["result"]
+    http_cap = by_name["httpmisbehaving"]["maxResultBytes"]
+    check("oversized http result truncated to the configured cap with marker",
+          "TRELLIS_MCP_TRUNCATED" in http_oversized
+          and len(http_oversized.encode("utf-8")) <= http_cap + 128)
+
     # The provenance invariant, at the counter level: a run that only
     # searched the web made ZERO database tool calls and would still be
     # a TRELLIS_PROTOCOL_VIOLATION.
@@ -201,6 +320,60 @@ broken = parse_mcp_config(json.dumps([{
 }]))
 expect_raises("dead-on-arrival server raises at construction, never hangs",
               lambda: TrellisMcp(broken), RuntimeError, "broken")
+
+# --- 6. Session 12: http credential failures stay readable and REDACTED ----
+print("\n[6] http auth failure, missing credential, unreachable URL, redaction")
+
+auth_port = os.environ["TRELLIS_TEST_HTTP_AUTH_PORT"]
+wrong_token = os.environ["TRELLIS_TEST_WRONG_TOKEN"]
+good_token = os.environ["MCP_HTTP_SEARCH_TOKEN"]
+
+
+def auth_registry(value_env):
+    return parse_mcp_config(json.dumps([{
+        "transport": "http",
+        "name": "authprobe",
+        "url": f"http://127.0.0.1:{auth_port}/mcp",
+        "tools": ["web_search"],
+        "timeoutMs": 15_000,
+        "auth": {"kind": "bearer", "valueEnv": value_env},
+    }]))
+
+
+expect_raises(
+    "registry naming an unset valueEnv fails before any I/O",
+    lambda: TrellisMcp(auth_registry("TRELLIS_TEST_UNSET_CREDENTIAL")),
+    ValueError, "TRELLIS_TEST_UNSET_CREDENTIAL",
+)
+
+wrong_started = time.time()
+try:
+    TrellisMcp(auth_registry("TRELLIS_TEST_WRONG_TOKEN"))
+    check("wrong credential fails the construction", False, "no error raised")
+except RuntimeError as e:
+    message = str(e)
+    check("wrong credential degrades to a readable startup error",
+          "authprobe" in message and "401" in message)
+    check("the wrong credential value is REDACTED from the raised error",
+          wrong_token not in message)
+    check("the valid credential value never appears either", good_token not in message)
+    check(f"credential failure is fast, never a hang ({time.time() - wrong_started:.1f}s)",
+          time.time() - wrong_started < 30.0)
+except Exception as e:  # noqa: BLE001
+    check("wrong credential degrades to a readable startup error", False,
+          f"expected RuntimeError, got {type(e).__name__}: {e}")
+
+unreachable = parse_mcp_config(json.dumps([{
+    "transport": "http",
+    "name": "unreachable",
+    "url": "http://127.0.0.1:9/mcp",  # discard port: nothing listens
+    "tools": ["web_search"],
+}]))
+unreachable_started = time.time()
+expect_raises("unreachable URL raises a readable startup error, never hangs",
+              lambda: TrellisMcp(unreachable), RuntimeError, "unreachable")
+check(f"unreachable URL failed fast ({time.time() - unreachable_started:.1f}s)",
+      time.time() - unreachable_started < 35.0)
 
 # ---------------------------------------------------------------------------
 if failures:
