@@ -200,10 +200,10 @@ Ordered roughly by severity.
 | ~~7~~ | ~~MCP tool integration for the RLM (3.3 #8, first slice)~~ | **Done (Session 10, July 7, 2026)** — operator-configured stdio MCP client for the sub-agent with fixture-server zero-paid acceptance; see §5 |
 | ~~8~~ | ~~A2A server surface (3.3 #8, second slice)~~ | **Done (Session 11, July 7, 2026)** — Trellis serves A2A v1.0 over the goal loop behind the existing gates and bounds, zero-paid acceptance; see §5 |
 | ~~9~~ | ~~MCP tool-surface expansion (3.3 #8 continuation)~~ | **Done (Session 12, July 7, 2026)** — remote Streamable HTTP transports with env-referenced credentials, redaction, and the containerized tool-server pattern; the recorded 3.3 #8 scope is exhausted; see §5 |
-| 1 | Kernel hardening and the Tier-3 workspace (design record §11, steps 2 + 1) | **Session 14, owner-accepted July 7, 2026** — close the writable-unverified-hash gap at the single write path (`_normalize_fact` format + `ast_nodes` existence checks), then build the harness-captured in-REPL workspace (origin-stamped uuid segments, stub returns, plan-in-workspace, byte-identical gating); the substrate for lineage, promotion, and the module system. Spec: `HANDOFF.md` §3–§6 and `docs/architecture/WORKSPACE_AND_MODULES.md` |
-| 2 | Remaining design-record steps (§11 steps 3–6: module registry + module #0, workspace lineage, promotion path, first flywheel turn) | Owner-sequenced after Session 14 — order to be recorded here when directed |
-| 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
-| 4 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| ~~10~~ | ~~Kernel hardening and the Tier-3 workspace (design record §11, steps 2 + 1)~~ | **Done (Session 14, July 7, 2026)** — `sourceNodeIds` format + `ast_nodes` existence enforcement at the single write path, then the harness-captured in-REPL workspace (origin-stamped uuid segments, stub returns, plan-in-workspace, byte-identical gating); see §5 |
+| 1 | Remaining design-record steps (§11 steps 3–6: module registry + module #0, workspace lineage, promotion path, first flywheel turn) | Owner-sequenced after Session 14 — order to be recorded here when directed |
+| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
+| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -1322,3 +1322,124 @@ decision the paragraph above anticipated:
   negations that exist to forbid them.
 - Offline suite unchanged: 485 passing across 57 files;
   `npm run python:check` green.
+
+### July 7, 2026 — Session 14: kernel hardening and the Tier-3 workspace (design record §11 steps 2 + 1)
+
+Both halves of the owner-accepted scope shipped on one branch, hardening
+first, exactly as sequenced. Design record
+`docs/architecture/WORKSPACE_AND_MODULES.md` §11 steps 1 and 2 are now
+marked done; steps 3–6 remain open and owner-sequenced.
+
+**Write-path hardening (§10.2, first commit).** The single agent write
+path now enforces what was previously convention:
+
+- `_normalize_fact` ([trellis_tools.py](src/rlm/trellis_tools.py))
+  rejects any `sourceNodeIds` element not matching `^[0-9a-f]{64}$`
+  (module-level `AST_HASH_PATTERN`) with a `Provenance Violation` error
+  carrying a bounded (80-char) repr echo.
+- `TrellisPostgres.ast_hashes_exist(hashes)` returns a JSON list of the
+  MISSING hashes via one `SELECT id FROM ast_nodes WHERE id = ANY(%s)`,
+  with the same rollback-on-error posture as `get_ast_texts`. It is
+  deliberately NOT counted as a database tool call: reading it never
+  satisfies the provenance protocol, and the write it guards already
+  counts.
+- `TrellisNeo4j.__init__` accepts an `ast_existence_check` callable;
+  `_run_insight_writes` verifies the deduped union of the batch's
+  hashes BEFORE opening the WRITE session. Unknown hashes raise listing
+  the first 5 plus a total count; no partial write. An infrastructure
+  failure from the checker propagates as `RuntimeError` — never
+  reported as a provenance verdict. `trellis_agent.py` wires the check
+  unconditionally (no toggle).
+- Structural-disjointness note: workspace segment ids are UUIDv4 and
+  origin `argsHash` stamps are 16 hex chars, so no Tier-3 identifier
+  can even be shape-confused with Tier-1 provenance.
+
+**The Tier-3 workspace (§4, second commit).** New
+[trellis_workspace.py](src/rlm/trellis_workspace.py): `TrellisWorkspace`
+is injected via rlms `custom_tools` as `trellis_workspace` (non-callable
+⇒ persistent REPL locals, by construction). Inner state is the plain
+version-tagged dict `{version, plan, notes, segments}` — the
+data-not-objects contract. Model-visible methods return JSON strings and
+raise real exceptions: `read()` (bounded index — ids/origins/sizes/plan/
+notes, never contents), `segment(id)`, `set_plan(plan)` (JSON-round-trip
+enforced), `add_note(text)`, `drop(id)`, `snapshot()` (canonical
+sorted-key JSON — the future lineage seam). Harness-side
+`capture(server, tool, args_hash, content, truncated)` mints a uuid4
+segment stamped `origin/fetchedAt/bytes/truncated` (+`goalId`/`taskId`
+when present) and returns the stub; stamps are wrapper-owned.
+`WorkspaceBudgetError` carries current usage and a `drop()` hint; stored
+state is never silently truncated.
+
+- **Capture and stub returns:** `TrellisMcp(servers, workspace=None)`;
+  with a workspace attached, `call_tool` deposits the (already
+  size-capped) result inside the call and returns
+  `{"server","tool","segmentId","bytes","truncated","preview"}`
+  (preview ≤ 500 chars); a capture that trips the budget raises before
+  returning and the result is discarded deterministically. With no
+  workspace the legacy full-result return is byte-identical (pinned).
+- **Gating:** new `--goal-id` CLI arg on `trellis_agent.py`
+  (`buildAgentArgs` forwards it when `job.goalId` exists); the
+  workspace and its brace-free addendum (`dict(...)` example syntax,
+  rebind-for-atomic-updates guidance, the workspace-never-provenance
+  hard rule) are injected only when MCP servers are configured OR
+  `--goal-id` is present. Otherwise the prompt is byte-identical
+  (pinned).
+- **Bounds:** `TRELLIS_WORKSPACE_MAX_SEGMENTS` (default 128, cap 1024)
+  and `TRELLIS_WORKSPACE_MAX_BYTES` (default 4 MiB, cap 32 MiB),
+  Zod-validated in `src/config/index.ts`, forwarded by `buildAgentEnv`
+  (raw inherited values stripped when unset), re-validated defensively
+  in Python (`parse_workspace_bounds`) with identical maxima.
+- **Telemetry:** `TRELLIS_TELEMETRY` gains
+  `workspace_ops`/`workspace_segments`/`workspace_bytes` — counts only
+  (T16); the Node scanner parses them with degrade-to-0 for
+  pre-Session-14 payloads. The provenance protocol is unchanged: zero
+  DATABASE tool calls is still `TRELLIS_PROTOCOL_VIOLATION` regardless
+  of workspace or MCP activity.
+- **Shipping hygiene:** the Docker image `COPY` line and
+  `check_python_runtime.py` gained `trellis_workspace.py` (the Session
+  12 missing-module defect class, closed proactively); the isolated
+  Compose integration rebuilt the image with the new module and passed.
+
+**Acceptance (all zero-paid, July 7, 2026).** Exact commands and
+observed counts:
+
+- `npm test` — 493 passing across 58 files (baseline 485/57; new:
+  `workspace_bounds.test.ts`, `--goal-id`/workspace-env forwarding in
+  `rlm_job.test.ts`, workspace telemetry parsing pins in
+  `rlm_telemetry.test.ts`).
+- `npm run build`, `npm run python:check`,
+  `docker compose --profile test config --quiet` — green.
+- Isolated Compose integration (`trellis-s14-integration`, host ports
+  0): 10/10 including the containerized credentialed MCP fixture probe.
+- `npm run test:rlm-workspace` — NEW, 64 checks: bounds twins, holder
+  surface, capture-inside-`call_tool` against the stdio fixture,
+  truncation stamps, budget raise + `drop()` recovery, deterministic
+  discard, gated-off byte-identity, and the direct-`LocalREPL`
+  rlms==0.1.3 pin (persistence, scaffold restore, rebind-vs-mutate on
+  exception, underscore filtering).
+- `npm run test:rlm-sandbox` — 21 checks (was 4), extended with the
+  hardening matrix.
+- `npm run test:rlm-mcp` — 86; `npm run test:a2a` — 46;
+  `npm run test:agent-loop` — 23; `npm run test:repo-ingest` — 45;
+  `npm run test:benchmark-hardening` — 24;
+  `npm run test:entity-resolution` — 34 (the drill has always had 34
+  `check()` calls; the previously recorded 33 was a stale count, not a
+  behavior change); `npm run test:api-hardening` — 18;
+  `npm run test:belief-recovery` — 30;
+  `npm run test:invalidation-sweep` — 17 — all unchanged and green.
+- `npm run drill:scale` — migration gate CLOSED: maximum
+  `sourceNodeIds` cardinality 286, sweep latency growth 1.85x against
+  5.77x fact growth (within run-to-run variance of Session 12's 1.63x;
+  both far under the superlinear trigger).
+
+**Defects found along the way:** one, in the pre-existing test suite
+rather than production code — `test_rlm_sandbox.py`'s write-path probe
+had always written with the fake hash `sandbox-test-hash`, which is
+exactly what the hardening now forbids; the probe was rewritten around a
+token-scoped real AST row the test inserts and deletes. No production
+defects surfaced; the Session 10–12 MCP suite passed unchanged against
+the tuple-returning internal `call` seam.
+
+**Not run (owner-gated):** the design record §11 step-1 paired-run
+behavioral probe is PAID and remains proposed-not-executed; see the PR
+for the cost estimate.

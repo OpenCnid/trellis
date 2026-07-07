@@ -1,9 +1,10 @@
 # Workspace and Modules — Design Record
 
-*Status: approved design, pre-implementation. Origin: the owner-directed design
-study of July 7, 2026 (a one-shot session outside the numbered HANDOFF loop).
-All code claims verified against `master` at `c3b4c39` (485/485 offline tests)
-and the installed `rlms==0.1.3` package source. Nothing described here is
+*Status: approved design; §11 steps 1–2 implemented (Session 14, July 7,
+2026), steps 3–6 open. Origin: the owner-directed design study of July 7,
+2026 (a one-shot session outside the numbered HANDOFF loop). All code claims
+verified against `master` at `c3b4c39` (485/485 offline tests) and the
+installed `rlms==0.1.3` package source. Nothing described here is
 implemented unless a section says otherwise.*
 
 This document is the durable record of two connected designs: the **Tier 3
@@ -475,16 +476,27 @@ permanence → self-modification). Each is independently valuable; none
 forecloses the others. Acceptance follows the house pattern: zero-paid proof
 of every mechanism; paid runs only as small owner-approved behavioral probes.
 
-1. **Workspace** (§4) — holder object, capture hook in the MCP wrapper,
-   origin stamps, stub returns, plan-in-workspace addendum, bounds in
-   validated config. Zero-paid: fixture-MCP drills prove capture, stamping,
-   stub shape, bounds, byte-identical gating. Paid probe (owner-approved): a
-   sequential multi-step task, paired runs with/without the addendum,
-   measuring repeated tool calls, end-of-run workspace well-formedness, and
-   answer correctness. This is the module R&D bench everything later uses.
-2. **Write-path hardening** (§10.2) — format + existence check in
-   `_normalize_fact`. Tiny, severable, valuable independent of everything
-   else here; ships first if sequencing allows.
+1. **Workspace** (§4) — **DONE (Session 14, July 7, 2026).** Holder object
+   (`src/rlm/trellis_workspace.py`, injected as `trellis_workspace`),
+   capture hook in `trellis_mcp.call_tool`, origin stamps, stub returns,
+   plan-in-workspace addendum, bounds in validated config
+   (`TRELLIS_WORKSPACE_MAX_SEGMENTS`/`TRELLIS_WORKSPACE_MAX_BYTES`).
+   Zero-paid acceptance: `npm run test:rlm-workspace` (64 checks) proves
+   capture, stamping, stub shape, bounds, byte-identical gating, and the
+   direct-`LocalREPL` rlms==0.1.3 semantics pin. The paid paired-run probe
+   (owner-approved: a sequential multi-step task, paired runs with/without
+   the addendum, measuring repeated tool calls, end-of-run workspace
+   well-formedness, and answer correctness) remains open — it is a
+   behavioral measurement, not an acceptance gate. This is the module R&D
+   bench everything later uses.
+2. **Write-path hardening** (§10.2) — **DONE (Session 14, July 7, 2026;
+   shipped first, as sequenced).** Format check in `_normalize_fact`
+   (`^[0-9a-f]{64}$`, bounded echo) and the batched existence check
+   before the WRITE session (`TrellisPostgres.ast_hashes_exist` injected
+   into `TrellisNeo4j`), unconditional. Extended `npm run
+   test:rlm-sandbox` (21 checks) pins malformed shapes, unknown-hash
+   rejection with bounded lists, deduped-union-once, and the
+   infrastructure-failure/provenance-verdict distinction.
 3. **Module registry + module #0** (§9.1, §9.5) — registry schema, loader,
    composition rules, and the spatial-flywheel extraction with a
    byte-identical composed-prompt pin. Includes the manifest-as-graph-entity

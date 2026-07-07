@@ -314,7 +314,31 @@ count toward the database-provenance requirement — a run that only
 searched the web is still a `TRELLIS_PROTOCOL_VIOLATION`. External content
 earns citability only by being ingested through the verified ingest path.
 MCP usage is reported separately as `mcp_calls` in the telemetry line and
-the `trellis_rlm_mcp_calls_total` metric.
+the `trellis_rlm_mcp_calls_total` metric. Since Session 14 the write path
+also enforces this structurally: every `sourceNodeIds` element must be a
+64-lowercase-hex AST hash that exists in `ast_nodes`, checked before any
+write session opens.
+
+**Workspace capture (Session 14):** when the Tier-3 workspace is active
+(MCP servers configured, or the run carries a goal id), every MCP result
+is captured into the in-REPL workspace as an origin-stamped segment
+inside the tool call itself, and `call_tool` returns a bounded stub
+(`segmentId`, size, truncation flag, ≤500-char preview) instead of the
+full payload. The model pulls full content deliberately with
+`trellis_workspace.segment(id)` or fans `llm_query` out over segments —
+context stays small while captured knowledge grows. The workspace also
+holds the agent's plan and self-notes; bounds come from
+`TRELLIS_WORKSPACE_MAX_SEGMENTS` (default 128) and
+`TRELLIS_WORKSPACE_MAX_BYTES` (default 4 MiB), and over-budget writes
+raise a readable error rather than silently truncating stored state.
+Workspace state has no provenance standing and is reported in telemetry
+as counts only (`workspace_ops`/`workspace_segments`/`workspace_bytes`).
+With no MCP servers and no goal id, nothing is injected and prompt and
+behavior are byte-identical to a pre-Session-14 run:
+
+```bash
+npm run test:rlm-workspace
+```
 
 **Cost posture:** acceptance is zero-paid and local — the deterministic
 fixture server (`scripts/fixture_mcp_server.py`, stdio and loopback
@@ -410,6 +434,7 @@ npm run test:benchmark-hardening
 npm run test:repo-ingest
 npm run test:agent-loop
 npm run test:rlm-mcp
+npm run test:rlm-workspace
 npm run test:a2a
 ```
 
