@@ -26,6 +26,7 @@ task that opens and closes its own contexts.
 """
 
 import asyncio
+import hashlib
 import json
 import os
 import re
@@ -485,7 +486,10 @@ class _McpServerConnection:
             raise RuntimeError(
                 f"MCP tool error from '{self._cfg['name']}.{tool}': {truncate_result(rendered, 2000)}"
             )
-        return truncate_result(rendered, self._cfg["maxResultBytes"])
+        # (text, truncated) so the workspace capture (Session 14) can
+        # stamp whether the size cap clipped this result.
+        was_truncated = len(rendered.encode("utf-8")) > self._cfg["maxResultBytes"]
+        return truncate_result(rendered, self._cfg["maxResultBytes"]), was_truncated
 
     def stop(self, join_timeout_s: float = 10.0):
         if self._task is None:
@@ -505,9 +509,13 @@ class TrellisMcp:
     operator-configured servers; every REPL-visible method returns a JSON
     string; violations and failures raise with real messages."""
 
-    def __init__(self, servers):
+    def __init__(self, servers, workspace=None):
         if not servers:
             raise ValueError("TrellisMcp requires at least one configured server; with none, do not construct it.")
+        # Session 14: when a Tier-3 workspace is attached, call_tool
+        # deposits every result into it and returns a stub; with no
+        # workspace the legacy full-result return is byte-identical.
+        self._workspace = workspace
         self._servers = {server["name"]: server for server in servers}
         self._loop = asyncio.new_event_loop()
         self._thread = threading.Thread(target=self._run_loop, name="trellis-mcp-loop", daemon=True)
@@ -562,7 +570,24 @@ class TrellisMcp:
         if arguments is not None and not isinstance(arguments, dict):
             raise ValueError("MCP tool arguments must be a dict (or omitted).")
 
-        result_text = self._connections[server].call(tool, arguments)
+        result_text, was_truncated = self._connections[server].call(tool, arguments)
+        if self._workspace is not None:
+            # Capture is mechanical, inside the call, before returning
+            # (design record §4.1): the full result becomes an
+            # origin-stamped segment; the model gets a thin stub. A
+            # capture that trips the workspace budget raises here and
+            # the result is discarded deterministically.
+            args_hash = hashlib.sha256(
+                json.dumps(arguments, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest()[:16]
+            stub = self._workspace.capture(
+                server=server,
+                tool=tool,
+                args_hash=args_hash,
+                content=result_text,
+                truncated=was_truncated,
+            )
+            return json.dumps(stub)
         return json.dumps({"server": server, "tool": tool, "result": result_text})
 
     def close(self):

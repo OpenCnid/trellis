@@ -144,6 +144,20 @@ const EnvSchema = z.object({
   // error message stays readable).
   TRELLIS_MCP_SERVERS: z.string().optional(),
 
+  // Tier-3 workspace bounds for the RLM sub-agent (Session 14). The
+  // workspace holds captured external tool results, the plan, and
+  // self-notes inside one REPL run; over-budget writes raise a readable
+  // error in the REPL rather than silently truncating stored state.
+  // Forwarded to the spawned agent by buildAgentEnv and re-validated in
+  // Python (src/rlm/trellis_workspace.py) with identical maxima.
+  TRELLIS_WORKSPACE_MAX_SEGMENTS: z.coerce.number().int().positive().max(1024).default(128),
+  TRELLIS_WORKSPACE_MAX_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(32 * 1024 * 1024)
+    .default(4 * 1024 * 1024),
+
   // Interpreter used to spawn the RLM agent and the PDF parser. On
   // Windows the launcher is conventionally `python`; elsewhere `python3`.
   PYTHON_EXECUTABLE: z
@@ -247,6 +261,10 @@ export const config = {
      * by buildAgentEnv; values never appear in logs or serializations.
      */
     credentialEnv: mcpCredentialEnv,
+  },
+  workspace: {
+    maxSegments: env.TRELLIS_WORKSPACE_MAX_SEGMENTS,
+    maxBytes: env.TRELLIS_WORKSPACE_MAX_BYTES,
   },
   python: {
     executable: env.PYTHON_EXECUTABLE,

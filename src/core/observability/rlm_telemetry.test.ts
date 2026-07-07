@@ -38,6 +38,9 @@ describe('RlmTelemetryScanner', () => {
         subcallCount: 3,
         toolCalls: 5,
         mcpCalls: 0,
+        workspaceOps: 0,
+        workspaceSegments: 0,
+        workspaceBytes: 0,
         executionTimeS: 12.5,
       },
     }]);
@@ -77,6 +80,9 @@ describe('RlmTelemetryScanner', () => {
         subcallCount: 0,
         toolCalls: 2,
         mcpCalls: 0,
+        workspaceOps: 0,
+        workspaceSegments: 0,
+        workspaceBytes: 0,
         executionTimeS: null,
       },
     }]);
@@ -98,6 +104,37 @@ describe('RlmTelemetryScanner', () => {
         subcallCount: 3,
         toolCalls: 5,
         mcpCalls: 4,
+        workspaceOps: 0,
+        workspaceSegments: 0,
+        workspaceBytes: 0,
+        executionTimeS: 12.5,
+      },
+    }]);
+  });
+
+  it('parses workspace counters separately from provenance-bearing tool calls (Session 14 pin)', () => {
+    // A pre-Session-14 payload (no workspace_* fields) degrades to 0 —
+    // pinned by the tests above. Workspace activity never disturbs
+    // toolCalls, which alone carries the provenance requirement.
+    const events = scan([
+      `TRELLIS_TELEMETRY: ${JSON.stringify({
+        ...PAYLOAD,
+        workspace_ops: 7,
+        workspace_segments: 2,
+        workspace_bytes: 4096,
+      })}\n`,
+    ]);
+    expect(events).toEqual([{
+      kind: 'telemetry',
+      telemetry: {
+        inputTokens: 1200,
+        outputTokens: 340,
+        subcallCount: 3,
+        toolCalls: 5,
+        mcpCalls: 0,
+        workspaceOps: 7,
+        workspaceSegments: 2,
+        workspaceBytes: 4096,
         executionTimeS: 12.5,
       },
     }]);

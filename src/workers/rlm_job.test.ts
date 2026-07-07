@@ -129,6 +129,23 @@ describe('buildAgentEnv', () => {
     const env = buildAgentEnv({ PATH: '/bin' }, { ...CFG, mcpCredentialEnv: {} });
     expect(Object.keys(env)).not.toContain('MCP_REMOTE_TOKEN');
   });
+
+  it('forwards the validated workspace bounds (Session 14)', () => {
+    const env = buildAgentEnv({}, { ...CFG, workspace: { maxSegments: 64, maxBytes: 1_048_576 } });
+    expect(env.TRELLIS_WORKSPACE_MAX_SEGMENTS).toBe('64');
+    expect(env.TRELLIS_WORKSPACE_MAX_BYTES).toBe('1048576');
+  });
+
+  it('strips raw inherited workspace bounds when none are configured', () => {
+    // Same discipline as TRELLIS_MCP_SERVERS: the child only ever sees
+    // bounds that crossed the Zod validator, never a raw passthrough.
+    const env = buildAgentEnv(
+      { TRELLIS_WORKSPACE_MAX_SEGMENTS: '99999', TRELLIS_WORKSPACE_MAX_BYTES: 'huge' },
+      CFG
+    );
+    expect('TRELLIS_WORKSPACE_MAX_SEGMENTS' in env).toBe(false);
+    expect('TRELLIS_WORKSPACE_MAX_BYTES' in env).toBe(false);
+  });
 });
 
 describe('buildAgentArgs', () => {
@@ -144,5 +161,23 @@ describe('buildAgentArgs', () => {
       maxIterations: 4,
     });
     expect(args).toEqual(['/x/trellis_agent.py', '--query', 'q', '--max-iterations', '4']);
+  });
+
+  it('forwards --goal-id when the job carries goal correlation (Session 14)', () => {
+    const args = buildAgentArgs('/x/trellis_agent.py', {
+      query: 'q',
+      jobId: 'j',
+      goalId: 'g-1',
+      taskId: 't-1',
+      maxIterations: 4,
+    });
+    expect(args).toEqual([
+      '/x/trellis_agent.py', '--query', 'q', '--max-iterations', '4', '--goal-id', 'g-1',
+    ]);
+  });
+
+  it('omits --goal-id for goal-less jobs (pre-Session-14 argument vector pinned)', () => {
+    const args = buildAgentArgs('/x/trellis_agent.py', { query: 'q', jobId: 'j' });
+    expect(args).toEqual(['/x/trellis_agent.py', '--query', 'q']);
   });
 });
