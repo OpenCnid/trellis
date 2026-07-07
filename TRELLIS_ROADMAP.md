@@ -178,6 +178,8 @@ Ordered roughly by severity.
 
 7. ~~**Agentic orchestration loop (owner-directed, July 6, 2026).**~~ **Done (Session 9, July 7, 2026):** `GET /api/agent-stream` accepts one goal; the `agent_queue` worker runs an orchestrator (same LLM, planner system prompt, plain structured chat completions through the T8 boundary — never an rlms REPL) whose Zod-validated decisions dispatch single-task RLM runs as ordinary `rlm_queue` jobs, observe their new `TRELLIS_RESULT` envelopes, and iterate until finish/fail or a hard bound trips (`AGENT_MAX_ITERATIONS_PER_GOAL`/`AGENT_MAX_TASKS_PER_GOAL`/`AGENT_MAX_CONCURRENT_TASKS`/`AGENT_TASK_MAX_ITERATIONS`, all single-digit-capped). Task failures and protocol violations are observations for the next decision; every other exit is a typed streamed failure. The orchestrator never writes to the graph; acceptance was zero-LLM (oracle decisions + stubbed tasks over the real queues, pub/sub, and API — `npm run test:agent-loop`). See §5. The original direction follows. Trellis must be able to work agentically: an external loop that accepts a goal, decomposes it into tasks, and mediates execution until the goal completes or a bound is hit. The loop is driven by the same LLM under a different (orchestrator) system prompt — plain structured chat completions crossing the T8 `parseLlmResponse` boundary, never a second REPL (the rlms `custom_system_prompt` replaces the REPL protocol prompt, so the orchestrator persona must not be routed through rlms). The RLM becomes a reusable single-task sub-agent: one `rlm_queue` job per task, one process per run exactly as today, so a goal can dispatch many RLM runs and aggregate their `FINAL_ANSWER:` results and `TRELLIS_TELEMETRY:` spend. Hard per-goal bounds on orchestrator iterations, dispatched tasks, and tokens; all LLM calls stay inside workers; the orchestrator itself never writes to the graph — `write_derived_insight` remains the single agent write path. Zero-LLM acceptance via a deterministic oracle planner plus stubbed task execution over the real queue/stream plumbing. Scheduled as Session 9; see §4 and `HANDOFF.md`.
 
+8. **External tool integration for the RLM sub-agent (owner-directed, July 7, 2026).** With the agentic loop in place (3.3 #7), the sub-agent's world is still exactly two injected database tools — it can decompose goals but every task bottoms out in graph/AST lookups. The owner directed that Trellis now gain external tools, **MCP (Model Context Protocol) first**, with web search as the first concrete tool and A2A (agent-to-agent) interoperability as a follow-on direction across future sessions. The extension point already exists: `trellis_agent.py` injects tools via rlms `custom_tools`, and `trellis_tools.py` shows the wrapper discipline (JSON-string returns, tool-call counting, exceptions that surface real tracebacks into the REPL). Hard invariants: MCP servers and their tool allowlists come from operator-validated configuration only — never from job payloads and never chosen freely by the model; MCP calls do NOT satisfy the database-provenance requirement (`TRELLIS_PROTOCOL_VIOLATION` stays keyed to database tool calls) and MCP output can never be passed as `sourceNodeIds` — external content earns citability only by round-tripping through the verified ingest path to become content-addressed AST bytes; responses are size-capped and time-bounded; acceptance is zero-paid against a local deterministic fixture MCP server. Scheduled as Session 10; see §4 and `HANDOFF.md`.
+
 ---
 
 ## 4. Suggested Sequencing
@@ -190,9 +192,11 @@ Ordered roughly by severity.
 | ~~4~~ | ~~Semantic provenance scale gate (3.3 #4 measurement)~~ | **Measured (Session 7, July 6, 2026)** — migration not justified at 300 documents; explicit 1,000-source/superlinear triggers recorded; see §5 |
 | ~~5~~ | ~~Whole-codebase ingestion (3.3 #6)~~ | **Done (Session 8, July 6, 2026)** — code-aware per-file snapshots with tombstone deletion, zero-paid-work default, and the measured Entity.name merge index; see §5 |
 | ~~6~~ | ~~Agentic orchestration loop (3.3 #7)~~ | **Done (Session 9, July 7, 2026)** — goal loop over the RLM as a reusable single-task sub-agent, zero-LLM acceptance; see §5 |
-| 1 | Frontend deployment and community readiness remainder (3.3 #5 residue) | Deferred from the Session 9 default by the owner redirect — the Next.js frontend still has no production build, container, API-key handling, or CI coverage |
-| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
-| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| 1 | MCP tool integration for the RLM (3.3 #8, first slice) | Owner-directed priority (July 7, 2026), jumping the sequencing default again: an operator-configured MCP client surface for the sub-agent, web search first, zero-paid fixture-server acceptance |
+| 2 | Tool-surface expansion and A2A interop (3.3 #8 continuation) | Owner-directed follow-on: more MCP tools/transports and agent-to-agent interoperability, scoped per session after the MCP foundation lands |
+| 3 | Frontend deployment and community readiness remainder (3.3 #5 residue) | Twice deferred by owner redirects — the Next.js frontend still has no production build, container, API-key handling, or CI coverage |
+| 4 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
+| 5 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 
 ---
 
@@ -802,3 +806,31 @@ modifications; frontend work.
 (3.3 #5 residue — the next session); repository-extraction prerequisites;
 conditional 3.3 #4 migration behind its unchanged trigger; T13's
 migration-dependent hash preimage.
+
+### July 7, 2026 — Session 10 redirected: external tools for the RLM (3.3 #8, MCP first)
+
+Immediately after Session 9's acceptance, the owner redirected the next
+session away from the sequencing default (frontend deployment) to a new
+capability: give the agentic sub-agent tools beyond its two databases.
+The direction, recorded as roadmap item 3.3 #8 and the rewritten
+`HANDOFF.md`:
+
+- **MCP first**: an operator-configured Model Context Protocol client
+  surface injected into the RLM alongside `trellis_neo4j`/
+  `trellis_postgres`, with **web search as the first tool**;
+- **A2A and further tool expansion follow** in later sessions, as the
+  3.3 #8 continuation row in §4;
+- **provenance is not negotiable**: MCP calls never satisfy the
+  database-provenance requirement, and external content becomes citable
+  only through the verified ingest path (content-addressed AST bytes) —
+  `write_derived_insight` stays the single write path and still demands
+  live AST provenance;
+- **operator control**: servers, transports, and tool allowlists come
+  from validated configuration only, never from job payloads or model
+  choice; acceptance stays zero-paid via a local deterministic fixture
+  MCP server.
+
+Frontend deployment moves to sequencing row 3, deferred a second time,
+not dropped. No code changed in this entry — it records the priority
+decision and the handoff rewrite so the next session starts with zero
+external context.
