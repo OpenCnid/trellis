@@ -31,6 +31,15 @@ export interface RlmTelemetry {
    * from pre-Session-10 agents omit the field; it degrades to 0.
    */
   mcpCalls: number;
+  /**
+   * Tier-3 workspace activity (Session 14) — counts only; workspace
+   * content never crosses the telemetry line. Pre-Session-14 payloads
+   * omit the fields; they degrade to 0. Like mcpCalls, none of these
+   * carry provenance standing.
+   */
+  workspaceOps: number;
+  workspaceSegments: number;
+  workspaceBytes: number;
   /** Seconds; null when the agent could not measure it. */
   executionTimeS: number | null;
 }
@@ -63,6 +72,9 @@ export function parseTelemetryLine(line: string): TelemetryEvent {
       subcallCount: toCount(record.subcall_count),
       toolCalls: toCount(record.tool_calls),
       mcpCalls: toCount(record.mcp_calls),
+      workspaceOps: toCount(record.workspace_ops),
+      workspaceSegments: toCount(record.workspace_segments),
+      workspaceBytes: toCount(record.workspace_bytes),
       executionTimeS:
         typeof record.execution_time_s === 'number' && Number.isFinite(record.execution_time_s)
           ? record.execution_time_s

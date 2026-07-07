@@ -52,6 +52,11 @@ export function buildAgentArgs(scriptPath: string, job: RlmJobData): string[] {
   if (job.maxIterations !== undefined) {
     args.push('--max-iterations', String(job.maxIterations));
   }
+  // Session 14: goal correlation reaches the agent itself — it stamps
+  // workspace segments and gates the Tier-3 workspace on for goal runs.
+  if (job.goalId !== undefined) {
+    args.push('--goal-id', job.goalId);
+  }
   return args;
 }
 
@@ -74,6 +79,13 @@ export interface AgentEnvConfig {
    * the child resolves them against (Session 12).
    */
   mcpCredentialEnv?: Record<string, string>;
+  /**
+   * Tier-3 workspace bounds (Session 14, config.workspace). The child
+   * re-validates them defensively with identical maxima; when omitted,
+   * any raw inherited values are stripped so the agent only ever sees
+   * validated bounds (the TRELLIS_MCP_SERVERS discipline).
+   */
+  workspace?: { maxSegments: number; maxBytes: number };
 }
 
 /**
@@ -101,6 +113,13 @@ export function buildAgentEnv(
     env.TRELLIS_MCP_SERVERS = cfg.mcpServersJson;
   } else {
     delete env.TRELLIS_MCP_SERVERS;
+  }
+  if (cfg.workspace !== undefined) {
+    env.TRELLIS_WORKSPACE_MAX_SEGMENTS = String(cfg.workspace.maxSegments);
+    env.TRELLIS_WORKSPACE_MAX_BYTES = String(cfg.workspace.maxBytes);
+  } else {
+    delete env.TRELLIS_WORKSPACE_MAX_SEGMENTS;
+    delete env.TRELLIS_WORKSPACE_MAX_BYTES;
   }
   // Explicitly set the credential variables the registry names, so the
   // forwarding contract holds regardless of what the base env carries.

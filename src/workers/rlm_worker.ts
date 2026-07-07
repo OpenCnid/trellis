@@ -159,6 +159,7 @@ function runAgentProcess(
         pgDsn: pgDsn(),
         mcpServersJson: config.mcp.serversJson,
         mcpCredentialEnv: config.mcp.credentialEnv,
+        workspace: config.workspace,
       })
     });
 

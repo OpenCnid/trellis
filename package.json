@@ -41,6 +41,7 @@
     "test:belief-recovery": "tsx scripts/test_belief_recovery.ts",
     "test:rlm-sandbox": "tsx scripts/test_rlm_sandbox.ts",
     "test:rlm-mcp": "tsx scripts/test_rlm_mcp.ts",
+    "test:rlm-workspace": "tsx scripts/test_rlm_workspace.ts",
     "test:api-hardening": "tsx scripts/test_api_hardening.ts",
     "test:agent-loop": "tsx scripts/test_agent_loop.ts",
     "test:a2a": "tsx scripts/test_a2a.ts",

@@ -5,7 +5,7 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–13 are complete and merged:
+Sessions 1–14 are complete and merged:
 
 - PR #21 — async reliability and batch ingestion.
 - PR #22 — provenance liveness closure and verified production ingestion.
@@ -40,84 +40,110 @@ Sessions 1–13 are complete and merged:
   (`npm run test:rlm-mcp`).
 - PR #35 — the A2A server surface (Session 11, 3.3 #8 second slice):
   Trellis serves the Agent2Agent protocol (spec v1.0.0, JSON-RPC
-  binding, hand-rolled with Zod — the official `@a2a-js/sdk` 0.3.13
-  still spoke the 0.3.x wire format and was not adopted; zero new
-  dependencies) over the existing goal loop. `TRELLIS_A2A_ENABLED`
-  (default false; unset ⇒ byte-identical API, drill-pinned) mounts the
-  public well-known Agent Card plus one key-gated JSON-RPC endpoint
-  (`POST /a2a/v1`) whose
+  binding, hand-rolled with Zod; zero new dependencies) over the
+  existing goal loop. `TRELLIS_A2A_ENABLED` (default false; unset ⇒
+  byte-identical API, drill-pinned) mounts the public well-known Agent
+  Card plus one key-gated JSON-RPC endpoint (`POST /a2a/v1`) whose
   `SendMessage`/`SendStreamingMessage`/`GetTask`/`CancelTask` dispatch
   goals through the SAME `StreamGate` + queue-depth gates and per-goal
   bounds as `/api/agent-stream`, record lifecycle in TTL-bounded Redis
   task records, and translate goal events to A2A task states through
   the pure `src/core/a2a/task_record.ts`. Zero-paid acceptance:
   `npm run test:a2a` (46 checks).
-- Session 12 (July 7, 2026) — remote MCP transports and the
-  containerized tool-server pattern (3.3 #8 third and closing slice,
-  branch `session-12-mcp-http`): the registry became a Zod union
-  discriminated on `transport` (`stdio` default — every pre-Session-12
-  value parses unchanged; new `http` variant carrying a Streamable HTTP
-  URL, https required for public hosts, plain http only for
-  loopback/RFC1918/dot-free private hosts) with an operator-owned auth
-  story: `auth: {kind: bearer|header, header?, valueEnv}` NAMES a
-  credential env var; `resolveMcpCredentialEnv` resolves it fail-fast
-  at startup, `buildAgentEnv` forwards exactly the named variables, and
-  every REPL-visible error is scrubbed of credential values
-  (`_scrub`/`_describe_exception` — anyio ExceptionGroups are flattened
-  so a 401 stays diagnosable). One transport-aware seam in the Python
-  client (`_dial`: `stdio_client` vs `streamablehttp_client`); the
+- PR #36 — remote MCP transports and the containerized tool-server
+  pattern (Session 12, 3.3 #8 third and closing slice): the registry
+  became a Zod union discriminated on `transport` (`stdio` default —
+  every pre-Session-12 value parses unchanged; new `http` variant
+  carrying a Streamable HTTP URL, https required for public hosts,
+  plain http only for loopback/RFC1918/dot-free private hosts) with an
+  operator-owned auth story: `auth: {kind: bearer|header, header?,
+  valueEnv}` NAMES a credential env var; `resolveMcpCredentialEnv`
+  resolves it fail-fast at startup, `buildAgentEnv` forwards exactly
+  the named variables, and every REPL-visible error is scrubbed of
+  credential values (`_scrub`/`_describe_exception` — anyio
+  ExceptionGroups are flattened so a 401 stays diagnosable). One
+  transport-aware seam in the Python client (`_dial`); the
   allowlist/timeout/size-cap/handshake-once machinery is
-  transport-agnostic. The fixture serves Streamable HTTP with an
-  optional required-bearer mode; Compose demonstrates the containerized
-  pattern (`mcp-fixture` service, test profile, project network, no
-  host port, entrypoint override — a tool server needs no Trellis
-  databases). MCP protocol revision 2025-06-18 on the unchanged
+  transport-agnostic. MCP protocol revision 2025-06-18 on the pinned
   `mcp==1.12.4`; the deprecated HTTP+SSE transport is unsupported.
-  Defect found and fixed: the Docker image had never shipped
-  `trellis_mcp.py`, so every containerized RLM run since Session 10
-  would have crashed at import. Zero-paid acceptance:
-  `npm run test:rlm-mcp` (86 checks) + the 10-assertion Compose
-  integration. The recorded 3.3 #8 scope is exhausted.
-- Session 13 (July 7, 2026, branch `d/musing-wilbur-5bf4b2`) —
-  documentation, context alignment, and architectural consolidation
-  (owner-redirected; the frontend deployment is deferred — unscheduled,
-  scope preserved in roadmap §3.3 #5). The
-  primary deliverable is the design record
-  `docs/architecture/WORKSPACE_AND_MODULES.md`: the three-tier trust
-  model, the Tier-3 workspace contract (harness-captured, origin-stamped,
-  uuid-delimited segments; stub returns; plan-in-workspace; the
-  data-not-objects contract and the verified rlms rebind-vs-mutate
-  exception semantics), cross-task workspace lineage (serialize → park →
-  seed; explicitly not a blackboard), the promotion path, the L0–L3
-  self-editing capability ladder (L1/L2 forbidden; L3 — staged
-  self-modification through the verified pipeline — is the capability
-  flywheel's mechanism), the kernel/userspace boundary, the module
-  manifest/registry/gates design with module #0 (extracting the
-  spatial-flywheel protocol), and a six-step implementation sequence.
-  DESIGN ONLY — none of it is implemented. Alongside it:
-  `docs/GLOSSARY.md` (canonical one-line definitions; authority
-  hierarchy code > glossary > prose) and the `TRELLIS_ROADMAP.md` §1
-  drift fixes (three injected tool surfaces, all seven queues,
-  `agent_queue` in the diagram). A close-out sweep in the same session
-  scoped Session 14 (§3–§6 below), recorded the frontend deferral, and
-  aligned README with the July 7 baseline (agency-layer summary,
-  single-source-of-truth pointer, `test:a2a` added to its live-check
-  list). No code changes; offline suite unchanged at 485.
+  Defect found and fixed there: the Docker image had never shipped
+  `trellis_mcp.py`. The recorded 3.3 #8 scope is exhausted.
+- PRs #37/#38 — Session 13 (July 7, 2026): documentation, context
+  alignment, and architectural consolidation (owner-redirected; the
+  frontend deployment deferred unscheduled, scope preserved in roadmap
+  §3.3 #5). The design record `docs/architecture/WORKSPACE_AND_MODULES.md`
+  (three-tier trust model, the Tier-3 workspace contract, cross-task
+  lineage, the promotion path, the L0–L3 self-editing ladder with
+  L1/L2 forbidden and L3 as the capability flywheel's mechanism, the
+  kernel/userspace boundary, the module manifest/registry/gates design
+  with module #0, and a six-step implementation sequence),
+  `docs/GLOSSARY.md` (authority: code > glossary > prose), roadmap §1
+  drift fixes, Session 14 scoping, and README alignment. No code
+  changes; offline suite was 485 across 57 files.
+- Session 14 (July 7, 2026, branch `d/jovial-hertz-399138`) — kernel
+  hardening and the Tier-3 workspace (design record §11 steps 2 + 1, in
+  that order, one PR). **Hardening:** `_normalize_fact`
+  (`src/rlm/trellis_tools.py`) rejects any `sourceNodeIds` element not
+  matching `^[0-9a-f]{64}$` (module-level `AST_HASH_PATTERN`, bounded
+  80-char echo), and `_run_insight_writes` verifies the deduped union
+  of a batch's hashes against `ast_nodes` BEFORE the WRITE session
+  opens — `TrellisPostgres.ast_hashes_exist(hashes)` (one `ANY()`
+  select returning the JSON list of MISSING hashes, deliberately not
+  tool-call-counted) injected as
+  `TrellisNeo4j(ast_existence_check=...)` unconditionally by
+  `trellis_agent.py`. Unknown hashes raise listing the first 5 + total
+  count, no partial write; checker infrastructure failures propagate as
+  `RuntimeError`, never a provenance verdict. **Workspace:** new
+  `src/rlm/trellis_workspace.py` — `TrellisWorkspace` injected via rlms
+  `custom_tools` as `trellis_workspace` (non-callable ⇒ persistent REPL
+  locals by construction). State is the plain version-tagged dict
+  `{version, plan, notes, segments}` (the data-not-objects contract);
+  model-visible methods return JSON strings and raise real exceptions —
+  `read()` (bounded index, never contents), `segment(id)`,
+  `set_plan(plan)` (JSON round-trip enforced), `add_note(text)`,
+  `drop(id)`, `snapshot()` (canonical sorted-key JSON — the lineage
+  seam). Harness-side `capture()` mints uuid4 segments stamped
+  `origin{server,tool,argsHash(16 hex)}/fetchedAt/bytes/truncated`
+  (+`goalId` when present); stamps are wrapper-owned.
+  `WorkspaceBudgetError` carries usage + a `drop()` hint; stored state
+  is never silently truncated. `TrellisMcp(servers, workspace=None)`
+  deposits every result inside `call_tool` and returns the stub
+  `{server,tool,segmentId,bytes,truncated,preview≤500}`; no workspace ⇒
+  byte-identical legacy return (pinned). Gating: workspace + brace-free
+  addendum injected only when MCP servers are configured OR `--goal-id`
+  is present (new CLI arg; `buildAgentArgs` forwards it when
+  `job.goalId` exists); otherwise byte-identical prompt (pinned).
+  Bounds `TRELLIS_WORKSPACE_MAX_SEGMENTS` (default 128, cap 1024) /
+  `TRELLIS_WORKSPACE_MAX_BYTES` (default 4 MiB, cap 32 MiB): Zod schema
+  + Python `parse_workspace_bounds` twins; `buildAgentEnv` forwards
+  validated values and strips raw inherited ones. `TRELLIS_TELEMETRY`
+  gains `workspace_ops`/`workspace_segments`/`workspace_bytes` (counts
+  only; Node scanner degrades missing fields to 0). The Docker image
+  `COPY` line and `python:check` ship the new module (the Session 12
+  missing-module defect class, closed proactively). Zero-paid
+  acceptance: NEW `npm run test:rlm-workspace` (64 checks, including a
+  direct-`LocalREPL` rlms==0.1.3 semantics pin) and the extended
+  `npm run test:rlm-sandbox` (21 checks, was 4 — its old probe wrote
+  with a fake hash, exactly what hardening now forbids; rewritten
+  around a token-scoped real AST row). Offline suite 485→493. The paid
+  paired-run behavioral probe was NOT run (owner-gated; proposed in the
+  PR with a cost estimate).
 
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is to study the current code, `TRELLIS_ROADMAP.md`, and the
-design record `docs/architecture/WORKSPACE_AND_MODULES.md` (sovereign on
-`master`, with `docs/GLOSSARY.md`; authority: code > glossary > prose),
-present a concrete design, and then implement **Session 14: kernel hardening
-and the Tier-3 workspace** — design-record §11 steps 2 and 1, in that order,
-on one branch and one PR: first the `sourceNodeIds` format + existence
-checks at the single write path, then the harness-captured in-REPL workspace
-with origin-stamped segments and stub returns. The frontend deployment
-(3.3 #5 residue) is DEFERRED by owner direction — unscheduled, scope
-preserved in the roadmap; do not pick it up. Design-record steps 3–6 are
-owner-sequenced after this session. Do not re-plan or re-implement completed
-work. RLM expands exclusively to Recursive Language Model (the MIT CSAIL
+Your objective is **Session 15, which begins with an owner decision**:
+the roadmap's first unstruck §4 row is "remaining design-record steps
+(§11 steps 3–6), owner-sequenced — order to be recorded when directed."
+The Session 14 PR asked the owner to choose among design-record step 3
+(module registry + module #0), step 4 (workspace lineage), and the
+deferred frontend. **Check the roadmap §4 table and the Session 14 PR
+discussion for the recorded direction before doing anything else.** If a
+direction is recorded, that is the objective — re-derive §4–§6 from the
+design record at full concreteness before implementing. If not, §3–§6
+below carry the RECOMMENDED DEFAULT (step 3: module registry +
+module #0, the design record's own dependency order); state the
+assumption in the PR. Do not re-plan or re-implement completed work. RLM
+expands exclusively to Recursive Language Model (the MIT CSAIL
 formulation).
 
 ---
@@ -192,6 +218,15 @@ immutable, content-addressed physical location in source material.
      machine (`src/core/graph/provenance.ts`).
    - Entity identity is immutable; equivalence is an overlay belief.
      Retrieval expands one trusted `SAME_AS` hop with per-fact `viaAlias`.
+   - **Session 14 (kernel):** the single agent write path
+     (`write_derived_insight`/`write_derived_insights` →
+     `_normalize_fact` → `_run_insight_writes` in
+     `src/rlm/trellis_tools.py`) ENFORCES provenance: every
+     `sourceNodeIds` element must match `^[0-9a-f]{64}$` AND exist in
+     `ast_nodes` (deduped batch union, checked via the injected
+     `ast_existence_check` before the WRITE session opens). "An AST hash
+     means verified ingested bytes" is enforcement, not convention.
+     Never weaken or make this configurable.
 3. **Redis + BullMQ — asynchronous layer**
    - Seven queues: `extraction_queue`, `rlm_queue`, `supervisor_queue`,
      `invalidation_queue`, `verification_queue`, `resolution_queue`, and
@@ -207,69 +242,92 @@ immutable, content-addressed physical location in source material.
      per job (`trellis_agent.py`) with config forwarded via env by the pure
      `buildAgentEnv` helper in `src/workers/rlm_job.ts` (`NEO4J_*`,
      `PG_DSN`, `PYTHONPATH`, the canonical `TRELLIS_MCP_SERVERS` registry,
-     and — Session 12 — exactly the credential env vars the registry's
-     http servers name, resolved fail-fast at startup by
-     `resolveMcpCredentialEnv`; when no servers are configured the helper
-     strips any raw inherited value so the child only ever sees validated
-     config). The worker publishes every stdout chunk and feeds two pure
-     bounded scanners over the identical bytes: `RlmTelemetryScanner`
-     (`TRELLIS_TELEMETRY:` spend line, carrying `mcp_calls`) and
-     `RlmResultScanner` (`TRELLIS_RESULT:` task envelope
-     `{status, answer, toolCalls}`; shared buffering in
+     exactly the credential env vars the registry's http servers name —
+     resolved fail-fast at startup — and, Session 14, the validated
+     workspace bounds; unset config values are stripped, never passed
+     through raw). `buildAgentArgs` forwards `--max-iterations` and
+     `--goal-id` when present. The worker publishes every stdout chunk
+     and feeds two pure bounded scanners over the identical bytes:
+     `RlmTelemetryScanner` (`TRELLIS_TELEMETRY:` spend line, carrying
+     `mcp_calls` and `workspace_ops`/`workspace_segments`/
+     `workspace_bytes`) and `RlmResultScanner` (`TRELLIS_RESULT:` task
+     envelope `{status, answer, toolCalls}`; shared buffering in
      `line_scanner.ts`). Job payloads are normalized by
      `parseRlmJobData`: pre-Session-9 `{query, jobId}` still processes;
      optional `goalId`/`taskId` correlation, `maxIterations`, and a
      data-only `stub` replay mode for zero-LLM drills. Payloads carry
-     nothing MCP-shaped (unit-pinned).
+     nothing MCP- or workspace-shaped (unit-pinned).
    - `src/rlm/trellis_agent.py` wraps the `rlms` recursive-LM library
      (model `gpt-5.4-2026-03-05`, `max_depth` 1) and injects tools via the
      rlms `custom_tools` mapping — `trellis_neo4j` (read-only Cypher via
-     `default_access_mode=READ`, plus the single write path
-     `write_derived_insight`/`write_derived_insights`, which REQUIRES
-     non-empty `sourceNodeIds` AST hashes), `trellis_postgres`
-     (`get_ast_texts`, `vector_search`), and — only when the operator
-     configured servers — `trellis_mcp` (`src/rlm/trellis_mcp.py`): an
-     MCP client over the pinned `mcp==1.12.4` SDK speaking protocol
-     revision 2025-06-18. The registry (`src/config/mcp_servers.ts`,
-     Python twin bound-for-bound identical) is a union discriminated on
-     `transport`: `stdio` servers are spawned from explicit argument
-     vectors as children of the RLM process; `http` servers are dialed
-     over Streamable HTTP (https required for public hosts; plain http
-     only for loopback/RFC1918/dot-free private hosts), optionally with
-     `auth: {kind: bearer|header, header?, valueEnv}` — the registry
-     carries the env var NAME, both halves resolve the value from their
-     own environment, and every REPL-visible error is scrubbed of
-     credential values. One transport-aware seam (`_dial`); everything
-     else — handshake-once inside a long-lived asyncio task (anyio
-     cancel scopes are task-bound), allowlist BEFORE any I/O,
-     double-bounded per-call timeouts, `TRELLIS_MCP_TRUNCATED` size
-     caps, readable dead-on-arrival startup errors, close-in-`finally`
-     — is transport-agnostic. PROVENANCE SPLIT: database tools increment
-     `_count_tool_call()`; MCP calls increment their own counter
-     reported as `mcp_calls` — an answer with zero DATABASE tool calls
-     emits `TRELLIS_PROTOCOL_VIOLATION` no matter how many MCP calls
-     happened. The addendum (`build_mcp_addendum`) lists
-     names/tools/bounds only — never URLs or credentials; empty registry
-     ⇒ byte-identical prompt (unit- and live-pinned).
-   - CRITICAL rlms constraint: `custom_system_prompt` REPLACES the base
-     REPL protocol prompt. Trellis EXTENDS `RLM_SYSTEM_PROMPT` via
-     `TRELLIS_ADDENDUM` (plus the MCP addendum), and rlms runs `.format()`
-     over the prompt so literal curly braces are forbidden there (escape
-     by doubling — see `_SAFE_RUBRIC`; the MCP name charset
-     `^[a-z][a-z0-9_-]*$` makes generated tool listings structurally
-     brace-free).
+     `default_access_mode=READ`, plus the hardened single write path
+     `write_derived_insight`/`write_derived_insights`), `trellis_postgres`
+     (`get_ast_texts`, `vector_search`, and `ast_hashes_exist` — the
+     latter is write-path plumbing and never increments the tool-call
+     counter), and — only when the operator configured servers —
+     `trellis_mcp` (`src/rlm/trellis_mcp.py`): an MCP client over the
+     pinned `mcp==1.12.4` SDK speaking protocol revision 2025-06-18.
+     The registry (`src/config/mcp_servers.ts`, Python twin
+     bound-for-bound identical) is a union discriminated on `transport`:
+     `stdio` servers are spawned from explicit argument vectors; `http`
+     servers are dialed over Streamable HTTP (https required for public
+     hosts), optionally with env-referenced credentials, every
+     REPL-visible error scrubbed. One transport-aware seam (`_dial`);
+     handshake-once inside a long-lived asyncio task, allowlist BEFORE
+     any I/O, double-bounded per-call timeouts, `TRELLIS_MCP_TRUNCATED`
+     size caps, close-in-`finally` — all transport-agnostic. PROVENANCE
+     SPLIT: database tools increment `_count_tool_call()`; MCP calls
+     increment their own counter reported as `mcp_calls` — an answer
+     with zero DATABASE tool calls emits `TRELLIS_PROTOCOL_VIOLATION`
+     no matter how many MCP or workspace operations happened.
+   - **The Tier-3 workspace (Session 14;
+     `src/rlm/trellis_workspace.py`):** injected as `trellis_workspace`
+     when MCP servers are configured OR the run carries `--goal-id`;
+     otherwise nothing is injected and prompt/behavior are
+     byte-identical (pinned by `test:rlm-workspace`). The holder's state
+     is one plain JSON-serializable dict
+     `{version, plan, notes, segments}` — the data-not-objects contract.
+     With a workspace attached, `trellis_mcp.call_tool` captures every
+     result INSIDE the call as an origin-stamped uuid4 segment (stamps
+     wrapper-owned: server, tool, 16-hex argsHash, fetchedAt, bytes,
+     truncated, goalId) and returns the bounded stub
+     `{server,tool,segmentId,bytes,truncated,preview≤500}`; the model
+     pulls full content deliberately via `segment(id)` or fans
+     `llm_query` over segments (recursion-over-variables applied to
+     external knowledge). Model surface: `read()` (bounded index),
+     `segment(id)`, `set_plan`, `add_note`, `drop`, `snapshot()`
+     (canonical JSON — the seam step 4's serialize/park/seed lineage
+     will use). Budgets raise `WorkspaceBudgetError` with usage and a
+     `drop()` hint — stored state is never silently truncated.
+     Structural disjointness: uuid segment ids and 16-hex argsHashes can
+     never match `^[0-9a-f]{64}$`, and the hardened write path rejects
+     them independently. Tier 3 has NO provenance standing.
+   - CRITICAL rlms constraints (verified against the installed
+     rlms==0.1.3; pinned live by the `test:rlm-workspace` LocalREPL
+     section): `custom_system_prompt` REPLACES the base REPL protocol
+     prompt — Trellis EXTENDS `RLM_SYSTEM_PROMPT` via `TRELLIS_ADDENDUM`
+     plus the MCP and workspace addenda; rlms runs `.format()` over the
+     prompt so literal curly braces are forbidden (escape by doubling —
+     see `_SAFE_RUBRIC`; addenda use `dict(...)` example syntax; the
+     MCP/module name charset `^[a-z][a-z0-9_-]*$` keeps generated
+     listings structurally brace-free). `LocalREPL` persists
+     `self.locals` across turns; scaffold restore touches only
+     `RESERVED_TOOL_NAMES` (injected tools persist untouched); on
+     exception, rebindings are lost but in-place mutations persist
+     (harness capture survives model errors in the same block;
+     model-side atomic updates should build-new-then-rebind);
+     underscore-prefixed names never persist.
    - The orchestrator (Session 9) lives in `src/core/agent/` and is a
      pure decision maker: `OrchestratorDecisionSchema` through
      `parseLlmResponse`, planner prompt never routed through rlms,
      dependency-injected `runGoalLoop` with typed failures
-     (`iteration_bound`/`task_bound`/`concurrency_bound`/`decision_error`/
-     `orchestrator_fail`), `agent_worker.ts` + `GET /api/agent-stream`
-     with hard per-goal bounds (`AGENT_*`, single-digit-capped) and its
-     own admission gate (`StreamGate` + `AGENT_QUEUE_MAX_DEPTH` → 429).
-     The orchestrator has NO tools and no database access — tools belong
-     to the RLM sub-agent; that split is deliberate and stays.
-     Zero-LLM drills: `AGENT_ORACLE_ENABLED=true` accepts an `oracle`
-     script (scripted decisions + stubbed tasks) —
+     (`iteration_bound`/`task_bound`/`concurrency_bound`/
+     `decision_error`/`orchestrator_fail`), `agent_worker.ts` +
+     `GET /api/agent-stream` with hard per-goal bounds (`AGENT_*`,
+     single-digit-capped) and its own admission gate. The orchestrator
+     has NO tools and no database access — tools belong to the RLM
+     sub-agent; that split is deliberate and stays. Zero-LLM drills:
+     `AGENT_ORACLE_ENABLED=true` accepts an `oracle` script —
      `npm run test:agent-loop`.
    - **The A2A server surface (Session 11)** exposes the goal loop to
      external agents: `src/api/a2a.ts` over pure modules in
@@ -291,12 +349,13 @@ immutable, content-addressed physical location in source material.
      Prometheus registries; API and workers are separate processes/
      containers. Stable dot-namespaced events; bounded metric labels only —
      queries, goals, message content, artifacts, paths, hashes, entity
-     names, tool arguments, tool results, server commands, URLs, and
-     credentials never become label values or log content. Queue-depth
-     gauges cover all seven queues; `trellis_rlm_mcp_calls_total` is
-     label-free (a `transport` label was considered in Session 12 and
-     rejected — it would grow the telemetry wire line for a distinction
-     the operator's own registry already answers).
+     names, tool arguments, tool results, workspace content, server
+     commands, URLs, and credentials never become label values or log
+     content. Queue-depth gauges cover all seven queues;
+     `trellis_rlm_mcp_calls_total` is label-free. Workspace telemetry is
+     counts only on the `TRELLIS_TELEMETRY` line; no Prometheus metrics
+     were added for it in Session 14 (revisit only with a concrete
+     operational need).
 6. **The frontend (DEFERRED — unscheduled, 3.3 #5 residue) and other stable subsystems**
    - `src/frontend/` is a Next.js 16.2.9 / React 19 app (its own
      `package.json` and lockfile, npm-installed separately) with one
@@ -308,13 +367,13 @@ immutable, content-addressed physical location in source material.
      `http://localhost:3000/:path*` with NO API-key injection (a
      rewrite cannot add headers), there is no production build wired
      into CI, no container, and no deployment documentation. The
-     backend rejects keyless requests whenever `API_KEY` is set, so the
-     proxied page only works against an open local backend today.
+     backend rejects keyless requests whenever `API_KEY` is set.
      `src/frontend/AGENTS.md` warns: this Next.js version has breaking
      changes vs. training data — read `node_modules/next/dist/docs/`
      before writing Next-specific code. These gaps are the deferred
-     3.3 #5 residue (owner direction, July 7, 2026) — scope preserved
-     in the roadmap, NOT this session's work.
+     3.3 #5 residue (owner direction, July 7, 2026 — third deferral) —
+     scope preserved in the roadmap; NOT this session's work unless the
+     owner directs it.
    - Whole-codebase ingestion: `src/core/repository/`, `npm run
      repo:ingest`, live drill `npm run test:repo-ingest`.
    - Benchmarks: OOLONG v1 saturated baseline; anti-shortcut v2 at
@@ -332,27 +391,33 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the Session 13 close-out merge (use `git log -- HANDOFF.md`
-  to identify it; Session 13 landed as two squash-merged PRs).
-- Offline baseline: `npm test` = 485 passing across 57 files.
+- `master`: the Session 14 merge (use `git log -- HANDOFF.md` to
+  identify it; Session 14 landed as one squash-merged PR from branch
+  `d/jovial-hertz-399138`).
+- Offline baseline: `npm test` = 493 passing across 58 files.
 - `npm run build` and `npm run python:check` pass.
 - `npm run drill:scale`: gate CLOSED at max provenance 286; sweep growth
-  1.63x in the Session 12 run against 5.77x fact growth.
-- Live zero-LLM checks: `test:rlm-mcp` (86), `test:a2a` (46),
+  1.85x in the Session 14 run against 5.77x fact growth (run-to-run
+  variance around Session 12's 1.63x; both far under the superlinear
+  trigger).
+- Live zero-LLM checks (Session 14 observed counts):
+  `test:rlm-workspace` (64, new), `test:rlm-mcp` (86), `test:a2a` (46),
   `test:agent-loop` (23), `test:repo-ingest` (45),
-  `test:benchmark-hardening` (24), `test:entity-resolution` (33),
-  `test:api-hardening` (18), `test:rlm-sandbox` (4),
+  `test:benchmark-hardening` (24), `test:entity-resolution` (34 — the
+  previously recorded 33 was a stale count, not a behavior change),
+  `test:api-hardening` (18), `test:rlm-sandbox` (21, extended from 4),
   `test:belief-recovery` (30), `test:invalidation-sweep` (17).
 - Isolated Compose integration: 10 assertions (`--profile test`, unique
   project name, host ports 0; includes the containerized credentialed
-  MCP fixture probe via `scripts/compose_mcp_probe.py`).
-- CI target is Node 22. Session 12's local environment was Node 20.19.2,
-  PostgreSQL 16.14, Neo4j 5.11.0, Python 3.13.1, Docker Compose v2.
+  MCP fixture probe and an image build that ships
+  `trellis_workspace.py`).
+- CI target is Node 22. Session 14's local environment was Node 20.19.2,
+  Python 3.13.1, Docker Compose v2, PostgreSQL 16.x, Neo4j 5.11.
 - Python runtime deps are pinned in `requirements.txt` (`rlms==0.1.3`,
   `openai`, `neo4j`, `psycopg2-binary`, `unstructured`, `mcp==1.12.4`);
-  `npm run python:check` verifies syntax/imports/assets.
-- The frontend has NO offline tests and NO CI coverage today; its build
-  has never been exercised in this repository's CI.
+  `npm run python:check` verifies syntax/imports/assets, including
+  `trellis_workspace.py`.
+- The frontend has NO offline tests and NO CI coverage today.
 
 Fresh worktrees do not contain `node_modules`. Start with:
 
@@ -368,171 +433,136 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 14 problem statement
+## 3. Session 15 problem statement
 
-Two gaps, both recorded in `docs/architecture/WORKSPACE_AND_MODULES.md`
-(the normative design; §ref markers below point into it):
+**First: resolve the owner decision.** The roadmap's first unstruck §4
+row is "remaining design-record steps (§11 steps 3–6), owner-sequenced —
+order to be recorded when directed." The Session 14 PR asked the owner
+to choose among design-record step 3 (module registry + module #0),
+step 4 (workspace lineage), and the deferred frontend. If a direction is
+recorded in the roadmap or the PR thread, that is the objective —
+re-derive §4–§6 from `docs/architecture/WORKSPACE_AND_MODULES.md` at
+this file's level of concreteness before implementing. What follows is
+the RECOMMENDED DEFAULT: **step 3**, per the design record's dependency
+ordering (format → safety → **loader** → transport → permanence →
+self-modification).
 
-- **The single write path enforces provenance only for non-emptiness
-  (§10.2).** `_normalize_fact` in `src/rlm/trellis_tools.py` accepts any
-  non-empty list as `sourceNodeIds`: a hallucinated 64-hex string, a
-  uuid, or `q_0001` writes into the graph as if it were verified
-  provenance. "An AST hash means verified ingested bytes" is convention,
-  not enforcement — a live defect today, independent of any workspace.
-- **External tool results evaporate (§3, §4).** An MCP result transits
-  `call_tool`'s return value into stdout scrollback exactly once;
-  nothing captures it, later turns cannot re-read it without re-calling,
-  `llm_query` fan-out over accumulated findings is impossible, and the
-  RLM has no Tier-3 working state at all — no plan object, no
-  origin-stamped findings, no self-notes surviving a turn.
+**Step 3 problem (design record §9, §9.5, §11 step 3).** The
+spatial-flywheel protocol — the mandatory TREC classification workflow —
+is fused into the monolithic `TRELLIS_ADDENDUM` string in
+`src/rlm/trellis_agent.py`. It is already a module in everything but
+form: a purpose-specific cognitive protocol with its own versioned asset
+(`trec_rubric.json`, the single-source precedent shared with the Phase 5
+verifier). Because it is fused, no capability can be added, versioned,
+retired, or contested without hand-editing the kernel prompt, and the
+capability flywheel (design record §2) has no substrate: no registry to
+land agent-authored modules into, no loader to compose them, no
+manifest-as-graph-entity representation to let the invalidation sweep
+contest a module whose research basis dies (§9.4 — recorded as NOT
+inherited for free). Module #0 — extracting the spatial-flywheel
+protocol into the first registry entry behind a byte-identical
+composed-prompt pin — is the loader's acceptance test with zero new
+capability risk.
 
-Session 14 closes both, hardening first, so Tier 3 lands into a system
-where a scratch-shaped identifier cannot be written as provenance even
-by a defective future change.
+## 4. Required design (for the recommended step 3; re-derive if the owner directs otherwise)
 
-## 4. Required design
+The design record §9 is normative; deviations require a concrete reason
+and equivalent tests, recorded in the roadmap §5 entry.
 
-The design record is normative; deviations require a concrete reason and
-equivalent tests, recorded in the roadmap §5 entry.
-
-### 4.1 Write-path hardening (first commit; design record §10.2)
-
-- `TrellisPostgres` gains `ast_hashes_exist(hashes)` → JSON list of
-  MISSING hashes, one `SELECT id FROM ast_nodes WHERE id = ANY(%s)`,
-  rollback-on-error mirroring `get_ast_texts`. Internal write-path use
-  does not increment the model tool-call counter (leave every existing
-  `_count_tool_call()` placement untouched).
-- `_normalize_fact` rejects any `sourceNodeIds` element not matching
-  `^[0-9a-f]{64}$` (lowercase — AST ids come from `digest('hex')`) with
-  a readable `Provenance Violation` error carrying a bounded echo.
-- `TrellisNeo4j.__init__` accepts an `ast_existence_check` callable;
-  `_run_insight_writes` verifies the deduped union of the batch's hashes
-  BEFORE opening the WRITE session; unknown hashes raise with a bounded
-  list (first 5 + total count). Fail fast, no partial write, no config
-  toggle — enforcement is unconditional. Wire the injection in
-  `trellis_agent.py`. Distinguish infrastructure failure (raise as
-  such) from verified-absent (provenance violation).
-
-### 4.2 The workspace holder (design record §4, all eight subsections)
-
-- New `src/rlm/trellis_workspace.py`: a holder object injected via rlms
-  `custom_tools` as `trellis_workspace` (persists in REPL globals by
-  construction — Appendix A). Inner state is a plain JSON-serializable
-  dict (`version`, `plan`, `notes`, `segments`) — the data-not-objects
-  contract. Methods return JSON STRINGS and raise real exceptions:
-  `read()` (bounded index: ids/origins/sizes/plan/notes, never full
-  contents), `segment(id)` (full content), `set_plan(plan)`,
-  `add_note(text)`, `drop(id)`, `snapshot()` (canonical JSON; the
-  future lineage seam), and harness-side
-  `capture(server, tool, args_hash, content, truncated)` → creates a
-  uuid4 segment stamped with `origin`/`fetchedAt`/`bytes`/`truncated`
-  (+ `goalId`/`taskId` when present) and returns the stub. Stamps are
-  wrapper-owned; the model can never forge them.
-- Budget errors raise (`WorkspaceBudgetError` with current usage and a
-  `drop()` hint); stored state is never silently truncated.
-
-### 4.3 Capture and stub returns (design record §4.1, §4.3)
-
-- `TrellisMcp(servers, workspace=None)`. In `call_tool`, after the
-  existing truncation: with a workspace attached, deposit the result and
-  return the stub
-  `{"server","tool","segmentId","bytes","truncated","preview"}`
-  (preview ≤ 500 chars); with no workspace, the legacy full-result
-  return is byte-identical (pinned). A capture that trips the budget
-  raises before returning; the result is discarded deterministically.
-
-### 4.4 Gating and the addendum (design record §4.7)
-
-- New `--goal-id` CLI arg on `trellis_agent.py`; `buildAgentArgs`
-  forwards it when `job.goalId` exists. Inject the workspace + its
-  addendum only when MCP servers are configured OR `--goal-id` is
-  present; otherwise prompt and behavior are byte-identical (pinned,
-  the empty-registry MCP precedent). The addendum is brace-free
-  (`dict(...)` example syntax), instructs rebind-for-atomic-updates,
-  and restates the hard rule: workspace ids/content never satisfy
-  provenance.
-
-### 4.5 Bounds and configuration (design record §4.7)
-
-- `TRELLIS_WORKSPACE_MAX_SEGMENTS` (default 128, hard cap 1024) and
-  `TRELLIS_WORKSPACE_MAX_BYTES` (default 4 MB, hard cap 32 MB),
-  Zod-validated in `src/config/index.ts`, forwarded by `buildAgentEnv`
-  (stripped when unset), re-validated defensively in Python with the
-  same maxima.
-
-### 4.6 Telemetry (design record §4.8)
-
-- `TRELLIS_TELEMETRY` gains `workspace_ops`, `workspace_segments`,
-  `workspace_bytes` — counts only; workspace content never appears in
-  logs or metric labels (T16). The provenance protocol is unchanged:
-  zero DATABASE tool calls is still `TRELLIS_PROTOCOL_VIOLATION`
-  regardless of workspace or MCP activity.
+- **Manifest schema (§9.1).** A module is a versioned
+  document-plus-assets artifact under `modules/<name>/` (manifest plus a
+  brace-free addendum text file), validated by a Zod schema in a new
+  `src/config/modules.ts` with a bound-for-bound Python twin: name
+  charset `^[a-z][a-z0-9_-]*$` (the `MCP_NAME_PATTERN` discipline, so
+  generated prompt listings stay structurally brace-free), integer
+  `version`, one-sentence `purpose`, `research.sourceNodeIds` (AST
+  hashes; may be empty for module #0 — it predates the promotion path),
+  `addendum` path, optional namespaced `tools` (EMPTY this session —
+  protocol modules only), hard-capped `bounds` (suggested
+  `addendumMaxBytes` 8192), `acceptance.zeroPaid` naming a drill,
+  `status: active|contested|retired`, `kernelCompat: 1`. Addendum text
+  is validated brace-free and size-capped at registry load.
+- **Registry + composition (§9.2).** Operator-configured selection (an
+  env-named registry, the `TRELLIS_MCP_SERVERS` pattern; forwarded to
+  the child by `buildAgentEnv`, re-validated defensively in Python):
+  composed system prompt = `RLM_SYSTEM_PROMPT` + the residual base
+  `TRELLIS_ADDENDUM` + Σ selected module addenda (+ MCP + workspace
+  addenda) + query, with deterministic ordering and a hard cap on
+  modules per run (suggested 4). Selection only ever WITHIN the
+  registered allowlist (Guardrail 5). Empty registry ⇒ byte-identical
+  prompt (pinned).
+- **Module #0 (§9.5).** Extract the spatial-flywheel protocol section of
+  `TRELLIS_ADDENDUM` into `modules/spatial-flywheel/`; the default
+  configuration loads it, and the composed prompt is pinned
+  BYTE-IDENTICAL to today's `SYSTEM_PROMPT` — the loader proves itself
+  with zero behavior change. Keep the `_SAFE_RUBRIC` splice semantics
+  intact (the rubric stays the versioned single source; decide whether
+  the module addendum references it via the same escape-by-doubling
+  splice, and pin whichever you choose).
+- **Manifest-as-graph-entity (§9.4).** Represent registered modules as
+  graph entities citing their `research.sourceNodeIds` so the existing
+  invalidation sweep can reach them. Module #0 may carry empty research
+  provenance and therefore no graph entity yet — decide and record. If
+  this half is too large for one session, defer it explicitly to the
+  step-6 flywheel turn with the reason recorded in the roadmap — do not
+  silently drop it.
+- **Gates (§9.3).** This session lands the protocol-module class only:
+  automated brace/charset/size validation + zero-paid drill + human PR
+  review. No auto-landing; tool-bearing modules and kernel changes stay
+  out of scope.
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `docs/architecture/WORKSPACE_AND_MODULES.md` §4, §10.2, §11 steps 1–2,
-  Appendix A; `docs/GLOSSARY.md`; `.agents/AGENT_CODING_GUIDELINES.md`.
-- `src/rlm/trellis_tools.py` (`_normalize_fact`, `_run_insight_writes`,
-  session access modes), `src/rlm/trellis_mcp.py` (`call_tool`,
-  `truncate_result`, the addendum builder and its brace discipline),
-  `src/rlm/trellis_agent.py` (tool construction, gating, telemetry
-  payload, the `.format()` brace contract comment block).
-- `src/workers/rlm_job.ts` (`buildAgentArgs`/`buildAgentEnv` — pure,
-  unit-pinned), `src/config/index.ts` (validated config; AGENT_* bound
-  style), `src/config/mcp_servers.ts` (bounds discipline to mirror).
-- The installed rlms package (`rlm/environments/local_repl.py` — locate
-  with `python -c "import rlm, os; print(os.path.dirname(rlm.__file__))"`)
-  for the persistence/scaffold/exception semantics pinned in Appendix A.
-- Test patterns: `scripts/test_rlm_mcp.ts` + `scripts/test_rlm_mcp.py`
-  (fixture-driven Python drill with a Node runner),
-  `scripts/test_rlm_sandbox.ts` + `.py` (live write-path probes),
-  `scripts/fixture_mcp_server.py` (the only MCP server acceptance ever
-  configures).
+- `docs/architecture/WORKSPACE_AND_MODULES.md` §9 (all subsections),
+  §9.5, §11 step 3, §12 corrections ledger; `docs/GLOSSARY.md`;
+  `.agents/AGENT_CODING_GUIDELINES.md`.
+- `src/rlm/trellis_agent.py` (`TRELLIS_ADDENDUM`, `_SAFE_RUBRIC`, the
+  `.format()` brace-contract comment block, the Session 14
+  workspace-gating block — the composition point new module addenda
+  join), `src/rlm/trellis_mcp.py` (`build_mcp_addendum` — the
+  brace-free composition discipline), `src/rlm/trellis_workspace.py`
+  (`build_workspace_addendum`, `parse_workspace_bounds` — the
+  Python-twin validation pattern).
+- `src/config/mcp_servers.ts` (the registry-validation pattern to
+  mirror), `src/config/index.ts` (where the module registry config
+  lands), `src/workers/rlm_job.ts` (`buildAgentEnv`/`buildAgentArgs` —
+  pure, unit-pinned forwarding).
+- `src/rlm/trec_rubric.json` and its loading in `trellis_tools.py`
+  (the versioned-asset precedent).
+- Test patterns: `scripts/test_rlm_workspace.ts`/`.py` (the freshest
+  wrapper+drill pair, including prompt byte-identity pins),
+  `src/config/workspace_bounds.test.ts` (the config-test pattern),
+  `scripts/test_rlm_mcp.py` §2 (addendum hygiene checks).
 
 ## 6. Test strategy and acceptance
 
 Test first. No paid LLM calls and no external network in acceptance.
 
-Offline (joins `npm test`, baseline 485):
+Offline (joins `npm test`, baseline 493):
 
-- `rlm_job`: `--goal-id` forwarded when present, absent otherwise;
-  workspace env vars forwarded when configured, stripped when not.
-- config: workspace bounds validated with defaults and hard-cap
-  rejection.
+- manifest/registry validation twins: valid manifest parses; bad
+  names/versions/sizes rejected; addendum brace and size validation;
+  duplicate module names rejected; the modules-per-run cap; empty
+  registry means no modules.
+- composition purity: deterministic ordering; composed-prompt assembly
+  as a pure function pinned by unit test.
 
-New live zero-paid drill `npm run test:rlm-workspace`
-(`scripts/test_rlm_workspace.ts` driving `scripts/test_rlm_workspace.py`
-against the fixture server):
+New live zero-paid drill `npm run test:modules` (or extend an existing
+drill — decide and record):
 
-- capture fires from inside `call_tool`; stub shape and preview bound;
-  origin stamps present and unforgeable;
-- segment ids are uuid-shaped and FAIL `^[0-9a-f]{64}$` (structural
-  disjointness pin);
-- budget exhaustion raises with usage; `drop()` recovers;
-- gated-off runs: prompt byte-identical AND `call_tool` return
-  byte-identical to pre-Session-14;
-- direct-`LocalREPL` semantics pin against the installed rlms==0.1.3:
-  persistence across `execute_code`, scaffold restore leaves
-  `trellis_workspace` intact, rebind-vs-mutate on exception (in-place
-  mutation persists, rebinding is lost), underscore names do not
-  persist. An rlms upgrade that changes namespace semantics must fail
-  this drill loudly.
+- **The byte-identical pin (the session's most important check):** the
+  composed prompt with module #0 loaded equals the pre-extraction
+  `SYSTEM_PROMPT` byte-for-byte; the empty-registry composed prompt
+  equals `RLM_SYSTEM_PROMPT` + the residual base addendum.
+- brace-freedom of every composed prompt; the rubric splice unchanged;
+  the Zod and Python validators agree on the same manifest corpus
+  (cross-language contract).
+- If manifest-as-graph-entity ships: the invalidation sweep contests a
+  module whose research hash is orphaned (fixture-scoped, cleaned up).
 
-Extend `npm run test:rlm-sandbox` with the hardening checks: malformed
-hash rejected (uppercase hex, 63 chars, uuid-shaped, `q_0001`);
-well-formed-but-unknown hash rejected with bounded message; real
-ingested hash still writes (and cleans up); bulk variant validates the
-deduped union once.
-
-The design record §11 step-1 paired-run behavioral probe (sequential
-multi-step task, workspace on/off, measuring repeated tool calls and
-end-of-run workspace well-formedness) is PAID and requires explicit
-owner approval — propose it with a cost estimate; do not run it
-unprompted. It is not an acceptance gate.
-
-Required close-out:
+Required close-out (the standing block):
 
 ```
  npm test
@@ -558,19 +588,23 @@ Required close-out:
 Update:
 
 - `TRELLIS_ROADMAP.md`: full-dated §5 entry with exact commands, counts,
-  and any defects found; record design-record §11 steps 1–2 as complete
-  only after acceptance.
-- `docs/architecture/WORKSPACE_AND_MODULES.md`: mark §11 steps 1–2 done
-  (dated), leaving steps 3–6 open.
-- README (workspace env vars + a short External tools note that results
-  are captured into the workspace when active), `.env.example`
-  (workspace bounds), `API_REFERENCE.md` only if a client-visible
-  contract changes (it should not — the SSE and queue contracts are
-  untouched).
-- `HANDOFF.md`: regenerate per §0. The next objective is owner-directed:
-  design-record step 3 (module registry + module #0), step 4 (workspace
-  lineage), or the deferred frontend — do not assume; ask via the PR or
-  pick up the owner's recorded direction.
+  and any defects found; record the completed design-record step in §4
+  and in the design record §11.
+- README and `.env.example` (the module registry is operator-facing
+  configuration); `API_REFERENCE.md` only if a client-visible contract
+  changes (it should not).
+- If a new Python file ships under `src/rlm/`, add it to the Dockerfile
+  `COPY` line and `check_python_runtime.py` (the Session 12 defect
+  class; Session 14 kept this green — keep it that way).
+- `HANDOFF.md`: regenerate per §0.
+
+Standing owner-gated item (do NOT run unprompted): the design record §11
+step-1 paired-run behavioral probe (a sequential multi-step task, paired
+runs with the workspace on/off, measuring repeated tool calls,
+end-of-run workspace well-formedness, and answer correctness) is PAID;
+it was proposed in the Session 14 PR with a cost estimate and awaits
+approval. If approved, run it under its recorded protocol and record
+results in `docs/benchmarks/` and the roadmap.
 
 ## 7. Guardrails
 
@@ -580,43 +614,51 @@ Update:
 2. Never merge, rename, or delete Entity nodes. Equivalence stays an
    overlay belief.
 3. Preserve provenance on every semantic node and edge.
-   `write_derived_insight` remains the single agent write path — after
-   this session it also enforces hash format and existence. Workspace
-   ids/content and MCP output can never be passed as `sourceNodeIds`;
-   external content earns citability only through the verified ingest
-   path.
+   `write_derived_insight` remains the single agent write path, and its
+   Session 14 enforcement (hash format + `ast_nodes` existence, checked
+   before the WRITE session opens) is kernel — never weaken, bypass, or
+   make it configurable. Workspace ids/content and MCP output can never
+   be passed as `sourceNodeIds`; external content earns citability only
+   through the verified ingest path.
 4. Tier 3 never satisfies the provenance protocol: an answer with zero
    database tool calls emits `TRELLIS_PROTOCOL_VIOLATION` no matter how
    many workspace or MCP operations occurred.
-5. Operator control is absolute for the RLM tool surface: servers,
-   tools, bounds, and credential references come from validated config
-   only; no inbound payload or model completion may alter any of it.
-   The workspace adds no such path. L1 (runtime config mutation) and
-   L2 (runtime code hot-patching) remain forbidden.
+5. Operator control is absolute for the RLM tool surface AND the module
+   space: servers, tools, modules, bounds, and credential references
+   come from validated config only; no inbound payload or model
+   completion may alter any of it mid-run; module selection is only ever
+   within the operator-registered allowlist. L1 (runtime config
+   mutation) and L2 (runtime code hot-patching) remain forbidden; L3
+   lands only through the recorded gates.
 6. Every external interaction is bounded; workspace writes are bounded
    by validated config and raise on budget — never silent truncation of
-   stored state.
-7. Validate at every boundary: workspace bounds cross Zod and Python
-   validators; all LLM calls stay inside BullMQ workers or the RLM
-   process; the orchestrator stays tool-free; `AGENT_ORACLE_ENABLED`
-   and `TRELLIS_A2A_ENABLED` defaults stay pinned false.
+   stored state; module addenda are size-capped and brace-validated at
+   registry load.
+7. Validate at every boundary: bounds and registries cross Zod and
+   Python twin validators; all LLM calls stay inside BullMQ workers or
+   the RLM process; the orchestrator stays tool-free;
+   `AGENT_ORACLE_ENABLED` and `TRELLIS_A2A_ENABLED` defaults stay
+   pinned false.
 8. Default to zero paid work and zero external network in acceptance;
    the fixture server remains the only MCP server acceptance
    configures; the paired-run probe is owner-gated.
 9. Do not break existing consumers: with no workspace attached,
-   `call_tool` returns and the system prompt are byte-identical;
-   pre-Session-9 `rlm_queue` payloads still process; the
-   `/api/agent-stream` SSE contract, the A2A v1.0 surface, and the
+   `call_tool` returns and the system prompt are byte-identical; with an
+   empty module registry the composed prompt is byte-identical; with
+   module #0 loaded the composed prompt is byte-identical to today's
+   `SYSTEM_PROMPT`; pre-Session-9 `rlm_queue` payloads still process;
+   the `/api/agent-stream` SSE contract, the A2A v1.0 surface, and the
    backend API contract are untouched; the backend API key still never
    reaches any client bundle.
 10. Respect the rlms prompt contract: extend `RLM_SYSTEM_PROMPT`, never
     replace it; no literal curly braces in anything rlms formats
-    (addendum examples use `dict(...)` syntax); no rlms library
-    modifications — the workspace is injected `custom_tools` state.
-11. Follow the T16 observability house style: workspace content,
-    queries, tool arguments/results, hashes, and credentials never
-    become metric label values or log content; telemetry carries counts
-    only.
+    (addenda use `dict(...)` example syntax; validated name charsets
+    keep generated listings structurally brace-free); no rlms library
+    modifications.
+11. Follow the T16 observability house style: workspace content, module
+    addendum text, queries, tool arguments/results, hashes, and
+    credentials never become metric label values or log content;
+    telemetry carries counts only.
 12. Keep API and worker processes split; project-scoped Compose
     commands; fixtures and drills clean up only token-scoped or
     pre-snapshotted state.
@@ -627,12 +669,15 @@ Update:
 
 ## 8. Explicit exclusions
 
-Do not include: frontend work of any kind (deferred, unscheduled —
+Do not include (unless the owner's recorded direction for Session 15
+says otherwise): frontend work of any kind (deferred, unscheduled —
 scope preserved in roadmap §3.3 #5); workspace lineage / Redis parking
-(design record §11 step 4); the promotion path (step 5); the module
-registry or module #0 (step 3); the first flywheel turn (step 6);
-orchestrator tools or transcript changes; rlms `compaction` enablement;
-new MCP servers, transports, or OAuth flows; A2A changes; repository-
-extraction prerequisites; `ASTRef`/`EVIDENCED_BY` migration (gate closed
-at 286); T13 re-hashing; rlms library modifications; paid LLM calls or
-external network access as acceptance checks.
+(design record §11 step 4); the promotion path (step 5); the first
+flywheel turn (step 6); tool-bearing modules or module auto-landing
+(the protocol-module class must earn trust first, §9.3); orchestrator
+tools or transcript changes; rlms `compaction` enablement; new MCP
+servers, transports, or OAuth flows; A2A changes; repository-extraction
+prerequisites; `ASTRef`/`EVIDENCED_BY` migration (gate closed at 286);
+T13 re-hashing; rlms library modifications; weakening or toggling the
+Session 14 write-path enforcement; paid LLM calls or external network
+access as acceptance checks.

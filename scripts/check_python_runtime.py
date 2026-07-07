@@ -14,6 +14,7 @@ PYTHON_FILES = [
     RLM_DIR / "trellis_agent.py",
     RLM_DIR / "trellis_tools.py",
     RLM_DIR / "trellis_mcp.py",
+    RLM_DIR / "trellis_workspace.py",
     ROOT / "scripts" / "parse_pdf.py",
     ROOT / "scripts" / "fixture_mcp_server.py",
     ROOT / "scripts" / "compose_mcp_probe.py",
@@ -34,6 +35,7 @@ def main() -> None:
         "unstructured.partition.pdf",
         "trellis_tools",
         "trellis_mcp",
+        "trellis_workspace",
         "trellis_agent",
     ):
         importlib.import_module(module_name)

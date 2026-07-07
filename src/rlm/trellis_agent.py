@@ -8,6 +8,7 @@ from rlm.core.lm_handler import LMRequestHandler
 from rlm.utils.prompts import RLM_SYSTEM_PROMPT
 from trellis_tools import TrellisNeo4j, TrellisPostgres, get_tool_call_count, RUBRIC_TEXT
 from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
+from trellis_workspace import TrellisWorkspace, build_workspace_addendum, parse_workspace_bounds
 
 # --- Sub-call counting -------------------------------------------------
 # In this rlms version, REPL llm_query()/llm_query_batched() requests are
@@ -101,11 +102,15 @@ def main():
     parser = argparse.ArgumentParser(description="Trellis RLM Agent")
     parser.add_argument("--query", type=str, required=True, help="The user query to solve")
     parser.add_argument("--max-iterations", type=int, default=5, help="Max root REPL iterations")
+    parser.add_argument("--goal-id", type=str, default=None,
+                        help="Goal correlation id (Session 14: also gates the Tier-3 workspace on)")
     args = parser.parse_args()
 
-    # Initialize tools
-    neo4j_tool = TrellisNeo4j()
+    # Initialize tools. The Neo4j write path verifies cited AST hashes
+    # against ast_nodes through the Postgres tool (Session 14 §10.2) —
+    # unconditional, no toggle.
     postgres_tool = TrellisPostgres()
+    neo4j_tool = TrellisNeo4j(ast_existence_check=postgres_tool.ast_hashes_exist)
     mcp_tool = None
 
     print(f"Starting RLM Agent for query: '{args.query}'", flush=True)
@@ -128,15 +133,35 @@ def main():
         # pre-Session-10 run (build_mcp_addendum([]) is the empty string).
         mcp_servers = parse_mcp_config(os.getenv("TRELLIS_MCP_SERVERS"))
         custom_tools = {"trellis_neo4j": neo4j_tool, "trellis_postgres": postgres_tool}
+
+        # Session 14: the Tier-3 workspace is injected only when external
+        # tools are configured OR the run belongs to a goal — a bare
+        # pre-existing run stays byte-identical (prompt and behavior),
+        # the empty-registry MCP precedent, pinned by test:rlm-workspace.
+        workspace = None
+        if mcp_servers or args.goal_id:
+            max_segments, max_bytes = parse_workspace_bounds()
+            workspace = TrellisWorkspace(
+                max_segments=max_segments,
+                max_bytes=max_bytes,
+                goal_id=args.goal_id,
+            )
+            custom_tools["trellis_workspace"] = workspace
+
         if mcp_servers:
-            mcp_tool = TrellisMcp(mcp_servers)
+            mcp_tool = TrellisMcp(mcp_servers, workspace=workspace)
             custom_tools["trellis_mcp"] = mcp_tool
             print(f"MCP servers connected: {', '.join(s['name'] for s in mcp_servers)}", flush=True)
 
         # Inject the query directly into the system prompt to ensure the LLM sees it and doesn't ask for it.
         # Curly braces are escaped because rlms applies .format() to the system prompt.
         safe_query = args.query.replace("{", "{{").replace("}", "}}")
-        dynamic_system_prompt = SYSTEM_PROMPT + build_mcp_addendum(mcp_servers) + f"\n\nTHE USER'S QUERY IS: {safe_query}\nDO NOT ASK FOR A QUERY, THIS IS IT. EXECUTE IT IMMEDIATELY."
+        dynamic_system_prompt = (
+            SYSTEM_PROMPT
+            + build_mcp_addendum(mcp_servers)
+            + build_workspace_addendum(workspace)
+            + f"\n\nTHE USER'S QUERY IS: {safe_query}\nDO NOT ASK FOR A QUERY, THIS IS IT. EXECUTE IT IMMEDIATELY."
+        )
 
         rlm = RLM(
             environment="local",
@@ -171,6 +196,11 @@ def main():
             # Session 10: MCP usage is counted separately from database
             # tool calls — it never feeds the provenance requirement.
             "mcp_calls": get_mcp_call_count(),
+            # Session 14: workspace activity — counts only, never content
+            # (T16). Like mcp_calls, none of it feeds the provenance
+            # requirement.
+            **(workspace.stats() if workspace is not None else
+               {"workspace_ops": 0, "workspace_segments": 0, "workspace_bytes": 0}),
             "execution_time_s": getattr(result, "execution_time", None),
             "model_usage": usage_dict.get("model_usage_summaries", {}),
         }
