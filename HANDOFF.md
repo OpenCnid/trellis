@@ -297,7 +297,7 @@ immutable, content-addressed physical location in source material.
      label-free (a `transport` label was considered in Session 12 and
      rejected — it would grow the telemetry wire line for a distinction
      the operator's own registry already answers).
-6. **The frontend (THIS SESSION'S SUBJECT) and other stable subsystems**
+6. **The frontend (DEFERRED — unscheduled, 3.3 #5 residue) and other stable subsystems**
    - `src/frontend/` is a Next.js 16.2.9 / React 19 app (its own
      `package.json` and lockfile, npm-installed separately) with one
      page: an entity search box over a force-directed graph pane
@@ -312,7 +312,9 @@ immutable, content-addressed physical location in source material.
      proxied page only works against an open local backend today.
      `src/frontend/AGENTS.md` warns: this Next.js version has breaking
      changes vs. training data — read `node_modules/next/dist/docs/`
-     before writing Next-specific code.
+     before writing Next-specific code. These gaps are the deferred
+     3.3 #5 residue (owner direction, July 7, 2026) — scope preserved
+     in the roadmap, NOT this session's work.
    - Whole-codebase ingestion: `src/core/repository/`, `npm run
      repo:ingest`, live drill `npm run test:repo-ingest`.
    - Benchmarks: OOLONG v1 saturated baseline; anti-shortcut v2 at
