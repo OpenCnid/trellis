@@ -42,6 +42,23 @@ describe('createMetrics', () => {
     expect(text).toContain('trellis_rlm_mcp_calls_total 4');
   });
 
+  it('pins the A2A counter names and bounded labels (Session 11)', async () => {
+    // The method label is drawn from the fixed protocol vocabulary plus
+    // 'invalid'; outcomes reuse the agent goal vocabulary. Goal text,
+    // messages, and artifacts never become label values (Guardrail 11).
+    const metrics = createMetrics(new Registry());
+    metrics.a2aRequestsTotal.inc({ method: 'SendMessage' });
+    metrics.a2aRequestsTotal.inc({ method: 'invalid' }, 2);
+    metrics.a2aTasksTotal.inc({ outcome: 'completed' });
+    metrics.a2aTasksTotal.inc({ outcome: 'failed' });
+
+    const text = await metrics.registry.metrics();
+    expect(text).toContain('trellis_a2a_requests_total{method="SendMessage"} 1');
+    expect(text).toContain('trellis_a2a_requests_total{method="invalid"} 2');
+    expect(text).toContain('trellis_a2a_tasks_total{outcome="completed"} 1');
+    expect(text).toContain('trellis_a2a_tasks_total{outcome="failed"} 1');
+  });
+
   it('creates independent registries without duplicate-registration failures', async () => {
     const a = createMetrics(new Registry());
     const b = createMetrics(new Registry());

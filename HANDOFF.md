@@ -5,7 +5,7 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–10 are complete and merged:
+Sessions 1–11 are complete and merged:
 
 - PR #21 — async reliability and batch ingestion.
 - PR #22 — provenance liveness closure and verified production ingestion.
@@ -29,28 +29,42 @@ Sessions 1–10 are complete and merged:
   reads their `TRELLIS_RESULT` envelopes, and iterates under hard
   per-goal bounds. Zero-LLM acceptance via oracle scripts + stubbed
   tasks (`npm run test:agent-loop`).
-- Session 10 (July 7, 2026) — the MCP tool surface for the RLM sub-agent
-  (3.3 #8 first slice, branch `session-10-mcp-tools`): an
-  operator-configured stdio MCP client (`TRELLIS_MCP_SERVERS` →
-  `src/config/mcp_servers.ts` → `src/rlm/trellis_mcp.py`, injected as
-  `trellis_mcp` via rlms `custom_tools`) with allowlist-before-I/O
-  enforcement, per-call timeouts, size-capped results, a separate
-  `mcp_calls` telemetry counter that never satisfies the
-  database-provenance requirement, and zero-paid acceptance against a
-  local deterministic fixture server (`npm run test:rlm-mcp`).
+- PR #34 — the MCP tool surface for the RLM sub-agent (Session 10,
+  3.3 #8 first slice): an operator-configured stdio MCP client
+  (`TRELLIS_MCP_SERVERS` → `src/config/mcp_servers.ts` →
+  `src/rlm/trellis_mcp.py`, injected as `trellis_mcp` via rlms
+  `custom_tools`) with allowlist-before-I/O enforcement, per-call
+  timeouts, size-capped results, a separate `mcp_calls` telemetry
+  counter that never satisfies the database-provenance requirement, and
+  zero-paid acceptance against a local deterministic fixture server
+  (`npm run test:rlm-mcp`).
+- Session 11 (July 7, 2026) — the A2A server surface (3.3 #8 second
+  slice, branch `session-11-a2a-server`): Trellis serves the Agent2Agent
+  protocol (spec v1.0.0, JSON-RPC binding, hand-rolled with Zod — the
+  official `@a2a-js/sdk` 0.3.13 still speaks the 0.3.x wire format and
+  was not adopted; zero new dependencies) over the existing goal loop.
+  `TRELLIS_A2A_ENABLED` (default false; unset ⇒ byte-identical API,
+  drill-pinned) mounts the public well-known Agent Card plus one
+  key-gated JSON-RPC endpoint (`POST /a2a/v1`) whose
+  `SendMessage`/`SendStreamingMessage`/`GetTask`/`CancelTask` dispatch
+  goals through the SAME `StreamGate` + queue-depth gates and per-goal
+  bounds as `/api/agent-stream`, record lifecycle in TTL-bounded Redis
+  task records, and translate goal events to A2A task states through the
+  pure `src/core/a2a/task_record.ts`. Zero-paid acceptance:
+  `npm run test:a2a` (46 checks).
 
 OpenCnid selected the MIT License on July 6, 2026.
 
 Your objective is to study the current code and `TRELLIS_ROADMAP.md`, present a
-concrete design, and then implement **Session 11: the 3.3 #8 continuation,
-first A2A slice — expose Trellis as an A2A (Agent2Agent protocol) server over
-the existing agentic goal loop**, so external agents can dispatch goals to
-Trellis through a standard interoperability surface without weakening the
-admission gates, per-goal bounds, provenance invariants, or the zero-paid
-acceptance posture. Further MCP tool-surface expansion (remote/HTTP
-transports, containerized tool servers) is the recorded following slice —
-not this session unless the owner redirects. Do not re-plan or re-implement
-completed work.
+concrete design, and then implement **Session 12: the 3.3 #8 continuation,
+MCP tool-surface expansion — remote (Streamable HTTP) MCP transports with an
+operator-owned auth story, plus a containerized tool-server pattern**, so the
+RLM sub-agent can consult tool servers that do not live inside the worker
+container, without weakening the allowlist/timeout/size-cap discipline, the
+provenance split, or the zero-paid acceptance posture. The frontend
+deployment remainder (3.3 #5) is the recorded following item — not this
+session unless the owner redirects. Do not re-plan or re-implement completed
+work.
 
 ---
 
@@ -132,20 +146,20 @@ immutable, content-addressed physical location in source material.
      rest use bounded retries. All LLM calls live inside BullMQ workers or
      the RLM process; every worker-consumed completion crosses
      `parseLlmResponse` (`src/core/llm/boundary.ts`).
-4. **RLM execution, the agentic loop, and external tools**
+4. **RLM execution, the agentic loop, and external surfaces**
    - `GET /api/rlm-stream` (API-key gated, `StreamGate` + queue-depth
      backstop) subscribes to `rlm-stream:<jobId>`, then enqueues one
      `rlm_queue` job. `src/workers/rlm_worker.ts` spawns one Python process
      per job (`trellis_agent.py`) with config forwarded via env by the pure
      `buildAgentEnv` helper in `src/workers/rlm_job.ts` (`NEO4J_*`,
-     `PG_DSN`, `PYTHONPATH`, and — Session 10 — the canonical
-     `TRELLIS_MCP_SERVERS` registry; when no servers are configured the
-     helper strips any raw inherited value so the child only ever sees
-     validated config). The worker publishes every stdout chunk and feeds
-     two pure bounded scanners over the identical bytes:
-     `RlmTelemetryScanner` (`TRELLIS_TELEMETRY:` spend line — since
-     Session 10 carrying `mcp_calls`, backward-compatible in both
-     directions) and `RlmResultScanner` (`TRELLIS_RESULT:` task envelope
+     `PG_DSN`, `PYTHONPATH`, and the canonical `TRELLIS_MCP_SERVERS`
+     registry; when no servers are configured the helper strips any raw
+     inherited value so the child only ever sees validated config). The
+     worker publishes every stdout chunk and feeds two pure bounded
+     scanners over the identical bytes: `RlmTelemetryScanner`
+     (`TRELLIS_TELEMETRY:` spend line, carrying `mcp_calls` since
+     Session 10, backward-compatible in both directions) and
+     `RlmResultScanner` (`TRELLIS_RESULT:` task envelope
      `{status, answer, toolCalls}`; shared buffering in
      `line_scanner.ts`). The worker's completion value is the parsed
      envelope + telemetry (`RlmJobCompletion`). Job payloads are
@@ -159,26 +173,29 @@ immutable, content-addressed physical location in source material.
      `default_access_mode=READ`, plus the single write path
      `write_derived_insight`/`write_derived_insights`, which REQUIRES
      non-empty `sourceNodeIds` AST hashes), `trellis_postgres`
-     (`get_ast_texts`, `vector_search`), and — Session 10, only when the
-     operator configured servers — `trellis_mcp`
-     (`src/rlm/trellis_mcp.py`): a stdio MCP client over the pinned
-     `mcp==1.12.4` SDK. Each configured server is spawned from an explicit
-     argument vector as a child of the RLM process, handshaken once inside
-     a long-lived asyncio task on a background loop thread (anyio cancel
-     scopes are task-bound), and closed in the agent's `finally`.
-     `call_tool(server, tool, arguments)` enforces the operator allowlist
-     BEFORE any I/O, bounds every call (SDK `read_timeout_seconds` plus a
-     sync-side backstop so the REPL thread can never hang), and truncates
-     oversized results with an explicit `TRELLIS_MCP_TRUNCATED` marker.
-     Wrapper discipline everywhere: JSON STRING returns; errors RAISE with
-     real messages for REPL self-correction. PROVENANCE SPLIT: database
-     tools increment `_count_tool_call()`; MCP calls increment their own
-     counter reported as `mcp_calls` — an answer with zero DATABASE tool
-     calls emits `TRELLIS_PROTOCOL_VIOLATION` no matter how many MCP
-     calls happened. The prompt addendum generated from the config
-     (`build_mcp_addendum`) is empty for an empty registry (byte-identical
-     prompt, unit- and live-pinned) and states the contract: MCP results
-     are research context, never `sourceNodeIds`.
+     (`get_ast_texts`, `vector_search`), and — only when the operator
+     configured servers — `trellis_mcp` (`src/rlm/trellis_mcp.py`): a
+     stdio MCP client over the pinned `mcp==1.12.4` SDK. Each configured
+     server is spawned from an explicit argument vector as a child of the
+     RLM process, handshaken once inside a long-lived asyncio task on a
+     background loop thread (anyio cancel scopes are task-bound), and
+     closed in the agent's `finally`. `call_tool(server, tool, arguments)`
+     enforces the operator allowlist BEFORE any I/O, bounds every call
+     (SDK `read_timeout_seconds` plus a sync-side backstop so the REPL
+     thread can never hang), and truncates oversized results with an
+     explicit `TRELLIS_MCP_TRUNCATED` marker. Wrapper discipline
+     everywhere: JSON STRING returns; errors RAISE with real messages for
+     REPL self-correction. PROVENANCE SPLIT: database tools increment
+     `_count_tool_call()`; MCP calls increment their own counter reported
+     as `mcp_calls` — an answer with zero DATABASE tool calls emits
+     `TRELLIS_PROTOCOL_VIOLATION` no matter how many MCP calls happened.
+     The prompt addendum generated from the config (`build_mcp_addendum`)
+     is empty for an empty registry (byte-identical prompt, unit- and
+     live-pinned) and states the contract: MCP results are research
+     context, never `sourceNodeIds`. THIS SESSION extends this client:
+     the registry gains a remote transport variant, and the same
+     allowlist/timeout/cap machinery must hold for servers reached over
+     HTTP.
    - CRITICAL rlms constraint: `custom_system_prompt` REPLACES the base
      REPL protocol prompt. Trellis EXTENDS `RLM_SYSTEM_PROMPT` via
      `TRELLIS_ADDENDUM` (plus the MCP addendum), and rlms runs `.format()`
@@ -195,19 +212,46 @@ immutable, content-addressed physical location in source material.
      with hard per-goal bounds (`AGENT_*`, single-digit-capped) and its
      own admission gate (`StreamGate` + `AGENT_QUEUE_MAX_DEPTH` → 429).
      The orchestrator has NO tools and no database access — tools belong
-     to the RLM sub-agent; that split is deliberate and stays. Zero-LLM
-     drills: `AGENT_ORACLE_ENABLED=true` accepts an `oracle` script
-     (scripted decisions + stubbed tasks) — `npm run test:agent-loop`.
-     THIS SESSION builds on this loop: A2A is a new inbound surface that
-     dispatches the same goals through the same queue, gates, and bounds.
+     to the RLM sub-agent; that split is deliberate and stays.
+     Zero-LLM drills: `AGENT_ORACLE_ENABLED=true` accepts an `oracle`
+     script (scripted decisions + stubbed tasks) —
+     `npm run test:agent-loop`.
+   - **The A2A server surface (Session 11)** exposes the goal loop to
+     external agents: `src/api/a2a.ts` (Express integration) over pure
+     modules in `src/core/a2a/` (`protocol.ts` — the Zod JSON-RPC
+     boundary, spec error codes, `A2A-Version` negotiation;
+     `task_record.ts` — the goal→task state machine and all ProtoJSON
+     wire rendering; `agent_card.ts`). Enabled only by
+     `TRELLIS_A2A_ENABLED` (default false; the API is byte-identical
+     when unset). The card is served unauthenticated from
+     `/.well-known/agent-card.json` (public contract only, no-leak
+     pinned); `POST /a2a/v1` sits behind the API key and requires
+     `A2A-Version: 1.0` (spec: an absent header means a 0.3 client and
+     is declined). Dispatch shares the SAME `StreamGate` instance and
+     queue-depth backstop as `/api/agent-stream`; one A2A task is one
+     goal (taskId = goalId), recorded in TTL-bounded Redis records
+     (`a2a:task:<id>`, `A2A_TASK_TTL_SECONDS`) by a per-goal recorder
+     subscribed to `agent-stream:<goalId>`. IORedis gotcha (found live
+     in Session 11): issue `subscribe` in the SAME tick the connection
+     is created — a subscribe issued after an unrelated await can land
+     mid ready-check and wedge the connection in a reconnect loop that
+     delivers no events. Message text is the only payload that crosses
+     into the loop; `metadata.oracle` is honored only when
+     `AGENT_ORACLE_ENABLED=true` and rejected otherwise. Cancel is
+     declined (-32002); goals are one-shot; push notifications,
+     ListTasks, SubscribeToTask, and the extended card are declined with
+     typed spec errors. Metrics: `trellis_a2a_requests_total{method}`,
+     `trellis_a2a_tasks_total{outcome}`; `a2a.*` events carry ids and
+     states only.
 5. **Observability and process boundaries**
    - `src/core/observability/` defines pino JSON logging and per-process
      Prometheus registries; API and workers are separate processes/
      containers. Stable dot-namespaced events; bounded metric labels only —
-     queries, goals, paths, hashes, entity names, tool arguments, and tool
-     results never become label values or log content. Queue-depth gauges
-     cover all seven queues; `trellis_rlm_mcp_calls_total` is label-free
-     with a counts-only `rlm.mcp` event.
+     queries, goals, message content, artifacts, paths, hashes, entity
+     names, tool arguments, and tool results never become label values or
+     log content. Queue-depth gauges cover all seven queues;
+     `trellis_rlm_mcp_calls_total` is label-free with a counts-only
+     `rlm.mcp` event.
 6. **Other subsystems (stable, not this session's subject)**
    - Whole-codebase ingestion: `src/core/repository/`, `npm run
      repo:ingest`, live drill `npm run test:repo-ingest`.
@@ -218,33 +262,35 @@ immutable, content-addressed physical location in source material.
    - The fixture MCP server (`scripts/fixture_mcp_server.py`) is the only
      MCP server acceptance ever configures; real web-search servers are
      owner-approved runs with the allowlist printed and `mcp_calls`
-     recorded.
+     recorded. THIS SESSION teaches the fixture to serve the remote
+     transport so acceptance stays local and deterministic.
    - Frontend: Next.js 16 app in `src/frontend/` with a dev-only proxy —
-     deployment deferred by owner redirects (sequencing row 3).
+     deployment deferred by owner redirects (sequencing row 2).
 
 ## 2. Current baseline
 
 Repository state at handoff creation:
 
-- `master`: the Session 10 PR merge (branch `session-10-mcp-tools`; use
+- `master`: the Session 11 PR merge (branch `session-11-a2a-server`; use
   `git log -- HANDOFF.md` to identify it).
-- Offline baseline: `npm test` = 419 passing across 53 files.
-- `npm run build` and `npm run python:check` pass (the Python check now
-  imports `mcp` and compiles `trellis_mcp.py` + the fixture server).
+- Offline baseline: `npm test` = 468 passing across 57 files.
+- `npm run build` and `npm run python:check` pass.
 - `npm run drill:scale`: gate CLOSED at max provenance 286; sweep growth
-  1.99x against 5.77x fact growth.
-- Live zero-LLM checks: `test:rlm-mcp` (46), `test:agent-loop` (23, green
-  with `TRELLIS_MCP_SERVERS` both set and unset), `test:repo-ingest` (45),
+  1.23x in the Session 11 run against 5.77x fact growth.
+- Live zero-LLM checks: `test:a2a` (46), `test:rlm-mcp` (46),
+  `test:agent-loop` (23), `test:repo-ingest` (45),
   `test:benchmark-hardening` (24), `test:entity-resolution` (33),
   `test:api-hardening` (18), `test:rlm-sandbox` (4),
   `test:belief-recovery` (30), `test:invalidation-sweep` (17).
-- Isolated Compose integration: 9 assertions (`--profile test`; the image
-  installs `mcp==1.12.4`).
-- CI target is Node 22. Session 10's local environment was Node 20.19.2,
+- Isolated Compose integration: 9 assertions (`--profile test`, unique
+  project name, host ports 0; the image installs `mcp==1.12.4`).
+- CI target is Node 22. Session 11's local environment was Node 20.19.2,
   PostgreSQL 16.14, Neo4j 5.11.0, Python 3.13.1, Docker Compose v2.
 - Python runtime deps are pinned in `requirements.txt` (`rlms==0.1.3`,
   `openai`, `neo4j`, `psycopg2-binary`, `unstructured`, `mcp`);
   `npm run python:check` verifies syntax/imports/assets.
+- The A2A wire contract is pinned to spec v1.0.0; `@a2a-js/sdk` was
+  evaluated at 0.3.13 and not adopted (0.3.x wire format).
 
 Fresh worktrees do not contain `node_modules`. Start with:
 
@@ -260,183 +306,194 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 11 problem statement
+## 3. Session 12 problem statement
 
-Trellis can pursue goals and consult external tools, but nothing external
-can dispatch a goal to Trellis except a bespoke SSE client.
+The RLM's external tool surface is stdio-only: every MCP server must be
+a spawnable child process inside the worker container.
 
-- **The goal loop has one inbound surface.** `GET /api/agent-stream`
-  (`src/api/server.ts`) is a Trellis-specific SSE contract: query-param
-  goal, custom event names (`goal_started`, `decision`, `task_started`,
-  `task_result`, `goal_completed`/`goal_failed`), API-key auth. An
-  external agent framework cannot discover it, negotiate with it, or
-  consume it without hand-written glue.
-- **A2A is the standard for exactly this.** The Agent2Agent protocol
-  (Linux Foundation) defines an Agent Card for discovery, JSON-RPC 2.0
-  methods (message send/stream, task get/cancel), a task lifecycle state
-  vocabulary, and SSE streaming — an interoperability wrapper whose
-  semantics map almost one-to-one onto what the goal loop already does:
-  a goal is a task, goal events are status updates, the final answer is
-  an artifact, a typed failure is a failed task with a reason. The owner
-  direction (roadmap 3.3 #8, sequencing row 1) names A2A as the
-  continuation of the external-tools work.
-- **The plumbing to reuse is proven.** `agent_worker.ts` + `agent_queue`
-  + the `agent-stream:<goalId>` pub/sub channel already execute goals
-  with hard bounds and typed failures; the API layer already has the
-  admission pattern (`StreamGate` + queue-depth backstop → 429), API-key
-  middleware, and subscribe-then-enqueue ordering. A2A must be a thin
-  adapter over these — a second door into the same room, never a bypass.
-- **Verify the protocol against its current spec before designing wire
-  shapes.** A2A has evolved since its 2025 announcement (well-known
-  agent-card path, method names, task-state vocabulary). Session 11 must
-  read the spec version it builds against and record it in the roadmap
-  entry; do not build from memory. Evaluate the official Node SDK
-  (`@a2a-js/sdk`) versus a minimal hand-rolled JSON-RPC subset validated
-  with Zod — prefer whichever keeps the surface small, dependency-light,
-  and fully Zod-validated at the boundary (the T8 discipline applies to
-  inbound protocol payloads exactly as it does to LLM output).
-- **Acceptance must stay zero-paid.** The oracle/stub machinery
-  (`AGENT_ORACLE_ENABLED`, scripted decisions, stubbed RLM tasks) already
-  drives the full goal loop with zero LLM calls. The A2A drill dispatches
-  oracle goals through the real A2A surface and asserts the protocol
-  responses — no paid work, no external network.
+- **The transport is the bottleneck, not the client.**
+  `src/rlm/trellis_mcp.py` already enforces the operator allowlist
+  before I/O, bounds every call, caps every result, and counts usage
+  separately from database provenance — but `McpServerSchema`
+  (`src/config/mcp_servers.ts`) only describes `{name, command, tools,
+  timeoutMs, maxResultBytes}`, and the client only opens
+  `mcp.client.stdio` connections. Real tool ecosystems (hosted
+  web-search providers, shared internal tool services, anything not
+  installable into the worker image) speak the MCP **Streamable HTTP**
+  transport. An operator today would have to wrap every remote server
+  in a local stdio proxy.
+- **Remote servers need an auth story — operator-owned, secret-safe.**
+  Hosted MCP servers require credentials (typically a bearer token or
+  API-key header). Those credentials are configuration, never payload:
+  they must be referenced from the validated registry, reach only the
+  HTTP client, and never appear in logs, metric labels, the prompt
+  addendum, `TRELLIS_RESULT`/`TRELLIS_TELEMETRY` lines, or error
+  messages that flow back into the REPL (a raised tool error is
+  model-visible — redact before raising).
+- **Containerized tool servers are the deployment shape.** A tool server
+  the operator controls should be runnable as its own Compose service on
+  the project network (own image, no host publishing), reached over the
+  remote transport — not baked into the worker image. The repository
+  should demonstrate that pattern with its own fixture.
+- **Verify the current MCP spec/SDK state before designing wire
+  shapes.** The pinned `mcp==1.12.4` SDK ships a Streamable HTTP client;
+  the older HTTP+SSE transport is deprecated in the MCP spec. Session 12
+  must read the SDK/spec versions it builds against, record them in the
+  roadmap entry, and pin what it adopts. If the SDK must move, the
+  fixture, the Docker image, and `python:check` move with it.
+- **Acceptance must stay zero-paid and local.** The fixture server gains
+  a Streamable HTTP mode (FastMCP serves it natively) bound to
+  127.0.0.1 for the bare-host drill and to a Compose-internal service
+  for the integration, including an auth-required mode so credential
+  success and failure are both drillable. No external network, no
+  metered server, ever, in acceptance.
 
-Session 11 gives Trellis a standards-compliant inbound agent surface over
-the existing loop, leaving every bound, gate, and invariant in place.
+Session 12 lets an operator point the RLM at tool servers anywhere —
+child process, localhost, or a containerized service — under the same
+allowlist, bounds, and provenance split.
 
 ## 4. Required design
 
-Present the exact design after inspecting §5 (including the current A2A
-spec and SDK versions), then implement it. Deviations require a concrete
-reason and equivalent tests.
+Present the exact design after inspecting §5 (including the current MCP
+spec/SDK transport state), then implement it. Deviations require a
+concrete reason and equivalent tests.
 
-### 4.1 A2A server surface (API process)
+### 4.1 Registry schema: a transport-discriminated union
 
-- New modules (suggested `src/api/a2a.ts` for the Express mounting plus
-  `src/core/a2a/` for pure helpers): an A2A endpoint set on the existing
-  API process and port, gated by the same API-key middleware (declare the
-  scheme in the Agent Card). Zod schemas for every inbound JSON-RPC
-  envelope and method params; malformed requests get proper JSON-RPC
-  error responses, never stack traces.
-- Agent Card served at the spec's well-known path: operator-configured
-  name/description/URL via validated config, one skill (goal execution),
-  streaming capability declared. The card must never leak secrets,
-  internal hosts, or values that are not already public contract.
-- Method mapping: message send → enqueue a goal (subscribe-then-enqueue
-  on the existing `agent-stream:<goalId>` channel) and return the task
-  per spec; message stream → SSE of A2A task-status/artifact events
-  translated from the goal events; task get → current state from a
-  bounded Redis-backed task record (TTL — the queue-retention idiom);
-  task cancel → decline as unsupported (the goal loop has no abort path;
-  do not invent one this session).
-- State translation is a pure function (goal lifecycle → A2A task
-  states; final answer → one text artifact; typed failures → failed
-  state with the typed reason). Unit-test it exhaustively.
+- Extend `src/config/mcp_servers.ts` to a Zod discriminated union on
+  `transport`: the existing shape becomes `{transport: 'stdio', name,
+  command, tools, timeoutMs, maxResultBytes}` with `stdio` as the
+  DEFAULT so every existing registry value parses unchanged
+  (backward-compatibility unit-pinned); new
+  `{transport: 'http', name, url, tools, timeoutMs, maxResultBytes,
+  auth?}`. `url` must be http(s); decide and document the posture on
+  plain `http://` (recommended: allow it only for loopback/private
+  hosts, require https otherwise — enforce in Zod and mirror in Python).
+- Auth: `auth: {kind: 'bearer' | 'header', header?, valueEnv}` — the
+  credential VALUE never sits in the registry JSON; `valueEnv` names an
+  environment variable the worker resolves at connect time. A registry
+  naming a missing env var fails startup with a readable error (the
+  Guardrail-5 fail-fast posture). The canonical serialization forwarded
+  to the child (`serializeMcpServers`) keeps only `valueEnv`; the Python
+  side resolves it from its own environment, which `buildAgentEnv` must
+  pass through for exactly the named variables — a pure helper change,
+  unit-pinned.
+- The Node and Python validators stay bound-for-bound identical twins;
+  extend both and their twin tests.
 
-### 4.2 Admission and bounds
+### 4.2 Python client: one connection machinery, two dial functions
 
-- A2A dispatch flows through the SAME gates as `/api/agent-stream`: the
-  goal `StreamGate` concurrency cap, `AGENT_QUEUE_MAX_DEPTH` backstop,
-  and all per-goal bounds. Over-limit A2A requests get the spec's error
-  mapping of the 429 semantics; the bounds stay config-owned. No A2A
-  parameter may raise a bound, name a tool, or reach the RLM/MCP layer;
-  the goal text is the only payload that crosses into the loop.
+- In `src/rlm/trellis_mcp.py`, keep the per-server long-lived asyncio
+  task + handshake + allowlist + timeout + truncation machinery exactly
+  as is; vary only the connection factory: stdio servers keep
+  `stdio_client(...)`, HTTP servers use the SDK's Streamable HTTP
+  client with the configured URL and auth header. Same
+  handshake-once-at-construction, same close-in-`finally`, same
+  dead-on-arrival readable startup error (an unreachable URL must fail
+  the run fast, never hang — bound the connect like the calls).
+- Redaction: the credential value must never appear in `list_tools()`
+  output, the prompt addendum, raised error messages (wrap/scrub
+  exceptions from the HTTP layer before re-raising into the REPL), or
+  stdout. Pin with tests that force auth failures and assert the secret
+  is absent from every observable channel.
+- `build_mcp_addendum` output for HTTP servers lists name and tools
+  exactly like stdio servers — never the URL or auth material. Empty
+  registry stays byte-identical (existing pin).
 
-### 4.3 Configuration
+### 4.3 Containerized tool-server pattern
 
-- `TRELLIS_A2A_ENABLED` (default `false` — the surface does not exist
-  unless the operator turns it on) plus the minimal card fields, all
-  Zod-validated in `src/config/index.ts` following the Session 10
-  `TRELLIS_MCP_SERVERS` discipline. With it off, the API is
-  byte-identical to today (pinned by test).
+- Teach `scripts/fixture_mcp_server.py` a `--transport streamable-http
+  --port <p>` mode (FastMCP supports it) with an optional
+  require-token auth mode, keeping the canned `web_search` and
+  misbehaving tools identical across transports.
+- Compose: a fixture tool service under the existing `test` profile (or
+  a dedicated profile) running over Streamable HTTP on the project
+  network with no host port; the integration proves a worker-side client
+  can call it through the validated registry. Document the pattern in
+  the README/runbook as the way operators deploy their own tool servers.
 
 ### 4.4 Observability
 
-- T16 house style: an `a2a.*` event family (request received, task state
-  transitions — ids and states only, never goal text or message
-  content), bounded counters (e.g. `trellis_a2a_requests_total{method}`
-  with the method enum as the only label; task outcomes reusing the
-  agent outcome vocabulary). Goal text, messages, and artifacts never
-  reach labels or logs.
+- Keep the T16 label discipline. `trellis_rlm_mcp_calls_total` is
+  label-free today; a bounded `transport` label (`stdio`/`http`) is
+  acceptable if it earns its keep — decide and record the decision
+  either way. The `rlm.mcp` event may carry per-server counts only if
+  operator-chosen server names remain the only identifying values —
+  URLs and credentials never appear in logs or labels.
 
 ### 4.5 Zero-paid acceptance
 
-- New `npm run test:a2a`: a fixture A2A client (plain Node HTTP against
-  the real server, or the adopted SDK's client) that fetches the Agent
-  Card, dispatches oracle goals via send and stream, polls task state,
-  asserts the state translation for success, failure, and bound-tripped
-  goals, and exercises the disabled-by-default posture, auth rejection,
-  malformed JSON-RPC rejection, and admission-gate saturation — all
-  against oracle decisions and stubbed tasks, zero LLM calls, zero
-  external network.
+- Extend `npm run test:rlm-mcp` (or add `test:rlm-mcp-http` if runtime
+  cost warrants a split): the HTTP fixture on 127.0.0.1 — handshake,
+  canned search, allowlist rejection before I/O, timeout, truncation,
+  auth success, auth failure (readable + redacted), a registry naming a
+  missing `valueEnv` failing startup, and a mixed stdio+HTTP registry in
+  one run; the existing stdio suite unchanged. The Compose integration
+  gains the containerized-fixture check. `test:agent-loop` and
+  `test:a2a` stay green untouched.
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `TRELLIS_ROADMAP.md` §3.3 #8, §4, and the Session 9/10 §5 entries;
+- `TRELLIS_ROADMAP.md` §3.3 #8, §4, and the Session 10/11 §5 entries;
   `.agents/AGENT_CODING_GUIDELINES.md`.
-- The current A2A specification and SDK state (record adopted versions):
-  the a2a-project spec and `@a2a-js/sdk`. Pin what you adopt; validate
-  everything you expose regardless.
-- `src/api/server.ts` — the `/api/agent-stream` handler: API-key
-  middleware, `StreamGate`, queue-depth backstop, subscribe-then-enqueue,
-  SSE frame shapes; this is the pattern (and the plumbing) A2A adapts.
-- `src/core/agent/goal_loop.ts` + `src/workers/agent_worker.ts` — the
-  goal event vocabulary on `agent-stream:<goalId>` and the terminal
-  event shapes the A2A translation consumes; `src/workers/agent_job.ts`
-  for the goal payload contract (oracle threading included).
-- `scripts/test_agent_loop.ts` — the zero-LLM drill harness this
-  session's `test:a2a` mirrors (server spawn with env overrides, oracle
-  scripts, stubbed tasks, metrics scrape assertions).
-- `src/config/index.ts` + `src/config/mcp_servers.ts` — the validated
-  config discipline (Session 10's registry is the closest precedent for
-  an operator-owned feature toggle with structured fields);
-  `src/config/agent_bounds.test.ts` + `src/config/mcp_servers.test.ts`
-  for the reset-modules test pattern.
-- `src/core/observability/metrics.ts` and `metrics.test.ts` — where the
-  `a2a` counters and their label pins land.
+- The MCP spec's current transport section and the pinned `mcp` SDK's
+  Streamable HTTP client API (record adopted versions; check whether
+  `mcp==1.12.4` suffices or a bump is needed — if bumped, update
+  `requirements.txt`, the Docker image, and `python:check` together).
+- `src/config/mcp_servers.ts` + `mcp_servers.test.ts` — the registry
+  schema and its validation pins; `src/config/index.ts` (fail-fast
+  parse at startup).
+- `src/rlm/trellis_mcp.py` — the connection machinery to extend;
+  `scripts/test_rlm_mcp.ts`/`test_rlm_mcp.py` — the drill to grow;
+  `scripts/fixture_mcp_server.py` — the FastMCP fixture.
+- `src/workers/rlm_job.ts` (`buildAgentEnv`) — the env forwarding
+  contract that must learn to pass through exactly the configured
+  `valueEnv` variables; `rlm_job.test.ts` pins.
+- `docker-compose.yml` + `scripts/test_compose_roundtrip.ts` — the
+  `test` profile and integration assertions.
+- `docs/operations/RUNBOOK.md` §8 — the MCP operations section to
+  extend with the remote/auth story.
 
-Prefer pure helpers for the state translation, card construction, and
-JSON-RPC envelope validation; keep Express handlers thin delegates.
+Prefer pure helpers for registry parsing/serialization and env
+resolution; keep the Python connection factory the only transport-aware
+seam.
 
 ## 6. Test strategy and acceptance
 
-Test first. No paid LLM calls and no external network access are permitted
-for Session 11 acceptance.
+Test first. No paid LLM calls and no external network access are
+permitted for Session 12 acceptance (loopback and Compose-internal
+traffic is local, not external).
 
 Offline tests must cover:
 
-- Zod validation of the A2A config (disabled default, card fields,
-  rejection cases) via the reset-modules pattern;
-- JSON-RPC envelope/method-param validation: valid requests for every
-  supported method, malformed envelope, unknown method, wrong params —
-  each mapped to the correct JSON-RPC error code;
-- the pure goal→A2A state translation: every goal lifecycle path
-  (completed, every typed failure, every bound trip) to the correct task
-  state/artifact/reason, exhaustively;
-- Agent Card construction: well-known shape, and no secret leakage —
-  assert the serialized card contains no API key, internal ports, or
-  non-public values;
-- metric label pins for the new counters.
+- the discriminated registry union: stdio-default backward
+  compatibility (every pre-Session-12 registry parses identically), the
+  http variant's URL/auth validation, rejection cases (bad scheme,
+  missing valueEnv name, name collisions across transports), and the
+  canonical serialization;
+- `buildAgentEnv` passing through exactly the configured credential
+  variables — no more, no less — with the existing strip behavior
+  preserved;
+- Python twin validation of both variants (mirroring
+  `test_rlm_mcp.py`'s registry twins);
+- addendum construction for HTTP servers (names/tools only; no URL, no
+  credential; empty-registry byte-identity unchanged);
+- any new metric/label pins.
 
-Live zero-LLM coverage (local stack; oracle + stubs only):
+Live zero-LLM coverage (local stack; fixture servers only):
 
-- new `npm run test:a2a` per §4.5, including: card fetch; a send-mode
-  goal completing with the oracle answer as an artifact; a stream-mode
-  goal observed through its A2A status events; task-state polling before
-  and after completion; a bound-tripped oracle goal surfacing as a failed
-  task with the typed reason; auth rejection without the key; malformed
-  JSON-RPC rejected with proper error responses; the surface absent when
-  `TRELLIS_A2A_ENABLED` is unset; admission-gate saturation behaving per
-  the spec mapping;
-- regression: `test:agent-loop` unchanged and green (the SSE surface and
-  oracle gating must be untouched);
-- all existing live suites stay green: `test:rlm-mcp`,
-  `test:agent-loop`, `test:repo-ingest`, `test:benchmark-hardening`,
-  `test:entity-resolution`, `test:api-hardening`, `test:rlm-sandbox`,
-  `test:belief-recovery`, `test:invalidation-sweep`; `drill:scale` still
-  closes its gate.
+- the extended `test:rlm-mcp` (or split suite) per §4.5, including auth
+  success/failure with secret redaction asserted on every observable
+  channel, per-call timeout and truncation over HTTP, and a mixed
+  stdio+HTTP registry;
+- the Compose-profile containerized fixture check;
+- regression: `test:agent-loop` (23) and `test:a2a` (46) unchanged and
+  green; all other live suites stay green: `test:repo-ingest`,
+  `test:benchmark-hardening`, `test:entity-resolution`,
+  `test:api-hardening`, `test:rlm-sandbox`, `test:belief-recovery`,
+  `test:invalidation-sweep`; `drill:scale` still closes its gate.
 
 Required close-out:
 
@@ -445,10 +502,10 @@ Required close-out:
  npm run build
  npm run python:check
  docker compose --profile test config --quiet
- # Run the isolated zero-LLM Compose integration.
- # Run the new zero-LLM A2A live suite (oracle goals + stubbed tasks).
- npm run test:a2a
+ # Run the isolated zero-LLM Compose integration (unique project name).
+ # Run the extended zero-LLM MCP suite(s) against the local fixtures.
  npm run test:rlm-mcp
+ npm run test:a2a
  npm run test:agent-loop
  npm run drill:scale
  npm run test:repo-ingest
@@ -463,20 +520,21 @@ Required close-out:
 
 Update:
 
-- README (an "Agent interoperability (A2A)" section: enablement, card
-  discovery, method surface, bounds inheritance, zero-paid drill),
-  `API_REFERENCE.md` (a new section for the A2A surface), the runbook
-  (new env, metrics, events, and an "external agent misbehaving"
-  diagnostic), and dependency manifests if an SDK is adopted.
-- `TRELLIS_ROADMAP.md`: record the A2A slice under 3.3 #8 only after
-  acceptance (the item stays open for MCP transport expansion); add a
-  full-dated §5 entry with exact commands/counts, the pinned A2A
-  spec/SDK versions, and any defects found.
+- README (§External tools: the http transport, the auth story, the
+  containerized pattern), `docs/operations/RUNBOOK.md` §8
+  (remote-server diagnostics: unreachable URL, expired credential, the
+  redaction guarantee), `requirements.txt`/Docker image if the SDK
+  moves, and `.env.example` if credential env conventions are
+  documented there.
+- `TRELLIS_ROADMAP.md`: record the slice under 3.3 #8 only after
+  acceptance (state explicitly whether the owner's recorded 3.3 #8
+  scope is now exhausted or what remains); add a full-dated §5 entry
+  with exact commands/counts, the pinned MCP spec/SDK versions, and any
+  defects found.
 - `HANDOFF.md`: regenerate for the next objective per §0 — the next
-  unstruck sequencing rows are the remaining 3.3 #8 continuation (MCP
-  tool-surface expansion: remote/HTTP transports with their auth story,
-  containerized tool servers) and then the frontend remainder (3.3 #5),
-  unless something discovered this session should jump the queue.
+  unstruck sequencing row is the frontend deployment remainder (3.3 #5:
+  production build, container, API-key handling, CI coverage), unless
+  something discovered this session should jump the queue.
 
 ## 7. Guardrails
 
@@ -487,47 +545,51 @@ Update:
 3. Preserve provenance on every semantic node and edge.
    `write_derived_insight` remains the single agent write path, still
    requiring live AST provenance. MCP output is research context and can
-   never be passed as `sourceNodeIds`; external content earns citability
-   only through the verified ingest path. Nothing arriving over A2A
-   touches either database directly — an A2A message is only ever a goal
-   handed to the existing loop.
+   never be passed as `sourceNodeIds` — a remote transport changes where
+   a tool runs, never what its output is allowed to become; external
+   content earns citability only through the verified ingest path.
 4. MCP calls never satisfy the database-provenance requirement:
    `_count_tool_call()` counts database tools only, and
-   `TRELLIS_PROTOCOL_VIOLATION` semantics are unchanged. A run that only
-   searched the web is still provenance-free.
-5. Operator control is absolute: the A2A surface is off by default and
-   configured only through validated env; MCP servers, commands,
-   transports, tool allowlists, timeouts, and size caps come from
-   `TRELLIS_MCP_SERVERS` only. No inbound A2A payload, queue payload, or
-   model completion may name a server or tool, raise a bound, or alter
-   admission behavior. Argument vectors, never shell strings.
-6. Every external interaction is bounded: A2A goals inherit every
-   `AGENT_*` bound and admission gate (the spec's mapping of the 429
-   semantics); MCP calls keep their per-call timeout and size cap; A2A
-   task records in Redis carry a TTL. A misbehaving external agent must
-   degrade to protocol errors, never resource exhaustion.
-7. Validate at every boundary: inbound A2A JSON-RPC crosses Zod schemas
-   exactly as LLM output crosses `parseLlmResponse`; all LLM calls remain
-   inside BullMQ workers or the RLM process; the orchestrator stays
-   tool-free; the `AGENT_ORACLE_ENABLED=false` and
+   `TRELLIS_PROTOCOL_VIOLATION` semantics are unchanged, over every
+   transport.
+5. Operator control is absolute: servers, URLs, transports, tool
+   allowlists, timeouts, size caps, and credential *references* come
+   from `TRELLIS_MCP_SERVERS` only; credential *values* come from named
+   env vars resolved by the worker. No inbound A2A payload, queue
+   payload, or model completion may name a server, tool, URL, or
+   credential, raise a bound, or alter admission behavior. Argument
+   vectors, never shell strings.
+6. Every external interaction is bounded: per-call timeouts and size
+   caps hold over HTTP exactly as over stdio, connects are bounded, and
+   A2A task records keep their TTL. A misbehaving or unreachable tool
+   server must degrade to a raised, readable, REDACTED tool error —
+   never a hung REPL, never resource exhaustion, never a leaked secret.
+7. Validate at every boundary: the registry crosses identical Zod and
+   Python validators; inbound A2A JSON-RPC crosses its Zod schemas; all
+   LLM calls remain inside BullMQ workers or the RLM process; the
+   orchestrator stays tool-free; the `AGENT_ORACLE_ENABLED=false` and
    `TRELLIS_A2A_ENABLED=false` defaults stay pinned.
 8. Default to zero paid work and zero external network in acceptance:
-   oracle decisions + stubbed tasks drive the A2A drill; the fixture MCP
-   server remains the only MCP server acceptance configures. Real
-   external-agent or web-search runs are owner-approved, with the
-   configured surface printed first and observed spend recorded.
-9. Do not break existing consumers: the `/api/agent-stream` SSE contract,
-   `FINAL_ANSWER:`/`TRELLIS_TELEMETRY:`/`TRELLIS_RESULT:` parsing
-   (telemetry stays backward-compatible in both directions),
-   pre-Session-9 `rlm_queue` payloads, empty-config byte-identical RLM
-   behavior, and the disabled-by-default byte-identical API surface.
+   fixture servers (stdio, loopback HTTP, Compose-internal) are the only
+   MCP servers acceptance configures; oracle decisions + stubbed tasks
+   drive loop drills. Real remote/metered servers are owner-approved
+   runs, with the configured surface printed first and observed
+   `mcp_calls` recorded.
+9. Do not break existing consumers: pre-Session-12 `TRELLIS_MCP_SERVERS`
+   values parse identically (stdio default), empty-config byte-identical
+   RLM behavior stays pinned, the `/api/agent-stream` SSE contract and
+   the A2A v1.0 surface are untouched,
+   `FINAL_ANSWER:`/`TRELLIS_TELEMETRY:`/`TRELLIS_RESULT:` parsing stays
+   backward-compatible, and pre-Session-9 `rlm_queue` payloads still
+   process.
 10. Respect the rlms prompt contract: extend `RLM_SYSTEM_PROMPT`, never
     replace it; no literal curly braces in anything rlms formats (double
-    them); the orchestrator persona stays plain chat completions.
+    them); the generated MCP addendum stays structurally brace-free and
+    never carries URLs or credentials.
 11. Follow the T16 observability house style. Queries, goals, message
-    content, artifacts, tool arguments, results, server commands, paths,
-    hashes, and entity names never become metric label values or log
-    content.
+    content, artifacts, tool arguments, results, server commands, URLs,
+    credentials, paths, hashes, and entity names never become metric
+    label values or log content.
 12. Keep API and worker processes split; use project-scoped Compose
     commands; never remove another stack's volumes; fixtures and drills
     clean up only token-scoped or pre-snapshotted state.
@@ -537,16 +599,15 @@ Update:
 
 ## 8. Explicit exclusions
 
-Do not include: Trellis as an A2A *client* (calling other agents — a
-later slice; the orchestrator stays tool-free either way); A2A push
-notifications/webhooks (their auth story is its own work); goal
-cancellation mid-flight (the loop has no abort path; the cancel method
-may decline per spec); multi-turn `input-required` interactions (goals
-are one-shot); MCP transport expansion (remote/HTTP servers,
-containerized tool servers — the recorded next slice); new RLM tools or
-write paths; exposing MCP through A2A in any form; authentication
-schemes beyond the existing API key (declare it in the card; OAuth is
-follow-on); frontend work (sequencing row 3); repository-extraction
-prerequisites; `ASTRef`/`EVIDENCED_BY` migration (gate closed at 286);
-T13 re-hashing; rlms library modifications; paid LLM calls or external
-network access as acceptance checks.
+Do not include: new tools or tool semantics (this session moves
+transports, not capabilities); Trellis as an MCP *server* or A2A
+*client*; exposing MCP through A2A in any form; OAuth flows for MCP
+servers (bearer/header credentials only — OAuth is its own follow-on if
+the owner asks); MCP server auto-discovery or registry fetching (the
+operator writes the registry by hand); the deprecated HTTP+SSE MCP
+transport; A2A push notifications, cancellation, or multi-turn
+interactions (unchanged from Session 11's exclusions); new RLM write
+paths; orchestrator tools; frontend work (sequencing row 2);
+repository-extraction prerequisites; `ASTRef`/`EVIDENCED_BY` migration
+(gate closed at 286); T13 re-hashing; rlms library modifications; paid
+LLM calls or external network access as acceptance checks.

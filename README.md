@@ -210,6 +210,41 @@ write path. A real goal makes paid LLM calls; the zero-LLM drill
 decisions and stubbed tasks (`AGENT_ORACLE_ENABLED=true`, off by default).
 See `API_REFERENCE.md` §4 for the event contract.
 
+## Agent interoperability (A2A)
+
+Trellis can serve its goal loop to external agents over the
+[A2A protocol](https://a2a-protocol.org/) (Agent2Agent, Linux Foundation;
+spec v1.0.0, JSON-RPC binding) — Session 11. The surface is **off by
+default**: set `TRELLIS_A2A_ENABLED=true` to mount it; with the flag
+unset the API is byte-identical to a pre-Session-11 process.
+
+- **Discovery:** the Agent Card is served unauthenticated from
+  `/.well-known/agent-card.json` (it is how a client learns the required
+  security scheme, and it carries only public contract). Card fields come
+  from validated config: `A2A_AGENT_NAME`, `A2A_AGENT_DESCRIPTION`, and
+  `A2A_AGENT_URL` — set the URL to the externally reachable JSON-RPC
+  endpoint for any non-local deployment.
+- **Method surface:** one JSON-RPC 2.0 endpoint at `POST /a2a/v1` behind
+  the existing API key, requiring `A2A-Version: 1.0`. `SendMessage`
+  (blocking by default, `returnImmediately` supported),
+  `SendStreamingMessage` (SSE status/artifact updates), `GetTask`
+  (TTL-bounded Redis task records, `A2A_TASK_TTL_SECONDS` default 3600),
+  and `CancelTask` (declined — the loop has no abort path). Everything
+  else gets the spec's typed error codes.
+- **Bounds inheritance:** an A2A task IS one agentic goal. Dispatch flows
+  through the same admission gates as `/api/agent-stream` (one shared
+  concurrent-goal cap, the `agent_queue` depth backstop → HTTP `429`
+  with a JSON-RPC error body) and every `AGENT_*` per-goal bound holds.
+  The message text is the only payload that crosses into the loop; no
+  A2A parameter can name a tool, raise a bound, or reach the RLM/MCP
+  layer. Nothing arriving over A2A touches either database directly.
+- **Zero-paid drill:** `npm run test:a2a` exercises discovery, the full
+  method surface, streaming, bound trips, auth/version rejection, the
+  malformed-JSON-RPC matrix, and admission saturation with oracle
+  decisions and stubbed tasks — no LLM calls, no external network.
+
+See `API_REFERENCE.md` §5 for the wire contract.
+
 ## External tools (MCP)
 
 The RLM sub-agent can call external tools over the Model Context Protocol

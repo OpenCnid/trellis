@@ -241,6 +241,7 @@ npm run test:belief-recovery
 npm run test:invalidation-sweep
 npm run test:agent-loop
 npm run test:rlm-mcp
+npm run test:a2a
 ```
 
 The isolated Compose round trip starts the API without workers and receives no
@@ -286,7 +287,10 @@ Key events: `ingest.accepted`, `ingest.failed`, `extraction.started`,
 `rlm.result_malformed`, `rlm.mcp` (counts only — never tool arguments or
 results), `agent.goal_started`, `agent.decision`,
 `agent.task_dispatched`, `agent.task_completed`, `agent.goal_completed`,
-`agent.goal_failed`, `worker.error_classified`,
+`agent.goal_failed`, `a2a.task_submitted`, `a2a.task_state` (ids and
+state enums only — never message or artifact content),
+`a2a.recorder_ceiling`, `a2a.record_write_failed`, `a2a.request_failed`,
+`worker.error_classified`,
 `runtime.shutdown_started` / `runtime.shutdown_completed`.
 
 ### 7.2 Metrics topology
@@ -315,6 +319,7 @@ Two registries, one per process:
 | Entity-resolution outcomes | `trellis_resolution_candidates_total`, `trellis_resolution_pairs_total{verdict}` (`same`, `distinct`, `skipped_no_text`, `skipped_no_answer`) |
 | Repository snapshot runs | `trellis_repo_snapshots_total{result}` (`published`, `failed`), `trellis_repo_files_total{outcome,language}` (`ingested`/`unchanged`/`tombstoned` by source language), `trellis_repo_skipped_files_total{reason}`, `trellis_repo_blocks_total{stage}` (`eligible`, `queued`) |
 | Agentic goal loop | `trellis_agent_goals_total{outcome}` (`completed`, `failed`), `trellis_agent_decisions_total{action}` (`dispatch`, `finish`, `fail`), `trellis_agent_tasks_total{outcome}` (`ok`, `protocol_violation`, `error`); goal text and task queries never appear in labels or logs |
+| A2A server surface (API process) | `trellis_a2a_requests_total{method}` (`SendMessage`, `SendStreamingMessage`, `GetTask`, `CancelTask`, `declined`, `invalid`), `trellis_a2a_tasks_total{outcome}` (`completed`, `failed`); message content and artifacts never appear in labels or logs |
 | LLM spend | `trellis_llm_calls_total{operation,model}`, `trellis_llm_input_tokens_total`, `trellis_llm_output_tokens_total`, `trellis_llm_embedding_tokens_total` (operations: `extraction`, `extraction_embedding`, `supervision`, `verification`, `resolution`, `orchestration`) |
 | RLM agent cost/health | `trellis_rlm_runs_total{exit_status}`, `trellis_rlm_input_tokens_total`, `trellis_rlm_output_tokens_total`, `trellis_rlm_subcalls_total`, `trellis_rlm_tool_calls_total`, `trellis_rlm_duration_seconds`, `trellis_rlm_telemetry_malformed_total` |
 | External MCP tool usage | `trellis_rlm_mcp_calls_total` (label-free; counted separately from database tool calls — MCP never satisfies provenance). Per-run counts appear in the `rlm.mcp` log event |
@@ -373,3 +378,45 @@ MCP calls never satisfy the database-provenance requirement: `mcp_calls`
 is separate from `tool_calls` in `TRELLIS_TELEMETRY`, and a run with zero
 database tool calls is still a `TRELLIS_PROTOCOL_VIOLATION` no matter how
 much it searched.
+
+## 9. A2A server surface (Session 11)
+
+The A2A surface (`/.well-known/agent-card.json` + `POST /a2a/v1`) exists
+only when `TRELLIS_A2A_ENABLED=true`; it dispatches external agents'
+messages as ordinary agentic goals through the same gates and bounds as
+`/api/agent-stream`. Environment: `TRELLIS_A2A_ENABLED`,
+`A2A_AGENT_NAME`, `A2A_AGENT_DESCRIPTION`, `A2A_AGENT_URL` (the
+advertised JSON-RPC URL — set it for any non-local deployment),
+`A2A_TASK_TTL_SECONDS` (task-record retention, default 3600).
+Contract: `API_REFERENCE.md` §5.
+
+**External agent misbehaving** — symptoms and containment:
+
+- *Request floods*: every dispatch passes the shared concurrent-goal gate
+  (`AGENT_MAX_CONCURRENT_GOALS`) and the `agent_queue` depth backstop;
+  over-limit requests get HTTP `429` and enqueue nothing. Watch
+  `trellis_a2a_requests_total{method}` for volume and
+  `trellis_queue_jobs{queue="agent_queue"}` for backlog. Confirm the
+  `429`s in API logs (`http.request_completed` with `status: 429`).
+- *Protocol garbage*: malformed JSON, bad envelopes, wrong params, and
+  unsupported methods are answered with typed JSON-RPC errors and counted
+  under `trellis_a2a_requests_total{method="invalid"}` (or `"declined"`
+  for recognized-but-unserved spec methods). A rising `invalid` rate with
+  a flat supported-method rate is a broken or hostile client, not a
+  Trellis defect.
+- *0.3-protocol clients*: a client that omits `A2A-Version: 1.0` is
+  declined with `VersionNotSupportedError` (-32009) per spec — the fix is
+  on the client side.
+- *Goals that never finish*: a goal dispatched over A2A is bounded
+  exactly like any other (see §3, agent_queue). The API-side task
+  recorder additionally reclaims its subscriber and gate slot when the
+  record TTL elapses (`a2a.recorder_ceiling` event); the Redis record
+  then expires and `GetTask` returns `TaskNotFoundError`.
+- *Spend*: A2A adds no new spend path — orchestrator/sub-agent spend
+  appears under the existing agent metrics. To shut the surface off,
+  unset `TRELLIS_A2A_ENABLED` and restart the API; in-flight goals run to
+  their bounded end in the workers.
+
+Emergency containment order: rotate/withdraw the API key (the RPC surface
+is key-gated), then disable the flag. Task records are TTL-bounded Redis
+keys (`a2a:task:<id>`); they never need manual cleanup.

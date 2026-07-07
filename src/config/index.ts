@@ -105,6 +105,31 @@ const EnvSchema = z.object({
   RESOLUTION_MAX_PAIRS_PER_SWEEP: z.coerce.number().int().positive().default(200),
   RESOLUTION_BATCH_SIZE: z.coerce.number().int().positive().default(25),
 
+  // A2A server surface (Session 11). Off by default: with the switch
+  // unset the API registers no A2A routes and is byte-identical to a
+  // pre-Session-11 process (pinned by the test:a2a drill). The card
+  // fields are public contract by definition — they are served from the
+  // well-known discovery path — so nothing secret may ever be routed
+  // through them.
+  TRELLIS_A2A_ENABLED: z.enum(['true', 'false']).default('false'),
+  A2A_AGENT_NAME: z.string().min(1).max(128).default('Trellis Engine'),
+  A2A_AGENT_DESCRIPTION: z
+    .string()
+    .min(1)
+    .max(1024)
+    .default(
+      'Provenance-preserving GraphRAG agent. Dispatches one bounded '
+        + 'agentic goal per task over a content-addressed knowledge graph; '
+        + 'every answer is grounded in database provenance.'
+    ),
+  // Public URL of the JSON-RPC interface as advertised in the Agent
+  // Card. Operators MUST set this to the externally reachable URL for
+  // any non-local deployment; the default matches a bare local run.
+  A2A_AGENT_URL: z.url().optional(),
+  // Task records back GetTask polling and are retention-bounded like
+  // BullMQ job history: age-limited, never unbounded (Guardrail 6).
+  A2A_TASK_TTL_SECONDS: z.coerce.number().int().positive().max(86400).default(3600),
+
   // MCP server registry for the RLM sub-agent (Session 10): a JSON
   // array of {name, command, tools, timeoutMs, maxResultBytes}. Servers,
   // commands, tool allowlists, and per-call bounds come from this value
@@ -195,6 +220,14 @@ export const config = {
     minConfidence: env.RESOLUTION_MIN_CONFIDENCE,
     maxPairsPerSweep: env.RESOLUTION_MAX_PAIRS_PER_SWEEP,
     batchSize: env.RESOLUTION_BATCH_SIZE,
+  },
+  a2a: {
+    enabled: env.TRELLIS_A2A_ENABLED === 'true',
+    agentName: env.A2A_AGENT_NAME,
+    agentDescription: env.A2A_AGENT_DESCRIPTION,
+    /** Advertised JSON-RPC interface URL; defaults to the bare local run. */
+    agentUrl: env.A2A_AGENT_URL ?? `http://127.0.0.1:${env.PORT}/a2a/v1`,
+    taskTtlSeconds: env.A2A_TASK_TTL_SECONDS,
   },
   mcp: {
     servers: mcpServers,

@@ -13,6 +13,7 @@ import fs from 'fs/promises';
 import OpenAI from 'openai';
 import { apiKeyMiddleware } from './auth.js';
 import { StreamGate } from './stream_gate.js';
+import { mountAgentCard, mountA2aRpc } from './a2a.js';
 import { ingestDocument } from '../core/ingestion/ingest_document.js';
 import {
   installShutdownSignalHandlers,
@@ -87,6 +88,11 @@ app.use((req, res, next) => {
 // Unauthenticated process liveness for container orchestration. This is
 // intentionally not dependency readiness; schema bootstrap gates startup.
 app.get('/healthz', (_req, res) => healthHandler(res));
+// A2A discovery (Session 11): the Agent Card precedes authentication —
+// it is how an external agent learns which security scheme the RPC
+// surface requires, and it carries only public contract. With the
+// feature flag off the route does not exist.
+if (config.a2a.enabled) mountAgentCard(app);
 // Authentication before body parsing: unauthorized requests are refused
 // before any bytes are buffered or databases touched.
 app.use(apiKeyMiddleware(config.api.apiKey));
@@ -521,6 +527,14 @@ app.get('/api/agent-stream', async (req, res) => {
     }
   });
 });
+
+// A2A JSON-RPC surface (Session 11): a second inbound door into the
+// same goal loop. It shares the agentStreamGate instance, so the
+// concurrent-goal cap holds across both surfaces, and it inherits the
+// queue-depth backstop and every per-goal bound. Registered after
+// express.text so JSON-RPC bodies arrive size-capped and parsed as raw
+// strings; absent entirely when the flag is off.
+if (config.a2a.enabled) mountA2aRpc(app, { goalGate: agentStreamGate });
 
 // Body-size violations from express.text surface here; everything else
 // unexpected becomes a JSON 500 instead of the default HTML error page.

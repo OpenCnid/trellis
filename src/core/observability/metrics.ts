@@ -61,6 +61,13 @@ export interface TrellisMetrics {
   agentDecisionsTotal: Counter<'action'>;
   agentTasksTotal: Counter<'outcome'>;
 
+  // A2A server surface (Session 11). The method label is the fixed
+  // protocol vocabulary plus 'invalid'; task outcomes reuse the agent
+  // goal vocabulary. Goal text, messages, and artifacts never become
+  // label values.
+  a2aRequestsTotal: Counter<'method'>;
+  a2aTasksTotal: Counter<'outcome'>;
+
   // LLM spend by operation/model (never by prompt or document).
   llmCallsTotal: Counter<'operation' | 'model'>;
   llmInputTokensTotal: Counter<'operation' | 'model'>;
@@ -228,6 +235,19 @@ export function createMetrics(registry: Registry): TrellisMetrics {
     agentTasksTotal: new Counter({
       name: 'trellis_agent_tasks_total',
       help: 'Sub-agent task results by outcome (ok, protocol_violation, error).',
+      labelNames: ['outcome'],
+      registers: [registry],
+    }),
+
+    a2aRequestsTotal: new Counter({
+      name: 'trellis_a2a_requests_total',
+      help: 'A2A JSON-RPC requests by method (protocol vocabulary or invalid).',
+      labelNames: ['method'],
+      registers: [registry],
+    }),
+    a2aTasksTotal: new Counter({
+      name: 'trellis_a2a_tasks_total',
+      help: 'A2A tasks reaching a terminal state, by outcome (completed, failed).',
       labelNames: ['outcome'],
       registers: [registry],
     }),
