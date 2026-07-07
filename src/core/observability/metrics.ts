@@ -73,6 +73,7 @@ export interface TrellisMetrics {
   rlmOutputTokensTotal: Counter<string>;
   rlmSubcallsTotal: Counter<string>;
   rlmToolCallsTotal: Counter<string>;
+  rlmMcpCallsTotal: Counter<string>;
   rlmDurationSeconds: Histogram<string>;
   rlmTelemetryMalformedTotal: Counter<string>;
 
@@ -280,6 +281,11 @@ export function createMetrics(registry: Registry): TrellisMetrics {
     rlmToolCallsTotal: new Counter({
       name: 'trellis_rlm_tool_calls_total',
       help: 'RLM database tool calls.',
+      registers: [registry],
+    }),
+    rlmMcpCallsTotal: new Counter({
+      name: 'trellis_rlm_mcp_calls_total',
+      help: 'RLM external MCP tool calls (counted separately from database tool calls).',
       registers: [registry],
     }),
     rlmDurationSeconds: new Histogram({

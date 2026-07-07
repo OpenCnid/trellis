@@ -32,6 +32,16 @@ describe('createMetrics', () => {
     expect(text).toContain('trellis_llm_input_tokens_total{operation="orchestration",model="m"} 40');
   });
 
+  it('pins the label-free MCP call counter name (Session 10)', async () => {
+    // Deliberately unlabeled: tool names, servers, commands, queries,
+    // and results never become metric label values (Guardrail 11).
+    const metrics = createMetrics(new Registry());
+    metrics.rlmMcpCallsTotal.inc(4);
+
+    const text = await metrics.registry.metrics();
+    expect(text).toContain('trellis_rlm_mcp_calls_total 4');
+  });
+
   it('creates independent registries without duplicate-registration failures', async () => {
     const a = createMetrics(new Registry());
     const b = createMetrics(new Registry());

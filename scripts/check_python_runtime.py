@@ -13,7 +13,9 @@ RLM_DIR = ROOT / "src" / "rlm"
 PYTHON_FILES = [
     RLM_DIR / "trellis_agent.py",
     RLM_DIR / "trellis_tools.py",
+    RLM_DIR / "trellis_mcp.py",
     ROOT / "scripts" / "parse_pdf.py",
+    ROOT / "scripts" / "fixture_mcp_server.py",
 ]
 
 
@@ -27,8 +29,10 @@ def main() -> None:
         "openai",
         "psycopg2",
         "rlm",
+        "mcp",
         "unstructured.partition.pdf",
         "trellis_tools",
+        "trellis_mcp",
         "trellis_agent",
     ):
         importlib.import_module(module_name)

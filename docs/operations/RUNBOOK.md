@@ -240,6 +240,7 @@ npm run test:rlm-sandbox
 npm run test:belief-recovery
 npm run test:invalidation-sweep
 npm run test:agent-loop
+npm run test:rlm-mcp
 ```
 
 The isolated Compose round trip starts the API without workers and receives no
@@ -282,7 +283,8 @@ Key events: `ingest.accepted`, `ingest.failed`, `extraction.started`,
 `resolution.sweep_started`, `resolution.sweep_completed`,
 `resolution.alias_recorded`, `resolution.pair_distinct`,
 `rlm.telemetry`, `rlm.telemetry_malformed`, `rlm.result`,
-`rlm.result_malformed`, `agent.goal_started`, `agent.decision`,
+`rlm.result_malformed`, `rlm.mcp` (counts only — never tool arguments or
+results), `agent.goal_started`, `agent.decision`,
 `agent.task_dispatched`, `agent.task_completed`, `agent.goal_completed`,
 `agent.goal_failed`, `worker.error_classified`,
 `runtime.shutdown_started` / `runtime.shutdown_completed`.
@@ -315,6 +317,7 @@ Two registries, one per process:
 | Agentic goal loop | `trellis_agent_goals_total{outcome}` (`completed`, `failed`), `trellis_agent_decisions_total{action}` (`dispatch`, `finish`, `fail`), `trellis_agent_tasks_total{outcome}` (`ok`, `protocol_violation`, `error`); goal text and task queries never appear in labels or logs |
 | LLM spend | `trellis_llm_calls_total{operation,model}`, `trellis_llm_input_tokens_total`, `trellis_llm_output_tokens_total`, `trellis_llm_embedding_tokens_total` (operations: `extraction`, `extraction_embedding`, `supervision`, `verification`, `resolution`, `orchestration`) |
 | RLM agent cost/health | `trellis_rlm_runs_total{exit_status}`, `trellis_rlm_input_tokens_total`, `trellis_rlm_output_tokens_total`, `trellis_rlm_subcalls_total`, `trellis_rlm_tool_calls_total`, `trellis_rlm_duration_seconds`, `trellis_rlm_telemetry_malformed_total` |
+| External MCP tool usage | `trellis_rlm_mcp_calls_total` (label-free; counted separately from database tool calls — MCP never satisfies provenance). Per-run counts appear in the `rlm.mcp` log event |
 
 Example PromQL once a scraper is attached:
 
@@ -333,3 +336,40 @@ trellis_queue_jobs{queue="extraction_queue",state="waiting"} > 100
 Label discipline: job IDs, request IDs, document keys, AST hashes, entity
 names, and error messages appear only in logs, never as metric labels.
 High-cardinality label growth in a scrape is a regression — report it.
+
+## 8. External MCP tool servers (Session 10)
+
+The RLM sub-agent's external tool surface comes from `TRELLIS_MCP_SERVERS`
+(a JSON array of `{name, command, tools, timeoutMs, maxResultBytes}`),
+validated at worker startup and re-validated by the spawned agent. Unset
+means no external tools. Each server is a stdio child of the RLM process,
+spawned from the configured argument vector — never a shell string — and
+only allowlisted tools are callable. Details: README §External tools (MCP).
+
+**A worker refuses to start after setting the variable**: the registry is
+invalid — the startup error names the offending field. Fix the JSON; do
+not work around it by moving the value into a job payload (payloads carry
+nothing MCP-shaped by design).
+
+**MCP server misbehaving** — symptoms and containment:
+
+- *Hangs*: each call is bounded by the server's `timeoutMs`; the REPL sees
+  a raised timeout error and the run continues. A server that hangs its
+  handshake at spawn fails the run after 30 s with a readable error.
+- *Oversized results*: truncated at `maxResultBytes` with an explicit
+  `TRELLIS_MCP_TRUNCATED` marker in the tool result.
+- *Dies at startup or mid-run*: the run fails (startup) or subsequent
+  calls raise (mid-run); the agent's stderr carries the child's stderr.
+- *Runaway usage*: watch `trellis_rlm_mcp_calls_total` and the per-run
+  `rlm.mcp` event. Spend on a *metered* server is bounded per call, not
+  per run — if a server bills per request, watch this counter closely.
+
+Diagnosis: reproduce with the deterministic fixture
+(`npm run test:rlm-mcp` — handshake, allowlist, timeout, truncation, and
+shutdown checks against `scripts/fixture_mcp_server.py`). If the fixture
+suite passes, the defect is in the configured server, not the client.
+
+MCP calls never satisfy the database-provenance requirement: `mcp_calls`
+is separate from `tool_calls` in `TRELLIS_TELEMETRY`, and a run with zero
+database tool calls is still a `TRELLIS_PROTOCOL_VIOLATION` no matter how
+much it searched.

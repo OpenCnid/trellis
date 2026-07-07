@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseRlmJobData, buildAgentArgs, RlmStubSchema } from './rlm_job';
+import { parseRlmJobData, buildAgentArgs, buildAgentEnv, RlmStubSchema } from './rlm_job';
 
 describe('parseRlmJobData', () => {
   it('accepts the exact pre-Session-9 payload shape', () => {
@@ -58,6 +58,55 @@ describe('parseRlmJobData', () => {
     if (result.success) {
       expect(Object.keys(result.data).sort()).toEqual(['delayMs', 'exitCode', 'stdout']);
     }
+  });
+
+  it('carries nothing MCP-shaped — a payload cannot name servers, commands, or tools', () => {
+    // Guardrail 5 (Session 10): the external tool surface comes from the
+    // operator's validated config only. Any MCP-looking fields riding a
+    // queue payload are stripped at the boundary.
+    const parsed = parseRlmJobData({
+      query: 'q',
+      jobId: 'j',
+      mcpServers: [{ name: 'evil', command: ['rm'], tools: ['everything'] }],
+      TRELLIS_MCP_SERVERS: '[]',
+      tools: ['web_search'],
+      server: 'evil',
+    });
+    expect(Object.keys(parsed).sort()).toEqual(['jobId', 'query']);
+  });
+});
+
+describe('buildAgentEnv', () => {
+  const CFG = {
+    neo4j: { uri: 'bolt://db:7687', user: 'neo4j', password: 'pw' },
+    pgDsn: 'dbname=trellis',
+  };
+
+  it('forwards the validated connection values and Python runtime flags', () => {
+    const env = buildAgentEnv({ PATH: '/bin' }, { ...CFG, pythonPath: '/site-packages' });
+    expect(env).toEqual({
+      PATH: '/bin',
+      PYTHONPATH: '/site-packages',
+      NEO4J_URI: 'bolt://db:7687',
+      NEO4J_USER: 'neo4j',
+      NEO4J_PASSWORD: 'pw',
+      PG_DSN: 'dbname=trellis',
+      PYTHONUNBUFFERED: '1',
+      PYTHONIOENCODING: 'utf-8',
+    });
+  });
+
+  it('forwards the canonical MCP registry JSON when servers are configured', () => {
+    const json = JSON.stringify([{ name: 's', command: ['x'], tools: ['t'], timeoutMs: 1, maxResultBytes: 1 }]);
+    const env = buildAgentEnv({}, { ...CFG, mcpServersJson: json });
+    expect(env.TRELLIS_MCP_SERVERS).toBe(json);
+  });
+
+  it('strips a raw inherited registry when no servers are configured', () => {
+    // The child only ever sees the canonical validated serialization —
+    // never a raw un-validated env passthrough.
+    const env = buildAgentEnv({ TRELLIS_MCP_SERVERS: '[]' }, CFG);
+    expect('TRELLIS_MCP_SERVERS' in env).toBe(false);
   });
 });
 

@@ -1,5 +1,6 @@
 import './environment.js';
 import { z } from 'zod';
+import { parseMcpServers, serializeMcpServers } from './mcp_servers.js';
 
 // Single source of truth for runtime configuration (Guideline:
 // .agents/AGENT_CODING_GUIDELINES.md). The environment is read exactly
@@ -104,6 +105,15 @@ const EnvSchema = z.object({
   RESOLUTION_MAX_PAIRS_PER_SWEEP: z.coerce.number().int().positive().default(200),
   RESOLUTION_BATCH_SIZE: z.coerce.number().int().positive().default(25),
 
+  // MCP server registry for the RLM sub-agent (Session 10): a JSON
+  // array of {name, command, tools, timeoutMs, maxResultBytes}. Servers,
+  // commands, tool allowlists, and per-call bounds come from this value
+  // only — never from job payloads or model output. Unset means no
+  // external tools and byte-identical pre-Session-10 RLM behavior.
+  // Validated by src/config/mcp_servers.ts below (transform-free here so
+  // the schema error message stays readable).
+  TRELLIS_MCP_SERVERS: z.string().optional(),
+
   // Interpreter used to spawn the RLM agent and the PDF parser. On
   // Windows the launcher is conventionally `python`; elsewhere `python3`.
   PYTHON_EXECUTABLE: z
@@ -121,6 +131,10 @@ if (!parsed.success) {
   throw new Error(`Invalid environment configuration:\n${z.prettifyError(parsed.error)}`);
 }
 const env = parsed.data;
+
+// Fail fast at startup on a malformed registry (Guardrail 5): a worker
+// that cannot know its tool surface must not run at all.
+const mcpServers = parseMcpServers(env.TRELLIS_MCP_SERVERS);
 
 export const config = {
   postgres: {
@@ -181,6 +195,11 @@ export const config = {
     minConfidence: env.RESOLUTION_MIN_CONFIDENCE,
     maxPairsPerSweep: env.RESOLUTION_MAX_PAIRS_PER_SWEEP,
     batchSize: env.RESOLUTION_BATCH_SIZE,
+  },
+  mcp: {
+    servers: mcpServers,
+    /** Canonical validated JSON for the spawned agent env; undefined when empty. */
+    serversJson: serializeMcpServers(mcpServers),
   },
   python: {
     executable: env.PYTHON_EXECUTABLE,

@@ -55,6 +55,49 @@ export function buildAgentArgs(scriptPath: string, job: RlmJobData): string[] {
   return args;
 }
 
+/** Config-derived inputs for the spawned agent's environment. */
+export interface AgentEnvConfig {
+  pythonPath?: string;
+  neo4j: { uri: string; user: string; password: string };
+  pgDsn: string;
+  /**
+   * Canonical validated MCP registry JSON (config.mcp.serversJson);
+   * undefined when no servers are configured. Session 10, Guardrail 5:
+   * this is the ONLY route by which the Python agent learns of external
+   * tool servers — job payloads carry nothing MCP-shaped.
+   */
+  mcpServersJson?: string;
+}
+
+/**
+ * Environment for the spawned agent, from the validated config. Pure so
+ * the forwarding contract is pinned by unit test. The child only ever
+ * sees the canonical registry serialization: when no servers are
+ * configured, any raw TRELLIS_MCP_SERVERS inherited from the worker's
+ * own environment is stripped rather than passed through un-validated.
+ */
+export function buildAgentEnv(
+  base: NodeJS.ProcessEnv,
+  cfg: AgentEnvConfig
+): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {
+    ...base,
+    ...(cfg.pythonPath && { PYTHONPATH: cfg.pythonPath }),
+    NEO4J_URI: cfg.neo4j.uri,
+    NEO4J_USER: cfg.neo4j.user,
+    NEO4J_PASSWORD: cfg.neo4j.password,
+    PG_DSN: cfg.pgDsn,
+    PYTHONUNBUFFERED: '1',
+    PYTHONIOENCODING: 'utf-8',
+  };
+  if (cfg.mcpServersJson !== undefined) {
+    env.TRELLIS_MCP_SERVERS = cfg.mcpServersJson;
+  } else {
+    delete env.TRELLIS_MCP_SERVERS;
+  }
+  return env;
+}
+
 /**
  * The worker's completion value (Session 9): the parsed result envelope
  * and telemetry instead of the former placeholder string, so the agent

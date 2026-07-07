@@ -40,6 +40,7 @@
     "test:invalidation-sweep": "tsx scripts/test_invalidation_sweep.ts",
     "test:belief-recovery": "tsx scripts/test_belief_recovery.ts",
     "test:rlm-sandbox": "tsx scripts/test_rlm_sandbox.ts",
+    "test:rlm-mcp": "tsx scripts/test_rlm_mcp.ts",
     "test:api-hardening": "tsx scripts/test_api_hardening.ts",
     "test:agent-loop": "tsx scripts/test_agent_loop.ts",
     "test:benchmark-hardening": "tsx scripts/test_benchmark_hardening.ts",

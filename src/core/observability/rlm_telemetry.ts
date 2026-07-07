@@ -25,6 +25,12 @@ export interface RlmTelemetry {
   outputTokens: number;
   subcallCount: number;
   toolCalls: number;
+  /**
+   * External MCP tool calls (Session 10) — counted separately from
+   * database toolCalls, which alone carry provenance standing. Payloads
+   * from pre-Session-10 agents omit the field; it degrades to 0.
+   */
+  mcpCalls: number;
   /** Seconds; null when the agent could not measure it. */
   executionTimeS: number | null;
 }
@@ -56,6 +62,7 @@ export function parseTelemetryLine(line: string): TelemetryEvent {
       outputTokens: toCount(record.output_tokens),
       subcallCount: toCount(record.subcall_count),
       toolCalls: toCount(record.tool_calls),
+      mcpCalls: toCount(record.mcp_calls),
       executionTimeS:
         typeof record.execution_time_s === 'number' && Number.isFinite(record.execution_time_s)
           ? record.execution_time_s

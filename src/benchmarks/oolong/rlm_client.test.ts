@@ -43,6 +43,7 @@ describe('extractTelemetry', () => {
     reported_cost_usd: null,
     subcall_count: 2,
     tool_calls: 5,
+    mcp_calls: 0,
     execution_time_s: 1.5,
     model_usage: {},
   };
@@ -60,6 +61,20 @@ describe('extractTelemetry', () => {
     const { tool_calls, ...withoutToolCalls } = valid;
     const out = `TRELLIS_TELEMETRY: ${JSON.stringify(withoutToolCalls)}`;
     expect(extractTelemetry(out)?.tool_calls).toBe(0);
+  });
+
+  it('parses mcp_calls in both directions (Session 10 compatibility pin)', () => {
+    // Pre-Session-10 payloads carry no mcp_calls and must keep parsing.
+    const { mcp_calls, ...preSession10 } = valid;
+    const legacy = extractTelemetry(`TRELLIS_TELEMETRY: ${JSON.stringify(preSession10)}`);
+    expect(legacy?.mcp_calls).toBe(0);
+    expect(legacy?.tool_calls).toBe(5);
+
+    // Session 10 payloads report the separate MCP counter.
+    const withMcp = extractTelemetry(
+      `TRELLIS_TELEMETRY: ${JSON.stringify({ ...valid, mcp_calls: 3 })}`
+    );
+    expect(withMcp?.mcp_calls).toBe(3);
   });
 
   it('returns null for malformed JSON or schema violations', () => {
