@@ -16,6 +16,22 @@ describe('createMetrics', () => {
     expect(metrics.registry.contentType).toContain('text/plain');
   });
 
+  it('pins the agent-loop counter names and bounded labels (Session 9)', async () => {
+    const metrics = createMetrics(new Registry());
+    metrics.agentGoalsTotal.inc({ outcome: 'completed' });
+    metrics.agentGoalsTotal.inc({ outcome: 'failed' });
+    metrics.agentDecisionsTotal.inc({ action: 'dispatch' }, 2);
+    metrics.agentTasksTotal.inc({ outcome: 'protocol_violation' });
+    metrics.llmInputTokensTotal.inc({ operation: 'orchestration', model: 'm' }, 40);
+
+    const text = await metrics.registry.metrics();
+    expect(text).toContain('trellis_agent_goals_total{outcome="completed"} 1');
+    expect(text).toContain('trellis_agent_goals_total{outcome="failed"} 1');
+    expect(text).toContain('trellis_agent_decisions_total{action="dispatch"} 2');
+    expect(text).toContain('trellis_agent_tasks_total{outcome="protocol_violation"} 1');
+    expect(text).toContain('trellis_llm_input_tokens_total{operation="orchestration",model="m"} 40');
+  });
+
   it('creates independent registries without duplicate-registration failures', async () => {
     const a = createMetrics(new Registry());
     const b = createMetrics(new Registry());

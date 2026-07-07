@@ -37,6 +37,8 @@ Uploads must be PDFs (`400` otherwise) and are deleted from `uploads/` after par
 
 **RLM stream admission** (see §3): concurrent SSE streams are capped per process (`RLM_MAX_CONCURRENT_STREAMS`, default 4) and requests are refused while the `rlm_queue` backlog exceeds `RLM_QUEUE_MAX_DEPTH` (default 32); both cases return `429`.
 
+**Agent stream admission** (see §4): concurrent goal streams are capped per process (`AGENT_MAX_CONCURRENT_GOALS`, default 2) and requests are refused while the `agent_queue` backlog exceeds `AGENT_QUEUE_MAX_DEPTH` (default 8); both cases return `429`.
+
 ### `GET /metrics`
 
 Prometheus text exposition (`text/plain; version=0.0.4`) for the **API process**: request counters/durations by method, normalized route, and status class, LLM usage recorded in this process, and default Node.js process metrics. Authentication follows §0 — when `API_KEY` is set, an unauthenticated scrape receives `401`.
@@ -216,4 +218,80 @@ curl -N -X GET "http://localhost:3000/api/rlm-stream?query=Find%20the%20contradi
 data: {"type": "stdout", "data": "Let's explore the graph...\n"}
 
 data: {"type": "done", "code": 0}
+```
+
+The agent's stdout carries three machine-readable line conventions consumed
+by clients and by the orchestrator (§4): `FINAL_ANSWER: <text>` (the prose
+answer), `TRELLIS_TELEMETRY: {json}` (token/tool-call/duration accounting),
+and `TRELLIS_RESULT: {json}` — the Session 9 task envelope
+`{"status": "ok" | "protocol_violation" | "error", "answer": string | null, "toolCalls": number}`.
+A `TRELLIS_PROTOCOL_VIOLATION` line additionally flags an answer produced
+with zero database tool calls (no provenance).
+
+---
+
+## 4. Agentic Goal Stream Endpoint
+
+### `GET /api/agent-stream`
+
+Runs one **goal** through the agentic orchestration loop (Session 9): an
+orchestrator — the same LLM under a planner system prompt, making
+structured decisions validated at the Zod boundary — decomposes the goal
+into single-task RLM runs, dispatches them as ordinary `rlm_queue` jobs,
+observes their result envelopes, and iterates until it finishes, fails, or
+trips a hard bound. Goal-level progress streams as SSE.
+
+**Query Parameters:**
+- `goal` (string, required): the goal to pursue.
+- `api_key` (required when `API_KEY` is configured): see §0.
+- `oracle` (JSON, optional; **rejected with `400` unless
+  `AGENT_ORACLE_ENABLED=true`**): a scripted decision sequence with stubbed
+  tasks for zero-LLM drills (`scripts/test_agent_loop.ts`). Production
+  deployments leave the switch off.
+
+**Responses:**
+- `200` — SSE stream begins.
+- `400` — missing goal, or an oracle script that is malformed/disabled.
+- `401` — missing/invalid API key (when configured).
+- `429` — goal concurrency cap or queue-depth limit reached; retry later.
+- `503` — the job queue is unreachable.
+
+**Stream events** (one JSON object per SSE `data:` frame; the stream ends
+after a terminal event):
+
+| Event | Payload highlights |
+|---|---|
+| `goal_started` | `goalId`, the effective per-goal bounds |
+| `decision` | `iteration`, `action` (`dispatch`/`finish`/`fail`), `assessment`, `taskCount` |
+| `task_started` | `iteration`, `taskId`, `query` |
+| `task_result` | `outcome`: `{taskId, status, answer, toolCalls, spend}` |
+| `goal_completed` *(terminal)* | `finalAnswer`, `iterations`, `tasksDispatched`, aggregated `spend` |
+| `goal_failed` *(terminal)* | typed `failure` (`kind`, `reason`), `iterations`, `tasksDispatched`, `spend` |
+
+Failure kinds: `iteration_bound`, `task_bound`, `concurrency_bound`
+(bounds below), `decision_error` (the orchestrator completion failed the
+schema boundary or the oracle script ran out), and `orchestrator_fail`
+(the orchestrator itself declared the goal unachievable).
+
+**Bounds and cost controls.** Every goal is hard-bounded by validated
+configuration; tripping any bound ends the goal as a typed, streamed
+failure with no further dispatches:
+
+| Bound | Default | Env var |
+|---|---|---|
+| Decision rounds per goal | 4 | `AGENT_MAX_ITERATIONS_PER_GOAL` |
+| Total tasks per goal | 8 | `AGENT_MAX_TASKS_PER_GOAL` |
+| Tasks per dispatch batch (run concurrently) | 2 | `AGENT_MAX_CONCURRENT_TASKS` |
+| RLM iterations per task (`--max-iterations`) | 5 | `AGENT_TASK_MAX_ITERATIONS` |
+
+Task failures and protocol violations do **not** end the goal — they are
+observations the next decision reacts to. The orchestrator never writes to
+the graph; `write_derived_insight` inside the RLM sandbox remains the only
+agentic write path. Aggregated spend (orchestrator completions plus
+per-task `TRELLIS_TELEMETRY`) is reported on the terminal event and in the
+worker's Prometheus registry under `operation="orchestration"`.
+
+**Example Request:**
+```bash
+curl -N "http://localhost:3000/api/agent-stream?goal=Answer%20these%20two%20questions%20and%20reconcile%20them&api_key=$TRELLIS_API_KEY"
 ```

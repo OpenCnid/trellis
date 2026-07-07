@@ -1,6 +1,7 @@
 import type { Server } from 'node:http';
 import { config } from '../config/index.js';
 import {
+  agentQueue,
   extractionQueue,
   invalidationQueue,
   resolutionQueue,
@@ -29,7 +30,7 @@ const metrics = getMetrics();
 
 registerQueueDepthCollection(
   metrics,
-  [extractionQueue, rlmQueue, supervisorQueue, invalidationQueue, verificationQueue, resolutionQueue],
+  [extractionQueue, rlmQueue, supervisorQueue, invalidationQueue, verificationQueue, resolutionQueue, agentQueue],
   log
 );
 

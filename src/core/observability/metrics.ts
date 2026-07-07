@@ -55,6 +55,12 @@ export interface TrellisMetrics {
   repoSkippedFilesTotal: Counter<'reason'>;
   repoBlocksTotal: Counter<'stage'>;
 
+  // Agentic goal loop (Session 9). Labels are bounded outcome/action
+  // enums; goal text and task queries never become label values.
+  agentGoalsTotal: Counter<'outcome'>;
+  agentDecisionsTotal: Counter<'action'>;
+  agentTasksTotal: Counter<'outcome'>;
+
   // LLM spend by operation/model (never by prompt or document).
   llmCallsTotal: Counter<'operation' | 'model'>;
   llmInputTokensTotal: Counter<'operation' | 'model'>;
@@ -203,6 +209,25 @@ export function createMetrics(registry: Registry): TrellisMetrics {
       name: 'trellis_repo_blocks_total',
       help: 'Extraction blocks per snapshot run by stage (eligible, queued).',
       labelNames: ['stage'],
+      registers: [registry],
+    }),
+
+    agentGoalsTotal: new Counter({
+      name: 'trellis_agent_goals_total',
+      help: 'Agentic goals by outcome (completed, failed).',
+      labelNames: ['outcome'],
+      registers: [registry],
+    }),
+    agentDecisionsTotal: new Counter({
+      name: 'trellis_agent_decisions_total',
+      help: 'Orchestrator decisions by action (dispatch, finish, fail).',
+      labelNames: ['action'],
+      registers: [registry],
+    }),
+    agentTasksTotal: new Counter({
+      name: 'trellis_agent_tasks_total',
+      help: 'Sub-agent task results by outcome (ok, protocol_violation, error).',
+      labelNames: ['outcome'],
       registers: [registry],
     }),
 

@@ -186,6 +186,30 @@ npm run repo:ingest -- --repo-key my-repo --root /path/to/checkout --extract non
 Live coverage: `npm run test:repo-ingest` (zero LLM calls). Details and
 measured results: `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`.
 
+## Agentic goals
+
+The agentic orchestration loop (Session 9) lets one goal drive many RLM
+runs. `GET /api/agent-stream?goal=...` enqueues a goal; the agent worker
+runs an orchestrator — the same LLM under a planner system prompt, its
+decisions validated at the Zod boundary — that decomposes the goal into
+single-task RLM sub-agent runs (ordinary `rlm_queue` jobs), reads their
+`TRELLIS_RESULT` envelopes, and iterates. Progress streams as goal-level
+SSE events (`goal_started`, `decision`, `task_started`, `task_result`,
+`goal_completed`/`goal_failed`).
+
+Every goal is hard-bounded by validated config —
+`AGENT_MAX_ITERATIONS_PER_GOAL` (default 4), `AGENT_MAX_TASKS_PER_GOAL`
+(8), `AGENT_MAX_CONCURRENT_TASKS` per batch (2), and
+`AGENT_TASK_MAX_ITERATIONS` forwarded to each RLM run (5) — and a tripped
+bound ends the goal as a typed streamed failure. Admission mirrors the RLM
+stream (`AGENT_MAX_CONCURRENT_GOALS`, `AGENT_QUEUE_MAX_DEPTH`; over-limit
+requests get `429`). The orchestrator never touches either database:
+`write_derived_insight` inside the RLM sandbox remains the single agentic
+write path. A real goal makes paid LLM calls; the zero-LLM drill
+(`npm run test:agent-loop`) exercises the whole loop with scripted oracle
+decisions and stubbed tasks (`AGENT_ORACLE_ENABLED=true`, off by default).
+See `API_REFERENCE.md` §4 for the event contract.
+
 ## Benchmarks
 
 The OOLONG-Pairs harness ships two committed, seeded corpora:
@@ -265,6 +289,7 @@ npm run test:invalidation-sweep
 npm run test:entity-resolution
 npm run test:benchmark-hardening
 npm run test:repo-ingest
+npm run test:agent-loop
 ```
 
 See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts.

@@ -155,7 +155,14 @@ docker compose exec workers node -e "fetch('http://127.0.0.1:9464/metrics').then
 - **Interactive RLM jobs:** `rlm_queue` deliberately has no automatic retry;
   its SSE client owns redispatch so a background retry cannot spend LLM budget
   without a listener.
-- **Queue cleanup:** do not use `FLUSHALL`. Trellis shares Redis across six
+- **Agentic goals:** `agent_queue` (Session 9) follows the same interactive
+  no-retry policy — an interrupted goal must not silently re-run paid
+  orchestrator and sub-agent work with no listener. Every goal is
+  hard-bounded (`AGENT_MAX_ITERATIONS_PER_GOAL`, `AGENT_MAX_TASKS_PER_GOAL`,
+  `AGENT_MAX_CONCURRENT_TASKS`, `AGENT_TASK_MAX_ITERATIONS`); a goal that
+  trips a bound ends as a typed `goal_failed` stream event, so a stuck goal
+  is a worker or Redis problem, not a runaway loop.
+- **Queue cleanup:** do not use `FLUSHALL`. Trellis shares Redis across seven
   queues and pub/sub; `FLUSHALL` destroys every pending job and coordination
   key. Prefer allowing configured age/count retention to remove history.
   Before any exceptional purge, stop API admission and workers, capture logs,
@@ -232,6 +239,7 @@ npm run test:api-hardening
 npm run test:rlm-sandbox
 npm run test:belief-recovery
 npm run test:invalidation-sweep
+npm run test:agent-loop
 ```
 
 The isolated Compose round trip starts the API without workers and receives no
@@ -273,7 +281,10 @@ Key events: `ingest.accepted`, `ingest.failed`, `extraction.started`,
 `supervisor.evaluation_invalid`, `verification.belief_disputed`,
 `resolution.sweep_started`, `resolution.sweep_completed`,
 `resolution.alias_recorded`, `resolution.pair_distinct`,
-`rlm.telemetry`, `rlm.telemetry_malformed`, `worker.error_classified`,
+`rlm.telemetry`, `rlm.telemetry_malformed`, `rlm.result`,
+`rlm.result_malformed`, `agent.goal_started`, `agent.decision`,
+`agent.task_dispatched`, `agent.task_completed`, `agent.goal_completed`,
+`agent.goal_failed`, `worker.error_classified`,
 `runtime.shutdown_started` / `runtime.shutdown_completed`.
 
 ### 7.2 Metrics topology
@@ -294,14 +305,15 @@ Two registries, one per process:
 |---|---|
 | Request/error rate per route | `trellis_http_requests_total{method,route,status_class}`, `trellis_http_request_duration_seconds` |
 | Failure/retry rate per worker | `trellis_jobs_total{queue,worker,outcome}` with outcomes `started`, `completed`, `failed_retryable`, `failed_exhausted`, `failed_unrecoverable`; `trellis_job_duration_seconds` |
-| Queue backlog | `trellis_queue_jobs{queue,state}` for all six queues (`extraction_queue`, `rlm_queue`, `supervisor_queue`, `invalidation_queue`, `verification_queue`, `resolution_queue`), states `waiting`/`active`/`delayed`/`failed`; read failures in `trellis_queue_depth_read_failures_total{queue}` |
+| Queue backlog | `trellis_queue_jobs{queue,state}` for all seven queues (`extraction_queue`, `rlm_queue`, `supervisor_queue`, `invalidation_queue`, `verification_queue`, `resolution_queue`, `agent_queue`), states `waiting`/`active`/`delayed`/`failed`; read failures in `trellis_queue_depth_read_failures_total{queue}` |
 | Unresolved/dropped actions | `trellis_extraction_unresolved_endpoints_total`, `trellis_extraction_dropped_actions_total` |
 | Superseded/compensated extractions | `trellis_extraction_superseded_total{stage}` (`before_start`, `before_merge`, `post_merge_compensated`) |
 | Invalidation behavior | `trellis_invalidation_candidate_hashes_total`, `trellis_invalidation_retained_shared_hashes_total`, `trellis_invalidation_contested_total{kind}`, `trellis_invalidation_survived_total{kind}`, `trellis_invalidation_sweep_batches_total` |
 | Verification outcomes | `trellis_verification_beliefs_total{result}` (`classified`, `agreed`, `disputed`, `skipped_no_text`, `skipped_no_answer`) |
 | Entity-resolution outcomes | `trellis_resolution_candidates_total`, `trellis_resolution_pairs_total{verdict}` (`same`, `distinct`, `skipped_no_text`, `skipped_no_answer`) |
 | Repository snapshot runs | `trellis_repo_snapshots_total{result}` (`published`, `failed`), `trellis_repo_files_total{outcome,language}` (`ingested`/`unchanged`/`tombstoned` by source language), `trellis_repo_skipped_files_total{reason}`, `trellis_repo_blocks_total{stage}` (`eligible`, `queued`) |
-| LLM spend | `trellis_llm_calls_total{operation,model}`, `trellis_llm_input_tokens_total`, `trellis_llm_output_tokens_total`, `trellis_llm_embedding_tokens_total` (operations: `extraction`, `extraction_embedding`, `supervision`, `verification`, `resolution`) |
+| Agentic goal loop | `trellis_agent_goals_total{outcome}` (`completed`, `failed`), `trellis_agent_decisions_total{action}` (`dispatch`, `finish`, `fail`), `trellis_agent_tasks_total{outcome}` (`ok`, `protocol_violation`, `error`); goal text and task queries never appear in labels or logs |
+| LLM spend | `trellis_llm_calls_total{operation,model}`, `trellis_llm_input_tokens_total`, `trellis_llm_output_tokens_total`, `trellis_llm_embedding_tokens_total` (operations: `extraction`, `extraction_embedding`, `supervision`, `verification`, `resolution`, `orchestration`) |
 | RLM agent cost/health | `trellis_rlm_runs_total{exit_status}`, `trellis_rlm_input_tokens_total`, `trellis_rlm_output_tokens_total`, `trellis_rlm_subcalls_total`, `trellis_rlm_tool_calls_total`, `trellis_rlm_duration_seconds`, `trellis_rlm_telemetry_malformed_total` |
 
 Example PromQL once a scraper is attached:
