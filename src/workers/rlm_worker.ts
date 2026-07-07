@@ -158,6 +158,7 @@ function runAgentProcess(
         neo4j: config.neo4j,
         pgDsn: pgDsn(),
         mcpServersJson: config.mcp.serversJson,
+        mcpCredentialEnv: config.mcp.credentialEnv,
       })
     });
 

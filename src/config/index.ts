@@ -1,6 +1,10 @@
 import './environment.js';
 import { z } from 'zod';
-import { parseMcpServers, serializeMcpServers } from './mcp_servers.js';
+import {
+  parseMcpServers,
+  resolveMcpCredentialEnv,
+  serializeMcpServers,
+} from './mcp_servers.js';
 
 // Single source of truth for runtime configuration (Guideline:
 // .agents/AGENT_CODING_GUIDELINES.md). The environment is read exactly
@@ -130,13 +134,14 @@ const EnvSchema = z.object({
   // BullMQ job history: age-limited, never unbounded (Guardrail 6).
   A2A_TASK_TTL_SECONDS: z.coerce.number().int().positive().max(86400).default(3600),
 
-  // MCP server registry for the RLM sub-agent (Session 10): a JSON
-  // array of {name, command, tools, timeoutMs, maxResultBytes}. Servers,
-  // commands, tool allowlists, and per-call bounds come from this value
-  // only — never from job payloads or model output. Unset means no
-  // external tools and byte-identical pre-Session-10 RLM behavior.
-  // Validated by src/config/mcp_servers.ts below (transform-free here so
-  // the schema error message stays readable).
+  // MCP server registry for the RLM sub-agent (Session 10; Session 12
+  // adds the 'http' transport variant with env-referenced credentials).
+  // Servers, transports, URLs, tool allowlists, per-call bounds, and
+  // credential *references* come from this value only — never from job
+  // payloads or model output. Unset means no external tools and
+  // byte-identical pre-Session-10 RLM behavior. Validated by
+  // src/config/mcp_servers.ts below (transform-free here so the schema
+  // error message stays readable).
   TRELLIS_MCP_SERVERS: z.string().optional(),
 
   // Interpreter used to spawn the RLM agent and the PDF parser. On
@@ -158,8 +163,11 @@ if (!parsed.success) {
 const env = parsed.data;
 
 // Fail fast at startup on a malformed registry (Guardrail 5): a worker
-// that cannot know its tool surface must not run at all.
+// that cannot know its tool surface must not run at all. The same goes
+// for a registry naming a credential env var the process does not have —
+// a missing secret is a startup error, not a mid-run tool failure.
 const mcpServers = parseMcpServers(env.TRELLIS_MCP_SERVERS);
+const mcpCredentialEnv = resolveMcpCredentialEnv(mcpServers, process.env);
 
 export const config = {
   postgres: {
@@ -233,6 +241,12 @@ export const config = {
     servers: mcpServers,
     /** Canonical validated JSON for the spawned agent env; undefined when empty. */
     serversJson: serializeMcpServers(mcpServers),
+    /**
+     * Exactly the credential env vars the http servers name, resolved
+     * fail-fast at startup (Session 12). Forwarded to the spawned agent
+     * by buildAgentEnv; values never appear in logs or serializations.
+     */
+    credentialEnv: mcpCredentialEnv,
   },
   python: {
     executable: env.PYTHON_EXECUTABLE,

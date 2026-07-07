@@ -250,22 +250,50 @@ See `API_REFERENCE.md` §5 for the wire contract.
 The RLM sub-agent can call external tools over the Model Context Protocol
 (Session 10) — web search is the first intended tool. The surface is
 operator-configured and nothing else: set `TRELLIS_MCP_SERVERS` to a JSON
-array of servers, each an explicit argument vector spawned as a child of
-the RLM process (stdio transport only) with a per-tool allowlist and
-per-call bounds:
+array of servers, each with a per-tool allowlist and per-call bounds.
+Two transports (Session 12), discriminated by `transport`:
+
+- **`stdio`** (the default when the field is absent, so pre-Session-12
+  registries parse unchanged): an explicit argument vector spawned as a
+  child of the RLM process — never a shell string.
+- **`http`**: a remote server reached over the MCP Streamable HTTP
+  transport (spec 2025-06-18; the deprecated HTTP+SSE transport is not
+  supported). `https://` is always accepted; plain `http://` only for
+  loopback, RFC1918, or dot-free (Compose/LAN service DNS) hosts, so a
+  credential is never sent in cleartext across a public network.
 
 ```bash
-TRELLIS_MCP_SERVERS='[{"name":"websearch","command":["python","/path/to/server.py"],"tools":["web_search"],"timeoutMs":10000,"maxResultBytes":65536}]'
+TRELLIS_MCP_SERVERS='[
+  {"name":"websearch","command":["python","/path/to/server.py"],"tools":["web_search"],"timeoutMs":10000,"maxResultBytes":65536},
+  {"transport":"http","name":"hosted","url":"https://tools.example.com/mcp","tools":["web_search"],
+   "auth":{"kind":"bearer","valueEnv":"HOSTED_MCP_TOKEN"}}
+]'
 ```
+
+**Credentials are references, never values.** An `http` server may carry
+`auth: {kind: "bearer" | "header", header?, valueEnv}` — `valueEnv` NAMES
+an environment variable; the worker resolves it at startup (a registry
+naming an unset variable refuses to start) and forwards exactly the named
+variables to the spawned agent. The value never appears in the registry
+JSON, the system prompt, logs, metrics, or error messages — every raised
+tool error is scrubbed (`[REDACTED]`) before it reaches the REPL.
 
 The registry is Zod-validated at startup, forwarded to the spawned agent
 like the database credentials, and re-validated in Python. The REPL then
 sees one injected `trellis_mcp` object (`list_tools()`,
 `call_tool(server, tool, arguments)`); tools outside the allowlist are
-rejected before any I/O, every call is time-bounded, and oversized results
-are truncated with an explicit marker. No queue payload or model output
-can name or spawn a server. When the variable is unset, nothing is
-injected and the RLM behaves byte-identically to a pre-Session-10 run.
+rejected before any I/O, every call is time-bounded over either
+transport, and oversized results are truncated with an explicit marker.
+No queue payload or model output can name, spawn, or dial a server. When
+the variable is unset, nothing is injected and the RLM behaves
+byte-identically to a pre-Session-10 run.
+
+**Containerized tool servers** are the recommended deployment shape for
+servers you operate yourself: run the tool server as its own Compose
+service on the project network (own image, no host-published port) and
+point an `http` registry entry at its service DNS name — see the
+`mcp-fixture` service in `docker-compose.yml` (test profile) for the
+working pattern, including bearer auth via an env-var reference.
 
 **Provenance rule (hard):** MCP results are research context only. They
 carry no AST hashes, can never be passed as `sourceNodeIds`, and do not
@@ -275,9 +303,10 @@ earns citability only by being ingested through the verified ingest path.
 MCP usage is reported separately as `mcp_calls` in the telemetry line and
 the `trellis_rlm_mcp_calls_total` metric.
 
-**Cost posture:** acceptance is zero-paid and offline — the deterministic
-local fixture server (`scripts/fixture_mcp_server.py`) is the only server
-the drill configures:
+**Cost posture:** acceptance is zero-paid and local — the deterministic
+fixture server (`scripts/fixture_mcp_server.py`, stdio and loopback
+Streamable HTTP, with and without required auth) is the only server the
+drill configures:
 
 ```bash
 npm run test:rlm-mcp

@@ -67,6 +67,13 @@ export interface AgentEnvConfig {
    * tool servers — job payloads carry nothing MCP-shaped.
    */
   mcpServersJson?: string;
+  /**
+   * Exactly the credential env vars the registry's http servers name
+   * (config.mcp.credentialEnv, resolved fail-fast at startup). The
+   * registry carries only variable NAMES; this map carries the values
+   * the child resolves them against (Session 12).
+   */
+  mcpCredentialEnv?: Record<string, string>;
 }
 
 /**
@@ -94,6 +101,11 @@ export function buildAgentEnv(
     env.TRELLIS_MCP_SERVERS = cfg.mcpServersJson;
   } else {
     delete env.TRELLIS_MCP_SERVERS;
+  }
+  // Explicitly set the credential variables the registry names, so the
+  // forwarding contract holds regardless of what the base env carries.
+  for (const [name, value] of Object.entries(cfg.mcpCredentialEnv ?? {})) {
+    env[name] = value;
   }
   return env;
 }

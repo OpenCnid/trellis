@@ -16,6 +16,7 @@ PYTHON_FILES = [
     RLM_DIR / "trellis_mcp.py",
     ROOT / "scripts" / "parse_pdf.py",
     ROOT / "scripts" / "fixture_mcp_server.py",
+    ROOT / "scripts" / "compose_mcp_probe.py",
 ]
 
 
