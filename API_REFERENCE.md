@@ -228,6 +228,12 @@ and `TRELLIS_RESULT: {json}` — the Session 9 task envelope
 A `TRELLIS_PROTOCOL_VIOLATION` line additionally flags an answer produced
 with zero database tool calls (no provenance).
 
+Since Session 10 the telemetry payload also carries `mcp_calls` — external
+MCP tool calls (see README §External tools), counted separately from
+`tool_calls` because MCP usage never satisfies the database-provenance
+requirement. The field is backward-compatible in both directions: payloads
+without it parse as 0, and consumers that predate it ignore it.
+
 ---
 
 ## 4. Agentic Goal Stream Endpoint

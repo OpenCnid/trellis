@@ -16,6 +16,7 @@ import { RlmResultScanner, type RlmResultEnvelope } from '../core/observability/
 import {
   parseRlmJobData,
   buildAgentArgs,
+  buildAgentEnv,
   type RlmJobData,
   type RlmJobCompletion,
 } from './rlm_job.js';
@@ -57,6 +58,7 @@ function makeStreamObservers(jobLog: Logger): StreamObservers {
     metrics.rlmOutputTokensTotal.inc(telemetry.outputTokens);
     metrics.rlmSubcallsTotal.inc(telemetry.subcallCount);
     metrics.rlmToolCallsTotal.inc(telemetry.toolCalls);
+    metrics.rlmMcpCallsTotal.inc(telemetry.mcpCalls);
     if (telemetry.executionTimeS !== null) {
       metrics.rlmDurationSeconds.observe(telemetry.executionTimeS);
     }
@@ -68,6 +70,11 @@ function makeStreamObservers(jobLog: Logger): StreamObservers {
       toolCalls: telemetry.toolCalls,
       executionTimeS: telemetry.executionTimeS,
     });
+    if (telemetry.mcpCalls > 0) {
+      // T16 house style: counts only — tool names, arguments, and
+      // results never reach log lines or metric labels.
+      jobLog.info({ event: 'rlm.mcp', mcpCalls: telemetry.mcpCalls });
+    }
   });
 
   const resultScanner = new RlmResultScanner(event => {
@@ -143,18 +150,15 @@ function runAgentProcess(
 
   return new Promise((resolve, reject) => {
     // Forward the validated config to the Python half so both sides of
-    // the system derive their connection targets from the same values.
+    // the system derive their connection targets — and, Session 10, the
+    // MCP server registry — from the same values.
     const pythonProcess = spawn(config.python.executable, buildAgentArgs(pythonScript, jobData), {
-      env: {
-        ...process.env,
-        ...(config.python.pythonPath && { PYTHONPATH: config.python.pythonPath }),
-        NEO4J_URI: config.neo4j.uri,
-        NEO4J_USER: config.neo4j.user,
-        NEO4J_PASSWORD: config.neo4j.password,
-        PG_DSN: pgDsn(),
-        PYTHONUNBUFFERED: '1',
-        PYTHONIOENCODING: 'utf-8'
-      }
+      env: buildAgentEnv(process.env, {
+        pythonPath: config.python.pythonPath,
+        neo4j: config.neo4j,
+        pgDsn: pgDsn(),
+        mcpServersJson: config.mcp.serversJson,
+      })
     });
 
     let stderrTail = '';

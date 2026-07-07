@@ -11,6 +11,9 @@ export const TelemetrySchema = z.object({
   reported_cost_usd: z.number().nullable(),
   subcall_count: z.number(),
   tool_calls: z.number().default(0),
+  // Session 10: external MCP tool calls. Optional-with-default so
+  // pre-Session-10 payloads (no field) keep parsing.
+  mcp_calls: z.number().default(0),
   execution_time_s: z.number().nullable(),
   model_usage: z.record(z.string(), z.any())
 });

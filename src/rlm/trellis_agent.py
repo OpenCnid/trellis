@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 import argparse
@@ -6,6 +7,7 @@ from rlm import RLM
 from rlm.core.lm_handler import LMRequestHandler
 from rlm.utils.prompts import RLM_SYSTEM_PROMPT
 from trellis_tools import TrellisNeo4j, TrellisPostgres, get_tool_call_count, RUBRIC_TEXT
+from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
 
 # --- Sub-call counting -------------------------------------------------
 # In this rlms version, REPL llm_query()/llm_query_batched() requests are
@@ -104,6 +106,7 @@ def main():
     # Initialize tools
     neo4j_tool = TrellisNeo4j()
     postgres_tool = TrellisPostgres()
+    mcp_tool = None
 
     print(f"Starting RLM Agent for query: '{args.query}'", flush=True)
 
@@ -118,10 +121,22 @@ def main():
 
     exit_code = 0
     try:
+        # Session 10: the external tool surface comes exclusively from the
+        # validated TRELLIS_MCP_SERVERS registry the worker forwarded
+        # (re-validated here defensively). With no servers configured,
+        # nothing is injected and the system prompt is byte-identical to a
+        # pre-Session-10 run (build_mcp_addendum([]) is the empty string).
+        mcp_servers = parse_mcp_config(os.getenv("TRELLIS_MCP_SERVERS"))
+        custom_tools = {"trellis_neo4j": neo4j_tool, "trellis_postgres": postgres_tool}
+        if mcp_servers:
+            mcp_tool = TrellisMcp(mcp_servers)
+            custom_tools["trellis_mcp"] = mcp_tool
+            print(f"MCP servers connected: {', '.join(s['name'] for s in mcp_servers)}", flush=True)
+
         # Inject the query directly into the system prompt to ensure the LLM sees it and doesn't ask for it.
         # Curly braces are escaped because rlms applies .format() to the system prompt.
         safe_query = args.query.replace("{", "{{").replace("}", "}}")
-        dynamic_system_prompt = SYSTEM_PROMPT + f"\n\nTHE USER'S QUERY IS: {safe_query}\nDO NOT ASK FOR A QUERY, THIS IS IT. EXECUTE IT IMMEDIATELY."
+        dynamic_system_prompt = SYSTEM_PROMPT + build_mcp_addendum(mcp_servers) + f"\n\nTHE USER'S QUERY IS: {safe_query}\nDO NOT ASK FOR A QUERY, THIS IS IT. EXECUTE IT IMMEDIATELY."
 
         rlm = RLM(
             environment="local",
@@ -129,7 +144,7 @@ def main():
             max_iterations=args.max_iterations,
             backend_kwargs={"model_name": "gpt-5.4-2026-03-05"},
             environment_kwargs={},
-            custom_tools={"trellis_neo4j": neo4j_tool, "trellis_postgres": postgres_tool},
+            custom_tools=custom_tools,
             custom_system_prompt=dynamic_system_prompt,
             on_subcall_complete=on_subcall_complete,
         )
@@ -153,6 +168,9 @@ def main():
             "reported_cost_usd": usage.total_cost if usage else None,
             "subcall_count": _subcall_stats["count"],
             "tool_calls": get_tool_call_count(),
+            # Session 10: MCP usage is counted separately from database
+            # tool calls — it never feeds the provenance requirement.
+            "mcp_calls": get_mcp_call_count(),
             "execution_time_s": getattr(result, "execution_time", None),
             "model_usage": usage_dict.get("model_usage_summaries", {}),
         }
@@ -188,6 +206,8 @@ def main():
     finally:
         neo4j_tool.close()
         postgres_tool.close()
+        if mcp_tool is not None:
+            mcp_tool.close()
 
     sys.exit(exit_code)
 

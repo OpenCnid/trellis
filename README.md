@@ -210,6 +210,48 @@ write path. A real goal makes paid LLM calls; the zero-LLM drill
 decisions and stubbed tasks (`AGENT_ORACLE_ENABLED=true`, off by default).
 See `API_REFERENCE.md` §4 for the event contract.
 
+## External tools (MCP)
+
+The RLM sub-agent can call external tools over the Model Context Protocol
+(Session 10) — web search is the first intended tool. The surface is
+operator-configured and nothing else: set `TRELLIS_MCP_SERVERS` to a JSON
+array of servers, each an explicit argument vector spawned as a child of
+the RLM process (stdio transport only) with a per-tool allowlist and
+per-call bounds:
+
+```bash
+TRELLIS_MCP_SERVERS='[{"name":"websearch","command":["python","/path/to/server.py"],"tools":["web_search"],"timeoutMs":10000,"maxResultBytes":65536}]'
+```
+
+The registry is Zod-validated at startup, forwarded to the spawned agent
+like the database credentials, and re-validated in Python. The REPL then
+sees one injected `trellis_mcp` object (`list_tools()`,
+`call_tool(server, tool, arguments)`); tools outside the allowlist are
+rejected before any I/O, every call is time-bounded, and oversized results
+are truncated with an explicit marker. No queue payload or model output
+can name or spawn a server. When the variable is unset, nothing is
+injected and the RLM behaves byte-identically to a pre-Session-10 run.
+
+**Provenance rule (hard):** MCP results are research context only. They
+carry no AST hashes, can never be passed as `sourceNodeIds`, and do not
+count toward the database-provenance requirement — a run that only
+searched the web is still a `TRELLIS_PROTOCOL_VIOLATION`. External content
+earns citability only by being ingested through the verified ingest path.
+MCP usage is reported separately as `mcp_calls` in the telemetry line and
+the `trellis_rlm_mcp_calls_total` metric.
+
+**Cost posture:** acceptance is zero-paid and offline — the deterministic
+local fixture server (`scripts/fixture_mcp_server.py`) is the only server
+the drill configures:
+
+```bash
+npm run test:rlm-mcp
+```
+
+Real networked or metered MCP servers (an actual web-search provider) are
+owner-approved runs: print the configured allowlist first and record the
+observed `mcp_calls`.
+
 ## Benchmarks
 
 The OOLONG-Pairs harness ships two committed, seeded corpora:
@@ -290,6 +332,7 @@ npm run test:entity-resolution
 npm run test:benchmark-hardening
 npm run test:repo-ingest
 npm run test:agent-loop
+npm run test:rlm-mcp
 ```
 
 See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts.

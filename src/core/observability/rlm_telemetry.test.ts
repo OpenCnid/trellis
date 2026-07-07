@@ -37,6 +37,7 @@ describe('RlmTelemetryScanner', () => {
         outputTokens: 340,
         subcallCount: 3,
         toolCalls: 5,
+        mcpCalls: 0,
         executionTimeS: 12.5,
       },
     }]);
@@ -75,7 +76,29 @@ describe('RlmTelemetryScanner', () => {
         outputTokens: 0,
         subcallCount: 0,
         toolCalls: 2,
+        mcpCalls: 0,
         executionTimeS: null,
+      },
+    }]);
+  });
+
+  it('parses mcp_calls separately from database tool calls (Session 10 pin)', () => {
+    // A pre-Session-10 payload (no mcp_calls) degrades to 0 — pinned by
+    // the tests above. A Session 10 payload reports the MCP counter
+    // without disturbing toolCalls, which alone carries the provenance
+    // requirement.
+    const events = scan([
+      `TRELLIS_TELEMETRY: ${JSON.stringify({ ...PAYLOAD, mcp_calls: 4 })}\n`,
+    ]);
+    expect(events).toEqual([{
+      kind: 'telemetry',
+      telemetry: {
+        inputTokens: 1200,
+        outputTokens: 340,
+        subcallCount: 3,
+        toolCalls: 5,
+        mcpCalls: 4,
+        executionTimeS: 12.5,
       },
     }]);
   });
