@@ -136,6 +136,17 @@ describe('buildAgentEnv', () => {
     expect(env.TRELLIS_WORKSPACE_MAX_BYTES).toBe('1048576');
   });
 
+  it('forwards the canonical module selection and never a raw inherited one (Session 15)', () => {
+    const env = buildAgentEnv(
+      { TRELLIS_MODULES: '["evil-module"]' },
+      { ...CFG, modulesJson: '["spatial-flywheel"]' }
+    );
+    expect(env.TRELLIS_MODULES).toBe('["spatial-flywheel"]');
+
+    const stripped = buildAgentEnv({ TRELLIS_MODULES: '["evil-module"]' }, CFG);
+    expect('TRELLIS_MODULES' in stripped).toBe(false);
+  });
+
   it('strips raw inherited workspace bounds when none are configured', () => {
     // Same discipline as TRELLIS_MCP_SERVERS: the child only ever sees
     // bounds that crossed the Zod validator, never a raw passthrough.

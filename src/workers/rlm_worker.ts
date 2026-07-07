@@ -160,6 +160,7 @@ function runAgentProcess(
         mcpServersJson: config.mcp.serversJson,
         mcpCredentialEnv: config.mcp.credentialEnv,
         workspace: config.workspace,
+        modulesJson: config.modules.selectionJson,
       })
     });
 

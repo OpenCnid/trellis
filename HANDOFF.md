@@ -131,20 +131,30 @@ Sessions 1–14 are complete and merged:
 
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 15, which begins with an owner decision**:
-the roadmap's first unstruck §4 row is "remaining design-record steps
-(§11 steps 3–6), owner-sequenced — order to be recorded when directed."
-The Session 14 PR asked the owner to choose among design-record step 3
-(module registry + module #0), step 4 (workspace lineage), and the
-deferred frontend. **Check the roadmap §4 table and the Session 14 PR
-discussion for the recorded direction before doing anything else.** If a
-direction is recorded, that is the objective — re-derive §4–§6 from the
-design record at full concreteness before implementing. If not, §3–§6
-below carry the RECOMMENDED DEFAULT (step 3: module registry +
-module #0, the design record's own dependency order); state the
-assumption in the PR. Do not re-plan or re-implement completed work. RLM
-expands exclusively to Recursive Language Model (the MIT CSAIL
-formulation).
+Session 15 (July 7, 2026, branch `session-15-probe-and-modules`) is
+also complete: the owner directed the sequence step 3 → step 4 and
+approved the paid probe on the PR #40 discussion. Session 15 shipped
+(a) the MEASURED paired-run workspace probe
+(`docs/benchmarks/WORKSPACE_PROBE_REPORT.md`: both arms correct; the
+workspace arm made the minimum 4 external calls with a well-formed
+snapshot; the legacy arm repeated every call, 8 vs 4 — n=1,
+directional) and (b) design-record §11 step 3: the protocol-module
+registry (`modules/<name>/` manifest + brace-free addendum;
+`src/config/modules.ts` Zod validator fail-fast at startup;
+`src/rlm/trellis_modules.py` Python twin; operator-owned
+`TRELLIS_MODULES` selection, default `["spatial-flywheel"]`, max 4,
+protocol modules only) and module #0 — the spatial-flywheel protocol
+extracted mechanically from `TRELLIS_ADDENDUM` behind the sha256
+byte-identical composed-prompt pin (`npm run test:modules`, 27 checks).
+The §9.4 manifest-as-graph-entity representation is explicitly deferred
+to the first research-bearing module (recorded in the design record and
+roadmap).
+
+Your objective is **Session 16: workspace lineage** (design record §11
+step 4, owner-directed July 7, 2026) — serialize/park/seed across a
+goal's tasks per §3–§6 below. Do not re-plan or re-implement completed
+work. RLM expands exclusively to Recursive Language Model (the MIT
+CSAIL formulation).
 
 ---
 
@@ -302,6 +312,21 @@ immutable, content-addressed physical location in source material.
      Structural disjointness: uuid segment ids and 16-hex argsHashes can
      never match `^[0-9a-f]{64}$`, and the hardened write path rejects
      them independently. Tier 3 has NO provenance standing.
+   - **The module registry (Session 15;
+     `src/config/modules.ts` + `src/rlm/trellis_modules.py`,
+     `modules/<name>/`):** the RLM's cognitive protocols are composed —
+     `TRELLIS_ADDENDUM` = `TRELLIS_ADDENDUM_BASE` + Σ selected module
+     addenda + `TRELLIS_WORKFLOW_RULES`. Selection is operator-owned via
+     `TRELLIS_MODULES` (unset ⇒ default `["spatial-flywheel"]`, the
+     composed prompt byte-identical to the pre-Session-15 monolith,
+     sha256-pinned; `[]` ⇒ base + rules only; max 4/run). PROTOCOL
+     MODULES ONLY this kernel edition — manifests declaring tools are
+     rejected. Addendum files are brace-free; rubric text enters through
+     the single `<<TRELLIS_RUBRIC>>` substitution token. Both validators
+     are bound-for-bound twins and normalize CRLF→LF; Node fails fast at
+     config load, Python re-validates at spawn. `buildAgentEnv` always
+     forwards the canonical selection (a raw inherited value never
+     leaks).
    - CRITICAL rlms constraints (verified against the installed
      rlms==0.1.3; pinned live by the `test:rlm-workspace` LocalREPL
      section): `custom_system_prompt` REPLACES the base REPL protocol
@@ -394,14 +419,19 @@ Repository state at handoff creation:
 - `master`: the Session 14 merge (use `git log -- HANDOFF.md` to
   identify it; Session 14 landed as one squash-merged PR from branch
   `d/jovial-hertz-399138`).
-- Offline baseline: `npm test` = 493 passing across 58 files.
+- Offline baseline: `npm test` = 513 passing across 59 files
+  (Session 15 added `src/config/modules.test.ts` and the `modulesJson`
+  forwarding pin).
 - `npm run build` and `npm run python:check` pass.
 - `npm run drill:scale`: gate CLOSED at max provenance 286; sweep growth
   1.85x in the Session 14 run against 5.77x fact growth (run-to-run
   variance around Session 12's 1.63x; both far under the superlinear
   trigger).
-- Live zero-LLM checks (Session 14 observed counts):
-  `test:rlm-workspace` (64, new), `test:rlm-mcp` (86), `test:a2a` (46),
+- Live zero-LLM checks (Sessions 14–15 observed counts):
+  `test:modules` (27, new — carries the byte-identical composed-prompt
+  sha256 pin `abb945a6…f9b2`; recompute it in the same commit if the
+  kernel prompt or rubric legitimately changes),
+  `test:rlm-workspace` (64), `test:rlm-mcp` (86), `test:a2a` (46),
   `test:agent-loop` (23), `test:repo-ingest` (45),
   `test:benchmark-hardening` (24), `test:entity-resolution` (34 — the
   previously recorded 33 was a stale count, not a behavior change),
@@ -433,134 +463,110 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 15 problem statement
+## 3. Session 16 problem statement
 
-**First: resolve the owner decision.** The roadmap's first unstruck §4
-row is "remaining design-record steps (§11 steps 3–6), owner-sequenced —
-order to be recorded when directed." The Session 14 PR asked the owner
-to choose among design-record step 3 (module registry + module #0),
-step 4 (workspace lineage), and the deferred frontend. If a direction is
-recorded in the roadmap or the PR thread, that is the objective —
-re-derive §4–§6 from `docs/architecture/WORKSPACE_AND_MODULES.md` at
-this file's level of concreteness before implementing. What follows is
-the RECOMMENDED DEFAULT: **step 3**, per the design record's dependency
-ordering (format → safety → **loader** → transport → permanence →
-self-modification).
+**Workspace lineage (design record §5, §11 step 4; owner-directed
+July 7, 2026).** One goal dispatches multiple RLM tasks, each a fresh
+subprocess. Today the only cross-task channel is the orchestrator's
+paraphrase, truncated at 4,000 chars per observation
+(`src/core/agent/transcript.ts`) — lossy for prose and hazardous for
+AST hashes, which get re-typed through two LLM hops. The Session 14
+workspace dies with its process: `snapshot()` exists as the
+serialization seam but nothing calls it, nothing parks it, and no later
+task can be seeded from it. The probe report's follow-up names the
+measurable consequence: cross-task re-derivation of results a prior
+task already fetched.
 
-**Step 3 problem (design record §9, §9.5, §11 step 3).** The
-spatial-flywheel protocol — the mandatory TREC classification workflow —
-is fused into the monolithic `TRELLIS_ADDENDUM` string in
-`src/rlm/trellis_agent.py`. It is already a module in everything but
-form: a purpose-specific cognitive protocol with its own versioned asset
-(`trec_rubric.json`, the single-source precedent shared with the Phase 5
-verifier). Because it is fused, no capability can be added, versioned,
-retired, or contested without hand-editing the kernel prompt, and the
-capability flywheel (design record §2) has no substrate: no registry to
-land agent-authored modules into, no loader to compose them, no
-manifest-as-graph-entity representation to let the invalidation sweep
-contest a module whose research basis dies (§9.4 — recorded as NOT
-inherited for free). Module #0 — extracting the spatial-flywheel
-protocol into the first registry entry behind a byte-identical
-composed-prompt pin — is the loader's acceptance test with zero new
-capability risk.
+## 4. Required design
 
-## 4. Required design (for the recommended step 3; re-derive if the owner directs otherwise)
+Design record §5 is normative: workspace inheritance along the goal's
+iteration structure — explicitly NOT a live blackboard (tasks in one
+batch stay independent; inheritance runs between iterations).
 
-The design record §9 is normative; deviations require a concrete reason
-and equivalent tests, recorded in the roadmap §5 entry.
-
-- **Manifest schema (§9.1).** A module is a versioned
-  document-plus-assets artifact under `modules/<name>/` (manifest plus a
-  brace-free addendum text file), validated by a Zod schema in a new
-  `src/config/modules.ts` with a bound-for-bound Python twin: name
-  charset `^[a-z][a-z0-9_-]*$` (the `MCP_NAME_PATTERN` discipline, so
-  generated prompt listings stay structurally brace-free), integer
-  `version`, one-sentence `purpose`, `research.sourceNodeIds` (AST
-  hashes; may be empty for module #0 — it predates the promotion path),
-  `addendum` path, optional namespaced `tools` (EMPTY this session —
-  protocol modules only), hard-capped `bounds` (suggested
-  `addendumMaxBytes` 8192), `acceptance.zeroPaid` naming a drill,
-  `status: active|contested|retired`, `kernelCompat: 1`. Addendum text
-  is validated brace-free and size-capped at registry load.
-- **Registry + composition (§9.2).** Operator-configured selection (an
-  env-named registry, the `TRELLIS_MCP_SERVERS` pattern; forwarded to
-  the child by `buildAgentEnv`, re-validated defensively in Python):
-  composed system prompt = `RLM_SYSTEM_PROMPT` + the residual base
-  `TRELLIS_ADDENDUM` + Σ selected module addenda (+ MCP + workspace
-  addenda) + query, with deterministic ordering and a hard cap on
-  modules per run (suggested 4). Selection only ever WITHIN the
-  registered allowlist (Guardrail 5). Empty registry ⇒ byte-identical
-  prompt (pinned).
-- **Module #0 (§9.5).** Extract the spatial-flywheel protocol section of
-  `TRELLIS_ADDENDUM` into `modules/spatial-flywheel/`; the default
-  configuration loads it, and the composed prompt is pinned
-  BYTE-IDENTICAL to today's `SYSTEM_PROMPT` — the loader proves itself
-  with zero behavior change. Keep the `_SAFE_RUBRIC` splice semantics
-  intact (the rubric stays the versioned single source; decide whether
-  the module addendum references it via the same escape-by-doubling
-  splice, and pin whichever you choose).
-- **Manifest-as-graph-entity (§9.4).** Represent registered modules as
-  graph entities citing their `research.sourceNodeIds` so the existing
-  invalidation sweep can reach them. Module #0 may carry empty research
-  provenance and therefore no graph entity yet — decide and record. If
-  this half is too large for one session, defer it explicitly to the
-  step-6 flywheel turn with the reason recorded in the roadmap — do not
-  silently drop it.
-- **Gates (§9.3).** This session lands the protocol-module class only:
-  automated brace/charset/size validation + zero-paid drill + human PR
-  review. No auto-landing; tool-bearing modules and kernel changes stay
-  out of scope.
+- **Serialize (agent side).** New `--workspace-out <path>` CLI arg on
+  `trellis_agent.py`: at run end (in the `finally`, success or not),
+  when a workspace is active and non-empty, write `snapshot()` to the
+  named temp file. No giant stdout lines — the telemetry line scanner
+  stays bounded; SSE clients see nothing new.
+- **Park (worker side).** `rlm_worker.ts` names the temp file for
+  goal-correlated jobs, and after process exit reads, validates
+  (`parse` + shape + size), and parks the snapshot in Redis at
+  `scratch:goal:<goalId>:task:<taskId>` with TTL
+  (`SCRATCH_TTL_SECONDS`, default 3600, cap 86400 — the
+  `a2a:task:<id>` precedent), enforcing a per-goal parked-bytes cap
+  (`SCRATCH_MAX_BYTES_PER_GOAL`, default 8 MiB) via a goal-scoped
+  counter key expiring alongside. Redis is a parking lot for
+  checkpoints, never a live store the model queries. The job completion
+  value gains a `workspaceRef` summary (`{taskId, segments, bytes}`) —
+  counts only, never content.
+- **Seed (dispatch side).** `RlmJobDataSchema` gains optional
+  `seedTasks: string[]` (task ids within the SAME goal, bounded, data
+  only). The worker resolves each from Redis, merges/validates against
+  the workspace bounds, writes a seed file, and passes
+  `--seed-workspace <path>`; `trellis_workspace.py` gains
+  `seed_from_snapshot(data, ...)` constructing a pre-populated
+  workspace (segments/plan/notes restored, wrapper stamps preserved,
+  bounds re-enforced — an over-budget seed FAILS the task fast, never
+  silently truncates). A seeded run always gets a workspace even
+  without MCP servers (it carries `--goal-id` by construction).
+  A missing/expired parked snapshot is a readable dispatch-time
+  failure, not a silent empty seed.
+- **Route by reference (orchestrator).** The orchestrator stays
+  tool-free: `GoalIterationRecord` carries each task's `workspaceRef`;
+  `buildDecisionMessages` renders it in the observation (counts only);
+  `TaskRequestSchema` gains optional `seedFromTasks` (validated against
+  task ids already completed in this goal); the goal loop threads them
+  into the rlm job payload. Oracle scripts can express seeded
+  dispatches so the zero-LLM drills cover the full path.
+- **Stub parity.** `RlmStubSchema` gains an optional data-only
+  `workspaceSnapshot` so stub jobs can exercise the identical
+  park/resolve path with zero LLM calls (the stdout-replay precedent).
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `docs/architecture/WORKSPACE_AND_MODULES.md` §9 (all subsections),
-  §9.5, §11 step 3, §12 corrections ledger; `docs/GLOSSARY.md`;
-  `.agents/AGENT_CODING_GUIDELINES.md`.
-- `src/rlm/trellis_agent.py` (`TRELLIS_ADDENDUM`, `_SAFE_RUBRIC`, the
-  `.format()` brace-contract comment block, the Session 14
-  workspace-gating block — the composition point new module addenda
-  join), `src/rlm/trellis_mcp.py` (`build_mcp_addendum` — the
-  brace-free composition discipline), `src/rlm/trellis_workspace.py`
-  (`build_workspace_addendum`, `parse_workspace_bounds` — the
-  Python-twin validation pattern).
-- `src/config/mcp_servers.ts` (the registry-validation pattern to
-  mirror), `src/config/index.ts` (where the module registry config
-  lands), `src/workers/rlm_job.ts` (`buildAgentEnv`/`buildAgentArgs` —
-  pure, unit-pinned forwarding).
-- `src/rlm/trec_rubric.json` and its loading in `trellis_tools.py`
-  (the versioned-asset precedent).
-- Test patterns: `scripts/test_rlm_workspace.ts`/`.py` (the freshest
-  wrapper+drill pair, including prompt byte-identity pins),
-  `src/config/workspace_bounds.test.ts` (the config-test pattern),
-  `scripts/test_rlm_mcp.py` §2 (addendum hygiene checks).
+- `docs/architecture/WORKSPACE_AND_MODULES.md` §5 (the
+  serialize/park/seed contract and the not-a-blackboard rationale),
+  §11 step 4; `docs/GLOSSARY.md` (Lineage).
+- `src/rlm/trellis_workspace.py` (`snapshot()` — the existing seam;
+  bounds validation to reuse in `seed_from_snapshot`),
+  `src/rlm/trellis_agent.py` (CLI args, the gating block, the
+  `finally`).
+- `src/workers/rlm_job.ts` (`RlmJobDataSchema`, `buildAgentArgs`,
+  `RlmJobCompletion`), `src/workers/rlm_worker.ts` (spawn lifecycle,
+  where the temp file is named and reaped), `src/api/a2a.ts` +
+  `src/core/a2a/task_record.ts` (the TTL-bounded Redis record
+  precedent, including the same-tick subscribe gotcha).
+- `src/core/agent/goal_loop.ts`, `decision.ts`
+  (`TaskRequestSchema`), `transcript.ts` (`buildDecisionMessages`),
+  `oracle.ts` (extending scripted decisions), plus their tests.
+- `src/config/index.ts` (bounds style), `.env.example`.
 
 ## 6. Test strategy and acceptance
 
 Test first. No paid LLM calls and no external network in acceptance.
 
-Offline (joins `npm test`, baseline 493):
+Offline (joins `npm test`, baseline 513):
 
-- manifest/registry validation twins: valid manifest parses; bad
-  names/versions/sizes rejected; addendum brace and size validation;
-  duplicate module names rejected; the modules-per-run cap; empty
-  registry means no modules.
-- composition purity: deterministic ordering; composed-prompt assembly
-  as a pure function pinned by unit test.
+- `rlm_job`: `seedTasks` validation (bounded list, data-only);
+  `--workspace-out`/`--seed-workspace` forwarded exactly when expected;
+  stub `workspaceSnapshot` stays data-only.
+- agent/decision: `seedFromTasks` schema validation (unknown task ids
+  rejected by the goal loop), transcript rendering of `workspaceRef`
+  (counts only, no content), goal-loop threading via a DI'd dispatcher.
+- config: scratch TTL/byte-cap bounds validated with defaults and caps.
 
-New live zero-paid drill `npm run test:modules` (or extend an existing
-drill — decide and record):
+Live zero-paid:
 
-- **The byte-identical pin (the session's most important check):** the
-  composed prompt with module #0 loaded equals the pre-extraction
-  `SYSTEM_PROMPT` byte-for-byte; the empty-registry composed prompt
-  equals `RLM_SYSTEM_PROMPT` + the residual base addendum.
-- brace-freedom of every composed prompt; the rubric splice unchanged;
-  the Zod and Python validators agree on the same manifest corpus
-  (cross-language contract).
-- If manifest-as-graph-entity ships: the invalidation sweep contests a
-  module whose research hash is orphaned (fixture-scoped, cleaned up).
+- extend `npm run test:rlm-workspace` with the Python seed semantics:
+  `seed_from_snapshot` round-trips a real `snapshot()` (segments,
+  stamps, plan, notes preserved; budget re-enforced; malformed and
+  over-budget seeds raise readable errors).
+- extend `npm run test:agent-loop` (or a sibling drill) with the
+  park/resolve path over real Redis: a stub task parks a snapshot; a
+  second dispatch with `seedTasks` resolves it; TTL and per-goal caps
+  enforced; missing ref fails readably; cleanup token-scoped.
 
 Required close-out (the standing block):
 
@@ -571,6 +577,7 @@ Required close-out (the standing block):
  docker compose --profile test config --quiet
  # Run the isolated zero-LLM Compose integration (unique project name).
  npm run test:rlm-workspace
+ npm run test:modules
  npm run test:rlm-mcp
  npm run test:rlm-sandbox
  npm run test:agent-loop
@@ -598,13 +605,14 @@ Update:
   class; Session 14 kept this green — keep it that way).
 - `HANDOFF.md`: regenerate per §0.
 
-Standing owner-gated item (do NOT run unprompted): the design record §11
-step-1 paired-run behavioral probe (a sequential multi-step task, paired
-runs with the workspace on/off, measuring repeated tool calls,
-end-of-run workspace well-formedness, and answer correctness) is PAID;
-it was proposed in the Session 14 PR with a cost estimate and awaits
-approval. If approved, run it under its recorded protocol and record
-results in `docs/benchmarks/` and the roadmap.
+Standing owner-gated item (do NOT run unprompted): the paired-run
+behavioral probe was approved and MEASURED on July 7, 2026
+(`docs/benchmarks/WORKSPACE_PROBE_REPORT.md`; driver
+`tsx scripts/probe_workspace_paired.ts`, no npm alias, PAID — per-run
+owner approval still applies). The report names the natural follow-up
+once lineage lands: the same paired protocol across a two-task goal,
+measuring whether seeded workspaces eliminate cross-task re-derivation.
+Propose it with a cost estimate; do not run it unprompted.
 
 ## 7. Guardrails
 
@@ -669,15 +677,19 @@ results in `docs/benchmarks/` and the roadmap.
 
 ## 8. Explicit exclusions
 
-Do not include (unless the owner's recorded direction for Session 15
-says otherwise): frontend work of any kind (deferred, unscheduled —
-scope preserved in roadmap §3.3 #5); workspace lineage / Redis parking
-(design record §11 step 4); the promotion path (step 5); the first
-flywheel turn (step 6); tool-bearing modules or module auto-landing
-(the protocol-module class must earn trust first, §9.3); orchestrator
-tools or transcript changes; rlms `compaction` enablement; new MCP
-servers, transports, or OAuth flows; A2A changes; repository-extraction
-prerequisites; `ASTRef`/`EVIDENCED_BY` migration (gate closed at 286);
-T13 re-hashing; rlms library modifications; weakening or toggling the
-Session 14 write-path enforcement; paid LLM calls or external network
-access as acceptance checks.
+Do not include: frontend work of any kind (deferred, unscheduled —
+scope preserved in roadmap §3.3 #5); the promotion path (design record
+§11 step 5); the first flywheel turn (step 6); the
+manifest-as-graph-entity representation (recorded deferral — lands with
+the first research-bearing module); tool-bearing modules or module
+auto-landing (the protocol-module class must earn trust first, §9.3);
+orchestrator tools (routing stays by reference; transcript changes are
+limited to the counts-only `workspaceRef` rendering §4 specifies); any
+live intra-batch workspace sharing (lineage is inheritance between
+iterations, never a blackboard); rlms `compaction` enablement; new MCP
+servers, transports, or OAuth flows; A2A changes;
+repository-extraction prerequisites; `ASTRef`/`EVIDENCED_BY` migration
+(gate closed at 286); T13 re-hashing; rlms library modifications;
+weakening or toggling the Session 14 write-path enforcement or the
+Session 15 byte-identical composition pins; paid LLM calls or external
+network access as acceptance checks.

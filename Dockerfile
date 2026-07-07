@@ -45,7 +45,11 @@ RUN python3 -m venv /opt/venv \
 COPY --from=node-production /app/node_modules ./node_modules
 COPY --from=node-build /app/dist ./dist
 COPY package.json package-lock.json ./
-COPY src/rlm/trellis_agent.py src/rlm/trellis_tools.py src/rlm/trellis_mcp.py src/rlm/trellis_workspace.py src/rlm/trec_rubric.json ./src/rlm/
+COPY src/rlm/trellis_agent.py src/rlm/trellis_tools.py src/rlm/trellis_mcp.py src/rlm/trellis_workspace.py src/rlm/trellis_modules.py src/rlm/trec_rubric.json ./src/rlm/
+# The module registry (Session 15): manifests + addendum text composed
+# into the RLM prompt at startup by both the Node validator and the
+# Python loader.
+COPY modules ./modules
 # verification.ts resolves the rubric relative to __dirname, which is
 # dist/src/core/graph in the compiled runtime — the same versioned file
 # must exist at both the Python (src/rlm) and compiled-Node (dist/src/rlm)
