@@ -1,8 +1,9 @@
 # Workspace and Modules — Design Record
 
-*Status: approved design; §11 steps 1–3 implemented (Sessions 14–15,
-July 7, 2026; the step-1 paired-run probe is measured — see
-docs/benchmarks/WORKSPACE_PROBE_REPORT.md), steps 4–6 open. Origin: the
+*Status: approved design; §11 steps 1–5 implemented (Sessions 14–17,
+July 7, 2026; the step-1 paired-run probe and the step-4 two-task
+lineage probe are measured — see docs/benchmarks/WORKSPACE_PROBE_REPORT.md
+and docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md), step 6 open. Origin: the
 owner-directed design study of July 7,
 2026 (a one-shot session outside the numbered HANDOFF loop). All code claims
 verified against `master` at `c3b4c39` (485/485 offline tests) and the
@@ -543,8 +544,29 @@ of every mechanism; paid runs only as small owner-approved behavioral probes.
    Redis via stub `workspaceSnapshot`, TTL and per-goal cap enforced
    live, missing-ref readable failure), plus the new
    `workspace_scratch.test.ts` / schema / goal-loop / transcript units.
-5. **Promotion path** (§6) — operator-gated segment→ingest with URL doc
-   keys; the research corpus modules cite begins here.
+5. **Promotion path** (§6) — **DONE (Session 17, July 7, 2026).**
+   Operator-gated segment→ingest through the UNMODIFIED verified
+   transaction. Pure planner (`src/core/promotion/plan_promotion.ts`,
+   reusing the Session 16 snapshot schema): exact ingest request or a
+   typed refusal — truncated captures, empty content, unknown segment
+   ids (bounded listing), invalid doc keys. Operator CLI
+   (`npm run promote`, `scripts/promote_segment.ts`): list mode
+   inventories a PARKED snapshot (origin stamps, sizes, truncation
+   markers, doc-key hints); promote mode takes an explicit
+   `--doc-key` (recommended `web:<url>`; the deterministic
+   `mcp:<server>:<tool>:<argsHash>` fallback is printed, never
+   applied silently), echoes the exact bytes/origin before writing,
+   defaults to zero paid work, and prints the now-citable block
+   hashes. The origin stamp lands on the new nullable
+   `documents.origin` JSONB column inside the ingest transaction, so
+   "which server/tool/args produced these bytes, fetched when"
+   survives promotion. One segment per invocation; no API surface —
+   nomination is prose, promotion is a human running the CLI.
+   Zero-paid acceptance (`npm run test:promotion`, 41 checks) closes
+   the §6 loop live: the same block hash is a Provenance Violation
+   before promotion and writes cleanly after; re-promoting refreshed
+   bytes under the same doc key versions the document and the sweep
+   contests the citing insight with audit preserved.
 6. **First flywheel turn** — the RLM authors module #1 end-to-end through
    the pathway: research in the workspace, design grounded in ingested
    sources, manifest + addendum + drill proposed as a gated artifact, landed

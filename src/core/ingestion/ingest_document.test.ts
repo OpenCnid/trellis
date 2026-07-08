@@ -35,9 +35,10 @@ function fakeDeps(state: FakeDbState) {
       return { rows: rows.slice(-1) };
     }
     if (sql.includes('INSERT INTO documents')) {
-      const [docKey, version, rootHash] = params as [string, number, string];
+      const [docKey, version, rootHash, origin] = params as [string, number, string, string | null];
       const rows = state.documents.get(docKey) ?? [];
       state.documents.set(docKey, [...rows, { version, root_hash: rootHash }]);
+      documentOrigins.push(origin);
       return { rows: [] };
     }
     if (sql.includes('SELECT node_id FROM document_nodes')) {
@@ -57,13 +58,14 @@ function fakeDeps(state: FakeDbState) {
     return { rows: [] };
   });
   let lastPersisted: any[] = [];
+  const documentOrigins: Array<string | null> = [];
   const release = vi.fn();
   const pgPool = { connect: async () => ({ query, release }) } as unknown as Pool;
   const extraction = { addBulk: vi.fn(async () => undefined) };
   const invalidation = { add: vi.fn(async () => undefined) };
   const log = { info: vi.fn(), warn: vi.fn(), error: vi.fn() } as unknown as IngestDeps['log'];
   const deps: IngestDeps = { pgPool, queues: { extraction, invalidation }, log };
-  return { deps, statements, extraction, invalidation, release, query };
+  return { deps, statements, extraction, invalidation, release, query, documentOrigins };
 }
 
 const V1 = '# Title\n\nAlpha fact one.\n\nBeta fact two.';
@@ -282,6 +284,34 @@ describe('ingestDocument', () => {
       freshHashes: [],
       requestId: 'req-t',
     });
+  });
+
+  it('records the promotion origin stamp with the version row and leaves it NULL otherwise', async () => {
+    const state: FakeDbState = { documents: new Map(), membership: new Map() };
+    const first = fakeDeps(state);
+    await ingestDocument(first.deps, {
+      rootNode: parseMarkdownToAST(V1),
+      docKey: 'doc-1',
+      extractionPolicy: { mode: 'none' },
+    });
+    expect(first.documentOrigins).toEqual([null]);
+
+    const origin = {
+      server: 'fixture',
+      tool: 'search',
+      argsHash: 'ab12cd34ef56ab78',
+      fetchedAt: '2026-07-07T12:00:00Z',
+      segmentId: 'f1e2d3c4-0000-4000-8000-000000000001',
+      bytes: 21,
+    };
+    const second = fakeDeps(state);
+    await ingestDocument(second.deps, {
+      rootNode: parseMarkdownToAST(V2),
+      docKey: 'doc-1',
+      extractionPolicy: { mode: 'none' },
+      origin,
+    });
+    expect(second.documentOrigins).toEqual([JSON.stringify(origin)]);
   });
 
   it('derives a deterministic empty tombstone root', () => {

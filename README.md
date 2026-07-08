@@ -357,6 +357,45 @@ missing or expired reference fails the seeded task with a readable
 error, and an over-budget seed fails fast rather than truncating.
 Parked state keeps Tier-3 trust standing: none.
 
+**Promotion (Session 17):** the operator-gated route by which a
+workspace segment earns permanence. Promotion is a human running a CLI —
+there is no API endpoint, and no model output can trigger it. It
+consumes a PARKED snapshot only, one segment per invocation:
+
+```bash
+# LIST (default, read-only): inventory a task's parked snapshot —
+# segment ids, origin stamps, sizes, truncation markers, previews,
+# and a deterministic doc-key hint per segment.
+npm run promote -- --goal <goalId> --task <taskId>
+
+# PROMOTE: one segment, byte-verbatim, through the ordinary verified
+# ingest transaction. Zero paid work by default (--extract none).
+npm run promote -- --goal <goalId> --task <taskId> \
+  --segment <segmentId> --doc-key web:https://example.com/page
+```
+
+Pick the doc key deliberately — it is the document's identity across
+versions. Use `web:<url>` for web content: re-promoting the re-fetched
+page later registers a new version of the SAME document, and the
+existing Merkle-diff → invalidation sweep contests beliefs whose
+web-sourced bytes changed, exactly as for an edited local document. For
+non-URL tool results, list mode prints the deterministic fallback
+`mcp:<server>:<tool>:<argsHash>`. Keys are never invented silently, and
+truncated segments are refused outright (a size-capped capture is not
+the source bytes). The CLI echoes the doc key, byte count, and origin
+stamp before writing, records that origin on the `documents` row inside
+the same transaction, and prints the resulting root and block hashes —
+those block hashes are now verified substrate the RLM may cite as
+`sourceNodeIds`. Extraction stays separately gated spend:
+`--extract changed` requires an explicit `--max-blocks` budget plus
+`--confirm-extraction`, exactly like `repo:ingest`. The end-to-end loop
+(refusals, earned citability through the hardened write path, and the
+contested transition on re-promotion) is drilled zero-paid:
+
+```bash
+npm run test:promotion
+```
+
 **Cost posture:** acceptance is zero-paid and local — the deterministic
 fixture server (`scripts/fixture_mcp_server.py`, stdio and loopback
 Streamable HTTP, with and without required auth) is the only server the
@@ -477,6 +516,7 @@ npm run test:benchmark-hardening
 npm run test:repo-ingest
 npm run test:agent-loop
 npm run test:rlm-mcp
+npm run test:promotion
 npm run test:rlm-workspace
 npm run test:modules
 npm run test:a2a
