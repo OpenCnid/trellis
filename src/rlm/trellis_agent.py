@@ -115,6 +115,12 @@ def main():
     parser.add_argument("--max-iterations", type=int, default=5, help="Max root REPL iterations")
     parser.add_argument("--goal-id", type=str, default=None,
                         help="Goal correlation id (Session 14: also gates the Tier-3 workspace on)")
+    parser.add_argument("--workspace-out", type=str, default=None,
+                        help="Session 16 lineage: write the end-of-run workspace snapshot "
+                             "to this file (success or not) so the worker can park it")
+    parser.add_argument("--seed-workspace", type=str, default=None,
+                        help="Session 16 lineage: JSON snapshot file (worker-resolved and "
+                             "merged) to pre-populate the workspace from at spawn")
     args = parser.parse_args()
 
     # Initialize tools. The Neo4j write path verifies cited AST hashes
@@ -136,6 +142,7 @@ def main():
             _subcall_stats["count"] += 1
 
     exit_code = 0
+    workspace = None
     try:
         # Session 10: the external tool surface comes exclusively from the
         # validated TRELLIS_MCP_SERVERS registry the worker forwarded
@@ -149,8 +156,22 @@ def main():
         # tools are configured OR the run belongs to a goal — a bare
         # pre-existing run stays byte-identical (prompt and behavior),
         # the empty-registry MCP precedent, pinned by test:rlm-workspace.
-        workspace = None
-        if mcp_servers or args.goal_id:
+        # Session 16: a seeded run always gets a workspace (it carries
+        # --goal-id by construction; the seed arg is included defensively).
+        # A malformed or over-budget seed raises HERE, before any paid
+        # work — a broken inheritance fails the task fast (§5).
+        if args.seed_workspace:
+            max_segments, max_bytes = parse_workspace_bounds()
+            with open(args.seed_workspace, encoding="utf-8") as seed_file:
+                seed_data = json.load(seed_file)
+            workspace = TrellisWorkspace.seed_from_snapshot(
+                seed_data,
+                max_segments=max_segments,
+                max_bytes=max_bytes,
+                goal_id=args.goal_id,
+            )
+            custom_tools["trellis_workspace"] = workspace
+        elif mcp_servers or args.goal_id:
             max_segments, max_bytes = parse_workspace_bounds()
             workspace = TrellisWorkspace(
                 max_segments=max_segments,
@@ -170,7 +191,7 @@ def main():
         dynamic_system_prompt = (
             SYSTEM_PROMPT
             + build_mcp_addendum(mcp_servers)
-            + build_workspace_addendum(workspace)
+            + build_workspace_addendum(workspace, seeded=bool(args.seed_workspace))
             + f"\n\nTHE USER'S QUERY IS: {safe_query}\nDO NOT ASK FOR A QUERY, THIS IS IT. EXECUTE IT IMMEDIATELY."
         )
 
@@ -245,6 +266,18 @@ def main():
         print(f"TRELLIS_RESULT: {json.dumps(result_payload)}", flush=True)
         exit_code = 1
     finally:
+        # Session 16 lineage serialization: success or not, a non-empty
+        # workspace is written to the worker-named temp file (no giant
+        # stdout lines — the telemetry scanner stays bounded and SSE
+        # clients see nothing new). A partial workspace from a failed run
+        # is still worth parking: it can seed the retry. A write failure
+        # is reported but never masks the run's own result.
+        if args.workspace_out and workspace is not None and not workspace.is_empty():
+            try:
+                with open(args.workspace_out, "w", encoding="utf-8") as out_file:
+                    out_file.write(workspace.snapshot())
+            except OSError as e:
+                print(f"Workspace serialization failed: {type(e).__name__} - {e}", flush=True)
         neo4j_tool.close()
         postgres_tool.close()
         if mcp_tool is not None:

@@ -33,6 +33,10 @@ export function renderHistory(history: readonly GoalIterationRecord[]): string {
       status: outcome.status,
       answer: outcome.answer === null ? null : truncateForTranscript(outcome.answer),
       toolCalls: outcome.toolCalls,
+      // Session 16: the parked-workspace reference, counts only — the
+      // orchestrator routes by naming task ids in seedFromTasks, never
+      // by seeing workspace content.
+      ...(outcome.workspaceRef && { workspaceRef: outcome.workspaceRef }),
       ...(outcome.error && { error: truncateForTranscript(outcome.error) }),
     })),
   }));

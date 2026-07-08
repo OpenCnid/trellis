@@ -72,6 +72,11 @@ export interface TaskRequest {
   query: string;
   /** Per-task RLM iteration ceiling (bounds.taskMaxIterations). */
   maxIterations: number;
+  /**
+   * Session 16 lineage: prior-iteration task ids whose parked workspace
+   * snapshots seed this run — validated by the loop before dispatch.
+   */
+  seedFromTasks?: string[];
   /** Oracle-attached stub payload for zero-LLM drills; absent in real runs. */
   stub?: unknown;
 }
@@ -158,6 +163,24 @@ export async function runGoalLoop(options: GoalLoopOptions): Promise<GoalResult>
     // dispatch — bounds are checked BEFORE any task starts, so a
     // tripping decision dispatches nothing.
     const tasks = decision.tasks ?? [];
+    // Session 16: seeding routes by reference to tasks of PRIOR
+    // iterations only. Same-batch ids are rejected with everything else
+    // unknown — tasks in one batch stay independent (never a
+    // blackboard), and a decision naming a task this goal never
+    // dispatched is exactly as malformed as an invalid action.
+    const priorTaskIds = new Set(
+      history.flatMap(record => record.observations.map(outcome => outcome.taskId))
+    );
+    for (const task of tasks) {
+      const unknown = (task.seedFromTasks ?? []).filter(id => !priorTaskIds.has(id));
+      if (unknown.length > 0) {
+        return fail(
+          'decision_error',
+          `Task '${task.taskId}' seeds from [${unknown.join(', ')}], which are not tasks `
+            + 'completed in a prior iteration of this goal'
+        );
+      }
+    }
     if (tasks.length > bounds.maxConcurrentTasks) {
       return fail(
         'concurrency_bound',
@@ -181,6 +204,7 @@ export async function runGoalLoop(options: GoalLoopOptions): Promise<GoalResult>
           taskId: task.taskId,
           query: task.query,
           maxIterations: bounds.taskMaxIterations,
+          ...(task.seedFromTasks?.length && { seedFromTasks: task.seedFromTasks }),
           ...(decided.stubs.has(task.taskId) && { stub: decided.stubs.get(task.taskId) }),
         });
       } catch (error) {
@@ -192,6 +216,7 @@ export async function runGoalLoop(options: GoalLoopOptions): Promise<GoalResult>
           answer: null,
           toolCalls: null,
           spend: null,
+          workspaceRef: null,
           error: error instanceof Error ? error.message : String(error),
         };
       }

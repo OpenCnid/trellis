@@ -171,6 +171,18 @@ const EnvSchema = z.object({
     .max(32 * 1024 * 1024)
     .default(4 * 1024 * 1024),
 
+  // Workspace lineage parking (Session 16, design record §5). Parked
+  // snapshots are goal-scoped checkpoints in Redis: age-bounded like
+  // A2A task records (TTL, hard 24 h cap) and volume-bounded per goal
+  // via a counter key that expires alongside the snapshots it meters.
+  SCRATCH_TTL_SECONDS: z.coerce.number().int().positive().max(86400).default(3600),
+  SCRATCH_MAX_BYTES_PER_GOAL: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(64 * 1024 * 1024)
+    .default(8 * 1024 * 1024),
+
   // Interpreter used to spawn the RLM agent and the PDF parser. On
   // Windows the launcher is conventionally `python`; elsewhere `python3`.
   PYTHON_EXECUTABLE: z
@@ -291,6 +303,10 @@ export const config = {
   workspace: {
     maxSegments: env.TRELLIS_WORKSPACE_MAX_SEGMENTS,
     maxBytes: env.TRELLIS_WORKSPACE_MAX_BYTES,
+  },
+  scratch: {
+    ttlSeconds: env.SCRATCH_TTL_SECONDS,
+    maxBytesPerGoal: env.SCRATCH_MAX_BYTES_PER_GOAL,
   },
   python: {
     executable: env.PYTHON_EXECUTABLE,

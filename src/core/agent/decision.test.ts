@@ -23,8 +23,8 @@ const VALID_DISPATCH = {
   assessment: 'need two facts',
   action: 'dispatch',
   tasks: [
-    { taskId: 't1', query: 'first question' },
-    { taskId: 't2', query: 'second question' },
+    { taskId: 't1', query: 'first question', seedFromTasks: null },
+    { taskId: 't2', query: 'second question', seedFromTasks: null },
   ],
   finalAnswer: null,
   reason: null,
@@ -58,9 +58,26 @@ describe('OrchestratorDecisionSchema at the parseLlmResponse boundary', () => {
     expect(stageOf(JSON.stringify({
       ...VALID_DISPATCH,
       tasks: [
-        { taskId: 't1', query: 'a' },
-        { taskId: 't1', query: 'b' },
+        { taskId: 't1', query: 'a', seedFromTasks: null },
+        { taskId: 't1', query: 'b', seedFromTasks: null },
       ],
+    }))).toBe('schema');
+  });
+
+  it('accepts seeded tasks and rejects malformed or oversized seed lists', () => {
+    // Session 16: routing by reference — the field carries task ids
+    // only. Whether the ids exist in this goal is the loop's check.
+    expect(stageOf(JSON.stringify({
+      ...VALID_DISPATCH,
+      tasks: [{ taskId: 't3', query: 'follow-up', seedFromTasks: ['t1', 't2'] }],
+    }))).toBe('parsed');
+    expect(stageOf(JSON.stringify({
+      ...VALID_DISPATCH,
+      tasks: [{ taskId: 't3', query: 'q', seedFromTasks: [''] }],
+    }))).toBe('schema');
+    expect(stageOf(JSON.stringify({
+      ...VALID_DISPATCH,
+      tasks: [{ taskId: 't3', query: 'q', seedFromTasks: Array.from({ length: 9 }, (_, i) => `t${i}`) }],
     }))).toBe('schema');
   });
 

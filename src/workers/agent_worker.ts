@@ -81,6 +81,10 @@ const runRlmTask: TaskRunner = async (task: TaskRequest): Promise<TaskOutcome> =
     goalId: task.goalId,
     taskId: task.taskId,
     maxIterations: task.maxIterations,
+    // Session 16 lineage: prior task ids only — the worker resolves them
+    // from the goal-scoped scratch keys; snapshot content never rides a
+    // queue payload.
+    ...(task.seedFromTasks !== undefined && { seedTasks: task.seedFromTasks }),
     ...(task.stub !== undefined && { stub: task.stub }),
   });
   const completion = (await job.waitUntilFinished(rlmQueueEvents, TASK_WAIT_TTL_MS)) as RlmJobCompletion;
@@ -92,6 +96,7 @@ const runRlmTask: TaskRunner = async (task: TaskRequest): Promise<TaskOutcome> =
       answer: null,
       toolCalls: null,
       spend: completion ? telemetrySpend(completion) : null,
+      workspaceRef: completion?.workspaceRef ?? null,
       error: 'RLM run completed without a TRELLIS_RESULT envelope',
     };
   }
@@ -102,6 +107,7 @@ const runRlmTask: TaskRunner = async (task: TaskRequest): Promise<TaskOutcome> =
     answer: completion.result.answer,
     toolCalls: completion.result.toolCalls,
     spend: telemetrySpend(completion),
+    workspaceRef: completion.workspaceRef ?? null,
   };
 };
 
