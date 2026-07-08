@@ -17,6 +17,8 @@ import type { OrchestratorDecision } from './decision.js';
 const OracleTaskSchema = z.object({
   taskId: z.string().min(1),
   query: z.string().min(1),
+  /** Session 16: scripted seeded dispatches, same shape as the LLM field. */
+  seedFromTasks: z.array(z.string().min(1)).max(8).optional(),
   stub: z.unknown().optional(),
 });
 
@@ -55,7 +57,11 @@ export function toOrchestratorDecision(decision: OracleDecision): OrchestratorDe
   return {
     assessment: decision.assessment,
     action: decision.action,
-    tasks: decision.tasks?.map(task => ({ taskId: task.taskId, query: task.query })) ?? null,
+    tasks: decision.tasks?.map(task => ({
+      taskId: task.taskId,
+      query: task.query,
+      seedFromTasks: task.seedFromTasks ?? null,
+    })) ?? null,
     finalAnswer: decision.finalAnswer ?? null,
     reason: decision.reason ?? null,
   };

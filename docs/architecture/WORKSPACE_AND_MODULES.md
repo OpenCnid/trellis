@@ -517,8 +517,32 @@ of every mechanism; paid runs only as small owner-approved behavioral probes.
    so the entity would be empty and unreachable by the sweep; the
    representation lands with the first research-bearing module
    (steps 5–6), where it has something to contest.
-4. **Workspace lineage** (§5) — serialize/park/seed across tasks;
-   orchestrator routes by reference; oracle drills extended to seeded runs.
+4. **Workspace lineage** (§5) — **DONE (Session 16, July 7, 2026).**
+   Serialize: `--workspace-out` on `trellis_agent.py` writes the
+   end-of-run `snapshot()` to a worker-named temp file in the `finally`
+   (success or not — a failed run's partial workspace can seed the
+   retry); nothing new crosses stdout. Park: `rlm_worker.ts` validates
+   the snapshot (Zod twin of the state dict) and parks it at
+   `scratch:goal:<goalId>:task:<taskId>` with `SCRATCH_TTL_SECONDS`
+   (default 3600, cap 86400) under the per-goal
+   `SCRATCH_MAX_BYTES_PER_GOAL` cap (default 8 MiB, counter key expiring
+   alongside); the completion value carries a counts-only
+   `workspaceRef`. Seed: `seedTasks` on the rlm job payload (ids only,
+   goal-scoped, bounded 8) resolves/merges/re-validates parked
+   snapshots into `--seed-workspace`, restored by
+   `TrellisWorkspace.seed_from_snapshot` — stamps preserved verbatim,
+   bounds re-enforced, torn or over-budget seeds fail the task fast; a
+   missing reference is a readable dispatch-time failure. The
+   orchestrator routes by reference: `seedFromTasks` on the task spec,
+   validated by the goal loop against prior-iteration task ids only
+   (same-batch seeding rejected — never a blackboard), `workspaceRef`
+   rendered counts-only in observations. Zero-paid acceptance:
+   `test:rlm-workspace` extended to 83 (seed round-trip, stamp
+   preservation, seed budgets, torn-seed rejection, the seeded
+   addendum), `test:agent-loop` extended to 35 (park/resolve over real
+   Redis via stub `workspaceSnapshot`, TTL and per-goal cap enforced
+   live, missing-ref readable failure), plus the new
+   `workspace_scratch.test.ts` / schema / goal-loop / transcript units.
 5. **Promotion path** (§6) — operator-gated segment→ingest with URL doc
    keys; the research corpus modules cite begins here.
 6. **First flywheel turn** — the RLM authors module #1 end-to-end through

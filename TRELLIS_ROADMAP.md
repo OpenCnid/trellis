@@ -202,8 +202,9 @@ Ordered roughly by severity.
 | ~~9~~ | ~~MCP tool-surface expansion (3.3 #8 continuation)~~ | **Done (Session 12, July 7, 2026)** — remote Streamable HTTP transports with env-referenced credentials, redaction, and the containerized tool-server pattern; the recorded 3.3 #8 scope is exhausted; see §5 |
 | ~~10~~ | ~~Kernel hardening and the Tier-3 workspace (design record §11, steps 2 + 1)~~ | **Done (Session 14, July 7, 2026)** — `sourceNodeIds` format + `ast_nodes` existence enforcement at the single write path, then the harness-captured in-REPL workspace (origin-stamped uuid segments, stub returns, plan-in-workspace, byte-identical gating); see §5 |
 | ~~11~~ | ~~Module registry + module #0 (design record §11 step 3)~~ | **Done (Session 15, July 7, 2026)** — owner directed the step 3 → step 4 order on July 7, 2026 (PR #40 discussion); protocol-module registry, operator-owned `TRELLIS_MODULES` selection, spatial-flywheel extraction behind a byte-identical composed-prompt pin; the §9.4 graph representation is explicitly deferred to the first research-bearing module; the owner-approved paired-run workspace probe was also measured this session; see §5 |
-| 1 | Workspace lineage (design record §11 step 4) | **Session 16, owner-directed July 7, 2026** — serialize/park/seed across a goal's tasks: goal-scoped TTL-bounded Redis parking, orchestrator routes by reference, oracle drills extended to seeded runs |
-| 2 | Remaining design-record steps (§11 steps 5–6: promotion path, first flywheel turn) | Owner-sequenced after Session 16 |
+| ~~12~~ | ~~Workspace lineage (design record §11 step 4)~~ | **Done (Session 16, July 7, 2026)** — serialize/park/seed across a goal's tasks: end-of-run snapshots parked goal-scoped in Redis (TTL + per-goal byte cap), the orchestrator routes by reference (`workspaceRef` observations, `seedFromTasks` dispatches, prior iterations only), seeded runs restored at spawn with stamps preserved and bounds re-enforced; oracle drills extended to seeded runs; see §5 |
+| 1 | Promotion path (design record §11 step 5) | Operator-gated segment→ingest with URL doc keys; the research corpus modules cite begins here |
+| 2 | First flywheel turn (design record §11 step 6) | The RLM authors module #1 end-to-end through the sculpted pathway; lands only through the recorded gates |
 | 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
 | 4 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
@@ -1539,3 +1540,91 @@ trigger); the isolated Compose integration
 (`trellis-s15-integration`, host ports 0) rebuilt the image with
 `modules/` + `trellis_modules.py` and passed 10/10. No defects found in
 existing code this session.
+
+### July 7, 2026 — Session 16: workspace lineage (design record §11 step 4, owner-directed)
+
+The owner directed step 4 for Session 16 on the PR #40 discussion.
+Design record §5 is normative and shipped as specified: workspace
+inheritance along the goal iteration structure — explicitly not a live
+blackboard.
+
+**Serialize (agent side).** `trellis_agent.py` gains `--workspace-out`:
+in the `finally`, success or failure, a non-empty workspace writes
+`snapshot()` (canonical sorted-key JSON, the Session 14 seam) to the
+worker-named temp file. Nothing new crosses stdout — the telemetry
+scanner stays bounded and SSE clients see nothing new. A failed run
+still serializes: its partial workspace can seed the retry.
+`TrellisWorkspace.is_empty()` gates the write.
+
+**Park (worker side).** For goal-correlated jobs `rlm_worker.ts` names
+the temp file, and after process exit validates the snapshot against
+the new Zod schema (`src/workers/workspace_scratch.ts`, twin of the
+Python state dict: version 1, plan, notes, origin-stamped segments) and
+parks it at `scratch:goal:<goalId>:task:<taskId>` with
+`SCRATCH_TTL_SECONDS` (default 3600, hard cap 86400 — the
+`a2a:task:<id>` retention precedent). A per-goal parked-bytes cap
+(`SCRATCH_MAX_BYTES_PER_GOAL`, default 8 MiB, cap 64 MiB) is enforced
+via a goal-scoped counter key expiring alongside; an over-cap snapshot
+is refused with a counts-only warning. Redis is a parking lot for
+checkpoints, never a live store the model queries. The job completion
+value gains `workspaceRef` (`{taskId, segments, bytes}` — counts only).
+Parking failures degrade to "nothing parked"; they never fail the run
+that produced the result.
+
+**Seed (dispatch side).** `RlmJobDataSchema` gains `seedTasks` (ids
+only, requires `goalId`, bounded 8). The worker resolves each parked
+snapshot BEFORE anything runs — a missing/expired reference or a
+malformed parked payload is a readable dispatch-time failure with zero
+spend, never a silent empty seed — merges them (notes concatenate,
+segments union first-wins, last non-default plan wins), writes a seed
+file, and passes `--seed-workspace`.
+`TrellisWorkspace.seed_from_snapshot` restores it at spawn: wrapper
+stamps preserved verbatim (a seeded segment still records the task that
+fetched it), structural and integrity validation (a bytes-stamp/content
+mismatch is a torn seed and raises), bounds re-enforced — an
+over-budget seed fails the task fast. A seeded run always gets a
+workspace, and its prompt appends the brace-free `SEEDED RUN` addendum
+telling the model to `read()` first; the unseeded prompt is
+byte-identical to Session 14 (pinned).
+
+**Route by reference (orchestrator).** The orchestrator stays
+tool-free. `AgentTaskSpecSchema` gains `seedFromTasks` (nullable for
+the OpenAI strict-schema contract; max 8); the goal loop validates
+every id against tasks dispatched in PRIOR iterations — unknown ids and
+same-batch ids end the goal as a typed `decision_error` before any
+dispatch (batches stay independent, per the §5 no-blackboard rule).
+`TaskOutcome` gains the counts-only `workspaceRef`;
+`buildDecisionMessages` renders it in observations; the orchestrator
+prompt teaches routing by reference (byte-exact identifier transfer
+instead of restating findings). Oracle scripts express seeded
+dispatches, and `RlmStubSchema` gains a data-only `workspaceSnapshot`
+parked through the identical validate/park path, so the whole
+park/resolve loop drills with zero LLM calls.
+
+**Acceptance (July 7, 2026, all zero-paid).** `npm test` = 536 passing
+across 61 files (was 513/59; new `workspace_scratch.test.ts` and
+`scratch_bounds.test.ts`, plus seed/lineage cases in `rlm_job`,
+`decision`, `goal_loop`, `transcript`, and `oracle` tests);
+`npm run build` and `npm run python:check` green. Live:
+`test:rlm-workspace` 83 (was 64 — seed round-trips a real snapshot
+byte-identically, stamps preserved, seed budgets raise, malformed/torn
+seeds raise readable errors, seeded-addendum gating pinned);
+`test:agent-loop` 35 (was 23 — a stub task parks a snapshot in real
+Redis with byte-exact content and a bounded TTL, a second-iteration
+task seeds from it by reference, the per-goal cap refuses an oversized
+park live, and a missing reference fails the seeded task readably;
+token-scoped cleanup). Unchanged and green: `test:modules` 27,
+`test:rlm-mcp` 86, `test:rlm-sandbox` 21, `test:a2a` 46,
+`test:api-hardening` 18, `test:belief-recovery` 30,
+`test:invalidation-sweep` 17, `test:entity-resolution` 34,
+`test:benchmark-hardening` 24, `test:repo-ingest` 45.
+`npm run drill:scale`: gate CLOSED (max provenance 286, sweep growth
+2.04x — within the recorded 1.63x–2.26x run-to-run band). The isolated
+Compose integration (`trellis-s16-integration`, host ports 0) passed
+10/10 on a rebuilt image. No new Python files shipped (the Dockerfile
+`COPY` line and `check_python_runtime.py` were already complete for
+`trellis_workspace.py`); no defects found in existing code this
+session. The natural follow-up remains owner-gated: the paired-run
+probe protocol across a two-task goal, measuring whether seeded
+workspaces eliminate the cross-task re-derivation the Session 15 report
+names.

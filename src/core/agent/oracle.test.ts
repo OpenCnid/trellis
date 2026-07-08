@@ -11,14 +11,17 @@ const BOUNDS: GoalBounds = {
 };
 
 function outcome(status: TaskOutcome['status']): TaskOutcome {
-  return { taskId: 't1', query: 'q', status, answer: 'a', toolCalls: status === 'ok' ? 1 : 0, spend: null };
+  return {
+    taskId: 't1', query: 'q', status, answer: 'a',
+    toolCalls: status === 'ok' ? 1 : 0, spend: null, workspaceRef: null,
+  };
 }
 
 function round(status: TaskOutcome['status']): GoalIterationRecord {
   return {
     decision: {
       assessment: 'a', action: 'dispatch',
-      tasks: [{ taskId: 't1', query: 'q' }], finalAnswer: null, reason: null,
+      tasks: [{ taskId: 't1', query: 'q', seedFromTasks: null }], finalAnswer: null, reason: null,
     },
     observations: [outcome(status)],
   };
@@ -58,9 +61,22 @@ describe('makeOracleDecisionSource', () => {
     const decide = makeOracleDecisionSource(script);
     const first = await decide({ goal: 'g', bounds: BOUNDS, history: [] });
     expect(first.decision.action).toBe('dispatch');
-    expect(first.decision.tasks).toEqual([{ taskId: 't1', query: 'q1' }]);
+    expect(first.decision.tasks).toEqual([{ taskId: 't1', query: 'q1', seedFromTasks: null }]);
     expect(first.stubs.get('t1')).toEqual({ stdout: 'FINAL_ANSWER: 1\n' });
     expect(first.usage).toEqual({ inputTokens: 0, outputTokens: 0, calls: 0 });
+  });
+
+  it('maps scripted seedFromTasks onto the decision shape (Session 16)', async () => {
+    const seeded = makeOracleDecisionSource(OracleScriptSchema.parse({
+      steps: [{
+        decision: {
+          action: 'dispatch',
+          tasks: [{ taskId: 't2', query: 'q2', seedFromTasks: ['t1'] }],
+        },
+      }],
+    }));
+    const result = await seeded({ goal: 'g', bounds: BOUNDS, history: [] });
+    expect(result.decision.tasks).toEqual([{ taskId: 't2', query: 'q2', seedFromTasks: ['t1'] }]);
   });
 
   it('takes the onProtocolViolation branch when the last round violated', async () => {

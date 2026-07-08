@@ -1,6 +1,8 @@
 import { Worker, Job } from 'bullmq';
 import { connectionParams } from './queue.js';
 import { spawn } from 'child_process';
+import fs from 'fs/promises';
+import os from 'os';
 import path from 'path';
 import IORedis from 'ioredis';
 import { config, pgDsn } from '../config/index.js';
@@ -17,9 +19,19 @@ import {
   parseRlmJobData,
   buildAgentArgs,
   buildAgentEnv,
+  type AgentLineageFiles,
   type RlmJobData,
   type RlmJobCompletion,
 } from './rlm_job.js';
+import {
+  mergeSnapshots,
+  parseWorkspaceSnapshot,
+  scratchBytesKey,
+  scratchKey,
+  workspaceRefFor,
+  type WorkspaceRef,
+  type WorkspaceSnapshot,
+} from './workspace_scratch.js';
 
 const redisPublisher = new IORedis({
   host: config.redis.host,
@@ -116,6 +128,120 @@ function completionValue(jobData: RlmJobData, observers: StreamObservers): RlmJo
   };
 }
 
+// --- Workspace lineage: park and seed (Session 16, design record §5) ----
+//
+// Redis is a parking lot for end-of-run workspace checkpoints, never a
+// live store the model queries: the agent serializes to a worker-named
+// temp file, the worker validates and parks the snapshot goal-scoped
+// with a TTL (the a2a:task:<id> precedent) under a per-goal parked-bytes
+// cap, and a later task in the same goal is seeded from named prior
+// tasks at spawn. Parking failures degrade to "nothing parked" (the run
+// already produced its result — never fail a paid run over its
+// checkpoint); a missing or malformed SEED is the opposite: a readable
+// dispatch-time failure before anything is spawned or spent.
+
+// The agent bounds workspace content bytes; the serialized snapshot adds
+// stamp overhead and JSON \uXXXX escaping (up to ~2x for non-ASCII), so
+// the out-file read cap sits well above the content bound while still
+// refusing something absurd.
+const WORKSPACE_OUT_MAX_BYTES = 3 * config.workspace.maxBytes + 1024 * 1024;
+
+/**
+ * Resolves a job's seedTasks to one merged snapshot. Throws readably on
+ * a missing/expired reference or a malformed parked payload.
+ */
+async function resolveSeedSnapshot(jobData: RlmJobData): Promise<WorkspaceSnapshot | undefined> {
+  if (!jobData.seedTasks) return undefined;
+  const goalId = jobData.goalId!; // schema: seedTasks requires goalId
+  const snapshots: WorkspaceSnapshot[] = [];
+  for (const taskId of [...new Set(jobData.seedTasks)]) {
+    const raw = await redisPublisher.get(scratchKey(goalId, taskId));
+    if (raw === null) {
+      throw new Error(
+        `Workspace seed unavailable: no parked snapshot for task '${taskId}' in this goal `
+        + '(never parked, over the parked-bytes cap, or expired past SCRATCH_TTL_SECONDS)'
+      );
+    }
+    snapshots.push(parseWorkspaceSnapshot(raw, `parked task '${taskId}'`));
+  }
+  return mergeSnapshots(snapshots);
+}
+
+/**
+ * Parks one validated snapshot under the goal's scratch keys. Returns
+ * the counts-only ref, or undefined when the per-goal parked-bytes cap
+ * refuses it. Redis errors degrade to undefined with a warning.
+ */
+async function parkSnapshot(
+  goalId: string,
+  taskId: string,
+  snapshot: WorkspaceSnapshot,
+  jobLog: Logger
+): Promise<WorkspaceRef | undefined> {
+  const ref = workspaceRefFor(taskId, snapshot);
+  try {
+    const bytesKey = scratchBytesKey(goalId);
+    const goalTotal = await redisPublisher.incrby(bytesKey, ref.bytes);
+    await redisPublisher.expire(bytesKey, config.scratch.ttlSeconds);
+    if (goalTotal > config.scratch.maxBytesPerGoal) {
+      await redisPublisher.decrby(bytesKey, ref.bytes);
+      jobLog.warn({
+        event: 'rlm.workspace_park_refused',
+        reason: 'goal_bytes_cap',
+        segments: ref.segments,
+        bytes: ref.bytes,
+      });
+      return undefined;
+    }
+    await redisPublisher.set(
+      scratchKey(goalId, taskId),
+      JSON.stringify(snapshot),
+      'EX',
+      config.scratch.ttlSeconds
+    );
+  } catch (error) {
+    jobLog.warn({ event: 'rlm.workspace_park_failed', err: error });
+    return undefined;
+  }
+  // T16 house style: counts only — content never reaches log lines.
+  jobLog.info({ event: 'rlm.workspace_parked', segments: ref.segments, bytes: ref.bytes });
+  return ref;
+}
+
+/**
+ * Reads, validates, and parks the agent's workspace out-file. Missing
+ * file means the run had nothing to park; a malformed or oversized file
+ * is a warning, never a failure of the run that produced it.
+ */
+async function parkWorkspaceOutFile(
+  jobData: RlmJobData,
+  outPath: string,
+  jobLog: Logger
+): Promise<WorkspaceRef | undefined> {
+  let raw: string;
+  try {
+    const stat = await fs.stat(outPath);
+    if (stat.size > WORKSPACE_OUT_MAX_BYTES) {
+      jobLog.warn({ event: 'rlm.workspace_out_oversized', bytes: stat.size });
+      return undefined;
+    }
+    raw = await fs.readFile(outPath, 'utf8');
+  } catch {
+    return undefined; // nothing serialized — an empty workspace parks nothing
+  }
+  let snapshot: WorkspaceSnapshot;
+  try {
+    snapshot = parseWorkspaceSnapshot(raw, 'the agent workspace out-file');
+  } catch (error) {
+    jobLog.warn({
+      event: 'rlm.workspace_out_malformed',
+      reason: error instanceof Error ? error.message : String(error),
+    });
+    return undefined;
+  }
+  return parkSnapshot(jobData.goalId!, jobData.taskId!, snapshot, jobLog);
+}
+
 /**
  * Zero-LLM stub replay (Session 9): publishes the canned stdout through
  * the identical Redis channel and scanner path a real agent run uses —
@@ -124,7 +250,8 @@ function completionValue(jobData: RlmJobData, observers: StreamObservers): RlmJo
 async function runStubJob(
   jobData: RlmJobData,
   observers: StreamObservers,
-  channel: string
+  channel: string,
+  jobLog: Logger
 ): Promise<RlmJobCompletion> {
   const stub = jobData.stub!;
   if (stub.delayMs > 0) {
@@ -135,16 +262,24 @@ async function runStubJob(
   observers.flush();
   metrics.rlmRunsTotal.inc({ exit_status: stub.exitCode === 0 ? 'success' : 'failure' });
   await redisPublisher.publish(channel, JSON.stringify({ type: 'done', code: stub.exitCode }));
+  // Session 16: a stub's snapshot crosses the identical park path a real
+  // agent's out-file crosses — before the exit-code throw, exactly like
+  // a failed real run still parks its partial workspace.
+  let workspaceRef: WorkspaceRef | undefined;
+  if (stub.workspaceSnapshot && jobData.goalId && jobData.taskId) {
+    workspaceRef = await parkSnapshot(jobData.goalId, jobData.taskId, stub.workspaceSnapshot, jobLog);
+  }
   if (stub.exitCode !== 0) {
     throw new Error(`Stub RLM run exited with code ${stub.exitCode}`);
   }
-  return completionValue(jobData, observers);
+  return { ...completionValue(jobData, observers), ...(workspaceRef && { workspaceRef }) };
 }
 
 function runAgentProcess(
   jobData: RlmJobData,
   observers: StreamObservers,
-  channel: string
+  channel: string,
+  lineage: AgentLineageFiles
 ): Promise<RlmJobCompletion> {
   const pythonScript = path.resolve('src/rlm/trellis_agent.py');
 
@@ -152,7 +287,7 @@ function runAgentProcess(
     // Forward the validated config to the Python half so both sides of
     // the system derive their connection targets — and, Session 10, the
     // MCP server registry — from the same values.
-    const pythonProcess = spawn(config.python.executable, buildAgentArgs(pythonScript, jobData), {
+    const pythonProcess = spawn(config.python.executable, buildAgentArgs(pythonScript, jobData, lineage), {
       env: buildAgentEnv(process.env, {
         pythonPath: config.python.pythonPath,
         neo4j: config.neo4j,
@@ -220,10 +355,52 @@ export const rlmWorker = new Worker('rlm_queue', async (job: Job): Promise<RlmJo
   const channel = `rlm-stream:${jobData.jobId}`;
   const observers = makeStreamObservers(jobLog);
 
+  // Session 16: seeds resolve BEFORE anything runs — a broken reference
+  // is a readable dispatch-time failure with zero spend, never a run
+  // that silently starts empty.
+  const seedSnapshot = await resolveSeedSnapshot(jobData);
+
   if (jobData.stub) {
-    return runStubJob(jobData, observers, channel);
+    return runStubJob(jobData, observers, channel, jobLog);
   }
-  return runAgentProcess(jobData, observers, channel);
+
+  // Lineage temp files are worker-named (jobId is a fresh uuid), written
+  // under the OS temp dir, and reaped whatever the run's outcome.
+  const goalCorrelated = jobData.goalId !== undefined && jobData.taskId !== undefined;
+  const lineage: AgentLineageFiles = {
+    ...(goalCorrelated && {
+      workspaceOut: path.join(os.tmpdir(), `trellis-ws-out-${jobData.jobId}.json`),
+    }),
+    ...(seedSnapshot && {
+      seedWorkspace: path.join(os.tmpdir(), `trellis-ws-seed-${jobData.jobId}.json`),
+    }),
+  };
+  try {
+    if (lineage.seedWorkspace) {
+      await fs.writeFile(lineage.seedWorkspace, JSON.stringify(seedSnapshot), 'utf8');
+    }
+    let completion: RlmJobCompletion;
+    try {
+      completion = await runAgentProcess(jobData, observers, channel, lineage);
+    } catch (error) {
+      // A failed run may still have serialized a partial workspace — it
+      // is parked so a retry task can inherit it (the orchestrator knows
+      // the taskId from the error observation).
+      if (lineage.workspaceOut) {
+        await parkWorkspaceOutFile(jobData, lineage.workspaceOut, jobLog);
+      }
+      throw error;
+    }
+    if (lineage.workspaceOut) {
+      const workspaceRef = await parkWorkspaceOutFile(jobData, lineage.workspaceOut, jobLog);
+      if (workspaceRef) completion.workspaceRef = workspaceRef;
+    }
+    return completion;
+  } finally {
+    for (const file of [lineage.workspaceOut, lineage.seedWorkspace]) {
+      if (file) await fs.rm(file, { force: true });
+    }
+  }
 }, connectionParams);
 instrumentWorker(rlmWorker, { worker: 'rlm', queue: 'rlm_queue' }, metrics);
 

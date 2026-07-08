@@ -19,22 +19,29 @@ const BOUNDS: GoalBounds = {
   taskMaxIterations: 5,
 };
 
-function decisionResult(partial: Partial<DecisionResult['decision']>): DecisionResult {
+// Scripted tasks may omit seedFromTasks (normalized to null here), the
+// way OracleTaskSchema does for scripts.
+type ScriptedDecision = Partial<Omit<DecisionResult['decision'], 'tasks'>> & {
+  tasks?: Array<{ taskId: string; query: string; seedFromTasks?: string[] | null }> | null;
+};
+
+function decisionResult(partial: ScriptedDecision): DecisionResult {
+  const { tasks, ...rest } = partial;
   return {
     decision: {
       assessment: 'test decision',
       action: 'finish',
-      tasks: null,
+      tasks: tasks?.map(task => ({ seedFromTasks: null, ...task })) ?? null,
       finalAnswer: null,
       reason: null,
-      ...partial,
+      ...rest,
     },
     stubs: new Map(),
     usage: { inputTokens: 10, outputTokens: 5, calls: 1 },
   };
 }
 
-function scriptedDecide(script: Array<Partial<DecisionResult['decision']>>): {
+function scriptedDecide(script: ScriptedDecision[]): {
   decide: DecisionSource;
   inputs: DecisionInput[];
 } {
@@ -59,6 +66,7 @@ function okRunner(answerFor: (task: TaskRequest) => string) {
       answer: answerFor(task),
       toolCalls: 2,
       spend: { inputTokens: 100, outputTokens: 50, subcalls: 1 },
+      workspaceRef: { taskId: task.taskId, segments: 1, bytes: 64 },
     };
   };
   return { runTask, calls };
@@ -133,6 +141,7 @@ describe('runGoalLoop', () => {
       return {
         taskId: task.taskId, query: task.query,
         status: 'protocol_violation', answer: 'unsupported claim', toolCalls: 0, spend: null,
+        workspaceRef: null,
       };
     };
     const { events, emit } = collectEmit();
@@ -244,6 +253,62 @@ describe('runGoalLoop', () => {
     expect(events.map(e => e.type)).toEqual(['goal_started', 'decision', 'goal_failed']);
   });
 
+  it('threads seedFromTasks to the runner for prior-iteration task ids (Session 16)', async () => {
+    const { decide } = scriptedDecide([
+      { action: 'dispatch', tasks: [{ taskId: 'fetch', query: 'q1' }] },
+      { action: 'dispatch', tasks: [{ taskId: 'derive', query: 'q2', seedFromTasks: ['fetch'] }] },
+      { action: 'finish', finalAnswer: 'done' },
+    ]);
+    const { runTask, calls } = okRunner(() => 'x');
+    const { emit } = collectEmit();
+
+    const result = await runGoalLoop({
+      goalId: 'g9', goal: 'goal', bounds: BOUNDS, decide, runTask, emit,
+    });
+
+    expect(result.status).toBe('completed');
+    expect(calls.find(c => c.taskId === 'fetch')?.seedFromTasks).toBeUndefined();
+    expect(calls.find(c => c.taskId === 'derive')?.seedFromTasks).toEqual(['fetch']);
+  });
+
+  it('rejects seeding from a task this goal never dispatched, dispatching nothing', async () => {
+    const { decide } = scriptedDecide([
+      { action: 'dispatch', tasks: [{ taskId: 'a', query: 'q' }] },
+      { action: 'dispatch', tasks: [{ taskId: 'b', query: 'q', seedFromTasks: ['ghost'] }] },
+    ]);
+    const { runTask, calls } = okRunner(() => 'x');
+    const { events, emit } = collectEmit();
+
+    const result = await runGoalLoop({
+      goalId: 'g10', goal: 'goal', bounds: BOUNDS, decide, runTask, emit,
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure?.kind).toBe('decision_error');
+    expect(result.failure?.reason).toContain('ghost');
+    expect(calls.map(c => c.taskId)).toEqual(['a']);
+    expect(events[events.length - 1].type).toBe('goal_failed');
+  });
+
+  it('rejects same-batch seeding — batches stay independent, never a blackboard', async () => {
+    const { decide } = scriptedDecide([
+      { action: 'dispatch', tasks: [
+        { taskId: 'a', query: 'q' },
+        { taskId: 'b', query: 'q', seedFromTasks: ['a'] },
+      ] },
+    ]);
+    const { runTask, calls } = okRunner(() => 'x');
+    const { emit } = collectEmit();
+
+    const result = await runGoalLoop({
+      goalId: 'g11', goal: 'goal', bounds: BOUNDS, decide, runTask, emit,
+    });
+
+    expect(result.status).toBe('failed');
+    expect(result.failure?.kind).toBe('decision_error');
+    expect(calls).toHaveLength(0);
+  });
+
   it('passes oracle stubs through to the task runner by taskId', async () => {
     const stub = { stdout: 'FINAL_ANSWER: 4\n' };
     const decide: DecisionSource = async input => {
@@ -251,7 +316,10 @@ describe('runGoalLoop', () => {
         return {
           decision: {
             assessment: 'a', action: 'dispatch',
-            tasks: [{ taskId: 'stubbed', query: 'q' }, { taskId: 'plain', query: 'q' }],
+            tasks: [
+              { taskId: 'stubbed', query: 'q', seedFromTasks: null },
+              { taskId: 'plain', query: 'q', seedFromTasks: null },
+            ],
             finalAnswer: null, reason: null,
           },
           stubs: new Map([['stubbed', stub]]),

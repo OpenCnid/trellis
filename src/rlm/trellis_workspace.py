@@ -271,10 +271,101 @@ class TrellisWorkspace:
     def snapshot(self) -> str:
         """The whole workspace dict as canonical JSON (sorted keys,
         compact separators) — the serialization seam cross-task lineage
-        (design record §5) will park and seed."""
+        (design record §5) parks and seeds."""
         self._count_op()
         with self._lock:
             return json.dumps(self._state, sort_keys=True, separators=(",", ":"))
+
+    # --- lineage (Session 16, design record §5) -------------------------
+
+    def is_empty(self):
+        """Harness-side: True when there is nothing worth parking."""
+        with self._lock:
+            return (
+                not self._state["segments"]
+                and not self._state["notes"]
+                and self._state["plan"] == []
+            )
+
+    @classmethod
+    def seed_from_snapshot(cls, data, max_segments=None, max_bytes=None,
+                           goal_id=None, task_id=None):
+        """Constructs a workspace pre-populated from a parked snapshot
+        (the worker resolved and merged it from Redis). Wrapper stamps
+        are preserved exactly — a seeded segment still records the task
+        that originally fetched it. Every structural defect and every
+        budget violation RAISES before the run's first turn: an
+        over-budget or torn seed fails the task fast, never silently
+        truncates (§4.7 applied to inheritance)."""
+        if not isinstance(data, dict) or data.get("version") != 1:
+            raise ValueError(
+                "Workspace seed must be a version-1 snapshot dict "
+                "(keys: version, plan, notes, segments)."
+            )
+        notes = data.get("notes", [])
+        segments = data.get("segments", {})
+        plan = data.get("plan", [])
+        if not isinstance(notes, list) or any(
+            not isinstance(n, str) or n == "" for n in notes
+        ):
+            raise ValueError("Workspace seed notes must be a list of non-empty strings.")
+        if not isinstance(segments, dict):
+            raise ValueError("Workspace seed segments must be a dict keyed by segment id.")
+        for segment_id, seg in segments.items():
+            if not isinstance(seg, dict):
+                raise ValueError(
+                    f"Workspace seed segment {str(segment_id)[:80]!r} is not a dict."
+                )
+            origin = seg.get("origin")
+            content = seg.get("content")
+            if (
+                not isinstance(origin, dict)
+                or not all(isinstance(origin.get(k), str) for k in ("server", "tool", "argsHash"))
+                or not isinstance(content, str)
+                or not isinstance(seg.get("fetchedAt"), str)
+                or not isinstance(seg.get("truncated"), bool)
+            ):
+                raise ValueError(
+                    f"Workspace seed segment {str(segment_id)[:80]!r} is missing required "
+                    f"stamps (origin server/tool/argsHash, fetchedAt, truncated, content)."
+                )
+            if seg.get("bytes") != _utf8_len(content):
+                raise ValueError(
+                    f"Workspace seed segment {str(segment_id)[:80]!r} is torn: its bytes "
+                    f"stamp does not match its content."
+                )
+        try:
+            plan = json.loads(json.dumps(plan))
+        except (TypeError, ValueError) as e:
+            raise ValueError(f"Workspace seed plan is not plain JSON data: {e}") from None
+
+        ws = cls(max_segments=max_segments, max_bytes=max_bytes,
+                 goal_id=goal_id, task_id=task_id)
+        if len(segments) > ws._max_segments:
+            raise WorkspaceBudgetError(
+                f"Workspace seed exceeds the segment budget: {len(segments)} seeded "
+                f"segments over the {ws._max_segments} maximum. Seed fewer tasks or "
+                f"raise TRELLIS_WORKSPACE_MAX_SEGMENTS."
+            )
+        plan_bytes = _utf8_len(json.dumps(plan))
+        note_bytes = sum(_utf8_len(n) for n in notes)
+        segment_bytes = sum(seg["bytes"] for seg in segments.values())
+        total = plan_bytes + note_bytes + segment_bytes
+        if total > ws._max_bytes:
+            raise WorkspaceBudgetError(
+                f"Workspace seed exceeds the byte budget: {total} seeded bytes over "
+                f"the {ws._max_bytes} maximum. Seed fewer tasks or raise "
+                f"TRELLIS_WORKSPACE_MAX_BYTES."
+            )
+        ws._state = {
+            "version": 1,
+            "plan": plan,
+            "notes": list(notes),
+            "segments": {str(sid): dict(seg) for sid, seg in segments.items()},
+        }
+        ws._plan_bytes = plan_bytes
+        ws._note_bytes = note_bytes
+        return ws
 
     # --- telemetry (counts only — content never leaves as telemetry) ---
 
@@ -306,11 +397,21 @@ Budgets are bounded; over-budget writes raise with current usage — drop() what
 HARD RULE: the workspace has NO provenance standing. Segment ids and workspace content are NEVER sourceNodeIds and can never be written to the graph as provenance; database provenance stays mandatory for every answer and every cached insight.
 """
 
+# Appended after the workspace addendum only on seeded runs (Session 16
+# lineage): the model must know inherited state exists before its first
+# turn, or the seed is scrollback it never reads. Brace-free like every
+# rlms-formatted string.
+WORKSPACE_SEEDED_ADDENDUM = """SEEDED RUN: this workspace was pre-populated with state inherited from earlier tasks in the same goal (their plan, notes, and captured segments, origin stamps intact). Call trellis_workspace.read() in your VERY FIRST repl block and reuse what is already there instead of re-fetching it. Inherited content has the same trust standing as everything else in the workspace: NONE.
+"""
 
-def build_workspace_addendum(workspace) -> str:
+
+def build_workspace_addendum(workspace, seeded=False) -> str:
     """Empty string when no workspace is injected, so a gated-off run's
     system prompt stays byte-identical (the build_mcp_addendum
-    precedent, pinned by test)."""
+    precedent, pinned by test). An unseeded workspace run's prompt is
+    likewise byte-identical to Session 14's (seeded=False default)."""
     if workspace is None:
         return ""
+    if seeded:
+        return WORKSPACE_ADDENDUM + WORKSPACE_SEEDED_ADDENDUM
     return WORKSPACE_ADDENDUM

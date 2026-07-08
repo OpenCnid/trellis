@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { RlmResultEnvelope } from '../core/observability/rlm_result.js';
 import type { RlmTelemetry } from '../core/observability/rlm_telemetry.js';
+import { WorkspaceSnapshotSchema, type WorkspaceRef } from './workspace_scratch.js';
 
 // Session 9: the rlm_queue job payload, normalized by a pure helper so
 // the worker and tests share one contract. The pre-Session-9 payload
@@ -22,18 +23,41 @@ export const RlmStubSchema = z.object({
   exitCode: z.number().int().min(-1).max(255).default(0),
   /** Bounded artificial runtime, for admission-control and concurrency drills. */
   delayMs: z.number().int().nonnegative().max(60_000).default(0),
+  /**
+   * Session 16: the snapshot a stub "produced", parked through the
+   * identical validate/park path a real agent's out-file crosses, so
+   * lineage drills need zero LLM calls. Data only, like the rest of the
+   * stub — it is a workspace state dict, never code.
+   */
+  workspaceSnapshot: WorkspaceSnapshotSchema.optional(),
 });
 
 export type RlmStub = z.infer<typeof RlmStubSchema>;
 
-export const RlmJobDataSchema = z.object({
-  query: z.string().min(1),
-  jobId: z.string().min(1),
-  goalId: z.string().min(1).optional(),
-  taskId: z.string().min(1).optional(),
-  maxIterations: z.number().int().positive().max(50).optional(),
-  stub: RlmStubSchema.optional(),
-});
+// A goal dispatches at most single-digit tasks (AGENT_MAX_TASKS_PER_GOAL
+// caps at 9) and a task cannot seed from itself, so 8 bounds seedTasks.
+export const MAX_SEED_TASKS = 8;
+
+export const RlmJobDataSchema = z
+  .object({
+    query: z.string().min(1),
+    jobId: z.string().min(1),
+    goalId: z.string().min(1).optional(),
+    taskId: z.string().min(1).optional(),
+    maxIterations: z.number().int().positive().max(50).optional(),
+    stub: RlmStubSchema.optional(),
+    /**
+     * Session 16 lineage: prior task ids within the SAME goal whose
+     * parked snapshots seed this run's workspace. Data only — the
+     * worker resolves them against scratch:goal:<goalId>:task:<id>;
+     * a payload can never carry snapshot content itself.
+     */
+    seedTasks: z.array(z.string().min(1)).min(1).max(MAX_SEED_TASKS).optional(),
+  })
+  .refine(data => data.seedTasks === undefined || data.goalId !== undefined, {
+    message: 'seedTasks requires goalId — parked snapshots are goal-scoped',
+    path: ['seedTasks'],
+  });
 
 export type RlmJobData = z.infer<typeof RlmJobDataSchema>;
 
@@ -46,8 +70,20 @@ export function parseRlmJobData(data: unknown): RlmJobData {
   return parsed.data;
 }
 
+/** Worker-computed lineage file paths (Session 16); never payload data. */
+export interface AgentLineageFiles {
+  /** Temp file the agent writes its end-of-run snapshot to. */
+  workspaceOut?: string;
+  /** Temp file holding the resolved, merged seed snapshot. */
+  seedWorkspace?: string;
+}
+
 /** Argument vector for the spawned agent, from the normalized payload. */
-export function buildAgentArgs(scriptPath: string, job: RlmJobData): string[] {
+export function buildAgentArgs(
+  scriptPath: string,
+  job: RlmJobData,
+  lineage: AgentLineageFiles = {}
+): string[] {
   const args = [scriptPath, '--query', job.query];
   if (job.maxIterations !== undefined) {
     args.push('--max-iterations', String(job.maxIterations));
@@ -56,6 +92,14 @@ export function buildAgentArgs(scriptPath: string, job: RlmJobData): string[] {
   // workspace segments and gates the Tier-3 workspace on for goal runs.
   if (job.goalId !== undefined) {
     args.push('--goal-id', job.goalId);
+  }
+  // Session 16: lineage temp files are named by the worker, never by the
+  // payload — a queue payload cannot pick filesystem paths.
+  if (lineage.workspaceOut !== undefined) {
+    args.push('--workspace-out', lineage.workspaceOut);
+  }
+  if (lineage.seedWorkspace !== undefined) {
+    args.push('--seed-workspace', lineage.seedWorkspace);
   }
   return args;
 }
@@ -154,4 +198,10 @@ export interface RlmJobCompletion {
   taskId?: string;
   result: RlmResultEnvelope | null;
   telemetry: RlmTelemetry | null;
+  /**
+   * Session 16: counts-only summary of the snapshot this task parked
+   * ({taskId, segments, bytes}); absent when nothing was parked. Never
+   * carries workspace content.
+   */
+  workspaceRef?: WorkspaceRef;
 }

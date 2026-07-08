@@ -340,6 +340,23 @@ behavior are byte-identical to a pre-Session-14 run:
 npm run test:rlm-workspace
 ```
 
+**Workspace lineage (Session 16):** within one agentic goal, workspaces
+are inherited between iterations. At task end the harness serializes a
+non-empty workspace and parks the snapshot goal-scoped in Redis —
+age-bounded by `SCRATCH_TTL_SECONDS` (default 3600, hard cap 24 h) and
+volume-bounded per goal by `SCRATCH_MAX_BYTES_PER_GOAL` (default
+8 MiB). The orchestrator sees each task's parked snapshot only as a
+counts-only `workspaceRef` and routes by reference: a later task
+dispatched with `seedFromTasks` names prior task ids, and the worker
+resolves, merges, and re-validates their snapshots into that run's
+workspace at spawn — plan, notes, segments, and origin stamps restored
+verbatim, so exact identifiers (AST hashes above all) cross tasks
+byte-exact instead of being re-typed through two LLM hops. Tasks in one
+batch stay independent (inheritance, never a live blackboard); a
+missing or expired reference fails the seeded task with a readable
+error, and an over-budget seed fails fast rather than truncating.
+Parked state keeps Tier-3 trust standing: none.
+
 **Cost posture:** acceptance is zero-paid and local — the deterministic
 fixture server (`scripts/fixture_mcp_server.py`, stdio and loopback
 Streamable HTTP, with and without required auth) is the only server the

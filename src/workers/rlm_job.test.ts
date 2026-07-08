@@ -60,6 +60,53 @@ describe('parseRlmJobData', () => {
     }
   });
 
+  it('validates seedTasks: bounded, non-empty ids, goal-scoped (Session 16)', () => {
+    const parsed = parseRlmJobData({
+      query: 'q', jobId: 'j', goalId: 'g-1', taskId: 't-2', seedTasks: ['t-1'],
+    });
+    expect(parsed.seedTasks).toEqual(['t-1']);
+
+    // Parked snapshots are goal-scoped; a goal-less seed cannot resolve.
+    expect(() => parseRlmJobData({ query: 'q', jobId: 'j', seedTasks: ['t-1'] }))
+      .toThrow(/seedTasks requires goalId/);
+    expect(() => parseRlmJobData({ query: 'q', jobId: 'j', goalId: 'g', seedTasks: [] }))
+      .toThrow(/Invalid rlm_queue job data/);
+    expect(() => parseRlmJobData({ query: 'q', jobId: 'j', goalId: 'g', seedTasks: [''] }))
+      .toThrow(/Invalid rlm_queue job data/);
+    expect(() => parseRlmJobData({
+      query: 'q', jobId: 'j', goalId: 'g',
+      seedTasks: Array.from({ length: 9 }, (_, i) => `t${i}`),
+    })).toThrow(/Invalid rlm_queue job data/);
+  });
+
+  it('accepts a stub workspaceSnapshot and keeps it data-only (Session 16)', () => {
+    const snapshot = {
+      version: 1,
+      plan: [],
+      notes: ['seeded note'],
+      segments: {
+        'seg-uuid': {
+          origin: { server: 's', tool: 't', argsHash: 'ab12cd34ef56ab78' },
+          fetchedAt: '2026-07-07T12:00:00+00:00',
+          bytes: 4,
+          truncated: false,
+          content: 'body',
+        },
+      },
+    };
+    const parsed = parseRlmJobData({
+      query: 'q', jobId: 'j', goalId: 'g', taskId: 't',
+      stub: { stdout: 'FINAL_ANSWER: x\n', workspaceSnapshot: snapshot },
+    });
+    expect(parsed.stub?.workspaceSnapshot).toEqual(snapshot);
+
+    // A snapshot is a state dict, never code or paths.
+    expect(() => parseRlmJobData({
+      query: 'q', jobId: 'j', goalId: 'g', taskId: 't',
+      stub: { stdout: 'x', workspaceSnapshot: { version: 1, plan: [], notes: [], segments: { s: { content: 'no stamps' } } } },
+    })).toThrow(/Invalid rlm_queue job data/);
+  });
+
   it('carries nothing MCP-shaped — a payload cannot name servers, commands, or tools', () => {
     // Guardrail 5 (Session 10): the external tool surface comes from the
     // operator's validated config only. Any MCP-looking fields riding a
@@ -190,5 +237,21 @@ describe('buildAgentArgs', () => {
   it('omits --goal-id for goal-less jobs (pre-Session-14 argument vector pinned)', () => {
     const args = buildAgentArgs('/x/trellis_agent.py', { query: 'q', jobId: 'j' });
     expect(args).toEqual(['/x/trellis_agent.py', '--query', 'q']);
+  });
+
+  it('forwards worker-named lineage files, never payload-derived paths (Session 16)', () => {
+    const job = { query: 'q', jobId: 'j', goalId: 'g-1', taskId: 't-1' };
+    expect(buildAgentArgs('/x/a.py', job, { workspaceOut: '/tmp/out.json' })).toEqual([
+      '/x/a.py', '--query', 'q', '--goal-id', 'g-1', '--workspace-out', '/tmp/out.json',
+    ]);
+    expect(buildAgentArgs('/x/a.py', job, {
+      workspaceOut: '/tmp/out.json',
+      seedWorkspace: '/tmp/seed.json',
+    })).toEqual([
+      '/x/a.py', '--query', 'q', '--goal-id', 'g-1',
+      '--workspace-out', '/tmp/out.json', '--seed-workspace', '/tmp/seed.json',
+    ]);
+    // No lineage files means the Session-14 argument vector, unchanged.
+    expect(buildAgentArgs('/x/a.py', job)).toEqual(['/x/a.py', '--query', 'q', '--goal-id', 'g-1']);
   });
 });

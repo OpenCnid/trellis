@@ -22,6 +22,9 @@
 process.env.AGENT_MAX_ITERATIONS_PER_GOAL = '4';
 process.env.AGENT_MAX_TASKS_PER_GOAL = '2';
 process.env.AGENT_MAX_CONCURRENT_TASKS = '2';
+// Session 16: a small per-goal parked-bytes cap so the lineage phase can
+// trip it with a ~3 KB snapshot while ordinary snapshots park freely.
+process.env.SCRATCH_MAX_BYTES_PER_GOAL = '2048';
 delete process.env.OPENAI_API_KEY;
 
 import { spawn, ChildProcess } from 'child_process';
@@ -69,6 +72,26 @@ function stubStdout(answer: string, options: {
       : '')
     + `TRELLIS_RESULT: ${JSON.stringify(envelope)}\n`
   );
+}
+
+// Session 16: a well-formed workspace snapshot a stub task "produced" —
+// exactly the dict trellis_workspace.py serializes, parked through the
+// identical validate/park path a real agent's out-file crosses.
+function stubSnapshot(content: string): unknown {
+  return {
+    version: 1,
+    plan: [{ id: 's1', desc: 'fetch the evidence', status: 'done' }],
+    notes: ['parked by the fetch task'],
+    segments: {
+      'seg-0001-fetch': {
+        origin: { server: 'websearch', tool: 'web_search', argsHash: 'ab12cd34ef56ab78' },
+        fetchedAt: '2026-07-07T12:00:00+00:00',
+        bytes: Buffer.byteLength(content, 'utf8'),
+        truncated: false,
+        content,
+      },
+    },
+  };
 }
 
 // --- SSE client --------------------------------------------------------
@@ -393,6 +416,176 @@ async function main() {
     check('gated goal still completes after the delay',
       slowDone.events[slowDone.events.length - 1]?.type === 'goal_completed',
       JSON.stringify(slowDone.events.map(e => e.type)));
+
+    // --- Session 16: lineage park/resolve over real Redis ---
+    console.log('\nPhase 3: workspace lineage (park, seed, cap, missing ref)\n');
+    const IORedis = (await import('ioredis')).default;
+    const redis = new IORedis({
+      host: process.env.REDIS_HOST ?? '127.0.0.1',
+      port: Number(process.env.REDIS_PORT ?? 6379),
+    });
+    const lineageGoalIds: string[] = [];
+    const trackGoal = (events: any[]) => {
+      const started = events.find(e => e.type === 'goal_started');
+      if (started?.goalId) lineageGoalIds.push(started.goalId);
+      return started?.goalId as string | undefined;
+    };
+
+    try {
+      // Happy path: task 1 parks a snapshot; task 2 (next iteration) is
+      // seeded from it by reference. The exact-identifier payload below
+      // is the byte-exact transfer lineage exists for.
+      const exactHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+      const lineage = await openGoalStream(PORT, 'two-task goal with inherited workspace', {
+        apiKey: KEY,
+        oracle: {
+          steps: [
+            {
+              decision: {
+                action: 'dispatch',
+                tasks: [{
+                  taskId: 'fetch', query: 'fetch the evidence',
+                  stub: { stdout: stubStdout('fetched'), workspaceSnapshot: stubSnapshot(`load-bearing hash: ${exactHash}`) },
+                }],
+              },
+            },
+            {
+              decision: {
+                action: 'dispatch',
+                tasks: [{
+                  taskId: 'derive', query: 'derive from the inherited evidence',
+                  seedFromTasks: ['fetch'],
+                  stub: { stdout: stubStdout('derived from seed') },
+                }],
+              },
+            },
+            { decision: { action: 'finish', finalAnswer: 'lineage done' } },
+          ],
+        },
+      }).finished;
+
+      const lineageGoalId = trackGoal(lineage.events);
+      const lineageEnd = lineage.events[lineage.events.length - 1];
+      check('seeded goal completes through the real queues',
+        lineageEnd.type === 'goal_completed' && lineageEnd.finalAnswer === 'lineage done',
+        JSON.stringify(lineageEnd));
+
+      const lineageOutcomes = lineage.events.filter(e => e.type === 'task_result').map(e => e.outcome);
+      const fetchOutcome = lineageOutcomes.find(o => o.taskId === 'fetch');
+      const deriveOutcome = lineageOutcomes.find(o => o.taskId === 'derive');
+      check('the parking task\'s observation carries a counts-only workspaceRef',
+        fetchOutcome?.workspaceRef?.taskId === 'fetch'
+          && fetchOutcome?.workspaceRef?.segments === 1
+          && fetchOutcome?.workspaceRef?.bytes > 0,
+        JSON.stringify(fetchOutcome?.workspaceRef));
+      check('the observation ref never carries workspace content',
+        !JSON.stringify(fetchOutcome?.workspaceRef).includes(exactHash),
+        JSON.stringify(fetchOutcome?.workspaceRef));
+      check('the seeded task resolved its inheritance and ran (no dispatch failure)',
+        deriveOutcome?.status === 'ok' && deriveOutcome?.answer === 'derived from seed',
+        JSON.stringify(deriveOutcome));
+      check('a task that parked nothing reports a null workspaceRef',
+        deriveOutcome?.workspaceRef === null, JSON.stringify(deriveOutcome?.workspaceRef));
+
+      const parkedRaw = await redis.get(`scratch:goal:${lineageGoalId}:task:fetch`);
+      const parked = parkedRaw ? JSON.parse(parkedRaw) : null;
+      check('the snapshot is parked goal-scoped in Redis with byte-exact content',
+        parked?.segments?.['seg-0001-fetch']?.content === `load-bearing hash: ${exactHash}`,
+        parkedRaw === null ? 'key missing' : 'content mismatch');
+      const ttl = await redis.ttl(`scratch:goal:${lineageGoalId}:task:fetch`);
+      check('the parked snapshot carries the scratch TTL (bounded, never permanent)',
+        ttl > 0 && ttl <= 3600, `ttl=${ttl}`);
+      const bytesCounter = Number(await redis.get(`scratch:goal:${lineageGoalId}:bytes`));
+      check('the per-goal parked-bytes counter metered the park',
+        bytesCounter === fetchOutcome?.workspaceRef?.bytes,
+        `counter=${bytesCounter} ref=${fetchOutcome?.workspaceRef?.bytes}`);
+
+      // Missing reference: seeding from a prior task that parked nothing
+      // is a readable dispatch-time failure surfacing as an observation.
+      const missing = await openGoalStream(PORT, 'goal seeding from a task that parked nothing', {
+        apiKey: KEY,
+        oracle: {
+          steps: [
+            {
+              decision: {
+                action: 'dispatch',
+                tasks: [{ taskId: 'no-park', query: 'plain task', stub: { stdout: stubStdout('plain') } }],
+              },
+            },
+            {
+              decision: {
+                action: 'dispatch',
+                tasks: [{
+                  taskId: 'wants-seed', query: 'needs the missing state',
+                  seedFromTasks: ['no-park'],
+                  stub: { stdout: stubStdout('never runs') },
+                }],
+              },
+            },
+            { decision: { action: 'finish', finalAnswer: 'finished despite the missing seed' } },
+          ],
+        },
+      }).finished;
+      trackGoal(missing.events);
+      const missingOutcome = missing.events
+        .filter(e => e.type === 'task_result')
+        .map(e => e.outcome)
+        .find(o => o.taskId === 'wants-seed');
+      check('a missing parked snapshot fails the seeded task readably (never a silent empty seed)',
+        missingOutcome?.status === 'error'
+          && /Workspace seed unavailable.*no-park/.test(missingOutcome?.error ?? ''),
+        JSON.stringify(missingOutcome));
+
+      // Per-goal cap: an oversized snapshot is refused at park time, so
+      // the observation has no ref and a later seed fails readably.
+      const capped = await openGoalStream(PORT, 'goal whose snapshot exceeds the parked-bytes cap', {
+        apiKey: KEY,
+        oracle: {
+          steps: [
+            {
+              decision: {
+                action: 'dispatch',
+                tasks: [{
+                  taskId: 'big', query: 'oversized park',
+                  stub: { stdout: stubStdout('big done'), workspaceSnapshot: stubSnapshot('x'.repeat(3000)) },
+                }],
+              },
+            },
+            {
+              decision: {
+                action: 'dispatch',
+                tasks: [{
+                  taskId: 'wants-big', query: 'seed from the refused park',
+                  seedFromTasks: ['big'],
+                  stub: { stdout: stubStdout('never runs') },
+                }],
+              },
+            },
+            { decision: { action: 'finish', finalAnswer: 'finished under the cap' } },
+          ],
+        },
+      }).finished;
+      const cappedGoalId = trackGoal(capped.events);
+      const cappedOutcomes = capped.events.filter(e => e.type === 'task_result').map(e => e.outcome);
+      check('an over-cap snapshot is refused: no workspaceRef on the observation',
+        cappedOutcomes.find(o => o.taskId === 'big')?.workspaceRef === null,
+        JSON.stringify(cappedOutcomes.find(o => o.taskId === 'big')));
+      check('nothing over the cap reaches Redis',
+        (await redis.get(`scratch:goal:${cappedGoalId}:task:big`)) === null);
+      check('seeding from the refused park fails readably',
+        /Workspace seed unavailable/.test(
+          cappedOutcomes.find(o => o.taskId === 'wants-big')?.error ?? ''),
+        JSON.stringify(cappedOutcomes.find(o => o.taskId === 'wants-big')));
+    } finally {
+      // Token-scoped cleanup: only this drill's goal-scoped keys.
+      for (const goalId of lineageGoalIds) {
+        for (const taskId of ['fetch', 'derive', 'no-park', 'wants-seed', 'big', 'wants-big']) {
+          await redis.del(`scratch:goal:${goalId}:task:${taskId}`);
+        }
+        await redis.del(`scratch:goal:${goalId}:bytes`);
+      }
+      await redis.quit();
+    }
 
     // --- Worker-process metrics (in-process registry) ---
     const metricsText = await getMetrics().registry.metrics();

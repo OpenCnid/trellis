@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from trellis_workspace import (  # noqa: E402
     TrellisWorkspace,
     WorkspaceBudgetError,
+    WORKSPACE_ADDENDUM,
     build_workspace_addendum,
     parse_workspace_bounds,
     WORKSPACE_MAX_SEGMENTS_DEFAULT,
@@ -330,6 +331,93 @@ try:
     check("underscore names do not persist", out.stdout.strip() == "False")
 finally:
     repl.cleanup()
+
+# --- 6. Cross-task lineage: seed_from_snapshot (Session 16, §5) -------------
+print("\n[6] seed_from_snapshot: round-trip, stamp preservation, seed budgets")
+
+source = TrellisWorkspace(max_segments=8, max_bytes=64 * 1024, goal_id="goal-42", task_id="task-1")
+source.set_plan([dict(id="s1", desc="fetch evidence", status="done")])
+source.add_note("hash abc123 looked load-bearing")
+seg_a = source.capture(server="websearch", tool="web_search", args_hash="ab12cd34ef56ab78",
+                       content="first fetched body", truncated=False)
+seg_b = source.capture(server="websearch", tool="web_search", args_hash="cd34ef56ab78ab12",
+                       content="second fetched body — non-ascii too", truncated=True)
+source_snapshot = json.loads(source.snapshot())
+
+seeded = TrellisWorkspace.seed_from_snapshot(
+    source_snapshot, max_segments=8, max_bytes=64 * 1024,
+    goal_id="goal-42", task_id="task-2")
+check("a seeded workspace's snapshot is byte-identical to its source (canonical JSON)",
+      seeded.snapshot() == source.snapshot())
+seeded_index = json.loads(seeded.read())
+check("plan and notes survive seeding",
+      seeded_index["plan"] == [dict(id="s1", desc="fetch evidence", status="done")]
+      and seeded_index["notes"] == ["hash abc123 looked load-bearing"])
+seeded_seg = json.loads(seeded.segment(seg_a["segmentId"]))
+check("wrapper stamps survive seeding verbatim (origin, fetchedAt, truncated, taskId)",
+      seeded_seg["origin"] == {"server": "websearch", "tool": "web_search",
+                               "argsHash": "ab12cd34ef56ab78"}
+      and seeded_seg["taskId"] == "task-1"
+      and json.loads(seeded.segment(seg_b["segmentId"]))["truncated"] is True)
+check("seeded usage accounts every inherited byte",
+      seeded_index["usage"]["bytes"] == json.loads(source.read())["usage"]["bytes"])
+
+seeded.add_note("continuing where task-1 stopped")
+check("a seeded workspace keeps working normally", len(json.loads(seeded.read())["notes"]) == 2)
+dropped_seed = json.loads(seeded.drop(seg_a["segmentId"]))
+check("seeded segments can be dropped to free budget",
+      dropped_seed["freedBytes"] == seg_a["bytes"])
+
+# Budgets are re-enforced at seed time: an over-budget seed fails fast.
+expect_raises("a seed with more segments than the budget raises (fails the task fast)",
+              lambda: TrellisWorkspace.seed_from_snapshot(source_snapshot, max_segments=1),
+              WorkspaceBudgetError, "segment budget")
+expect_raises("a seed larger than the byte budget raises (never silent truncation)",
+              lambda: TrellisWorkspace.seed_from_snapshot(dict(source_snapshot),
+                                                          max_segments=8, max_bytes=16),
+              WorkspaceBudgetError, "byte budget")
+
+# Structural validation: malformed and torn seeds raise readable errors.
+expect_raises("a non-snapshot seed raises",
+              lambda: TrellisWorkspace.seed_from_snapshot(["not", "a", "dict"]),
+              ValueError, "version-1 snapshot")
+expect_raises("a wrong-version seed raises",
+              lambda: TrellisWorkspace.seed_from_snapshot({**source_snapshot, "version": 2}),
+              ValueError, "version-1 snapshot")
+expect_raises("empty note strings in a seed raise",
+              lambda: TrellisWorkspace.seed_from_snapshot({**source_snapshot, "notes": [""]}),
+              ValueError, "non-empty")
+stampless = {**source_snapshot,
+             "segments": {"seg-x": {"content": "no stamps at all"}}}
+expect_raises("a segment without wrapper stamps raises",
+              lambda: TrellisWorkspace.seed_from_snapshot(stampless),
+              ValueError, "stamps")
+torn_seg = dict(json.loads(source.segment(seg_b["segmentId"])))
+torn_seg.pop("segmentId")
+torn_seg["bytes"] = torn_seg["bytes"] + 1
+torn = {**source_snapshot, "segments": {"seg-torn": torn_seg}}
+expect_raises("a torn segment (bytes stamp vs content mismatch) raises",
+              lambda: TrellisWorkspace.seed_from_snapshot(torn),
+              ValueError, "torn")
+
+# is_empty gates serialization: only non-empty workspaces are parked.
+check("a fresh workspace is empty; plan, notes, or segments make it non-empty",
+      TrellisWorkspace(max_segments=2, max_bytes=200).is_empty()
+      and not source.is_empty())
+
+# The seeded addendum: gated, additive, brace-free; the unseeded prompt
+# is byte-identical to Session 14's (pinned).
+check("unseeded addendum is byte-identical to the Session 14 addendum",
+      build_workspace_addendum(source) == WORKSPACE_ADDENDUM
+      and build_workspace_addendum(source, seeded=False) == WORKSPACE_ADDENDUM)
+seeded_addendum = build_workspace_addendum(seeded, seeded=True)
+check("seeded addendum extends the base addendum and announces the seed",
+      seeded_addendum.startswith(WORKSPACE_ADDENDUM) and "SEEDED RUN" in seeded_addendum
+      and "trellis_workspace.read()" in seeded_addendum)
+check("seeded addendum has no braces at all (rlms .format() safety)",
+      "{" not in seeded_addendum and "}" not in seeded_addendum)
+check("no workspace still means an empty addendum, seeded or not",
+      build_workspace_addendum(None, seeded=True) == "")
 
 # ---------------------------------------------------------------------------
 if failures:

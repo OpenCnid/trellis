@@ -21,7 +21,7 @@ const ROUND: GoalIterationRecord = {
   decision: {
     assessment: 'need one fact',
     action: 'dispatch',
-    tasks: [{ taskId: 't1', query: 'what does the graph say?' }],
+    tasks: [{ taskId: 't1', query: 'what does the graph say?', seedFromTasks: null }],
     finalAnswer: null,
     reason: null,
   },
@@ -32,6 +32,7 @@ const ROUND: GoalIterationRecord = {
     answer: 'the graph says 42',
     toolCalls: 3,
     spend: { inputTokens: 10, outputTokens: 5, subcalls: 0 },
+    workspaceRef: null,
   }],
 };
 
@@ -81,6 +82,26 @@ describe('transcript truncation', () => {
   });
 });
 
+describe('workspaceRef rendering (Session 16)', () => {
+  it('renders the parked-workspace reference as counts only', () => {
+    const history: GoalIterationRecord[] = [{
+      decision: ROUND.decision,
+      observations: [{
+        ...ROUND.observations[0],
+        workspaceRef: { taskId: 't1', segments: 3, bytes: 2048 },
+      }],
+    }];
+    const rendered = renderHistory(history);
+    expect(rendered).toContain('"workspaceRef"');
+    expect(rendered).toContain('"segments": 3');
+    expect(rendered).toContain('"bytes": 2048');
+  });
+
+  it('omits the field entirely when nothing was parked', () => {
+    expect(renderHistory([ROUND])).not.toContain('workspaceRef');
+  });
+});
+
 // Guardrail 8: the orchestrator persona is plain chat completions. It
 // must never be routed through rlms — whose custom_system_prompt
 // REPLACES the REPL protocol prompt and whose .format() call forbids
@@ -110,5 +131,11 @@ describe('orchestrator prompt hygiene', () => {
     }
     expect(ORCHESTRATOR_SYSTEM_PROMPT).toContain('goals are never delegated as goals');
     expect(ORCHESTRATOR_SYSTEM_PROMPT).toContain('NO database access');
+  });
+
+  it('teaches routing by reference, never same-batch seeding (Session 16)', () => {
+    expect(ORCHESTRATOR_SYSTEM_PROMPT).toContain('seedFromTasks');
+    expect(ORCHESTRATOR_SYSTEM_PROMPT).toContain('workspaceRef');
+    expect(ORCHESTRATOR_SYSTEM_PROMPT).toContain('can never seed from each other');
   });
 });

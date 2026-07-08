@@ -14,11 +14,25 @@ import { z } from 'zod';
 // they run in safeParse, so a violating completion fails at the
 // 'schema' stage exactly like a missing field.
 
+// A goal dispatches single-digit tasks and a task cannot seed from
+// itself or its own batch, so 8 bounds seedFromTasks (MAX_SEED_TASKS in
+// rlm_job.ts is the same figure at the queue boundary).
+export const MAX_SEED_FROM_TASKS = 8;
+
 export const AgentTaskSpecSchema = z.object({
   /** Orchestrator-chosen task label, unique within one dispatch batch. */
   taskId: z.string().min(1),
   /** The single-task query handed to the RLM sub-agent verbatim. */
   query: z.string().min(1),
+  /**
+   * Session 16 lineage: prior-iteration task ids whose parked workspace
+   * snapshots seed this task at spawn. Routing by reference only — the
+   * orchestrator names tasks, never content; the goal loop rejects ids
+   * that are not previously dispatched tasks of THIS goal (same-batch
+   * ids included: batches stay independent). Nullable, not optional:
+   * OpenAI strict JSON schemas require every field present.
+   */
+  seedFromTasks: z.array(z.string().min(1)).max(MAX_SEED_FROM_TASKS).nullable(),
 });
 
 export type AgentTaskSpec = z.infer<typeof AgentTaskSpecSchema>;
@@ -77,6 +91,13 @@ export interface TaskOutcome {
   toolCalls: number | null;
   /** Aggregatable sub-agent spend from TRELLIS_TELEMETRY, when reported. */
   spend: { inputTokens: number; outputTokens: number; subcalls: number } | null;
+  /**
+   * Session 16: counts-only summary of the workspace snapshot this task
+   * parked ({taskId, segments, bytes}); null when nothing was parked.
+   * The orchestrator routes by this reference — content never crosses
+   * into the decision context.
+   */
+  workspaceRef: { taskId: string; segments: number; bytes: number } | null;
   /** Failure detail when status is 'error'. */
   error?: string;
 }
