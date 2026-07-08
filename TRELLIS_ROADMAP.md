@@ -1628,3 +1628,36 @@ session. The natural follow-up remains owner-gated: the paired-run
 probe protocol across a two-task goal, measuring whether seeded
 workspaces eliminate the cross-task re-derivation the Session 15 report
 names.
+
+### July 8, 2026 — The two-task lineage probe (Session 16 follow-up, owner-approved paid run)
+
+The owner approved the Session 16 lineage follow-up the report named:
+the paired workspace protocol lifted from one task to a two-task goal,
+measuring whether seeded workspaces eliminate cross-task re-derivation.
+Driver `scripts/probe_workspace_lineage.py` (wrapper
+`tsx scripts/probe_workspace_lineage.ts`, no npm alias, PAID, excluded
+from every zero-paid suite — the single-task probe precedent). One
+upstream task fetched four `archive_search` results into a workspace and
+parked the snapshot; one dependent task ran twice, identical except for
+lineage — seeded (real `seed_from_snapshot` + `SEEDED RUN` addendum) vs
+unseeded (fresh goal workspace). Task 1 ran once so both arms faced
+identical upstream state; the only variable was seeding.
+
+**Result (n=1 per arm, directional):** all three runs answered the four
+codes correctly. Goal-total external calls **4 (seeded) vs 8 (unseeded)**
+— the dependent task made **0** external calls when seeded (it read the
+inherited four segments, stamps intact, and re-fetched nothing) and **4**
+when unseeded (it re-fetched everything task 1 had already retrieved).
+The Session 15 within-task 8-vs-4 effect, confirmed at the cross-task
+level lineage targets. Token cost was higher in the seeded arm (22.4K vs
+16.6K input — the seed carries the four full ~4 KB segments the model
+pulls into context; the unseeded arm's own re-fetches return bounded
+stubs), so at this deliberately small task size the external-call
+elimination and the token cost roughly trade off, exactly the wash the
+Session 15 report noted within a task. Combined spend ≈48.6K input /
+≈3.4K output; `reported_cost_usd` not populated by the rlms usage
+summary for this model, as in Session 15. Recorded in
+`docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md`. No code changes; the
+lineage mechanism stays pinned zero-paid by `test:rlm-workspace` (the
+`seed_from_snapshot` round-trip) and `test:agent-loop` (the real Redis
+park/seed path).

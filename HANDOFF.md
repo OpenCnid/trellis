@@ -644,13 +644,18 @@ Update:
 - `HANDOFF.md`: regenerate per §0.
 
 Standing owner-gated item (do NOT run unprompted): the paired-run
-behavioral probe (driver `tsx scripts/probe_workspace_paired.ts`, no
-npm alias, PAID — per-run owner approval). With lineage landed
-(Session 16), the recorded natural follow-up is the same paired
-protocol across a TWO-TASK goal, measuring whether seeded workspaces
-eliminate the cross-task re-derivation the Session 15 report names
-(8-vs-4 external calls). Propose it with a cost estimate; do not run
-it unprompted.
+behavioral probes (drivers `tsx scripts/probe_workspace_paired.ts` and
+`tsx scripts/probe_workspace_lineage.ts`, no npm alias, PAID — per-run
+owner approval). Both have been run and MEASURED: the single-task probe
+(Session 14, `docs/benchmarks/WORKSPACE_PROBE_REPORT.md`) and the
+two-task lineage probe (Session 16 follow-up, July 8, 2026,
+`docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md` — goal-total
+external calls 4 seeded vs 8 unseeded; cross-task re-derivation
+eliminated, 0 vs 4; n=1 per arm). The remaining open variant, if a
+research question ever warrants the spend, is a larger-payload or
+longer-horizon lineage probe where the token axis and the external-call
+axis separate rather than trade off. Propose any paid run with a cost
+estimate; do not run it unprompted.
 
 ## 7. Guardrails
 
