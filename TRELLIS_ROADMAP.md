@@ -1745,17 +1745,14 @@ Unchanged and green: `test:rlm-workspace` 83, `test:agent-loop` 35,
 `test:repo-ingest` 45. `npm run drill:scale`: gate CLOSED (max
 provenance 286, sweep growth 2.17x — within the recorded 1.63x–2.26x
 band). The isolated Compose integration (`trellis-s17-promotion`, host
-ports 0) was attempted and BLOCKED by host disk exhaustion: the image
-rebuild filled the machine's C: drive to 0 bytes free mid-build and
-Docker Desktop crashed (the drive was already near-full with unrelated
-state — a 121 GB WSL distro, a 48 GB pagefile, 25.6 GB hibernation —
-none of it safely reclaimable without elevation). Session 17 changes
-nothing the integration exercises beyond the additive
-`documents.origin` column, which the same idempotent bootstrap applies
-and `test:promotion` exercises live; the Session 16 run of the
-identical topology passed 10/10. Re-running the isolated integration
-once disk space is freed is recorded as an OPEN close-out item, not a
-pass.
+ports 0, CI's exact recipe) passed 10/10 on the rebuilt Session 17
+image — including the containerized credentialed MCP fixture probe —
+with the schema bootstrap applying the `documents.origin` column
+inside the container. The first attempt was blocked by host disk
+exhaustion (the image rebuild filled C: to 0 bytes mid-build and
+crashed Docker Desktop); after the operator freed disk space the run
+completed clean on the second attempt, exit 0, project and volumes
+removed.
 
 **Defect found and fixed during the session (tooling, not product):**
 an early draft of the doc-key validator embedded literal C0 control

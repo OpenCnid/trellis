@@ -524,14 +524,11 @@ Repository state at handoff creation:
   `test:belief-recovery` (30), `test:invalidation-sweep` (17).
 - Isolated Compose integration: 10 assertions (`--profile test`, unique
   project name, host ports 0 via `TRELLIS_*_HOST_PORT=0`; includes the
-  containerized credentialed MCP fixture probe). OPEN ITEM from
-  Session 17: its close-out run was blocked by host disk exhaustion
-  (the image rebuild filled C: to 0 bytes and crashed Docker Desktop;
-  the drive was already near-full with unrelated state). The
-  Session 16 run of the identical topology passed 10/10, and nothing
-  the integration exercises changed beyond the additive
-  `documents.origin` column — but re-run it early in Session 18 once
-  disk space is freed, before building anything new.
+  containerized credentialed MCP fixture probe). Session 17 close-out
+  ran it 10/10 on the rebuilt image (second attempt — the first filled
+  the host disk mid-build; space has since been freed, but be aware
+  the machine's C: drive runs close to full and an image rebuild
+  needs several GB of headroom).
 - CI target is Node 22. Session 17's local environment was Node 20.19.2,
   Python 3.13.1, Docker Compose v2, PostgreSQL 16.x, Neo4j 5.11.
 - Python runtime deps are pinned in `requirements.txt` (`rlms==0.1.3`,
