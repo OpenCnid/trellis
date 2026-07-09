@@ -205,9 +205,9 @@ Ordered roughly by severity.
 | ~~12~~ | ~~Workspace lineage (design record §11 step 4)~~ | **Done (Session 16, July 7, 2026)** — serialize/park/seed across a goal's tasks: end-of-run snapshots parked goal-scoped in Redis (TTL + per-goal byte cap), the orchestrator routes by reference (`workspaceRef` observations, `seedFromTasks` dispatches, prior iterations only), seeded runs restored at spawn with stamps preserved and bounds re-enforced; oracle drills extended to seeded runs; see §5 |
 | ~~13~~ | ~~Promotion path (design record §11 step 5)~~ | **Done (Session 17, July 7, 2026)** — operator-gated segment→ingest through the unmodified verified transaction: `npm run promote` (list/promote, zero-paid default), typed planner refusals (truncated/empty/unknown/bad-key), the origin audit stamp on the documents row, and the earned-citability loop drilled end to end (`test:promotion` 41); see §5 |
 | ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn RAN, owner-approved, July 9, 2026 (module `workspace-discipline`; see §5) and surfaced the laundering finding that produced row 1 below |
-| 1 | Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2) | **Owner-directed queue jump (July 9, 2026)** — the module #1 turn demonstrated live provenance laundering in the authoring pathway (real-but-unrelated hashes self-cited; the existence gate is structurally blind to it; caught only at the operator gate). The remediation — kernel `--mode author` scoped to the promoted corpus, harness-pinned citations, fixed template, anchor derivation gate — must land before any further paid authoring turn; Phase 0 procedure covers the gap meanwhile |
-| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (moved from row 1 by the July 9 owner direction — moved, not dropped) |
-| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| ~~1~~ | ~~Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2)~~ | **Done (Session 19, July 9, 2026)** — kernel `trellis_agent.py --mode author` scoped to a seeded read-only corpus (no DB/search/write), harness-pinned `research.sourceNodeIds`, byte-pinned authoring template, deterministic anchor derivation gate, and the `npm run modules:author` operator driver (plan-echo / `--draft` replay / `--confirm-paid` spawn); `TRELLIS_DRAFT` scanner refuses any 64-hex token; drilled end to end zero-LLM; see §5 |
+| 1 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (moved from row 1 by the July 9 owner direction — moved, not dropped) |
+| 2 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -1977,3 +1977,119 @@ depends on satisfies the jump-the-queue rule even when an existing gate
 contained it. Origin of the rule: this very sequence — the laundering
 finding and its design record initially landed as standing-item pointers
 while the handoff's §3 still named the pre-finding objective.
+
+### July 9, 2026 — Session 19: grounded authoring (GROUNDED_AUTHORING.md Phases 1–2)
+
+Implemented the kernel authoring mode and its gates so the flywheel's
+authoring PATHWAY can no longer launder provenance the way module #1 did.
+Everything points existing rails at authoring; no new trust machinery, no
+new HTTP/A2A surface, no new queue, no Postgres DDL, no manifest schema
+change (`kernelCompat` stays 1). Zero paid LLM calls and zero external
+network in acceptance.
+
+**The mode (`src/rlm/trellis_agent.py --mode author`, D1).** A distinct,
+DB-free branch: `custom_tools` is exactly `{trellis_workspace}`; no
+`TrellisPostgres`/`TrellisNeo4j`/MCP is constructed, so the process opens
+no database connection. It seeds the promoted corpus, composes an
+author-specific system prompt (rlms base + a brace-free author addendum +
+the workspace surface + the driver's template), and emits a
+`TRELLIS_DRAFT:` envelope (`purpose`/`addendum`/`gapNotes`, no hashes) —
+never `TRELLIS_RESULT`/`TRELLIS_PROTOCOL_VIOLATION` (a draft is supposed to
+make zero DB calls). Setup factored into `build_author_tools` /
+`build_author_system_prompt` / `extract_draft_envelope` (testable without a
+completion or a DB). `--mode research` (and no flag) is byte-identical to
+before — the `test:modules` composed-prompt sha256 pin did not move.
+
+**Pinned attribution (D4/D5, Layer 2).** `src/core/authoring/corpus.ts`
+reads a promoted doc's current-version extraction blocks (hash + text)
+straight from `ast_nodes`; `src/core/authoring/seed.ts` maps them
+block-aligned into a `WorkspaceSnapshot` (one segment per block, content
+verbatim, `origin.argsHash` = the block hash's first 16 hex — deterministic,
+auditable, and structurally never a 64-hex provenance token). The driver
+pins `research.sourceNodeIds` = the corpus block set, sorted and deduped
+(D3 flat v1); the model contributes only prose.
+
+**The template (§6, Layer 3).** `src/core/authoring/template.ts` — a
+byte-pinned kernel constant composed from exactly the bounded topic and the
+doc keys (sources in, protocol out; declare gaps, never invent). Pre-stating
+directives is structurally impossible: the operator's only free text is the
+topic (bounded, single-line, brace-free). Brace-free so it transits rlms
+`.format()`.
+
+**The anchor gate (§7 v1, D2).** `src/core/authoring/anchors.ts` extracts
+corpus-specific anchors (numeric comparisons like `8 vs 4`/`0 vs 4`,
+hyphenated mechanics like `build-new-then-rebind`, and distinctive
+vocabulary with stopwords filtered) and scores draft coverage.
+`ANCHOR_COVERAGE_THRESHOLD = 0.3` (kernel constant, unit-pinned): measured a
+derived draft covers ~0.69–0.83, a corpus-blind generic draft 0.0; it fails
+closed on an unanchorable corpus. Joins the module drill, so §9.4's sampled
+re-verification re-runs it for free.
+
+**The draft scanner.** `src/core/observability/rlm_draft.ts`, sibling of
+`RlmResultScanner`: pure, bounded, Zod-validated `{purpose, addendum,
+gapNotes}`; a draft carrying ANY 64-hex token is REFUSED (not parsed) — the
+pen stays with the harness.
+
+**The driver.** `scripts/author_module.ts` (`npm run modules:author`), in
+the `promote`/`modules:register` house style. Reads the corpus, composes the
+template, builds+budget-checks the seed, and: default echoes the plan
+(corpus, template sha256, cost estimate) and refuses to spawn without
+`--confirm-paid`; `--draft <file>` assembles from a saved envelope (the
+zero-paid drill path, stub-replay precedent); `--confirm-paid` spawns the
+paid author run and collects the draft. Assembly pins the manifest, writes
+`addendum.txt` + a harness-generated `RESEARCH.md`, and validates via
+`readModuleManifest`/`loadModule`. It NEVER registers, NEVER lands, and
+refuses to author over an existing directory (Guardrail 4).
+
+**Refinement recorded in the design record §12.1:** the seed budget is
+enforced in the driver (`assertSeedWithinBudget`) as well as at the Python
+seed, so `--draft` is gated identically to the paid path.
+
+**Acceptance (all green).**
+
+```
+npm test                     # 608 passing across 69 files (was 568/63; +40 offline)
+npm run build                # pass
+npm run python:check         # pass
+docker compose --profile test config --quiet   # pass
+# Isolated Compose integration (project trellis_s19_ci, host ports 0): 10/10 PASS,
+# torn down with --volumes; the dev stack left intact.
+npm run test:module-lifecycle    # 60 PASS (was 35; +25 — authoring end-to-end §10–§11)
+npm run test:modules             # 43 PASS (was 33; +10 author-mode; sha256 prompt pin UNMOVED)
+npm run test:promotion           # 41 PASS
+npm run test:rlm-workspace       # 82 PASS
+npm run test:rlm-mcp             # 86 PASS
+npm run test:rlm-sandbox         # 21 PASS
+npm run test:agent-loop          # ALL CHECKS PASSED
+npm run test:a2a                 # ALL CHECKS PASSED
+npm run drill:scale              # gate CLOSED, max provenance 286, sweep growth 2.05x
+npm run test:repo-ingest         # all checks passed
+npm run test:benchmark-hardening # all checks passed
+npm run test:entity-resolution   # all checks passed
+npm run test:api-hardening       # all checks passed
+npm run test:belief-recovery     # all checks passed
+npm run test:invalidation-sweep  # all checks passed
+git diff --check                 # clean
+```
+
+New offline suites (join `npm test`): `template.test.ts` (byte pin, topic
+bounds, composition), `corpus.test.ts` (blocksFromRoot), `seed.test.ts`
+(block-aligned mapping, argsHash prefix, schema-valid), `anchors.test.ts`
+(extraction + coverage + threshold + module-#1 regression anchors),
+`assemble.test.ts` (pinned sorted/deduped `sourceNodeIds`, loader-valid
+directory), `rlm_draft.test.ts` (well-formed/hash-refused/size-cap/malformed).
+`test:module-lifecycle` §10–§11 drive the REAL driver: promote a fixture
+corpus → `--draft` assemble → register (existence gate) → §9.4 sweep contests
+the authored entity; negatives — below-threshold refuses, hash-bearing
+refuses, over-budget refuses, plan-only writes nothing.
+
+No defects found in existing code during the session. Module #1's committed
+artifacts were left untouched (the historical record of the pre-mode
+pathway). The next paid authoring turn (module #2) is owner-gated and NOT
+part of this acceptance; it should pick a corpus chosen for
+anchor-testable specificity (design record §8).
+
+**Next objective (§4 row 1): repository-scale extraction prerequisites** —
+scanner test/fixture exclusion plus a code-tuned extraction prompt with
+generic-identifier suppression, per the recorded pilot findings. HANDOFF
+regenerated accordingly in this PR.

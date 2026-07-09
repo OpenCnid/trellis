@@ -8,7 +8,13 @@ from rlm.core.lm_handler import LMRequestHandler
 from rlm.utils.prompts import RLM_SYSTEM_PROMPT
 from trellis_tools import TrellisNeo4j, TrellisPostgres, get_tool_call_count, RUBRIC_TEXT
 from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
-from trellis_workspace import TrellisWorkspace, build_workspace_addendum, parse_workspace_bounds
+from trellis_workspace import (
+    TrellisWorkspace,
+    WORKSPACE_ADDENDUM,
+    WORKSPACE_SEEDED_ADDENDUM,
+    build_workspace_addendum,
+    parse_workspace_bounds,
+)
 from trellis_modules import (
     RUBRIC_TOKEN,
     build_modules_addendum,
@@ -43,6 +49,14 @@ def _counted_batched(self, request, handler):
 LMRequestHandler._handle_single = _counted_single
 LMRequestHandler._handle_batched = _counted_batched
 # -----------------------------------------------------------------------
+
+
+def on_subcall_complete(depth, model, duration, error):
+    # Covers recursive child RLMs if max_depth is ever raised above 1;
+    # the socket patch above counts the max_depth == 1 route. Shared by
+    # the research and author paths.
+    with _subcall_lock:
+        _subcall_stats["count"] += 1
 
 # The Trellis directives EXTEND the rlms base prompt rather than replace
 # it: the base prompt teaches the model the ```repl``` execution protocol
@@ -109,9 +123,177 @@ TRELLIS_ADDENDUM = (
 
 SYSTEM_PROMPT = RLM_SYSTEM_PROMPT + TRELLIS_ADDENDUM
 
+# --- Grounded authoring mode (Session 19) ------------------------------
+# design record: docs/architecture/GROUNDED_AUTHORING.md §4/§6/§9.
+# A distinct, kernel-owned mode: the author sees ONLY the promoted
+# research corpus (seeded into the workspace), has no database/search/
+# write tools, and emits a TRELLIS_DRAFT envelope (prose only — no
+# hashes). The answer-path zero-DB-calls protocol-violation rule does not
+# apply here: a draft is SUPPOSED to make zero database calls. The setup
+# is factored into functions testable without a completion or a DB
+# connection (test:modules author section).
+#
+# Brace-free like every rlms-formatted string (the workspace addenda and
+# the driver-composed template are brace-free too; the template is
+# escape-doubled defensively before splicing).
+AUTHOR_ADDENDUM = """
+
+=== GROUNDED AUTHORING MODE ===
+You are running in AUTHORING mode. You have exactly one tool, trellis_workspace, and NO database, search, network, or write access of any kind. Your workspace has been seeded with a FIXED research corpus — one segment per corpus block. Derive the requested protocol from that corpus and from nothing else.
+- Read the corpus first: call trellis_workspace.read() for the index, then trellis_workspace.segment(segment_id) to read each block you rely on. You may fan llm_query over segment contents to summarize.
+- Every directive you output must be grounded in the seeded corpus. Do not import directives from your own prior knowledge of the topic; where the corpus is silent, record a gap note instead of inventing.
+- You do NOT choose citations and cannot emit source hashes: research provenance is pinned by the harness from the promoted corpus, never by you. Never write a 64-character hexadecimal hash into your answer.
+- When the protocol is complete, set answer['content'] to a SINGLE JSON object serialized as a string, with exactly the keys purpose, addendum, and gap_notes (a list of strings), and set answer['ready'] = True. Do not prefix it with FINAL_ANSWER or wrap it in any other prose.
+"""
+
+
+def build_author_tools(workspace):
+    """The author-mode tool surface: trellis_workspace and nothing else
+    (design record §4, D4). No DB tools are even constructed."""
+    return {"trellis_workspace": workspace}
+
+
+def build_author_system_prompt(template_query):
+    """Composes the author system prompt: the rlms base REPL protocol +
+    the authoring-mode addendum + the workspace surface (always seeded in
+    author mode) + the driver-composed authoring template as the task.
+    The template is brace-free by construction; it is escape-doubled here
+    defensively because rlms runs .format() over the system prompt."""
+    safe_query = template_query.replace("{", "{{").replace("}", "}}")
+    return (
+        RLM_SYSTEM_PROMPT
+        + AUTHOR_ADDENDUM
+        + WORKSPACE_ADDENDUM
+        + WORKSPACE_SEEDED_ADDENDUM
+        + "\n\nTHE AUTHORING TASK FOLLOWS — EXECUTE IT IMMEDIATELY.\n\n"
+        + safe_query
+        + "\n"
+    )
+
+
+def extract_draft_envelope(response):
+    """Parses the model's final answer into the TRELLIS_DRAFT payload
+    (purpose, addendum, gapNotes) or returns None. The model is asked for
+    a single JSON object; we tolerate surrounding prose by taking the
+    outermost braces. The harness never lets the model supply provenance,
+    so hashes are neither read nor forwarded — the Node scanner refuses
+    any draft carrying a 64-hex token independently."""
+    if not isinstance(response, str):
+        return None
+    start = response.find("{")
+    end = response.rfind("}")
+    if start == -1 or end == -1 or end < start:
+        return None
+    try:
+        data = json.loads(response[start:end + 1])
+    except (json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    purpose = data.get("purpose")
+    addendum = data.get("addendum")
+    gap_notes = data.get("gap_notes", data.get("gapNotes", []))
+    if not isinstance(purpose, str) or not isinstance(addendum, str):
+        return None
+    if not isinstance(gap_notes, list) or any(not isinstance(n, str) for n in gap_notes):
+        return None
+    return {"purpose": purpose, "addendum": addendum, "gapNotes": gap_notes}
+
+
+def run_author_mode(args):
+    """The --mode author branch: seed the promoted corpus, run the RLM
+    with only the workspace tool, and emit one TRELLIS_DRAFT envelope. No
+    database or MCP tool is ever constructed, so the process opens no DB
+    connection. A malformed or over-budget seed raises before any paid
+    work (the Session 16 over-budget-seed rule)."""
+    if not args.seed_workspace:
+        print("Author mode requires --seed-workspace (the promoted corpus seed).", flush=True)
+        return 1
+
+    exit_code = 0
+    workspace = None
+    try:
+        max_segments, max_bytes = parse_workspace_bounds()
+        with open(args.seed_workspace, encoding="utf-8") as seed_file:
+            seed_data = json.load(seed_file)
+        workspace = TrellisWorkspace.seed_from_snapshot(
+            seed_data, max_segments=max_segments, max_bytes=max_bytes, goal_id=args.goal_id,
+        )
+        custom_tools = build_author_tools(workspace)
+        system_prompt = build_author_system_prompt(args.query)
+
+        print("Starting RLM Author run (grounded authoring mode).", flush=True)
+        rlm = RLM(
+            environment="local",
+            verbose=True,
+            max_iterations=args.max_iterations,
+            backend_kwargs={"model_name": "gpt-5.4-2026-03-05"},
+            environment_kwargs={},
+            custom_tools=custom_tools,
+            custom_system_prompt=system_prompt,
+            on_subcall_complete=on_subcall_complete,
+        )
+        result = rlm.completion(args.query)
+        response = getattr(result, "response", None) or str(result)
+        print("\n--- RLM Draft ---", flush=True)
+        print(response, flush=True)
+
+        usage = getattr(result, "usage_summary", None)
+        usage_dict = usage.to_dict() if usage else {}
+        telemetry_payload = {
+            "mode": "author",
+            "input_tokens": usage.total_input_tokens if usage else 0,
+            "output_tokens": usage.total_output_tokens if usage else 0,
+            "reported_cost_usd": usage.total_cost if usage else None,
+            "subcall_count": _subcall_stats["count"],
+            # Author mode makes no database or MCP calls by construction.
+            "tool_calls": get_tool_call_count(),
+            "mcp_calls": get_mcp_call_count(),
+            **workspace.stats(),
+            "execution_time_s": getattr(result, "execution_time", None),
+            "model_usage": usage_dict.get("model_usage_summaries", {}),
+        }
+        print(f"TRELLIS_TELEMETRY: {json.dumps(telemetry_payload)}", flush=True)
+
+        # Author mode NEVER emits TRELLIS_RESULT or TRELLIS_PROTOCOL_VIOLATION
+        # — the zero-database-calls rule does not apply to drafting.
+        draft = extract_draft_envelope(response)
+        if draft is None:
+            print(
+                "Author run produced no parseable draft envelope "
+                "(expected a JSON object with purpose, addendum, gap_notes).",
+                flush=True,
+            )
+            exit_code = 1
+        else:
+            print(f"TRELLIS_DRAFT: {json.dumps(draft)}", flush=True)
+
+    except BaseException as e:
+        import traceback
+        print(f"RLM Author Error: {type(e).__name__} - {str(e)}", flush=True)
+        traceback.print_exc()
+        exit_code = 1
+    finally:
+        # Author runs are self-contained; the only resource is the
+        # workspace, which needs no close. Serialize it if requested (the
+        # lineage seam), success or not.
+        if args.workspace_out and workspace is not None and not workspace.is_empty():
+            try:
+                with open(args.workspace_out, "w", encoding="utf-8") as out_file:
+                    out_file.write(workspace.snapshot())
+            except OSError as e:
+                print(f"Workspace serialization failed: {type(e).__name__} - {e}", flush=True)
+
+    return exit_code
+
+
 def main():
     parser = argparse.ArgumentParser(description="Trellis RLM Agent")
     parser.add_argument("--query", type=str, required=True, help="The user query to solve")
+    parser.add_argument("--mode", type=str, default="research", choices=["research", "author"],
+                        help="Run mode (Session 19). 'research' (default) is the ordinary "
+                             "database-backed agent — byte-identical to before. 'author' is "
+                             "grounded authoring: workspace-only, no database, TRELLIS_DRAFT output.")
     parser.add_argument("--max-iterations", type=int, default=5, help="Max root REPL iterations")
     parser.add_argument("--goal-id", type=str, default=None,
                         help="Goal correlation id (Session 14: also gates the Tier-3 workspace on)")
@@ -123,6 +305,12 @@ def main():
                              "merged) to pre-populate the workspace from at spawn")
     args = parser.parse_args()
 
+    # Session 19: author mode is a distinct, DB-free branch — no
+    # TrellisPostgres/TrellisNeo4j construction at all, so the process
+    # opens no database connection.
+    if args.mode == "author":
+        sys.exit(run_author_mode(args))
+
     # Initialize tools. The Neo4j write path verifies cited AST hashes
     # against ast_nodes through the Postgres tool (Session 14 §10.2) —
     # unconditional, no toggle.
@@ -133,14 +321,10 @@ def main():
     print(f"Starting RLM Agent for query: '{args.query}'", flush=True)
 
     # Sub-calls are counted via the LMRequestHandler patch above; the
-    # on_subcall_complete callback additionally covers recursive child
-    # RLMs if max_depth is ever raised above 1. Iteration count is parsed
-    # by the Node runner from the rlms summary banner (this rlms version
-    # never fires on_iteration_complete).
-    def on_subcall_complete(depth, model, duration, error):
-        with _subcall_lock:
-            _subcall_stats["count"] += 1
-
+    # module-level on_subcall_complete callback additionally covers
+    # recursive child RLMs if max_depth is ever raised above 1. Iteration
+    # count is parsed by the Node runner from the rlms summary banner
+    # (this rlms version never fires on_iteration_complete).
     exit_code = 0
     workspace = None
     try:
