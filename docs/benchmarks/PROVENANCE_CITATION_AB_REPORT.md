@@ -204,6 +204,59 @@ prototype, and it works.
 
 ---
 
+## 9. Lessons learned (transferable beyond this eval)
+
+The point of writing these down: the *methodology* mistakes we made and
+corrected are reusable across every future eval, and the *substantive*
+findings change how we build.
+
+**Methodology — how to run an eval:**
+
+1. **A null result is worthless without a positive control.** "No effect"
+   only means something if the experiment *could* have shown an effect. Our
+   first pass concluded "the module is useless" from a test that had no
+   condition where the module could help. Build the failing case first, then
+   test the fix against it. (This one was the operator's catch, not the
+   harness's.)
+2. **Measure the persisted end-state, not intermediate attempts.** Our audit
+   logged citation *attempts*; a gate that refuses a write still leaves the
+   attempt in the log, so we nearly scored a *working* gate as broken. Score
+   the durable state the system actually commits (here: the graph edge), not
+   what the model tried.
+3. **Isolate the fixture; never test on shared state.** An early run on the
+   shared benchmark corpus mutated it and confounded the result. Every test
+   corpus since is token-scoped and torn down.
+4. **Use ground truth you control.** Made-up entities (no model priors) with
+   a known TRUE block and known DECOYS let us measure *actual* mis-citation,
+   not a proxy — and validated the semantic judge against that ground truth.
+
+**Substance — what we now believe about the system:**
+
+5. **Structural checks cannot validate meaning.** "Does the hash exist" and
+   "did the model read it" are cheap and *provably insufficient* for "do
+   these bytes support the claim." A semantic property needs a semantic check
+   (a model call). Reaching for a structural proxy for a semantic question is
+   a category error — the parent record §2/§10 thesis, now measured.
+6. **Many model failures are incentive-driven, not capability-driven.** The
+   model laundered because the task rewarded over-citing, not because it
+   couldn't tell true from decoy — its *answers* were always correct. Look
+   for the bad gradient before blaming the model. Corollary standing rule:
+   never reward citation *count*.
+7. **A prompt instruction is a soft constraint; a gate is a hard one.** Under
+   pressure the model ignored an explicit "never pad your citations." If a
+   behavior must not happen, enforce it structurally; do not request it in a
+   prompt. Prompt modules are for genuinely behavioral protocols, not for
+   properties better made impossible.
+8. **Accuracy metrics are blind to provenance.** Every laundered run had the
+   *right answer* and a *wrong citation*. If provenance is the product, it
+   needs its own eval — a correctness benchmark will never surface this.
+9. **A latent data bug can hide behind a convenient test corpus.** The
+   markdown-text-reads-NULL bug (§6.1) survived because the main corpus
+   happens to be content-bearing. Vary the fixture shape, not just its
+   contents.
+
+---
+
 ## Appendix A — the candidate module addendum tested (module arm)
 
 Hand-written; placed at `modules/provenance-citation-discipline/` for the
