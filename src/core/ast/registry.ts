@@ -19,10 +19,17 @@ export interface VersionRegistration {
 // (documents.root_hash references ast_nodes.id). The FOR UPDATE lock
 // serializes concurrent re-ingests of the same doc_key; for a brand-new
 // key the (doc_key, version) primary key still rejects a double insert.
+//
+// `origin` (Session 17) is the promotion audit stamp — which
+// server/tool/args produced these bytes, fetched when. Only the
+// promotion CLI supplies it; every other caller leaves the column NULL.
+// It commits with the version row so the audit story cannot be lost to
+// a crash between ingest and a follow-up write.
 export async function registerDocumentVersion(
   client: PoolClient,
   docKey: string,
-  rootHash: string
+  rootHash: string,
+  origin?: Record<string, unknown>
 ): Promise<VersionRegistration> {
   const prior = await client.query(
     `SELECT version, root_hash FROM documents
@@ -32,8 +39,8 @@ export async function registerDocumentVersion(
   const priorRow = prior.rows[0];
   const version = priorRow ? priorRow.version + 1 : 1;
   await client.query(
-    'INSERT INTO documents (doc_key, version, root_hash) VALUES ($1, $2, $3)',
-    [docKey, version, rootHash]
+    'INSERT INTO documents (doc_key, version, root_hash, origin) VALUES ($1, $2, $3, $4)',
+    [docKey, version, rootHash, origin ? JSON.stringify(origin) : null]
   );
   return { docKey, version, rootHash, priorRootHash: priorRow ? priorRow.root_hash : null };
 }

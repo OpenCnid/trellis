@@ -21,8 +21,14 @@ export const POSTGRES_SCHEMA_SQL = `
     version INTEGER NOT NULL,
     root_hash VARCHAR NOT NULL REFERENCES ast_nodes(id),
     ingested_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    origin JSONB,
     PRIMARY KEY (doc_key, version)
   );
+  -- Session 17: promotion audit stamp (which server/tool/args produced a
+  -- promoted document's bytes, fetched when). Nullable and additive —
+  -- only the promotion CLI writes it; pre-existing installs gain the
+  -- column here without a rewrite.
+  ALTER TABLE documents ADD COLUMN IF NOT EXISTS origin JSONB;
   -- Phase 4: per-version node membership. ast_nodes.document_id is
   -- not authoritative for this (ON CONFLICT DO NOTHING pins a shared
   -- node to whichever version inserted it first).

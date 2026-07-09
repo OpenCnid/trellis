@@ -203,10 +203,10 @@ Ordered roughly by severity.
 | ~~10~~ | ~~Kernel hardening and the Tier-3 workspace (design record §11, steps 2 + 1)~~ | **Done (Session 14, July 7, 2026)** — `sourceNodeIds` format + `ast_nodes` existence enforcement at the single write path, then the harness-captured in-REPL workspace (origin-stamped uuid segments, stub returns, plan-in-workspace, byte-identical gating); see §5 |
 | ~~11~~ | ~~Module registry + module #0 (design record §11 step 3)~~ | **Done (Session 15, July 7, 2026)** — owner directed the step 3 → step 4 order on July 7, 2026 (PR #40 discussion); protocol-module registry, operator-owned `TRELLIS_MODULES` selection, spatial-flywheel extraction behind a byte-identical composed-prompt pin; the §9.4 graph representation is explicitly deferred to the first research-bearing module; the owner-approved paired-run workspace probe was also measured this session; see §5 |
 | ~~12~~ | ~~Workspace lineage (design record §11 step 4)~~ | **Done (Session 16, July 7, 2026)** — serialize/park/seed across a goal's tasks: end-of-run snapshots parked goal-scoped in Redis (TTL + per-goal byte cap), the orchestrator routes by reference (`workspaceRef` observations, `seedFromTasks` dispatches, prior iterations only), seeded runs restored at spawn with stamps preserved and bounds re-enforced; oracle drills extended to seeded runs; see §5 |
-| 1 | Promotion path (design record §11 step 5) | Operator-gated segment→ingest with URL doc keys; the research corpus modules cite begins here |
-| 2 | First flywheel turn (design record §11 step 6) | The RLM authors module #1 end-to-end through the sculpted pathway; lands only through the recorded gates |
-| 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
-| 4 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| ~~13~~ | ~~Promotion path (design record §11 step 5)~~ | **Done (Session 17, July 7, 2026)** — operator-gated segment→ingest through the unmodified verified transaction: `npm run promote` (list/promote, zero-paid default), typed planner refusals (truncated/empty/unknown/bad-key), the origin audit stamp on the documents row, and the earned-citability loop drilled end to end (`test:promotion` 41); see §5 |
+| 1 | First flywheel turn (design record §11 step 6) | The RLM authors module #1 end-to-end through the sculpted pathway; lands only through the recorded gates |
+| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
+| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -1661,3 +1661,106 @@ summary for this model, as in Session 15. Recorded in
 lineage mechanism stays pinned zero-paid by `test:rlm-workspace` (the
 `seed_from_snapshot` round-trip) and `test:agent-loop` (the real Redis
 park/seed path).
+
+### July 7, 2026 — Session 17: the promotion path (design record §6, §11 step 5)
+
+Design record §6 is normative and shipped as specified: the
+operator-gated, byte-preserving bridge from a parked Tier-3 workspace
+segment to the ordinary verified ingest path — the missing middle step
+of "ephemeral intake → verified substrate → compounding belief →
+continuous self-correction". No API surface, no new queue, no new
+Python runtime file: the operator gate is a CLI.
+
+**The pure planner** (`src/core/promotion/plan_promotion.ts`). Takes a
+parsed `WorkspaceSnapshot` (reuses `parseWorkspaceSnapshot` /
+`WorkspaceSnapshotSchema` from `src/workers/workspace_scratch.ts` — the
+schema is not duplicated) plus a segment id and doc key, and returns
+either the exact ingest request `{docKey, content, origin}` — content
+byte-verbatim, no normalization — or a typed refusal:
+`truncated_segment` (a size-capped capture is NOT the source bytes;
+promoting it would mint verified hashes over corrupt content),
+`empty_content`, `unknown_segment` (with a bounded listing of what the
+snapshot does hold), or `invalid_doc_key`. Doc keys are never invented
+silently: the operator supplies one explicitly (recommended `web:<url>`
+for web content — stable across refreshes, which is what makes the
+update machinery cover re-fetches), and the deterministic fallback
+`mcp:<server>:<tool>:<argsHash>` (from `derivedDocKey`) is printed as a
+hint for non-URL tool results. Key validation is conservative:
+printable, whitespace-free, ≤512 chars, not shaped like an AST hash
+(the anonymous-ingest namespace), not under the reserved `repo:` prefix
+(the next `repo:ingest` run would tombstone it).
+
+**Origin traceability.** The `documents` table gains a nullable,
+additive `origin JSONB` column (`ALTER TABLE ... ADD COLUMN IF NOT
+EXISTS` in the idempotent bootstrap); `registerDocumentVersion` takes an
+optional origin argument and `IngestRequest.origin` threads it through
+`ingestDocument`, so the stamp — server, tool, argsHash, fetchedAt,
+segmentId, bytes, goal/task correlation, copied verbatim from the
+wrapper-owned segment stamps — commits atomically with the version row.
+Every pre-existing caller is unchanged and leaves the column NULL.
+
+**The operator CLI** (`scripts/promote_segment.ts`, npm alias
+`promote`; execution shared with the drill via
+`src/core/promotion/promote_segment.ts`). LIST mode (default) is
+read-only: each segment's id, origin stamps, size, truncation marker,
+bounded preview, and doc-key hint; a missing/expired parked snapshot is
+a readable failure naming `SCRATCH_TTL_SECONDS`. PROMOTE mode
+(`--segment` + `--doc-key`) echoes exactly what will be ingested (doc
+key, byte count, origin) before any write, runs the UNMODIFIED verified
+ingest transaction in-process (persist → read-back re-hash → membership
+→ registration with origin → in-transaction Merkle diff — promotion
+bypasses nothing, which is why the resulting hashes are citable), and
+prints the root hash plus the block-level hashes the RLM may now cite.
+Zero paid work by default (`--extract none`); `--extract changed`
+requires an explicit positive `--max-blocks` budget AND
+`--confirm-extraction` (the `repo:ingest` double gate). One segment per
+invocation; promotion consumes PARKED snapshots only, never a live
+workspace.
+
+**Acceptance (July 7, 2026, all zero-paid).** `npm test` = 554 passing
+across 62 files (was 536/61; new `plan_promotion.test.ts` — 17 cases
+over refusals, key validation, verbatim content, stamp copying,
+bounded listings — plus an `ingest_document.test.ts` case pinning
+origin threading and the NULL default). `npm run build` and
+`npm run python:check` green. New live drill `npm run test:promotion`
+(41 checks): parks a drill-authored snapshot at the production scratch
+key; list mode inventories it through the real CLI; missing-snapshot,
+truncated, unknown-segment, empty, missing-key (with the derived-key
+hint), and reserved-key refusals all exercised against real Redis with
+nothing ingested; then the earned-citability loop end to end —
+`write_derived_insight` citing the would-be block hash is a Provenance
+Violation BEFORE promotion and SUCCEEDS with the same hash after the
+CLI promotes (the real hardened write path via
+`scripts/test_promotion_write.py`); the documents row carries the
+origin stamp; re-promoting changed bytes under the same doc key
+registers version 2, the Merkle diff orphans the v1 block, and the
+captured invalidation payload driven through
+`findGloballyOrphanedAstNodeIds` + `sweepOrphanedProvenance` contests
+the insight with the audit trail preserved (provenance moved to
+`orphanedSourceIds`), v1 dead, v2 live. Token-scoped cleanup.
+Unchanged and green: `test:rlm-workspace` 83, `test:agent-loop` 35,
+`test:modules` 27, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
+`test:a2a` 46, `test:api-hardening` 18, `test:belief-recovery` 30,
+`test:invalidation-sweep` 17, `test:entity-resolution` 34,
+`test:repo-ingest` 45. `npm run drill:scale`: gate CLOSED (max
+provenance 286, sweep growth 2.17x — within the recorded 1.63x–2.26x
+band). The isolated Compose integration (`trellis-s17-promotion`, host
+ports 0, CI's exact recipe) passed 10/10 on the rebuilt Session 17
+image — including the containerized credentialed MCP fixture probe —
+with the schema bootstrap applying the `documents.origin` column
+inside the container. The first attempt was blocked by host disk
+exhaustion (the image rebuild filled C: to 0 bytes mid-build and
+crashed Docker Desktop); after the operator freed disk space the run
+completed clean on the second attempt, exit 0, project and volumes
+removed.
+
+**Defect found and fixed during the session (tooling, not product):**
+an early draft of the doc-key validator embedded literal C0 control
+bytes in its regex character class (an editor escape-decoding
+artifact); the committed source spells the class with source-level
+unicode escapes, the file is verified free of control bytes, and the
+unit tests pin control-character rejection behaviorally
+(`String.fromCharCode`, so no raw control byte ever sits in a source
+file). No pre-existing tests needed adjustment — the `documents`
+INSERT statement-prefix pins in `ingest_document.test.ts` were
+unaffected by the added column.

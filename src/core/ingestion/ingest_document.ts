@@ -45,6 +45,12 @@ export interface IngestRequest {
   docKey: string;
   extractionPolicy: ExtractionPolicy;
   requestId?: string;
+  /**
+   * Promotion audit stamp (Session 17): recorded on the documents row,
+   * inside the same transaction. Only segment promotion supplies this;
+   * API/repository ingests leave it undefined (column stays NULL).
+   */
+  origin?: Record<string, unknown>;
 }
 
 export interface IngestResult {
@@ -75,7 +81,7 @@ export async function ingestDocument(
   deps: IngestDeps,
   request: IngestRequest
 ): Promise<IngestResult> {
-  const { rootNode, docKey, extractionPolicy, requestId } = request;
+  const { rootNode, docKey, extractionPolicy, requestId, origin } = request;
   const allNodes = flattenAST(rootNode);
 
   let registration: VersionRegistration;
@@ -90,7 +96,7 @@ export async function ingestDocument(
     // missing/corrupt/conflicting row rolls the entire version back.
     await verifyPersistedAstNodes(client, allNodes);
     await recordDocumentNodes(client, rootNode.id, allNodes.map(n => n.id));
-    registration = await registerDocumentVersion(client, docKey, rootNode.id);
+    registration = await registerDocumentVersion(client, docKey, rootNode.id, origin);
     // Merkle diff against the prior version. Shared subtree hashes are
     // skipped entirely; only genuinely new blocks are extraction-
     // eligible. Byte-identical re-ingest yields an empty diff.
