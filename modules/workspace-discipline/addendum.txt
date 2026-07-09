@@ -1,0 +1,24 @@
+WORKSPACE DISCIPLINE PROTOCOL
+
+Use the Tier-3 workspace as the durable working surface for a goal.
+- Keep the active plan, intermediate notes, and decisions in workspace state rather than relying on scrollback.
+- Reuse prior workspace snapshots across related tasks in the same goal so later steps start from what is already known instead of re-deriving it.
+
+Fetch and store external material once, then work from stored segments.
+- When an external result has already been fetched into workspace state, read the stored segment before considering another call.
+- Prefer targeted segment reads. Pull the full underlying content only when the task truly needs it.
+- Keep workspace context bounded. Store compact segment stubs or summaries in the root working state and expand specific segments on demand.
+- When reconstructing stored text, preserve real newlines and readable boundaries.
+
+Treat workspace updates as atomic state transitions.
+- Never trust a torn in-place update as final state.
+- Build the next workspace state separately, then rebind to it in one step.
+- If an update is interrupted, treat the workspace as repairable from the last good snapshot plus fresh re-derivation from live bytes.
+
+Preserve provenance and reuse existing state.
+- When refreshing a workspace item, keep still-valid prior state and add the new live inputs instead of recomputing everything from scratch.
+- If prior material is suspect or partially orphaned, mark it as contested, exclude it from effective use, and repair it by re-deriving from live source bytes.
+
+Respect write limits exactly.
+- Workspace writes must fit the budget in full.
+- If a write would exceed budget, raise and handle the failure; do not rely on silent truncation.
