@@ -1,0 +1,39 @@
+{
+  "name": "workspace-discipline",
+  "version": 1,
+  "purpose": "Teaches an RLM to use the Tier-3 workspace as a compact, reusable, repair-safe working memory instead of re-fetching or re-deriving context.",
+  "research": {
+    "sourceNodeIds": [
+      "4e42eb9dfc00b51c92b6b6c25ef023f798b5ab425aa188e65cc5099751477b26",
+      "202318f61e0fb3cd6fa67884c5f0975d2ef3a006fe56ebf75db1ca6258249217",
+      "8b3d090e660f21c0652a9bd6c3c89f74a417f6fe5de702b3f4250a4a98914dfd",
+      "e01565c82731df136f9787cd73d61c622c4b28d5c2283db9a971a1de56b511c6",
+      "183d3a61b2036fa9421678c8bebee22fe812a9c62bcdb58251b8f7b9ab659ec0",
+      "ecc294b5d1d8ff8678b6ee3b01c1ac773610abbfff7e88ec9d6617ed6b63e1b0",
+      "c023ed31748f30e36cc433971e81017bfa9ddc2e657b27645021157b7d272e0f",
+      "9ce28725522159cb5caf83e77b2ac3bc7e63eb0e947da7e7d8e114e922ca7e3b",
+      "39a488ddc378c3fc076f6092bf43e279359fe4cb335381506c38209135fb44b8",
+      "2f44bba09faea2129c02a212228eeaeb929f73379b8d265dbeb142e699807100",
+      "8b5e4f97f9d1feb999e22e03bb1d566439167316b6f1d36b3a4bacbad3ac5914",
+      "2400ecc1d1978e8e4f4de0d1e9830ecc645d867165b73528580c90373842effc",
+      "ba907aae0f8f8754643f76ada430753e4593ef54a664ba38cdfd32564a70b085",
+      "040dc8d10ec7d743d881c64ff7da3cc0cf373e1a9710f54f286532713fdf83a6",
+      "0b87f8f51b2b1aea50b064c5c54e1cda5c41a9d8744c55dc609c6302c4ff8413",
+      "8c09b8e9adcda09f99bcd1c10ed9ba199b080e7854e57af4958694ac3a159210",
+      "44d6d8c99b354886c432202c5b86912c5acb1d70d48460796a2e14e83949a6ac",
+      "fcb90e1d7c62257237986a7bb9b3ab9f2174187f92de45bd92e7200312748c30",
+      "83d83e2d162552448bcb55b46148b95379d820052c2915972b83ccd458d6a907",
+      "089f5d575698f4f43bd4b9690cece233c2cac9072fb7b90d312ace6bfad63fdb",
+      "40794b9d0d7ee64191a0670e9aebb7e8ea1adaae8769cde4c601a8ea42a8d0c3",
+      "d3b5636a74c7b1567c55e834175e242be17207e55d9170301eb2a45f92ebbcd9",
+      "ac958983d533f9cf0fc27dbf2c62b7f94170a934252eba5da52f4bdc5c90a6b1",
+      "c971857340f1f55ee914a483e9a145609a5aa4577b1a3e3fdcd1eaaabd9192ac"
+    ]
+  },
+  "addendum": "addendum.txt",
+  "tools": [],
+  "bounds": { "addendumMaxBytes": 8192 },
+  "acceptance": { "zeroPaid": "npm run test:modules" },
+  "status": "active",
+  "kernelCompat": 1
+}

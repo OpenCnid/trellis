@@ -138,6 +138,35 @@ stripped = trellis_agent.TRELLIS_ADDENDUM.replace("{{", "").replace("}}", "")
 check("the composed addendum has no unescaped braces (rlms .format() safety)",
       "{" not in stripped and "}" not in stripped)
 
+# --- 5. Module #1 (workspace-discipline) — the first flywheel-turn module ----
+# Loads and validates the registry's first research-bearing module WITHOUT
+# adding it to the default selection, so the byte-identical pin above is
+# untouched. This is the module's acceptance drill (its manifest names
+# `npm run test:modules`). The research provenance is existence-checked
+# live by `npm run modules:register` / `npm run test:module-lifecycle`, not
+# here (this drill stays database-free).
+print("\n[5] module #1 (workspace-discipline)")
+
+module1 = load_module("workspace-discipline")
+check("module #1 loads with its manifest identity",
+      module1["name"] == "workspace-discipline" and module1["version"] == 1)
+check("module #1 addendum is brace-free and titled",
+      "{" not in module1["addendum_text"] and "}" not in module1["addendum_text"]
+      and "WORKSPACE DISCIPLINE PROTOCOL" in module1["addendum_text"])
+check("module #1 addendum is LF-normalized", "\r" not in module1["addendum_text"])
+
+selected = build_modules_addendum([module0, module1],
+                                  substitutions={RUBRIC_TOKEN: trellis_agent._SAFE_RUBRIC})
+check("module #1 composes after module #0 in selection order",
+      module1["addendum_text"].splitlines()[0] in selected
+      and selected.index("WORKSPACE DISCIPLINE PROTOCOL")
+      > selected.index("SPATIAL FLYWHEEL PROTOCOL"))
+selected_stripped = selected.replace("{{", "").replace("}}", "")
+check("a selection including module #1 stays brace-safe after substitution",
+      "{" not in selected_stripped and "}" not in selected_stripped)
+check("module #1 is NOT in the default selection (the byte-identical pin is untouched)",
+      "workspace-discipline" not in list(DEFAULT_SELECTION))
+
 # ---------------------------------------------------------------------------
 if failures:
     print(f"\n{failures} check(s) failed.")
