@@ -204,9 +204,10 @@ Ordered roughly by severity.
 | ~~11~~ | ~~Module registry + module #0 (design record §11 step 3)~~ | **Done (Session 15, July 7, 2026)** — owner directed the step 3 → step 4 order on July 7, 2026 (PR #40 discussion); protocol-module registry, operator-owned `TRELLIS_MODULES` selection, spatial-flywheel extraction behind a byte-identical composed-prompt pin; the §9.4 graph representation is explicitly deferred to the first research-bearing module; the owner-approved paired-run workspace probe was also measured this session; see §5 |
 | ~~12~~ | ~~Workspace lineage (design record §11 step 4)~~ | **Done (Session 16, July 7, 2026)** — serialize/park/seed across a goal's tasks: end-of-run snapshots parked goal-scoped in Redis (TTL + per-goal byte cap), the orchestrator routes by reference (`workspaceRef` observations, `seedFromTasks` dispatches, prior iterations only), seeded runs restored at spawn with stamps preserved and bounds re-enforced; oracle drills extended to seeded runs; see §5 |
 | ~~13~~ | ~~Promotion path (design record §11 step 5)~~ | **Done (Session 17, July 7, 2026)** — operator-gated segment→ingest through the unmodified verified transaction: `npm run promote` (list/promote, zero-paid default), typed planner refusals (truncated/empty/unknown/bad-key), the origin audit stamp on the documents row, and the earned-citability loop drilled end to end (`test:promotion` 41); see §5 |
-| ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn itself is owner-gated and pending per-run approval with a cost estimate — recorded as a standing owner-gated item, not a sequencing row; see §5 |
-| 1 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
-| 2 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn RAN, owner-approved, July 9, 2026 (module `workspace-discipline`; see §5) and surfaced the laundering finding that produced row 1 below |
+| 1 | Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2) | **Owner-directed queue jump (July 9, 2026)** — the module #1 turn demonstrated live provenance laundering in the authoring pathway (real-but-unrelated hashes self-cited; the existence gate is structurally blind to it; caught only at the operator gate). The remediation — kernel `--mode author` scoped to the promoted corpus, harness-pinned citations, fixed template, anchor derivation gate — must land before any further paid authoring turn; Phase 0 procedure covers the gap meanwhile |
+| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (moved from row 1 by the July 9 owner direction — moved, not dropped) |
+| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -1961,6 +1962,18 @@ that promoted-with-`none` blocks carry no embeddings, 0/50 on the module #1
 corpus). No invariant is touched; the operator gate stays the backstop.
 Phase 0 (procedure only) is effective immediately: authoring briefs must
 not pre-state directives, and citations are pinned by the operator from
-promotion output. Implementation is owner-scheduled (recommended before the
-next paid authoring turn; Session 19 extraction prerequisites need not be
-displaced).
+promotion output.
+
+**Owner direction, recorded the same day (July 9, 2026):** the
+implementation JUMPS the queue — grounded authoring (Phases 1–2) is
+Session 19 (§4 row 1); repository-scale extraction prerequisites move to
+row 2 (moved, not dropped). The HANDOFF was regenerated accordingly in the
+same PR, and the §0 loop protocol gained a permanent step 5 (the
+event-loop rule): work landing AFTER a session's handoff regeneration —
+an owner-approved paid run, a follow-up fix, a new design record —
+re-runs step 3's objective selection before handing off; pointer edits
+are not a substitute, and a defect discovered in a pathway the flywheel
+depends on satisfies the jump-the-queue rule even when an existing gate
+contained it. Origin of the rule: this very sequence — the laundering
+finding and its design record initially landed as standing-item pointers
+while the handoff's §3 still named the pre-finding objective.
