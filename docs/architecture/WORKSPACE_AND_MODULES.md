@@ -484,7 +484,13 @@ citing a *real* AST hash for a claim it actually took from an unverified
 segment — is not created by the workspace (scrollback allows it today) and is
 not catchable by any runtime check. The backstop is the Phase 5 verification
 worker re-checking derived insights against their cited source text, plus the
-confidence/rubric-version routing already shipped.
+confidence/rubric-version routing already shipped. **Observed live in the
+module #1 authoring turn (July 9, 2026):** the drafting run cited real but
+unrelated hashes it surfaced by whole-database vector search instead of the
+promoted research it was given; the operator gate caught it. The
+capability-side extension of this backstop — scoped authoring, harness-pinned
+citations, and derivation verification on the sampled-verifier rails — is
+designed in [GROUNDED_AUTHORING.md](GROUNDED_AUTHORING.md) (proposed).
 
 ## 11. Implementation sequence
 
@@ -585,8 +591,16 @@ of every mechanism; paid runs only as small owner-approved behavioral probes.
    the pathway: research in the workspace, design grounded in ingested
    sources, manifest + addendum + drill proposed as a gated artifact, landed
    by the operator, composed in the next run. **Machinery DONE
-   (Session 18, July 8, 2026); the paid authoring turn itself is
-   owner-gated and pending.** What shipped: the research existence gate
+   (Session 18, July 8, 2026); the paid authoring turn RAN,
+   owner-approved, on July 9, 2026** — module #1
+   (`modules/workspace-discipline/`, registered as
+   `module:workspace-discipline` over 24 promoted research hashes;
+   record in the roadmap §5 and the module's RESEARCH.md). The turn
+   also observed the §10 laundering residual live: the drafting run
+   self-cited real-but-unrelated hashes found by whole-database search,
+   corrected at the operator gate — the grounded-authoring remediation
+   is designed in [GROUNDED_AUTHORING.md](GROUNDED_AUTHORING.md)
+   (proposed). What Session 18 shipped: the research existence gate
    (registration-time verification of every `research.sourceNodeIds`
    hash against `ast_nodes`, bounded missing-hash refusals, nothing
    registered on refusal), the §9.4 manifest-as-graph-entity
