@@ -632,10 +632,21 @@ Repository state at handoff creation:
   owner-gated and did not run); it added `src/core/authoring/*`,
   `src/core/observability/rlm_draft.ts`, `scripts/author_module.ts`
   (`npm run modules:author`), and the `--mode author` branch of
-  `src/rlm/trellis_agent.py`.
-- Offline baseline: `npm test` = 608 passing across 69 files
-  (Session 19 added `src/core/authoring/{template,corpus,seed,anchors,
-  assemble}.test.ts` and `src/core/observability/rlm_draft.test.ts`).
+  `src/rlm/trellis_agent.py`. A follow-up provenance-citation A/B eval
+  (owner-approved paid, `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`)
+  added opt-in, off-by-default, byte-identical citation instrumentation to
+  `trellis_tools.py`/`trellis_agent.py` (`TRELLIS_CITATION_AUDIT`/`_HINT`/
+  `_ENTAIL`) and the experiments `scripts/exp_citation_ab.ts` /
+  `exp_citation_metadata.ts`, and FIXED a real bug: `get_ast_texts` /
+  `vector_search` returned NULL for markdown/container block text (fixed via
+  `_node_text` reconstruction; the RLM could not read markdown or promoted
+  research). Finding: citation laundering is incentive-driven and only the
+  semantic entailment check (§7 v3) catches/prevents it — never reward
+  citation count. No module #2 authored (the candidate was measured
+  unreliable).
+- Offline baseline: `npm test` = 612 passing across 70 files (Session 19
+  added `src/core/authoring/{template,corpus,seed,anchors,assemble,
+  estimate}.test.ts` and `src/core/observability/rlm_draft.test.ts`).
 - `npm run build` and `npm run python:check` pass.
 - `npm run drill:scale`: gate CLOSED at max provenance 286 (run-to-run
   sweep-growth band ~1.63x–2.26x across Sessions 12–19; Session 19
@@ -647,7 +658,8 @@ Repository state at handoff creation:
   composed-prompt sha256 pin `abb945a6…f9b2`, which the author-mode
   addition did NOT move — recompute it in the same commit only if the
   kernel research prompt or rubric legitimately changes),
-  `test:promotion` (41), `test:rlm-workspace` (82), `test:rlm-mcp` (86),
+  `test:promotion` (41), `test:rlm-workspace` (86 — the follow-up added
+  four `_node_text` markdown-reconstruction checks; was 82), `test:rlm-mcp` (86),
   `test:rlm-sandbox` (21), `test:agent-loop` (35 / ALL CHECKS PASSED),
   `test:a2a` (46), `test:repo-ingest` (45),
   `test:benchmark-hardening` (24), `test:entity-resolution` (34),

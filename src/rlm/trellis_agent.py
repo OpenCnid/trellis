@@ -12,6 +12,7 @@ from trellis_tools import (
     get_tool_call_count,
     RUBRIC_TEXT,
     CITATION_AUDIT_ENABLED,
+    CITATION_ENTAIL_ENABLED,
     get_citation_audit,
 )
 from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
@@ -64,6 +65,39 @@ def on_subcall_complete(depth, model, duration, error):
     # the research and author paths.
     with _subcall_lock:
         _subcall_stats["count"] += 1
+
+
+def make_entailment_check(postgres_tool):
+    """Builds the semantic citation checker (experimental §7 v3): for each
+    cited block, asks a checker model whether the block's text supports the
+    claim, returning the hashes that do NOT. Uses fetch_texts (non-counted,
+    non-audited) so the check never pollutes the citation audit or the
+    tool-call count. Only constructed when TRELLIS_CITATION_ENTAIL=1."""
+    import openai
+    client = openai.OpenAI()
+
+    def check(subject, verb, obj, hashes):
+        texts = postgres_tool.fetch_texts(list(hashes))
+        unsupported = []
+        for h in hashes:
+            text = texts.get(h) or ""
+            prompt = (
+                f"Claim: {subject} {verb} {obj}\n\n"
+                f"Source block text:\n{text}\n\n"
+                "Does the source block text state or directly support the claim? "
+                "Answer with only YES or NO."
+            )
+            resp = client.chat.completions.create(
+                model="gpt-5.4-2026-03-05",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0,
+            )
+            answer = (resp.choices[0].message.content or "").strip().upper()
+            if not answer.startswith("YES"):
+                unsupported.append(h)
+        return unsupported
+
+    return check
 
 # The Trellis directives EXTEND the rlms base prompt rather than replace
 # it: the base prompt teaches the model the ```repl``` execution protocol
@@ -322,7 +356,11 @@ def main():
     # against ast_nodes through the Postgres tool (Session 14 §10.2) —
     # unconditional, no toggle.
     postgres_tool = TrellisPostgres()
-    neo4j_tool = TrellisNeo4j(ast_existence_check=postgres_tool.ast_hashes_exist)
+    entailment_check = make_entailment_check(postgres_tool) if CITATION_ENTAIL_ENABLED else None
+    neo4j_tool = TrellisNeo4j(
+        ast_existence_check=postgres_tool.ast_hashes_exist,
+        entailment_check=entailment_check,
+    )
     mcp_tool = None
 
     print(f"Starting RLM Agent for query: '{args.query}'", flush=True)

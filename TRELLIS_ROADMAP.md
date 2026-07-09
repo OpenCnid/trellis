@@ -2093,3 +2093,53 @@ anchor-testable specificity (design record §8).
 scanner test/fixture exclusion plus a code-tuned extraction prompt with
 generic-identifier suppression, per the recorded pilot findings. HANDOFF
 regenerated accordingly in this PR.
+
+### July 9, 2026 — Provenance-citation A/B eval + a markdown-read bug fix (Session 19 follow-up)
+
+An owner-approved paid eval (~$10 total; each run well under the $5/run
+ceiling) settled whether anything reliably reduces citation laundering
+(citing a real hash for a claim its bytes do not support). Full write-up:
+`docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`; design-record update:
+GROUNDED_AUTHORING.md §12.2.
+
+**Findings (isolated ground-truthed traps, pressure sweep, persisted-state
+measurement):** laundering is **incentive-driven** — 0% in a neutral task,
+but present the moment the task rewards over-citing ("cite ≥N blocks" when
+only one supports the answer: baseline 100% at min-cite 2, 67% at min-cite
+3). Structural checks do **not** catch it: the Session 14 existence check
+passes it, and a readership gate is blind (`cited-but-unread = 0` in 100% of
+laundered runs — the model reads the decoy then cites it). A prompt
+"discipline" module is unreliable (0–100% across conditions). The **only**
+reliable mechanism is the semantic **entailment** check (the §7 v3 tier):
+as a post-hoc judge it flags exactly the laundered citations, and as an
+inline gate (`TRELLIS_CITATION_ENTAIL`, prototyped, off by default) it
+refuses unsupported citations so **0% laundering persists at every
+pressure**. Cost ~1.5–2×; under an impossible over-citation demand it makes
+the model write nothing rather than launder. **Standing design principle
+(new):** never reward citation *count* anywhere; v3 entailment stays
+class-gated/sampled for where the incentive cannot be removed.
+
+**Instrumentation (all opt-in, off by default, production byte-identical):**
+`TRELLIS_CITATION_AUDIT` (per-run read/search/cited hash sets),
+`TRELLIS_CITATION_HINT` (readership gate — measured ineffective),
+`TRELLIS_CITATION_ENTAIL` (semantic gate — the working mechanism), in
+`src/rlm/trellis_tools.py` + `src/rlm/trellis_agent.py`. Experiments:
+`scripts/exp_citation_ab.ts` (retrieval trap + `--min-cite` pressure sweep +
+post-hoc entailment judge), `scripts/exp_citation_metadata.ts`.
+
+**Bug found and FIXED (`get_ast_texts` / `vector_search`).** Both read
+`data->>'content'`, which is NULL for markdown / container blocks
+(paragraph/heading/listItem — their text lives in child nodes). Because the
+`/ingest` API and the Session 17 promotion path both parse markdown, the RLM
+could not read the text of markdown documents or promoted research it is
+meant to cite — a provenance defect in a provenance system. Both tools now
+reconstruct text from the stored node (`_node_text`, mirroring
+`traverse.ts nodeText`); content-bearing blocks (OOLONG/unstructured) are
+unchanged. Unit-pinned in `npm run test:rlm-workspace`.
+
+Acceptance (all green): `npm test` 612/70, `npm run build`,
+`npm run python:check`, `test:rlm-workspace` (86, +`_node_text` checks),
+`test:rlm-sandbox` (21), `test:modules` (43, sha256 pin unmoved),
+`test:module-lifecycle` (60). The next objective (§4 row 1, repository-scale
+extraction prerequisites) is unchanged — this late work fixed its own defect
+and did not surface one that jumps the queue.

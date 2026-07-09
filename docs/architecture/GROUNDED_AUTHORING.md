@@ -409,6 +409,36 @@ The decisions above were left where the code would settle them; it did:
   set never auto-passes): a corpus too generic to yield anchors cannot have
   its derivation measured, so it is refused rather than waved through (§8).
 
+### 12.2 The §7 verifier tiers, measured (provenance-citation A/B, July 9, 2026)
+
+A paid A/B eval of citation laundering in the research path
+(`docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`) validated the §7 tiering
+empirically and sharpened it:
+
+- **Laundering is incentive-driven, not dispositional.** The RLM cites
+  correctly in a neutral task (0% laundered) and launders only when the task
+  rewards over-citing. **New standing design principle:** never reward
+  citation *count* — not in task prompts, rubrics, or orchestration rewards.
+  This is the same mechanism as module #1's authoring laundering, and the
+  same fix Session 19 applied there (remove the affordance and the incentive:
+  harness-pinned citations, no whole-DB search).
+- **v1 (deterministic) and structural checks do NOT catch laundering.** The
+  existence check passes it (hashes are real); a readership check
+  (cited-but-unread) is blind (the model reads the decoy, then cites it —
+  `cited-but-unread = 0` in 100% of laundered runs); a prompt "discipline"
+  module is unreliable (0–100% across conditions). Confirms §2: laundering
+  is semantic, not structurally decidable.
+- **v3 (narrow entailment) is the only mechanism that works, and it works
+  both ways.** As a detector (a narrow "does this block support this claim"
+  judge) it flags exactly the laundered citations; as an inline gate
+  (`TRELLIS_CITATION_ENTAIL`, prototyped, off by default) it refuses
+  unsupported citations so 0% laundering persists at every pressure. Cost is
+  ~1.5–2× and, under an impossible over-citation demand, it makes the model
+  write nothing rather than launder — so v3 stays **class-gated and sampled**
+  (the belief-verifier precedent), for contexts where the incentive cannot be
+  removed (tool-bearing agents citing external retrieval). The primary lever
+  remains incentive design; v3 is the backstop where it cannot be applied.
+
 ---
 
 ## Appendix A — module #1 evidence index
