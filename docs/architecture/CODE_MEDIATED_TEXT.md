@@ -166,19 +166,35 @@ moving, and the model estimating where text lives.
 
 ## 6. Follow-ups this record drives (document first, implementation after)
 
-1. **The self-hosted editing enablement session** (SCHEDULED as the next
-   session by owner directive, July 9, 2026 — extraction defers behind it):
-   the edit toolkit IS the pillar's §2 — `load(path) → (frame, digest)`;
-   `locate(frame, query) → handles`; `splice(frame, handle, new_text)`;
-   `write_back(path, frame, digest)` refusing on digest mismatch — exposed
-   to the RLM as REPL helpers, landing as ordinary commits under review.
-   Structure selection and bounds are normative per the measured §7:
-   list-of-lines frames for single-file splicing, pandas for relational
-   multi-file queries, byte-capped with loud refusals.
-2. **Kernel prompt revision** (candidate, separate deliberate change — it
-   moves the composed-prompt sha256 pin, so it ships in its own commit with
-   the pin recomputed): brace-free rule text teaching the discipline for
-   research runs. Candidate wording (brace-free by construction):
+1. **The self-hosted editing enablement session** — **IMPLEMENTED
+   (Session 20, July 9, 2026):** `src/rlm/trellis_textedit.py`, the
+   `trellis_textedit` holder injected only when the operator sets
+   `TRELLIS_EDIT_ROOT` (strict resolve-then-commonpath containment;
+   byte-identical prompt and namespace when unset, pinned by
+   `npm run test:textedit`). The surface is the pillar's §2 —
+   `load(relpath)` → held list-of-lines frame + load-time digest;
+   `locate(relpath, pattern)` → bounded engine-computed addresses;
+   `splice(relpath, start, end, new_lines)` → staged replacement at a
+   computed range; `diff`/`revert` for in-REPL review; `write_back(relpath)`
+   refusing on digest mismatch, else atomic (temp + rename). Bounds per the
+   measured §7 (Zod + Python twins: `TRELLIS_TEXTEDIT_MAX_FILE_BYTES`
+   4 MiB default / 32 MiB cap, `TRELLIS_TEXTEDIT_MAX_FILES` 16 / 64;
+   slice/hit/diff caps are kernel constants). Refinements the code forced,
+   recorded here per the DDD contract: (a) `drop(relpath)` joins the
+   surface — a bounded frame budget needs a model-visible release valve
+   (the workspace `drop()` precedent), and the budget raise hints it;
+   (b) addresses are 0-based half-open `[start, end)` — Python slice
+   semantics, so the REPL-native model composes them without conversion;
+   (c) the frame representation is `text.split("\n")`, whose join is the
+   exact inverse — an unedited load → write_back round-trips
+   byte-identically, and moved CRLF lines keep their bytes verbatim (only
+   authored lines are new bytes). Landing stays human: the toolkit never
+   touches git.
+2. **Kernel prompt revision** — **IMPLEMENTED (Session 20, July 9, 2026):**
+   the candidate wording below was adopted verbatim into
+   `TRELLIS_ADDENDUM_BASE` in its own commit, with the `test:modules`
+   composed-prompt sha256 pin recomputed in that commit (the pin constant
+   now records its move history in place):
    *"CODE-MEDIATED TEXT (HARD RULE): load text into structures and operate
    on them with code. Locate by query, never by counting lines or guessing
    positions. Move existing text by slicing and splicing, never by retyping

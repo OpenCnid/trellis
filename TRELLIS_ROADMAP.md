@@ -206,7 +206,7 @@ Ordered roughly by severity.
 | ~~13~~ | ~~Promotion path (design record §11 step 5)~~ | **Done (Session 17, July 7, 2026)** — operator-gated segment→ingest through the unmodified verified transaction: `npm run promote` (list/promote, zero-paid default), typed planner refusals (truncated/empty/unknown/bad-key), the origin audit stamp on the documents row, and the earned-citability loop drilled end to end (`test:promotion` 41); see §5 |
 | ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn RAN, owner-approved, July 9, 2026 (module `workspace-discipline`; see §5) and surfaced the laundering finding that produced row 1 below |
 | ~~1~~ | ~~Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2)~~ | **Done (Session 19, July 9, 2026)** — kernel `trellis_agent.py --mode author` scoped to a seeded read-only corpus (no DB/search/write), harness-pinned `research.sourceNodeIds`, byte-pinned authoring template, deterministic anchor derivation gate, and the `npm run modules:author` operator driver (plan-echo / `--draft` replay / `--confirm-paid` spawn); `TRELLIS_DRAFT` scanner refuses any 64-hex token; drilled end to end zero-LLM; see §5 |
-| 1 | Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision | **Owner directive, July 9, 2026 — takes precedence over extraction.** DDD implementation of `docs/architecture/CODE_MEDIATED_TEXT.md`: the operator-gated `load/locate/splice/write_back` editing toolkit with digest guards (§6.1, structure selection per the measured §7), and the kernel prompt revision teaching the discipline to research runs (§6.2 — a deliberate composed-prompt sha256 pin move, its own commit) |
+| ~~1~~ | ~~Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision~~ | **Done (Session 20, July 9, 2026)** — the operator-gated `trellis_textedit` holder (engine-computed `locate`, staged `splice`, digest-guarded atomic `write_back`, strict root containment, Zod/Python twin bounds, byte-identical prompt and namespace when `TRELLIS_EDIT_ROOT` is unset; `npm run test:textedit`, 81 checks) and the §6.2 CODE-MEDIATED TEXT kernel prompt block shipped in its own commit with the composed-prompt sha256 pin recomputed there; see §5 |
 | 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind row 1 by the July 9 owner direction — deferred again, not dropped) |
 | 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
@@ -2255,3 +2255,76 @@ single-file edit frames, pandas (object dtype) as the relational default
 lines (halves memory, ~25% faster), polars documented as the unneeded
 escalation tier (5.9× faster at 10M: 247 ms vs 1,465 ms). Toolkit byte
 caps align with the workspace bounds (4 MiB default / 32 MiB cap).
+
+### July 9, 2026 — Session 20: the code-mediated editing toolkit + the kernel prompt revision (§4 row 1, pillar §6.1/§6.2)
+
+The pillar's two implementation follow-ups, per the owner's July 9
+re-sequencing. Two commits: the toolkit (everything byte-identical when
+unconfigured) and the kernel prompt revision (the one deliberate global
+change, with the pin recomputed in the same commit).
+
+**The editing toolkit (`src/rlm/trellis_textedit.py`, pillar §6.1).**
+A `TrellisTextEdit` holder injected via rlms `custom_tools` as
+`trellis_textedit` ONLY when the operator sets `TRELLIS_EDIT_ROOT` —
+config fails fast when the root is not an existing directory, the worker
+forwards root + bounds through `buildAgentEnv` exactly when configured
+and strips raw inherited values otherwise, and a queue payload carrying
+anything textedit-shaped is ignored (all unit-pinned). The surface is
+the pillar's §2 as tooling shape: `load` (held list-of-lines frame +
+load-time sha256), `lines` (bounded half-open slices), `locate`
+(engine-computed addresses for content/regex queries, bounded hits +
+true total), `splice` (staged replacement at a computed range; list of
+newline-free strings only), `diff` (bounded unified review), `revert`,
+`drop` (frees a frame slot — the budget release valve, a §6.1
+refinement recorded in the pillar record), and `write_back` (re-hashes
+the CURRENT disk bytes; mismatch RAISES and writes nothing; else temp +
+rename atomically). Frames are `text.split("\n")` lists: an unedited
+round-trip is byte-identical and moved CRLF lines keep their bytes
+verbatim. Containment is resolve-then-commonpath inside the real root —
+`..`, absolute/rooted paths, and symlink escapes are refused before any
+I/O. Bounds are Zod + Python twins (`TRELLIS_TEXTEDIT_MAX_FILE_BYTES`
+4 MiB/32 MiB, `TRELLIS_TEXTEDIT_MAX_FILES` 16/64); slice (200), hit
+(40), and diff (400) caps are kernel constants. Telemetry adds
+counts-only `textedit_ops`/`textedit_files`/`textedit_writes`; toolkit
+ops never count as database tool calls. A brace-free TEXTEDIT addendum
+composes only when configured. Git stays out: landing is a human PR.
+
+**The kernel prompt revision (pillar §6.2, own commit).** The candidate
+wording adopted verbatim into `TRELLIS_ADDENDUM_BASE` (locate by query,
+splice instead of retype, author only new text); the `test:modules`
+composed-prompt pin moved `abb945a6…f9b2` → `170e9f7e…67e9`, recomputed
+in the same commit, and the pin constant (renamed
+`COMPOSED_SYSTEM_PROMPT_SHA256`) now records its move history in place.
+The relative prompt pins in `test:rlm-workspace` held unmoved.
+
+**Defect found and fixed during the drill:** Python 3.13 `ntpath.isabs`
+treats a bare leading slash as drive-relative, not absolute, so
+`/etc/passwd` fell through to the commonpath backstop (still refused,
+wrong message). Rooted paths are now refused explicitly as absolute on
+every platform.
+
+**Acceptance (all green, July 9, 2026):** `npm test` 621/71 (baseline
+612/70: + `textedit_bounds.test.ts`, extended `rlm_job.test.ts`);
+`npm run build`; `npm run python:check` (trellis_textedit.py joined the
+Dockerfile COPY line and the runtime check); `docker compose --profile
+test config --quiet`; the new `npm run test:textedit` (81 checks:
+bounds twins, bounded reads, staged splices, byte-compare write_back,
+the digest guard with disk-untouched proof, containment incl. a live
+symlink escape, budgets, gating byte-identity, LocalREPL persistence,
+counts-only telemetry); `test:modules` (43, pin moved wittingly);
+`test:module-lifecycle` (60); `test:promotion` (41);
+`test:rlm-workspace` (86); `test:rlm-mcp` (86); `test:rlm-sandbox`
+(21); `test:agent-loop` (35); `test:a2a` (46); `test:repo-ingest` (45);
+`test:benchmark-hardening` (24); `test:entity-resolution` (34);
+`test:api-hardening` (18); `test:belief-recovery` (30);
+`test:invalidation-sweep` (17); `npm run drill:scale` (gate CLOSED at
+286; sweep growth 1.70x, inside the recorded band); the isolated
+Compose integration as project `trellis_s20_ci` (10 assertions, torn
+down with `--volumes`); `git diff --check` clean.
+
+**Standing owner-gated proposals (unchanged, not run):** the supervised
+Trellis-edits-Trellis proof run (operator sets `TRELLIS_EDIT_ROOT` at a
+branch checkout; one small real edit lands as a reviewed PR); the
+effective-context probe (pillar §6.3, ≤$5); module #1 v2 (§6.4); the
+module #2 authoring turn. Next scheduled row: the repository-scale
+extraction prerequisites (§4 row 2).
