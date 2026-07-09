@@ -425,14 +425,28 @@ The belief-verification discipline, applied to capabilities:
   sampled belief re-check.
 - **Death:** a failing module is **contested** (excluded from composition,
   status `contested`) pending re-review; retirement is explicit and versioned.
-- **Research-change contestation — requires new machinery, and is not
-  inherited for free.** The existing invalidation sweep contests *Neo4j facts*
-  whose source hashes died; it knows nothing about manifests. To have a
-  module challenged when the literature under it moves, module manifests must
-  be represented as graph entities citing their research `sourceNodeIds`, so
-  the sweep can reach them. That representation is part of the module-registry
-  work (§11 step 3), and the payoff is stated precisely: a software capability
-  automatically flagged for re-review when its research basis changes.
+- **Research-change contestation — SHIPPED (Session 18, July 8, 2026).**
+  The invalidation sweep contests *Neo4j facts* whose source hashes died; it
+  knows nothing about manifests. The bridge is the manifest-as-graph-entity
+  representation: `npm run modules:register`
+  ([scripts/register_modules.ts](../../scripts/register_modules.ts) over
+  [src/core/graph/module_registration.ts](../../src/core/graph/module_registration.ts))
+  MERGEs each research-bearing active manifest as one ordinary
+  `(:Entity {kind: 'module_manifest', name: 'module:<name>'})` carrying
+  `sourceNodeIds` = the manifest's research hashes, written with the same
+  `applyRederivation` ON MATCH discipline as every other writer — so the
+  UNCHANGED sweep reaches it, and the payoff holds precisely: a software
+  capability automatically flagged for re-review when its research basis
+  changes. The research existence gate runs at registration (every cited
+  hash must exist in `ast_nodes` before any write; refusal lists missing
+  hashes bounded), NOT at prompt composition, which stays free of any
+  PostgreSQL dependency. The loop stays human: `npm run modules:verify`
+  reports contested entities and orphaned hashes; the operator flips the
+  manifest `status` by hand (a contested/retired manifest is also SKIPPED
+  by re-registration — recovery must follow re-review, never precede it);
+  re-registration with live research recovers the entity. Empty-research
+  manifests (module #0) register nothing. Drilled zero-paid end to end by
+  `npm run test:module-lifecycle`.
 
 ### 9.5 Module #0
 
@@ -512,12 +526,12 @@ of every mechanism; paid runs only as small owner-approved behavioral probes.
    rejected by this kernel edition), composition base + Σ addenda +
    workflow rules with the `<<TRELLIS_RUBRIC>>` substitution token, and
    the spatial-flywheel extraction pinned BYTE-IDENTICAL by sha256
-   (`npm run test:modules`, 27 checks). **Deferred:** the
+   (`npm run test:modules`, 27 checks). **Deferred at the time:** the
    manifest-as-graph-entity representation (§9.4) — module #0 cites no
    research `sourceNodeIds` (it predates the promotion path, step 5),
-   so the entity would be empty and unreachable by the sweep; the
-   representation lands with the first research-bearing module
-   (steps 5–6), where it has something to contest.
+   so the entity would have been empty and unreachable by the sweep.
+   That deferral is now closed: the representation shipped in
+   Session 18 (July 8, 2026) as part of step 6's machinery — see §9.4.
 4. **Workspace lineage** (§5) — **DONE (Session 16, July 7, 2026).**
    Serialize: `--workspace-out` on `trellis_agent.py` writes the
    end-of-run `snapshot()` to a worker-named temp file in the `finally`
@@ -570,7 +584,23 @@ of every mechanism; paid runs only as small owner-approved behavioral probes.
 6. **First flywheel turn** — the RLM authors module #1 end-to-end through
    the pathway: research in the workspace, design grounded in ingested
    sources, manifest + addendum + drill proposed as a gated artifact, landed
-   by the operator, composed in the next run.
+   by the operator, composed in the next run. **Machinery DONE
+   (Session 18, July 8, 2026); the paid authoring turn itself is
+   owner-gated and pending.** What shipped: the research existence gate
+   (registration-time verification of every `research.sourceNodeIds`
+   hash against `ast_nodes`, bounded missing-hash refusals, nothing
+   registered on refusal), the §9.4 manifest-as-graph-entity
+   representation (`npm run modules:register`, idempotent MERGE with
+   the `applyRederivation` ON MATCH discipline; the unchanged sweep
+   contests a module whose promoted research is superseded), and the
+   contested-module surfacing (`npm run modules:verify`, read-only;
+   the recovery loop stays human). Zero-paid acceptance:
+   `npm run test:module-lifecycle` closes the loop live — promote →
+   register → re-promote changed bytes → sweep contests the module →
+   verify reports → manifest flip refused composition → re-review →
+   recovery. The module #1 authoring runs (research through MCP,
+   operator promotion, gated manifest+addendum+drill PR) run only with
+   per-run owner approval and a cost estimate.
 
 ## 12. Corrections ledger (anti-drift)
 

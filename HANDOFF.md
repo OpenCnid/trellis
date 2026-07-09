@@ -5,7 +5,7 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–16 are complete and merged:
+Sessions 1–17 are complete and merged:
 
 - PR #21 — async reliability and batch ingestion.
 - PR #22 — provenance liveness closure and verified production ingestion.
@@ -119,102 +119,107 @@ Sessions 1–16 are complete and merged:
   protocol modules only) and module #0 — the spatial-flywheel protocol
   extracted mechanically from `TRELLIS_ADDENDUM` behind the sha256
   byte-identical composed-prompt pin (`npm run test:modules`, 27
-  checks). The §9.4 manifest-as-graph-entity representation is
-  explicitly deferred to the first research-bearing module.
+  checks).
 - PR #42 — Session 16 (July 7, 2026): workspace lineage (design record
-  §11 step 4, owner-directed). **Serialize:** `--workspace-out` on
-  `trellis_agent.py` writes the end-of-run `snapshot()` to a
-  worker-named temp file in the `finally` (success or failure — a
-  failed run's partial workspace can seed the retry); nothing new
-  crosses stdout. **Park:** `rlm_worker.ts` validates the snapshot
-  against the Zod twin of the state dict
-  (`src/workers/workspace_scratch.ts`) and parks it at
-  `scratch:goal:<goalId>:task:<taskId>` with `SCRATCH_TTL_SECONDS`
-  (default 3600, cap 86400) under the per-goal
-  `SCRATCH_MAX_BYTES_PER_GOAL` cap (default 8 MiB, cap 64 MiB; a
-  goal-scoped counter key expires alongside); the completion value
-  gains the counts-only `workspaceRef` `{taskId, segments, bytes}`.
-  Parking failures degrade to "nothing parked"; a paid run is never
-  failed over its checkpoint. **Seed:** `seedTasks` on the rlm job
-  payload (ids only, requires `goalId`, bounded 8) resolves BEFORE
-  anything runs — a missing/expired reference is a readable
-  dispatch-time failure with zero spend — merges (notes concatenate,
-  segments union first-wins, last non-default plan wins), writes a seed
-  file, and passes `--seed-workspace`;
-  `TrellisWorkspace.seed_from_snapshot` restores it with stamps
-  preserved verbatim, integrity checked (a bytes/content mismatch is a
-  torn seed and raises), and bounds re-enforced — an over-budget seed
-  fails the task fast, never silent truncation. A seeded run always
-  gets a workspace and appends the brace-free `SEEDED RUN` addendum;
-  the unseeded prompt is byte-identical to Session 14 (pinned). The
-  orchestrator stays tool-free and routes by reference:
-  `AgentTaskSpecSchema.seedFromTasks` (nullable, max 8), validated by
-  the goal loop against PRIOR-iteration task ids only (unknown and
-  same-batch ids end the goal as a typed `decision_error` before
-  dispatch — batches stay independent, never a blackboard);
-  `TaskOutcome.workspaceRef` rendered counts-only in
-  `buildDecisionMessages`; the orchestrator prompt teaches the field.
-  Oracle scripts express seeded dispatches and
-  `RlmStubSchema.workspaceSnapshot` (data-only) parks through the
-  identical path, so the whole loop drills with zero LLM calls. The
-  two-task lineage probe was owner-approved and MEASURED as a follow-up
-  (July 8, 2026, `docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md`):
-  goal-total external calls 4 seeded vs 8 unseeded; the seeded
-  dependent task made 0 external calls — cross-task re-derivation
-  eliminated; n=1 per arm, directional.
+  §11 step 4). Serialize: `--workspace-out` on `trellis_agent.py`
+  writes the end-of-run `snapshot()` to a worker-named temp file in the
+  `finally`. Park: `rlm_worker.ts` validates the snapshot against the
+  Zod twin (`src/workers/workspace_scratch.ts`) and parks it at
+  `scratch:goal:<goalId>:task:<taskId>` under `SCRATCH_TTL_SECONDS`
+  (default 3600, cap 86400) and the per-goal `SCRATCH_MAX_BYTES_PER_GOAL`
+  cap; the completion value gains the counts-only `workspaceRef`.
+  Seed: `seedTasks` on the rlm job payload (ids only, goal-scoped,
+  bounded 8) resolves BEFORE anything runs, merges (notes concatenate,
+  segments union first-wins, last non-default plan wins), and passes
+  `--seed-workspace`; `TrellisWorkspace.seed_from_snapshot` restores
+  stamps verbatim, integrity-checked (torn seeds raise), bounds
+  re-enforced. A seeded run appends the brace-free `SEEDED RUN`
+  addendum; the unseeded prompt is byte-identical to Session 14
+  (pinned). The orchestrator routes lineage BY REFERENCE
+  (`seedFromTasks` validated against prior-iteration task ids only;
+  `workspaceRef` rendered counts-only). The two-task lineage probe was
+  owner-approved and MEASURED as a follow-up (July 8, 2026,
+  `docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md`): goal-total
+  external calls 4 seeded vs 8 unseeded; the seeded dependent task made
+  0 external calls; n=1 per arm, directional.
+- PR #43 — Session 17 (July 7, 2026): the promotion path (design record
+  §6, §11 step 5) — the operator-gated, byte-preserving bridge from a
+  parked Tier-3 workspace segment to the ordinary verified ingest path.
+  Pure planner (`src/core/promotion/plan_promotion.ts`, reusing the
+  Session 16 snapshot schema): the exact ingest request
+  `{docKey, content, origin}` — content byte-verbatim — or a typed
+  refusal (`truncated_segment`, `empty_content`, `unknown_segment` with
+  a bounded listing, `invalid_doc_key`). Doc keys are operator-explicit
+  (recommended `web:<url>`; the deterministic
+  `mcp:<server>:<tool>:<argsHash>` fallback is printed, never applied
+  silently), bounded, not AST-hash-shaped, not under the reserved
+  `repo:` prefix. The `documents` table gained a nullable additive
+  `origin JSONB` column — the promotion audit stamp, committed
+  atomically with the version row; every other caller leaves it NULL.
+  CLI `npm run promote` (`scripts/promote_segment.ts` over
+  `src/core/promotion/promote_segment.ts`): LIST mode inventories a
+  PARKED snapshot; PROMOTE mode echoes doc key/bytes/origin before any
+  write, runs the UNMODIFIED verified ingest transaction in-process
+  (extraction `none` by default; `changed` needs `--max-blocks` +
+  `--confirm-extraction`), and prints the citable block hashes. One
+  segment per invocation; no API surface. Zero-paid acceptance
+  `npm run test:promotion` (41 checks): the same block hash is a
+  Provenance Violation before promotion and writes cleanly after;
+  re-promoting changed bytes under the same doc key versions the
+  document and the sweep contests the citing insight, audit preserved.
 
-Session 17 (July 7, 2026, branch `d/keen-moser-080be2`) is also
-complete: **the promotion path** (design record §6, §11 step 5) — the
-operator-gated, byte-preserving bridge from a parked Tier-3 workspace
-segment to the ordinary verified ingest path. **Planner** (pure,
-`src/core/promotion/plan_promotion.ts`, reusing
-`WorkspaceSnapshotSchema` from `workspace_scratch.ts`): produces the
-exact ingest request `{docKey, content, origin}` — content
-byte-verbatim — or a typed refusal (`truncated_segment`: a size-capped
-capture is NOT the source bytes; `empty_content`; `unknown_segment`
-with a bounded listing; `invalid_doc_key`). Doc keys are operator-
-explicit, never invented: recommended `web:<url>` for web content
-(stable across refreshes); the deterministic fallback
-`mcp:<server>:<tool>:<argsHash>` (`derivedDocKey`) is printed as a
-hint. Keys must be printable/whitespace-free/≤512 chars, not shaped
-like an AST hash (the anonymous-ingest namespace), and not under the
-reserved `repo:` prefix. **Origin traceability:** the `documents` table
-gained a nullable additive `origin JSONB` column;
-`registerDocumentVersion` takes an optional origin and
-`IngestRequest.origin` threads it through `ingestDocument`, so the
-wrapper-owned stamp (server/tool/argsHash/fetchedAt/segmentId/bytes +
-goal/task correlation) commits atomically with the version row; every
-pre-existing caller leaves it NULL. **CLI** (`npm run promote`,
-`scripts/promote_segment.ts`, execution shared with the drill via
-`src/core/promotion/promote_segment.ts`): LIST mode (default,
-read-only) inventories a PARKED snapshot (ids, stamps, sizes,
-truncation markers, bounded previews, key hints; a missing/expired key
-is a readable failure naming `SCRATCH_TTL_SECONDS`); PROMOTE mode
-(`--segment` + `--doc-key`) echoes doc key/bytes/origin before any
-write, runs the UNMODIFIED verified ingest transaction in-process, and
-prints the root and citable block hashes. Zero paid work by default
-(`--extract none`); `changed` needs `--max-blocks` +
-`--confirm-extraction` (the `repo:ingest` double gate). One segment per
-invocation; parked snapshots only, never a live workspace; no API
-surface — promotion is a human running the CLI. **Acceptance**
-(`npm run test:promotion`, 41 checks, zero-paid): list/refusals over
-real Redis; earned citability end to end — `write_derived_insight`
-citing the would-be block hash is a Provenance Violation BEFORE
-promotion and SUCCEEDS with the same hash after (the real hardened
-write path via `scripts/test_promotion_write.py`); the origin stamp on
-the documents row; re-promoting changed bytes under the same doc key
-versions the document and the sweep contests the citing insight with
-audit preserved (offline 554/62).
+Session 18 (July 8, 2026, branch `d/session-18-first-flywheel-turn`) is
+also complete: **the first flywheel turn, machinery** (design record
+§11 step 6 machinery + the recorded §9.4 deferral, now closed). Three
+pieces: **(1) The research existence gate** — module registration (not
+prompt composition, which stays free of any PostgreSQL dependency)
+verifies every manifest `research.sourceNodeIds` hash against
+`ast_nodes` before any write session opens (`findMissingAstHashes` in
+`src/core/graph/module_registration.ts`); a manifest citing a
+well-formed unknown hash refuses the WHOLE invocation with a bounded
+missing-hash listing, and co-registered valid modules are not written
+either. **(2) Manifest-as-graph-entity (§9.4)** — the operator CLI
+`npm run modules:register` (`scripts/register_modules.ts`) MERGEs each
+research-bearing ACTIVE manifest as one ordinary
+`(:Entity {kind: 'module_manifest', name: 'module:<name>'})` carrying
+`sourceNodeIds` = the manifest's research hashes + a `moduleVersion`
+stamp; ON MATCH mirrors `applyRederivation` field-for-field (the
+`extraction_merge.ts` discipline — transitions commute), so the
+UNCHANGED invalidation sweep contests a module whose promoted research
+is superseded, with zero sweep changes. The `module:` prefix keeps the
+entities out of name-matching retrieval. Idempotent; empty-research
+manifests (module #0) register nothing (pinned no-op);
+contested/retired manifests are SKIPPED — re-registration is the
+recovery transition and must follow re-review, never precede it.
+**(3) Contested-module surfacing** — `npm run modules:verify`
+(read-only) reports contested state, live/orphaned hash counts, bounded
+orphaned-hash listings, recovery timestamps, and on-disk manifest
+status, with an ACTION prescription. The loop stays human: sweep
+contests → operator flips manifest `status` by hand (the Session 15
+loader refuses composing it) → re-review lands refreshed research →
+re-registration recovers per the state machine. Loader seam:
+`readModuleManifest`/`listModuleNames` extracted in
+`src/config/modules.ts`; `loadModule` delegates, behavior-identical
+(the `test:modules` sha256 pin did not move). Zero-paid acceptance
+`npm run test:module-lifecycle` (35 checks) closes the §9.4 loop live:
+promote fixture research through the REAL Session 17 path → register →
+existence-gate refusals over real PostgreSQL → idempotency →
+re-promotion orphans the hash and the sweep contests the module entity
+(audit preserved) → verify reports → flipped manifest refused
+composition AND skipped by registration → recovery → post-recovery
+idempotency (offline 568/63). The module #1 PAID authoring turn is
+owner-gated and was proposed with a measured-token cost estimate in the
+roadmap §5 entry (July 8, 2026); it runs only with per-run owner
+approval.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 18: the first flywheel turn** (design
-record §11 step 6, §9.3–§9.5) — the machinery by which a
-research-bearing module is grounded in promoted sources and reachable
-by the invalidation sweep, plus the owner-gated authoring of module #1
-through the sculpted pathway, per §3–§6 below. Do not re-plan or
-re-implement completed work. RLM expands exclusively to Recursive
-Language Model (the MIT CSAIL formulation).
+Your objective is **Session 19: repository-scale extraction
+prerequisites** (roadmap §4 row 1) — the scanner test/fixture exclusion
+and the code-tuned extraction prompt with generic-identifier
+suppression, per the recorded July 6, 2026 pilot findings and §3–§6
+below. Do not re-plan or re-implement completed work. RLM expands
+exclusively to Recursive Language Model (the MIT CSAIL formulation).
 
 ---
 
@@ -291,13 +296,12 @@ immutable, content-addressed physical location in source material.
      `mcp:<server>:<tool>:<argsHash>` fallback offered, never applied
      silently) + `promote_segment.ts` (one planned request through the
      unmodified verified transaction, returning the citable block
-     hashes) + the operator CLI `npm run promote`
-     (`scripts/promote_segment.ts`: list/promote over PARKED snapshots
-     only, zero-paid default, `repo:ingest`-style extraction double
-     gate). Because the doc key is stable, re-promoting refreshed
-     external content versions the document and the existing
-     Merkle-diff → sweep machinery contests stale beliefs for free.
-     Drill: `npm run test:promotion`.
+     hashes) + the operator CLI `npm run promote` (list/promote over
+     PARKED snapshots only, zero-paid default, `repo:ingest`-style
+     extraction double gate). Because the doc key is stable,
+     re-promoting refreshed external content versions the document and
+     the existing Merkle-diff → sweep machinery contests stale beliefs
+     for free. Drill: `npm run test:promotion`.
 2. **Neo4j — semantic and belief layer**
    - `Entity` and `Conflict` nodes plus `ACTION`, `CONTRADICTS`,
      `DERIVED_INSIGHT`, `SAME_AS`/`DISTINCT_FROM` edges, all carrying
@@ -315,6 +319,22 @@ immutable, content-addressed physical location in source material.
      `ast_existence_check` before the WRITE session opens). "An AST hash
      means verified ingested bytes" is enforcement, not convention.
      Never weaken or make this configurable.
+   - **Module entities (Session 18; `src/core/graph/module_registration.ts`
+     + `scripts/register_modules.ts`):** each research-bearing ACTIVE
+     module manifest is registrable as
+     `(:Entity {kind: 'module_manifest', name: 'module:<name>'})` whose
+     `sourceNodeIds` are the manifest's research hashes
+     (existence-gated against `ast_nodes` before any write) and whose
+     ON MATCH mirrors `applyRederivation` — so the unchanged sweep
+     contests a capability when its research basis changes, and
+     re-registration after re-review recovers it. `npm run
+     modules:register` / `npm run modules:verify` are operator tooling
+     in the `repo:ingest`/`promote` mold: no API endpoint, never worker
+     startup, never reachable from a model completion. Contested/retired
+     manifests are skipped by registration (no silent un-contest);
+     empty-research module #0 registers nothing. Like every Entity,
+     module entities are contested/retired, never deleted (drills clean
+     up only their own token-scoped names).
 3. **Redis + BullMQ — asynchronous layer**
    - Seven queues: `extraction_queue`, `rlm_queue`, `supervisor_queue`,
      `invalidation_queue`, `verification_queue`, `resolution_queue`, and
@@ -326,9 +346,8 @@ immutable, content-addressed physical location in source material.
    - **Scratch parking (Session 16):** `scratch:goal:<goalId>:task:<taskId>`
      holds one task's end-of-run workspace snapshot, TTL-bounded
      (`SCRATCH_TTL_SECONDS`) and volume-capped per goal
-     (`SCRATCH_MAX_BYTES_PER_GOAL` via `scratch:goal:<goalId>:bytes`).
-     Redis is a parking lot for checkpoints, never a live store the
-     model queries. Pure helpers (snapshot schema, merge, refs, keys)
+     (`SCRATCH_MAX_BYTES_PER_GOAL`). Redis is a parking lot for
+     checkpoints, never a live store the model queries. Pure helpers
      live in `src/workers/workspace_scratch.ts`; all I/O is in
      `rlm_worker.ts`. Promotion consumes these parked snapshots — TTL
      expiry is BY DESIGN; anything worth keeping is promoted, not
@@ -352,11 +371,11 @@ immutable, content-addressed physical location in source material.
      (`TRELLIS_RESULT:` task envelope `{status, answer, toolCalls}`).
      Job payloads are normalized by `parseRlmJobData`: pre-Session-9
      `{query, jobId}` still processes; optional `goalId`/`taskId`
-     correlation, `maxIterations`, `seedTasks` (Session 16: prior task
-     ids within the same goal, never content), and a data-only `stub`
-     replay mode (whose optional `workspaceSnapshot` parks through the
-     identical path) for zero-LLM drills. Payloads carry nothing MCP- or
-     workspace-content-shaped (unit-pinned).
+     correlation, `maxIterations`, `seedTasks` (ids only, never
+     content), and a data-only `stub` replay mode (whose optional
+     `workspaceSnapshot` parks through the identical path) for zero-LLM
+     drills. Payloads carry nothing MCP- or workspace-content-shaped
+     (unit-pinned).
    - `src/rlm/trellis_agent.py` wraps the `rlms` recursive-LM library
      (model `gpt-5.4-2026-03-05`, `max_depth` 1) and injects tools via the
      rlms `custom_tools` mapping — `trellis_neo4j` (read-only Cypher plus
@@ -384,18 +403,15 @@ immutable, content-addressed physical location in source material.
      as an origin-stamped uuid4 segment and returns a bounded stub
      (`preview≤500`); the model pulls content deliberately via
      `segment(id)` or fans `llm_query` over segments. Budgets raise
-     `WorkspaceBudgetError` with usage and a `drop()` hint; stored
-     state is never silently truncated. **Lineage (Session 16):**
-     `snapshot()` serializes at task end (`--workspace-out`, written in
-     the `finally`); `seed_from_snapshot(data, ...)` restores a parked,
-     worker-merged snapshot at spawn — wrapper stamps preserved
-     verbatim, torn seeds (bytes/content mismatch) and over-budget
-     seeds raise before the first turn. Structural disjointness: uuid
-     segment ids and 16-hex argsHashes can never match
-     `^[0-9a-f]{64}$`, and the hardened write path rejects them
+     `WorkspaceBudgetError`; stored state is never silently truncated.
+     Lineage: `snapshot()` serializes at task end; `seed_from_snapshot`
+     restores parked snapshots at spawn — stamps verbatim, torn and
+     over-budget seeds raise before the first turn. Structural
+     disjointness: uuid segment ids and 16-hex argsHashes can never
+     match `^[0-9a-f]{64}$`, and the hardened write path rejects them
      independently. Tier 3 has NO provenance standing; permanence is
      earned only through the Session 17 promotion CLI.
-   - **The module registry (Session 15; `src/config/modules.ts` +
+   - **The module registry (Sessions 15/18; `src/config/modules.ts` +
      `src/rlm/trellis_modules.py`, `modules/<name>/`):**
      `TRELLIS_ADDENDUM` = `TRELLIS_ADDENDUM_BASE` + Σ selected module
      addenda + `TRELLIS_WORKFLOW_RULES`. Selection is operator-owned via
@@ -406,13 +422,12 @@ immutable, content-addressed physical location in source material.
      rejected. Addendum files are brace-free; rubric text enters
      through the single `<<TRELLIS_RUBRIC>>` substitution token. Both
      validators are bound-for-bound twins and normalize CRLF→LF. The
-     manifest already carries `research.sourceNodeIds` (format-checked
-     64-hex; module #0's list is empty) and `status`
-     (`active`/`contested`/`retired`; only `active` composes —
-     `loadModules` refuses the rest with a readable error). What does
-     NOT exist yet is Session 18's scope: existence verification for
-     research hashes, the manifest-as-graph-entity representation, and
-     contested-module surfacing.
+     manifest carries `research.sourceNodeIds` (format-checked 64-hex;
+     existence-checked at REGISTRATION, Session 18) and `status`
+     (`active`/`contested`/`retired`; only `active` composes — and only
+     `active` registers). `readModuleManifest` (shape only) is the
+     registration read seam; `loadModule` (status + addendum gates) is
+     the composition seam.
    - CRITICAL rlms constraints (verified against the installed
      rlms==0.1.3; pinned live by the `test:rlm-workspace` LocalREPL
      section): `custom_system_prompt` REPLACES the base REPL protocol
@@ -434,12 +449,10 @@ immutable, content-addressed physical location in source material.
      (`AGENT_*`, single-digit-capped) and its own admission gate. The
      orchestrator has NO tools and no database access — and it routes
      workspace lineage BY REFERENCE: task specs carry `seedFromTasks`
-     (prior iterations only; the loop rejects unknown and same-batch
-     ids as a typed `decision_error` before any dispatch), observations
-     carry counts-only `workspaceRef`s, and snapshot content never
-     enters the decision context. Zero-LLM drills:
-     `AGENT_ORACLE_ENABLED=true` accepts an `oracle` script —
-     `npm run test:agent-loop`.
+     (prior iterations only), observations carry counts-only
+     `workspaceRef`s, and snapshot content never enters the decision
+     context. Zero-LLM drills: `AGENT_ORACLE_ENABLED=true` accepts an
+     `oracle` script — `npm run test:agent-loop`.
    - **The A2A server surface (Session 11)** exposes the goal loop to
      external agents: `src/api/a2a.ts` over pure modules in
      `src/core/a2a/` (`protocol.ts`, `task_record.ts`,
@@ -461,12 +474,10 @@ immutable, content-addressed physical location in source material.
      containers. Stable dot-namespaced events; bounded metric labels only —
      queries, goals, message content, artifacts, paths, hashes, entity
      names, tool arguments, tool results, workspace content, promoted
-     content, server commands, URLs, and credentials never become label
-     values or log content. Queue-depth gauges cover all seven queues;
-     `trellis_rlm_mcp_calls_total` is label-free. Workspace and lineage
-     telemetry is counts only (`workspace_*` on the `TRELLIS_TELEMETRY`
-     line; `workspaceRef` and park log events carry segment and byte
-     counts, never content).
+     content, module addendum text, server commands, URLs, and
+     credentials never become label values or log content. Queue-depth
+     gauges cover all seven queues; `trellis_rlm_mcp_calls_total` is
+     label-free. Workspace and lineage telemetry is counts only.
 6. **The frontend (DEFERRED — unscheduled, 3.3 #5 residue) and other stable subsystems**
    - `src/frontend/` is a Next.js 16.2.9 / React 19 app (its own
      `package.json` and lockfile, npm-installed separately) with one
@@ -502,40 +513,42 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the Session 17 merge (use `git log -- HANDOFF.md` to
-  identify it; Session 17 landed as one squash-merged PR from branch
-  `d/keen-moser-080be2`).
-- Offline baseline: `npm test` = 554 passing across 62 files
-  (Session 17 added `src/core/promotion/plan_promotion.test.ts` and an
-  origin-threading case in `src/core/ingestion/ingest_document.test.ts`).
+- `master`: the Session 18 merge (use `git log -- HANDOFF.md` to
+  identify it; Session 18 landed as one squash-merged PR from branch
+  `d/session-18-first-flywheel-turn`).
+- Offline baseline: `npm test` = 568 passing across 63 files
+  (Session 18 added `src/core/graph/module_registration.test.ts` and
+  the `readModuleManifest`/`listModuleNames` cases in
+  `src/config/modules.test.ts`).
 - `npm run build` and `npm run python:check` pass.
-- `npm run drill:scale`: gate CLOSED at max provenance 286; sweep growth
-  2.17x in the Session 17 run (run-to-run band 1.63x–2.26x across
-  Sessions 12–17; all far under the superlinear trigger).
-- Live zero-LLM checks (Session 17 observed counts):
-  `test:promotion` (41 — NEW: the earned-citability loop end to end),
-  `test:rlm-workspace` (83), `test:agent-loop` (35),
-  `test:modules` (27 — carries the byte-identical composed-prompt
-  sha256 pin `abb945a6…f9b2`; recompute it in the same commit if the
-  kernel prompt or rubric legitimately changes), `test:rlm-mcp` (86),
-  `test:a2a` (46), `test:repo-ingest` (45),
-  `test:benchmark-hardening` (24), `test:entity-resolution` (34),
-  `test:api-hardening` (18), `test:rlm-sandbox` (21),
-  `test:belief-recovery` (30), `test:invalidation-sweep` (17).
+- `npm run drill:scale`: gate CLOSED at max provenance 286 (run-to-run
+  sweep-growth band 1.63x–2.26x across Sessions 12–18; all far under
+  the superlinear trigger).
+- Live zero-LLM checks (Session 18 observed counts):
+  `test:module-lifecycle` (35 — NEW: the §9.4 capability-provenance
+  loop end to end), `test:promotion` (41), `test:rlm-workspace` (82 —
+  the 83 recorded by Sessions 16/17 was a miscount; 82 PASS lines
+  observed on both the unmodified Session 17 master and this branch,
+  drill green either way), `test:agent-loop` (35), `test:modules` (27 — carries the
+  byte-identical composed-prompt sha256 pin `abb945a6…f9b2`; recompute
+  it in the same commit if the kernel prompt or rubric legitimately
+  changes), `test:rlm-mcp` (86), `test:a2a` (46),
+  `test:repo-ingest` (45), `test:benchmark-hardening` (24),
+  `test:entity-resolution` (34), `test:api-hardening` (18),
+  `test:rlm-sandbox` (21), `test:belief-recovery` (30),
+  `test:invalidation-sweep` (17).
 - Isolated Compose integration: 10 assertions (`--profile test`, unique
   project name, host ports 0 via `TRELLIS_*_HOST_PORT=0`; includes the
-  containerized credentialed MCP fixture probe). Session 17 close-out
-  ran it 10/10 on the rebuilt image (second attempt — the first filled
-  the host disk mid-build; space has since been freed, but be aware
-  the machine's C: drive runs close to full and an image rebuild
-  needs several GB of headroom).
-- CI target is Node 22. Session 17's local environment was Node 20.19.2,
+  containerized credentialed MCP fixture probe). NOTE: the machine's
+  C: drive runs close to full and an image rebuild needs several GB of
+  headroom (a Session 17 build filled the disk mid-build).
+- CI target is Node 22. Session 18's local environment was Node 20.19.2,
   Python 3.13.1, Docker Compose v2, PostgreSQL 16.x, Neo4j 5.11.
 - Python runtime deps are pinned in `requirements.txt` (`rlms==0.1.3`,
   `openai`, `neo4j`, `psycopg2-binary`, `unstructured`, `mcp==1.12.4`);
-  `npm run python:check` verifies syntax/imports/assets.
-- The `documents.origin` column ships in the idempotent bootstrap
-  (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`); run
+  `npm run python:check` verifies syntax/imports/assets. Session 18
+  shipped no new Python files.
+- The `documents.origin` column ships in the idempotent bootstrap; run
   `npm run db:init:dev` (or restart a container) once against a
   pre-Session-17 database before using `npm run promote`.
 - The frontend has NO offline tests and NO CI coverage today.
@@ -554,169 +567,139 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 18 problem statement
+## 3. Session 19 problem statement
 
-**The first flywheel turn (design record §11 step 6, with the recorded
-§9.4 deferral now due).** Every prerequisite is shipped: the RLM can
-research through MCP into an origin-stamped workspace (S14), checkpoint
-it across a goal's tasks (S16), and the operator can promote
-load-bearing segments into verified, citable substrate (S17). The
-module system exists (S15) and its manifest schema already carries
-`research.sourceNodeIds` (format-validated 64-hex in
-`src/config/modules.ts` and the Python twin) and a `status` field whose
-non-`active` values are refused composition. But the capability
-flywheel has never turned, and three pieces of machinery are missing
-before it can:
+**Repository-scale extraction prerequisites (roadmap §4 row 1; findings
+recorded July 6, 2026 in `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`
+§5 and the roadmap §5 pilot entry).** The owner-approved extraction
+pilot (`repo:ingest --root src/core/graph --extract changed`, 112
+blocks, 112/112 jobs clean) proved the pipeline and surfaced three
+defects that BLOCK any full-repository `changed` run:
 
-1. **Research provenance is format-checked but never existence-checked.**
-   A manifest can cite 64 well-formed hex chars that correspond to
-   nothing. The write path enforces existence for belief provenance
-   (Session 14); capability provenance deserves the same discipline at
-   its gate.
-2. **Modules are unreachable by the sweep (§9.4, recorded deferral).**
-   The invalidation sweep contests any Neo4j node/relationship whose
-   `sourceNodeIds` intersect a dead set — but module manifests exist
-   only as files. Until a research-bearing manifest is represented as a
-   graph entity citing its research hashes, "a software capability
-   automatically flagged for re-review when its research basis changes"
-   is prose, not machinery. Session 15 deferred this deliberately
-   because module #0 cites no research (it predates promotion) — the
-   entity would have been empty and unreachable. The first
-   research-bearing module is exactly when it lands.
-3. **The pathway has never been exercised.** §11 step 6: the RLM
-   authors module #1 end-to-end — research in the workspace, design
-   grounded in ingested (promoted) sources, manifest + addendum + drill
-   proposed as a gated artifact, landed by the operator, composed in
-   the next run. The authoring runs are PAID and owner-gated; the
-   machinery they flow through must be proven zero-paid first.
+1. **Test-fixture contamination.** The scanner
+   (`src/core/repository/scanner.ts`, pure per-path `selectFile` with
+   typed `ScanSkipReason`s) accepts test files; fixture strings in
+   `alias_candidates.test.ts` produced
+   `globex corporation --[acquired]-> initech`, and name-based entity
+   identity merged those FICTIONAL facts onto pre-existing demo
+   entities with real-looking provenance. There is no test/fixture
+   exclusion today.
+2. **Generic-identifier hubs.** The pilot's top entity was literally
+   `entity` (14 sources), with `name`, `id`, and `action` close behind.
+   At repo scale these become mega-hubs — degraded retrieval AND a
+   spurious fast path to the 3.3 #4 migration trigger (an "observed
+   1,000-source fact" that is an artifact, not evidence).
+3. **Prompt mismatch.** The extraction prompt is inline in
+   `src/workers/extraction_worker.ts` (`processJob`, the `promptData` +
+   system message pair) and targets "macro-level business entities"; on
+   source code it improvises
+   (`organization --[is_default_type_for]-> organization`). A
+   code-tuned prompt with generic-identifier suppression is needed.
+
+The paid validation re-run of the pilot is NOT part of acceptance — it
+is owner-gated (propose with the CLI's printed block count and a cost
+estimate from the committed pilot telemetry: 112 blocks ran 57,323
+input / 46,862 output `gpt-5.4` tokens + 28,618 embedding tokens).
 
 ## 4. Required design
 
-Design record §9.3–§9.5 and §11 step 6 are normative: modules land only
-through class-appropriate gates (protocol modules: automated validation
-+ zero-paid drill green + human review), the kernel (loader, gates,
-validators) stays human-owned, and nothing about module selection or
-registration is ever writable by a model completion.
+Recommended shape (adjust against the code, not the other way around):
 
-- **Research existence gate.** Wherever module manifests are validated
-  against the database (NOT at every prompt composition — composition
-  is config-time and must not grow a PostgreSQL dependency), verify
-  every `research.sourceNodeIds` hash exists in `ast_nodes` before
-  accepting the module for registration; reuse the
-  `ast_hashes_exist`/bounded-listing discipline from Session 14. A
-  module citing unknown hashes is refused fail-fast with the missing
-  hashes listed (bounded).
-- **Manifest-as-graph-entity (§9.4).** An operator-run, idempotent
-  registration step — suggest `scripts/register_modules.ts`, npm alias
-  `modules:register` — that, for each registry module with non-empty
-  research provenance, MERGEs one graph entity (suggest
-  `(:Entity {name: 'module:<name>', kind: 'module_manifest'})` — the
-  `module:` prefix keeps it out of every retrieval path that matches
-  user-facing entity names; document the choice) carrying
-  `sourceNodeIds` = the manifest's research hashes and the module
-  version. Write it with the SAME provenance state-machine semantics as
-  every other writer (`src/core/graph/provenance.ts`; the
-  `extraction_merge.ts` ON MATCH discipline: re-registration with live
-  hashes un-contests and re-stamps `rederivedAt`, orphaned hashes move
-  to the audit trail) so the existing sweep
-  (`sweepOrphanedProvenance`) contests it with zero sweep changes.
-  Module #0 (empty research) registers nothing — pinned by test.
-  Registration is operator tooling in the `repo:ingest`/`promote`
-  mold: never an API endpoint, never reachable from a model
-  completion, never part of worker startup.
-- **Contested-module surfacing.** A read-only verify mode (suggest
-  `npm run modules:register -- --verify` or a `modules:verify` alias)
-  that reports each registered module entity's contested state and
-  orphaned hashes. The LOOP stays human: the sweep contests the graph
-  entity; the operator reads the report and flips the manifest `status`
-  to `contested` (the Session 15 loader already refuses composing it);
-  re-review and re-registration recover it. Do NOT auto-edit manifest
-  files from the graph state — that would be the flywheel modifying
-  its own gate.
-- **The paid turn itself (owner-gated; propose, do not run).** With the
-  machinery green, propose the module #1 authoring plan to the owner
-  with a cost estimate: topic (owner's call), research runs (MCP
-  web-search or an owner-supplied corpus) into a goal workspace,
-  operator promotion of the load-bearing segments (`npm run promote`),
-  an authoring run that drafts `modules/<name>/module.json` +
-  brace-free `addendum.txt` + a zero-paid drill citing the promoted
-  hashes as `research.sourceNodeIds`, and an ordinary human-reviewed PR
-  that lands it. Nomination is prose; the artifact enters the repo only
-  through the gate. If the owner defers the paid turn, the session is
-  still complete when the machinery ships with its zero-paid
-  acceptance — record the deferral in the roadmap.
-- No API surface change, no new queue, no schema change beyond what the
-  graph entity needs (it is an ordinary `Entity` node; expect zero
-  Postgres DDL).
+- **Scanner test/fixture exclusion.** A new typed skip reason (suggest
+  `test_fixture`) in `ScanSkipReason`, applied inside the pure
+  `selectFile` path selection with a deterministic, unit-pinned rule
+  set over repo-relative paths — at minimum: `*.test.*`, `*.spec.*`,
+  `__tests__/`, `__mocks__/`, `__fixtures__/`, `fixtures/`, `test/`,
+  `tests/`, `testdata/`, `conftest.py`, `test_*.py`, `*_test.py`/
+  `*_test.go`-style suffixes for the supported languages. Exclusion is
+  the DEFAULT for `repo:ingest`; an explicit `--include-tests` flag
+  (operator-owned) widens it back, mirroring the existing
+  `--include-untracked` flag style. Skip counts surface in the scan
+  report and CLI output like every other typed reason. Keep the rules
+  in one exported, documented constant so the drill and README state
+  the same truth.
+- **Code-tuned extraction prompt, selected deterministically.** Extract
+  the inline business prompt into a pure module (suggest
+  `src/core/extraction/prompts.ts`) exporting the EXISTING prompt
+  byte-identical (pin it — non-repo extraction behavior must not move)
+  and a code-tuned variant targeting API-level facts (exported
+  functions/classes/modules, their call/import/extends relations,
+  suppressing generic identifiers by instruction). Selection is
+  deterministic from data the job already carries: the `repo:` docKey
+  prefix (repository ingests) picks the code prompt; everything else —
+  including promoted `web:`/`mcp:` documents and legacy payloads
+  without a docKey — keeps the business prompt byte-identical. NO job
+  payload changes.
+- **Deterministic generic-identifier suppression.** Prompt instruction
+  alone is not enforcement: add a post-parse filter between
+  `resolveExtractedGraph` and the merge — a bounded, validated stoplist
+  (suggest an exported constant; make it operator-extensible via env
+  only if genuinely needed, with Zod bounds) that drops entities whose
+  lowercased name is a bare generic identifier (`entity`, `name`, `id`,
+  `action`, `type`, `key`, `value`, `data`, `object`, `string`, ...),
+  cascades the drop to actions citing them, and reports counts (log
+  event + a label-free or bounded-label counter), never silently. It
+  runs for CODE-prompt extractions; business-prompt extractions are
+  untouched this session (their corpus was benchmarked; changing their
+  graph shape invalidates baselines).
+- **No new queues, no schema changes, no API changes.** The extraction
+  job payload is untouched; the worker seam is prompt selection + the
+  post-parse filter; the scanner seam is pure path selection.
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `docs/architecture/WORKSPACE_AND_MODULES.md` §9.3–§9.5 (gates,
-  lifecycle, module #0), §11 step 6; §9.4 for the exact contestation
-  contract; `docs/GLOSSARY.md` (Module, Kernel, Userspace, Capability
-  ladder).
-- `src/config/modules.ts` + `src/rlm/trellis_modules.py` (the manifest
-  schema — `research.sourceNodeIds` and `status` already exist; the
-  loader's `status !== 'active'` refusal; the composed-prompt sha256
-  pin in `scripts/test_modules.ts` that must NOT move).
-- `src/core/graph/extraction_merge.ts` and
-  `src/core/graph/provenance.ts` (the ON MATCH recovery semantics the
-  registration MERGE must mirror) and `src/core/graph/invalidation.ts`
-  (the sweep that must reach the new entity unchanged).
-- `src/core/promotion/` and `scripts/promote_segment.ts` (Session 17 —
-  the drill promotes its fixture research corpus through this);
-  `scripts/test_promotion.ts` (the drill pattern to extend, including
-  the captured-invalidation-payload sweep technique).
-- `src/rlm/trellis_tools.py` (`ast_hashes_exist` — the existence-check
-  precedent) and `TrellisPostgres` wiring in `scripts/test_rlm_sandbox.py`.
-- `scripts/ingest_repository.ts` / `scripts/promote_segment.ts` (the
-  operator-CLI house style: parse args, echo the plan, act, print
-  results, close handles).
-- `package.json` scripts; README (Modules section to extend);
-  `.env.example` only if a new bound ships (none is expected).
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5 (the pilot
+  findings verbatim) and the roadmap §5 entry "Owner-approved
+  extraction pilot on real code" (July 6, 2026).
+- `src/core/repository/scanner.ts` (`ScanSkipReason`, `selectFile`,
+  the git-ls-files enumeration) and `paths.ts`
+  (`isExcludedDirectoryPath` — the existing exclusion precedent);
+  `scanner`/`paths` unit tests for the pinning style.
+- `scripts/ingest_repository.ts` (CLI flags, scan-report printing, the
+  zero-paid default and extraction double gate).
+- `src/workers/extraction_worker.ts` (`processJob`: the inline
+  `promptData` + system message — the seam to extract; the
+  `parseLlmResponse` → `resolveExtractedGraph` → merge sequence the
+  suppression filter slots into).
+- `src/core/graph/resolve_actions.ts` (what `resolveExtractedGraph`
+  returns — entities/actions/unresolved — and how drops must cascade).
+- `scripts/test_repo_ingest.ts` (the live drill to extend with
+  exclusion-count assertions over its fixture repository).
+- `src/config/index.ts` + `.env.example` (only if an operator bound
+  ships); README §Repository ingestion.
 
 ## 6. Test strategy and acceptance
 
 Test first. No paid LLM calls and no external network in acceptance.
 
-Offline (joins `npm test`, baseline 554):
+Offline (joins `npm test`, baseline 568):
 
-- Registration planning pure helpers (if extracted — recommended):
-  research-bearing vs empty-research module selection (module #0 ⇒
-  no-op), the entity name/kind derivation (`module:<name>`), Cypher
-  parameter shapes.
-- Manifest validation stays pinned: module #0 composes byte-identically
-  (existing sha256 pin), `status: contested` refuses composition with a
-  readable error (existing behavior, re-asserted where touched).
+- Scanner: every exclusion rule accepts/rejects the exact paths it
+  claims (table-driven over the exported rule set); `--include-tests`
+  restores acceptance; non-test paths are untouched; skip counts typed
+  as `test_fixture`.
+- Prompts: the business prompt export is byte-identical to the string
+  currently inline in `extraction_worker.ts` (pin the exact bytes —
+  this is a Session 15-style extraction); selection by docKey prefix
+  (`repo:` ⇒ code, `web:`/absent/anything else ⇒ business); the code
+  prompt contains the suppression instruction.
+- Suppression filter: stoplisted entities dropped with counts; actions
+  citing a dropped endpoint dropped and counted; non-stoplisted
+  entities and their actions pass through structurally unchanged; the
+  filter is a no-op for business-prompt extractions; stoplist
+  validation bounds (if env-extensible) reject junk fail-fast.
 
-Live zero-paid (new `npm run test:module-lifecycle`, or extend
-`test:modules` if the stack dependency stays acceptable there —
-`test:modules` is currently offline-only, so a NEW drill is cleaner):
+Live zero-paid:
 
-- Fixture research corpus: park a drill-authored snapshot and promote
-  one segment through the REAL Session 17 path (`plan_promotion` +
-  `promoteSegment`, or the CLI as subprocess) — the promoted block hash
-  is the research provenance.
-- A temp module directory (drill-owned, token-scoped, NOT under
-  `modules/` — point the loader/registrar at it explicitly) citing the
-  promoted hash: validator accepts; registration creates the graph
-  entity with `sourceNodeIds` = [the hash], uncontested.
-- Registration refusals: a manifest citing a well-formed unknown hash
-  is refused with a bounded listing (existence gate); module #0
-  registers nothing (empty research no-op).
-- The §9.4 loop: re-promote changed bytes under the same doc key; drive
-  the captured invalidation payload through
-  `findGloballyOrphanedAstNodeIds` + `sweepOrphanedProvenance`; the
-  module entity is contested with the audit trail preserved; the verify
-  mode reports it; a manifest flipped to `status: contested` is refused
-  composition with a readable error; re-registration after re-promotion
-  of the original bytes (or citing the new hash) recovers the entity
-  per the provenance state machine.
-- Idempotency: registering twice changes nothing (MERGE semantics).
-- All state token-scoped and cleaned up (graph entities, documents, AST
-  rows, scratch keys, temp module dirs).
+- Extend `npm run test:repo-ingest`: the fixture repository gains a
+  committed test-fixture file whose exclusion the scan report must
+  count (and whose inclusion `--include-tests` must restore); snapshot
+  publishing, tombstones, and the existing 45 checks stay green with
+  policy `none` (no extraction spend — the prompt/filter seams get
+  their live behavior only from the owner-gated pilot re-run, which is
+  NOT acceptance).
 
 Required close-out (the standing block):
 
@@ -726,6 +709,7 @@ Required close-out (the standing block):
  npm run python:check
  docker compose --profile test config --quiet
  # Run the isolated zero-LLM Compose integration (unique project name).
+ npm run test:repo-ingest
  npm run test:module-lifecycle
  npm run test:promotion
  npm run test:rlm-workspace
@@ -735,7 +719,6 @@ Required close-out (the standing block):
  npm run test:agent-loop
  npm run test:a2a
  npm run drill:scale
- npm run test:repo-ingest
  npm run test:benchmark-hardening
  npm run test:entity-resolution
  npm run test:api-hardening
@@ -747,26 +730,36 @@ Required close-out (the standing block):
 Update:
 
 - `TRELLIS_ROADMAP.md`: full-dated §5 entry with exact commands, counts,
-  and any defects found; record the completed design-record step in §4
-  and in the design record §11 (and strike the §9.4 deferral note where
-  it is recorded).
-- README (the module lifecycle/registration workflow is
-  operator-facing); `.env.example` only if a new bound ships;
-  `API_REFERENCE.md` only if a client-visible contract changes (it
-  should not — §4 forbids new endpoints).
+  and any defects found; strike §4 row 1 only after acceptance.
+- README §Repository ingestion (the exclusion default and
+  `--include-tests` are operator-facing); `.env.example` only if a new
+  bound ships; `API_REFERENCE.md` only if a client-visible contract
+  changes (it should not).
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`: a short addendum
+  noting the prerequisites shipped and the owner-gated re-run proposal.
 - If a new Python file ships under `src/rlm/`, add it to the Dockerfile
   `COPY` line and `check_python_runtime.py` (the Session 12 defect
-  class; Sessions 14–17 kept this green — keep it that way).
+  class; Sessions 14–18 kept this green — keep it that way).
 - `HANDOFF.md`: regenerate per §0.
 
-Standing owner-gated items (do NOT run unprompted): the paired-run
-behavioral probes (`tsx scripts/probe_workspace_paired.ts`,
-`tsx scripts/probe_workspace_lineage.ts` — both MEASURED and recorded;
-the remaining open variant is a larger-payload/longer-horizon lineage
-probe where the token and external-call axes separate), and — new this
-session — the module #1 paid authoring turn itself (§4 above: research
-runs, promotion, authoring run). Propose any paid run with a cost
-estimate; do not run it unprompted.
+Standing owner-gated items (do NOT run unprompted; propose each with a
+cost estimate):
+
+- **The module #1 paid authoring turn** (design record §11 step 6; the
+  machinery shipped in Session 18): owner picks the topic; one research
+  goal (2–3 tasks) into a goal workspace; operator promotion
+  (`npm run promote`); one authoring run drafting
+  `modules/<name>/module.json` + brace-free addendum + a zero-paid
+  drill citing the promoted hashes; an ordinary human-reviewed PR;
+  then `npm run modules:register`. Estimate recorded in the roadmap §5
+  Session 18 entry (~100k–200k input / 10k–20k output gpt-5.4 tokens).
+- **The extraction pilot re-run** (after Session 19 ships): validates
+  the code prompt + suppression on real code; propose with the printed
+  block count (committed telemetry: ~512 in / ~419 out tokens per
+  block).
+- The paired-run behavioral probes (both MEASURED; the remaining open
+  variant is a larger-payload/longer-horizon lineage probe where the
+  token and external-call axes separate).
 
 ## 7. Guardrails
 
@@ -774,71 +767,70 @@ estimate; do not run it unprompted.
    `rederiveAstNodeId` stays authoritative; nothing positional is ever
    persisted as identity.
 2. **Never merge, rename, or delete Entity nodes.** Equivalence stays an
-   overlay belief. The `module_manifest` entity (if you ship it as
-   designed) follows the same rule: contested/retired, never deleted —
-   audit history is the point.
+   overlay belief. This includes `module_manifest` entities:
+   contested/retired, never deleted — audit history is the point. The
+   Session 19 suppression filter drops entities BEFORE they are ever
+   written; it must never delete or rename nodes already in the graph.
 3. **Preserve provenance on every semantic node and edge.**
    `write_derived_insight` remains the single AGENT write path, and its
    Session 14 enforcement (hash format + `ast_nodes` existence, checked
    before the WRITE session opens) is kernel — never weaken, bypass, or
    make it configurable. Workspace ids/content and MCP output can never
    be passed as `sourceNodeIds`; external content earns citability ONLY
-   through the verified ingest path (the Session 17 promotion CLI is
-   that path's operator gate). Harness-side writers (extraction merge,
-   module registration) mirror the provenance state machine in
-   `src/core/graph/provenance.ts` — never invent divergent semantics.
+   through the verified ingest path (the Session 17 promotion CLI).
+   Harness-side writers (extraction merge, module registration) mirror
+   the provenance state machine in `src/core/graph/provenance.ts` —
+   never invent divergent semantics.
 4. **Promotion and module landing are operator-gated, absolutely.** No
-   autonomous path from Tier 3 to Tier 1; no API endpoint that promotes
-   or registers modules; no model output that triggers ingestion,
-   registration, or manifest edits. Nomination is prose; landing is a
-   human running a CLI or merging a reviewed PR. Tier 3 never satisfies
-   the provenance protocol: an answer with zero database tool calls
-   emits `TRELLIS_PROTOCOL_VIOLATION` regardless of workspace/MCP
-   activity.
+   autonomous path from Tier 3 to Tier 1; no API endpoint that
+   promotes or registers modules; no model output that triggers
+   ingestion, registration, or manifest edits. Registration skips
+   non-active manifests (recovery follows re-review, never precedes
+   it); nothing auto-edits manifest `status` from graph state.
 5. **Operator control is absolute for the RLM tool surface AND the
-   module space:** servers, tools, modules, bounds, and credential
-   references come from validated config only; no inbound payload or
-   model completion may alter any of it mid-run; module selection is
-   only ever within the operator-registered allowlist; module `status`
-   lives in the manifest file and is edited only by humans. L1 (runtime
-   config mutation) and L2 (runtime code hot-patching) remain
-   forbidden; L3 lands only through the recorded gates — protocol
-   modules: automated validation + zero-paid drill + human review,
-   always, this edition.
+   module space:** servers, tools, modules, bounds, credential
+   references, scanner exclusions, and extraction stoplists come from
+   validated config or exported constants only; no inbound payload or
+   model completion may alter any of it mid-run. L1 (runtime config
+   mutation) and L2 (runtime code hot-patching) remain forbidden; L3
+   lands only through the recorded gates.
 6. **Every external interaction is bounded;** workspace and scratch
    state is TTL- and byte-bounded by validated config; over-budget
-   writes and seeds raise — never silent truncation. Durable cross-goal
-   unverified memory stays a non-feature: TTL expiry of parked
-   snapshots is BY DESIGN; permanence is earned via promotion only.
+   writes and seeds raise — never silent truncation. TTL expiry of
+   parked snapshots is BY DESIGN; permanence is earned via promotion
+   only.
 7. **Validate at every boundary:** bounds and registries cross Zod and
    Python twin validators; all LLM calls stay inside BullMQ workers or
-   the RLM process; the orchestrator stays tool-free and routes lineage
-   by reference only; `AGENT_ORACLE_ENABLED` and `TRELLIS_A2A_ENABLED`
-   defaults stay pinned false.
+   the RLM process; every worker-consumed completion crosses
+   `parseLlmResponse`; the orchestrator stays tool-free;
+   `AGENT_ORACLE_ENABLED` and `TRELLIS_A2A_ENABLED` defaults stay
+   pinned false.
 8. **Default to zero paid work and zero external network in
    acceptance;** the fixture server remains the only MCP server
-   acceptance configures; promotion/module drills promote and cite
-   fixture-produced or drill-authored bytes, never live web content;
-   the module #1 paid turn is owner-approved, per-run.
-9. **Do not break existing consumers:** with no workspace attached,
-   `call_tool` returns and the system prompt are byte-identical; an
-   unseeded workspace run's prompt is byte-identical to Session 14;
-   with module #0 loaded the composed prompt is byte-identical to the
-   pre-Session-15 monolith (the sha256 pin in `test:modules` must not
-   move unless the kernel prompt legitimately changes — recompute in
-   the same commit); pre-Session-9 `rlm_queue` payloads still process;
-   the `/api/agent-stream` SSE contract, the A2A v1.0 surface, and the
-   backend API contract are untouched; non-promotion ingests leave
-   `documents.origin` NULL; the backend API key still never reaches any
-   client bundle.
+   acceptance configures; drills promote and cite fixture-produced or
+   drill-authored bytes only; the extraction pilot re-run and the
+   module #1 authoring turn are owner-approved, per-run.
+9. **Do not break existing consumers:** the business extraction prompt
+   stays byte-identical for every non-`repo:` document (pinned) —
+   changing the benchmarked corpus's graph shape invalidates the
+   committed baselines; with no workspace attached, `call_tool` returns
+   and the system prompt are byte-identical; the unseeded prompt is
+   byte-identical to Session 14; with module #0 loaded the composed
+   prompt is byte-identical to the pre-Session-15 monolith (the sha256
+   pin in `test:modules` must not move unless the kernel prompt
+   legitimately changes — recompute in the same commit); pre-Session-9
+   `rlm_queue` payloads still process; the `/api/agent-stream` SSE
+   contract, the A2A v1.0 surface, and the backend API contract are
+   untouched; non-promotion ingests leave `documents.origin` NULL; the
+   backend API key never reaches any client bundle.
 10. **Respect the rlms prompt contract:** extend `RLM_SYSTEM_PROMPT`,
-    never replace it; no literal curly braces in anything rlms formats
-    (addenda use `dict(...)` example syntax); no rlms library
-    modifications.
+    never replace it; no literal curly braces in anything rlms formats;
+    no rlms library modifications.
 11. **Follow the T16 observability house style:** workspace content,
     module addendum text, queries, tool arguments/results, hashes,
-    promoted content, and credentials never become metric label values
-    or log content; telemetry carries counts only.
+    promoted content, entity names, file paths, and credentials never
+    become metric label values; suppression/exclusion telemetry is
+    counts only.
 12. **Keep API and worker processes split;** project-scoped Compose
     commands; fixtures and drills clean up only token-scoped or
     pre-snapshotted state.
@@ -850,23 +842,21 @@ estimate; do not run it unprompted.
 ## 8. Explicit exclusions
 
 Do not include: frontend work of any kind (deferred, unscheduled —
-scope preserved in roadmap §3.3 #5); tool-bearing modules or any
-relaxation of the protocol-modules-only kernel edition (the class must
-earn trust first, §9.3); module auto-landing of any kind (the gate is
-the feature); autonomous nomination, promotion, registration, or
-manifest editing (operator gates are absolute); a module or promotion
-HTTP/A2A surface; auto-flipping manifest `status` from graph state;
-batch promotion or whole-snapshot promotion (one segment per invocation
-this edition); running the module #1 paid authoring turn without
-per-run owner approval and a cost estimate; orchestrator tools (routing
-stays by reference); live intra-batch workspace sharing (lineage is
-inheritance between iterations, never a blackboard); durable cross-goal
-scratch storage (TTL stays); rlms `compaction` enablement; new MCP
-servers, transports, or OAuth flows; A2A changes;
-repository-extraction prerequisites (separately sequenced);
-`ASTRef`/`EVIDENCED_BY` migration (gate closed at 286); T13 re-hashing;
-rlms library modifications; weakening or toggling the Session 14
-write-path enforcement, the Session 15 composition pins, the
-Session 16 lineage byte-identity pins, or the Session 17 promotion
-refusals (truncated captures stay unpromotable, period); paid LLM calls
-or external network access as acceptance checks.
+scope preserved in roadmap §3.3 #5); running the extraction pilot
+re-run or ANY paid extraction as acceptance (owner-gated, per-run);
+running the module #1 paid authoring turn (owner-gated, standing);
+retro-filtering or deleting existing graph entities (the suppression
+filter is pre-write only; the pilot's graph was already tombstoned);
+changing the business extraction prompt's bytes or the benchmarked
+corpus's graph shape; tool-bearing modules or module auto-landing;
+autonomous nomination, promotion, registration, or manifest editing;
+a promotion/module HTTP or A2A surface; batch promotion; orchestrator
+tools; live intra-batch workspace sharing; durable cross-goal scratch
+storage (TTL stays); rlms `compaction` enablement; new MCP servers,
+transports, or OAuth flows; A2A changes; `ASTRef`/`EVIDENCED_BY`
+migration (gate closed at 286); T13 re-hashing; rlms library
+modifications; weakening or toggling the Session 14 write-path
+enforcement, the Session 15 composition pins, the Session 16 lineage
+byte-identity pins, the Session 17 promotion refusals, or the
+Session 18 registration gates (existence check, non-active skip); paid
+LLM calls or external network access as acceptance checks.

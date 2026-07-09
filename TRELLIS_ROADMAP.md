@@ -204,9 +204,9 @@ Ordered roughly by severity.
 | ~~11~~ | ~~Module registry + module #0 (design record §11 step 3)~~ | **Done (Session 15, July 7, 2026)** — owner directed the step 3 → step 4 order on July 7, 2026 (PR #40 discussion); protocol-module registry, operator-owned `TRELLIS_MODULES` selection, spatial-flywheel extraction behind a byte-identical composed-prompt pin; the §9.4 graph representation is explicitly deferred to the first research-bearing module; the owner-approved paired-run workspace probe was also measured this session; see §5 |
 | ~~12~~ | ~~Workspace lineage (design record §11 step 4)~~ | **Done (Session 16, July 7, 2026)** — serialize/park/seed across a goal's tasks: end-of-run snapshots parked goal-scoped in Redis (TTL + per-goal byte cap), the orchestrator routes by reference (`workspaceRef` observations, `seedFromTasks` dispatches, prior iterations only), seeded runs restored at spawn with stamps preserved and bounds re-enforced; oracle drills extended to seeded runs; see §5 |
 | ~~13~~ | ~~Promotion path (design record §11 step 5)~~ | **Done (Session 17, July 7, 2026)** — operator-gated segment→ingest through the unmodified verified transaction: `npm run promote` (list/promote, zero-paid default), typed planner refusals (truncated/empty/unknown/bad-key), the origin audit stamp on the documents row, and the earned-citability loop drilled end to end (`test:promotion` 41); see §5 |
-| 1 | First flywheel turn (design record §11 step 6) | The RLM authors module #1 end-to-end through the sculpted pathway; lands only through the recorded gates |
-| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
-| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn itself is owner-gated and pending per-run approval with a cost estimate — recorded as a standing owner-gated item, not a sequencing row; see §5 |
+| 1 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings |
+| 2 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -1764,3 +1764,123 @@ unit tests pin control-character rejection behaviorally
 file). No pre-existing tests needed adjustment — the `documents`
 INSERT statement-prefix pins in `ingest_document.test.ts` were
 unaffected by the added column.
+
+### July 8, 2026 — Session 18: the first flywheel turn, machinery (design record §11 step 6 + the §9.4 deferral)
+
+Every prerequisite for the capability flywheel existed after Session 17
+— research into origin-stamped workspaces (S14), cross-task checkpoints
+(S16), operator promotion to verified substrate (S17), and the module
+registry (S15) whose manifest schema already carried format-checked
+`research.sourceNodeIds` — but three pieces of machinery were missing
+before the flywheel could turn: research provenance was never
+existence-checked, module manifests were unreachable by the
+invalidation sweep (the recorded §9.4 deferral), and nothing surfaced a
+contested capability to the operator. Session 18 ships all three; the
+module #1 PAID authoring turn itself stays owner-gated (below).
+
+**Research existence gate.** Registration — not prompt composition,
+which stays free of any PostgreSQL dependency — verifies every cited
+research hash against `ast_nodes` before any write session opens
+(`findMissingAstHashes` in the new
+`src/core/graph/module_registration.ts`, the Session 14
+`ast_hashes_exist` discipline applied to capability provenance). A
+manifest citing a well-formed unknown hash refuses the WHOLE invocation
+with a bounded missing-hash listing and the offending module named;
+co-registered valid modules are not written either.
+
+**Manifest-as-graph-entity (§9.4, deferral closed).** The new operator
+CLI `npm run modules:register` (`scripts/register_modules.ts`) MERGEs
+each research-bearing ACTIVE manifest as one ordinary
+`(:Entity {kind: 'module_manifest', name: 'module:<name>'})` carrying
+`sourceNodeIds` = the manifest's research hashes plus a `moduleVersion`
+stamp. The ON MATCH mirrors `applyRederivation`
+(`src/core/graph/provenance.ts`) field-for-field — the
+`extraction_merge.ts` discipline, so the sweep transition and
+registration commute and the UNCHANGED sweep (`sweepOrphanedProvenance`)
+contests a module whose promoted research is superseded, with zero sweep
+changes. The `module:` name prefix (validated lowercase charset) keeps
+these entities out of every retrieval path that matches user-facing
+names. Registration is idempotent, operator-only (no API endpoint,
+never worker startup, never reachable from a model completion), and
+skips two classes deliberately: empty-research manifests (module #0 —
+the entity would be unreachable by the sweep; pinned no-op) and
+contested/retired manifests (re-registration is the RECOVERY transition
+and must follow re-review, never precede it — a re-run can never
+silently un-contest a quarantined capability).
+
+**Contested-module surfacing.** `npm run modules:verify` (read-only)
+reports each registered entity's contested state, live/orphaned research
+hash counts, bounded orphaned-hash listing, recovery timestamp, and the
+on-disk manifest status, with an ACTION prescription for contested
+modules. The loop stays human: sweep contests → operator reads the
+report → flips manifest `status` to `contested` by hand (the Session 15
+loader refuses composing it) → re-review lands refreshed research →
+status back to `active` → re-registration recovers the entity
+(`rederivedAt` stamped, orphaned audit trail preserved). Nothing
+auto-edits manifest files from graph state.
+
+**Loader seam (no behavior change).** `readModuleManifest` and
+`listModuleNames` extracted in `src/config/modules.ts`; `loadModule`
+now delegates to the former and is behavior-identical (the `test:modules`
+sha256 composed-prompt pin did not move).
+
+**Verification (all commands run, zero paid calls, no external
+network).** Offline: `npm test` = **568 passing across 63 files**
+(baseline 554/62; +14: the registration planner/param/refusal units in
+`module_registration.test.ts`, and the `readModuleManifest`/
+`listModuleNames` seam cases in `modules.test.ts`). `npm run build`,
+`npm run python:check`, `docker compose --profile test config --quiet`,
+and `git diff --check` pass. New live suite:
+`npm run test:module-lifecycle` = **35 checks**: fixture research
+promoted through the REAL Session 17 path (parked snapshot →
+`planSegmentPromotion` → `promoteSegment`, policy `none`); a temp-dir
+module citing the promoted hash registered through the real CLI; the
+existence-gate refusal matrix over real PostgreSQL (unknown hash refused
+with bounded listing, co-registered valid module not written); module #0
+no-op pinned; MERGE idempotency (identical full entity state on re-run,
+before and after recovery); the §9.4 loop live — re-promotion of changed
+bytes under the same doc key orphans the research hash, the captured
+invalidation payload driven through `findGloballyOrphanedAstNodeIds` +
+`sweepOrphanedProvenance` contests the module entity with the audit
+trail preserved, verify mode reports it, the flipped manifest is refused
+composition AND skipped by re-registration, and re-registration with the
+refreshed hash recovers per the state machine. All state token-scoped
+and cleaned up. Unchanged and green: `test:promotion` 41,
+`test:rlm-workspace` 82 (the 83 recorded by Sessions 16/17 was a
+miscount — 82 PASS lines observed on the unmodified Session 17 master
+too, drill green either way), `test:agent-loop` 35, `test:modules` 27
+(the composed-prompt sha256 pin did not move), `test:rlm-mcp` 86,
+`test:rlm-sandbox` 21, `test:a2a` 46, `test:repo-ingest` 45,
+`test:benchmark-hardening` 24, `test:entity-resolution` 34,
+`test:api-hardening` 18, `test:belief-recovery` 30,
+`test:invalidation-sweep` 17. `npm run drill:scale`: gate CLOSED (max
+provenance 286, sweep growth 1.80x — within the recorded 1.63x–2.26x
+band). The isolated Compose integration (`trellis-s18-lifecycle`, host
+ports 0, CI's exact recipe) passed 10/10 on the rebuilt image, project
+and volumes removed.
+
+**Defect found and fixed during the session (drill authoring, not
+product):** the drill's first draft indexed the captured invalidation
+payloads assuming the version-1 promotion queues one — it does not (a
+first version has no prior root and queues no invalidation), so the
+re-promotion's payload is `capturedSweeps[0]`, not `[1]`. Fixed with a
+comment recording why.
+
+**The module #1 paid authoring turn (owner-gated; proposed, not run).**
+With the machinery green, the recorded proposal for the first real
+flywheel turn: the owner picks the topic; one research goal (2–3 tasks,
+MCP web-search or an owner-supplied corpus) into a goal workspace;
+operator promotion of the load-bearing segments (`npm run promote`); one
+authoring run drafting `modules/<name>/module.json` + brace-free
+`addendum.txt` + a zero-paid drill citing the promoted hashes as
+`research.sourceNodeIds`; landed as an ordinary human-reviewed PR, then
+`npm run modules:register`. Estimated spend, grounded on the measured
+lineage probe (a two-task goal ran ~32k input / ~2.3k output gpt-5.4
+tokens per arm): roughly 100k–200k input plus 10k–20k output tokens
+end-to-end — same order as the two paired probes combined. Awaiting
+per-run owner approval.
+
+**Still open:** repository-scale extraction prerequisites (the next
+sequencing row); conditional 3.3 #4 migration behind its unchanged
+trigger; frontend deployment (unscheduled 3.3 #5 residue); T13's
+migration-dependent hash preimage.

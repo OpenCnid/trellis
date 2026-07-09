@@ -424,11 +424,45 @@ at spawn) validate the same files with identical bounds. Addendum files
 carry no literal braces (the rlms `.format()` contract); rubric text
 enters through the single `<<TRELLIS_RUBRIC>>` substitution token.
 Module #0 carries empty research provenance (it predates the promotion
-path); the manifest-as-graph-entity representation for research-change
-contestation lands with the first research-bearing module.
+path).
 
 ```bash
 npm run test:modules
+```
+
+### Module lifecycle (registration and research-change contestation)
+
+A research-bearing module cites the promoted sources its design derives
+from as `research.sourceNodeIds` (AST hashes minted by `npm run
+promote`). Registration represents each such manifest as a graph entity
+the invalidation sweep can reach (Session 18; design record §9.4), so a
+capability is automatically flagged for re-review when its research
+basis changes:
+
+```bash
+npm run modules:register            # register all research-bearing active modules
+npm run modules:register -- --module <name>   # scope to one module
+npm run modules:verify              # read-only report: contested state, orphaned hashes
+```
+
+Registration is operator-only and idempotent. Every cited research hash
+must exist in `ast_nodes` (verified before any write; a manifest citing
+unknown hashes refuses the whole invocation with a bounded listing —
+promote the sources first). Empty-research manifests (module #0)
+register nothing. Manifests with status `contested`/`retired` are
+skipped: re-registration is the recovery transition and must follow
+re-review, never precede it.
+
+When a re-promotion of refreshed external content supersedes a cited
+source, the ordinary invalidation sweep contests the module's entity
+(audit trail preserved). The recovery loop stays human: read
+`npm run modules:verify`, set `"status": "contested"` in the module's
+`module.json` to exclude it from composition pending re-review, update
+its research provenance against re-promoted sources, set the status
+back to `active`, and re-register.
+
+```bash
+npm run test:module-lifecycle   # zero-LLM drill of the whole loop (requires the compose stack)
 ```
 
 Real networked or metered MCP servers (an actual web-search provider) are
@@ -517,6 +551,7 @@ npm run test:repo-ingest
 npm run test:agent-loop
 npm run test:rlm-mcp
 npm run test:promotion
+npm run test:module-lifecycle
 npm run test:rlm-workspace
 npm run test:modules
 npm run test:a2a
