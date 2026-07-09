@@ -509,6 +509,47 @@ The first paid run under this mode should be an owner-approved new module
 with a corpus chosen for testable specificity. Drilled zero-LLM by
 `npm run test:module-lifecycle` (§10–§11).
 
+## Editing files (the code-mediated toolkit, Session 20)
+
+The RLM has no file surface by default — and that stays the shipped
+configuration. When the operator wants Trellis to drive edits (the
+self-editing doctrine: content pool + standard permissions, design
+record §7), they set `TRELLIS_EDIT_ROOT` to an existing directory —
+typically a branch checkout — and the RLM gains one holder,
+`trellis_textedit`, that embodies the code-mediated-text pillar
+(`docs/architecture/CODE_MEDIATED_TEXT.md`): *the model never counts,
+and the model never copies.*
+
+```bash
+TRELLIS_EDIT_ROOT=/path/to/branch-checkout   # enablement + containment boundary
+#TRELLIS_TEXTEDIT_MAX_FILE_BYTES=4194304     # per-file cap (hard max 32 MiB)
+#TRELLIS_TEXTEDIT_MAX_FILES=16               # held-frame cap (hard max 64)
+```
+
+The surface is the pillar's §2 discipline as tooling shape: `load`
+reads a file into a held frame and returns its content digest;
+`locate` returns engine-computed line addresses for a content query
+(the model never estimates positions); `splice` stages the replacement
+of a computed half-open range with newly authored lines (existing text
+is moved by code, never retyped); `diff` reviews staged edits in-REPL;
+`write_back` re-hashes the disk bytes against the load-time digest and
+REFUSES a stale write, then writes atomically. Every path strictly
+resolves inside the edit root; `..`, absolute paths, and symlink
+escapes are refused before any I/O. With the variable unset, nothing
+is injected and the prompt is byte-identical (pinned).
+
+Boundaries: the toolkit never touches git — landing edits is a human
+reviewing an ordinary PR. Toolkit operations have no provenance
+standing (a separate telemetry counter, like `mcp_calls`); edited file
+content earns citability only through verified ingest or promotion.
+The root and bounds come exclusively from operator env — never from a
+queue payload or a model completion (unit-pinned). Drilled zero-LLM on
+token-scoped temp directories:
+
+```bash
+npm run test:textedit
+```
+
 ## Benchmarks
 
 The OOLONG-Pairs harness ships two committed, seeded corpora:

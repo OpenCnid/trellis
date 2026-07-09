@@ -138,6 +138,14 @@ export interface AgentEnvConfig {
    * own default selection.
    */
   modulesJson?: string;
+  /**
+   * Code-mediated editing toolkit (Session 20, config.textedit). Present
+   * ONLY when the operator set TRELLIS_EDIT_ROOT; when omitted, raw
+   * inherited textedit variables are stripped so the child's toolkit
+   * gate can only ever see operator-validated values — a queue payload
+   * or stale env can never enable editing (Guardrail 4).
+   */
+  textedit?: { editRoot: string; maxFileBytes: number; maxFiles: number };
 }
 
 /**
@@ -177,6 +185,15 @@ export function buildAgentEnv(
     env.TRELLIS_MODULES = cfg.modulesJson;
   } else {
     delete env.TRELLIS_MODULES;
+  }
+  if (cfg.textedit !== undefined) {
+    env.TRELLIS_EDIT_ROOT = cfg.textedit.editRoot;
+    env.TRELLIS_TEXTEDIT_MAX_FILE_BYTES = String(cfg.textedit.maxFileBytes);
+    env.TRELLIS_TEXTEDIT_MAX_FILES = String(cfg.textedit.maxFiles);
+  } else {
+    delete env.TRELLIS_EDIT_ROOT;
+    delete env.TRELLIS_TEXTEDIT_MAX_FILE_BYTES;
+    delete env.TRELLIS_TEXTEDIT_MAX_FILES;
   }
   // Explicitly set the credential variables the registry names, so the
   // forwarding contract holds regardless of what the base env carries.
