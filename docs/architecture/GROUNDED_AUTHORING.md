@@ -121,11 +121,13 @@ Two consequences frame everything below:
 ## 3. Design principle
 
 **No new trust machinery.** Every layer below is either an existing Trellis
-rail pointed at authoring, or harness discipline enforced by code humans
-own. The authoring mode, template, pinning, and derivation gate are all
-KERNEL (per §8 of the parent record and the §9.3 class table: gate machinery
-is human-owned, never flywheel-authored). The flywheel never builds its own
-authoring harness.
+rail pointed at authoring, or harness discipline enforced by kernel code.
+The authoring mode, template, pinning, and derivation gate are all KERNEL:
+they ship as repository code and are never composed, selected, or mutated at
+runtime by the module path. (Per the parent record §7 as revised July 9,
+2026, kernel changes land as ordinary reviewed commits — commits Trellis
+itself may author when the operator loads its repo; what the runtime
+flywheel never does is modify its own gates mid-flight.)
 
 ## 4. Layer 1 — the authoring mode (access grounding)
 
@@ -264,7 +266,7 @@ Tier-to-class mapping (extends the §9.3 landing-gate table):
 |---|---|
 | Protocol modules | v1 anchors, mandatory in the zero-paid drill + human review (unchanged) |
 | Tool-bearing modules (future class) | v1 + v3 sampled entailment + full human review + paid probe (unchanged) |
-| Kernel | Human-only, as ever — no model authoring at all |
+| Kernel | Ordinary code review: kernel changes land as reviewed commits, which Trellis itself may author when the operator loads its repo (parent record §7, revised July 9, 2026) — never through the runtime module path |
 
 ## 8. Residual and backstop
 
@@ -376,7 +378,7 @@ run remains in the measured band (module #1: 160,270 in / 7,827 out
 | D2 | v1 verifier: deterministic or model-based? | Deterministic lexical anchors; model entailment reserved for tool-bearing class | Zero-paid acceptance is the house rule; embeddings are absent on promoted-with-`none` blocks (measured); narrow entailment reintroduces model trust and should be spent where gates warrant it |
 | D3 | Flat vs per-claim citations? | Flat now; per-claim reserved as manifest v2 (`kernelCompat: 2`) | Flat fails safe (over-contests); per-claim is a twin-validator schema change with no current consumer |
 | D4 | Scoped `get_ast_texts` in the sandbox? | No database tools at all; corpus travels as block-aligned workspace segments | Fewest surfaces; fidelity satisfied by seeding exact block texts; hash metadata keeps the audit trail human-readable |
-| D5 | Which classes get which derivation tier? | Protocol: v1 mandatory. Tool-bearing: v1 + sampled v3. Kernel: no model authoring | Extends the §9.3 gate table without relaxing any existing gate |
+| D5 | Which classes get which derivation tier? | Protocol: v1 mandatory. Tool-bearing: v1 + sampled v3. Kernel: ordinary code review, outside the module path (parent §7 as revised July 9, 2026) | Extends the §9.3 gate table without relaxing any existing gate |
 
 ### 12.1 Implementation refinements (Session 19, resolved by the code)
 

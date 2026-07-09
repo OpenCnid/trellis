@@ -71,9 +71,12 @@ Sessions 1–17 are complete and merged:
   §3.3 #5). The design record `docs/architecture/WORKSPACE_AND_MODULES.md`
   (three-tier trust model, the Tier-3 workspace contract, cross-task
   lineage, the promotion path, the L0–L3 self-editing ladder with
-  L1/L2 forbidden and L3 as the capability flywheel's mechanism, the
-  kernel/userspace boundary, the module manifest/registry/gates design
-  with module #0, and a six-step implementation sequence),
+  L1/L2 forbidden and L3 as the capability flywheel's mechanism (the
+  ladder's L1/L2 prohibition was WITHDRAWN by owner directive on
+  July 9, 2026 — see the revised design record §7: content pool +
+  standard editing permissions), the kernel/userspace boundary, the
+  module manifest/registry/gates design with module #0, and a six-step
+  implementation sequence),
   `docs/GLOSSARY.md` (authority: code > glossary > prose), roadmap §1
   drift fixes, Session 14 scoping, and README alignment.
 - PR #40 — Session 14 (July 7, 2026): kernel hardening and the Tier-3
@@ -947,12 +950,18 @@ cost estimate):
    `--extract changed` run is owner-approved per run, never automatic.
 5. **Gate machinery is kernel; operator control is absolute.** The
    scanner test/fixture exclusion patterns, the generic-identifier
-   stoplist, and the extraction prompts are human-owned kernel constants
-   — never env-tunable free text, never selectable by a job payload or a
-   model completion, never authored by the flywheel. The Session 19
-   authoring template, anchor extraction, threshold, and topic bounds
-   stay kernel constants too. L1/L2 stay forbidden; L3 excludes the
-   kernel.
+   stoplist, and the extraction prompts are kernel constants — never
+   env-tunable free text, never selectable by a job payload or a model
+   completion, never composed or mutated by the runtime module path. The
+   Session 19 authoring template, anchor extraction, threshold, and
+   topic bounds stay kernel constants too. Self-editing doctrine
+   (REVISED by owner directive, July 9, 2026 — design record §7): the
+   former L0–L3 ladder with L1/L2 forbidden is withdrawn; Trellis may
+   edit anything in the content pool including its own codebase, under
+   standard editing permissions (branch/review/merge rights, operator-
+   owned tool allowlists), with edits landing between runs through
+   source control — the Claude-Code-edits-Claude-Code pattern. Default
+   remains environment-outside-the-REPL until the operator loads it.
 6. **Every external interaction is bounded.** The extraction budget
    (`--max-blocks`), the scanner oversize/file caps, and the workspace
    seed/draft bounds all raise on violation — never silent truncation.

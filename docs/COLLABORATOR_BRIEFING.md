@@ -118,15 +118,23 @@ database access** — decisions and evidence flow through validated schemas.
   transaction, minting real addresses. The document row carries an audit
   stamp of which tool call produced those bytes and when.
 
-### Self-editing is a ladder, and most rungs are forbidden
+### Self-editing: the content pool and standard permissions
 
-The design record defines an L0–L3 ladder of self-modification. L1/L2
-(editing its own kernel prompt or code) are forbidden. **L3 is the
-flywheel**: the system may *author* new userspace modules — versioned,
-manifest-carrying blocks of operating instructions composed into the agent's
-system prompt — but every module is human-reviewed, human-landed,
-human-registered. The kernel (the harness, the gates, the write path) is
-human-only, permanently.
+Trellis treats its own codebase the way Anthropic treats Claude Code's: the
+tool can edit its own repository, governed by ordinary engineering process —
+branches, review, merge rights, operator-owned tool allowlists — not by a
+special prohibition. (An earlier edition of the design defined an L0–L3
+"self-modification ladder" with the middle rungs forbidden; the owner
+withdrew that on July 9, 2026. There are no forbidden rungs.) The default
+is conservative: Trellis's environment sits *outside* the REPL — no file or
+git tools configured, its own repo not loaded — until the operator brings
+it into the content pool. Because every run boots a fresh process from
+source, edits land *between* runs through source control: a Trellis-authored
+change to Trellis is just a commit under review. **The module flywheel** is
+the *runtime* half of self-improvement: the system authors versioned
+instruction modules composed per run — human-reviewed, human-landed,
+human-registered — while kernel changes (the harness, the gates, the write
+path) ship as ordinary reviewed commits, whoever authored the diff.
 
 Two closing mechanisms make capability itself provenance-tracked: a module's
 manifest cites the research addresses it derived from, the module is
@@ -266,11 +274,14 @@ was defined correctly.
 **On (4) — modular harness / Test-Time Training.** Aligned. The module
 registry *is* the mechanism for test-time behavioral adaptation: versioned,
 composable, provenance-tracked instruction modules selected per run by the
-operator, with the kernel/userspace split keeping gate machinery human-owned.
-Today's modules are protocol-only (behavioral instructions); tool-bearing
-modules are a designed-but-ungated future class with stricter verification
-tiers. The "full list of modules under R&D" is exactly the open question we
-want your help with, below.
+operator. The kernel/userspace split is a *packaging* distinction (kernel
+ships as repository code and boots identically every run; userspace composes
+per run), not a permission hierarchy — kernel changes land as ordinary
+reviewed commits, which Trellis itself may author (see "Self-editing"
+above). Today's modules are protocol-only (behavioral instructions);
+tool-bearing modules are a designed-but-ungated future class with stricter
+verification tiers. The "full list of modules under R&D" is exactly the open
+question we want your help with, below.
 
 ---
 
@@ -300,7 +311,7 @@ want your help with, below.
 | # | document | what it gives you |
 |---|---|---|
 | 1 | `docs/GLOSSARY.md` | the vocabulary (authority: code > glossary > prose) |
-| 2 | `docs/architecture/WORKSPACE_AND_MODULES.md` | the parent design record: trust tiers, workspace, modules, the L0–L3 ladder, the flywheel |
+| 2 | `docs/architecture/WORKSPACE_AND_MODULES.md` | the parent design record: trust tiers, workspace, modules, self-editing (content pool + standard permissions, §7), the flywheel |
 | 3 | `docs/architecture/GROUNDED_AUTHORING.md` | the authoring mode and the four grounding properties (§12.2 records the eval's impact) |
 | 4 | `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md` | the full eval: data, corrections, lessons (§9) |
 | 5 | `TRELLIS_ROADMAP.md` §5 | the dated progress ledger, most recent first |
