@@ -1884,3 +1884,59 @@ per-run owner approval.
 sequencing row); conditional 3.3 #4 migration behind its unchanged
 trigger; frontend deployment (unscheduled 3.3 #5 residue); T13's
 migration-dependent hash preimage.
+
+### July 9, 2026 — Module #1 (workspace-discipline): the first paid flywheel turn
+
+The Session 18 machinery was exercised end-to-end with a real, owner-approved
+paid authoring run — the first turn of the capability flywheel (design record
+§11 step 6). Owner picked the topic (workspace discipline) and authorized the
+spend; no web-search MCP server is configured, so the research source was the
+owner-supplied-corpus path the design permits.
+
+**Phase 1 — research promoted (zero paid).** Two documents assembled from
+Trellis's own workspace research — design record §4 (the workspace contract)
+and the two measured probe reports — were parked as workspace segments and
+promoted through the real `npm run promote` CLI (extraction `none`):
+`research:trellis/workspace-discipline/contract` (root
+`23637ac1…2293f1b`, 14 blocks) and `research:trellis/workspace-discipline/evidence`
+(root `976f62ce…8098fe99`, 10 blocks) — 24 citable AST block hashes in
+`ast_nodes`.
+
+**Phase 2 — paid authoring run.** `trellis_agent.py --query <authoring brief>
+--max-iterations 12`, model `gpt-5.4-2026-03-05`. Result envelope `status: ok`
+(no protocol violation — 7 `get_ast_texts` calls read the promoted corpus).
+Spend: **160,270 input / 7,827 output tokens** across 14 model calls, 44 tool
+calls, 99.8 s — within the approved envelope. The run drafted the module
+purpose, a brace-free `WORKSPACE DISCIPLINE PROTOCOL` addendum (1,729 bytes,
+preserved essentially verbatim — a faithful synthesis of the corpus), a
+research-hash list, and a drill spec.
+
+**Operator correction (the gate earning its keep).** The run's *self-reported*
+`research.sourceNodeIds` were NOT the promoted corpus: it surfaced unrelated
+real TypeScript code blocks (entity-snippet-fetch code) through 21
+`vector_search` calls and cited those. Those hashes exist in `ast_nodes`, so
+the existence gate alone would have passed them — this is precisely the
+"provenance laundering" residual design record §10 names (a real hash cited
+for content the claim did not come from). The operator replaced the citations
+with the actual 24 promoted corpus hashes before landing. Recorded in
+`modules/workspace-discipline/RESEARCH.md`. This is why module landing is
+operator-gated and nomination is prose: the human verifies cited provenance is
+the provenance the capability actually derives from.
+
+**Phase 3 — landed.** `modules/workspace-discipline/` (manifest citing the 24
+promoted hashes, `status: active`, protocol-only; addendum; RESEARCH.md
+provenance note). Its zero-paid acceptance extends `npm run test:modules`
+(27 → 33 checks: module #1 loads, is brace-free and titled, composes after
+module #0 when selected, stays brace-safe, and is NOT in the default selection
+— the byte-identical pin is untouched, still `abb945a6…f9b2`). Registered live:
+`npm run modules:register -- --module workspace-discipline` created
+`module:workspace-discipline` (24 live research hashes, uncontested — the
+existence gate passed all 24); `npm run modules:verify` reports it clean. The
+module is NOT added to the default `TRELLIS_MODULES` selection; it composes
+only when an operator selects it.
+
+**Verification:** offline `npm test` 568/63 (unchanged — the module is
+config/data, not code); `npm run build` and `npm run python:check` pass;
+`npm run test:modules` 33/33. The flywheel has turned once: research → promote
+→ author → gate → register, with the sweep now able to contest this capability
+if its promoted research changes.

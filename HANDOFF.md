@@ -529,10 +529,12 @@ Repository state at handoff creation:
   loop end to end), `test:promotion` (41), `test:rlm-workspace` (82 —
   the 83 recorded by Sessions 16/17 was a miscount; 82 PASS lines
   observed on both the unmodified Session 17 master and this branch,
-  drill green either way), `test:agent-loop` (35), `test:modules` (27 — carries the
-  byte-identical composed-prompt sha256 pin `abb945a6…f9b2`; recompute
-  it in the same commit if the kernel prompt or rubric legitimately
-  changes), `test:rlm-mcp` (86), `test:a2a` (46),
+  drill green either way), `test:agent-loop` (35), `test:modules` (33 as
+  of the July 9 module #1 turn; 27 at Session 18 — carries the
+  byte-identical composed-prompt sha256 pin `abb945a6…f9b2`, which the
+  module #1 addition did NOT move; recompute it in the same commit only
+  if the kernel prompt or rubric legitimately changes), `test:rlm-mcp`
+  (86), `test:a2a` (46),
   `test:repo-ingest` (45), `test:benchmark-hardening` (24),
   `test:entity-resolution` (34), `test:api-hardening` (18),
   `test:rlm-sandbox` (21), `test:belief-recovery` (30),
@@ -745,14 +747,17 @@ Update:
 Standing owner-gated items (do NOT run unprompted; propose each with a
 cost estimate):
 
-- **The module #1 paid authoring turn** (design record §11 step 6; the
-  machinery shipped in Session 18): owner picks the topic; one research
-  goal (2–3 tasks) into a goal workspace; operator promotion
-  (`npm run promote`); one authoring run drafting
-  `modules/<name>/module.json` + brace-free addendum + a zero-paid
-  drill citing the promoted hashes; an ordinary human-reviewed PR;
-  then `npm run modules:register`. Estimate recorded in the roadmap §5
-  Session 18 entry (~100k–200k input / 10k–20k output gpt-5.4 tokens).
+- **The module #1 paid authoring turn** (design record §11 step 6) —
+  **DONE (July 9, 2026), owner-approved.** The `workspace-discipline`
+  protocol module (`modules/workspace-discipline/`) was authored by a
+  paid RLM run (160,270 in / 7,827 out gpt-5.4 tokens) grounded in two
+  promoted research documents (`research:trellis/workspace-discipline/
+  contract` and `.../evidence`, 24 citable hashes), operator-corrected
+  for a provenance-laundering miscitation, landed, and registered
+  (`module:workspace-discipline`, 24 live hashes). `test:modules`
+  27 → 33. Full record in the roadmap §5 entry "Module #1
+  (workspace-discipline)". The flywheel has turned once; further
+  module authoring turns remain owner-gated per-run.
 - **The extraction pilot re-run** (after Session 19 ships): validates
   the code prompt + suppression on real code; propose with the printed
   block count (committed telemetry: ~512 in / ~419 out tokens per
