@@ -123,13 +123,13 @@ export function serializeModuleSelection(selection: string[]): string {
 }
 
 /**
- * Loads and validates one registered module — manifest shape, active
- * status, addendum existence, size bound, and brace-freedom. Line
- * endings are normalized to LF so the composed prompt is byte-stable
- * across checkout conventions (the Python loader's universal-newline
- * read does the same).
+ * Reads and shape-validates one module manifest WITHOUT the composition
+ * gates (active status, addendum checks). Session 18: the registration
+ * CLI needs to read contested/retired manifests — their graph entities
+ * still exist and their verify report still matters — while composition
+ * (loadModule below) keeps refusing them.
  */
-export function loadModule(name: string, modulesDir: string = path.resolve('modules')): TrellisModule {
+export function readModuleManifest(name: string, modulesDir: string = path.resolve('modules')): ModuleManifest {
   const manifestPath = path.join(modulesDir, name, 'module.json');
   if (!fs.existsSync(manifestPath)) {
     throw new Error(`Module '${name}' is not registered: missing ${manifestPath}.`);
@@ -148,6 +148,31 @@ export function loadModule(name: string, modulesDir: string = path.resolve('modu
   if (manifest.name !== name) {
     throw new Error(`Module '${name}' manifest name '${manifest.name}' must equal its directory name.`);
   }
+  return manifest;
+}
+
+/**
+ * Lists every registered module name (directories under modulesDir that
+ * carry a module.json), sorted for stable operator output.
+ */
+export function listModuleNames(modulesDir: string = path.resolve('modules')): string[] {
+  if (!fs.existsSync(modulesDir)) return [];
+  return fs
+    .readdirSync(modulesDir, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && fs.existsSync(path.join(modulesDir, entry.name, 'module.json')))
+    .map(entry => entry.name)
+    .sort();
+}
+
+/**
+ * Loads and validates one registered module — manifest shape, active
+ * status, addendum existence, size bound, and brace-freedom. Line
+ * endings are normalized to LF so the composed prompt is byte-stable
+ * across checkout conventions (the Python loader's universal-newline
+ * read does the same).
+ */
+export function loadModule(name: string, modulesDir: string = path.resolve('modules')): TrellisModule {
+  const manifest = readModuleManifest(name, modulesDir);
   if (manifest.status !== 'active') {
     throw new Error(`Module '${name}' has status '${manifest.status}' and cannot be composed (only active modules load).`);
   }

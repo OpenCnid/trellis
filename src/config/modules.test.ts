@@ -5,9 +5,11 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   DEFAULT_MODULE_SELECTION,
   MODULE_RUBRIC_TOKEN,
+  listModuleNames,
   loadModule,
   loadModules,
   parseModuleSelection,
+  readModuleManifest,
   serializeModuleSelection,
 } from './modules';
 
@@ -121,6 +123,30 @@ describe('loadModule (defect rejection)', () => {
       expect(() => loadModule('testmod', dir)).toThrow(/only active modules load/);
       fs.rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  it('readModuleManifest reads a contested manifest that composition refuses (Session 18 registration seam)', () => {
+    const dir = writeModule({ ...VALID, status: 'contested' }, 'x\n');
+    expect(readModuleManifest('testmod', dir).status).toBe('contested');
+    expect(() => loadModule('testmod', dir)).toThrow(/only active modules load/);
+  });
+
+  it('readModuleManifest still enforces manifest shape and directory-name identity', () => {
+    const dir = writeModule({ ...VALID, hotPatch: true }, 'x\n');
+    expect(() => readModuleManifest('testmod', dir)).toThrow(/invalid/);
+    fs.rmSync(dir, { recursive: true, force: true });
+    const dir2 = writeModule({ ...VALID, name: 'othername' }, 'x\n');
+    fs.renameSync(path.join(dir2, 'othername'), path.join(dir2, 'testmod'));
+    expect(() => readModuleManifest('testmod', dir2)).toThrow(/must equal its directory name/);
+  });
+
+  it('listModuleNames returns sorted module.json-bearing directories only', () => {
+    const dir = writeModule(VALID, 'x\n');
+    fs.mkdirSync(path.join(dir, 'zz-not-a-module'));
+    fs.mkdirSync(path.join(dir, 'another'));
+    fs.writeFileSync(path.join(dir, 'another', 'module.json'), '{}');
+    expect(listModuleNames(dir)).toEqual(['another', 'testmod']);
+    expect(listModuleNames(path.join(dir, 'no-such-dir'))).toEqual([]);
   });
 
   it('rejects a kernelCompat mismatch', () => {

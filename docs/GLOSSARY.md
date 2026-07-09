@@ -101,6 +101,16 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   extracted into the first registry module with a byte-identical
   composed-prompt pin: the loader's acceptance test, adding zero new
   capability.
+- **Module registration** (Session 18) — the operator-run bridge
+  (`npm run modules:register`,
+  [register_modules.ts](../scripts/register_modules.ts)) that represents
+  each research-bearing active manifest as one graph entity
+  (`module:<name>`, kind `module_manifest`) citing its research
+  `sourceNodeIds`, after verifying every hash exists in `ast_nodes` — so
+  the unchanged invalidation sweep contests a capability when its
+  research basis changes. `npm run modules:verify` reports contested
+  entities; recovery is human: re-review, flip the manifest status back
+  to active, re-register. Empty-research manifests register nothing.
 
 ## Prompt and protocol conventions
 
