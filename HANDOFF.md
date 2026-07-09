@@ -757,7 +757,13 @@ cost estimate):
   (`module:workspace-discipline`, 24 live hashes). `test:modules`
   27 → 33. Full record in the roadmap §5 entry "Module #1
   (workspace-discipline)". The flywheel has turned once; further
-  module authoring turns remain owner-gated per-run.
+  module authoring turns remain owner-gated per-run. The turn's
+  laundering finding produced a designed remediation —
+  `docs/architecture/GROUNDED_AUTHORING.md` (PROPOSED: scoped
+  authoring mode, harness-pinned citations, fixed template, anchor
+  derivation gate) — owner-scheduled; its Phase 0 procedure (never
+  pre-state directives; operator pins citations from promotion
+  output) applies to ANY authoring turn run before it ships.
 - **The extraction pilot re-run** (after Session 19 ships): validates
   the code prompt + suppression on real code; propose with the printed
   block count (committed telemetry: ~512 in / ~419 out tokens per

@@ -1940,3 +1940,27 @@ config/data, not code); `npm run build` and `npm run python:check` pass;
 `npm run test:modules` 33/33. The flywheel has turned once: research → promote
 → author → gate → register, with the sweep now able to contest this capability
 if its promoted research changes.
+
+### July 9, 2026 — Grounded-authoring design record (module #1 follow-up)
+
+The module #1 review surfaced that the turn's provenance-laundering
+miscitation was structural, not incidental: authoring ran on the general
+research agent (whole-database `vector_search`/`run_cypher`, self-reported
+citations) under a brief that pre-stated the target directives — so access,
+attribution, and derivation grounding all failed or went unproven, and only
+the operator gate caught it. The remediation is designed, not yet
+implemented: `docs/architecture/GROUNDED_AUTHORING.md` (PROPOSED) — a
+kernel-owned `--mode author` scoped to a seeded read-only corpus workspace
+with a `TRELLIS_DRAFT` contract, harness-pinned `research.sourceNodeIds`
+(the model never chooses hashes; registration's existence gate unchanged),
+a fixed harness-composed authoring template (sources in, protocol out), and
+a derivation gate on the sampled-verifier rails (v1 deterministic anchor
+coverage, zero-paid, joining the module acceptance drill; embedding and
+narrow-entailment tiers class-gated later — note the measured constraint
+that promoted-with-`none` blocks carry no embeddings, 0/50 on the module #1
+corpus). No invariant is touched; the operator gate stays the backstop.
+Phase 0 (procedure only) is effective immediately: authoring briefs must
+not pre-state directives, and citations are pinned by the operator from
+promotion output. Implementation is owner-scheduled (recommended before the
+next paid authoring turn; Session 19 extraction prerequisites need not be
+displaced).
