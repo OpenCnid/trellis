@@ -36,8 +36,88 @@ def _count_tool_call():
 def get_tool_call_count() -> int:
     return _tool_call_stats["count"]
 
+# --- Citation audit (opt-in measurement, off by default) ---------------
+# For the provenance-citation A/B eval: when TRELLIS_CITATION_AUDIT=1,
+# record which AST hashes the run actually READ (get_ast_texts returns),
+# which it SAW in vector_search results, and which it CITED as
+# sourceNodeIds. A cited hash the run never read cannot have been derived
+# from those bytes — the deterministic laundering signal. Purely
+# observational: it changes no tool return value and no prompt, and it
+# emits nothing unless enabled, so a normal run stays byte-identical and
+# the T16 no-hashes-in-logs rule holds (hashes appear only on the opt-in
+# TRELLIS_CITATION_AUDIT line the eval probe consumes).
+CITATION_AUDIT_ENABLED = os.getenv("TRELLIS_CITATION_AUDIT") == "1"
+# The HYBRID arm of the A/B eval: a STRUCTURAL read-before-cite soft-gate.
+# When TRELLIS_CITATION_HINT=1, the write path refuses to cite a hash the
+# run never read via get_ast_texts, with a self-correcting message — the
+# discipline enforced by the harness rather than requested by a prompt.
+# Off by default (byte-identical); experimental, not a shipped gate.
+CITATION_HINT_ENABLED = os.getenv("TRELLIS_CITATION_HINT") == "1"
+_TRACK_CITATIONS = CITATION_AUDIT_ENABLED or CITATION_HINT_ENABLED
+_audit_lock = threading.Lock()
+_audit = {"read": set(), "search": set(), "cited": set()}
+
+def _audit_add(bucket, ids):
+    if not _TRACK_CITATIONS:
+        return
+    with _audit_lock:
+        _audit[bucket].update(i for i in ids if isinstance(i, str))
+
+def _read_set() -> set:
+    with _audit_lock:
+        return set(_audit["read"])
+
+def get_citation_audit() -> dict:
+    """Sorted read/search/cited hash sets plus the derived laundering
+    signals. Empty when the audit is disabled."""
+    with _audit_lock:
+        read = set(_audit["read"])
+        search = set(_audit["search"])
+        cited = set(_audit["cited"])
+    return {
+        "read": sorted(read),
+        "search": sorted(search),
+        "cited": sorted(cited),
+        # Cited but never read via get_ast_texts — the core laundering
+        # signal (a claim cannot derive from bytes the run never fetched).
+        "citedButUnread": sorted(cited - read),
+        # Cited AND surfaced by vector_search — module #1's exact
+        # signature (citing a semantically-adjacent search hit).
+        "citedFromSearch": sorted(cited & search),
+    }
+
+
+# The semantic (entailment) citation gate — the experimental §7 v3 tier
+# (GROUNDED_AUTHORING). Off by default; when TRELLIS_CITATION_ENTAIL=1 the
+# write path calls an injected checker that asks, per cited block, whether
+# the block's text supports the claim, and refuses unsupported citations.
+# Structural checks (existence, readership) cannot catch laundering — the
+# measured finding in PROVENANCE_CITATION_AB_REPORT.md — because support is
+# semantic. Byte-identical when off.
+CITATION_ENTAIL_ENABLED = os.getenv("TRELLIS_CITATION_ENTAIL") == "1"
+
+
+def _node_text(node) -> str:
+    """Reconstructs a node's text from its stored `data` (mirrors
+    traverse.ts nodeText): direct content when present, else the
+    concatenation of its children's text in document order. Markdown
+    block nodes (paragraph/heading/listItem) carry no direct content —
+    their text lives in child nodes — so `data->>'content'` reads NULL
+    for them; this recovers it."""
+    if isinstance(node, str):
+        try:
+            node = json.loads(node)
+        except (json.JSONDecodeError, ValueError):
+            return node
+    if not isinstance(node, dict):
+        return ""
+    content = node.get("content")
+    if content is not None:
+        return content
+    return "".join(_node_text(child) for child in (node.get("children") or []))
+
 class TrellisNeo4j:
-    def __init__(self, ast_existence_check=None):
+    def __init__(self, ast_existence_check=None, entailment_check=None):
         # Retrieve config from environment variables
         uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
         user = os.getenv("NEO4J_USER", "neo4j")
@@ -50,6 +130,12 @@ class TrellisNeo4j:
         # WRITE session opens — "an AST hash means verified ingested
         # bytes" becomes enforcement, not convention.
         self._ast_existence_check = ast_existence_check
+        # Experimental semantic citation gate (off unless
+        # TRELLIS_CITATION_ENTAIL=1): a callable
+        # (subject, verb, obj, hashes) -> list of hashes whose block text
+        # does NOT support the claim. When wired, unsupported citations
+        # are refused before the write.
+        self._entailment_check = entailment_check
 
     def run_cypher(self, query: str) -> str:
         """
@@ -242,6 +328,43 @@ class TrellisNeo4j:
         # Existence enforcement runs first: no write session opens for a
         # batch citing unknown hashes.
         self._verify_hashes_exist(facts)
+        # Audit the cited hashes (the model's attempt), before the write —
+        # laundering is about existent-but-wrong hashes, which pass the
+        # existence gate and reach here.
+        cited_hashes = {h for fact in facts for h in fact["sourceNodeIds"]}
+        _audit_add("cited", cited_hashes)
+        # Hybrid soft-gate (experimental, opt-in): refuse to cite a hash
+        # the run never read via get_ast_texts, so the model must read
+        # before it cites. (Measured NOT to prevent laundering — the model
+        # reads the wrong block then cites it — kept for the A/B record.)
+        if CITATION_HINT_ENABLED:
+            unread = sorted(cited_hashes - _read_set())
+            if unread:
+                shown = ", ".join(unread[:3])
+                more = f" (+{len(unread) - 3} more)" if len(unread) > 3 else ""
+                raise ValueError(
+                    f"Citation discipline: you may cite only AST blocks you have READ this run "
+                    f"via get_ast_texts. These cited hashes were never read: {shown}{more}. "
+                    f"Call get_ast_texts on them, confirm the bytes actually support your claim, "
+                    f"then re-derive and cite."
+                )
+        # Semantic entailment gate (experimental, opt-in): refuse a cited
+        # block whose text does not support the claim — the only check that
+        # catches read-then-cite laundering. A checker infrastructure
+        # failure propagates as RuntimeError, never a provenance verdict
+        # (the Session 14 discipline).
+        if CITATION_ENTAIL_ENABLED and self._entailment_check is not None:
+            for fact in facts:
+                unsupported = self._entailment_check(
+                    fact["subject"], fact["verb"], fact["obj"], fact["sourceNodeIds"]
+                )
+                if unsupported:
+                    shown = ", ".join(unsupported[:3])
+                    raise ValueError(
+                        f"Citation support check: cited block(s) {shown} do not state or support "
+                        f"the claim '{fact['subject']} {fact['verb']} {fact['obj']}'. Cite only "
+                        f"blocks whose text actually supports the claim; drop the rest and re-derive."
+                    )
         try:
             with self.driver.session(default_access_mode=WRITE_ACCESS) as session:
                 result = session.run(self._WRITE_INSIGHT_QUERY, facts=facts, rubricVersion=RUBRIC_VERSION)
@@ -315,6 +438,19 @@ class TrellisPostgres:
         dsn = os.getenv("PG_DSN", "dbname=trellis_db user=trellis_user password=trellis_password host=localhost port=5433")
         self.conn = psycopg2.connect(dsn)
 
+    def fetch_texts(self, hashes: list) -> dict:
+        """Reconstructed block text for each hash — {id: text}. NOT counted
+        as a tool call and NOT audited: harness-side plumbing (used by the
+        entailment checker) that must not pollute the citation audit or the
+        provenance protocol. Reconstructs text from the full stored node so
+        markdown/container blocks (whose text lives in children) read back
+        correctly, not as NULL."""
+        if not hashes:
+            return {}
+        with self.conn.cursor() as cur:
+            cur.execute("SELECT id, data FROM ast_nodes WHERE id = ANY(%s)", (list(hashes),))
+            return {row[0]: _node_text(row[1]) for row in cur.fetchall()}
+
     def get_ast_texts(self, hashes: list) -> str:
         """
         Fetches the exact text blocks for a given list of AST node hashes (IDs).
@@ -323,18 +459,16 @@ class TrellisPostgres:
         _count_tool_call()
         if not hashes:
             return "{}"
-        
+
         try:
-            with self.conn.cursor() as cur:
-                # ast_nodes table has: id, document_id, data, embedding
-                # We need data->>'content'
-                cur.execute(
-                    "SELECT id, data->>'content' FROM ast_nodes WHERE id = ANY(%s)",
-                    (hashes,)
-                )
-                results = cur.fetchall()
-                # Return dict of {id: content}
-                return json.dumps({row[0]: row[1] for row in results})
+            # Reconstruct text from the full node (not data->>'content',
+            # which is NULL for markdown/container blocks whose text lives
+            # in child nodes — a provenance defect: the RLM could not read
+            # markdown or promoted-research bytes it is meant to cite).
+            texts = self.fetch_texts(hashes)
+            # Read-set: the hashes the run actually retrieved text for.
+            _audit_add("read", list(texts.keys()))
+            return json.dumps(texts)
         except Exception as e:
             # Roll back so the aborted transaction does not poison the
             # agent's next (corrected) query, then raise for the REPL
@@ -388,7 +522,18 @@ class TrellisPostgres:
                     (json.dumps(query_embedding),)
                 )
                 results = cur.fetchall()
-                return json.dumps([{"id": row[0], "content": row[1]} for row in results])
+                # Search-set: hashes surfaced by semantic search (module
+                # #1 laundered by citing these without reading them).
+                _audit_add("search", [row[0] for row in results])
+                # search_ast_nodes returns data->>'content', which is NULL
+                # for markdown/container blocks; reconstruct those so the
+                # preview is real text, not null (the get_ast_texts fix).
+                need = [row[0] for row in results if row[1] is None]
+                recon = self.fetch_texts(need) if need else {}
+                return json.dumps([
+                    {"id": row[0], "content": row[1] if row[1] is not None else recon.get(row[0], "")}
+                    for row in results
+                ])
         except Exception as e:
             self.conn.rollback()
             raise RuntimeError(f"PostgresError during vector search: {e}") from e

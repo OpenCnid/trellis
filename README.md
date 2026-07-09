@@ -469,6 +469,46 @@ Real networked or metered MCP servers (an actual web-search provider) are
 owner-approved runs: print the configured allowlist first and record the
 observed `mcp_calls`.
 
+### Authoring modules (grounded authoring, Session 19)
+
+A protocol module's addendum can be drafted by an RLM under the
+kernel-owned **grounded-authoring mode** (design record
+`docs/architecture/GROUNDED_AUTHORING.md`). The mode exists because the
+authoring job is not the research job: an author sees ONLY a fixed,
+already-promoted research corpus (seeded into a read-only-scope
+workspace), has no database, search, or write access, and never chooses
+its own citations — the harness pins `research.sourceNodeIds` from the
+corpus. The driver assembles a module **directory for human review**; it
+never registers and never lands.
+
+```bash
+# Plan only (default): echoes the corpus, template hash, and cost
+# estimate, then refuses to spawn — nothing is written.
+npm run modules:author -- --module-name <name> \
+    --topic "<one bounded sentence>" \
+    --doc-key <promoted-doc-key> [--doc-key <promoted-doc-key> ...]
+
+# Zero-paid: assemble from a saved TRELLIS_DRAFT JSON (the drill path).
+npm run modules:author -- --module-name <name> --topic "<sentence>" \
+    --doc-key <key> --draft path/to/draft.json
+
+# Paid: spawn the authoring run (owner-approved, per run).
+npm run modules:author -- --module-name <name> --topic "<sentence>" \
+    --doc-key <key> --confirm-paid
+```
+
+The template is a byte-pinned kernel constant composed from exactly the
+topic and the doc keys, so it cannot pre-state the target directives.
+Before assembly, a **derivation gate** scores the draft's coverage of
+corpus-specific anchors (measured comparisons, named mechanics,
+distinctive terms) and refuses below a modest threshold; a draft
+carrying any 64-hex token is refused at the scanner (the model never
+supplies provenance). The output directory is an ordinary module: review
+it, merge it, then register it with `npm run modules:register` as usual.
+The first paid run under this mode should be an owner-approved new module
+with a corpus chosen for testable specificity. Drilled zero-LLM by
+`npm run test:module-lifecycle` (§10–§11).
+
 ## Benchmarks
 
 The OOLONG-Pairs harness ships two committed, seeded corpora:

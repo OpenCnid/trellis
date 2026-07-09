@@ -1,11 +1,15 @@
 # Grounded Authoring — Design Record
 
-*Status: PROPOSED (pending owner scheduling). Child record of
+*Status: Phases 1–2 IMPLEMENTED (Session 19, July 9, 2026). Child record of
 [WORKSPACE_AND_MODULES.md](WORKSPACE_AND_MODULES.md); where they disagree,
 the parent record and the code win (authority: code > glossary > prose).
 Distilled July 9, 2026 from the review of the module #1 paid authoring turn
 (PR #45, `modules/workspace-discipline/`), whose findings this document
-remediates.*
+remediates. The mode (`trellis_agent.py --mode author`), pinned attribution,
+the fixed template, the deterministic anchor gate, and the operator driver
+(`npm run modules:author`) shipped in Session 19; Phase 3 (v2/v3 derivation
+tiers) stays conditional on the first tool-bearing module class. See the
+roadmap §5 entry (July 9, 2026 — Session 19) for the acceptance record.*
 
 ---
 
@@ -373,6 +377,67 @@ run remains in the measured band (module #1: 160,270 in / 7,827 out
 | D3 | Flat vs per-claim citations? | Flat now; per-claim reserved as manifest v2 (`kernelCompat: 2`) | Flat fails safe (over-contests); per-claim is a twin-validator schema change with no current consumer |
 | D4 | Scoped `get_ast_texts` in the sandbox? | No database tools at all; corpus travels as block-aligned workspace segments | Fewest surfaces; fidelity satisfied by seeding exact block texts; hash metadata keeps the audit trail human-readable |
 | D5 | Which classes get which derivation tier? | Protocol: v1 mandatory. Tool-bearing: v1 + sampled v3. Kernel: no model authoring | Extends the §9.3 gate table without relaxing any existing gate |
+
+### 12.1 Implementation refinements (Session 19, resolved by the code)
+
+The decisions above were left where the code would settle them; it did:
+
+- **Anchor coverage threshold = 0.3** (`ANCHOR_COVERAGE_THRESHOLD`, a kernel
+  constant, unit-pinned). Measured against fixtures a derived
+  workspace-discipline draft covers ~0.69–0.83 of corpus anchors while a
+  corpus-blind generic draft covers 0.0 — the modest bar the design asked
+  for (§7): it catches a blind draft, does not grade a derived one. Not
+  env-tunable (Guardrail 5).
+- **The seed budget is enforced in the driver too**, not only at the Python
+  seed. `assertSeedWithinBudget` refuses an over-budget corpus before any
+  spawn OR assembly, so the zero-paid `--draft` path is gated identically to
+  the paid path (the Session 16 over-budget-seed rule, applied to authoring).
+- **Corpus segment origin stamps:** `server = "trellis-authoring"`,
+  `tool = <corpus doc key>`, `argsHash = block hash first 16 hex`. The
+  16-hex prefix is deterministic and auditable and can never match
+  `^[0-9a-f]{64}$` (D4's "hash metadata keeps the audit trail readable",
+  made structural).
+- **Template composition split:** the TS driver composes the byte-pinned
+  template from (topic, doc keys) and passes it as the run's `--query`; the
+  Python author setup composes the system prompt (rlms base + author addendum
+  + workspace surface) around it. Both halves are brace-free; the template is
+  escape-doubled defensively before splicing.
+- **Draft envelope shape:** `{purpose, addendum, gapNotes}` — no hashes. The
+  model is asked for `gap_notes`; the agent normalizes to `gapNotes` and the
+  scanner refuses any 64-hex token anywhere in the payload.
+- **The anchor gate fails closed on an unanchorable corpus** (empty anchor
+  set never auto-passes): a corpus too generic to yield anchors cannot have
+  its derivation measured, so it is refused rather than waved through (§8).
+
+### 12.2 The §7 verifier tiers, measured (provenance-citation A/B, July 9, 2026)
+
+A paid A/B eval of citation laundering in the research path
+(`docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`) validated the §7 tiering
+empirically and sharpened it:
+
+- **Laundering is incentive-driven, not dispositional.** The RLM cites
+  correctly in a neutral task (0% laundered) and launders only when the task
+  rewards over-citing. **New standing design principle:** never reward
+  citation *count* — not in task prompts, rubrics, or orchestration rewards.
+  This is the same mechanism as module #1's authoring laundering, and the
+  same fix Session 19 applied there (remove the affordance and the incentive:
+  harness-pinned citations, no whole-DB search).
+- **v1 (deterministic) and structural checks do NOT catch laundering.** The
+  existence check passes it (hashes are real); a readership check
+  (cited-but-unread) is blind (the model reads the decoy, then cites it —
+  `cited-but-unread = 0` in 100% of laundered runs); a prompt "discipline"
+  module is unreliable (0–100% across conditions). Confirms §2: laundering
+  is semantic, not structurally decidable.
+- **v3 (narrow entailment) is the only mechanism that works, and it works
+  both ways.** As a detector (a narrow "does this block support this claim"
+  judge) it flags exactly the laundered citations; as an inline gate
+  (`TRELLIS_CITATION_ENTAIL`, prototyped, off by default) it refuses
+  unsupported citations so 0% laundering persists at every pressure. Cost is
+  ~1.5–2× and, under an impossible over-citation demand, it makes the model
+  write nothing rather than launder — so v3 stays **class-gated and sampled**
+  (the belief-verifier precedent), for contexts where the incentive cannot be
+  removed (tool-bearing agents citing external retrieval). The primary lever
+  remains incentive design; v3 is the backstop where it cannot be applied.
 
 ---
 

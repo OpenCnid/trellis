@@ -30,7 +30,7 @@ from trellis_workspace import (  # noqa: E402
     WORKSPACE_MAX_SEGMENTS_DEFAULT,
     WORKSPACE_MAX_BYTES_DEFAULT,
 )
-from trellis_tools import AST_HASH_PATTERN, get_tool_call_count  # noqa: E402
+from trellis_tools import AST_HASH_PATTERN, get_tool_call_count, _node_text  # noqa: E402
 from trellis_mcp import TrellisMcp, parse_mcp_config, get_mcp_call_count  # noqa: E402
 
 failures = 0
@@ -52,6 +52,26 @@ def expect_raises(name, fn, exc_type, needle=""):
     except Exception as e:  # noqa: BLE001
         check(name, False, f"expected {exc_type.__name__}, got {type(e).__name__}: {e}")
 
+
+# --- 0. AST text reconstruction (get_ast_texts markdown fix) ----------------
+# get_ast_texts/vector_search read block text; markdown block nodes
+# (paragraph/heading/listItem) carry no direct `content` (it lives in child
+# nodes), so data->>'content' reads NULL. _node_text reconstructs it
+# (mirrors traverse.ts nodeText) so the RLM can read markdown and promoted
+# research it is meant to cite.
+print("\n[0] _node_text reconstruction (markdown get_ast_texts fix)")
+check("content-bearing node returns its content directly",
+      _node_text({"type": "NarrativeText", "content": "direct text"}) == "direct text")
+check("markdown-shaped block reconstructs text from children in order",
+      _node_text({"type": "paragraph", "children": [
+          {"type": "text", "content": "Globex "},
+          {"type": "strong", "children": [{"type": "text", "content": "acquired"}]},
+          {"type": "text", "content": " Initech"},
+      ]}) == "Globex acquired Initech")
+check("a JSON-string node payload is parsed before reconstruction",
+      _node_text('{"type": "paragraph", "children": [{"type": "text", "content": "hi"}]}') == "hi")
+check("childless, contentless node reconstructs to empty (not None)",
+      _node_text({"type": "thematicBreak"}) == "")
 
 # --- 1. Defensive bounds re-validation (twins of workspace_bounds.test.ts) --
 print("\n[1] parse_workspace_bounds re-validation")

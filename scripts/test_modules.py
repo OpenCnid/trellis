@@ -167,6 +167,54 @@ check("a selection including module #1 stays brace-safe after substitution",
 check("module #1 is NOT in the default selection (the byte-identical pin is untouched)",
       "workspace-discipline" not in list(DEFAULT_SELECTION))
 
+# --- 6. Grounded authoring mode (Session 19) --------------------------------
+# The author-mode setup functions compose the author prompt and tool dict
+# with no completion and no database connection (design record §4/§6).
+# The research-mode prompt pin above is untouched: author mode is a
+# separate branch and a separate system prompt.
+print("\n[6] grounded authoring mode (Session 19)")
+
+from trellis_workspace import TrellisWorkspace  # noqa: E402
+
+author_ws = TrellisWorkspace(max_segments=8, max_bytes=64 * 1024)
+tools = trellis_agent.build_author_tools(author_ws)
+check("author tool surface is exactly {trellis_workspace}",
+      set(tools) == {"trellis_workspace"} and tools["trellis_workspace"] is author_ws)
+
+check("AUTHOR_ADDENDUM is brace-free (rlms .format() safety)",
+      "{" not in trellis_agent.AUTHOR_ADDENDUM and "}" not in trellis_agent.AUTHOR_ADDENDUM)
+
+sample_template = (
+    "GROUNDED AUTHORING TASK\n\nTOPIC: workspace discipline for an RLM\n\n"
+    "derive the operating protocol this research corpus implies; record a gap note "
+    "where the corpus is silent.\n"
+)
+author_prompt = trellis_agent.build_author_system_prompt(sample_template)
+check("author prompt extends the rlms base REPL prompt (never replaces it)",
+      author_prompt.startswith(RLM_SYSTEM_PROMPT))
+check("author prompt contains the composed template verbatim",
+      sample_template in author_prompt)
+check("author prompt teaches the workspace surface and the draft output contract",
+      "trellis_workspace.read()" in author_prompt
+      and "gap_notes" in author_prompt and "purpose" in author_prompt)
+check("author prompt does NOT carry the research directives or the DB tools",
+      "trellis_neo4j" not in author_prompt and "trellis_postgres" not in author_prompt)
+appended = author_prompt[len(RLM_SYSTEM_PROMPT):]
+check("the author-added prompt text is brace-free after the base prompt",
+      "{" not in appended and "}" not in appended)
+
+draft = trellis_agent.extract_draft_envelope(
+    'prose\n{"purpose": "p", "addendum": "PROTOCOL\\nrebind atomically", "gap_notes": ["none"]} trailing'
+)
+check("extract_draft_envelope pulls purpose/addendum/gapNotes from the answer",
+      draft == {"purpose": "p", "addendum": "PROTOCOL\nrebind atomically", "gapNotes": ["none"]})
+check("extract_draft_envelope also accepts camelCase gapNotes",
+      trellis_agent.extract_draft_envelope('{"purpose":"p","addendum":"a","gapNotes":[]}')
+      == {"purpose": "p", "addendum": "a", "gapNotes": []})
+check("extract_draft_envelope returns None on non-JSON and on missing fields",
+      trellis_agent.extract_draft_envelope("no json here") is None
+      and trellis_agent.extract_draft_envelope('{"purpose": "p"}') is None)
+
 # ---------------------------------------------------------------------------
 if failures:
     print(f"\n{failures} check(s) failed.")
