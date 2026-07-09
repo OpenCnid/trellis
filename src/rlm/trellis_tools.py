@@ -36,6 +36,56 @@ def _count_tool_call():
 def get_tool_call_count() -> int:
     return _tool_call_stats["count"]
 
+# --- Citation audit (opt-in measurement, off by default) ---------------
+# For the provenance-citation A/B eval: when TRELLIS_CITATION_AUDIT=1,
+# record which AST hashes the run actually READ (get_ast_texts returns),
+# which it SAW in vector_search results, and which it CITED as
+# sourceNodeIds. A cited hash the run never read cannot have been derived
+# from those bytes — the deterministic laundering signal. Purely
+# observational: it changes no tool return value and no prompt, and it
+# emits nothing unless enabled, so a normal run stays byte-identical and
+# the T16 no-hashes-in-logs rule holds (hashes appear only on the opt-in
+# TRELLIS_CITATION_AUDIT line the eval probe consumes).
+CITATION_AUDIT_ENABLED = os.getenv("TRELLIS_CITATION_AUDIT") == "1"
+# The HYBRID arm of the A/B eval: a STRUCTURAL read-before-cite soft-gate.
+# When TRELLIS_CITATION_HINT=1, the write path refuses to cite a hash the
+# run never read via get_ast_texts, with a self-correcting message — the
+# discipline enforced by the harness rather than requested by a prompt.
+# Off by default (byte-identical); experimental, not a shipped gate.
+CITATION_HINT_ENABLED = os.getenv("TRELLIS_CITATION_HINT") == "1"
+_TRACK_CITATIONS = CITATION_AUDIT_ENABLED or CITATION_HINT_ENABLED
+_audit_lock = threading.Lock()
+_audit = {"read": set(), "search": set(), "cited": set()}
+
+def _audit_add(bucket, ids):
+    if not _TRACK_CITATIONS:
+        return
+    with _audit_lock:
+        _audit[bucket].update(i for i in ids if isinstance(i, str))
+
+def _read_set() -> set:
+    with _audit_lock:
+        return set(_audit["read"])
+
+def get_citation_audit() -> dict:
+    """Sorted read/search/cited hash sets plus the derived laundering
+    signals. Empty when the audit is disabled."""
+    with _audit_lock:
+        read = set(_audit["read"])
+        search = set(_audit["search"])
+        cited = set(_audit["cited"])
+    return {
+        "read": sorted(read),
+        "search": sorted(search),
+        "cited": sorted(cited),
+        # Cited but never read via get_ast_texts — the core laundering
+        # signal (a claim cannot derive from bytes the run never fetched).
+        "citedButUnread": sorted(cited - read),
+        # Cited AND surfaced by vector_search — module #1's exact
+        # signature (citing a semantically-adjacent search hit).
+        "citedFromSearch": sorted(cited & search),
+    }
+
 class TrellisNeo4j:
     def __init__(self, ast_existence_check=None):
         # Retrieve config from environment variables
@@ -242,6 +292,25 @@ class TrellisNeo4j:
         # Existence enforcement runs first: no write session opens for a
         # batch citing unknown hashes.
         self._verify_hashes_exist(facts)
+        # Audit the cited hashes (the model's attempt), before the write —
+        # laundering is about existent-but-wrong hashes, which pass the
+        # existence gate and reach here.
+        cited_hashes = {h for fact in facts for h in fact["sourceNodeIds"]}
+        _audit_add("cited", cited_hashes)
+        # Hybrid soft-gate (experimental, opt-in): refuse to cite a hash
+        # the run never read via get_ast_texts, so the model must read
+        # before it cites.
+        if CITATION_HINT_ENABLED:
+            unread = sorted(cited_hashes - _read_set())
+            if unread:
+                shown = ", ".join(unread[:3])
+                more = f" (+{len(unread) - 3} more)" if len(unread) > 3 else ""
+                raise ValueError(
+                    f"Citation discipline: you may cite only AST blocks you have READ this run "
+                    f"via get_ast_texts. These cited hashes were never read: {shown}{more}. "
+                    f"Call get_ast_texts on them, confirm the bytes actually support your claim, "
+                    f"then re-derive and cite."
+                )
         try:
             with self.driver.session(default_access_mode=WRITE_ACCESS) as session:
                 result = session.run(self._WRITE_INSIGHT_QUERY, facts=facts, rubricVersion=RUBRIC_VERSION)
@@ -333,6 +402,8 @@ class TrellisPostgres:
                     (hashes,)
                 )
                 results = cur.fetchall()
+                # Read-set: the hashes the run actually retrieved text for.
+                _audit_add("read", [row[0] for row in results])
                 # Return dict of {id: content}
                 return json.dumps({row[0]: row[1] for row in results})
         except Exception as e:
@@ -388,6 +459,9 @@ class TrellisPostgres:
                     (json.dumps(query_embedding),)
                 )
                 results = cur.fetchall()
+                # Search-set: hashes surfaced by semantic search (module
+                # #1 laundered by citing these without reading them).
+                _audit_add("search", [row[0] for row in results])
                 return json.dumps([{"id": row[0], "content": row[1]} for row in results])
         except Exception as e:
             self.conn.rollback()

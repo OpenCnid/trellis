@@ -6,7 +6,14 @@ import threading
 from rlm import RLM
 from rlm.core.lm_handler import LMRequestHandler
 from rlm.utils.prompts import RLM_SYSTEM_PROMPT
-from trellis_tools import TrellisNeo4j, TrellisPostgres, get_tool_call_count, RUBRIC_TEXT
+from trellis_tools import (
+    TrellisNeo4j,
+    TrellisPostgres,
+    get_tool_call_count,
+    RUBRIC_TEXT,
+    CITATION_AUDIT_ENABLED,
+    get_citation_audit,
+)
 from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
 from trellis_workspace import (
     TrellisWorkspace,
@@ -421,6 +428,12 @@ def main():
             "model_usage": usage_dict.get("model_usage_summaries", {}),
         }
         print(f"TRELLIS_TELEMETRY: {json.dumps(telemetry_payload)}", flush=True)
+
+        # Opt-in citation audit for the provenance-citation A/B eval
+        # (TRELLIS_CITATION_AUDIT=1). Off by default: a normal run emits
+        # nothing here and stays byte-identical.
+        if CITATION_AUDIT_ENABLED:
+            print(f"TRELLIS_CITATION_AUDIT: {json.dumps(get_citation_audit())}", flush=True)
 
         if get_tool_call_count() == 0:
             # The agent answered without touching either database — the
