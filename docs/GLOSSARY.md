@@ -80,18 +80,27 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
 
 ## Self-editing and modules
 
-- **Capability ladder (L0–L3)** — L0 self-shaping inside the sandbox
-  (exists, safe); L1 runtime config mutation (forbidden, Guardrail 5); L2
-  runtime code hot-patching (rejected); L3 staged self-modification through
-  the verified pipeline: propose → tests → gate → merge → next run inherits
-  (approved; the capability flywheel's mechanism).
-- **Kernel** — the human-owned trust core no module may touch: the provenance
-  write path and validators, sandbox session modes, bounds enforcement,
-  credential redaction, telemetry protocols, and the module loader/gates
-  themselves.
-- **Userspace** — the agent-authorable extension space: prompt protocols
-  (addenda), namespaced tools, retrieval/planning/verifier strategies —
-  everything a module may contain.
+- **Content pool** — everything the operator has loaded into the agent's
+  reach: ingested documents and repositories (including Trellis's own),
+  workspace content, configured tools. Trellis's environment sits outside
+  the REPL by default; bringing it into the pool is an operator action
+  (design record §7).
+- **Self-editing (revised July 9, 2026, owner directive)** — Trellis may
+  work on anything in the content pool, including its own codebase,
+  governed by standard editing permissions (branches, review, merge rights,
+  tool allowlists) — the same pattern as Anthropic editing Claude Code with
+  Claude Code. The former L0–L3 ladder with L1/L2 forbidden is withdrawn;
+  edits land between runs through source control, never as mid-run
+  in-memory mutation.
+- **Kernel** — the trust core that ships as repository code and boots
+  identically for every run: the provenance write path and validators,
+  sandbox session modes, bounds enforcement, credential redaction,
+  telemetry protocols, and the module loader/gates. Changed through
+  ordinary reviewed commits (which Trellis may author), never composed or
+  mutated at runtime.
+- **Userspace** — the extension space composed per run from the module
+  registry: prompt protocols (addenda), namespaced tools,
+  retrieval/planning/verifier strategies — everything a module may contain.
 - **Module** — a versioned, manifest-described userspace extension (purpose,
   research `sourceNodeIds`, brace-free addendum, optional namespaced tools,
   bounds, acceptance drills, status) composed sparsely into runs from an

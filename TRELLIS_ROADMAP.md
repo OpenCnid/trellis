@@ -2143,3 +2143,47 @@ Acceptance (all green): `npm test` 612/70, `npm run build`,
 `test:module-lifecycle` (60). The next objective (§4 row 1, repository-scale
 extraction prerequisites) is unchanged — this late work fixed its own defect
 and did not surface one that jumps the queue.
+
+### July 9, 2026 — Owner directive: the self-editing ladder is pruned (docs revision)
+
+Owner directive, recorded verbatim in substance: *Anthropic edits Claude
+Code's own codebase with Claude Code. Trellis is no different — it can work
+on anything loaded into the REPL, including its own codebase. There are no
+forbidden rungs. Prune the L0–L3 ladder in favor of a content pool and
+standard industry-wide permissions for editing. The default state of
+Trellis's environment is outside the REPL, but the user MUST be able to
+implement L1/L2-class changes through Trellis.*
+
+**What changed (docs only; zero code):** design record
+`WORKSPACE_AND_MODULES.md` §7 rewritten (the L1 FORBIDDEN / L2 REJECTED
+verdicts are withdrawn; self-editing = content pool + standard permissions;
+the between-runs-through-source-control edit boundary and the mid-run
+in-memory mutation cautions survive as engineering facts, not prohibitions);
+§8 reframed (kernel/userspace is a packaging distinction, not a permission
+hierarchy — kernel changes land as ordinary reviewed commits, which Trellis
+may author); §13 exclusion rephrased accordingly. `GLOSSARY.md`: the
+Capability-ladder entry replaced by Content pool + Self-editing; Kernel and
+Userspace entries revised. `GROUNDED_AUTHORING.md`: §3, the §7 tier table
+kernel row, and D5 revised (kernel = ordinary code review, outside the
+module path). `HANDOFF.md`: guardrail 5 revised; the Session 13 historical
+entry annotated. `COLLABORATOR_BRIEFING.md` aligned.
+
+**Nothing needed restoring from a past branch:** the prohibition was
+doctrine-only — no code ever enforced it, and the enabling surfaces already
+exist (whole-codebase ingestion reads Trellis's own repo as verified AST
+bytes since Session 8; the operator-owned MCP registry is the vehicle for
+file/git write tooling since Sessions 10–12).
+
+**Unchanged:** the runtime data-trust rails (the Session 14 write path,
+promotion, module registration/composition gates) — those govern what enters
+the belief graph, not who may edit code. Gate machinery stays kernel
+constants at runtime (never env-tunable, never payload/completion-selectable);
+changing it is now explicitly an ordinary reviewed commit.
+
+**Candidate session (owner-schedulable): self-hosted editing enablement** —
+the first supervised Trellis-edits-Trellis exercise: operator configures a
+file/git MCP server against a checkout on a branch, the RLM authors a small
+real change (candidate: a docs or test improvement), and it lands through an
+ordinary reviewed PR — the L1/L2-class proof, analogous to module #1 proving
+the flywheel. Not scheduled; Session 20 (extraction prerequisites) remains
+the next row.

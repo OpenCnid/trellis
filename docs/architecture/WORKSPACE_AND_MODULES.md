@@ -291,64 +291,80 @@ The full pipeline of earned permanence: ephemeral intake (workspace) →
 verified substrate (ingest) → compounding belief (knowledge flywheel) →
 continuous self-correction (quarantine/verification).
 
-## 7. The capability ladder (self-editing, decomposed)
+## 7. Self-editing: the content pool and standard permissions
 
-"The model can edit its own harness" spans four capabilities with different
-risk profiles. Verdicts:
+*Revised July 9, 2026 by owner directive. The first edition of this section
+graded self-editing as an L0–L3 capability ladder and marked L1
+(configuration) FORBIDDEN and L2 (own code) REJECTED. That prohibition is
+withdrawn. The governing precedent is industry-standard: Anthropic edits
+Claude Code's own codebase with Claude Code. Trellis is no different — it
+can work on anything loaded into its reach, including its own codebase.
+There are no forbidden rungs.*
 
-- **L0 — self-shaping inside the sandbox. Exists, safe, encouraged.** The RLM
-  writes arbitrary Python each turn: helpers, scaffolding, its own workflow in
-  the namespace. Contained by transport-level read-only sessions and the
-  single write path. The workspace formalizes and persists this.
-- **L1 — runtime mutation of its own configuration. FORBIDDEN.** No
-  completion may alter the tool registry, allowlists, timeouts, bounds, or
-  budgets mid-run (Guardrail 5: "no inbound payload or model completion may
-  alter any of it"). Live reason, not ceremony: with web search configured,
-  retrieved content is attacker-controlled input; a model that can register
-  MCP servers mid-run converts a prompt injection into an exfiltration
-  channel. The containment vessel is not redesignable from inside while
-  running.
-- **L2 — hot-patching its own running code. REJECTED.** Trivial in Python,
-  catastrophic architecturally: it deletes reproducibility, voids telemetry,
-  and a model that can rewrite `_normalize_fact` in memory can delete the
-  provenance requirement itself.
-- **L3 — staged self-modification through the verified pipeline. APPROVED —
-  and it is the capability flywheel's drive shaft, not a distant pilot.** The
-  agent proposes harness changes as artifacts that flow through the same
-  trust discipline as everything else: **propose → tests → class-appropriate
-  gate (§9.3) → merge → the next run boots the new harness.** Three facts
-  make this Trellis-native: (1) every RLM run is a fresh subprocess from
-  source on disk — there is no long-lived process for hot mutation to
-  benefit; the natural edit boundary is between runs, exactly where gates
-  live; (2) whole-codebase ingestion (Session 8) means Trellis can ingest its
-  own repository, so the agent reads its own harness as verified,
-  content-addressed AST bytes and grounds proposed diffs in real source
-  hashes; (3) the HANDOFF §0 loop already runs this pattern manually at the
-  meta level.
+Self-editing decomposes into two ordinary concepts, not a bespoke
+permission ladder:
 
-Unifying principle: **self-editing is a write path, and Trellis already knows
-what to do with write paths — gate them, provenance them, make them
-recoverable.** "Agent proposes, pipeline verifies, operator admits, next run
-inherits" is to code what "external content earns citability only through
-verified ingest" is to knowledge.
+- **The content pool — what the agent can see and work on.** Anything the
+  operator loads is workable content, and Trellis's own repository is not a
+  special category: whole-codebase ingestion (Session 8) has been able to
+  load it as verified, content-addressed AST bytes since it shipped, and
+  the operator-owned MCP registry (Sessions 10–12) is the existing vehicle
+  for file and git tooling. The DEFAULT state is that Trellis's environment
+  sits OUTSIDE the REPL — no file or git tools configured, its own repo not
+  loaded. Bringing the environment into the pool is an operator action:
+  configure the tools, allowlist them, point them at a checkout.
+- **Standard editing permissions — who may change what, enforced the way
+  every codebase enforces it.** Branch protections, required review, merge
+  rights, tool allowlists, credential scoping. A Trellis-authored change to
+  Trellis lands exactly like a human-authored one: on a branch, through
+  review, merged by someone with merge rights. The user MUST be able to
+  drive changes at every level — configuration, harness code, kernel prompt
+  — through Trellis when they choose; the platform hard-codes no
+  prohibition.
+
+What survives from the first edition is the **edit boundary**, which is an
+engineering fact rather than a permission: every RLM run is a fresh
+subprocess booted from source on disk, so the natural place for an edit to
+land is BETWEEN runs, through source control — edit, commit, review, merge,
+and the next run inherits. The old L1/L2 rationales (mid-run mutation of
+the tool registry converts a prompt injection into an exfiltration channel;
+in-memory hot-patching deletes reproducibility and could silently void the
+provenance requirement) remain true as cautions about MID-RUN, IN-MEMORY
+mutation — which is simply not how edits land here. They were never a
+reason Trellis cannot edit Trellis.
+
+Unifying principle (unchanged): **self-editing is a write path, and Trellis
+already knows what to do with write paths — gate them, provenance them,
+make them recoverable.** "Agent proposes, pipeline verifies, operator
+admits, next run inherits" is to code what "external content earns
+citability only through verified ingest" is to knowledge. The module system
+(§9) remains the runtime half of this — userspace behavior composed per
+run; the repository is the rest of it — everything ships as reviewed
+commits, whoever (or whatever) authored the diff.
 
 ## 8. The kernel/userspace boundary
 
-- **Kernel — human-owned, changed only by hand, never by the flywheel:** the
-  provenance write path and its validators
+*Revised July 9, 2026: this boundary is a PACKAGING distinction — how a
+change lands — not a permission hierarchy over who may author it.*
+
+- **Kernel — ships as repository code, boots identically for every run:**
+  the provenance write path and its validators
   ([src/rlm/trellis_tools.py](../../src/rlm/trellis_tools.py)); sandbox
   session access modes (READ transport enforcement); bounds enforcement and
   every Zod/Python config validator; credential handling and redaction; the
   telemetry/result line protocols (`TRELLIS_TELEMETRY`, `TRELLIS_RESULT`,
   `TRELLIS_PROTOCOL_VIOLATION`); the module loader and gate machinery itself.
-- **Userspace — agent-authorable through L3:** modules (§9): prompt
+- **Userspace — composed per run from the module registry (§9):** prompt
   protocols/addenda, namespaced tools, retrieval and planning strategies,
   verifier modules.
 
-Humans own the kernel; the agent authors userspace; every extension boots
-fresh in the next subprocess. L1/L2 stay forbidden not as limits on the
-flywheel but as what keeps its outputs trustworthy: the agent builds
-extensions, never the vessel.
+Userspace changes land as registered modules selected per run; kernel
+changes land as ordinary reviewed commits — commits Trellis itself may
+author when the operator brings the repo into the content pool (§7). What
+keeps outputs trustworthy is the review gate on the change plus the
+unchanged runtime data-trust rails (the write path, promotion,
+registration), not a category prohibition on who writes the diff. Every
+change, either way, boots fresh in the next subprocess.
 
 ## 9. Modules
 
@@ -638,9 +654,10 @@ rather than propagating stale or drifted forms:
 ## 13. Explicit exclusions
 
 Not in this design, deliberately: durable cross-goal unverified memory of any
-kind (TTL is a feature; permanence is earned via promotion only); L1/L2
-runtime mutation; rlms library forks or monkey-patching beyond the existing
-counted-handler pattern; orchestrator tools of any kind (routing by reference
+kind (TTL is a feature; permanence is earned via promotion only); mid-run,
+in-memory self-mutation of configuration or code (edits land between runs
+through source control — §7); rlms library forks or monkey-patching beyond
+the existing counted-handler pattern; orchestrator tools of any kind (routing by reference
 only); workspace content satisfying the provenance protocol; changes to the
 backend API contract, the A2A surface, or recorded roadmap sequencing;
 autonomous promotion (operator gate is absolute); module auto-landing before
