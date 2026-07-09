@@ -92,6 +92,28 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   Claude Code. The former L0–L3 ladder with L1/L2 forbidden is withdrawn;
   edits land between runs through source control, never as mid-run
   in-memory mutation.
+- **Code-mediated text (core pillar; ratified July 9, 2026)** — the RLM's
+  text discipline: *the model never counts, and the model never copies.*
+  Text is loaded into queryable REPL structures ("ingestion = pandas");
+  locations are engine-computed and returned by query; existing bytes are
+  moved by code (splice at a computed address), never re-typed through the
+  model's attention ("no direct edits, only code edits"). The model authors
+  only genuinely new text plus the code that manipulates everything else.
+  Consequence: effective context is bounded by REPL memory, not the
+  attention window. Canonical record:
+  `docs/architecture/CODE_MEDIATED_TEXT.md`.
+- **Engine-computed address** — a location handle (row index, hash, segment
+  id) produced by a query and consumed by code in the same turn; transient
+  by definition — re-query rather than remember. The opposite of a
+  model-estimated position (a counted line number, an eyeballed anchor).
+- **Transient frame** — the per-task in-REPL structure a text is loaded
+  into for querying and splicing (load → query → splice → write → discard).
+  Never a persistent mirror: the file/store remains the single source of
+  truth.
+- **Hash-guarded write** — write-back that verifies the store's bytes still
+  match the digest captured at load; a mismatch refuses loudly instead of
+  overwriting (the verified-ingest read-back re-hash discipline applied to
+  editing).
 - **Kernel** — the trust core that ships as repository code and boots
   identically for every run: the provenance write path and validators,
   sandbox session modes, bounds enforcement, credential redaction,

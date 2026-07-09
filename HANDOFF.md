@@ -499,6 +499,25 @@ immutable, content-addressed physical location in source material.
      match `^[0-9a-f]{64}$`, and the hardened write path rejects them
      independently. Tier 3 has NO provenance standing; permanence is
      earned only through the Session 17 promotion CLI.
+   - **CORE PILLAR — code-mediated text (ratified July 9, 2026;
+     `docs/architecture/CODE_MEDIATED_TEXT.md`, doctrine on par with the
+     provenance invariant):** *the model never counts, and the model
+     never copies.* The RLM handles all text through queryable REPL
+     structures ("ingestion = pandas"): locations are engine-computed
+     and returned by query (transient handles — re-query, never
+     remember); existing bytes are moved by code (splice at a computed
+     address, hash-guarded write-back), never re-typed through
+     attention ("no direct edits, only code edits — rigidly"); the
+     model authors only genuinely new text plus the code that
+     manipulates everything else. Localization error and transcription
+     error (the laundering channel) are the same pathology — attention
+     doing code's job. Payoff: effective context bounded by REPL
+     memory, not the attention window. Lines locate, blocks mean.
+     Enforcement lands as tooling shape (structured ops + hash
+     guards); prompts reinforce only. Follow-ups the record drives
+     (§6, all owner-scheduled): the editing toolkit, a kernel prompt
+     revision (a deliberate sha256-pin move), the effective-context
+     probe, module #1 v2.
    - **The module registry (Sessions 15/18; `src/config/modules.ts` +
      `src/rlm/trellis_modules.py`, `modules/<name>/`):**
      `TRELLIS_ADDENDUM` = `TRELLIS_ADDENDUM_BASE` + Σ selected module
@@ -1000,6 +1019,14 @@ cost estimate):
     engineering prose, no AI attribution or generated-by trailers.
     Regenerate this file in the same PR — and re-run the §0 step 5
     check before handing off.
+14. **Code-mediated text is doctrine (permanent; survives every
+    rewrite).** Any new or modified surface where the RLM touches text
+    must follow `docs/architecture/CODE_MEDIATED_TEXT.md`: locations
+    engine-computed, bytes moved by code, transient frames, hash-guarded
+    writes — never model-estimated positions, never model-retyped
+    existing bytes, never a persistent in-memory mirror of a store.
+    Prompt text may reinforce the discipline but never substitutes for
+    tooling shape.
 
 ## 8. Explicit exclusions
 

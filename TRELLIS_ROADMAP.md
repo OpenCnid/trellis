@@ -2187,3 +2187,44 @@ real change (candidate: a docs or test improvement), and it lands through an
 ordinary reviewed PR — the L1/L2-class proof, analogous to module #1 proving
 the flywheel. Not scheduled; Session 20 (extraction prerequisites) remains
 the next row.
+
+### July 9, 2026 — Core pillar ratified: code-mediated text (DDD; docs only)
+
+From the collaborator's line-editing exchange (pandas as a line-store; the
+localization-failure diagnosis of edit thrash) and its correction cycle, the
+owner ratified a core pillar, recorded document-first per DDD as
+`docs/architecture/CODE_MEDIATED_TEXT.md`: **the model never counts, and
+the model never copies.** Owner's formulation, verbatim in substance:
+*"Ingestion = pandas. Edits = pandas. No direct edits. Only code edits.
+Rigidly. We get a giant context window that way."*
+
+The pillar: the RLM handles all text through queryable REPL structures;
+locations are engine-computed and returned by query (transient handles);
+existing bytes are moved by code at computed addresses with hash-guarded
+write-backs, never re-typed through attention; the model authors only
+genuinely new text plus the code that manipulates everything else.
+Localization error (edit thrash) and transcription error (the laundering
+channel from the provenance-citation eval) are the same pathology —
+attention doing code's job. Consequence: effective context bounded by REPL
+memory, not the attention window. Lines locate, blocks mean. Enforcement
+posture per the eval's lesson 7: tooling shape enforces, prompts reinforce.
+
+**Alignment sweep (this entry's PR):** new record
+`CODE_MEDIATED_TEXT.md`; HANDOFF §1 pillar bullet + permanent guardrail 14;
+GLOSSARY entries (code-mediated text, engine-computed address, transient
+frame, hash-guarded write); WORKSPACE_AND_MODULES §7 mechanics cross-ref;
+GROUNDED_AUTHORING §12.2 generalization note; COLLABORATOR_BRIEFING
+postscript + reading list. Zero code changes — the pillar's existing
+instances (workspace capture stubs, harness-pinned citations, by-reference
+orchestration, Merkle-diff ingestion, the `_node_text` reconstruction) all
+predate it; the record names them and drives the rest.
+
+**Follow-ups the record drives (owner-schedulable, in its §6):** (1) the
+self-hosted editing toolkit — load/locate/splice/write_back with digest
+guards, the enablement session's edit primitive; (2) a kernel prompt
+revision teaching the discipline for research runs (a deliberate
+composed-prompt sha256 pin move, its own commit); (3) the paired-run
+effective-context probe (paid, extends the workspace-probe series) to turn
+the giant-context claim into a number; (4) module #1 v2 through grounded
+authoring (its "reconstructing stored text" line predates the pillar).
+Session 20 (extraction prerequisites) remains the next scheduled row.

@@ -441,6 +441,12 @@ empirically and sharpened it:
   removed (tool-bearing agents citing external retrieval). The primary lever
   remains incentive design; v3 is the backstop where it cannot be applied.
 
+The eval's findings were subsequently generalized into the core pillar
+[CODE_MEDIATED_TEXT.md](CODE_MEDIATED_TEXT.md) (ratified July 9, 2026):
+laundering's transcription channel and edit-thrash's localization channel
+are the same pathology — attention doing code's job — and this record's
+harness-pinned attribution (§5) is the pillar applied to citations.
+
 ---
 
 ## Appendix A — module #1 evidence index

@@ -285,6 +285,24 @@ question we want your help with, below.
 
 ---
 
+## Postscript — the tipping point (added later on July 9, 2026)
+
+Your line-editing question ("store lines as rows; let the model query the
+table instead of grepping") became, after one round of pushback and
+correction, a ratified **core pillar**:
+[`docs/architecture/CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md)
+— *the model never counts, and the model never copies.* Locations are
+engine-computed and returned by query; existing bytes are moved by code at
+computed addresses (transient frames, hash-guarded writes), never re-typed
+through attention; the model authors only new text plus the code that
+manipulates everything else. Your thrash diagnosis (localization failure)
+and our laundering finding (transcription failure) turned out to be the
+same pathology — attention doing code's job — and the payoff is the one you
+named: effective context bounded by REPL memory, not the attention window.
+The record drives four owner-scheduled follow-ups: the self-editing
+toolkit, a kernel prompt revision, a paired-run effective-context probe,
+and a module #1 re-authoring.
+
 ## Where you can help next
 
 1. **Module #2 topic selection, under the corrected frame.** We need
@@ -314,6 +332,7 @@ question we want your help with, below.
 | 2 | `docs/architecture/WORKSPACE_AND_MODULES.md` | the parent design record: trust tiers, workspace, modules, self-editing (content pool + standard permissions, §7), the flywheel |
 | 3 | `docs/architecture/GROUNDED_AUTHORING.md` | the authoring mode and the four grounding properties (§12.2 records the eval's impact) |
 | 4 | `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md` | the full eval: data, corrections, lessons (§9) |
+| 4b | `docs/architecture/CODE_MEDIATED_TEXT.md` | the core pillar your line-editing exchange produced: never counts, never copies |
 | 5 | `TRELLIS_ROADMAP.md` §5 | the dated progress ledger, most recent first |
 | 6 | `HANDOFF.md` | the living session-to-session state (regenerated every session; §1 is the maintained mental model) |
 
