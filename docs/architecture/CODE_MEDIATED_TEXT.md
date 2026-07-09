@@ -166,12 +166,15 @@ moving, and the model estimating where text lives.
 
 ## 6. Follow-ups this record drives (document first, implementation after)
 
-1. **The self-hosted editing enablement session** (candidate, owner-
-   schedulable; extends the July 9 roadmap candidate): the edit toolkit IS
-   the pillar's §2 — `load(path) → (frame, digest)`;
+1. **The self-hosted editing enablement session** (SCHEDULED as the next
+   session by owner directive, July 9, 2026 — extraction defers behind it):
+   the edit toolkit IS the pillar's §2 — `load(path) → (frame, digest)`;
    `locate(frame, query) → handles`; `splice(frame, handle, new_text)`;
    `write_back(path, frame, digest)` refusing on digest mismatch — exposed
    to the RLM as REPL helpers, landing as ordinary commits under review.
+   Structure selection and bounds are normative per the measured §7:
+   list-of-lines frames for single-file splicing, pandas for relational
+   multi-file queries, byte-capped with loud refusals.
 2. **Kernel prompt revision** (candidate, separate deliberate change — it
    moves the composed-prompt sha256 pin, so it ships in its own commit with
    the pin recomputed): brace-free rule text teaching the discipline for
@@ -189,7 +192,60 @@ moving, and the model estimating where text lives.
    the grounded-authoring mode with the pillar in its corpus, retiring the
    "reconstructing stored text" mitigation language.
 
-## 7. Relationship to the other records
+## 7. Structure selection and scale bounds (measured July 9, 2026)
+
+The owner asked whether pandas has line-count limitations that should shape
+the spec, or whether a better library exists. Measured in the actual agent
+environment (Python 3.13.1, pandas 2.2.3, pyarrow 24.0.0, polars 1.34.0 —
+the latter two already installed transitively; zero new dependencies
+required for any tier below):
+
+| scale | structure | memory | substring query | splice |
+|---|---|---|---|---|
+| largest repo file (2,231 lines) | list-of-lines | — | 0.5 ms locate | 0.02 ms |
+| largest repo file | pandas (object) | — | 1.1 ms | 0.9 ms |
+| whole repo (342 files, 74,115 lines, 2.9 MB) | pandas (object) | 13 MB | 16 ms | — |
+| whole repo | pandas (`string[pyarrow]`) | 7 MB | 13 ms | — |
+| whole repo scale | polars | — | 1.8 ms | — |
+| 1M lines (synthetic) | pandas (object) | 111 MB | 143 ms | 11 ms |
+| 1M lines | pandas (arrow) | 70 MB | 104 ms | — |
+| 10M lines | pandas (object) | 1,118 MB | 1,465 ms | 125 ms |
+| 10M lines | pandas (arrow) | 708 MB | 1,138 ms | — |
+| 10M lines | polars | 628 MB | 247 ms | — |
+
+**Findings:**
+
+1. **pandas has no line-count limit relevant to Trellis.** There is no hard
+   row cap; the constraint is memory (~110 bytes/row at object dtype for
+   ~60-char lines; ~70 bytes/row Arrow-backed), and the discomfort zone
+   begins around 10M rows — three to five orders of magnitude above every
+   real Trellis frame (single files ≤ a few thousand lines; the whole
+   repository is 74k lines / a 13 MB frame / 16 ms queries; workspace-
+   bounded corpora cap at 32 MiB ≈ well under 1M lines).
+2. **Tiering is by job, not by scale anxiety:**
+   - **list-of-lines** for single-file edit frames — fastest at file scale,
+     zero overhead, and the hardest structure to misuse;
+   - **pandas (object dtype)** for relational/multi-file queries — the
+     default: model fluency with pandas (training-data depth) is worth more
+     than raw speed at these scales, and fluency = fewer errored turns =
+     cheaper runs;
+   - **`string[pyarrow]` dtype** when a corpus frame passes ~1M lines
+     (halves memory, ~25% faster) — a one-line `astype`, no new dependency;
+   - **polars** (already installed) is the escalation tier if a frame ever
+     exceeds pandas comfort (5–6× faster queries at 10M, multithreaded) —
+     documented so nobody re-litigates it, NOT recommended now: no Trellis
+     frame is within two orders of magnitude of needing it.
+3. **Bounds, not limits.** The toolkit enforces byte caps in the workspace-
+   bounds house style (validated config, hard maxima, over-budget RAISES
+   with usage — never silent truncation): per-file edit frames default
+   4 MiB, corpus frames default 32 MiB (aligned with the workspace cap,
+   since frames live in the same REPL memory).
+4. **Display truncation is not data truncation.** A printed DataFrame
+   elides rows (`...`); the model must query frames, never parse their
+   printed form — printing a frame wholesale is scrollback-pasting through
+   the back door.
+
+## 8. Relationship to the other records
 
 | record | relationship |
 |---|---|
