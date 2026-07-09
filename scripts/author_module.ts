@@ -11,7 +11,8 @@ import {
   readPromotedCorpus,
   type PromotedCorpus,
 } from '../src/core/authoring/corpus';
-import { assertSeedWithinBudget, corpusToSnapshot } from '../src/core/authoring/seed';
+import { assertSeedWithinBudget, corpusToSnapshot, seedByteFootprint } from '../src/core/authoring/seed';
+import { estimateAuthorSpend } from '../src/core/authoring/estimate';
 import { composeAuthoringPrompt, validateAuthoringTopic } from '../src/core/authoring/template';
 import { ANCHOR_COVERAGE_THRESHOLD, evaluateAnchorGate } from '../src/core/authoring/anchors';
 import {
@@ -52,15 +53,15 @@ import { WorkspaceSnapshotSchema, type WorkspaceSnapshot } from '../src/workers/
 // not chosen by the model (§5); registration stays a separate human step
 // (npm run modules:register).
 
-// Module #1 measurement (roadmap §5, July 9, 2026), echoed as the cost
-// estimate. Author mode drops the exploratory whole-DB search calls, so
-// the real spend is expected at or below this.
-const MODULE_1_INPUT_TOKENS = 160_270;
-const MODULE_1_OUTPUT_TOKENS = 7_827;
-
 // Author runs read the corpus, reason, and write one JSON draft; a small
 // ceiling is plenty and bounds a runaway. Kernel constant, not env-tuned.
 const AUTHOR_MAX_ITERATIONS = 6;
+
+// Default per-run spend ceiling for the paid authoring turn (operator
+// request, July 9, 2026): estimated spend must stay under this or the
+// run is refused before it spawns. Module #1 (the pre-mode pathway) came
+// in under $2; author mode is expected lower.
+const DEFAULT_MAX_SPEND_USD = 5;
 
 interface CliArgs {
   moduleName?: string;
@@ -70,10 +71,16 @@ interface CliArgs {
   goalId?: string;
   confirmPaid: boolean;
   draftFile?: string;
+  maxSpendUsd: number;
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { docKeys: [], outDir: path.resolve('modules'), confirmPaid: false };
+  const args: CliArgs = {
+    docKeys: [],
+    outDir: path.resolve('modules'),
+    confirmPaid: false,
+    maxSpendUsd: DEFAULT_MAX_SPEND_USD,
+  };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     const value = () => {
@@ -89,10 +96,35 @@ function parseArgs(argv: string[]): CliArgs {
       case '--goal-id': args.goalId = value(); break;
       case '--confirm-paid': args.confirmPaid = true; break;
       case '--draft': args.draftFile = value(); break;
+      case '--max-spend-usd': {
+        const parsed = Number(value());
+        if (!Number.isFinite(parsed) || parsed <= 0) {
+          throw new Error('--max-spend-usd must be a positive number');
+        }
+        args.maxSpendUsd = parsed;
+        break;
+      }
       default: throw new Error(`Unknown flag: ${flag}`);
     }
   }
   return args;
+}
+
+const TELEMETRY_PREFIX = 'TRELLIS_TELEMETRY:';
+
+/** Best-effort extraction of the run's reported cost from a telemetry line. */
+function reportedCostFrom(chunk: string): number | null {
+  const idx = chunk.indexOf(TELEMETRY_PREFIX);
+  if (idx === -1) return null;
+  const rest = chunk.slice(idx + TELEMETRY_PREFIX.length);
+  const end = rest.indexOf('\n');
+  const line = (end === -1 ? rest : rest.slice(0, end)).trim();
+  try {
+    const value = (JSON.parse(line) as { reported_cost_usd?: unknown }).reported_cost_usd;
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 function sha256(text: string): string {
@@ -104,8 +136,12 @@ function spawnAuthorRun(
   template: string,
   seedPath: string,
   goalId?: string
-): Promise<{ ok: true; draft: DraftEnvelope } | { ok: false; message: string }> {
+): Promise<
+  | { ok: true; draft: DraftEnvelope; reportedCostUsd: number | null }
+  | { ok: false; message: string; reportedCostUsd: number | null }
+> {
   return new Promise(resolve => {
+    let reportedCostUsd: number | null = null;
     const script = path.resolve('src/rlm/trellis_agent.py');
     const childArgs = [
       script,
@@ -138,24 +174,34 @@ function spawnAuthorRun(
     child.stdout.on('data', (chunk: string) => {
       process.stdout.write(chunk);
       scanner.feed(chunk);
+      const cost = reportedCostFrom(chunk);
+      if (cost !== null) reportedCostUsd = cost;
     });
     child.stderr.setEncoding('utf-8');
     child.stderr.on('data', (chunk: string) => process.stderr.write(chunk));
 
     child.on('error', err => {
-      resolve({ ok: false, message: `failed to spawn '${config.python.executable}': ${err.message}` });
+      resolve({
+        ok: false,
+        message: `failed to spawn '${config.python.executable}': ${err.message}`,
+        reportedCostUsd,
+      });
     });
     child.on('close', code => {
       scanner.flush();
       if (collected === null) {
-        resolve({ ok: false, message: `author run exited ${code} without emitting a draft envelope` });
+        resolve({
+          ok: false,
+          message: `author run exited ${code} without emitting a draft envelope`,
+          reportedCostUsd,
+        });
         return;
       }
       const event: DraftEvent = collected;
       if (event.kind === 'draft') {
-        resolve({ ok: true, draft: event.draft });
+        resolve({ ok: true, draft: event.draft, reportedCostUsd });
       } else {
-        resolve({ ok: false, message: `draft ${event.kind}: ${event.reason}` });
+        resolve({ ok: false, message: `draft ${event.kind}: ${event.reason}`, reportedCostUsd });
       }
     });
   });
@@ -169,6 +215,7 @@ function printPlan(
 ): void {
   const totalBytes = Buffer.byteLength(JSON.stringify(seed), 'utf8');
   const pinned = pinnedSourceNodeIds(corpus);
+  const est = estimateAuthorSpend(seedByteFootprint(seed));
   console.log('Grounded authoring plan:');
   console.log(`  module name:        ${args.moduleName}`);
   console.log(`  topic:              ${args.topic}`);
@@ -183,10 +230,11 @@ function printPlan(
   console.log(`  authoring template sha256:       ${sha256(template)}`);
   console.log(`  anchor coverage threshold:       ${ANCHOR_COVERAGE_THRESHOLD}`);
   console.log(
-    `  estimated paid spend:            ~${MODULE_1_INPUT_TOKENS.toLocaleString()} input / `
-    + `~${MODULE_1_OUTPUT_TOKENS.toLocaleString()} output tokens`
+    `  estimated paid spend:            ~${est.inputTokens.toLocaleString()} input / `
+    + `~${est.outputTokens.toLocaleString()} output tokens ≈ $${est.costUsd.toFixed(2)} `
+    + `(conservative; ceiling $${args.maxSpendUsd.toFixed(2)})`
   );
-  console.log('    (module #1 measurement; author mode drops exploratory whole-DB search, so likely lower)');
+  console.log('    (author mode drops exploratory whole-DB search; module #1 came in under $2)');
 }
 
 async function assembleModule(
@@ -315,14 +363,34 @@ async function main(): Promise<number> {
   }
 
   // --- paid path: spawn the author run, collect the draft, assemble ---
+  // Spend ceiling: refuse BEFORE spending if the conservative estimate
+  // exceeds the cap (operator request). The estimate never materially
+  // undershoots; the run reports its real cost, checked below.
+  const estimate = estimateAuthorSpend(seedByteFootprint(seed));
+  if (estimate.costUsd > args.maxSpendUsd) {
+    console.error(
+      `\nRefusing to spawn: estimated spend $${estimate.costUsd.toFixed(2)} exceeds the `
+      + `$${args.maxSpendUsd.toFixed(2)} ceiling. Author from a smaller corpus or raise `
+      + '--max-spend-usd after reviewing the estimate. Nothing was spent.'
+    );
+    return 1;
+  }
+
   const seedPath = path.join(
     os.tmpdir(),
     `trellis-author-seed-${process.pid}-${Date.now()}.json`
   );
   fs.writeFileSync(seedPath, JSON.stringify(seed));
   try {
-    console.log('\n--confirm-paid set: spawning the paid authoring run...\n');
+    console.log(
+      `\n--confirm-paid set: spawning the paid authoring run `
+      + `(estimated $${estimate.costUsd.toFixed(2)}, ceiling $${args.maxSpendUsd.toFixed(2)})...\n`
+    );
     const outcome = await spawnAuthorRun(template, seedPath, args.goalId);
+    if (outcome.reportedCostUsd !== null) {
+      const over = outcome.reportedCostUsd > args.maxSpendUsd ? '  *** OVER CEILING ***' : '';
+      console.log(`\nActual reported spend: $${outcome.reportedCostUsd.toFixed(4)}${over}`);
+    }
     if (!outcome.ok) {
       console.error(`\nAuthoring run failed: ${outcome.message}. Nothing was written.`);
       return 1;
