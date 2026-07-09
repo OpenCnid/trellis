@@ -144,6 +144,8 @@ TOOLS (available directly in the REPL):
 
 CRITICAL API CONTRACT: every tool method returns a JSON STRING, never a parsed object. Always wrap results in `json.loads(...)` (import json first) before indexing or iterating. `run_cypher` returns a JSON array of row dicts keyed by your RETURN aliases.
 
+CODE-MEDIATED TEXT (HARD RULE): load text into structures and operate on them with code. Locate by query, never by counting lines or guessing positions. Move existing text by slicing and splicing, never by retyping it. Author only genuinely new text.
+
 ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
 
 """

@@ -43,11 +43,16 @@ def expect_raises(name, fn, needle=""):
         check(name, False, f"expected ValueError, got {type(e).__name__}: {e}")
 
 
-# sha256 of SYSTEM_PROMPT on master 9f25a5b, immediately before the
-# spatial-flywheel extraction. If the rubric asset or the kernel prompt
-# text legitimately changes, recompute and update this pin in the same
-# commit — silently drifting composition must fail here.
-PRE_EXTRACTION_SYSTEM_PROMPT_SHA256 = "abb945a6e0c998ccabe2e2a930ea6934cae696643c1230f733c3d13d9feef9b2"
+# sha256 of the composed SYSTEM_PROMPT with the default selection. If
+# the rubric asset or the kernel prompt text legitimately changes,
+# recompute and update this pin in the same commit — silently drifting
+# composition must fail here. Pin history (every move is a witting
+# kernel change, one per line):
+#   abb945a6...f9b2 — master 9f25a5b, immediately before the Session 15
+#     spatial-flywheel extraction (the extraction itself moved nothing).
+#   170e9f7e...67e9 — Session 20: the CODE-MEDIATED TEXT hard-rule block
+#     added to TRELLIS_ADDENDUM_BASE (CODE_MEDIATED_TEXT.md §6.2).
+COMPOSED_SYSTEM_PROMPT_SHA256 = "170e9f7e9daead9b403fd5748b7db1eee2ef12953f078a6f39a4e7871d1267e9"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -114,9 +119,9 @@ check("wrapper forwarded the canonical default selection",
 import trellis_agent  # noqa: E402
 from rlm.utils.prompts import RLM_SYSTEM_PROMPT  # noqa: E402
 
-check("composed SYSTEM_PROMPT is byte-identical to the pre-extraction monolith",
+check("composed SYSTEM_PROMPT is byte-identical to the recorded kernel prompt",
       hashlib.sha256(trellis_agent.SYSTEM_PROMPT.encode("utf-8")).hexdigest()
-      == PRE_EXTRACTION_SYSTEM_PROMPT_SHA256,
+      == COMPOSED_SYSTEM_PROMPT_SHA256,
       hashlib.sha256(trellis_agent.SYSTEM_PROMPT.encode("utf-8")).hexdigest())
 check("SYSTEM_PROMPT is still base-prompt + composed addendum",
       trellis_agent.SYSTEM_PROMPT == RLM_SYSTEM_PROMPT + trellis_agent.TRELLIS_ADDENDUM)
