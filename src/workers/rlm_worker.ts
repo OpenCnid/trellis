@@ -296,6 +296,15 @@ function runAgentProcess(
         mcpCredentialEnv: config.mcp.credentialEnv,
         workspace: config.workspace,
         modulesJson: config.modules.selectionJson,
+        // Session 20: forwarded only when the operator set the edit
+        // root — never enabled by any default (Guardrail 4).
+        textedit: config.textedit.editRoot !== undefined
+          ? {
+              editRoot: config.textedit.editRoot,
+              maxFileBytes: config.textedit.maxFileBytes,
+              maxFiles: config.textedit.maxFiles,
+            }
+          : undefined,
       })
     });
 

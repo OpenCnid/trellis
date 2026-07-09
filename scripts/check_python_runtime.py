@@ -16,6 +16,7 @@ PYTHON_FILES = [
     RLM_DIR / "trellis_mcp.py",
     RLM_DIR / "trellis_workspace.py",
     RLM_DIR / "trellis_modules.py",
+    RLM_DIR / "trellis_textedit.py",
     ROOT / "scripts" / "parse_pdf.py",
     ROOT / "scripts" / "fixture_mcp_server.py",
     ROOT / "scripts" / "compose_mcp_probe.py",
@@ -33,11 +34,16 @@ def main() -> None:
         "psycopg2",
         "rlm",
         "mcp",
+        # pandas ships transitively via unstructured but is load-bearing
+        # for the code-mediated-text pillar (in-REPL frames — pillar §7),
+        # so its absence must fail this check, not a paid run.
+        "pandas",
         "unstructured.partition.pdf",
         "trellis_tools",
         "trellis_mcp",
         "trellis_workspace",
         "trellis_modules",
+        "trellis_textedit",
         "trellis_agent",
     ):
         importlib.import_module(module_name)

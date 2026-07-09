@@ -1,42 +1,189 @@
 # Trellis Engine
 
-Trellis is OpenCnid's provenance-preserving GraphRAG engine. It is an original
-codebase and is unrelated to other projects named Trellis.
+Trellis is OpenCnid's **Recursive Language Model runtime**: an operating
+environment in which a language model's context, memory, knowledge, and
+capabilities live as engine state — queryable stores with enforced
+provenance — and the model reaches all of it through code. It is an
+original codebase, unrelated to other projects named Trellis, and open
+source under the [MIT License](LICENSE).
 
-Every semantic fact remains traceable to immutable, content-addressed source
-bytes:
+Trellis began as a provenance-preserving GraphRAG engine. That machinery
+survives intact — but it is now the *substrate* of the system, not the
+system. What follows explains the difference; the operational manual
+starts at [Getting started](#getting-started).
 
-1. **Physical layer:** Markdown or PDF input becomes a SHA-256 Merkle AST in
-   PostgreSQL/pgvector. PDF nodes retain bounding boxes when the parser
-   provides them; Markdown nodes do not carry geometry.
-2. **Semantic layer:** asynchronous workers extract Neo4j entities and
-   relationships whose `sourceNodeIds` point back to AST hashes.
-3. **Async/RLM layer:** Redis/BullMQ isolates retryable LLM work, and the
-   Python RLM (Recursive Language Model) traverses both stores through
-   provenance-aware tools, with `write_derived_insight` as the single
-   provenance-required write path.
-4. **Agency layer:** an agentic goal loop decomposes one goal into many
-   RLM runs behind hard bounds (a tool-free orchestrator plans; only the
-   RLM touches data); external agents can dispatch goals over A2A
-   (opt-in), and the RLM can call operator-configured external tools
-   over MCP — whose results are research context only, never provenance.
+## What Trellis is
 
-This list is a high-level summary. The living architectural mental model
-— the single source of truth a session loads first — is `HANDOFF.md` §1;
-forward design lives in `docs/architecture/WORKSPACE_AND_MODULES.md`, and
-canonical terminology in `docs/GLOSSARY.md` (authority: code > glossary >
-prose).
+**RLM** expands exclusively to *Recursive Language Model* — the MIT CSAIL
+formulation: a language model given a Python REPL that treats context as
+data in a persistent namespace and calls itself (`llm_query`) as a
+subroutine over slices. Faced with material too large or too dense for one
+context window, it writes code that chunks, queries, and fans out
+sub-calls, then aggregates programmatically. **Context is a database, not
+a scroll.**
 
-## Prerequisites
+Trellis takes that formulation seriously as a *system design* rather than
+a prompting technique, and builds the runtime the formulation implies.
+Five commitments, layered in the order the system grew them:
+
+1. **The substrate (what "GraphRAG" named).** Every source — a PDF, a
+   markdown file, a repository, a promoted web page — becomes an
+   immutable, content-addressed SHA-256 Merkle AST in PostgreSQL. Every
+   semantic belief — an entity, a relationship, a cached derived insight —
+   lives in Neo4j carrying `sourceNodeIds`: the exact AST block hashes it
+   was derived from. Provenance proves *origin*, never correctness; what
+   makes it load-bearing is the machinery on top of it. When a document
+   changes, the Merkle diff identifies exactly the bytes that moved, and
+   the invalidation sweep **contests** exactly the beliefs whose evidence
+   died — quarantined with audit history, recovered when re-derived from
+   live bytes, never silently deleted and never confidently wrong forever.
+   Measured: a 5% corpus mutation contested exactly the 11 affected cached
+   facts (recall 1.000, precision 1.000) and post-update answers scored
+   F1 = 1.000 ([UPDATE_DRILL_REPORT](docs/benchmarks/UPDATE_DRILL_REPORT.md)).
+
+2. **The execution model (the RLM).** The model does not read this
+   substrate as retrieved passages pasted into a prompt. It runs inside a
+   REPL where the substrate is *tools and state*: `trellis_neo4j` (read
+   Cypher + one hardened write path), `trellis_postgres` (exact block
+   texts, vector search), a harness-managed **workspace** (Tier-3 working
+   memory whose external captures are origin-stamped mechanically, inside
+   the tool call), and — operator-gated — external MCP tools and a file
+   editing toolkit. The attention window holds queries, handles, and
+   bounded previews; the corpus holds itself. The designed payoff is a
+   giant *effective* context window — working-set size bounded by process
+   memory, not attention (the whole Trellis repository is a 13 MB frame
+   with 16 ms substring queries; a measured paired-run probe of that claim
+   is on the owner-gated queue).
+
+3. **The trust pipeline (three tiers, one direction).** Tier 1 is
+   verified bytes (`ast_nodes` — byte-verified on ingest by read-back
+   re-hashing). Tier 2 is derived belief with provenance (Neo4j). Tier 3
+   is working state (workspace segments, plans, notes, parked cross-task
+   snapshots) with **no trust standing at all**. Permanence is earned
+   only upward, through the operator-gated **promotion** path: a Tier-3
+   segment enters the ordinary verified ingest transaction byte-verbatim,
+   becomes Merkle-hashed Tier-1 substrate, and only then can be cited.
+   The write path enforces this structurally, not conventionally: every
+   `sourceNodeIds` element must match `^[0-9a-f]{64}$` AND exist in
+   `ast_nodes`, checked before any write session opens. A run that
+   answered from web searches alone is a protocol violation no matter how
+   good the answer was.
+
+4. **The two flywheels (knowledge, then capability).** The **knowledge
+   flywheel** is shipped and measured: derive a fact once, cache it with
+   provenance (`write_derived_insight`), verify and quarantine it over
+   its life, reuse it forever — stochastic per-query cost collapses into
+   amortized, self-correcting knowledge (the MIT-style stateless baseline
+   pays ~$1.12 per query, forever; Trellis pays once — see
+   [FLYWHEEL_EXPLAINER](docs/benchmarks/FLYWHEEL_EXPLAINER.md)). The
+   **capability flywheel** applies the same law to the system's own
+   operating instructions: cognitive protocols are versioned **modules**
+   (manifest + prompt addendum) that the RLM itself can draft under the
+   grounded-authoring mode — from a fixed, already-promoted research
+   corpus, with the harness (never the model) pinning the citations.
+   Registered modules become graph entities citing their research hashes,
+   which means **the system's capabilities are beliefs**: when a module's
+   research basis is superseded, the ordinary invalidation sweep contests
+   the capability itself, and a human re-reviews it. Nothing else we know
+   of treats its own prompt stack as an epistemic object with a chain of
+   custody.
+
+5. **The discipline (code-mediated text, the core pillar).** *The model
+   never counts, and the model never copies*
+   ([CODE_MEDIATED_TEXT](docs/architecture/CODE_MEDIATED_TEXT.md)).
+   Locations in text are engine-computed and returned by query — never
+   estimated by attention over a line-numbered dump. Existing bytes are
+   moved by code — sliced and spliced at computed addresses under
+   hash-guarded writes — never re-typed through the model. The model
+   authors only genuinely new text plus the code that manipulates
+   everything else. This unifies two observed failure classes as one
+   pathology: localization error (edit thrash from miscounted positions)
+   and transcription error (the provenance-laundering channel, observed
+   live in the first flywheel turn) are both *attention doing code's
+   job*. Enforcement is tooling shape — structured operations, digest
+   guards, refusal on stale writes — with prompt text as reinforcement
+   only.
+
+**Where the humans are.** Every trust elevation is a human running a
+gated CLI: promotion (`npm run promote`), module registration
+(`npm run modules:register`), authoring approval (`--confirm-paid`),
+extraction spend (`--confirm-extraction`), file editing
+(`TRELLIS_EDIT_ROOT`, per run), and landing any change as an ordinary
+reviewed PR. The model proposes; the gates dispose. Trellis may edit
+Trellis (the self-editing doctrine: content pool + standard permissions),
+but edits land between runs through source control, never as mid-run
+mutation.
+
+### Why this is no longer "GraphRAG"
+
+GraphRAG names a retrieval pattern: build a knowledge graph, retrieve
+from it, augment generation. Trellis contains that pattern — and inverts
+its role. Retrieval is one *use* of the substrate; the system's unit of
+progress is not a retrieved answer but a **verified belief or a verified
+capability added to a compounding, self-correcting store**. A RAG system
+is stateless between questions; Trellis's whole point is what persists
+between them: facts with provenance, working state with lineage, modules
+with research citations — all governed by one epistemology in which
+anything whose evidence dies is contested, including the system's own
+instructions. "Provenance-preserving GraphRAG" remains an accurate
+description of Tiers 1–2 viewed from the retrieval angle. The system is
+the RLM standing on them.
+
+### The documentation is the design (DDD)
+
+Trellis is document-driven: design records lead, implementation follows,
+and every document is part of the system's accumulated experience.
+Authority is explicit — **code > glossary > prose**. The living
+architectural mental model a session loads first is `HANDOFF.md` §1 (the
+self-perpetuating session prompt at the repository root; its §0 loop is
+the manual prototype of the capability flywheel). Canonical terms live in
+[docs/GLOSSARY.md](docs/GLOSSARY.md); doctrine and forward design in
+[docs/architecture/](docs/architecture/) (`WORKSPACE_AND_MODULES.md`,
+`CODE_MEDIATED_TEXT.md`, `GROUNDED_AUTHORING.md`); measured evidence in
+[docs/benchmarks/](docs/benchmarks/); history in [docs/product/](docs/product/).
+The reading map is [docs/README.md](docs/README.md).
+
+## The architecture in one pass
+
+1. **Physical layer (Tier 1):** Markdown, PDF, code, and promoted
+   external content become SHA-256 Merkle ASTs in PostgreSQL/pgvector
+   (`ast_nodes`, `documents`, `document_nodes`, repository snapshots).
+   PDF nodes retain bounding boxes when the parser provides them. The
+   verified ingest transaction re-hashes what it persisted before
+   committing; the in-transaction Merkle diff drives invalidation.
+2. **Semantic layer (Tier 2):** asynchronous workers extract Neo4j
+   entities and relationships whose `sourceNodeIds` point back to AST
+   hashes; the quarantine/recovery state machine
+   (`contested`/`orphanedSourceIds`/`rederivedAt`) keeps beliefs honest
+   over document lifetimes. Entity identity is immutable; equivalence is
+   an overlay belief (`SAME_AS`, one trusted hop at retrieval).
+3. **Async layer:** Redis/BullMQ isolates all LLM work into seven
+   bounded queues; every worker-consumed completion crosses one Zod
+   boundary (`parseLlmResponse`). Redis also parks TTL-bounded workspace
+   snapshots for cross-task lineage — a parking lot, never a live store.
+4. **RLM layer:** one Python process per task (`trellis_agent.py` over
+   the `rlms` library) with tools injected into the REPL: the two
+   database tools, the Tier-3 workspace, operator-configured MCP tools,
+   and the operator-gated editing toolkit. `write_derived_insight` is
+   the single agentic write path. The system prompt is composed from the
+   kernel base plus operator-selected protocol **modules**, pinned by
+   hash.
+5. **Agency layer:** a tool-free orchestrator (same LLM, planner prompt,
+   Zod-validated decisions) decomposes one goal into bounded RLM tasks
+   and routes working state *by reference*; external agents can dispatch
+   goals over **A2A** (opt-in, off by default); every surface inherits
+   the same gates and per-goal bounds.
+
+## Getting started
+
+### Prerequisites
 
 - Node.js 22
 - Python 3.11+ for bare-host RLM/PDF execution
 - Docker Desktop with Compose v2
 - `OPENAI_API_KEY` when running LLM workers
 
-Trellis Engine is open source under the [MIT License](LICENSE).
-
-## Bare-host development
+### Bare-host development
 
 Install the locked Node dependencies and create local configuration:
 
@@ -49,23 +196,6 @@ cp .env.example .env
 `src/config/index.ts` validates all TypeScript configuration with Zod.
 Existing shell values take precedence over `.env`. Set real `API_KEY` and
 `OPENAI_API_KEY` values before non-local or paid-worker use.
-
-Observability (T16): operational processes emit one JSON log line per
-event on stdout, filtered by `LOG_LEVEL` (default `info`) and stamped
-with `TRELLIS_SERVICE` (Compose sets `api`/`workers` per container). The
-API serves authenticated Prometheus metrics at `GET /metrics`; the worker
-process serves its own registry — including queue-depth gauges — on an
-internal listener at `WORKER_METRICS_PORT` (default `9464`,
-`WORKER_METRICS_HOST` default `0.0.0.0`) that Compose does not publish to
-the host. See `API_REFERENCE.md` §0 and `docs/operations/RUNBOOK.md` §7.
-
-Entity resolution (Session 5): `npm run resolve:sweep` proposes lexical
-alias candidates and the resolution worker adjudicates them into
-`SAME_AS`/`DISTINCT_FROM` overlay edges; `GET /retrieve` expands across
-non-contested `SAME_AS` edges at or above `RESOLUTION_MIN_CONFIDENCE`
-(default `0.8`; opt out per request with `?resolveAliases=false`).
-`RESOLUTION_MAX_PAIRS_PER_SWEEP` (default `200`) caps each sweep's batch
-and `RESOLUTION_BATCH_SIZE` (default `25`) sets pairs per LLM completion.
 
 Start only the databases on Docker and initialize their schemas:
 
@@ -87,7 +217,7 @@ npm run dev:api
 npm run dev:workers
 ```
 
-## Production build
+### Production build
 
 The checked-in build configuration emits CommonJS under `dist/`; `tsx` and
 TypeScript remain development-only dependencies.
@@ -113,7 +243,7 @@ python -m pip install --no-deps --requirement requirements-pdf-fast-nodeps.txt
 npm run python:check
 ```
 
-## Containers
+### Containers
 
 Compose uses its normal `.env` interpolation path and supplies explicit
 service-DNS connection values inside containers. The bare-host defaults in
@@ -155,15 +285,40 @@ failing schema bootstrap. Database outages do not intentionally trigger
 container restart loops through `/healthz`.
 
 The entrypoint replaces itself with Node after initialization, so
-`docker compose stop` delivers SIGTERM directly to the application and PR
-#21's phase-ordered shutdown closes admission, workers, queues, and database
+`docker compose stop` delivers SIGTERM directly to the application and the
+phase-ordered shutdown closes admission, workers, queues, and database
 clients.
 
-## Repository ingestion
+### Observability
 
-Whole-codebase ingestion (Session 8) turns one repository snapshot into a
-bounded sequence of per-file document ingests through the same verified
-service as `POST /ingest` — never one giant request or transaction:
+Operational processes emit one JSON log line per event on stdout,
+filtered by `LOG_LEVEL` (default `info`) and stamped with
+`TRELLIS_SERVICE` (Compose sets `api`/`workers` per container). The API
+serves authenticated Prometheus metrics at `GET /metrics`; the worker
+process serves its own registry — including queue-depth gauges — on an
+internal listener at `WORKER_METRICS_PORT` (default `9464`,
+`WORKER_METRICS_HOST` default `0.0.0.0`) that Compose does not publish to
+the host. Queries, content, paths, hashes, and credentials never become
+metric labels or log content. See `API_REFERENCE.md` §0 and
+`docs/operations/RUNBOOK.md` §7.
+
+## Feeding the substrate (Tier 1)
+
+### Document ingestion
+
+`POST /ingest` accepts markdown bodies and PDF uploads through the
+verified ingest transaction: persist → read-back re-hash verification →
+membership → registration → in-transaction Merkle diff. Re-ingesting a
+changed document versions it and the invalidation sweep contests exactly
+the beliefs whose source blocks died. Extraction policy is explicit
+(`none`/`changed`) with a hard block budget — paid extraction never
+happens by default. See `API_REFERENCE.md`.
+
+### Repository ingestion
+
+Whole-codebase ingestion turns one repository snapshot into a bounded
+sequence of per-file document ingests through the same verified service —
+never one giant request or transaction:
 
 ```bash
 npm run repo:ingest -- --repo-key my-repo --root /path/to/checkout --extract none
@@ -197,12 +352,28 @@ npm run repo:ingest -- --repo-key my-repo --root /path/to/checkout --extract non
   (`--dry-run` stops there).
 
 Live coverage: `npm run test:repo-ingest` (zero LLM calls). Details and
-measured results: `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`.
+measured results: `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` —
+including the recorded extraction-pilot findings that gate any
+repository-scale extraction run.
 
-## Agentic goals
+### Entity resolution
 
-The agentic orchestration loop (Session 9) lets one goal drive many RLM
-runs. `GET /api/agent-stream?goal=...` enqueues a goal; the agent worker
+`npm run resolve:sweep` proposes lexical alias candidates and the
+resolution worker adjudicates them into `SAME_AS`/`DISTINCT_FROM` overlay
+edges — entity identity is immutable; equivalence is a belief.
+`GET /retrieve` expands across non-contested `SAME_AS` edges at or above
+`RESOLUTION_MIN_CONFIDENCE` (default `0.8`; opt out per request with
+`?resolveAliases=false`). `RESOLUTION_MAX_PAIRS_PER_SWEEP` (default
+`200`) caps each sweep's batch and `RESOLUTION_BATCH_SIZE` (default `25`)
+sets pairs per LLM completion.
+
+## Running the RLM
+
+### Single tasks and agentic goals
+
+`GET /api/rlm-stream?query=...` dispatches one RLM task (API-key gated,
+concurrency + queue-depth bounded). The agentic loop lets one goal drive
+many: `GET /api/agent-stream?goal=...` enqueues a goal; the agent worker
 runs an orchestrator — the same LLM under a planner system prompt, its
 decisions validated at the Zod boundary — that decomposes the goal into
 single-task RLM sub-agent runs (ordinary `rlm_queue` jobs), reads their
@@ -223,13 +394,13 @@ write path. A real goal makes paid LLM calls; the zero-LLM drill
 decisions and stubbed tasks (`AGENT_ORACLE_ENABLED=true`, off by default).
 See `API_REFERENCE.md` §4 for the event contract.
 
-## Agent interoperability (A2A)
+### Agent interoperability (A2A)
 
 Trellis can serve its goal loop to external agents over the
 [A2A protocol](https://a2a-protocol.org/) (Agent2Agent, Linux Foundation;
-spec v1.0.0, JSON-RPC binding) — Session 11. The surface is **off by
-default**: set `TRELLIS_A2A_ENABLED=true` to mount it; with the flag
-unset the API is byte-identical to a pre-Session-11 process.
+spec v1.0.0, JSON-RPC binding). The surface is **off by default**: set
+`TRELLIS_A2A_ENABLED=true` to mount it; with the flag unset the API is
+byte-identical to a process without the feature.
 
 - **Discovery:** the Agent Card is served unauthenticated from
   `/.well-known/agent-card.json` (it is how a client learns the required
@@ -258,17 +429,17 @@ unset the API is byte-identical to a pre-Session-11 process.
 
 See `API_REFERENCE.md` §5 for the wire contract.
 
-## External tools (MCP)
+### External tools (MCP)
 
 The RLM sub-agent can call external tools over the Model Context Protocol
-(Session 10) — web search is the first intended tool. The surface is
+— web search is the first intended tool. The surface is
 operator-configured and nothing else: set `TRELLIS_MCP_SERVERS` to a JSON
 array of servers, each with a per-tool allowlist and per-call bounds.
-Two transports (Session 12), discriminated by `transport`:
+Two transports, discriminated by `transport`:
 
-- **`stdio`** (the default when the field is absent, so pre-Session-12
-  registries parse unchanged): an explicit argument vector spawned as a
-  child of the RLM process — never a shell string.
+- **`stdio`** (the default when the field is absent): an explicit
+  argument vector spawned as a child of the RLM process — never a shell
+  string.
 - **`http`**: a remote server reached over the MCP Streamable HTTP
   transport (spec 2025-06-18; the deprecated HTTP+SSE transport is not
   supported). `https://` is always accepted; plain `http://` only for
@@ -299,7 +470,7 @@ rejected before any I/O, every call is time-bounded over either
 transport, and oversized results are truncated with an explicit marker.
 No queue payload or model output can name, spawn, or dial a server. When
 the variable is unset, nothing is injected and the RLM behaves
-byte-identically to a pre-Session-10 run.
+byte-identically to a run without the feature.
 
 **Containerized tool servers** are the recommended deployment shape for
 servers you operate yourself: run the tool server as its own Compose
@@ -314,52 +485,71 @@ count toward the database-provenance requirement — a run that only
 searched the web is still a `TRELLIS_PROTOCOL_VIOLATION`. External content
 earns citability only by being ingested through the verified ingest path.
 MCP usage is reported separately as `mcp_calls` in the telemetry line and
-the `trellis_rlm_mcp_calls_total` metric. Since Session 14 the write path
-also enforces this structurally: every `sourceNodeIds` element must be a
+the `trellis_rlm_mcp_calls_total` metric. The write path also enforces
+this structurally: every `sourceNodeIds` element must be a
 64-lowercase-hex AST hash that exists in `ast_nodes`, checked before any
 write session opens.
 
-**Workspace capture (Session 14):** when the Tier-3 workspace is active
-(MCP servers configured, or the run carries a goal id), every MCP result
-is captured into the in-REPL workspace as an origin-stamped segment
-inside the tool call itself, and `call_tool` returns a bounded stub
-(`segmentId`, size, truncation flag, ≤500-char preview) instead of the
-full payload. The model pulls full content deliberately with
-`trellis_workspace.segment(id)` or fans `llm_query` out over segments —
-context stays small while captured knowledge grows. The workspace also
-holds the agent's plan and self-notes; bounds come from
-`TRELLIS_WORKSPACE_MAX_SEGMENTS` (default 128) and
+**Cost posture:** acceptance is zero-paid and local — the deterministic
+fixture server (`scripts/fixture_mcp_server.py`, stdio and loopback
+Streamable HTTP, with and without required auth) is the only server the
+drill configures. Real networked or metered MCP servers are
+owner-approved runs: print the configured allowlist first and record the
+observed `mcp_calls`.
+
+```bash
+npm run test:rlm-mcp
+```
+
+## Working memory and the trust pipeline (Tier 3)
+
+### The workspace
+
+When the Tier-3 workspace is active (MCP servers configured, or the run
+carries a goal id), every MCP result is captured into the in-REPL
+workspace as an origin-stamped segment **inside the tool call itself**,
+and `call_tool` returns a bounded stub (`segmentId`, size, truncation
+flag, ≤500-char preview) instead of the full payload. Capture is
+mechanical, not behavioral — the model cannot forget to file a result,
+and cannot forge an origin stamp. The model pulls full content
+deliberately with `trellis_workspace.segment(id)` or fans `llm_query`
+out over segments — attention stays small while captured knowledge
+grows. The workspace also holds the agent's plan and self-notes; bounds
+come from `TRELLIS_WORKSPACE_MAX_SEGMENTS` (default 128) and
 `TRELLIS_WORKSPACE_MAX_BYTES` (default 4 MiB), and over-budget writes
 raise a readable error rather than silently truncating stored state.
 Workspace state has no provenance standing and is reported in telemetry
-as counts only (`workspace_ops`/`workspace_segments`/`workspace_bytes`).
-With no MCP servers and no goal id, nothing is injected and prompt and
-behavior are byte-identical to a pre-Session-14 run:
+as counts only. With no MCP servers and no goal id, nothing is injected
+and prompt and behavior are byte-identical to a run without the feature:
 
 ```bash
 npm run test:rlm-workspace
 ```
 
-**Workspace lineage (Session 16):** within one agentic goal, workspaces
-are inherited between iterations. At task end the harness serializes a
-non-empty workspace and parks the snapshot goal-scoped in Redis —
-age-bounded by `SCRATCH_TTL_SECONDS` (default 3600, hard cap 24 h) and
-volume-bounded per goal by `SCRATCH_MAX_BYTES_PER_GOAL` (default
-8 MiB). The orchestrator sees each task's parked snapshot only as a
-counts-only `workspaceRef` and routes by reference: a later task
-dispatched with `seedFromTasks` names prior task ids, and the worker
-resolves, merges, and re-validates their snapshots into that run's
-workspace at spawn — plan, notes, segments, and origin stamps restored
-verbatim, so exact identifiers (AST hashes above all) cross tasks
-byte-exact instead of being re-typed through two LLM hops. Tasks in one
-batch stay independent (inheritance, never a live blackboard); a
-missing or expired reference fails the seeded task with a readable
-error, and an over-budget seed fails fast rather than truncating.
-Parked state keeps Tier-3 trust standing: none.
+### Lineage
 
-**Promotion (Session 17):** the operator-gated route by which a
-workspace segment earns permanence. Promotion is a human running a CLI —
-there is no API endpoint, and no model output can trigger it. It
+Within one agentic goal, workspaces are inherited between iterations. At
+task end the harness serializes a non-empty workspace and parks the
+snapshot goal-scoped in Redis — age-bounded by `SCRATCH_TTL_SECONDS`
+(default 3600, hard cap 24 h) and volume-bounded per goal by
+`SCRATCH_MAX_BYTES_PER_GOAL` (default 8 MiB). The orchestrator sees each
+task's parked snapshot only as a counts-only `workspaceRef` and routes by
+reference: a later task dispatched with `seedFromTasks` names prior task
+ids, and the worker resolves, merges, and re-validates their snapshots
+into that run's workspace at spawn — plan, notes, segments, and origin
+stamps restored verbatim, so exact identifiers (AST hashes above all)
+cross tasks byte-exact instead of being re-typed through two LLM hops.
+Tasks in one batch stay independent (inheritance, never a live
+blackboard); a missing or expired reference fails the seeded task with a
+readable error, and an over-budget seed fails fast rather than
+truncating. Parked state keeps Tier-3 trust standing: none. TTL expiry is
+by design — anything worth keeping is promoted, not parked longer.
+
+### Promotion
+
+Promotion is the operator-gated route by which a workspace segment earns
+permanence — the ONLY route from Tier 3 to Tier 1. It is a human running
+a CLI; there is no API endpoint, and no model output can trigger it. It
 consumes a PARKED snapshot only, one segment per invocation:
 
 ```bash
@@ -396,48 +586,37 @@ contested transition on re-promotion) is drilled zero-paid:
 npm run test:promotion
 ```
 
-**Cost posture:** acceptance is zero-paid and local — the deterministic
-fixture server (`scripts/fixture_mcp_server.py`, stdio and loopback
-Streamable HTTP, with and without required auth) is the only server the
-drill configures:
-
-```bash
-npm run test:rlm-mcp
-```
-
-## Modules (protocol registry)
+## Modules — the capability flywheel
 
 The RLM's cognitive protocols are composed from a versioned module
-registry (Session 15; design record §9). A module lives under
-`modules/<name>/` as a `module.json` manifest plus a brace-free
-addendum text file; the composed system prompt is kernel base +
-selected module addenda + workflow rules. This kernel edition supports
-**protocol modules only** — manifests declaring tools are rejected.
+registry. A module lives under `modules/<name>/` as a `module.json`
+manifest plus a brace-free addendum text file; the composed system
+prompt is kernel base + selected module addenda + workflow rules,
+**pinned by sha256** — the pin moves only with a witting kernel change,
+recomputed in the same commit. This kernel edition supports **protocol
+modules only** — manifests declaring tools are rejected.
 
 Selection is operator-owned via `TRELLIS_MODULES`: unset loads the
 default selection (`["spatial-flywheel"]` — module #0, the extracted
-spatial-flywheel protocol), which composes a prompt **byte-identical**
-to the pre-extraction monolith (pinned by hash); a JSON array selects
-exactly those registered modules (max 4); `[]` composes none. Both the
-Node config (fail-fast at startup) and the Python agent (defensively,
-at spawn) validate the same files with identical bounds. Addendum files
-carry no literal braces (the rlms `.format()` contract); rubric text
-enters through the single `<<TRELLIS_RUBRIC>>` substitution token.
-Module #0 carries empty research provenance (it predates the promotion
-path).
+spatial-flywheel protocol); a JSON array selects exactly those registered
+modules (max 4); `[]` composes none. Both the Node config (fail-fast at
+startup) and the Python agent (defensively, at spawn) validate the same
+files with identical bounds. Addendum files carry no literal braces (the
+rlms `.format()` contract); rubric text enters through the single
+`<<TRELLIS_RUBRIC>>` substitution token.
 
 ```bash
 npm run test:modules
 ```
 
-### Module lifecycle (registration and research-change contestation)
+### Module lifecycle: capabilities are beliefs
 
 A research-bearing module cites the promoted sources its design derives
 from as `research.sourceNodeIds` (AST hashes minted by `npm run
 promote`). Registration represents each such manifest as a graph entity
-the invalidation sweep can reach (Session 18; design record §9.4), so a
-capability is automatically flagged for re-review when its research
-basis changes:
+the invalidation sweep can reach, so **a capability is automatically
+flagged for re-review when its research basis changes** — the same
+epistemology that governs facts governs the system's own instructions:
 
 ```bash
 npm run modules:register            # register all research-bearing active modules
@@ -465,21 +644,21 @@ back to `active`, and re-register.
 npm run test:module-lifecycle   # zero-LLM drill of the whole loop (requires the compose stack)
 ```
 
-Real networked or metered MCP servers (an actual web-search provider) are
-owner-approved runs: print the configured allowlist first and record the
-observed `mcp_calls`.
+### Authoring modules (grounded authoring)
 
-### Authoring modules (grounded authoring, Session 19)
-
-A protocol module's addendum can be drafted by an RLM under the
+A protocol module's addendum can be drafted by the RLM itself under the
 kernel-owned **grounded-authoring mode** (design record
-`docs/architecture/GROUNDED_AUTHORING.md`). The mode exists because the
-authoring job is not the research job: an author sees ONLY a fixed,
-already-promoted research corpus (seeded into a read-only-scope
-workspace), has no database, search, or write access, and never chooses
-its own citations — the harness pins `research.sourceNodeIds` from the
-corpus. The driver assembles a module **directory for human review**; it
-never registers and never lands.
+`docs/architecture/GROUNDED_AUTHORING.md`) — the mechanized turn of the
+capability flywheel. The mode exists because the first flywheel turn
+observed **provenance laundering** live: asked to cite its sources, the
+model cited real-but-unrelated hashes surfaced by whole-database search.
+The remediation is structural, not behavioral: an author sees ONLY a
+fixed, already-promoted research corpus (seeded into a workspace-only
+REPL — no database, search, or write tools; the process opens no DB
+connection), and never chooses its citations — the harness pins
+`research.sourceNodeIds` from the corpus mechanically. The driver
+assembles a module **directory for human review**; it never registers
+and never lands.
 
 ```bash
 # Plan only (default): echoes the corpus, template hash, and cost
@@ -501,15 +680,58 @@ The template is a byte-pinned kernel constant composed from exactly the
 topic and the doc keys, so it cannot pre-state the target directives.
 Before assembly, a **derivation gate** scores the draft's coverage of
 corpus-specific anchors (measured comparisons, named mechanics,
-distinctive terms) and refuses below a modest threshold; a draft
-carrying any 64-hex token is refused at the scanner (the model never
-supplies provenance). The output directory is an ordinary module: review
-it, merge it, then register it with `npm run modules:register` as usual.
-The first paid run under this mode should be an owner-approved new module
-with a corpus chosen for testable specificity. Drilled zero-LLM by
-`npm run test:module-lifecycle` (§10–§11).
+distinctive terms) and refuses below a threshold; a draft carrying any
+64-hex token is refused at the scanner (the model never supplies
+provenance). The output directory is an ordinary module: review it,
+merge it, then register it with `npm run modules:register` as usual.
+Related measured finding (`docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`):
+citation laundering is incentive-driven — it appears when a task rewards
+citation count, prompt discipline does not stop it, and only a semantic
+entailment check both detects and prevents it. Never reward citation
+count anywhere.
 
-## Benchmarks
+## Editing files (the code-mediated toolkit)
+
+The RLM has no file surface by default — and that stays the shipped
+configuration. When the operator wants Trellis to drive edits (the
+self-editing doctrine: content pool + standard permissions — Trellis may
+edit Trellis the way Claude Code edits Claude Code), they set
+`TRELLIS_EDIT_ROOT` to an existing directory — typically a branch
+checkout — and the RLM gains one holder, `trellis_textedit`, that
+embodies the code-mediated-text pillar: *the model never counts, and the
+model never copies.*
+
+```bash
+TRELLIS_EDIT_ROOT=/path/to/branch-checkout   # enablement + containment boundary
+#TRELLIS_TEXTEDIT_MAX_FILE_BYTES=4194304     # per-file cap (hard max 32 MiB)
+#TRELLIS_TEXTEDIT_MAX_FILES=16               # held-frame cap (hard max 64)
+```
+
+The surface is the pillar's §2 discipline as tooling shape: `load`
+reads a file into a held frame and returns its content digest;
+`locate` returns engine-computed line addresses for a content query
+(the model never estimates positions); `splice` stages the replacement
+of a computed half-open range with newly authored lines (existing text
+is moved by code, never retyped); `diff` reviews staged edits in-REPL;
+`write_back` re-hashes the disk bytes against the load-time digest and
+REFUSES a stale write, then writes atomically. Every path strictly
+resolves inside the edit root; `..`, absolute paths, and symlink
+escapes are refused before any I/O. With the variable unset, nothing
+is injected and the prompt is byte-identical (pinned).
+
+Boundaries: the toolkit never touches git — landing edits is a human
+reviewing an ordinary PR. Toolkit operations have no provenance
+standing (a separate telemetry counter, like `mcp_calls`); edited file
+content earns citability only through verified ingest or promotion.
+The root and bounds come exclusively from operator env — never from a
+queue payload or a model completion (unit-pinned). Drilled zero-LLM on
+token-scoped temp directories:
+
+```bash
+npm run test:textedit
+```
+
+## Benchmarks and evidence
 
 The OOLONG-Pairs harness ships two committed, seeded corpora:
 
@@ -553,6 +775,13 @@ npm run drill:scale
 npm run drill:scale -- --documents 150 --blocks 20 --seed 20260706
 ```
 
+The measured record lives in `docs/benchmarks/`: the flywheel economics
+(`FLYWHEEL_EXPLAINER.md`, `OOLONG_BENCHMARK_REPORT.md`), the update and
+poisoning drills, the scale gate (`SCALE_PROVENANCE_REPORT.md`), the
+workspace and lineage paired-run probes, the repository-ingestion pilot,
+and the provenance-citation A/B eval. The honest ledger of open critiques
+is `CRITIQUE_AND_FUTURE.md`.
+
 ## Verification
 
 Offline checks require no Docker or API key:
@@ -594,7 +823,10 @@ npm run test:promotion
 npm run test:module-lifecycle
 npm run test:rlm-workspace
 npm run test:modules
+npm run test:textedit
 npm run test:a2a
 ```
 
-See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts.
+See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts,
+[docs/README.md](docs/README.md) for the documentation map, and
+`HANDOFF.md` §1 for the living architectural mental model.

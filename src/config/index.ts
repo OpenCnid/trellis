@@ -1,4 +1,5 @@
 import './environment.js';
+import { statSync } from 'node:fs';
 import { z } from 'zod';
 import {
   parseMcpServers,
@@ -171,6 +172,25 @@ const EnvSchema = z.object({
     .max(32 * 1024 * 1024)
     .default(4 * 1024 * 1024),
 
+  // Code-mediated editing toolkit for the RLM sub-agent (Session 20;
+  // design record CODE_MEDIATED_TEXT.md §6.1). TRELLIS_EDIT_ROOT is the
+  // operator-owned enablement switch AND the containment boundary: every
+  // toolkit path strictly resolves inside it. Unset (the default, and the
+  // only shipped configuration) means no toolkit is injected and the RLM
+  // prompt/namespace are byte-identical. The bounds are validated with
+  // hard maxima and re-validated by the Python twin
+  // (src/rlm/trellis_textedit.py); slice/hit caps are kernel constants,
+  // deliberately NOT env. Never enabled by any default, worker, or
+  // Compose configuration (Guardrail 4).
+  TRELLIS_EDIT_ROOT: z.string().optional(),
+  TRELLIS_TEXTEDIT_MAX_FILE_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(32 * 1024 * 1024)
+    .default(4 * 1024 * 1024),
+  TRELLIS_TEXTEDIT_MAX_FILES: z.coerce.number().int().positive().max(64).default(16),
+
   // Workspace lineage parking (Session 16, design record §5). Parked
   // snapshots are goal-scoped checkpoints in Redis: age-bounded like
   // A2A task records (TTL, hard 24 h cap) and volume-bounded per goal
@@ -214,6 +234,25 @@ const mcpCredentialEnv = resolveMcpCredentialEnv(mcpServers, process.env);
 // the Python agent from the same repository files.
 const moduleSelection = parseModuleSelection(env.TRELLIS_MODULES);
 const loadedModules = loadModules(moduleSelection);
+
+// The edit root fails fast at startup too (the credential-resolution
+// precedent): an operator who set TRELLIS_EDIT_ROOT to a path that is
+// not an existing directory must learn it before any run, not from a
+// mid-run toolkit failure. Blank means unset.
+const editRoot = env.TRELLIS_EDIT_ROOT?.trim() || undefined;
+if (editRoot !== undefined) {
+  let isDirectory = false;
+  try {
+    isDirectory = statSync(editRoot).isDirectory();
+  } catch {
+    isDirectory = false;
+  }
+  if (!isDirectory) {
+    throw new Error(
+      `Invalid TRELLIS_EDIT_ROOT: '${editRoot}' is not an existing directory.`
+    );
+  }
+}
 
 export const config = {
   postgres: {
@@ -303,6 +342,12 @@ export const config = {
   workspace: {
     maxSegments: env.TRELLIS_WORKSPACE_MAX_SEGMENTS,
     maxBytes: env.TRELLIS_WORKSPACE_MAX_BYTES,
+  },
+  textedit: {
+    /** Operator-owned enablement + containment root; undefined = toolkit off. */
+    editRoot,
+    maxFileBytes: env.TRELLIS_TEXTEDIT_MAX_FILE_BYTES,
+    maxFiles: env.TRELLIS_TEXTEDIT_MAX_FILES,
   },
   scratch: {
     ttlSeconds: env.SCRATCH_TTL_SECONDS,

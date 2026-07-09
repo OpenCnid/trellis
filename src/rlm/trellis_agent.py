@@ -29,6 +29,11 @@ from trellis_modules import (
     load_modules,
     parse_module_selection,
 )
+from trellis_textedit import (
+    TrellisTextEdit,
+    build_textedit_addendum,
+    parse_textedit_bounds,
+)
 
 # --- Sub-call counting -------------------------------------------------
 # In this rlms version, REPL llm_query()/llm_query_batched() requests are
@@ -138,6 +143,8 @@ TOOLS (available directly in the REPL):
    - `trellis_postgres.vector_search(query)` is the hybrid fallback when graph traversal yields nothing.
 
 CRITICAL API CONTRACT: every tool method returns a JSON STRING, never a parsed object. Always wrap results in `json.loads(...)` (import json first) before indexing or iterating. `run_cypher` returns a JSON array of row dicts keyed by your RETURN aliases.
+
+CODE-MEDIATED TEXT (HARD RULE): load text into structures and operate on them with code. Locate by query, never by counting lines or guessing positions. Move existing text by slicing and splicing, never by retyping it. Author only genuinely new text.
 
 ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
 
@@ -372,6 +379,7 @@ def main():
     # (this rlms version never fires on_iteration_complete).
     exit_code = 0
     workspace = None
+    textedit = None
     try:
         # Session 10: the external tool surface comes exclusively from the
         # validated TRELLIS_MCP_SERVERS registry the worker forwarded
@@ -414,6 +422,21 @@ def main():
             custom_tools["trellis_mcp"] = mcp_tool
             print(f"MCP servers connected: {', '.join(s['name'] for s in mcp_servers)}", flush=True)
 
+        # Session 20: the code-mediated editing toolkit (design record
+        # CODE_MEDIATED_TEXT.md §6.1) is injected ONLY when the operator
+        # set TRELLIS_EDIT_ROOT — never from a payload or a completion.
+        # Unset means nothing is injected and the prompt is byte-identical
+        # (the TRELLIS_MCP_SERVERS gating precedent, pinned by
+        # test:textedit). A bad root or bad bounds fail HERE, before any
+        # paid work.
+        edit_root = os.getenv("TRELLIS_EDIT_ROOT")
+        if edit_root and edit_root.strip():
+            max_file_bytes, max_files = parse_textedit_bounds()
+            textedit = TrellisTextEdit(
+                edit_root, max_file_bytes=max_file_bytes, max_files=max_files)
+            custom_tools["trellis_textedit"] = textedit
+            print("Text editing toolkit enabled (operator-configured edit root).", flush=True)
+
         # Inject the query directly into the system prompt to ensure the LLM sees it and doesn't ask for it.
         # Curly braces are escaped because rlms applies .format() to the system prompt.
         safe_query = args.query.replace("{", "{{").replace("}", "}}")
@@ -421,6 +444,7 @@ def main():
             SYSTEM_PROMPT
             + build_mcp_addendum(mcp_servers)
             + build_workspace_addendum(workspace, seeded=bool(args.seed_workspace))
+            + build_textedit_addendum(textedit)
             + f"\n\nTHE USER'S QUERY IS: {safe_query}\nDO NOT ASK FOR A QUERY, THIS IS IT. EXECUTE IT IMMEDIATELY."
         )
 
@@ -462,6 +486,11 @@ def main():
             # requirement.
             **(workspace.stats() if workspace is not None else
                {"workspace_ops": 0, "workspace_segments": 0, "workspace_bytes": 0}),
+            # Session 20: editing-toolkit activity — counts only, never a
+            # path, pattern, or content (T16). Like mcp_calls, none of it
+            # feeds the provenance requirement.
+            **(textedit.stats() if textedit is not None else
+               {"textedit_ops": 0, "textedit_files": 0, "textedit_writes": 0}),
             "execution_time_s": getattr(result, "execution_time", None),
             "model_usage": usage_dict.get("model_usage_summaries", {}),
         }

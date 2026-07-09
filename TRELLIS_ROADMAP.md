@@ -8,7 +8,7 @@
 
 ## 1. Architecture Overview
 
-Trellis is a provenance-preserving GraphRAG system. Its central design commitment is that every semantic fact must remain traceable to an immutable, content-addressed physical location in the source document. The system is organized as an asynchronous pipeline over a three-tier storage layout.
+Trellis is a Recursive Language Model runtime over a provenance-enforced knowledge substrate (reframed July 9, 2026 — the original "provenance-preserving GraphRAG" description now names the Tier-1/2 substrate, not the system; see the root README "What Trellis is"). Its central design commitment is unchanged: every semantic fact must remain traceable to an immutable, content-addressed physical location in the source document. The system is organized as an asynchronous pipeline over a three-tier storage layout.
 
 ### 1.1 Components and Data Flow
 
@@ -206,8 +206,9 @@ Ordered roughly by severity.
 | ~~13~~ | ~~Promotion path (design record §11 step 5)~~ | **Done (Session 17, July 7, 2026)** — operator-gated segment→ingest through the unmodified verified transaction: `npm run promote` (list/promote, zero-paid default), typed planner refusals (truncated/empty/unknown/bad-key), the origin audit stamp on the documents row, and the earned-citability loop drilled end to end (`test:promotion` 41); see §5 |
 | ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn RAN, owner-approved, July 9, 2026 (module `workspace-discipline`; see §5) and surfaced the laundering finding that produced row 1 below |
 | ~~1~~ | ~~Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2)~~ | **Done (Session 19, July 9, 2026)** — kernel `trellis_agent.py --mode author` scoped to a seeded read-only corpus (no DB/search/write), harness-pinned `research.sourceNodeIds`, byte-pinned authoring template, deterministic anchor derivation gate, and the `npm run modules:author` operator driver (plan-echo / `--draft` replay / `--confirm-paid` spawn); `TRELLIS_DRAFT` scanner refuses any 64-hex token; drilled end to end zero-LLM; see §5 |
-| 1 | Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision | **Owner directive, July 9, 2026 — takes precedence over extraction.** DDD implementation of `docs/architecture/CODE_MEDIATED_TEXT.md`: the operator-gated `load/locate/splice/write_back` editing toolkit with digest guards (§6.1, structure selection per the measured §7), and the kernel prompt revision teaching the discipline to research runs (§6.2 — a deliberate composed-prompt sha256 pin move, its own commit) |
-| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind row 1 by the July 9 owner direction — deferred again, not dropped) |
+| ~~1~~ | ~~Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision~~ | **Done (Session 20, July 9, 2026)** — the operator-gated `trellis_textedit` holder (engine-computed `locate`, staged `splice`, digest-guarded atomic `write_back`, strict root containment, Zod/Python twin bounds, byte-identical prompt and namespace when `TRELLIS_EDIT_ROOT` is unset; `npm run test:textedit`, 81 checks) and the §6.2 CODE-MEDIATED TEXT kernel prompt block shipped in its own commit with the composed-prompt sha256 pin recomputed there; see §5 |
+| 1 | Pillar measurement + module #1 v2 (pillar §6.3 + §6.4, owner-APPROVED July 9, 2026) + the Frankenstein corpus | **Owner directive — takes precedence; the two formerly owner-gated pillar follow-ups are now approved.** Ingest Frankenstein (Gutenberg #84, ~440 KB — several times a practical working window) through the verified path (zero-paid, extraction `none`); run the paired-run **effective-context probe** (discipline-on vs discipline-off over the same question set; correctness, bytes-through-attention, turns, spend — the giant-context claim becomes a number, ≤$5/run); re-author **module #1 v2** through grounded authoring with the pillar in its promoted corpus, retiring the pre-pillar "reconstructing stored text" mitigation language. Readiness verified July 9 (pandas 2.2.3/pyarrow 24.0.0/polars 1.34.0 in the agent env; kernel block present; bounds fit; `python:check` now pins pandas) |
+| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind row 1 by the July 9 owner direction — now deferred a third time, behind the approved pillar measurements; not dropped) |
 | 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
@@ -2255,3 +2256,161 @@ single-file edit frames, pandas (object dtype) as the relational default
 lines (halves memory, ~25% faster), polars documented as the unneeded
 escalation tier (5.9× faster at 10M: 247 ms vs 1,465 ms). Toolkit byte
 caps align with the workspace bounds (4 MiB default / 32 MiB cap).
+
+### July 9, 2026 — Session 20: the code-mediated editing toolkit + the kernel prompt revision (§4 row 1, pillar §6.1/§6.2)
+
+The pillar's two implementation follow-ups, per the owner's July 9
+re-sequencing. Two commits: the toolkit (everything byte-identical when
+unconfigured) and the kernel prompt revision (the one deliberate global
+change, with the pin recomputed in the same commit).
+
+**The editing toolkit (`src/rlm/trellis_textedit.py`, pillar §6.1).**
+A `TrellisTextEdit` holder injected via rlms `custom_tools` as
+`trellis_textedit` ONLY when the operator sets `TRELLIS_EDIT_ROOT` —
+config fails fast when the root is not an existing directory, the worker
+forwards root + bounds through `buildAgentEnv` exactly when configured
+and strips raw inherited values otherwise, and a queue payload carrying
+anything textedit-shaped is ignored (all unit-pinned). The surface is
+the pillar's §2 as tooling shape: `load` (held list-of-lines frame +
+load-time sha256), `lines` (bounded half-open slices), `locate`
+(engine-computed addresses for content/regex queries, bounded hits +
+true total), `splice` (staged replacement at a computed range; list of
+newline-free strings only), `diff` (bounded unified review), `revert`,
+`drop` (frees a frame slot — the budget release valve, a §6.1
+refinement recorded in the pillar record), and `write_back` (re-hashes
+the CURRENT disk bytes; mismatch RAISES and writes nothing; else temp +
+rename atomically). Frames are `text.split("\n")` lists: an unedited
+round-trip is byte-identical and moved CRLF lines keep their bytes
+verbatim. Containment is resolve-then-commonpath inside the real root —
+`..`, absolute/rooted paths, and symlink escapes are refused before any
+I/O. Bounds are Zod + Python twins (`TRELLIS_TEXTEDIT_MAX_FILE_BYTES`
+4 MiB/32 MiB, `TRELLIS_TEXTEDIT_MAX_FILES` 16/64); slice (200), hit
+(40), and diff (400) caps are kernel constants. Telemetry adds
+counts-only `textedit_ops`/`textedit_files`/`textedit_writes`; toolkit
+ops never count as database tool calls. A brace-free TEXTEDIT addendum
+composes only when configured. Git stays out: landing is a human PR.
+
+**The kernel prompt revision (pillar §6.2, own commit).** The candidate
+wording adopted verbatim into `TRELLIS_ADDENDUM_BASE` (locate by query,
+splice instead of retype, author only new text); the `test:modules`
+composed-prompt pin moved `abb945a6…f9b2` → `170e9f7e…67e9`, recomputed
+in the same commit, and the pin constant (renamed
+`COMPOSED_SYSTEM_PROMPT_SHA256`) now records its move history in place.
+The relative prompt pins in `test:rlm-workspace` held unmoved.
+
+**Defect found and fixed during the drill:** Python 3.13 `ntpath.isabs`
+treats a bare leading slash as drive-relative, not absolute, so
+`/etc/passwd` fell through to the commonpath backstop (still refused,
+wrong message). Rooted paths are now refused explicitly as absolute on
+every platform.
+
+**Acceptance (all green, July 9, 2026):** `npm test` 621/71 (baseline
+612/70: + `textedit_bounds.test.ts`, extended `rlm_job.test.ts`);
+`npm run build`; `npm run python:check` (trellis_textedit.py joined the
+Dockerfile COPY line and the runtime check); `docker compose --profile
+test config --quiet`; the new `npm run test:textedit` (81 checks:
+bounds twins, bounded reads, staged splices, byte-compare write_back,
+the digest guard with disk-untouched proof, containment incl. a live
+symlink escape, budgets, gating byte-identity, LocalREPL persistence,
+counts-only telemetry); `test:modules` (43, pin moved wittingly);
+`test:module-lifecycle` (60); `test:promotion` (41);
+`test:rlm-workspace` (86); `test:rlm-mcp` (86); `test:rlm-sandbox`
+(21); `test:agent-loop` (35); `test:a2a` (46); `test:repo-ingest` (45);
+`test:benchmark-hardening` (24); `test:entity-resolution` (34);
+`test:api-hardening` (18); `test:belief-recovery` (30);
+`test:invalidation-sweep` (17); `npm run drill:scale` (gate CLOSED at
+286; sweep growth 1.70x, inside the recorded band); the isolated
+Compose integration as project `trellis_s20_ci` (10 assertions, torn
+down with `--volumes`); `git diff --check` clean.
+
+**Standing owner-gated proposals (unchanged, not run):** the supervised
+Trellis-edits-Trellis proof run (operator sets `TRELLIS_EDIT_ROOT` at a
+branch checkout; one small real edit lands as a reviewed PR); the
+effective-context probe (pillar §6.3, ≤$5); module #1 v2 (§6.4); the
+module #2 authoring turn. Next scheduled row: the repository-scale
+extraction prerequisites (§4 row 2).
+
+### July 9, 2026 — The RLM reframing: documentation identity overhaul (owner-directed; same PR as Session 20)
+
+Owner directive, after Session 20's close-out: Trellis's documentation
+still introduced the system as "provenance-preserving GraphRAG," a
+description the last twelve sessions outgrew — the graph-and-provenance
+machinery is now the SUBSTRATE (Tiers 1–2 of the trust model), and the
+system is the **Recursive Language Model runtime** standing on it. The
+docs were rewritten to lead with what the system is, not what it grew
+from.
+
+**The synthesis the new framing records (root README, "What Trellis
+is"):** five layered commitments — (1) the substrate (content-addressed
+Merkle ASTs + beliefs carrying `sourceNodeIds`, with Merkle-diff →
+sweep self-correction, measured at recall/precision 1.000); (2) the RLM
+execution model (context is a database, not a scroll: the model reaches
+stores, workspace, tools, and frames through code; attention holds
+queries, handles, and bounded previews); (3) the trust pipeline (three
+tiers, permanence earned only upward through operator-gated promotion,
+provenance as structural enforcement at the single write path); (4) the
+two flywheels — knowledge (derive once, cache with provenance, reuse;
+measured) and capability (modules the RLM authors under grounded
+authoring, registered as graph entities whose research basis the
+UNCHANGED sweep contests — the system's capabilities are beliefs under
+the same epistemology as its facts); (5) the code-mediated-text pillar
+(never counts, never copies — localization error and transcription
+error are one pathology). Plus the standing answer to "why not
+GraphRAG": RAG retrieves to augment generation and is stateless between
+questions; Trellis's unit of progress is a verified belief or verified
+capability added to a compounding, self-correcting store, and
+everything whose evidence dies — instructions included — is contested.
+
+**Files changed (docs only; zero code, zero pins):** root `README.md`
+(full rewrite: identity, the five commitments, the GraphRAG inversion,
+the DDD authority chain, architecture-in-one-pass; every operational
+section preserved verbatim-in-substance and regrouped under Getting
+started / Feeding the substrate / Running the RLM / Working memory and
+the trust pipeline / Modules / Editing / Benchmarks / Verification —
+`test:textedit` added to the live-check list, which had been missed in
+the Session 20 pass); `docs/README.md` (reading order rewritten:
+orientation → living doctrine → measured evidence → operations →
+product history, with each document's status named); `docs/GLOSSARY.md`
+(new canonical **Trellis** entry); `HANDOFF.md` line 1 and
+`TRELLIS_ROADMAP.md` §1 opening (identity lines updated);
+`docs/COLLABORATOR_BRIEFING.md` Altitude −1 (same); status banners on
+the three MVP-era records (`ARCHITECTURE.md`, `SYSTEM_ARCHITECTURE.md`,
+`TECHNICAL_SPEC.md` — historical, preserved, living model pointed to).
+`docs/product/*` and the dated benchmark reports are deliberately
+untouched: they are the record, and DDD preserves the record.
+
+**§0 step 5 re-check:** doctrinal work only — no defect surfaced, no
+queue jump; Session 21 (extraction prerequisites) stands as handed off.
+
+### July 9, 2026 — Owner directive: the pillar's remaining follow-ups are APPROVED; Session 21 re-pointed (readiness verified)
+
+The owner approved the two formerly owner-gated follow-ups of the
+code-mediated-text pillar and directed that the next session execute
+them, with the Frankenstein corpus as the measurement substrate:
+
+1. **The effective-context probe** (pillar §6.3, paid, ≤$5/run standing
+   cap): a paired-run measurement — discipline-on vs discipline-off over
+   the same question set on a corpus several times a practical working
+   window — scoring correctness, bytes-through-attention, turn count,
+   and spend. The giant-context claim becomes a number.
+2. **Module #1 v2** (pillar §6.4, paid): re-author workspace-discipline
+   through the grounded-authoring mode with the pillar record in its
+   promoted corpus, retiring the pre-pillar "reconstructing stored text"
+   mitigation language.
+
+Extraction prerequisites defer a third time (row 2; deferred, never
+dropped). `HANDOFF.md` §3–§8 regenerated for the new objective at full
+concreteness.
+
+**Readiness verification (run this day, zero-paid, all green):** pandas
+2.2.3, pyarrow 24.0.0, and polars 1.34.0 import in the agent Python
+(3.13.1); a list-of-lines/pandas frame round-trips bytes exactly and
+answers substring queries by engine-computed index; the composed kernel
+prompt carries the Session 20 CODE-MEDIATED TEXT hard-rule block;
+Frankenstein (~440 KB) fits every relevant bound (`INGEST_MAX_BODY_MB`
+5 MB, workspace 4 MiB default, textedit frame 4 MiB); the RLM can read
+markdown block text (`_node_text`, pinned since the Session 19
+follow-up). Hardening landed with the check: `pandas` joined the
+`check_python_runtime.py` import list — it ships transitively via
+`unstructured` but is now pillar-load-bearing, so its absence must fail
+the runtime check, not a paid run (`npm run python:check` green).

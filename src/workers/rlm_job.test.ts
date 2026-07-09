@@ -107,6 +107,20 @@ describe('parseRlmJobData', () => {
     })).toThrow(/Invalid rlm_queue job data/);
   });
 
+  it('carries nothing textedit-shaped — a payload cannot name an edit root or bounds', () => {
+    // Guardrail 4 (Session 20): the edit root and its bounds come only
+    // from operator env through the validated config. Anything
+    // textedit-looking on a queue payload is stripped at the boundary.
+    const parsed = parseRlmJobData({
+      query: 'q',
+      jobId: 'j',
+      editRoot: '/etc',
+      TRELLIS_EDIT_ROOT: '/etc',
+      textedit: { editRoot: '/etc', maxFileBytes: 1, maxFiles: 1 },
+    });
+    expect(Object.keys(parsed).sort()).toEqual(['jobId', 'query']);
+  });
+
   it('carries nothing MCP-shaped — a payload cannot name servers, commands, or tools', () => {
     // Guardrail 5 (Session 10): the external tool surface comes from the
     // operator's validated config only. Any MCP-looking fields riding a
@@ -192,6 +206,33 @@ describe('buildAgentEnv', () => {
 
     const stripped = buildAgentEnv({ TRELLIS_MODULES: '["evil-module"]' }, CFG);
     expect('TRELLIS_MODULES' in stripped).toBe(false);
+  });
+
+  it('forwards the textedit root and bounds only when the operator configured them (Session 20)', () => {
+    const env = buildAgentEnv({}, {
+      ...CFG,
+      textedit: { editRoot: '/srv/checkout', maxFileBytes: 1_048_576, maxFiles: 8 },
+    });
+    expect(env.TRELLIS_EDIT_ROOT).toBe('/srv/checkout');
+    expect(env.TRELLIS_TEXTEDIT_MAX_FILE_BYTES).toBe('1048576');
+    expect(env.TRELLIS_TEXTEDIT_MAX_FILES).toBe('8');
+  });
+
+  it('strips raw inherited textedit variables when the toolkit is not configured', () => {
+    // Same discipline as TRELLIS_MCP_SERVERS: a stale inherited edit
+    // root can never enable editing — the child only ever sees values
+    // that crossed the Zod validator.
+    const env = buildAgentEnv(
+      {
+        TRELLIS_EDIT_ROOT: '/etc',
+        TRELLIS_TEXTEDIT_MAX_FILE_BYTES: 'huge',
+        TRELLIS_TEXTEDIT_MAX_FILES: '99999',
+      },
+      CFG
+    );
+    expect('TRELLIS_EDIT_ROOT' in env).toBe(false);
+    expect('TRELLIS_TEXTEDIT_MAX_FILE_BYTES' in env).toBe(false);
+    expect('TRELLIS_TEXTEDIT_MAX_FILES' in env).toBe(false);
   });
 
   it('strips raw inherited workspace bounds when none are configured', () => {

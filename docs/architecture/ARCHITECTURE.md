@@ -1,5 +1,13 @@
 # Trellis Architecture
 
+> **Status: historical (Phase 1 MVP era).** Preserved as the design
+> record of the original substrate. The living architectural model is
+> `HANDOFF.md` §1 at the repository root; the system-level framing
+> (Trellis as a Recursive Language Model runtime) is the root
+> `README.md`; canonical terms are in `docs/GLOSSARY.md`. Where this
+> document and current code disagree, the code and the living records
+> win.
+
 This document describes the high-level architecture of Trellis (formerly Syntaxiom).
 If you want to familiarize yourself with the codebase, you are just in the right place!
 
