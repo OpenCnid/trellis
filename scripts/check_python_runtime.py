@@ -34,6 +34,10 @@ def main() -> None:
         "psycopg2",
         "rlm",
         "mcp",
+        # pandas ships transitively via unstructured but is load-bearing
+        # for the code-mediated-text pillar (in-REPL frames — pillar §7),
+        # so its absence must fail this check, not a paid run.
+        "pandas",
         "unstructured.partition.pdf",
         "trellis_tools",
         "trellis_mcp",

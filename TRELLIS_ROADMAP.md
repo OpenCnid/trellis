@@ -207,7 +207,8 @@ Ordered roughly by severity.
 | ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn RAN, owner-approved, July 9, 2026 (module `workspace-discipline`; see §5) and surfaced the laundering finding that produced row 1 below |
 | ~~1~~ | ~~Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2)~~ | **Done (Session 19, July 9, 2026)** — kernel `trellis_agent.py --mode author` scoped to a seeded read-only corpus (no DB/search/write), harness-pinned `research.sourceNodeIds`, byte-pinned authoring template, deterministic anchor derivation gate, and the `npm run modules:author` operator driver (plan-echo / `--draft` replay / `--confirm-paid` spawn); `TRELLIS_DRAFT` scanner refuses any 64-hex token; drilled end to end zero-LLM; see §5 |
 | ~~1~~ | ~~Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision~~ | **Done (Session 20, July 9, 2026)** — the operator-gated `trellis_textedit` holder (engine-computed `locate`, staged `splice`, digest-guarded atomic `write_back`, strict root containment, Zod/Python twin bounds, byte-identical prompt and namespace when `TRELLIS_EDIT_ROOT` is unset; `npm run test:textedit`, 81 checks) and the §6.2 CODE-MEDIATED TEXT kernel prompt block shipped in its own commit with the composed-prompt sha256 pin recomputed there; see §5 |
-| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind row 1 by the July 9 owner direction — deferred again, not dropped) |
+| 1 | Pillar measurement + module #1 v2 (pillar §6.3 + §6.4, owner-APPROVED July 9, 2026) + the Frankenstein corpus | **Owner directive — takes precedence; the two formerly owner-gated pillar follow-ups are now approved.** Ingest Frankenstein (Gutenberg #84, ~440 KB — several times a practical working window) through the verified path (zero-paid, extraction `none`); run the paired-run **effective-context probe** (discipline-on vs discipline-off over the same question set; correctness, bytes-through-attention, turns, spend — the giant-context claim becomes a number, ≤$5/run); re-author **module #1 v2** through grounded authoring with the pillar in its promoted corpus, retiring the pre-pillar "reconstructing stored text" mitigation language. Readiness verified July 9 (pandas 2.2.3/pyarrow 24.0.0/polars 1.34.0 in the agent env; kernel block present; bounds fit; `python:check` now pins pandas) |
+| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind row 1 by the July 9 owner direction — now deferred a third time, behind the approved pillar measurements; not dropped) |
 | 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
@@ -2380,3 +2381,36 @@ untouched: they are the record, and DDD preserves the record.
 
 **§0 step 5 re-check:** doctrinal work only — no defect surfaced, no
 queue jump; Session 21 (extraction prerequisites) stands as handed off.
+
+### July 9, 2026 — Owner directive: the pillar's remaining follow-ups are APPROVED; Session 21 re-pointed (readiness verified)
+
+The owner approved the two formerly owner-gated follow-ups of the
+code-mediated-text pillar and directed that the next session execute
+them, with the Frankenstein corpus as the measurement substrate:
+
+1. **The effective-context probe** (pillar §6.3, paid, ≤$5/run standing
+   cap): a paired-run measurement — discipline-on vs discipline-off over
+   the same question set on a corpus several times a practical working
+   window — scoring correctness, bytes-through-attention, turn count,
+   and spend. The giant-context claim becomes a number.
+2. **Module #1 v2** (pillar §6.4, paid): re-author workspace-discipline
+   through the grounded-authoring mode with the pillar record in its
+   promoted corpus, retiring the pre-pillar "reconstructing stored text"
+   mitigation language.
+
+Extraction prerequisites defer a third time (row 2; deferred, never
+dropped). `HANDOFF.md` §3–§8 regenerated for the new objective at full
+concreteness.
+
+**Readiness verification (run this day, zero-paid, all green):** pandas
+2.2.3, pyarrow 24.0.0, and polars 1.34.0 import in the agent Python
+(3.13.1); a list-of-lines/pandas frame round-trips bytes exactly and
+answers substring queries by engine-computed index; the composed kernel
+prompt carries the Session 20 CODE-MEDIATED TEXT hard-rule block;
+Frankenstein (~440 KB) fits every relevant bound (`INGEST_MAX_BODY_MB`
+5 MB, workspace 4 MiB default, textedit frame 4 MiB); the RLM can read
+markdown block text (`_node_text`, pinned since the Session 19
+follow-up). Hardening landed with the check: `pandas` joined the
+`check_python_runtime.py` import list — it ships transitively via
+`unstructured` but is now pillar-load-bearing, so its absence must fail
+the runtime check, not a paid run (`npm run python:check` green).
