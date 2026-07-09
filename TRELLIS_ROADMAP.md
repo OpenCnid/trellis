@@ -206,8 +206,9 @@ Ordered roughly by severity.
 | ~~13~~ | ~~Promotion path (design record §11 step 5)~~ | **Done (Session 17, July 7, 2026)** — operator-gated segment→ingest through the unmodified verified transaction: `npm run promote` (list/promote, zero-paid default), typed planner refusals (truncated/empty/unknown/bad-key), the origin audit stamp on the documents row, and the earned-citability loop drilled end to end (`test:promotion` 41); see §5 |
 | ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn RAN, owner-approved, July 9, 2026 (module `workspace-discipline`; see §5) and surfaced the laundering finding that produced row 1 below |
 | ~~1~~ | ~~Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2)~~ | **Done (Session 19, July 9, 2026)** — kernel `trellis_agent.py --mode author` scoped to a seeded read-only corpus (no DB/search/write), harness-pinned `research.sourceNodeIds`, byte-pinned authoring template, deterministic anchor derivation gate, and the `npm run modules:author` operator driver (plan-echo / `--draft` replay / `--confirm-paid` spawn); `TRELLIS_DRAFT` scanner refuses any 64-hex token; drilled end to end zero-LLM; see §5 |
-| 1 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (moved from row 1 by the July 9 owner direction — moved, not dropped) |
-| 2 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| 1 | Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision | **Owner directive, July 9, 2026 — takes precedence over extraction.** DDD implementation of `docs/architecture/CODE_MEDIATED_TEXT.md`: the operator-gated `load/locate/splice/write_back` editing toolkit with digest guards (§6.1, structure selection per the measured §7), and the kernel prompt revision teaching the discipline to research runs (§6.2 — a deliberate composed-prompt sha256 pin move, its own commit) |
+| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind row 1 by the July 9 owner direction — deferred again, not dropped) |
+| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -2187,3 +2188,70 @@ real change (candidate: a docs or test improvement), and it lands through an
 ordinary reviewed PR — the L1/L2-class proof, analogous to module #1 proving
 the flywheel. Not scheduled; Session 20 (extraction prerequisites) remains
 the next row.
+
+### July 9, 2026 — Core pillar ratified: code-mediated text (DDD; docs only)
+
+From the collaborator's line-editing exchange (pandas as a line-store; the
+localization-failure diagnosis of edit thrash) and its correction cycle, the
+owner ratified a core pillar, recorded document-first per DDD as
+`docs/architecture/CODE_MEDIATED_TEXT.md`: **the model never counts, and
+the model never copies.** Owner's formulation, verbatim in substance:
+*"Ingestion = pandas. Edits = pandas. No direct edits. Only code edits.
+Rigidly. We get a giant context window that way."*
+
+The pillar: the RLM handles all text through queryable REPL structures;
+locations are engine-computed and returned by query (transient handles);
+existing bytes are moved by code at computed addresses with hash-guarded
+write-backs, never re-typed through attention; the model authors only
+genuinely new text plus the code that manipulates everything else.
+Localization error (edit thrash) and transcription error (the laundering
+channel from the provenance-citation eval) are the same pathology —
+attention doing code's job. Consequence: effective context bounded by REPL
+memory, not the attention window. Lines locate, blocks mean. Enforcement
+posture per the eval's lesson 7: tooling shape enforces, prompts reinforce.
+
+**Alignment sweep (this entry's PR):** new record
+`CODE_MEDIATED_TEXT.md`; HANDOFF §1 pillar bullet + permanent guardrail 14;
+GLOSSARY entries (code-mediated text, engine-computed address, transient
+frame, hash-guarded write); WORKSPACE_AND_MODULES §7 mechanics cross-ref;
+GROUNDED_AUTHORING §12.2 generalization note; COLLABORATOR_BRIEFING
+postscript + reading list. Zero code changes — the pillar's existing
+instances (workspace capture stubs, harness-pinned citations, by-reference
+orchestration, Merkle-diff ingestion, the `_node_text` reconstruction) all
+predate it; the record names them and drives the rest.
+
+**Follow-ups the record drives (owner-schedulable, in its §6):** (1) the
+self-hosted editing toolkit — load/locate/splice/write_back with digest
+guards, the enablement session's edit primitive; (2) a kernel prompt
+revision teaching the discipline for research runs (a deliberate
+composed-prompt sha256 pin move, its own commit); (3) the paired-run
+effective-context probe (paid, extends the workspace-probe series) to turn
+the giant-context claim into a number; (4) module #1 v2 through grounded
+authoring (its "reconstructing stored text" line predates the pillar).
+Session 20 (extraction prerequisites) remains the next scheduled row.
+
+### July 9, 2026 — Owner re-sequencing + the measured structure-selection study
+
+**Re-sequencing (owner directive):** Session 20 is now the code-mediated-
+text follow-ups — the editing toolkit (pillar §6.1) and the kernel prompt
+revision (§6.2); repository-scale extraction defers to §4 row 2 (deferred
+again, not dropped). HANDOFF.md regenerated accordingly (§3–§8 replaced at
+full concreteness: the `trellis_textedit` holder design — operator-owned
+`TRELLIS_EDIT_ROOT` gating with byte-identical-when-unset pins, engine-
+computed `locate`, staged `splice`, digest-guarded `write_back`, Zod/Python
+twin bounds, `test:textedit` drill — and the §6.2 pin-move protocol).
+
+**Structure-selection study (pillar §7, measured in the agent environment;
+Python 3.13.1, pandas 2.2.3, pyarrow 24.0.0, polars 1.34.0 — the latter two
+already present transitively):** pandas has NO line-count limit relevant to
+Trellis; the constraint is memory, and discomfort begins around 10M rows
+(1.1 GB object dtype / 708 MB Arrow; 1.1–1.5 s substring queries) — three
+to five orders of magnitude above real Trellis frames. The whole repository
+is 74,115 lines / 2.9 MB → a 13 MB frame with 16 ms queries; the largest
+file (2,231 lines) locates in 0.5 ms and splices in 0.02 ms as a plain
+list. Normative tiering recorded in pillar §7: list-of-lines for
+single-file edit frames, pandas (object dtype) as the relational default
+(model fluency > raw speed at these scales), `string[pyarrow]` past ~1M
+lines (halves memory, ~25% faster), polars documented as the unneeded
+escalation tier (5.9× faster at 10M: 247 ms vs 1,465 ms). Toolkit byte
+caps align with the workspace bounds (4 MiB default / 32 MiB cap).

@@ -342,6 +342,13 @@ citability only through verified ingest" is to knowledge. The module system
 run; the repository is the rest of it — everything ships as reviewed
 commits, whoever (or whatever) authored the diff.
 
+The *mechanics* of how the RLM performs an edit are governed by the sibling
+core pillar [CODE_MEDIATED_TEXT.md](CODE_MEDIATED_TEXT.md) (ratified
+July 9, 2026): locations engine-computed by query, bytes moved by code at
+computed addresses, transient frames, hash-guarded write-backs — the model
+never counts and never copies. This section governs who may edit and how a
+change lands; that record governs how an edit is mechanically made.
+
 ## 8. The kernel/userspace boundary
 
 *Revised July 9, 2026: this boundary is a PACKAGING distinction — how a
