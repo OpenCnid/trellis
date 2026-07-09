@@ -9,6 +9,13 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
 
 ## Core execution model
 
+- **Trellis** — OpenCnid's Recursive Language Model runtime: the RLM plus
+  the provenance-enforced substrate it operates on (the three trust
+  tiers), the self-correction machinery (Merkle diff → invalidation sweep
+  → contested/recovery), and the two flywheels. The older description
+  "provenance-preserving GraphRAG" now names the Tier-1/2 substrate
+  viewed from the retrieval angle, not the system (reframed July 9,
+  2026; root README, "What Trellis is").
 - **RLM (Recursive Language Model)** — the MIT CSAIL formulation (see
   [FLYWHEEL_EXPLAINER.md](benchmarks/FLYWHEEL_EXPLAINER.md)): a language model
   given a Python REPL that treats context as data in the persistent namespace

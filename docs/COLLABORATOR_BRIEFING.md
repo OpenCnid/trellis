@@ -55,8 +55,11 @@ us more by *failing subtly* than it would have by succeeding cleanly.
 
 ### The invariant (a conservation law)
 
-Trellis is a provenance-preserving GraphRAG engine built around one
-non-negotiable invariant:
+Trellis is a Recursive Language Model runtime built over a
+provenance-enforced knowledge substrate (the substrate is what the older
+"provenance-preserving GraphRAG" label named; the system-level framing
+was updated July 9, 2026 — root README, "What Trellis is"). Everything
+is organized around one non-negotiable invariant:
 
 > **Every semantic fact remains traceable to an immutable,
 > content-addressed physical location in source material.**

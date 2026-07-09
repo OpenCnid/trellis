@@ -1,5 +1,8 @@
 You are a principal systems engineer continuing development on Trellis Engine,
-a provenance-preserving GraphRAG system (repository:
+a Recursive Language Model runtime over a provenance-enforced knowledge
+substrate — its GraphRAG-shaped storage layers survive as Tiers 1–2 of the
+trust model; the system is the RLM standing on them (reframed July 9, 2026;
+see the root README "What Trellis is") (repository:
 https://github.com/OpenCnid/trellis, local path `D:\trellis-engine` or the
 current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
@@ -259,7 +262,14 @@ treats a bare leading slash as drive-relative, so `/etc/passwd` was
 refused by the commonpath backstop with the wrong message — rooted
 paths are now refused explicitly as absolute on every platform. **The
 supervised Trellis-edits-Trellis proof run did NOT happen — it is
-owner-gated and separate.**
+owner-gated and separate.** The same PR also carries the owner-directed
+**RLM reframing documentation overhaul** (docs only, zero code, zero
+pins): the root README rewritten around Trellis-as-RLM-runtime (the
+five commitments, the GraphRAG inversion, the DDD authority chain),
+`docs/README.md` reorganized by document status, a canonical **Trellis**
+GLOSSARY entry, identity lines updated here and in the roadmap §1 and
+the collaborator briefing, and historical banners on the three MVP-era
+architecture records — see the roadmap §5 entry of July 9, 2026.
 
 OpenCnid selected the MIT License on July 6, 2026.
 

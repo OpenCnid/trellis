@@ -8,7 +8,7 @@
 
 ## 1. Architecture Overview
 
-Trellis is a provenance-preserving GraphRAG system. Its central design commitment is that every semantic fact must remain traceable to an immutable, content-addressed physical location in the source document. The system is organized as an asynchronous pipeline over a three-tier storage layout.
+Trellis is a Recursive Language Model runtime over a provenance-enforced knowledge substrate (reframed July 9, 2026 — the original "provenance-preserving GraphRAG" description now names the Tier-1/2 substrate, not the system; see the root README "What Trellis is"). Its central design commitment is unchanged: every semantic fact must remain traceable to an immutable, content-addressed physical location in the source document. The system is organized as an asynchronous pipeline over a three-tier storage layout.
 
 ### 1.1 Components and Data Flow
 
@@ -2328,3 +2328,55 @@ branch checkout; one small real edit lands as a reviewed PR); the
 effective-context probe (pillar §6.3, ≤$5); module #1 v2 (§6.4); the
 module #2 authoring turn. Next scheduled row: the repository-scale
 extraction prerequisites (§4 row 2).
+
+### July 9, 2026 — The RLM reframing: documentation identity overhaul (owner-directed; same PR as Session 20)
+
+Owner directive, after Session 20's close-out: Trellis's documentation
+still introduced the system as "provenance-preserving GraphRAG," a
+description the last twelve sessions outgrew — the graph-and-provenance
+machinery is now the SUBSTRATE (Tiers 1–2 of the trust model), and the
+system is the **Recursive Language Model runtime** standing on it. The
+docs were rewritten to lead with what the system is, not what it grew
+from.
+
+**The synthesis the new framing records (root README, "What Trellis
+is"):** five layered commitments — (1) the substrate (content-addressed
+Merkle ASTs + beliefs carrying `sourceNodeIds`, with Merkle-diff →
+sweep self-correction, measured at recall/precision 1.000); (2) the RLM
+execution model (context is a database, not a scroll: the model reaches
+stores, workspace, tools, and frames through code; attention holds
+queries, handles, and bounded previews); (3) the trust pipeline (three
+tiers, permanence earned only upward through operator-gated promotion,
+provenance as structural enforcement at the single write path); (4) the
+two flywheels — knowledge (derive once, cache with provenance, reuse;
+measured) and capability (modules the RLM authors under grounded
+authoring, registered as graph entities whose research basis the
+UNCHANGED sweep contests — the system's capabilities are beliefs under
+the same epistemology as its facts); (5) the code-mediated-text pillar
+(never counts, never copies — localization error and transcription
+error are one pathology). Plus the standing answer to "why not
+GraphRAG": RAG retrieves to augment generation and is stateless between
+questions; Trellis's unit of progress is a verified belief or verified
+capability added to a compounding, self-correcting store, and
+everything whose evidence dies — instructions included — is contested.
+
+**Files changed (docs only; zero code, zero pins):** root `README.md`
+(full rewrite: identity, the five commitments, the GraphRAG inversion,
+the DDD authority chain, architecture-in-one-pass; every operational
+section preserved verbatim-in-substance and regrouped under Getting
+started / Feeding the substrate / Running the RLM / Working memory and
+the trust pipeline / Modules / Editing / Benchmarks / Verification —
+`test:textedit` added to the live-check list, which had been missed in
+the Session 20 pass); `docs/README.md` (reading order rewritten:
+orientation → living doctrine → measured evidence → operations →
+product history, with each document's status named); `docs/GLOSSARY.md`
+(new canonical **Trellis** entry); `HANDOFF.md` line 1 and
+`TRELLIS_ROADMAP.md` §1 opening (identity lines updated);
+`docs/COLLABORATOR_BRIEFING.md` Altitude −1 (same); status banners on
+the three MVP-era records (`ARCHITECTURE.md`, `SYSTEM_ARCHITECTURE.md`,
+`TECHNICAL_SPEC.md` — historical, preserved, living model pointed to).
+`docs/product/*` and the dated benchmark reports are deliberately
+untouched: they are the record, and DDD preserves the record.
+
+**§0 step 5 re-check:** doctrinal work only — no defect surfaced, no
+queue jump; Session 21 (extraction prerequisites) stands as handed off.
