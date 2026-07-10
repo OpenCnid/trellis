@@ -245,6 +245,15 @@ describe('buildAgentEnv', () => {
     expect('TRELLIS_WORKSPACE_MAX_SEGMENTS' in env).toBe(false);
     expect('TRELLIS_WORKSPACE_MAX_BYTES' in env).toBe(false);
   });
+
+  it('always strips the experiment prompt-omission flag (Session 21)', () => {
+    // TRELLIS_EXP_OMIT_CMT has no AgentEnvConfig field at all: the
+    // worker can never forward it, so an inherited value can never put
+    // a production run on the discipline-off kernel — only the
+    // effective-context probe's own spawn env sets it (pillar §6.3).
+    const env = buildAgentEnv({ TRELLIS_EXP_OMIT_CMT: '1' }, CFG);
+    expect('TRELLIS_EXP_OMIT_CMT' in env).toBe(false);
+  });
 });
 
 describe('buildAgentArgs', () => {
