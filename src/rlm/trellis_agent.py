@@ -124,6 +124,10 @@ _SAFE_RUBRIC = RUBRIC_TEXT.replace("{", "{{").replace("}", "}}")
 # via TRELLIS_MODULES; module addendum files are brace-free with
 # <<TRELLIS_RUBRIC>> as the single substitution token.
 
+CODE_MEDIATED_TEXT_RULE = """CODE-MEDIATED TEXT (HARD RULE): load text into structures and operate on them with code. Locate by query, never by counting lines or guessing positions. Move existing text by slicing and splicing, never by retyping it. Author only genuinely new text.
+
+"""
+
 TRELLIS_ADDENDUM_BASE = """
 
 === TRELLIS ENGINE DIRECTIVES ===
@@ -144,9 +148,7 @@ TOOLS (available directly in the REPL):
 
 CRITICAL API CONTRACT: every tool method returns a JSON STRING, never a parsed object. Always wrap results in `json.loads(...)` (import json first) before indexing or iterating. `run_cypher` returns a JSON array of row dicts keyed by your RETURN aliases.
 
-CODE-MEDIATED TEXT (HARD RULE): load text into structures and operate on them with code. Locate by query, never by counting lines or guessing positions. Move existing text by slicing and splicing, never by retyping it. Author only genuinely new text.
-
-ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
+""" + CODE_MEDIATED_TEXT_RULE + """ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
 
 """
 
@@ -170,6 +172,25 @@ TRELLIS_ADDENDUM = (
 )
 
 SYSTEM_PROMPT = RLM_SYSTEM_PROMPT + TRELLIS_ADDENDUM
+
+
+def build_research_system_prompt(exp_omit_cmt=None):
+    """Returns the ordinary research prompt, with one experiment-only
+    intervention available to scripts/exp_effective_context.ts.
+
+    The default is the byte-pinned SYSTEM_PROMPT. The opt-in arm removes
+    exactly the named Session 20 rule (including its following blank line)
+    and refuses drift if that byte sequence is no longer unique.
+    """
+    if exp_omit_cmt != "1":
+        return SYSTEM_PROMPT
+    occurrences = SYSTEM_PROMPT.count(CODE_MEDIATED_TEXT_RULE)
+    if occurrences != 1:
+        raise RuntimeError(
+            "CODE_MEDIATED_TEXT_RULE must occur exactly once in SYSTEM_PROMPT "
+            f"for the effective-context experiment (found {occurrences})."
+        )
+    return SYSTEM_PROMPT.replace(CODE_MEDIATED_TEXT_RULE, "", 1)
 
 # --- Grounded authoring mode (Session 19) ------------------------------
 # design record: docs/architecture/GROUNDED_AUTHORING.md §4/§6/§9.
@@ -441,7 +462,7 @@ def main():
         # Curly braces are escaped because rlms applies .format() to the system prompt.
         safe_query = args.query.replace("{", "{{").replace("}", "}}")
         dynamic_system_prompt = (
-            SYSTEM_PROMPT
+            build_research_system_prompt(os.getenv("TRELLIS_EXP_OMIT_CMT"))
             + build_mcp_addendum(mcp_servers)
             + build_workspace_addendum(workspace, seeded=bool(args.seed_workspace))
             + build_textedit_addendum(textedit)

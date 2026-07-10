@@ -116,6 +116,7 @@ describe('parseRlmJobData', () => {
       jobId: 'j',
       editRoot: '/etc',
       TRELLIS_EDIT_ROOT: '/etc',
+      TRELLIS_EXP_OMIT_CMT: '1',
       textedit: { editRoot: '/etc', maxFileBytes: 1, maxFiles: 1 },
     });
     expect(Object.keys(parsed).sort()).toEqual(['jobId', 'query']);
@@ -244,6 +245,15 @@ describe('buildAgentEnv', () => {
     );
     expect('TRELLIS_WORKSPACE_MAX_SEGMENTS' in env).toBe(false);
     expect('TRELLIS_WORKSPACE_MAX_BYTES' in env).toBe(false);
+  });
+
+  it('never forwards the experiment-only prompt omission flag', () => {
+    const env = buildAgentEnv(
+      { TRELLIS_EXP_OMIT_CMT: '1', PATH: '/bin' },
+      { ...CFG, mcpCredentialEnv: { TRELLIS_EXP_OMIT_CMT: 'credential-collision' } }
+    );
+    expect('TRELLIS_EXP_OMIT_CMT' in env).toBe(false);
+    expect(env.PATH).toBe('/bin');
   });
 });
 

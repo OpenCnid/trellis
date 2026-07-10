@@ -1,1 +1,2 @@
 *.sh text eol=lf
+data/frankenstein.txt text eol=lf
