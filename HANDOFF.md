@@ -284,6 +284,16 @@ re-verify cheaply, do not re-derive. Do not re-plan or re-implement
 completed work. RLM expands exclusively to Recursive Language Model
 (the MIT CSAIL formulation).
 
+**CONTINUATION CHECKPOINT — July 10, 2026.** Session 21 is IN PROGRESS,
+not complete. A first implementation turn produced the committed-corpus
+candidate and the probe/gating code described in §2 and §6, but the owner
+directed that post-change tests and live work continue in the next session
+to preserve context. NO paid run, database ingest, promotion, module-v2
+authoring, module replacement, registration, benchmark report, roadmap
+strike-through, commit, push, or PR happened. Resume THIS objective; do not
+advance to Session 22 and do not re-implement the completed implementation
+slice. Acceptance remains the boundary for every status change.
+
 ---
 
 ## 0. The handoff loop (permanent — preserve this section in every rewrite)
@@ -675,6 +685,65 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
+**Active Session 21 continuation state (July 10, 2026):**
+
+- Branch `agent/session-21-effective-context` is cleanly based on merged
+  Session 20 commit `95ff8c7`; the work is UNCOMMITTED. `node_modules` was
+  installed from the lockfile (`npm ci`: 315 packages, 0 vulnerabilities;
+  local Node remains 20.19.2 while CI targets 22).
+- The official Gutenberg #84 UTF-8 download used for the candidate was
+  448,885 bytes, sha256
+  `7810cd483cffcf2cc8a1d8f0d5807931e69d4f48cd14149b8c76f88af82fead3`.
+  `trimGutenbergBoilerplate` documents the fail-closed transform:
+  CRLF→LF, exactly one ordered start/end marker pair, boilerplate removal,
+  boundary-blank trim, exactly one final LF. The resulting
+  `data/frankenstein.txt` candidate is 421,536 bytes, 419,337 characters,
+  LF-only/no BOM, sha256
+  `bde72e6909fb0caebf375b81f7a63140d2b6ffab49a473c670a498dee96934a8`;
+  `.gitattributes` pins it to LF across Windows/CI.
+- New implementation: `src/benchmarks/effective_context/ground_truth.ts`
+  and `.test.ts` (fixed six-question count/byte-exact-quote/localization
+  set, deterministic truth/scoring, median and planning-spend helpers,
+  corpus/trim pins); `src/benchmarks/effective_context/runner.ts` plus thin
+  `scripts/exp_effective_context.ts` (exact-byte `.txt` parser,
+  verified-ingest `none`, mismatched-prior-root refusal, real Python
+  `get_ast_texts` samples, counterbalanced paired runs from a temp cwd with
+  handles only, full-corpus read-set audit, zero-vector-search gate,
+  bounded capture/timeout, no retries, telemetry/result validation,
+  post-run spend accounting, mandatory paid artifact); and the build include.
+- Prompt isolation: `CODE_MEDIATED_TEXT_RULE` is a named 252-byte block;
+  default `SYSTEM_PROMPT` remains the recorded `170e9f7e…d1267e9` pin;
+  `TRELLIS_EXP_OMIT_CMT=1` removes exactly that block, producing the recorded
+  pre-Session-20 `abb945a6…f9b2` prompt. `buildAgentEnv` strips the flag AFTER
+  MCP credential forwarding, so neither inherited state nor a credential
+  variable named `TRELLIS_EXP_OMIT_CMT` can weaken a normal worker prompt.
+- Static review defects already fixed before this checkpoint: prompt split
+  initially inserted one extra newline; worker flag deletion initially
+  preceded credential forwarding; the first ingest sketch could discard a
+  real invalidation on a mismatched existing root; global pre-existing
+  embeddings were confused with work performed by this ingest; protocol
+  violations/dummy DB calls could score; zero-token telemetry could satisfy
+  accounting; no-telemetry rows could disappear from correctness medians;
+  relative Python paths broke under the temp cwd; and paid output could be
+  lost without `--out`.
+- Validation actually observed: BEFORE the new edits, `npm test` passed
+  621/621 across 71 files, `npm run build` passed, and
+  `docker compose config --quiet` passed (Docker config access warnings
+  only). AFTER the edits, `python -m py_compile src/rlm/trellis_agent.py`
+  and `python -m py_compile scripts/test_modules.py` passed, and
+  `git diff --check` passed. The focused Node test command was NOT executed:
+  the desktop execution quota rejected it, and the owner then deferred tests
+  to the next session. `python scripts/check_python_runtime.py` emitted no
+  output and timed out once at 120.4 seconds and again at 600.3 seconds; treat
+  this as an unresolved runtime-check hang, not a pass and not a test failure.
+- Still missing by design at this checkpoint: literal `.txt` parser root hash,
+  exact block count, and ordered-block-hash digest pins in the offline test;
+  every live zero-paid step; both approved paid runs; module #1 v2 artifacts;
+  the report and doctrine/README updates; the full close-out matrix; final
+  HANDOFF regeneration for Session 22; commit/push/PR. `gh auth status` also
+  reported the OpenCnid token invalid, so refresh authentication before the
+  final publish step (not before implementation/acceptance).
+
 - `master`: the head after the July 9, 2026 sequence ending in
   Session 20 (the editing toolkit + the kernel prompt revision, the PR
   that carries this file; stacked on the PR #54 pillar record). Use
@@ -929,6 +998,73 @@ Inspect before editing:
 The two paid runs are APPROVED (July 9, 2026) — each still prints a
 pre-flight estimate first and respects the standing ≤$5/run cap, with
 actuals reported after. Everything else stays zero-paid and local.
+
+**Continuation order (owner-directed July 10; tests/live work deferred to
+the next session):**
+
+1. Re-read the active diff; do not reset it. Diagnose the silent
+   `check_python_runtime.py` hang first (process/import isolation, bounded
+   observation; never weaken or remove the pandas pin). Then run, in order:
+
+   ```
+   npm test -- src/benchmarks/effective_context/ground_truth.test.ts src/workers/rlm_job.test.ts
+   npm run build
+   npm run test:modules
+   npm run python:check
+   git diff --check
+   ```
+
+   The first focused run must yield the exact `.txt` AST root, exact ordered
+   block count, and sha256 of the ordered block-hash list. Replace the current
+   range-only block assertion with literal pins, then rerun the focused set
+   and full `npm test`. The expected post-change counts are observations to
+   record, never assumptions. The default composed-prompt hash MUST remain
+   `170e9f7e…d1267e9`; the off-arm hash MUST be `abb945a6…f9b2`.
+2. With `OPENAI_API_KEY` removed and ONLY PostgreSQL/Neo4j/Redis started,
+   initialize schema and run:
+
+   ```
+   npx tsx scripts/exp_effective_context.ts --ingest-only
+   npx tsx scripts/exp_effective_context.ts
+   ```
+
+   The first command must report the verified `book:` version, zero queued
+   extraction, real Python `get_ast_texts` samples, and an identical no-op
+   replay. The second is plan-only: six fixed questions × two arms, five
+   iterations, planning estimate about $4 under the $5 ceiling, no spawn.
+   Never use `POST /ingest` for the book: it hardcodes `changed` extraction.
+3. Only after steps 1–2 pass, restore the approved API key and run the ONE
+   approved probe invocation, persisting raw measurements:
+
+   ```
+   npx tsx scripts/exp_effective_context.ts --max-spend-usd 5 --out benchmark_logs/session21_effective_context.json --confirm-paid
+   ```
+
+   The runner has no retries and counterbalances order. Every scored row must
+   audit-read every distinct corpus block, make zero vector searches, carry
+   positive token/reported-cost accounting, and record correctness, input/
+   output tokens, iterations, subcalls, database calls, time, cost source,
+   and spend. A surprising result is the result. The estimate/after-each-run
+   stop is not a provider-side hard dollar limit; report that caveat.
+4. Assemble the pillar §0+§2 excerpt through a temporary, data-only
+   `RlmStubSchema.workspaceSnapshot` job and the REAL park→list→promote path
+   under `research:trellis/workspace-discipline/code-mediated-text` with
+   extraction `none`. There is no generic parking CLI: use a temporary
+   operator harness patterned on `test:agent-loop`; do not add an API or use
+   the unsafe `/ingest` endpoint. Remove the token-scoped task key and goal
+   byte counter after recording the promotion output.
+5. Run the author plan, then a saved-envelope `--draft` replay into a separate
+   temporary `--out-dir` (delete it before paid work), then the ONE approved
+   `--confirm-paid --max-spend-usd 5` author turn under scratch name
+   `workspace-discipline-v2`. Human-land content into the existing module as
+   version 2, preserve all v1 laundering history in `RESEARCH.md`, remove the
+   reconstruction/transcription mitigation, delete the scratch module, update
+   the module-version drill pin, re-register, and verify uncontested state.
+6. Produce the raw-number report and all documentation named below; run the
+   entire standing close-out matrix including isolated Compose. Only then
+   strike roadmap row 1, run §0 step 5, select Session 22 (unless a defect
+   jumps the queue), regenerate this file fully, commit, authenticate GitHub,
+   push, and open the draft PR.
 
 Offline (joins `npm test`, baseline 621 across 71 files):
 

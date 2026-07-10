@@ -2414,3 +2414,72 @@ follow-up). Hardening landed with the check: `pandas` joined the
 `check_python_runtime.py` import list — it ships transitively via
 `unstructured` but is now pillar-load-bearing, so its absence must fail
 the runtime check, not a paid run (`npm run python:check` green).
+
+### July 10, 2026 — Session 21 implementation checkpoint (IN PROGRESS; acceptance and paid work deferred)
+
+The first Session 21 turn implemented the corpus/probe slice but DID NOT
+complete the composite §4 row, so the row remains unstruck and Session 22
+does not begin. Owner direction deferred post-change tests and all live work
+to the next session to preserve context. No paid process, database ingest,
+promotion, module authoring/replacement/registration, commit, push, or PR ran.
+
+**Corpus candidate.** The current official Gutenberg #84 UTF-8 payload was
+448,885 bytes (sha256
+`7810cd483cffcf2cc8a1d8f0d5807931e69d4f48cd14149b8c76f88af82fead3`).
+The pure fail-closed trim in
+`src/benchmarks/effective_context/ground_truth.ts` normalizes CRLF→LF,
+requires exactly one ordered canonical start/end marker pair, removes the
+two boilerplate regions, trims only boundary blanks, and restores one final
+LF. Candidate `data/frankenstein.txt` is 421,536 bytes / 419,337 characters,
+LF-only/no BOM, sha256
+`bde72e6909fb0caebf375b81f7a63140d2b6ffab49a473c670a498dee96934a8`;
+`.gitattributes` pins LF across Windows and CI. Literal `.txt` AST-root,
+block-count, and ordered-block-digest test pins are deliberately still
+pending the first validated parser run next session.
+
+**Probe and gate implementation.** New
+`src/benchmarks/effective_context/{ground_truth,runner}.ts`, the Vitest file,
+and thin `scripts/exp_effective_context.ts` implement: the exact-byte
+`opaque_text` parser path; verified ingest under
+`book:gutenberg-84:frankenstein` with policy `none`; mismatched-prior-root
+refusal rather than a fake invalidation queue; a real zero-paid Python
+`get_ast_texts` sample; six kernel-fixed count/byte-exact-quote/localization
+questions; counterbalanced on/off order; a temp cwd containing only ordered
+handles; mandatory full-corpus read-set audit and zero vector searches;
+bounded stdout/timeout, no retries, validated result/telemetry, positive spend
+accounting, after-each-run ceiling projection, and mandatory paid JSON output.
+The planning estimate is ~1,408,608 input / 48,000 output tokens ≈ $4.00 at
+the recorded $2.50/M + $10/M fallback prices; it is explicitly not described
+as a provider-side hard dollar limit.
+
+`src/rlm/trellis_agent.py` now names the 252-byte
+`CODE_MEDIATED_TEXT_RULE`; default prompt bytes remain pinned at
+`170e9f7e…d1267e9`, while exact experiment value
+`TRELLIS_EXP_OMIT_CMT=1` removes only that block and returns the historical
+pre-Session-20 `abb945a6…f9b2` prompt. `buildAgentEnv` deletes the flag after
+MCP credential forwarding, including a credential-name collision; ordinary
+workers, payloads, defaults, and Compose have no route to the intervention.
+
+**Defects caught by static review and fixed before spend:** the initial prompt
+split introduced an extra newline; worker deletion order permitted an MCP
+credential collision; an early ingest sketch could silently drop a real
+invalidation on a changed root; global pre-existing embeddings were mistaken
+for work done by this ingest; protocol violations/dummy calls could score;
+zero-token telemetry could satisfy accounting; failed rows could vanish from
+correctness denominators or crash medians; relative interpreter/PYTHONPATH
+broke from the temporary cwd; and a paid run could lose its artifact without
+`--out`.
+
+**Observed validation only (do not overstate):** on baseline `95ff8c7`, before
+the new edits, `npm test` passed 621/621 across 71 files, `npm run build`
+passed, and `docker compose config --quiet` passed. After the edits,
+`python -m py_compile src/rlm/trellis_agent.py`, `python -m py_compile
+scripts/test_modules.py`, and `git diff --check` passed. The focused Node test
+command was rejected by the desktop execution quota and then deferred by the
+owner; it did not fail. `python scripts/check_python_runtime.py` emitted no
+output and timed out at both 120.4 s and 600.3 s. The next session must
+diagnose that hang without removing the pandas pin, add the literal parser
+pins, run focused/full offline acceptance, then follow HANDOFF §6's exact
+zero-paid → paid → module-v2 → documentation → full-closeout order. Roadmap
+row 1 may be struck only after all of that is green and the two approved runs'
+actual token/spend numbers are recorded.
