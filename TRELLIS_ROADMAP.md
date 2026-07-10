@@ -2475,8 +2475,12 @@ the new edits, `npm test` passed 621/621 across 71 files, `npm run build`
 passed, and `docker compose config --quiet` passed. After the edits,
 `python -m py_compile src/rlm/trellis_agent.py`, `python -m py_compile
 scripts/test_modules.py`, and `git diff --check` passed. The focused Node test
-command was rejected by the desktop execution quota and then deferred by the
-owner; it did not fail. `python scripts/check_python_runtime.py` emitted no
+initially could not run under the desktop quota. PR #56 then exposed a
+hand-copied fixture error: its byte-exact creature quote used a space where
+the committed corpus has a newline after `It was`. The expectation—not the
+correct byte-preserving extractor—was fixed, and the focused ground-truth
+file passed 9/9 locally. Broader post-change tests remain deferred by the
+owner. `python scripts/check_python_runtime.py` emitted no
 output and timed out at both 120.4 s and 600.3 s. The next session must
 diagnose that hang without removing the pandas pin, add the literal parser
 pins, run focused/full offline acceptance, then follow HANDOFF §6's exact

@@ -731,9 +731,13 @@ Repository state at handoff creation:
   `docker compose config --quiet` passed (Docker config access warnings
   only). AFTER the edits, `python -m py_compile src/rlm/trellis_agent.py`
   and `python -m py_compile scripts/test_modules.py` passed, and
-  `git diff --check` passed. The focused Node test command was NOT executed:
-  the desktop execution quota rejected it, and the owner then deferred tests
-  to the next session. `python scripts/check_python_runtime.py` emitted no
+  `git diff --check` passed. A subsequent PR #56 offline failure exposed one
+  incorrect hand-copied expectation: the byte-exact creature quote omitted
+  the corpus newline after `It was`. The expectation was corrected (the
+  extractor was already preserving source bytes), and
+  `npm test -- src/benchmarks/effective_context/ground_truth.test.ts` passed
+  9/9. All broader post-change testing remains deferred to the next session.
+  `python scripts/check_python_runtime.py` emitted no
   output and timed out once at 120.4 seconds and again at 600.3 seconds; treat
   this as an unresolved runtime-check hang, not a pass and not a test failure.
 - Still missing by design at this checkpoint: literal `.txt` parser root hash,

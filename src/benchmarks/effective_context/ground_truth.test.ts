@@ -71,7 +71,8 @@ describe('Frankenstein effective-context ground truth', () => {
 
   it('derives exact wrapped sentences instead of hand-copying them', () => {
     expect(extractSentenceContaining(corpus, 'dull yellow eye of the creature open')).toBe(
-      'It was already one in the morning; the rain pattered dismally against the\n'
+      'It was\n'
+      + 'already one in the morning; the rain pattered dismally against the\n'
       + 'panes, and my candle was nearly burnt out, when, by the glimmer of the\n'
       + 'half-extinguished light, I saw the dull yellow eye of the creature\n'
       + 'open; it breathed hard, and a convulsive motion agitated its limbs.'
