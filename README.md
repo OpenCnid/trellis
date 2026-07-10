@@ -779,8 +779,11 @@ The measured record lives in `docs/benchmarks/`: the flywheel economics
 (`FLYWHEEL_EXPLAINER.md`, `OOLONG_BENCHMARK_REPORT.md`), the update and
 poisoning drills, the scale gate (`SCALE_PROVENANCE_REPORT.md`), the
 workspace and lineage paired-run probes, the repository-ingestion pilot,
-and the provenance-citation A/B eval. The honest ledger of open critiques
-is `CRITIQUE_AND_FUTURE.md`.
+the provenance-citation A/B eval, and the effective-context probe over
+the verified Frankenstein corpus
+(`EFFECTIVE_CONTEXT_PROBE_REPORT.md` — the code-mediated-text pillar's
+§6.3 numbers). The honest ledger of open critiques is
+`CRITIQUE_AND_FUTURE.md`.
 
 ## Verification
 

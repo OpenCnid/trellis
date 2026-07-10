@@ -58,10 +58,14 @@ describe('Frankenstein effective-context ground truth', () => {
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
     expect(nodeText(parsed.root)).toBe(corpus);
+    expect(parsed.root.id).toBe('12625e580542070ebffc1229851a09a51c8f98e6789e8b08624ea0f6023c19e5');
     const blocks = collectExtractionBlocks(parsed.root);
-    expect(blocks.length).toBeGreaterThan(100);
-    expect(blocks.length).toBeLessThanOrEqual(128);
+    // 106 ordered handles also fit the 128-segment workspace default.
+    expect(blocks.length).toBe(106);
+    expect(new Set(blocks.map(block => block.id)).size).toBe(106);
     expect(blocks.every(block => block.type === 'opaque_text')).toBe(true);
+    expect(sha256Utf8(blocks.map(block => block.id).join('\n')))
+      .toBe('4edbff59ec2424645cde83e3f9c217c571a8fafac08e3cc8c960b02ef87e8a18');
   });
 
   it('computes occurrence counts with engine word boundaries', () => {

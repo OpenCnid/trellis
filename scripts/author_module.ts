@@ -250,13 +250,15 @@ async function assembleModule(
   // with the corpus it claims to derive from? Below threshold refuses
   // assembly with NOTHING written.
   const gate = evaluateAnchorGate(corpus.blocks.map(b => b.text), draft.addendum);
+  // Four decimals: at two, a 19/64 = 0.2969 refusal prints as "0.30 below
+  // the 0.3 threshold" — a contradiction on its face (observed July 10, 2026).
   console.log(
     `\nAnchor derivation gate: covered ${gate.covered}/${gate.total} corpus anchors `
-    + `(ratio ${gate.ratio.toFixed(2)}, threshold ${gate.threshold}).`
+    + `(ratio ${gate.ratio.toFixed(4)}, threshold ${gate.threshold}).`
   );
   if (!gate.passed) {
     console.error(
-      `Assembly refused: the draft covers ${gate.ratio.toFixed(2)} of the corpus anchors, `
+      `Assembly refused: the draft covers ${gate.ratio.toFixed(4)} of the corpus anchors, `
       + `below the ${gate.threshold} threshold — it does not demonstrably derive from the `
       + 'seeded research. Nothing was written.'
     );

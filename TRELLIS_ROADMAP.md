@@ -2487,3 +2487,156 @@ pins, run focused/full offline acceptance, then follow HANDOFF §6's exact
 zero-paid → paid → module-v2 → documentation → full-closeout order. Roadmap
 row 1 may be struck only after all of that is green and the two approved runs'
 actual token/spend numbers are recorded.
+
+### July 10, 2026 — Session 21 completion turn: corpus VERIFIED-INGESTED, probe MEASURED, module #1 v2 attempted and anchor-gate-refused (row 1 stays open on the v2 leg)
+
+Continuation of the July 10 checkpoint above, per its exact order. The two
+owner-approved paid runs both executed; every other step stayed zero-paid.
+Row 1 is NOT struck: two of its three legs (corpus, probe) are done and
+measured, the third (module #1 v2) ran and was refused by the anchor gate —
+the refusal, its measured root cause, and the owner decision it needs are
+recorded below and in the pillar record §6.4.
+
+**The runtime-check hang (diagnosed first, as directed).** Not reproducible:
+per-import subprocess isolation of the full `check_python_runtime.py` list
+ran every import in ≤6.93 s (that maximum was `unstructured.partition.pdf`),
+and the real script then passed twice at 8.3 s / 8.9 s. The July 9 hang was
+environmental and left no evidence precisely because the script printed
+nothing until success — fixed by flushed one-step-ahead progress lines
+(`compile <file>` / `import <module>`), so any recurrence names its culprit.
+Observability only; the pandas pin is untouched.
+
+**Literal parser pins (offline).** First validated parser run over the
+committed corpus: AST root
+`12625e580542070ebffc1229851a09a51c8f98e6789e8b08624ea0f6023c19e5`,
+exactly 106 ordered unique `opaque_text` blocks, ordered-block-hash-list
+sha256 `4edbff59ec2424645cde83e3f9c217c571a8fafac08e3cc8c960b02ef87e8a18`
+(also confirms 106 ≤ the 128-segment workspace default). The range-only
+assertion in `ground_truth.test.ts` was replaced with those literals.
+`npm test -- src/benchmarks/effective_context/ground_truth.test.ts
+src/workers/rlm_job.test.ts` = 36/36; full `npm test` = 631 across 72 files;
+`npm run build`, `npm run python:check`, `git diff --check` green;
+`npm run test:modules` = 47 checks — the composed-prompt pin held at
+`170e9f7e…d1267e9` and the off-arm pin at `abb945a6…9feef9b2`.
+
+**Frankenstein ingest (zero-paid, live).** `npm run db:init:dev`, then
+`npx tsx scripts/exp_effective_context.ts --ingest-only` with
+`OPENAI_API_KEY` removed: version 1 registered under
+`book:gutenberg-84:frankenstein` (107 total nodes, 106 eligible blocks,
+0 queued, extraction `none`, diff null), identical re-ingest an auditable
+no-op (version 2, diff added 0 / orphaned 0 / retained 107, 0 queued),
+membership complete for all 106 handles, first/middle/last sample blocks
+round-tripped byte-exact through BOTH the TS read and the real Python
+`get_ast_texts` subprocess (3 samples), 106 unembedded / 0 embedded. The
+plan-only invocation printed the fixed plan: 6 questions × 2 arms, 5
+iterations, ~1,408,608 input / ~48,000 output tokens ≈ $4.00 under the
+$5.00 ceiling, no spawn.
+
+**The effective-context probe (paid run 1 of 2, §6.3).**
+`npx tsx scripts/exp_effective_context.ts --max-spend-usd 5 --out
+benchmark_logs/session21_effective_context.json --confirm-paid` — 12/12
+counterbalanced runs, **$0.9629 total observed** (every row token-estimate
+priced at $2.50/M + $10/M; the runtime reported no cost), runner completed
+un-aborted. Full report:
+`docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`; pillar §6.3 is marked
+MEASURED. Headlines: neither arm pulled the ~110k-token corpus through
+attention (median input 22,527 on-arm vs 24,761 off-arm — the tooling
+shape, not the §6.2 prompt block, carries the discipline); the
+full-read-set audit refused 10 of 12 rows and decomposed every failure
+into a named pillar pathology — three doubled-frame rows (the agents read
+the root hash from `handles.json` plus all 106 blocks and answered
+EXACTLY 2× ground truth: 110 vs 55 Justine, 50 vs 25 Safie), five
+parametric-memory rows (0/106 blocks read; the quote answers gave the
+training-data-famous sub-clause and missed the sentence's real first
+clause and line breaks; two section answers were right values correctly
+refused for zero corpus grounding), three protocol violations, and the
+5-iteration ceiling binding on all 12 runs. Scored grounded-correct: 1/6
+per arm, symmetric. Probe-design defects recorded in the report for any
+future owner-approved v2 (~$1 actual): the root hash belongs either out
+of `handles.json` or in the audit set; 5 iterations is too tight; the
+manifest's location should be stated more explicitly. Guardrail 8
+applied: one approved invocation, no re-runs, the surprising result IS
+the result. Invocation defect (mine, not the runner's): piping the
+console through `tee benchmark_logs/…console.log` failed because the
+directory is created by the runner's `finally` — tee exited 1 while the
+runner itself exited 0 and wrote the artifact.
+
+**Corpus promotion (zero-paid, live).** The pillar's §0+§2 were extracted
+by heading query (never retyped) into one 4,095-byte segment
+(sha256-prefixed argsHash `858f875dc6ef33f8`) by a TEMPORARY operator
+harness (`scripts/park_pillar_excerpt.ts`, patterned on
+`test_agent_loop.ts`: refuses when `OPENAI_API_KEY` is present or
+`rlm_queue` is non-empty; enqueues one data-only stub job with
+`workspaceSnapshot`; imports the real `rlm_worker`; the snapshot crossed
+the REAL validate/park path to
+`scratch:goal:session21-pillar-corpus-c4d8b756:task:park`, TTL 3600 s).
+`npm run promote` LIST then PROMOTE:
+`research:trellis/workspace-discipline/code-mediated-text` version 1,
+root `fa3244116066f6c9f3fc17fd644a38c420c2d45ab7c4440bbbc638f4b53fff00`,
+107 total nodes, 19 eligible blocks / 0 queued, all 19 citable hashes
+echoed, origin audit stamp on the documents row. The scratch task key and
+goal byte counter were deleted after recording, and the harness file was
+deleted (this entry preserves its shape).
+
+**Module #1 v2 (paid run 2 of 2, §6.4) — anchor gate refused; not
+landed.** Plan echoed (3 doc keys, 43 deduped pinned blocks, seed
+19,967 bytes, template sha256 `3198375b…91c7df`, estimate $0.57 <
+$5.00). Drill: the `--draft` replay path was exercised BOTH ways into a
+temporary out-dir (deleted before paid work) — v1's addendum text was
+correctly REFUSED against the enlarged corpus (11/64 = 0.17), and an
+anchor-enriched drill draft assembled green (27/64 = 0.42,
+loader-validated). The one approved paid turn
+(`npm run modules:author -- --module-name workspace-discipline-v2 …
+--confirm-paid --max-spend-usd 5`): 6 iterations, 37,801 input / 4,142
+output tokens ≈ **$0.136** (token-estimate; runtime reported no cost),
+workspace telemetry 44 ops / 43 segments. The draft derives pillar §2
+essentially point-by-point (structures, index-first bounded pulls,
+turn-local handles, splice-at-computed-address, digest-guarded
+write-back, lines-locate/blocks-mean, tooling-over-prompt enforcement),
+retires the v1 "reconstructing stored text" mitigation, and declares 5
+honest gaps — but the deterministic anchor gate refused assembly at
+**19/64 = 0.2969 < 0.3**, one anchor short. Measured root cause
+(zero-paid analysis over the pinned corpus): the pillar excerpt is
+compound-dense, so the 64-anchor set became 52 exact-match hyphenated
+compounds + 8 terms + 4 numeric anchors (`8 vs 4`, `2.2`, `3.9`, `5.4` —
+the numeric ones structurally uncoverable by a draft obeying the
+template's "do not restate measured numbers", reachable ceiling 60/64);
+compound anchors get NO stem credit, so faithful paraphrases
+("moved by code" for `code-manipulated`, "computed addresses" for
+`engine-addressed`) score zero, and THE SAME DRAFT passes the v1-era
+two-doc corpus at 21/64 = 0.328. The gate held exactly as designed and
+was NOT changed (Session 21 pins it); the draft envelope is preserved at
+`benchmark_logs/session21_author_v2_draft.json` — transcribed from the
+run's `TRELLIS_DRAFT` line and verified content-faithful by replaying it
+through the deterministic gate (exactly 19/64 reproduced). **Owner
+decision needed (next session's first item):** (a) approve ONE re-run
+(~$0.14; drafts are stochastic and the miss was one anchor), or (b) a
+reviewed kernel refinement of the anchor extractor for compound-dense
+corpora (stem-match compounds the way terms already stem-match, and/or
+exclude template-forbidden numeric kinds in author mode), then land v2
+through the existing replay/landing steps. Driver fix shipped: the gate
+ratio now prints at four decimals — the refusal printed "ratio 0.30,
+threshold 0.3", a contradiction on its face, when 19/64 rounds up.
+
+**Close-out matrix (all green, `OPENAI_API_KEY` removed for every
+drill).** `npm test` 631/72 · `npm run build` · `npm run python:check` ·
+`docker compose --profile test config --quiet` · isolated Compose
+integration as project `trellis_s21_ci` (host ports 0) · `test:textedit`
+81 · `test:module-lifecycle` 60 · `test:modules` 47 (43 + the four
+PR #56 omit-flag pins) · `test:promotion` 41 · `test:rlm-workspace` 86 ·
+`test:rlm-mcp` 86 · `test:rlm-sandbox` 21 · `test:agent-loop` 35 ·
+`test:a2a` 46 · `drill:scale` gate CLOSED at max 286, sweep growth 2.25x
+(within the recorded 1.63x–2.26x band; tracked
+`scale_drill_results.json` rewritten and committed) · `test:repo-ingest`
+45 · `test:benchmark-hardening` 24 · `test:entity-resolution` 34 ·
+`test:api-hardening` 18 · `test:belief-recovery` 30 ·
+`test:invalidation-sweep` 17 · `git diff --check` clean.
+
+**Artifacts force-added past the `benchmark_logs/` ignore rule (both
+load-bearing):** `session21_effective_context.json` (the probe's raw
+per-run measurements, referenced by the report) and
+`session21_author_v2_draft.json` (the paid draft envelope — without it
+the approved run's output is unrecoverable for the v2 landing).
+
+**Paid spend this session: $1.099 total** ($0.9629 probe + $0.136
+author) against two approved runs each capped at $5.

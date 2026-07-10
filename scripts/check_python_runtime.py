@@ -24,7 +24,12 @@ PYTHON_FILES = [
 
 
 def main() -> None:
+    # Progress lines are flushed one step ahead of the work so that a
+    # hung compile or import names its culprit from the outside; a silent
+    # multi-minute stall here is otherwise undiagnosable (observed once,
+    # July 10, 2026 — no import reproduced it in isolation afterwards).
     for source in PYTHON_FILES:
+        print(f"compile {source.relative_to(ROOT)}", flush=True)
         py_compile.compile(str(source), doraise=True)
 
     sys.path.insert(0, str(RLM_DIR))
@@ -46,6 +51,7 @@ def main() -> None:
         "trellis_textedit",
         "trellis_agent",
     ):
+        print(f"import {module_name}", flush=True)
         importlib.import_module(module_name)
 
     rubric = RLM_DIR / "trec_rubric.json"

@@ -199,14 +199,39 @@ moving, and the model estimating where text lives.
    on them with code. Locate by query, never by counting lines or guessing
    positions. Move existing text by slicing and splicing, never by retyping
    it. Author only genuinely new text."*
-3. **The effective-context probe** (owner-gated, paid; extends the
-   workspace-probe series): a paired-run measurement on a corpus several
-   times the attention window — discipline-on vs. discipline-off — scoring
-   correctness, bytes-through-attention, and turn count. The "giant context
-   window" claim becomes a number.
-4. **Module #1 v2** (owner-gated): re-author workspace-discipline through
-   the grounded-authoring mode with the pillar in its corpus, retiring the
-   "reconstructing stored text" mitigation language.
+3. **The effective-context probe** — **MEASURED (Session 21, July 10,
+   2026;
+   [EFFECTIVE_CONTEXT_PROBE_REPORT.md](../benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md)):**
+   6 kernel-fixed questions × 2 arms over the verified Frankenstein
+   corpus (`book:gutenberg-84:frankenstein`, 421,536 bytes, 106 ordered
+   blocks), $0.9629 total. Headline: **neither arm pulled the corpus
+   through attention** — median input ~22.5k (on) vs ~24.8k (off) tokens
+   against a ~110k-token corpus; the tooling shape (handles +
+   `get_ast_texts`), not the §6.2 prompt block, carries the discipline
+   (§2.8 measured from the other side). The full-read-set audit refused
+   10 of 12 rows and decomposed every failure into a named pillar
+   pathology: doubled frames (root + blocks concatenated → counts
+   exactly 2× truth), parametric-memory answers with corrupted quote
+   boundaries (the transcription channel), and iteration-ceiling stalls.
+   Grounded-correct rows: 1/6 per arm, symmetric — directional, n small,
+   caveats in the report.
+4. **Module #1 v2** — **ATTEMPTED, NOT LANDED (Session 21, July 10,
+   2026):** the pillar's §0+§2 were promoted as the third corpus doc
+   (`research:trellis/workspace-discipline/code-mediated-text`, 19
+   blocks) and the one approved grounded-authoring turn ran ($0.136,
+   37,801 in / 4,142 out). The draft derived §2 faithfully and retired
+   the reconstruction language, but the deterministic anchor gate
+   refused assembly at 19/64 = 0.297 < 0.3 — one anchor short. Root
+   cause (measured): the pillar excerpt is compound-dense, so 52 of the
+   64 extracted anchors are exact-match hyphenated compounds; a draft
+   that paraphrases a compound's concept without its hyphenated spelling
+   gets no credit (the same draft scores 0.328 — passing — against the
+   v1-era two-doc corpus). The draft envelope is preserved at
+   `benchmark_logs/session21_author_v2_draft.json` (replay-verified to
+   reproduce 19/64). The gate held as designed and stays unchanged;
+   completing v2 is an owner decision — approve one re-run (stochastic
+   vocabulary; ~$0.14), or a reviewed gate refinement (stem-match
+   compounds the way terms already stem-match), then land.
 
 ## 7. Structure selection and scale bounds (measured July 9, 2026)
 
