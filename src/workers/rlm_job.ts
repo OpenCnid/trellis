@@ -200,12 +200,6 @@ export function buildAgentEnv(
   for (const [name, value] of Object.entries(cfg.mcpCredentialEnv ?? {})) {
     env[name] = value;
   }
-  // Session 21 effective-context instrumentation is deliberately NOT a
-  // worker setting. Only scripts/exp_effective_context.ts may put this
-  // flag on the child it spawns; a normal queue job can never weaken the
-  // kernel prompt through inherited state or a colliding credential-env
-  // name from an MCP registry.
-  delete env.TRELLIS_EXP_OMIT_CMT;
   return env;
 }
 

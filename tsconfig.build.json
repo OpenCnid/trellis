@@ -16,7 +16,6 @@
     "src/**/*.ts",
     "scripts/start_all.ts",
     "scripts/start_workers.ts",
-    "scripts/exp_effective_context.ts",
     "scripts/scale_provenance_drill.ts",
     "scripts/test_compose_roundtrip.ts"
   ],

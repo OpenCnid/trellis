@@ -53,7 +53,6 @@ def expect_raises(name, fn, needle=""):
 #   170e9f7e...67e9 — Session 20: the CODE-MEDIATED TEXT hard-rule block
 #     added to TRELLIS_ADDENDUM_BASE (CODE_MEDIATED_TEXT.md §6.2).
 COMPOSED_SYSTEM_PROMPT_SHA256 = "170e9f7e9daead9b403fd5748b7db1eee2ef12953f078a6f39a4e7871d1267e9"
-PRE_CODE_MEDIATED_TEXT_SYSTEM_PROMPT_SHA256 = "abb945a6e0c998ccabe2e2a930ea6934cae696643c1230f733c3d13d9feef9b2"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -126,21 +125,6 @@ check("composed SYSTEM_PROMPT is byte-identical to the recorded kernel prompt",
       hashlib.sha256(trellis_agent.SYSTEM_PROMPT.encode("utf-8")).hexdigest())
 check("SYSTEM_PROMPT is still base-prompt + composed addendum",
       trellis_agent.SYSTEM_PROMPT == RLM_SYSTEM_PROMPT + trellis_agent.TRELLIS_ADDENDUM)
-check("unset effective-context instrumentation returns the byte-identical default prompt",
-      trellis_agent.build_research_system_prompt() == trellis_agent.SYSTEM_PROMPT)
-check("only the exact experiment value 1 enables prompt omission",
-      all(trellis_agent.build_research_system_prompt(value) == trellis_agent.SYSTEM_PROMPT
-          for value in (None, "", "0", "true", "TRUE")))
-omitted_cmt_prompt = trellis_agent.build_research_system_prompt("1")
-check("discipline-off removes exactly the named CODE-MEDIATED TEXT block",
-      trellis_agent.CODE_MEDIATED_TEXT_RULE in trellis_agent.SYSTEM_PROMPT
-      and trellis_agent.CODE_MEDIATED_TEXT_RULE not in omitted_cmt_prompt
-      and len(trellis_agent.SYSTEM_PROMPT.encode("utf-8"))
-      - len(omitted_cmt_prompt.encode("utf-8"))
-      == len(trellis_agent.CODE_MEDIATED_TEXT_RULE.encode("utf-8")))
-check("discipline-off prompt matches the recorded pre-Session-20 bytes",
-      hashlib.sha256(omitted_cmt_prompt.encode("utf-8")).hexdigest()
-      == PRE_CODE_MEDIATED_TEXT_SYSTEM_PROMPT_SHA256)
 check("the composed addendum is structurally base + module #0 + rules",
       trellis_agent.TRELLIS_ADDENDUM
       == trellis_agent.TRELLIS_ADDENDUM_BASE
