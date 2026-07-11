@@ -107,19 +107,31 @@ export interface CorpusSection {
   body: string;
 }
 
-const SECTION_HEADING = /^(Letter|Chapter) \d+$/gm;
+/** Frankenstein's structure (round 1): 4 letters, then 24 chapters. */
+const DEFAULT_SECTION_KINDS = ['Letter', 'Chapter'] as const;
+
+function headingPattern(kinds: readonly string[]): RegExp {
+  if (kinds.length === 0) throw new Error('Section splitting needs at least one heading kind.');
+  return new RegExp(`^(${kinds.join('|')}) \\d+$`, 'gm');
+}
 
 /**
- * Splits the corpus at its own-line "Letter N" / "Chapter N" headings —
- * the 1831 text's structure (4 letters, 24 chapters). Front matter
- * before the first heading is not a section.
+ * Splits a corpus at its own-line "<Kind> N" headings (Session 22:
+ * parameterized so the synthetic chronicle's "Entry N" sections reuse
+ * the same machinery). Front matter before the first heading is not a
+ * section.
  */
-export function splitSections(text: string): CorpusSection[] {
-  const headings = [...text.matchAll(SECTION_HEADING)];
+export function splitSectionsBy(text: string, kinds: readonly string[]): CorpusSection[] {
+  const headings = [...text.matchAll(headingPattern(kinds))];
   return headings.map((match, i) => ({
     label: match[0],
     body: text.slice(match.index, i + 1 < headings.length ? headings[i + 1].index : text.length),
   }));
+}
+
+/** The round-1 fixed-structure form: "Letter N" / "Chapter N" headings. */
+export function splitSections(text: string): CorpusSection[] {
+  return splitSectionsBy(text, DEFAULT_SECTION_KINDS);
 }
 
 /**
@@ -128,9 +140,13 @@ export function splitSections(text: string): CorpusSection[] {
  * that appears in several sections (or only in front matter) cannot
  * anchor a localization question and is refused.
  */
-export function sectionContaining(text: string, phrase: string): string {
+export function sectionContainingBy(
+  text: string,
+  phrase: string,
+  kinds: readonly string[]
+): string {
   const needle = normalizeWhitespace(phrase);
-  const matches = splitSections(text).filter(section =>
+  const matches = splitSectionsBy(text, kinds).filter(section =>
     normalizeWhitespace(section.body).includes(needle)
   );
   if (matches.length !== 1) {
@@ -141,6 +157,40 @@ export function sectionContaining(text: string, phrase: string): string {
   return matches[0].label;
 }
 
+/** The round-1 fixed-structure form of sectionContainingBy. */
+export function sectionContaining(text: string, phrase: string): string {
+  return sectionContainingBy(text, phrase, DEFAULT_SECTION_KINDS);
+}
+
+/**
+ * Expected post-edit bytes for the edit-arm tasks (Session 22): the one
+ * line of `content` containing `marker` is replaced WHOLE by
+ * `replacementLine`; every other byte is untouched. Zero or several
+ * marker lines cannot anchor an edit task and are refused, as is a
+ * replacement carrying a newline (the trellis_textedit splice contract).
+ */
+export function replaceUniqueLine(
+  content: string,
+  marker: string,
+  replacementLine: string
+): string {
+  if (replacementLine.includes('\n')) {
+    throw new Error('replacementLine must be a single newline-free line.');
+  }
+  const lines = content.split('\n');
+  const hits = lines.reduce<number[]>((acc, line, i) => {
+    if (line.includes(marker)) acc.push(i);
+    return acc;
+  }, []);
+  if (hits.length !== 1) {
+    throw new Error(
+      `Marker must occur on exactly one line (found ${hits.length}): "${marker}"`
+    );
+  }
+  lines[hits[0]] = replacementLine;
+  return lines.join('\n');
+}
+
 /** The first integer in a model's answer text (commas tolerated), or null. */
 export function extractAnswerInteger(answer: string): number | null {
   const match = answer.match(/\d[\d,]*/);
@@ -149,15 +199,26 @@ export function extractAnswerInteger(answer: string): number | null {
 }
 
 /**
- * The first "Letter N" / "Chapter N" reference in a model's answer,
- * canonicalized ("chapter 5" -> "Chapter 5"), or null. First wins: an
- * answer hedging across several sections is scored on its lead claim.
+ * The first "<Kind> N" reference in a model's answer, canonicalized
+ * against the given heading kinds ("entry 5" -> "Entry 5"), or null.
+ * First wins: an answer hedging across several sections is scored on
+ * its lead claim.
  */
-export function extractAnswerSection(answer: string): string | null {
-  const match = answer.match(/\b(letter|chapter)\s+(\d{1,3})\b/i);
+export function extractAnswerSectionBy(
+  answer: string,
+  kinds: readonly string[]
+): string | null {
+  const match = answer.match(
+    new RegExp(`\\b(${kinds.join('|')})\\s+(\\d{1,3})\\b`, 'i')
+  );
   if (!match) return null;
-  const kind = match[1][0].toUpperCase() + match[1].slice(1).toLowerCase();
-  return `${kind} ${Number(match[2])}`;
+  const canonical = kinds.find(k => k.toLowerCase() === match[1].toLowerCase()) as string;
+  return `${canonical} ${Number(match[2])}`;
+}
+
+/** The round-1 fixed-structure form of extractAnswerSectionBy. */
+export function extractAnswerSection(answer: string): string | null {
+  return extractAnswerSectionBy(answer, DEFAULT_SECTION_KINDS);
 }
 
 /** Does the model's answer contain the expected sentence, normalized? */

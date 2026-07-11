@@ -56,6 +56,7 @@ from trellis_workspace import (  # noqa: E402
     build_workspace_addendum,
     parse_workspace_bounds,
 )
+from trellis_answer import TrellisAnswer  # noqa: E402
 from trellis_agent import SYSTEM_PROMPT  # noqa: E402
 
 QUERIES = ["alpha provenance", "beta lineage", "gamma modules", "delta flywheel"]
@@ -131,7 +132,10 @@ def run_task(label, task_text, servers, workspace, seeded):
     reset_counters()
     postgres_tool = TrellisPostgres()
     neo4j_tool = TrellisNeo4j(ast_existence_check=postgres_tool.ast_hashes_exist)
-    custom_tools = {"trellis_neo4j": neo4j_tool, "trellis_postgres": postgres_tool}
+    # Session 22: mirror the agent — the prompt teaches trellis_answer,
+    # so the probe must inject it too.
+    custom_tools = {"trellis_neo4j": neo4j_tool, "trellis_postgres": postgres_tool,
+                    "trellis_answer": TrellisAnswer()}
     if workspace is not None:
         custom_tools["trellis_workspace"] = workspace
     mcp_tool = TrellisMcp(servers, workspace=workspace)

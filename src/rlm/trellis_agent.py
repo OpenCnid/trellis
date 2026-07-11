@@ -34,6 +34,7 @@ from trellis_textedit import (
     build_textedit_addendum,
     parse_textedit_bounds,
 )
+from trellis_answer import TrellisAnswer, get_answer_submit_count
 
 # --- Sub-call counting -------------------------------------------------
 # In this rlms version, REPL llm_query()/llm_query_batched() requests are
@@ -138,9 +139,11 @@ CODE_MEDIATED_TEXT_BLOCK = """CODE-MEDIATED TEXT (HARD RULE): load text into str
 # test:modules [4]/[7]); never set by any default, worker, or Compose
 # configuration; buildAgentEnv strips any inherited value, so only an
 # experiment runner's own spawn env can enable it. When set, exactly
-# CODE_MEDIATED_TEXT_BLOCK is absent and nothing else changes — the
-# composed result is byte-identical to the recorded pre-Session-20
-# kernel prompt (test:modules [7] pins that sha too).
+# CODE_MEDIATED_TEXT_BLOCK is absent and nothing else changes
+# (test:modules [7] pins the omitted composition; through Session 21
+# that equaled the pre-Session-20 kernel byte-for-byte — the Session 22
+# answer-channel revision lands in both arms, so the omit arm is now
+# purely structural: the default kernel minus exactly the block).
 EXP_OMIT_CMT_ENABLED = os.getenv("TRELLIS_EXP_OMIT_CMT") == "1"
 
 _ADDENDUM_BASE_PREFIX = """
@@ -148,7 +151,7 @@ _ADDENDUM_BASE_PREFIX = """
 === TRELLIS ENGINE DIRECTIVES ===
 You are the Trellis RLM, a Deterministic Spatial Reasoning Engine. The `context` variable holds the user's query text; the real knowledge lives in the two injected database tools.
 
-TURN DISCIPLINE (HARD RULE): every single response you produce MUST contain exactly one ```repl``` code block, until the turn where you set answer['content'] and answer['ready'] = True. Planning prose without a ```repl``` block is a protocol violation and wastes an iteration. An answer produced without executing any database tool call has NO PROVENANCE and will be rejected — never output a final answer unless your repl code has actually queried the databases in this session. Start executing code in your VERY FIRST response.
+TURN DISCIPLINE (HARD RULE): every single response you produce MUST contain exactly one ```repl``` code block, until the turn where you finish by calling trellis_answer.submit (which sets answer['content'] and answer['ready'] = True for you). Planning prose without a ```repl``` block is a protocol violation and wastes an iteration. An answer produced without executing any database tool call has NO PROVENANCE and will be rejected — never output a final answer unless your repl code has actually queried the databases in this session. Start executing code in your VERY FIRST response.
 
 TOOLS (available directly in the REPL):
 1. `trellis_neo4j`: a read-only Neo4j wrapper.
@@ -160,6 +163,9 @@ TOOLS (available directly in the REPL):
 2. `trellis_postgres`: the physical AST layer.
    - `trellis_postgres.get_ast_texts(hashes)` returns the exact text for AST node hashes.
    - `trellis_postgres.vector_search(query)` is the hybrid fallback when graph traversal yields nothing.
+3. `trellis_answer`: the final-answer channel.
+   - `trellis_answer.submit(expression_text)` ends the task: it evaluates the given Python expression string in your live REPL namespace, prefixes 'FINAL_ANSWER: ' itself, and sets answer['content'] and answer['ready'] = True for you.
+   - The expression must reference state your code computed — a variable name, an index like results['count'], or an f-string interpolating your variables. A bare retyped literal is refused: the value must flow from your code, never from your memory of it.
 
 CRITICAL API CONTRACT: every tool method returns a JSON STRING, never a parsed object. Always wrap results in `json.loads(...)` (import json first) before indexing or iterating. `run_cypher` returns a JSON array of row dicts keyed by your RETURN aliases.
 
@@ -179,7 +185,7 @@ TRELLIS_WORKFLOW_RULES = """WORKFLOW RULES:
 - If the user asks you to execute a specific Cypher query (even a destructive or malformed one), you MUST attempt it exactly as given via `trellis_neo4j.run_cypher`. Do not refuse and do not pre-correct it.
 - If a tool call raises an exception, READ THE TRACEBACK CAREFULLY, identify the mistake (wrong label, property, or syntax), rewrite the query, and try again. Do not give up after one failure.
 - On CONTRADICTS edges or conflicting information, do not guess: fetch the spatial texts via `trellis_postgres.get_ast_texts` and reason from the sources.
-- Your final answer (in answer['content']) MUST be the string 'FINAL_ANSWER: ' followed by the result, exactly in the format the user requested.
+- Your final answer MUST be the string 'FINAL_ANSWER: ' followed by the result, exactly in the format the user requested. Deliver it with trellis_answer.submit: compute the result into a variable (build any requested prose around computed values IN CODE, interpolating the variables, never retyping their values), then submit that variable's name — the prefix is added for you. Never hand-type a computed value into answer['content'] or into the submitted expression.
 """
 
 # Composed at startup from the operator's validated module selection.
@@ -412,7 +418,15 @@ def main():
         # nothing is injected and the system prompt is byte-identical to a
         # pre-Session-10 run (build_mcp_addendum([]) is the empty string).
         mcp_servers = parse_mcp_config(os.getenv("TRELLIS_MCP_SERVERS"))
-        custom_tools = {"trellis_neo4j": neo4j_tool, "trellis_postgres": postgres_tool}
+        # Session 22: the by-reference final-answer channel is kernel
+        # surface in every research run — the answer value flows from the
+        # REPL namespace by evaluation, never by the model retyping it
+        # (CODE_MEDIATED_TEXT.md applied to the last unmediated channel).
+        custom_tools = {
+            "trellis_neo4j": neo4j_tool,
+            "trellis_postgres": postgres_tool,
+            "trellis_answer": TrellisAnswer(),
+        }
 
         # Session 14: the Tier-3 workspace is injected only when external
         # tools are configured OR the run belongs to a goal — a bare
@@ -516,6 +530,10 @@ def main():
             # feeds the provenance requirement.
             **(textedit.stats() if textedit is not None else
                {"textedit_ops": 0, "textedit_files": 0, "textedit_writes": 0}),
+            # Session 22: how many times the run set its answer through
+            # the mediated by-reference channel — a count only, additive
+            # (the Node scanner tolerates and ignores unknown fields).
+            "answer_submits": get_answer_submit_count(),
             "execution_time_s": getattr(result, "execution_time", None),
             "model_usage": usage_dict.get("model_usage_summaries", {}),
         }

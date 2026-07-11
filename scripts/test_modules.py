@@ -52,7 +52,12 @@ def expect_raises(name, fn, needle=""):
 #     spatial-flywheel extraction (the extraction itself moved nothing).
 #   170e9f7e...67e9 — Session 20: the CODE-MEDIATED TEXT hard-rule block
 #     added to TRELLIS_ADDENDUM_BASE (CODE_MEDIATED_TEXT.md §6.2).
-COMPOSED_SYSTEM_PROMPT_SHA256 = "170e9f7e9daead9b403fd5748b7db1eee2ef12953f078a6f39a4e7871d1267e9"
+#   9f09d7d2...dd68 — Session 22: the by-reference final-answer channel
+#     (trellis_answer.submit) taught in the TOOLS list, the TURN
+#     DISCIPLINE line, and the final-answer workflow rule — the
+#     answer-channel transcription fix the Session 21 probe demanded
+#     (tooling in src/rlm/trellis_answer.py; the prompt only teaches it).
+COMPOSED_SYSTEM_PROMPT_SHA256 = "9f09d7d2ec5f4837f0fe0ef6ae4335a1583443c466e26834384dc7ea3741dd68"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -209,6 +214,8 @@ check("author prompt teaches the workspace surface and the draft output contract
       and "gap_notes" in author_prompt and "purpose" in author_prompt)
 check("author prompt does NOT carry the research directives or the DB tools",
       "trellis_neo4j" not in author_prompt and "trellis_postgres" not in author_prompt)
+check("author prompt does NOT carry the research answer channel (Session 22)",
+      "trellis_answer" not in author_prompt)
 appended = author_prompt[len(RLM_SYSTEM_PROMPT):]
 check("the author-added prompt text is brace-free after the base prompt",
       "{" not in appended and "}" not in appended)
@@ -233,14 +240,20 @@ check("extract_draft_envelope returns None on non-JSON and on missing fields",
 # in a subprocess because the flag is read at import time.
 print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 
-# sha256 of the composed SYSTEM_PROMPT with the flag set. This is the
-# RECORDED pre-Session-20 kernel prompt (the constant pin history above:
-# abb945a6...f9b2 at master 9f25a5b): Session 20's only kernel change was
-# adding the CODE-MEDIATED TEXT block, so omitting exactly that block
-# reproduces the pre-Session-20 bytes — re-proven here on every run. If
-# the kernel prompt legitimately changes again, recompute BOTH pins in
-# the same commit.
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "abb945a6e0c998ccabe2e2a930ea6934cae696643c1230f733c3d13d9feef9b2"
+# sha256 of the composed SYSTEM_PROMPT with the flag set. Pin history
+# (moves in lockstep with the default pin above — recompute BOTH in the
+# same commit on any witting kernel change):
+#   abb945a6...f9b2 — through Session 21 this equaled the RECORDED
+#     pre-Session-20 kernel byte-for-byte, because Session 20's only
+#     kernel change was adding the CODE-MEDIATED TEXT block.
+#   9779b5c0...9e45 — Session 22: the answer-channel revision (see the
+#     default pin's history) lands in BOTH arms — the transcription fix
+#     is a kernel bug fix, not part of the discipline experiment — so the
+#     omit arm is no longer byte-identical to the pre-Session-20 prompt.
+#     Its meaning is now purely structural: the default kernel with
+#     exactly the CODE_MEDIATED_TEXT_BLOCK absent (the check below
+#     re-proves that structure on every run).
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "9779b5c054fed729891ef548db10aabd1cc938cd4fb280c87aaa21aff9d89e45"
 
 import subprocess  # noqa: E402
 
@@ -269,7 +282,7 @@ check("flagged subprocess composes and reports", _child.returncode == 0,
 _omitted = json.loads(_child.stdout.strip().splitlines()[-1]) if _child.returncode == 0 else {}
 check("flag set: the block is absent and the gate reports enabled",
       _omitted.get("absent") is True and _omitted.get("enabled") is True)
-check("flag set: the composed prompt is byte-identical to the recorded pre-Session-20 kernel",
+check("flag set: the composed prompt matches the recorded omit-arm pin",
       _omitted.get("sha") == EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256,
       str(_omitted.get("sha")))
 _default_minus_block = trellis_agent.SYSTEM_PROMPT.replace(

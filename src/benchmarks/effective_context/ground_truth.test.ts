@@ -7,11 +7,15 @@ import {
   countOccurrences,
   extractAnswerInteger,
   extractAnswerSection,
+  extractAnswerSectionBy,
   normalizeForComparison,
   normalizeWhitespace,
+  replaceUniqueLine,
   sectionContaining,
+  sectionContainingBy,
   sentenceContaining,
   splitSections,
+  splitSectionsBy,
 } from './ground_truth';
 
 // Session 21: the probe's ground truth is computed, never hand-typed —
@@ -156,5 +160,56 @@ describe('the committed Frankenstein corpus', () => {
     );
     expect(sectionContaining(corpus, 'It was on a dreary night of November')).toBe('Chapter 5');
     expect(sectionContaining(corpus, 'apparently of gigantic stature')).toBe('Letter 4');
+  });
+});
+
+// --- Session 22 additions ----------------------------------------------------
+
+describe('splitSectionsBy / sectionContainingBy / extractAnswerSectionBy', () => {
+  const entries = [
+    'Front matter before any section.',
+    '',
+    'Entry 1',
+    '',
+    'The first sitting records a quiet season.',
+    '',
+    'Entry 2',
+    '',
+    'The second sitting mentions the lost astrolabe once.',
+  ].join('\n');
+
+  it('splits on parameterized own-line headings', () => {
+    const labels = splitSectionsBy(entries, ['Entry']).map(s => s.label);
+    expect(labels).toEqual(['Entry 1', 'Entry 2']);
+  });
+
+  it('locates a phrase to its one section and refuses ambiguity', () => {
+    expect(sectionContainingBy(entries, 'lost astrolabe', ['Entry'])).toBe('Entry 2');
+    expect(() => sectionContainingBy(entries, 'sitting', ['Entry'])).toThrow(/exactly one/);
+    expect(() => sectionContainingBy(entries, 'Front matter', ['Entry'])).toThrow(/found 0/);
+    expect(() => splitSectionsBy(entries, [])).toThrow(/at least one/);
+  });
+
+  it('extracts and canonicalizes a parameterized section answer', () => {
+    expect(extractAnswerSectionBy('it appears in entry 07.', ['Entry'])).toBe('Entry 7');
+    expect(extractAnswerSectionBy('no section named', ['Entry'])).toBeNull();
+    // The default form still behaves as before.
+    expect(extractAnswerSection('probably chapter 5')).toBe('Chapter 5');
+  });
+});
+
+describe('replaceUniqueLine', () => {
+  const file = ['header', 'QUOTE: <<AWAITING>>', '', 'footer'].join('\n');
+
+  it('replaces exactly the marker line, preserving every other byte', () => {
+    expect(replaceUniqueLine(file, '<<AWAITING>>', 'QUOTE: found it.')).toBe(
+      ['header', 'QUOTE: found it.', '', 'footer'].join('\n')
+    );
+  });
+
+  it('refuses zero or multiple marker lines and multi-line replacements', () => {
+    expect(() => replaceUniqueLine(file, '<<MISSING>>', 'x')).toThrow(/found 0/);
+    expect(() => replaceUniqueLine(`${file}\n<<AWAITING>>`, '<<AWAITING>>', 'x')).toThrow(/found 2/);
+    expect(() => replaceUniqueLine(file, '<<AWAITING>>', 'a\nb')).toThrow(/newline-free/);
   });
 });
