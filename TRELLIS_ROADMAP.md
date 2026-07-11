@@ -209,8 +209,8 @@ Ordered roughly by severity.
 | ~~1~~ | ~~Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision~~ | **Done (Session 20, July 9, 2026)** — the operator-gated `trellis_textedit` holder (engine-computed `locate`, staged `splice`, digest-guarded atomic `write_back`, strict root containment, Zod/Python twin bounds, byte-identical prompt and namespace when `TRELLIS_EDIT_ROOT` is unset; `npm run test:textedit`, 81 checks) and the §6.2 CODE-MEDIATED TEXT kernel prompt block shipped in its own commit with the composed-prompt sha256 pin recomputed there; see §5 |
 | ~~1~~ | ~~Pillar measurement + module #1 v2 (pillar §6.3 + §6.4, owner-APPROVED July 9, 2026) + the Frankenstein corpus~~ | **Done (Session 21, July 10, 2026 — the redo; the first attempt, PR #56, was owner-discarded and reverted by PR #58 the same day)** — Frankenstein ingested zero-paid as durable Tier-1 substrate; the effective-context probe MEASURED (§6.3: 12 runs, $0.73 — with the §6.2 block no run put the corpus through attention, without it one run pushed all ~105k tokens through a single `llm_query`; the one wrong answer was an engine-computed 55 retyped as 47 — the transcription channel live in the answer path); module #1 v2 landed through grounded authoring (§6.4: anchor gate refused the three-doc corpus at 0.28, owner re-scoped to the two normative docs per the gate's documented remedy, the same paid draft landed at 0.50 by zero-paid replay; mitigation line retired, v1 history preserved); see §5 |
 | ~~3~~ | ~~Anchor-gate calibration (grounded-authoring follow-up, measured Session 21)~~ | **Core fix done (Session 21, later the same day)** — `evaluateAnchorGate` no longer scores template-forbidden numeric anchor kinds (`comparison`/`ratio`) in its denominator; the previously refused module #1 v2 draft now clears at 18/60 = 0.30. Optional residual (compound segments get exact-match, plain terms get stem credit — a minor asymmetry) left to a future gate touch, not blocking; see §5 |
-| 2 | Effective-context probe, round 2 + the answer-channel fix (owner-directed next, July 10, 2026) | **Replaces extraction as the immediate objective (owner direction — do NOT jump to repository-scale extraction yet).** The Session 21 probe left four measurement gaps and exposed one behavior bug: (a) re-run on an OBSCURE/PRIVATE corpus NOT in the model's training data — Frankenstein is memorized, so the quote/locate arms may answer from memory rather than from the REPL; (b) a corpus BIGGER than one book (many files / a repo snapshot) — the scale at which pandas actually earns use (the Session 21 runs used only plain string + regex; measure whether the model reaches for a DataFrame when the corpus is relational); (c) an EDIT round-trip (locate → splice → hash-guarded `write_back` through the Session 20 textedit toolkit) to test the "move bytes with code" half, not just reads; (d) MORE runs per question (n=1 today is too few to trust the exact numbers — raise repeats and report medians with spread); and (e) FIX the answer-channel transcription leak — the disciplined arm retyped an engine-computed 55 as 47 in its final answer, so give the model a way to set its answer FROM a computed REPL value by reference instead of retyping it (tooling shape, not prompt text — the pillar's own lesson 7) |
-| 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred again behind the probe round-2 work; never dropped) |
+| ~~2~~ | ~~Effective-context probe, round 2 + the answer-channel fix (owner-directed next, July 10, 2026)~~ | **Done (Session 22, July 11, 2026)** — the by-reference answer channel (`trellis_answer.submit`: caller-frame evaluation, structural literal refusal, engine-side rendering; `npm run test:answer-channel`, 32 checks; both composed-prompt pins recomputed wittingly) shipped FIRST, then all four measurement arms ran paid ($2.15, 57 runs): the unmemorized synthetic chronicle isolated read-fidelity (8/8 anomaly quotes byte-faithful), the 40-ledger corpus measured the pandas null result (0/12 aggregation runs reached for a DataFrame — plain loops stayed cheap and correct), the edit round-trip was 8/8 byte-exact through `trellis_textedit`, repeats reported medians with spread, and the round-1 55→47 question came back 55 in both arms; zero transcription errors in 56 runs (round 1: 1 in 12); every remaining miss is localization-method error over the glued reconstruction (a recorded observation, not a regression); see §5 |
+| 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (first unstruck row as of Session 22's close — the Session 23 objective, carried at full concreteness in `HANDOFF.md` §3–§8) |
 | 4 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
@@ -2601,3 +2601,158 @@ in the same PR before hand-off:
    round-trip, more runs per question, and the by-reference answer fix
    for the 55→47 transcription leak) is carried at full concreteness in
    the regenerated `HANDOFF.md` §3–§8.
+
+### July 11, 2026 — Session 22: the effective-context probe round 2 + the answer-channel fix (§4 row 2)
+
+**The answer-channel fix shipped first** (row 2 item (e); the round-1
+55→47 transcription leak, closed as tooling shape per pillar §2.8,
+never as prompt plea):
+
+1. **`src/rlm/trellis_answer.py`** — `TrellisAnswer`, injected via rlms
+   `custom_tools` as `trellis_answer` in EVERY research run (kernel
+   surface, like the database tools; author mode does not carry it —
+   pinned in `test:modules` [6]). The single model-visible method
+   `submit(expression_text)` takes the TEXT of a Python expression,
+   evaluates it in the calling REPL frame (`sys._getframe` — globals
+   AND locals, so nested-helper calls resolve; the caller's
+   `__builtins__` are rlms' safe table, so `eval` stays blocked inside
+   the expression and the channel widens nothing), refuses bare
+   literals structurally (`ast.parse` + no Name/Attribute/Subscript/
+   Call ⇒ the retyped-literal class, refused with a teaching message),
+   refuses `None` results and over-cap expressions/content (kernel
+   constants 400 chars / 64 KiB), renders deterministically (str
+   verbatim, int exact, float shortest-round-trip repr, containers as
+   compact JSON), prefixes `FINAL_ANSWER: ` engine-side, and mutates
+   the LIVE `answer` binding read from the caller frame each call (so
+   rlms scaffold-restore replacing the object between turns can never
+   leave the holder mutating a dead dict). ADDITIVE: direct
+   `answer['content']` assignment still works; `TRELLIS_RESULT`
+   semantics unchanged; telemetry gains counts-only `answer_submits`
+   (the Node scanner tolerates unknown fields — zero TS changes).
+2. **The kernel prompt teaches the channel** (TOOLS item 3, the TURN
+   DISCIPLINE line, the final-answer workflow rule — brace-free), so
+   BOTH composed-prompt pins moved wittingly and were recomputed in
+   the same commit with recorded move history (`scripts/
+   test_modules.py`): default `170e9f7e…67e9` → `9f09d7d2…dd68`;
+   omit-arm `abb945a6…f9b2` → `9779b5c0…9e45`. The omit arm is NO
+   LONGER byte-identical to the pre-Session-20 kernel — its meaning is
+   now purely structural (the default kernel minus exactly
+   `CODE_MEDIATED_TEXT_BLOCK`, re-proven structurally by
+   `test:modules` [7] on every run). The historical probes
+   (`probe_workspace_paired.py` / `probe_workspace_lineage.py`) mirror
+   the agent's composition, so they inject the holder too.
+3. **Regression: `npm run test:answer-channel`** (new,
+   `scripts/test_answer_channel.{ts,py}`, 32 checks) — reproduces the
+   55→47 class inside the REAL rlms `LocalREPL`: the REPL computes a
+   count, `submit("counts['simple']")` carries it to
+   `REPLResult.final_answer` unretyped; the hand-typed literal is
+   refused in-REPL; a typo'd name is a loud NameError, never a silent
+   wrong digit; nesting/sandbox/restore/additivity semantics and the
+   successes-only counter are pinned. `trellis_answer.py` joined
+   `python:check` and the Dockerfile's shipped `src/rlm` set (the
+   Session 12 lesson).
+
+**Round-2 measurement machinery** (rows (a)–(d)):
+
+4. **The unmemorized corpus** —
+   `src/benchmarks/effective_context/synthetic_corpus.ts`: seeded
+   deterministic generation (mulberry32, integer ops — bit-identical
+   everywhere; ASCII only). The chronicle
+   (`data/synthetic_chronicle.txt`, COMMITTED: 293,411 bytes ≈ 73k
+   tokens, sha256 `b56f6d32…f1e6` pinned in vitest along with
+   byte-equality to the generator and `.gitattributes -text`; 48
+   "Entry N" sections; invented substring-free vocabulary; one planted
+   unique anomaly sentence per entry, mid-paragraph, phrase =
+   `chronicleAnomalyPhrase(i)`) — quote/locate answers cannot come
+   from parametric memory. Ingested zero-paid as
+   `book:synthetic:ninth-circuit-chronicle` (root `f0ffaf20…7c23`,
+   1,655 nodes, 827 blocks, extraction `none`; re-ingest observed as
+   the auditable no-op; sampled blocks read back byte-exact through
+   the real Python `get_ast_texts`). Durable substrate, not drill
+   residue.
+5. **The multi-document corpus** — 40 generated shipping ledgers
+   (2,209 records, one canonical sentence shape, 185,301 bytes total,
+   concat sha pinned), ingested as `ledger:synthetic:house-01…40`
+   through the same verified path. `parseLedgerRecords` is SHAPE-based
+   (global regex), not line-based — **defect found live at ingest:**
+   the AST reconstruction concatenates paragraph blocks with unmarked
+   boundaries, so the last record of one block glues onto the first of
+   the next; line splitting is not representation-invariant but the
+   record shape is (unit test pins the glued case). Ground truth =
+   aggregations over records parsed FROM BYTES (`totalsByPort`,
+   `topPortForMaterial` — tie-refusing, `totalForCaptainMaterial`),
+   asserted identical on generated bytes and on every stored
+   reconstruction before any spawn.
+6. **Ground-truth generalization** (`ground_truth.ts`):
+   `splitSectionsBy`/`sectionContainingBy`/`extractAnswerSectionBy`
+   (parameterized heading kinds; the round-1 Letter/Chapter forms
+   delegate) and `replaceUniqueLine` (expected post-edit bytes;
+   refuses zero/multiple marker lines and multi-line replacements).
+   Offline suite 641 → **659** across 73 files.
+7. **The probe script round 2** (`scripts/exp_effective_context.ts`,
+   still deliberately un-aliased): `--suites frank,chronicle,ledger,
+   edit`, `--repeats` (1–5), `--questions` filter, per-suite corpus
+   metadata in the plan, medians WITH [min..max] spread, per-run
+   `submit`/`pandas` columns, and the edit suite — a fresh scratch
+   `TRELLIS_EDIT_ROOT` per run (the Session 20 operator-gating
+   mechanism pointed at a throwaway root), seeded notes file, scored
+   on byte-exact post-edit contents (computed by `replaceUniqueLine`)
+   AND the answer; actual post-edit bytes are captured next to each
+   run log. `--ingest` covers all three corpora with Python read-back
+   and representation-invariance checks. The zero-paid edit drill
+   (toolkit `locate`→`splice`→`write_back` vs the computed expected
+   bytes) agreed byte-for-byte before any paid run.
+
+**The measured runs** (owner-directed objective; pre-flight estimates
+printed, ≤$5 cumulative abort armed per invocation, none aborted):
+
+- Commands: `--suites chronicle,ledger --arms on,off --repeats 2`
+  (36 runs, $1.3975), `--suites edit --arms on,off --repeats 2`
+  (8 runs, $0.2596), `--suites frank --arms on,off --repeats 1`
+  (12 runs, $0.4532), plus one single-question smoke run ($0.0406).
+  **Total Session 22 paid spend: $2.1509 across 57 runs.** Raw logs
+  under `benchmark_logs/effective-context-2026-07-11T*` (gitignored);
+  the numbers live in
+  `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` (round-2
+  section).
+- Headline findings: **the transcription channel is closed in
+  practice** — 57/57 runs answered through `trellis_answer.submit`,
+  every computed value landed digit-exact (including the round-1
+  55→47 question, now 55 in both arms), zero transcription errors in
+  56 scored runs vs 1-in-12 in round 1. **Read-fidelity isolated and
+  held** (8/8 unmemorized anomaly quotes byte-faithful, ~10k median
+  input tokens against a 73k-token corpus). **The edit round-trip is
+  8/8 byte-exact** (first paid drive of the Session 20 toolkit).
+  **The pandas null result**: 0/68 round-2 runs imported pandas, even
+  for 40-document aggregation — plain loops stayed correct and cheap
+  (a finding: the §7 DataFrame threshold sits above this scale).
+  **The round-1 arm effect did not reproduce**: on/off medians are
+  indistinguishable in every suite and round 2 saw no attention
+  blowups — the strengthened tooling shape carries the discipline on
+  these task shapes; measurement pressure belongs on shape, not
+  prose. **Every round-2 miss (3 in 56) is localization-method error
+  over the glued reconstruction** (line-anchored heading regexes: two
+  loud sentinel answers "Entry None"/"Entry ?", one plausible
+  TOC-anchored "Chapter 23") — recorded as an observation with a
+  possible future kernel question (should `get_ast_texts` preserve
+  block boundaries? that would move every pinned reconstruction
+  truth, so witting or not at all), not patched mid-measurement.
+- **Defects found and fixed along the way:** (1) the block-gluing
+  representation hazard (item 5 — fixed as shape-based parsing before
+  any paid run); (2) the `led-top-port` grader demanded the literal
+  "Port X" prefix and falsely failed correct "Galeholt, 1679"-shaped
+  answers — grader corrected in the committed script, the four
+  affected rows re-scored, disclosure in the report; (3) the
+  chronicle preamble omitted the "paragraph boundaries are unmarked"
+  clause the frank preamble carries — left AS RUN for
+  reproducibility, noted for a future round.
+
+**Acceptance observed (July 11, 2026):** `npm test` 659/73 · `npm run
+build` · `npm run python:check` (now imports `trellis_answer`) ·
+`docker compose --profile test config --quiet` · `test:answer-channel`
+32 · `test:modules` 51 (pins moved wittingly, recorded) ·
+`test:textedit` 81 · `test:rlm-workspace` 86 · `test:rlm-mcp` 86 ·
+`test:rlm-sandbox` 21 · the full drill block and the isolated Compose
+integration recorded in the close-out below · `git diff --check`
+clean. The dev graph now durably carries the two new corpora alongside
+Frankenstein.

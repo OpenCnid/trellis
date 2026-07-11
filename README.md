@@ -781,8 +781,11 @@ poisoning drills, the scale gate (`SCALE_PROVENANCE_REPORT.md`), the
 workspace and lineage paired-run probes, the repository-ingestion pilot,
 the provenance-citation A/B eval, and the effective-context probe
 (`EFFECTIVE_CONTEXT_PROBE_REPORT.md` — the code-mediated-text pillar's
-§6.3 measurement over the committed Frankenstein corpus). The honest
-ledger of open critiques is `CRITIQUE_AND_FUTURE.md`.
+§6.3 measurement: round 1 over the committed Frankenstein corpus, and
+round 2 over an unmemorized synthetic corpus, a 40-document aggregation
+set, and an edit round-trip suite, measured with the Session 22
+by-reference answer channel). The honest ledger of open critiques is
+`CRITIQUE_AND_FUTURE.md`.
 
 ## Verification
 

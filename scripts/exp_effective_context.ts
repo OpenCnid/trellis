@@ -386,8 +386,13 @@ function buildLedgerQuestions(
         + `the largest total number of crates of ${LEDGER_TOP_MATERIAL}, and how many crates `
         + `was that total? Output FINAL_ANSWER: <Port name>, <integer>.`,
       expected: `${top.port}, ${top.total}`,
+      // The distinctive token: port names are "Port <Word>" with unique
+      // words, and answers legitimately come back as "Galeholt, 1679"
+      // (found live in Session 22's first scored runs — requiring the
+      // "Port " prefix falsely failed correct answers).
       isCorrect: answer =>
-        normalizeWhitespace(answer).toLowerCase().includes(top.port.toLowerCase())
+        normalizeWhitespace(answer).toLowerCase()
+          .includes(top.port.replace(/^Port /, '').toLowerCase())
         && extractAnswerInteger(answer.replace(/day \d+/gi, '')) === top.total,
     },
     {
