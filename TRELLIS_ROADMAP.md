@@ -213,7 +213,8 @@ Ordered roughly by severity.
 | ~~3~~ | ~~Effective-context probe, round 3 (owner-directed next, July 11, 2026)~~ | **Done (Session 23, July 11, 2026)** — the relational corpus (102 generated documents: 100 season-two ledgers ≈6,859 records + a captain→guild registry + a port/material tariff schedule; every question a genuine 2- or 3-table join) measured the pandas null result PERSISTING at 3.1× round-2 scale (0/87 round-3 runs imported pandas or polars; plain dict loops answered every join digit-exact); the localization arm (30 locate runs) reproduced the round-2 failure class at rate (7/30 misses, ALL method error over the glued reconstruction, none transcription) and quantified TWO representation traps zero-paid (line anchors: chronicle 0/48 headings visible glued vs 48/48 boundary-preserved; trailing word boundaries: `\d+\b` fails at glued digit→letter junctions, producing the exact "Chapter 23" wrong answer of both rounds); higher n moved the load-bearing claims (87/87 submits, zero transcription errors at n=5/arm on counts and quotes); the disclosure clause was restored to the chronicle/ledger preambles; RECOMMENDATION recorded (then re-pointed the same day — the owner chose the additive `get_ast_blocks` accessor over the reconstruction-byte change; now §4 row 4). See §5 |
 | ~~4~~ | ~~Boundary-aware block accessor (`get_ast_blocks`) + structure-selection demotion~~ | **Done (Session 24, July 11, 2026)** — `trellis_postgres.get_ast_blocks(root_hash)` returns a document's extraction blocks in order (`[{id, type, text}]`, exactly the `collectExtractionBlocks` set) via the dependency-free walk in `src/rlm/trellis_blocks.py`, parity-pinned block-for-block against the TS authority (`block_parity.test.ts`) and round-tripped live (frank 796 / chronicle 827 blocks byte-identical); NO stored or reconstructed byte moved; both composed-prompt pins moved wittingly to teach the tool (default `3f07295a…4b63`, omit-arm `85362b81…71bb`); pillar §7's "pandas default" DEMOTED to "plain loops until a measured threshold" per its own written contingency; the probe gained the `structured` method verdict, the paren-free locate-preamble offer, and the report's round-4 section. The localization re-measure ran OWNER-APPROVED the same day ($0.9452, 36 runs): 0/36 misses vs round 3's 7/30 on the same locate set, 36/36 runs adopting the accessor in BOTH arms (the off arm too — tooling shape, not the prompt block, carries the behavior); the round-3 "Chapter 23" trap question came back correct 6/6; the superseded reconstruction-byte row stays closed; see §5 |
 | ~~5~~ | ~~Repository-scale extraction prerequisites~~ | **Done (Session 25, July 11, 2026)** — the three recorded pilot findings turned into machinery, all zero-paid: the kernel-fixed test/fixture extraction exclusion (`isTestOrFixturePath`; classified files still ingest but their extraction policy is forced to `none`, reported as typed `test_fixture_excluded` file/block counts in the plan echo), additive `sourceKind` payload routing selecting a code-tuned extraction prompt (legacy prose bytes unit-pinned; unknown values refused at the boundary), and deterministic generic-identifier suppression before resolution (kernel denylist + length-<3 shape rule + touched-relationship drops, counted and logged, never silent). The paid pilot RE-RUN stays owner-gated: proposed at the CLI's printed post-exclusion bound of 103 blocks ≈ $0.29; see §5 |
-| 6 | Estimation-discipline positive control (module #2 follow-through) | Zero-paid machinery first: a module-arm flag for the effective-context probe (the `TRELLIS_EXP_OMIT_CMT` mold — byte-identical when unset) so paired runs can compose `estimation-discipline` into the selection; then the OWNER-GATED paired measurement (design recorded in `modules/estimation-discipline/RESEARCH.md`: tool calls / iterations / input tokens on sufficiency-bounded questions, ~n=5/arm ≈ $1–2). The module stays OUT of the default selection until the control measures a real effect (the briefing's rule) |
+| 6a | Data-plane representation verdict follow-ups (owner-directed July 11, 2026 — inserted AHEAD of the positive control, which is unchanged) | The owner-commissioned read-only Polars/Arrow architecture review (§5 entry of the same date) concluded NO migration at any of the six data-plane boundaries — JSON/list/dict contracts stand everywhere; structure selection is operation-shaped, not size-shaped. This session records the verdict and pins its prerequisites, all zero-paid: pin polars==1.34.0 in requirements.txt + the python:check import list (the review's found inconsistency: prose claims the agent environment carries polars, no manifest declares it, the Docker image lacks it — a containerized paid run importing it would fail at runtime, not at check time); the pillar §7 verdict + cap-raise doctrine paragraph; the M1 park/seed round-trip + M7 torn-payload refusal drills as standing fixtures in test:rlm-workspace. Pinning is NOT adoption: no src/ path imports polars |
+| 6 | Estimation-discipline positive control (module #2 follow-through) | (Pushed back one session by owner direction July 11, 2026 — row 6a runs first; this row is otherwise unchanged.) Zero-paid machinery first: a module-arm flag for the effective-context probe (the `TRELLIS_EXP_OMIT_CMT` mold — byte-identical when unset) so paired runs can compose `estimation-discipline` into the selection; then the OWNER-GATED paired measurement (design recorded in `modules/estimation-discipline/RESEARCH.md`: tool calls / iterations / input tokens on sufficiency-bounded questions, ~n=5/arm ≈ $1–2). The module stays OUT of the default selection until the control measures a real effect (the briefing's rule) |
 | 7 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
 | — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
@@ -3384,3 +3385,115 @@ series capped at $20 total.
    (now covering the bench script); `git diff --check` clean; the
    composed-prompt pins untouched (no kernel change anywhere in this
    work); the four durable probe corpora untouched.
+
+### July 11, 2026 — The data-plane representation review (owner-commissioned, read-only) and the Session 27 re-point
+
+The owner commissioned an in-session architectural review: should
+Trellis introduce Polars or Arrow-based storage at specific data-plane
+boundaries? Read-only — no tracked file changed during the review
+itself; this entry is its record, and HANDOFF §8 points migration
+re-entry at the matrix and thresholds below.
+
+**Boundaries inventoried (representations as-built):** (1) Tier-3
+plan/notes/segment index — one plain version-tagged dict, JSON-string
+method returns, uuid-keyed segments, wrapper-owned origin stamps
+(trellis_workspace.py); (2) MCP result payloads — scrubbed text,
+size-capped 64 KiB default / 4 MiB cap (trellis_mcp.py); (3) Redis
+cross-task snapshots — canonical sorted-key JSON, Zod-validated on
+park, Python-twin-validated on seed including the bytes-stamp
+integrity check (workspace_scratch.ts / seed_from_snapshot); (4)
+PostgreSQL — ast_nodes(id, data JSONB, embedding vector(1536)) +
+HNSW + search_ast_nodes, keyed reads; (5) Neo4j belief caches —
+DERIVED_INSIGHT edges with list-property provenance and the
+quarantine/recovery CASE logic in one UNWIND MERGE; (6) transient RLM
+frames — dict/regex loops (measured), the textedit split-lines frame.
+
+**Options compared:** A = current JSON/list/dict contracts; B = JSON
+control plane + Arrow IPC/Parquet payloads queried through Polars;
+C = Polars DataFrame/LazyFrame as the workspace's public contract.
+
+**Verdict: A stands at every boundary. No migration.** C is rejected
+by ratified doctrine (WORKSPACE_AND_MODULES.md §4.5: the contract is
+the plain JSON-serializable dict, never library types) and by
+behavior evidence; B is unjustified at the 4–32 MiB caps. Dimension
+highlights: keyed uuid lookup beats columnar scan at ≤1024 segments;
+the plan field is arbitrary JSON (z.unknown()) and unrepresentable in
+a fixed Arrow schema without an embedded-JSON column; canonical JSON
+is byte-deterministic (pin-compatible) where Arrow IPC bytes are not
+guaranteed stable across library versions; every boundary crossing
+serializes anyway (spawn env, stdout, Redis), so zero-copy claims are
+moot; rlms scaffold semantics (a failed block loses rebindings, keeps
+in-place mutations) favor dict mutation over copy-on-write frames;
+polars' streaming engine (collect with the streaming engine) solves
+larger-than-RAM scans that the 32 MiB caps and the databases make
+unreachable — PG/Neo4j already ARE the out-of-core engines, and a
+flat-file streaming scan would bypass verified ingest (provenance
+doctrine). Evidence: probe rounds 2–4 (0/191 runs imported
+pandas/polars; plain loops digit-exact through 6,859 records and
+3-table joins); the wall-clock report (insertion: Python lists win at
+EVERY size 100k–8M tokens, 16.9x→2.6x, no crossover; disambiguation:
+polars ~14x at the 2M-token baseline — ~246 ms Python vs ~17 ms, both
+far under any latency that matters inside a multi-second REPL turn;
+regex scanning 19x–27x); the pillar §7 RSS table.
+
+**Hypotheses adjudicated:** H1 "Polars/Arrow speeds the workspace at
+current sizes" — REJECTED (caps + keyed access + per-call overhead).
+H2 "Arrow snapshots reduce Redis park/seed cost" — INSUFFICIENTLY
+SUPPORTED (no measured bottleneck; read-once at ≤32 MiB; costs:
+dual-validator rebuild, determinism loss, Node Arrow dependency, the
+CI ordering constraint — npm test runs before the Python runtime
+installs). H3 "engine-side polars pays for bulk
+extract/normalize/group at ≥100k tokens" — ACCEPTED CONDITIONALLY
+(measured 14x–27x; no such surface exists today; adopt inside a
+future surface only, per the thresholds below). H4 "polars is
+available to the agent" (prose claim) — REJECTED AS STATED: absent
+from requirements.txt and both pdf-fast manifests, not imported by
+python:check, absent from the image; also the image pins
+pandas==3.0.3 while prose recorded the local 2.2.3.
+
+**Benchmark matrix (all zero-paid; result equality asserted across
+representations before any timing counts):** M1 snapshot park/seed
+round-trip at 4/32 MiB and 128/1024 segments; M2 workspace read/
+segment/capture per-op; M3 MCP capture end-to-end at 64 KiB/4 MiB
+(noise floor); M4 bulk extract/normalize/group + regex scan at 2M/8M
+tokens plus 100 MB/1 GB file-backed (loops vs polars eager vs
+streaming); M5 textedit load/locate/splice/write-back at 4/32 MiB
+(already measured — regression control); M6 get_ast_blocks walk vs
+COPY-to-Arrow export at 827-block and synthetic 50k-block documents;
+M7 failure injection — torn bytes stamp, truncated payload, version
+bump, cross-library re-serialization determinism. Metrics: p50/p95
+wall-clock, peak RSS, serialized bytes, refusal fidelity, byte
+stability, cold-import time, dependency delta.
+
+**Adoption thresholds (Option B, any boundary; ALL required):**
+(1) ≥5x p50 speedup AND ≥250 ms absolute p50 saving on a workload
+recorded in a real run's critical path at current cap sizes, or on an
+owner-scheduled workload at sizes where both hold; (2) 100% refusal
+parity on M7 (every fixture that refuses today still refuses);
+(3) byte-deterministic serialization across pinned library versions,
+or explicit owner sign-off removing byte-pins for that artifact;
+(4) every new dependency pinned in the manifests and covered by
+python:check (and the Node equivalent). **Rejection triggers (any
+one):** refusal-fidelity regression; nondeterminism in a pinned
+artifact; speedup below threshold with no scheduled workload above
+it; any contract-visible library type (that is C — rejected now under
+§4.5; re-enterable only via owner-approved revision of the design
+record itself). **Engine-side polars** (not a boundary change): adopt
+inside a future bulk-analytics surface when the surface exists, its
+input is ≥100k-token equivalent, in-situ speedup reproduces ≥5x, and
+the dependency is pinned + checked first.
+
+**Recommendations (ranked) and the owner's directive:** 1 no
+migration anywhere (the verdict); 2 fix the polars dependency
+inconsistency by pinning; 3 record the verdict in pillar §7's orbit;
+4 adopt M1/M7 as standing fixtures; 5 cap raises, not representation
+changes, are the first lever — M1 at target size before any cap
+raise. The owner adopted the recommendations the same day and
+directed them to be the NEXT session: recommendations 2–4 (plus the
+recommendation-5 doctrine line) are now §4 row 6a, inserted ahead of
+the estimation-discipline positive control, which moves back one
+session unchanged. HANDOFF §3–§6 were rewritten accordingly (the
+previous edition's positive-control spec is recoverable in
+HANDOFF.md's git history and re-derivable from
+modules/estimation-discipline/RESEARCH.md). No safeguard weakened;
+items 2–4 strengthen existing invariants.
