@@ -35,6 +35,19 @@ export interface Anchor {
 // env-tunable (Guardrail 5), unit-pinned so a change is a reviewed edit.
 export const ANCHOR_COVERAGE_THRESHOLD = 0.3;
 
+// Session 21 calibration fix: the authoring template (template.ts) FORBIDS
+// the draft from restating measured numerals ("no measured numerals";
+// "the durable mechanic ... not the measured numbers behind it"). So the
+// numeric anchor kinds — comparisons ("8 vs 4") and ratios ("2.26x",
+// "40%") — can NEVER be covered by a template-compliant draft. Counting
+// them in the coverage denominator punishes a draft for obeying the
+// template: it refused a faithful module #1 v2 draft at 18/64 = 0.28
+// whose only "misses" were the four numerals it was forbidden to write
+// (18/60 = exactly 0.30 with them excluded). The gate therefore scores
+// ONLY the coverable kinds; extractAnchors still surfaces every kind so
+// the numeric anchors remain available for diagnostics and reports.
+const COVERABLE_ANCHOR_KINDS: ReadonlySet<AnchorKind> = new Set(['compound', 'term']);
+
 // Bounds so the ratio stays meaningful and the extractor cannot be made
 // to emit an unbounded anchor set by a large corpus.
 const MAX_TERM_ANCHORS = 40;
@@ -170,7 +183,11 @@ export function evaluateAnchorGate(
   draftAddendum: string,
   threshold: number = ANCHOR_COVERAGE_THRESHOLD
 ): AnchorGateResult {
-  const anchors = extractAnchors(blockTexts);
+  // Score only the anchor kinds a template-compliant draft is allowed to
+  // cover (numeric comparisons/ratios are template-forbidden — see
+  // COVERABLE_ANCHOR_KINDS). A corpus with no coverable anchors still
+  // fails closed below (total === 0).
+  const anchors = extractAnchors(blockTexts).filter(a => COVERABLE_ANCHOR_KINDS.has(a.kind));
   const draft = normalize(draftAddendum);
   const missing: Anchor[] = [];
   let covered = 0;

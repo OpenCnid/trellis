@@ -97,6 +97,37 @@ describe('evaluateAnchorGate', () => {
     expect(result.passed).toBe(false);
   });
 
+  // Session 21 calibration: the template forbids the draft from writing
+  // measured numerals, so the gate must not count numeric anchors against
+  // it. A compliant draft that (correctly) omits every number must not be
+  // penalized for the omission.
+  it('does not score template-forbidden numeric anchors against a compliant draft', () => {
+    const result = evaluateAnchorGate(CORPUS_BLOCKS, DERIVED_DRAFT);
+    // The scored anchor set carries no numeric kinds...
+    for (const anchor of result.anchors) {
+      expect(anchor.kind === 'comparison' || anchor.kind === 'ratio').toBe(false);
+    }
+    // ...even though extractAnchors still surfaces them for diagnostics.
+    const allKinds = new Set(extractAnchors(CORPUS_BLOCKS).map(a => a.kind));
+    expect(allKinds.has('comparison')).toBe(true);
+  });
+
+  it('a numeral-heavy corpus does not drag a compliant draft below threshold', () => {
+    // A corpus whose distinctive anchors are mostly forbidden numerals
+    // plus a couple of coverable mechanics. A draft that covers the
+    // mechanics and writes no numbers passes — the numerals are not in
+    // the denominator.
+    const numeralHeavyCorpus = [
+      'The workspace arm made 4 calls, the legacy arm 8, a 2.26x reduction; the seeded task made 0 vs 4.',
+      'Treat updates as build-new-then-rebind and raise-not-truncate on an over-budget write.',
+    ];
+    const compliantDraft = [
+      'Treat every update as build-new-then-rebind; on an over-budget write, raise rather than truncate.',
+    ].join('\n');
+    const result = evaluateAnchorGate(numeralHeavyCorpus, compliantDraft);
+    expect(result.passed).toBe(true);
+  });
+
   it('reports bounded missing anchors for a failing draft', () => {
     const result = evaluateAnchorGate(CORPUS_BLOCKS, GENERIC_DRAFT);
     expect(result.missing.length).toBeGreaterThan(0);

@@ -153,12 +153,17 @@ check("the composed addendum has no unescaped braces (rlms .format() safety)",
 print("\n[5] module #1 (workspace-discipline)")
 
 module1 = load_module("workspace-discipline")
+# Version pin history: 1 (the July 9, 2026 first flywheel turn) -> 2
+# (Session 21, July 10, 2026: re-authored through grounded authoring
+# with the code-mediated-text pillar in the corpus).
 check("module #1 loads with its manifest identity",
-      module1["name"] == "workspace-discipline" and module1["version"] == 1)
+      module1["name"] == "workspace-discipline" and module1["version"] == 2)
 check("module #1 addendum is brace-free and titled",
       "{" not in module1["addendum_text"] and "}" not in module1["addendum_text"]
       and "WORKSPACE DISCIPLINE PROTOCOL" in module1["addendum_text"])
 check("module #1 addendum is LF-normalized", "\r" not in module1["addendum_text"])
+check("v2 retired the transcription-mitigation line (pillar §5)",
+      "reconstructing stored text" not in module1["addendum_text"])
 
 selected = build_modules_addendum([module0, module1],
                                   substitutions={RUBRIC_TOKEN: trellis_agent._SAFE_RUBRIC})
@@ -219,6 +224,59 @@ check("extract_draft_envelope also accepts camelCase gapNotes",
 check("extract_draft_envelope returns None on non-JSON and on missing fields",
       trellis_agent.extract_draft_envelope("no json here") is None
       and trellis_agent.extract_draft_envelope('{"purpose": "p"}') is None)
+
+# --- 7. The experiment omission flag (Session 21, pillar §6.3) --------------
+# TRELLIS_EXP_OMIT_CMT=1 is the effective-context probe's discipline-off
+# arm: exactly the §6.2 CODE-MEDIATED TEXT block absent, nothing else
+# changed. Unset stays byte-identical (section [4] above IS that pin —
+# this process never sets the flag). The omitted composition is checked
+# in a subprocess because the flag is read at import time.
+print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
+
+# sha256 of the composed SYSTEM_PROMPT with the flag set. This is the
+# RECORDED pre-Session-20 kernel prompt (the constant pin history above:
+# abb945a6...f9b2 at master 9f25a5b): Session 20's only kernel change was
+# adding the CODE-MEDIATED TEXT block, so omitting exactly that block
+# reproduces the pre-Session-20 bytes — re-proven here on every run. If
+# the kernel prompt legitimately changes again, recompute BOTH pins in
+# the same commit.
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "abb945a6e0c998ccabe2e2a930ea6934cae696643c1230f733c3d13d9feef9b2"
+
+import subprocess  # noqa: E402
+
+check("the flag is unset in this drill's own environment",
+      os.environ.get("TRELLIS_EXP_OMIT_CMT") is None
+      and trellis_agent.EXP_OMIT_CMT_ENABLED is False)
+check("the default composition carries the block exactly once",
+      trellis_agent.SYSTEM_PROMPT.count(trellis_agent.CODE_MEDIATED_TEXT_BLOCK) == 1)
+
+_rlm_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "rlm")
+_child_code = (
+    f"import sys; sys.path.insert(0, {_rlm_path!r}); "
+    "import hashlib, json, trellis_agent; "
+    "print(json.dumps(dict("
+    "sha=hashlib.sha256(trellis_agent.SYSTEM_PROMPT.encode('utf-8')).hexdigest(), "
+    "absent=trellis_agent.CODE_MEDIATED_TEXT_BLOCK not in trellis_agent.SYSTEM_PROMPT, "
+    "enabled=trellis_agent.EXP_OMIT_CMT_ENABLED)))"
+)
+_child = subprocess.run(
+    [sys.executable, "-c", _child_code],
+    env={**os.environ, "TRELLIS_EXP_OMIT_CMT": "1"},
+    capture_output=True, text=True,
+)
+check("flagged subprocess composes and reports", _child.returncode == 0,
+      f"exit {_child.returncode}: {_child.stderr.strip()[:300]}")
+_omitted = json.loads(_child.stdout.strip().splitlines()[-1]) if _child.returncode == 0 else {}
+check("flag set: the block is absent and the gate reports enabled",
+      _omitted.get("absent") is True and _omitted.get("enabled") is True)
+check("flag set: the composed prompt is byte-identical to the recorded pre-Session-20 kernel",
+      _omitted.get("sha") == EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256,
+      str(_omitted.get("sha")))
+_default_minus_block = trellis_agent.SYSTEM_PROMPT.replace(
+    trellis_agent.CODE_MEDIATED_TEXT_BLOCK, "")
+check("flag set: exactly the block is absent and nothing else changed",
+      _omitted.get("sha")
+      == hashlib.sha256(_default_minus_block.encode("utf-8")).hexdigest())
 
 # ---------------------------------------------------------------------------
 if failures:

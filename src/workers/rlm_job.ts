@@ -195,6 +195,13 @@ export function buildAgentEnv(
     delete env.TRELLIS_TEXTEDIT_MAX_FILE_BYTES;
     delete env.TRELLIS_TEXTEDIT_MAX_FILES;
   }
+  // Session 21: the effective-context probe's prompt-omission flag is
+  // experiment instrumentation ONLY (pillar §6.3). Unlike the managed
+  // variables above it has no config field at all — the worker NEVER
+  // forwards it, so an inherited value can never flip a production run
+  // onto the discipline-off kernel. Only the experiment runner's own
+  // spawn env can set it.
+  delete env.TRELLIS_EXP_OMIT_CMT;
   // Explicitly set the credential variables the registry names, so the
   // forwarding contract holds regardless of what the base env carries.
   for (const [name, value] of Object.entries(cfg.mcpCredentialEnv ?? {})) {

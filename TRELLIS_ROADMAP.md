@@ -207,9 +207,11 @@ Ordered roughly by severity.
 | ~~14~~ | ~~First flywheel turn (design record §11 step 6)~~ | **Machinery done (Session 18, July 8, 2026)** — research existence gate at registration, the §9.4 manifest-as-graph-entity representation (`modules:register`/`modules:verify`, unchanged sweep contests research-superseded modules), and the human recovery loop, drilled end to end (`test:module-lifecycle`); the module #1 PAID authoring turn RAN, owner-approved, July 9, 2026 (module `workspace-discipline`; see §5) and surfaced the laundering finding that produced row 1 below |
 | ~~1~~ | ~~Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2)~~ | **Done (Session 19, July 9, 2026)** — kernel `trellis_agent.py --mode author` scoped to a seeded read-only corpus (no DB/search/write), harness-pinned `research.sourceNodeIds`, byte-pinned authoring template, deterministic anchor derivation gate, and the `npm run modules:author` operator driver (plan-echo / `--draft` replay / `--confirm-paid` spawn); `TRELLIS_DRAFT` scanner refuses any 64-hex token; drilled end to end zero-LLM; see §5 |
 | ~~1~~ | ~~Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision~~ | **Done (Session 20, July 9, 2026)** — the operator-gated `trellis_textedit` holder (engine-computed `locate`, staged `splice`, digest-guarded atomic `write_back`, strict root containment, Zod/Python twin bounds, byte-identical prompt and namespace when `TRELLIS_EDIT_ROOT` is unset; `npm run test:textedit`, 81 checks) and the §6.2 CODE-MEDIATED TEXT kernel prompt block shipped in its own commit with the composed-prompt sha256 pin recomputed there; see §5 |
-| 1 | Pillar measurement + module #1 v2 (pillar §6.3 + §6.4, owner-APPROVED July 9, 2026) + the Frankenstein corpus | **Owner directive — takes precedence; the two formerly owner-gated pillar follow-ups are now approved.** Ingest Frankenstein (Gutenberg #84, ~440 KB — several times a practical working window) through the verified path (zero-paid, extraction `none`); run the paired-run **effective-context probe** (discipline-on vs discipline-off over the same question set; correctness, bytes-through-attention, turns, spend — the giant-context claim becomes a number, ≤$5/run); re-author **module #1 v2** through grounded authoring with the pillar in its promoted corpus, retiring the pre-pillar "reconstructing stored text" mitigation language. Readiness verified July 9 (pandas 2.2.3/pyarrow 24.0.0/polars 1.34.0 in the agent env; kernel block present; bounds fit; `python:check` now pins pandas) |
-| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind row 1 by the July 9 owner direction — now deferred a third time, behind the approved pillar measurements; not dropped) |
-| 3 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
+| ~~1~~ | ~~Pillar measurement + module #1 v2 (pillar §6.3 + §6.4, owner-APPROVED July 9, 2026) + the Frankenstein corpus~~ | **Done (Session 21, July 10, 2026 — the redo; the first attempt, PR #56, was owner-discarded and reverted by PR #58 the same day)** — Frankenstein ingested zero-paid as durable Tier-1 substrate; the effective-context probe MEASURED (§6.3: 12 runs, $0.73 — with the §6.2 block no run put the corpus through attention, without it one run pushed all ~105k tokens through a single `llm_query`; the one wrong answer was an engine-computed 55 retyped as 47 — the transcription channel live in the answer path); module #1 v2 landed through grounded authoring (§6.4: anchor gate refused the three-doc corpus at 0.28, owner re-scoped to the two normative docs per the gate's documented remedy, the same paid draft landed at 0.50 by zero-paid replay; mitigation line retired, v1 history preserved); see §5 |
+| ~~3~~ | ~~Anchor-gate calibration (grounded-authoring follow-up, measured Session 21)~~ | **Core fix done (Session 21, later the same day)** — `evaluateAnchorGate` no longer scores template-forbidden numeric anchor kinds (`comparison`/`ratio`) in its denominator; the previously refused module #1 v2 draft now clears at 18/60 = 0.30. Optional residual (compound segments get exact-match, plain terms get stem credit — a minor asymmetry) left to a future gate touch, not blocking; see §5 |
+| 2 | Effective-context probe, round 2 + the answer-channel fix (owner-directed next, July 10, 2026) | **Replaces extraction as the immediate objective (owner direction — do NOT jump to repository-scale extraction yet).** The Session 21 probe left four measurement gaps and exposed one behavior bug: (a) re-run on an OBSCURE/PRIVATE corpus NOT in the model's training data — Frankenstein is memorized, so the quote/locate arms may answer from memory rather than from the REPL; (b) a corpus BIGGER than one book (many files / a repo snapshot) — the scale at which pandas actually earns use (the Session 21 runs used only plain string + regex; measure whether the model reaches for a DataFrame when the corpus is relational); (c) an EDIT round-trip (locate → splice → hash-guarded `write_back` through the Session 20 textedit toolkit) to test the "move bytes with code" half, not just reads; (d) MORE runs per question (n=1 today is too few to trust the exact numbers — raise repeats and report medians with spread); and (e) FIX the answer-channel transcription leak — the disciplined arm retyped an engine-computed 55 as 47 in its final answer, so give the model a way to set its answer FROM a computed REPL value by reference instead of retyping it (tooling shape, not prompt text — the pillar's own lesson 7) |
+| 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred again behind the probe round-2 work; never dropped) |
+| 4 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -2414,3 +2416,188 @@ follow-up). Hardening landed with the check: `pandas` joined the
 `check_python_runtime.py` import list — it ships transitively via
 `unstructured` but is now pillar-load-bearing, so its absence must fail
 the runtime check, not a paid run (`npm run python:check` green).
+
+### July 10, 2026 — Session 21: the pillar's measurements (§4 row 1; pillar §6.3 + §6.4) — the redo
+
+**Context.** A first Session 21 attempt landed as PR #56 on July 9–10 and
+was discarded wholesale by the owner the same day (revert PR #58; master
+returned byte-identical to the Session 20 tree). This session is the
+owner-directed full redo — same ratified objective, fresh implementation
+in the repository's own idiom; nothing from the reverted tree was reused.
+Both paid runs re-approved; actuals below.
+
+**(a) The Frankenstein corpus (zero-paid).** `data/frankenstein.txt` is
+Project Gutenberg #84 (the 1831 text, public domain), trimmed
+deterministically — CRLF→LF, everything strictly between the
+`*** START/END OF THE PROJECT GUTENBERG EBOOK ***` marker lines, blank
+edge lines dropped, single trailing newline — 421,536 bytes, sha256
+`bde72e69…34a8`, structure Letter 1–4 + Chapter 1–24. `.gitattributes`
+marks it `-text` (this machine's `core.autocrlf=true` would otherwise
+rewrite the working tree and silently move every ground truth); the
+byte-stability (sha + length + LF-only) is unit-pinned. Ingested through
+the ordinary verified path (`tsx scripts/exp_effective_context.ts
+--ingest`): `book:gutenberg-84:frankenstein` version 1, root
+`a2f9c97c…4439`, 1,708 nodes, 796 extraction-eligible blocks, policy
+`none`, 0 queued; three sampled blocks (first/middle/last) read back
+byte-exact through the REAL Python `get_ast_texts`; re-running the
+identical ingest registered version 2 with the SAME root and an empty
+Merkle diff (added 0 / orphaned 0 / retained 1,687) — the auditable
+no-op. The corpus is deliberately durable substrate, not drill residue.
+
+**(b) The discipline-off arm (`TRELLIS_EXP_OMIT_CMT`).** The §6.2
+CODE-MEDIATED TEXT block became the named kernel constant
+`CODE_MEDIATED_TEXT_BLOCK`; `TRELLIS_EXP_OMIT_CMT=1` composes the base
+without exactly it. Unset, the composed prompt is byte-identical
+(`COMPOSED_SYSTEM_PROMPT_SHA256 = 170e9f7e…67e9`, unmoved); set, it is
+byte-identical to the RECORDED pre-Session-20 kernel
+(`abb945a6…f9b2` — Session 20's only kernel change was adding the block,
+re-proven on every run). Both pinned by the new `test:modules` [7]
+(subprocess re-import; also pins default-carries-the-block-exactly-once
+and default-minus-block equality). `buildAgentEnv` deletes the flag
+unconditionally — it has no config field at all, so no worker can ever
+forward it (`rlm_job.test.ts` pins the strip); only the experiment
+runner's own spawn env sets it. It appears in no default, worker, or
+Compose configuration and deliberately NOT in `.env.example`.
+
+**(c) The effective-context probe (pillar §6.3, PAID — MEASURED).**
+`scripts/exp_effective_context.ts` (the `exp_citation_ab.ts` house
+style): plan-only default with a printed estimate, `--confirm-paid` to
+run, `--max-spend-usd` cumulative abort (default the standing $5). Six
+kernel-fixed questions, ground truth COMPUTED from the committed file by
+`src/benchmarks/effective_context/ground_truth.ts` (pure; 17 unit tests
+pin fixtures AND the committed-corpus answers): counts ("Justine"=55,
+"Ingolstadt"=16), exact quotes (two sentences), localization (Chapter 5,
+Letter 4). Addressing hands the agent only the document's root hash; a
+representation-invariance check (file truths = stored-reconstruction
+truths — the root text glues paragraph boundaries) runs before any
+spawn. Command: `tsx scripts/exp_effective_context.ts --confirm-paid`;
+12/12 runs completed, **$0.7320 actual** (estimate printed ≈$1.44).
+Results (`docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`; n=6/arm,
+directional): correct 5/6 (on) vs 6/6 (off); median input 7,870 vs
+14,724 tokens; worst-run input 26,586 vs **110,550** — the off arm's
+`quote-vanished` run handed the ENTIRE ~105k-token corpus to one
+`llm_query` (7.6× the on arm's input for the same question, 5.4× the
+dollars), while with the block present no run put the corpus through
+attention; arm cost $0.2259 vs $0.5062 (2.2×); median iterations 2 vs 3.
+The single wrong answer is the probe's sharpest exhibit: the on arm's
+`count-justine` run wrote correct code, the engine printed
+`{'simple': 55, 'regex': 55}`, and the model's next turn typed
+`FINAL_ANSWER: 47` — the transcription channel live, in the one channel
+the discipline does not yet mediate (the answer assignment as a fresh
+literal instead of code interpolation). Pillar §6.3 marked MEASURED in
+the record.
+
+**(d) Module #1 v2 (pillar §6.4, PAID — landed after an owner
+re-scope).** The pillar's §0+§2 (3,959 bytes, sliced from the record by
+code) was parked at the production scratch key via a one-shot harness
+(the `test_promotion.ts` [1] shape: `redis.set(scratchKey(goal, task))`
+with a `trellis-repo/design-record` origin stamp, argsHash = content
+sha256 first 16 hex; harness deleted after use) and promoted through the
+REAL CLI: `npm run promote -- --goal
+module1-workspace-discipline-v2-research --task corpus-2026-07-10
+--segment <uuid> --doc-key
+research:trellis/workspace-discipline/code-mediated-text` → version 1,
+root `0a477d04…779e`, 103 nodes, 17 eligible blocks, extraction `none`.
+The `--draft` drill (hand-written fixture envelope) passed the full
+assembly path zero-paid first (gate 30/64; scratch dir deleted). The
+paid run — `npm run modules:author -- --module-name
+workspace-discipline-v2 --topic "workspace discipline for an RLM
+operating under the code-mediated text doctrine" --doc-key <contract>
+--doc-key <evidence> --doc-key <code-mediated-text> --confirm-paid`
+(estimate $0.57 printed) — produced a faithful draft (**$0.127 actual**:
+32,273 in / 4,632 out; 6 iterations; 41 workspace segments read; the
+mitigation line retired; 8 honest gap notes), but the anchor gate
+REFUSED assembly at 18/64 = 0.28 < 0.30. Measured decomposition: the
+evidence doc's distinctive anchors are measured numerals ("8 vs 4",
+ratios) the authoring TEMPLATE forbids a draft from restating, plus
+report artifacts ("goal-total", "task-2") no protocol prose would use —
+excluding the template-forbidden numerals the draft sits at exactly
+18/60 = 0.30. The same draft covers 32/64 = 0.50 against the two
+NORMATIVE docs. Per the gate's own documented remedy ("choose a more
+specific corpus", grounded-authoring record §8) the owner re-scoped the
+pinned corpus to contract + code-mediated-text on July 10 and the SAME
+paid envelope landed by the zero-paid `--draft` replay — no re-run, no
+gate/template/threshold change. The human swap kept the module name and
+the `WORKSPACE DISCIPLINE PROTOCOL` title, set `version: 2`, pinned
+`research.sourceNodeIds` to the 31 driver-pinned blocks, preserved v1's
+laundering-correction history verbatim in `RESEARCH.md`, and confirmed
+the "reconstructing stored text" line gone (`test:modules` [5]: version
+pin moved 1→2 wittingly; a new pin keeps the mitigation line retired).
+Re-registered live: `npm run modules:register -- --module
+workspace-discipline` (ON MATCH refresh, `moduleVersion` 2; the graph
+entity's live provenance is now the audit-preserving union of both
+versions' bases, 41 hashes, all live); `npm run modules:verify` —
+uncontested. The calibration finding is now §4 row 3.
+
+**Paid-run ledger:** probe $0.7320 + authoring $0.127 = **$0.859 total**
+(both behind printed estimates; standing ≤$5/run cap held with wide
+margin).
+
+**Defects found and fixed along the way:** (1) the ground-truth
+sentence extractor originally scanned the whole normalized text, so an
+unterminated section heading ("Chapter 1") glued onto a chapter-initial
+sentence — caught by the unit fixture, fixed by extracting within the
+containing blank-line paragraph (headings are their own paragraphs);
+(2) the corpus file needed `.gitattributes -text` — with this machine's
+`core.autocrlf=true` a plain commit would check out CRLF and move every
+ground truth (caught before commit; the byte-stability test now pins
+it). **Noted, not a defect:** `parseDraftPayload` (Node) accepts only
+`gapNotes` while the model's raw answer uses `gap_notes` — the Python
+envelope emitter canonicalizes to `gapNotes`, so only hand-written
+draft files need care.
+
+**Offline baseline moved 621/71 → 639/72** (the ground-truth suite +
+the env-strip pin); `test:modules` 43 → 50 (section [7] + the [5]
+retirement pin).
+
+**Close-out (all green; drills run keyless via `env -u
+OPENAI_API_KEY`):** `npm test` (639/72); `npm run build`; `npm run
+python:check`; `docker compose --profile test config --quiet`;
+`test:textedit` (81); `test:module-lifecycle` (60); `test:modules`
+(50); `test:promotion` (41); `test:rlm-workspace` (86); `test:rlm-mcp`
+(86); `test:rlm-sandbox` (21); `test:agent-loop` (35); `test:a2a`
+(46); `npm run drill:scale` (gate CLOSED at max provenance 286; sweep
+growth 1.88x, inside the recorded ~1.63x–2.26x band;
+`scale_drill_results.json` refreshed and committed, house practice);
+`test:repo-ingest` (45); `test:benchmark-hardening` (24);
+`test:entity-resolution` (34); `test:api-hardening` (18);
+`test:belief-recovery` (30); `test:invalidation-sweep` (17); the
+isolated Compose integration as project `trellis_s21_ci` (10
+assertions, incremental image rebuild — `package.json` untouched —
+torn down with `--volumes`); `git diff --check` clean.
+
+**Standing owner-gated proposals (unchanged, not run):** the extraction
+pilot re-run (~112 completions ≈ 57k in / 47k out at the July 6 shape);
+the supervised Trellis-edits-Trellis proof run; the module #2 authoring
+turn.
+
+### July 10, 2026 — Session 21 follow-ups: anchor-gate fix + owner re-sequencing (same PR)
+
+After reviewing the Session 21 findings, the owner directed two changes
+in the same PR before hand-off:
+
+1. **Anchor-gate calibration fixed (§4 row 3, struck).** The derivation
+   gate (`src/core/authoring/anchors.ts`) scored numeric anchor kinds
+   (`comparison` like "8 vs 4", `ratio` like "2.26x") in its coverage
+   denominator, but the authoring template FORBIDS a draft from writing
+   measured numerals — so a compliant draft could never cover them and
+   was penalized for compliance (this refused the module #1 v2 draft at
+   18/64 = 0.28, its only misses being the four forbidden numerals).
+   `evaluateAnchorGate` now scores only the coverable kinds (`compound`,
+   `term`); `extractAnchors` still surfaces every kind for diagnostics.
+   The previously refused three-doc draft now clears at 18/60 = 0.30
+   (verified against the actual saved paid draft). Two regression tests
+   pin it; offline suite 639 → **641**; the live gate drills
+   (`test:module-lifecycle`, `test:modules`) are unchanged. Had this fix
+   existed during the session, the module #1 v2 corpus re-scope would
+   not have been necessary — but the landed two-doc corpus is still the
+   correct, more-specific corpus and stands.
+
+2. **Next objective re-pointed (§4 row 2).** The owner directed that the
+   NEXT session be **effective-context probe, round 2 + the
+   answer-channel fix** — NOT the repository-scale extraction
+   prerequisites, which defer one more slot (now §4 row 3). The probe
+   round-2 scope (obscure/private corpus, multi-file/repo scale, an edit
+   round-trip, more runs per question, and the by-reference answer fix
+   for the 55→47 transcription leak) is carried at full concreteness in
+   the regenerated `HANDOFF.md` §3–§8.

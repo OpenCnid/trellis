@@ -1,1 +1,5 @@
 *.sh text eol=lf
+# The probe corpus must stay byte-stable on every platform: no eol
+# conversion (core.autocrlf would rewrite LF to CRLF on Windows checkouts
+# and silently move every ground-truth answer).
+data/frankenstein.txt -text

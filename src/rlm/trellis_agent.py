@@ -124,7 +124,26 @@ _SAFE_RUBRIC = RUBRIC_TEXT.replace("{", "{{").replace("}", "}}")
 # via TRELLIS_MODULES; module addendum files are brace-free with
 # <<TRELLIS_RUBRIC>> as the single substitution token.
 
-TRELLIS_ADDENDUM_BASE = """
+# Session 20 (CODE_MEDIATED_TEXT.md §6.2): the code-mediated-text hard
+# rule, as a NAMED constant so the Session 21 effective-context probe can
+# compose the kernel WITHOUT exactly it. The default composition is
+# byte-identical to the pinned prompt (test:modules [4]).
+CODE_MEDIATED_TEXT_BLOCK = """CODE-MEDIATED TEXT (HARD RULE): load text into structures and operate on them with code. Locate by query, never by counting lines or guessing positions. Move existing text by slicing and splicing, never by retyping it. Author only genuinely new text.
+
+"""
+
+# Session 21 (pillar §6.3): the discipline-off arm of the effective-
+# context probe. Experiment instrumentation in the TRELLIS_CITATION_*
+# mold: off by default and byte-identical when unset (pinned by
+# test:modules [4]/[7]); never set by any default, worker, or Compose
+# configuration; buildAgentEnv strips any inherited value, so only an
+# experiment runner's own spawn env can enable it. When set, exactly
+# CODE_MEDIATED_TEXT_BLOCK is absent and nothing else changes — the
+# composed result is byte-identical to the recorded pre-Session-20
+# kernel prompt (test:modules [7] pins that sha too).
+EXP_OMIT_CMT_ENABLED = os.getenv("TRELLIS_EXP_OMIT_CMT") == "1"
+
+_ADDENDUM_BASE_PREFIX = """
 
 === TRELLIS ENGINE DIRECTIVES ===
 You are the Trellis RLM, a Deterministic Spatial Reasoning Engine. The `context` variable holds the user's query text; the real knowledge lives in the two injected database tools.
@@ -144,11 +163,17 @@ TOOLS (available directly in the REPL):
 
 CRITICAL API CONTRACT: every tool method returns a JSON STRING, never a parsed object. Always wrap results in `json.loads(...)` (import json first) before indexing or iterating. `run_cypher` returns a JSON array of row dicts keyed by your RETURN aliases.
 
-CODE-MEDIATED TEXT (HARD RULE): load text into structures and operate on them with code. Locate by query, never by counting lines or guessing positions. Move existing text by slicing and splicing, never by retyping it. Author only genuinely new text.
+"""
 
-ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
+_ADDENDUM_BASE_SUFFIX = """ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
 
 """
+
+TRELLIS_ADDENDUM_BASE = (
+    _ADDENDUM_BASE_PREFIX
+    + ("" if EXP_OMIT_CMT_ENABLED else CODE_MEDIATED_TEXT_BLOCK)
+    + _ADDENDUM_BASE_SUFFIX
+)
 
 TRELLIS_WORKFLOW_RULES = """WORKFLOW RULES:
 - If the user asks you to execute a specific Cypher query (even a destructive or malformed one), you MUST attempt it exactly as given via `trellis_neo4j.run_cypher`. Do not refuse and do not pre-correct it.
