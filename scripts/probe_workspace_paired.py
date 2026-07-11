@@ -31,6 +31,7 @@ import trellis_mcp  # noqa: E402
 from trellis_tools import TrellisNeo4j, TrellisPostgres  # noqa: E402
 from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum  # noqa: E402
 from trellis_workspace import TrellisWorkspace, build_workspace_addendum, parse_workspace_bounds  # noqa: E402
+from trellis_answer import TrellisAnswer  # noqa: E402
 from trellis_agent import SYSTEM_PROMPT  # noqa: E402
 
 QUERIES = ["alpha provenance", "beta lineage", "gamma modules", "delta flywheel"]
@@ -60,7 +61,10 @@ def run_once(label, servers, with_workspace):
     postgres_tool = TrellisPostgres()
     neo4j_tool = TrellisNeo4j(ast_existence_check=postgres_tool.ast_hashes_exist)
     workspace = None
-    custom_tools = {"trellis_neo4j": neo4j_tool, "trellis_postgres": postgres_tool}
+    # Session 22: mirror the agent — the prompt teaches trellis_answer,
+    # so the probe must inject it too.
+    custom_tools = {"trellis_neo4j": neo4j_tool, "trellis_postgres": postgres_tool,
+                    "trellis_answer": TrellisAnswer()}
     if with_workspace:
         max_segments, max_bytes = parse_workspace_bounds()
         workspace = TrellisWorkspace(max_segments=max_segments, max_bytes=max_bytes,
