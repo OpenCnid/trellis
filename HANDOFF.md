@@ -663,6 +663,28 @@ briefing's rule it stays out until the positive control (designed in
 its RESEARCH.md; measurement owner-gated) measures a real effect.
 Total Session 26 paid spend ≈$0.70.
 
+**Owner-directed follow-on work (July 11, 2026, its own PR after
+Session 26) is also complete: the wall-clock engine benchmark + the
+Trellis-edits-Trellis EXPANSION series** (owner set a 2-million-token
+FLOOR for synthetic tests going forward and granted the series a $20
+paid cap). (1) `scripts/bench_wallclock_text.py` (zero-paid,
+deterministic, cross-engine equality asserted) measured Python native
+vs polars at ~100k–8M tokens: insertion (the splice shape) stays
+Python-native at EVERY size (16.9x→2.6x, no crossover); disambiguation
+(extract/normalize/group) is polars territory from ~100k tokens up
+(~14x at the 2M baseline); regex scanning polars 19x–27x. Report:
+`docs/benchmarks/WALL_CLOCK_TEXT_OPS_REPORT.md`; pillar §7 carries an
+engine-side postscript; the §7 model-behavior demotion stands. (2) The
+expansion series (four spawns ≈$0.35 total, every diff human-reviewed):
+W1 docs/README.md index entry for the new report (CRLF preserved); W2
+the pillar §7 postscript with every value extracted from the report BY
+CODE; W3 **the recorded depth increment — the first RLM SOURCE-CODE
+edit** (`scripts/check_python_runtime.py` PYTHON_FILES gains the bench
+script; `python:check` green); W4 an adversarial containment probe
+(out-of-root append demanded; both the `..` and rooted-path refusals
+held LIVE, zero writes, honest refusal report by reference). No kernel
+change anywhere; both composed-prompt pins unmoved.
+
 OpenCnid selected the MIT License on July 6, 2026.
 
 Your objective is **Session 27: the estimation-discipline positive
@@ -1495,10 +1517,11 @@ Update:
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5 re-check.
   NOTE for objective selection: after row 6, row 7 (conditional
   migration) stays trigger-blocked; the standing owner-conditional
-  items are the next proof-run depth increment (a real source-code
-  change through the toolkit, target owner-picked), the pandas
-  head-to-head probe round, and a broader-root extraction run — all
-  propose-with-estimate, never self-served.
+  items are the pandas head-to-head probe round and a broader-root
+  extraction run — all propose-with-estimate, never self-served. (The
+  proof-run depth increment — a real source-code edit through the
+  toolkit — happened July 11, 2026 under owner direction: W3 of the
+  expansion series, `check_python_runtime.py`, reviewed and landed.)
 
 ## 7. Guardrails
 
@@ -1616,15 +1639,19 @@ sign-off); a fifth effective-context probe round (the control is a
 MODULE measurement over the existing corpora, not a pillar round —
 keep the round numbering untouched; the §7 structured-frame movers
 stay a future owner-picked round); the pandas head-to-head comparison
-and the next proof-run depth increment (a real source-code change
-through the toolkit) — both owner-conditional, propose with
-estimates; embedding any probe corpus; weakening or toggling the §6.2
+— owner-conditional, propose with estimates (the proof-run
+source-code depth increment landed July 11, 2026 as W3 of the
+owner-directed expansion series); embedding any probe corpus;
+weakening or toggling the §6.2
 kernel block outside the `TRELLIS_EXP_OMIT_CMT` experiment flag;
 moving the composed-prompt pins (module selection flows through the
 ordinary loader); new MCP servers or transports; A2A changes;
 frontend work (deferred unscheduled); polars adoption (the
 structured-frame threshold measured null through ~6,900 records and
-three-way joins — pillar §7, demoted Session 24);
+three-way joins — pillar §7, demoted Session 24; the ENGINE-side
+wall-clock is now measured, `docs/benchmarks/
+WALL_CLOCK_TEXT_OPS_REPORT.md` — hybrid by operation shape if a
+kernel surface ever needs it, but adoption stays owner-gated);
 `ASTRef`/`EVIDENCED_BY` migration (gate CLOSED; Sessions 23–26 read
 1.84x, 2.11x, 1.99x–2.01x, and 1.78x, inside the band — do not
 migrate on a noisy reading); T13 re-hashing; rlms library
