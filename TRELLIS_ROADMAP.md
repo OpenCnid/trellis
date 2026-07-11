@@ -208,8 +208,9 @@ Ordered roughly by severity.
 | ~~1~~ | ~~Grounded authoring (`docs/architecture/GROUNDED_AUTHORING.md` Phases 1–2)~~ | **Done (Session 19, July 9, 2026)** — kernel `trellis_agent.py --mode author` scoped to a seeded read-only corpus (no DB/search/write), harness-pinned `research.sourceNodeIds`, byte-pinned authoring template, deterministic anchor derivation gate, and the `npm run modules:author` operator driver (plan-echo / `--draft` replay / `--confirm-paid` spawn); `TRELLIS_DRAFT` scanner refuses any 64-hex token; drilled end to end zero-LLM; see §5 |
 | ~~1~~ | ~~Code-mediated text follow-ups (pillar §6.1 + §6.2): the editing toolkit and the kernel prompt revision~~ | **Done (Session 20, July 9, 2026)** — the operator-gated `trellis_textedit` holder (engine-computed `locate`, staged `splice`, digest-guarded atomic `write_back`, strict root containment, Zod/Python twin bounds, byte-identical prompt and namespace when `TRELLIS_EDIT_ROOT` is unset; `npm run test:textedit`, 81 checks) and the §6.2 CODE-MEDIATED TEXT kernel prompt block shipped in its own commit with the composed-prompt sha256 pin recomputed there; see §5 |
 | ~~1~~ | ~~Pillar measurement + module #1 v2 (pillar §6.3 + §6.4, owner-APPROVED July 9, 2026) + the Frankenstein corpus~~ | **Done (Session 21, July 10, 2026 — the redo; the first attempt, PR #56, was owner-discarded and reverted by PR #58 the same day)** — Frankenstein ingested zero-paid as durable Tier-1 substrate; the effective-context probe MEASURED (§6.3: 12 runs, $0.73 — with the §6.2 block no run put the corpus through attention, without it one run pushed all ~105k tokens through a single `llm_query`; the one wrong answer was an engine-computed 55 retyped as 47 — the transcription channel live in the answer path); module #1 v2 landed through grounded authoring (§6.4: anchor gate refused the three-doc corpus at 0.28, owner re-scoped to the two normative docs per the gate's documented remedy, the same paid draft landed at 0.50 by zero-paid replay; mitigation line retired, v1 history preserved); see §5 |
-| 2 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind row 1 by the July 9 owner direction — deferred a third time, never dropped; next up) |
-| 3 | Anchor-gate calibration (grounded-authoring follow-up, measured Session 21) | The derivation gate's denominator counts anchors a compliant draft is FORBIDDEN to cover: the authoring template bans measured numerals while `extractAnchors` emits them as required anchors (the refused v2 draft sits at exactly 18/60 = 0.30 with them excluded), and hyphenated compounds get no stem credit while plain terms do. A small reviewed kernel change (exclude template-forbidden anchor kinds from the denominator and/or give compound segments stem credit), with the Session 21 saved draft + corpus as its zero-paid test fixture. Not blocking: the documented corpus-choice remedy worked — but every future module turn pays this tax until calibrated |
+| ~~3~~ | ~~Anchor-gate calibration (grounded-authoring follow-up, measured Session 21)~~ | **Core fix done (Session 21, later the same day)** — `evaluateAnchorGate` no longer scores template-forbidden numeric anchor kinds (`comparison`/`ratio`) in its denominator; the previously refused module #1 v2 draft now clears at 18/60 = 0.30. Optional residual (compound segments get exact-match, plain terms get stem credit — a minor asymmetry) left to a future gate touch, not blocking; see §5 |
+| 2 | Effective-context probe, round 2 + the answer-channel fix (owner-directed next, July 10, 2026) | **Replaces extraction as the immediate objective (owner direction — do NOT jump to repository-scale extraction yet).** The Session 21 probe left four measurement gaps and exposed one behavior bug: (a) re-run on an OBSCURE/PRIVATE corpus NOT in the model's training data — Frankenstein is memorized, so the quote/locate arms may answer from memory rather than from the REPL; (b) a corpus BIGGER than one book (many files / a repo snapshot) — the scale at which pandas actually earns use (the Session 21 runs used only plain string + regex; measure whether the model reaches for a DataFrame when the corpus is relational); (c) an EDIT round-trip (locate → splice → hash-guarded `write_back` through the Session 20 textedit toolkit) to test the "move bytes with code" half, not just reads; (d) MORE runs per question (n=1 today is too few to trust the exact numbers — raise repeats and report medians with spread); and (e) FIX the answer-channel transcription leak — the disciplined arm retyped an engine-computed 55 as 47 in its final answer, so give the model a way to set its answer FROM a computed REPL value by reference instead of retyping it (tooling shape, not prompt text — the pillar's own lesson 7) |
+| 3 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred again behind the probe round-2 work; never dropped) |
 | 4 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
@@ -2568,7 +2569,35 @@ torn down with `--volumes`); `git diff --check` clean.
 **Standing owner-gated proposals (unchanged, not run):** the extraction
 pilot re-run (~112 completions ≈ 57k in / 47k out at the July 6 shape);
 the supervised Trellis-edits-Trellis proof run; the module #2 authoring
-turn (mind the row-3 anchor-gate finding when picking its corpus). Next
-scheduled row: the repository-scale extraction prerequisites (§4 row
-2), then the anchor-gate calibration (§4 row 3, measured this
-session).
+turn.
+
+### July 10, 2026 — Session 21 follow-ups: anchor-gate fix + owner re-sequencing (same PR)
+
+After reviewing the Session 21 findings, the owner directed two changes
+in the same PR before hand-off:
+
+1. **Anchor-gate calibration fixed (§4 row 3, struck).** The derivation
+   gate (`src/core/authoring/anchors.ts`) scored numeric anchor kinds
+   (`comparison` like "8 vs 4", `ratio` like "2.26x") in its coverage
+   denominator, but the authoring template FORBIDS a draft from writing
+   measured numerals — so a compliant draft could never cover them and
+   was penalized for compliance (this refused the module #1 v2 draft at
+   18/64 = 0.28, its only misses being the four forbidden numerals).
+   `evaluateAnchorGate` now scores only the coverable kinds (`compound`,
+   `term`); `extractAnchors` still surfaces every kind for diagnostics.
+   The previously refused three-doc draft now clears at 18/60 = 0.30
+   (verified against the actual saved paid draft). Two regression tests
+   pin it; offline suite 639 → **641**; the live gate drills
+   (`test:module-lifecycle`, `test:modules`) are unchanged. Had this fix
+   existed during the session, the module #1 v2 corpus re-scope would
+   not have been necessary — but the landed two-doc corpus is still the
+   correct, more-specific corpus and stands.
+
+2. **Next objective re-pointed (§4 row 2).** The owner directed that the
+   NEXT session be **effective-context probe, round 2 + the
+   answer-channel fix** — NOT the repository-scale extraction
+   prerequisites, which defer one more slot (now §4 row 3). The probe
+   round-2 scope (obscure/private corpus, multi-file/repo scale, an edit
+   round-trip, more runs per question, and the by-reference answer fix
+   for the 55→47 transcription leak) is carried at full concreteness in
+   the regenerated `HANDOFF.md` §3–§8.
