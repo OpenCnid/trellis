@@ -158,6 +158,102 @@ entities that had absorbed pilot provenance (e.g. `initech`) are
 contested until next re-derived from live bytes — the standard lazy
 recovery path.
 
+## 5a. Postscript (July 11, 2026): the §5 prerequisites landed
+
+Session 25 turned the three recorded §5 findings into machinery (all
+zero-paid; see the roadmap §5 entry of July 11, 2026 for commands and
+counts):
+
+1. **Test-fixture contamination** → the kernel-fixed path classifier
+   `isTestOrFixturePath` (`src/core/repository/paths.ts`). Classified
+   files still ingest — snapshot completeness, versioning, and
+   tombstones are unchanged — but their extraction policy is forced to
+   `none` even under `--extract changed`, reported as
+   `test_fixture_excluded` file/block counts in the plan echo before
+   `--confirm-extraction`.
+2. **Generic-identifier hubs** → the deterministic suppression filter
+   `suppressGenericIdentifiers` (`src/core/graph/generic_suppression.ts`),
+   applied to BOTH prompts after `parseLlmResponse` and before
+   `resolveExtractedGraph`: a kernel-constant denylist (the recorded
+   offenders `entity`/`name`/`id`/`action` and their kin) plus a
+   length-<3 shape rule, dropping touched relationships too — counted
+   and logged, never silent.
+3. **Prompt mismatch** → additive `sourceKind` routing on the extraction
+   job payload (`src/workers/extraction_job.ts`): repository snapshots
+   stamp `code`/`prose` per file language; `code` selects a new
+   API-level code-tuned prompt; `prose` and every pre-Session-25 payload
+   compose the exact legacy prompt bytes (unit-pinned).
+
+The measured before/after — a pilot RE-RUN over `src/core/graph` with
+the new machinery — was proposed at 103 blocks ≈ $0.29, approved under
+the session's owner approval, and ran the same day: see §5b.
+
+## 5b. Owner-approved pilot RE-RUN with the Session 25 machinery (July 11, 2026)
+
+The same root as the July 6 pilot, through the same CLI, with the
+Session 25 machinery live:
+`repo:ingest --repo-key trellis-graph-pilot-2 --root src/core/graph
+--extract changed --max-blocks 150 --confirm-extraction` (workers:
+extraction + invalidation only; supervisor/resolution are
+operator-triggered and were not run).
+
+**Plan echo (the exclusion working before any write):** 24 TypeScript
+files, 131,111 bytes; 10 files `test_fixture_excluded` (29 blocks
+withheld — including `alias_candidates.test.ts`, the recorded
+contamination source); paid bound 103 blocks against budget 150. The
+snapshot published 24 ingested / 132 eligible / 103 queued / 29
+excluded.
+
+**Pipeline:** 103/103 extraction jobs completed with zero failures,
+zero merge-dropped actions, and 103 embeddings in ~5 minutes. 35
+unresolved endpoints flowed through the name pass-through (the July 6
+pilot had 0 — the code-tuned prompt references entities by qualified
+name more often; none were errors, and generic unresolved endpoints
+were suppressed, see below).
+
+**Suppression observed live:** 14 `extraction.generic_suppressed`
+events; 18 entities and 23 actions suppressed
+(`trellis_extraction_suppressed_total`). The completions still emitted
+`Entity` as an entity on `alias_resolution.ts` blocks DESPITE the
+prompt's explicit ban — the deterministic filter dropped it and its
+relationships every time. Prompts request, gates enforce: measured.
+
+**Graph produced:** 237 entities and 243 relationships carrying pilot
+provenance (July 6: 340/318 from 112 blocks — the code prompt is
+sparser per block). The top entity by pilot sources is `ast_nodes` at
+4 (July 6: literally `entity` at 14 — maximum hub cardinality 3.5×
+lower), and the top 15 are all genuine API-level identifiers
+(`classifierusage`, `same_as`, `current_rubric_version`,
+`distinct_from`, `orphanedsourceids`, `sourcenodeids`,
+`verificationtier`, `./schemas.js`, …). ZERO denylist names carry
+pilot provenance — verified by query against the live graph, not just
+asserted from the filter's structure.
+
+**Fixture containment:** `globex corporation` (1 source) and `initech`
+(2 sources) are byte-unchanged from the pre-run baseline and still
+contested from the July 6 cleanup — their fixture source blocks never
+reached the queue.
+
+**Residual, recorded not acted on:** three near-generic names sit at
+low cardinality (`concept`, `kind`, `generic` — 3 pilot sources each).
+These are the first OBSERVED counts for future denylist candidates;
+per the kernel-gate rule, additions require observed counts to justify
+them, and 3 sources is not a hub.
+
+**Spend:** 55,891 input / 40,545 output completion tokens
+(`gpt-5.4-2026-03-05`) + 20,543 embedding tokens — 2.5% fewer input
+and 13.5% fewer output tokens than the July 6 pilot's $0.31, ≈ $0.28
+at the same prices (token-ratio bounds $0.27–$0.30), under the $0.29
+estimate.
+
+**Cleanup:** snapshot #2 tombstoned all 24 paths (zero accepted
+files); the invalidation worker swept the globally dead hashes;
+post-sweep, EVERY entity carrying pilot provenance live or orphaned
+(521 total — the count includes July 6 pilot residue, since identical
+file bytes share content-addressed block hashes across repo keys)
+reads contested, zero uncontested. The standard lazy recovery path
+applies, exactly as after the July 6 pilot.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

@@ -6,7 +6,9 @@ import { zodResponseFormat } from 'openai/helpers/zod';
 import { GraphSchema, Graph } from '../core/graph/schemas.js';
 import { mergeExtractedGraph } from '../core/graph/extraction_merge.js';
 import { resolveExtractedGraph } from '../core/graph/resolve_actions.js';
+import { suppressGenericIdentifiers } from '../core/graph/generic_suppression.js';
 import { parseLlmResponse } from '../core/llm/boundary.js';
+import { buildExtractionPrompt, parseExtractionJobData } from './extraction_job.js';
 import { isAstNodeLive } from '../core/ast/registry.js';
 import { mergeWithAstLivenessFence } from '../core/graph/extraction_liveness.js';
 import { sweepOrphanedProvenance, type SweepResult } from '../core/graph/invalidation.js';
@@ -41,7 +43,12 @@ function jobLogger(job: Job): Logger {
 }
 
 async function processJob(job: Job) {
-  const { astNodeId, text } = job.data;
+  // Session 25: pure payload validation before any I/O. A legacy payload
+  // (no sourceKind) parses to the exact legacy prompt bytes; an unknown
+  // sourceKind/language fails the job loudly here, before the liveness
+  // gate and before anything paid.
+  const jobData = parseExtractionJobData(job.data);
+  const { astNodeId } = jobData;
   const jobLog = jobLogger(job);
 
   // Liveness gate: if a newer re-ingest superseded this block while the
@@ -59,15 +66,18 @@ async function processJob(job: Job) {
     return;
   }
 
-  jobLog.info({ event: 'extraction.started' });
+  jobLog.info({ event: 'extraction.started', sourceKind: jobData.sourceKind ?? 'legacy' });
 
-  const promptData = `Extract the entities and actions from the following text. Map the provided AST Node ID to the 'sourceNodeIds' array. Extract ONLY the most critical, macro-level business entities and relationships. Be extremely sparse to avoid graph bloat.\n\n--- Text ---\nContent: ${text}\nAST Node ID: ${astNodeId}`;
+  // Session 25: sourceKind routes the prompt — 'code' selects the
+  // code-tuned prompt; 'prose' and legacy payloads compose the exact
+  // pre-Session-25 bytes (pinned in extraction_job.test.ts).
+  const prompt = buildExtractionPrompt(jobData);
 
   const completion = await openai.chat.completions.create({
     model: config.llm.extractionModel,
     messages: [
-      { role: "system", content: "You are an expert GraphRAG extraction engine that strictly outputs sparse, high-level business logic graphs." },
-      { role: "user", content: promptData }
+      { role: "system", content: prompt.system },
+      { role: "user", content: prompt.user }
     ],
     response_format: zodResponseFormat(GraphSchema, "graph_extraction"),
     temperature: 0.1,
@@ -76,16 +86,37 @@ async function processJob(job: Job) {
 
   // A structurally invalid completion throws LlmResponseError here, failing
   // the job into BullMQ's retry flow — a fresh completion usually parses.
-  const graph: Graph = parseLlmResponse(
+  const rawGraph: Graph = parseLlmResponse(
     GraphSchema,
     completion.choices[0].message.content,
     `extraction job ${job.id} (AST node ${astNodeId})`
   );
 
+  // Session 25: deterministic generic-identifier suppression, applied to
+  // BOTH prompts before any candidate can become a global entity id.
+  // Counted and logged, never silent (the dropped-action precedent).
+  const suppression = suppressGenericIdentifiers(rawGraph);
+  for (let i = 0; i < suppression.suppressedEntities.length; i++) {
+    metrics.extractionSuppressedTotal.inc({ kind: 'entity' });
+  }
+  for (let i = 0; i < suppression.suppressedActions.length; i++) {
+    metrics.extractionSuppressedTotal.inc({ kind: 'action' });
+  }
+  if (suppression.suppressedEntities.length > 0 || suppression.suppressedActions.length > 0) {
+    jobLog.warn({
+      event: 'extraction.generic_suppressed',
+      entitiesSuppressed: suppression.suppressedEntities.length,
+      actionsSuppressed: suppression.suppressedActions.length,
+      // Entity names may appear in log content per the dropped-action
+      // precedent; the listing is bounded.
+      entityNames: suppression.suppressedEntities.slice(0, 20).map(e => e.name),
+    });
+  }
+
   // 2. Resolve local UUIDs to global deterministic hashes. Unresolved
   // endpoints are still submitted (the raw id doubles as a name that can
   // match a pre-existing entity) but never dropped silently.
-  const { entities, actions, unresolved } = resolveExtractedGraph(graph);
+  const { entities, actions, unresolved } = resolveExtractedGraph(suppression.graph);
   for (const u of unresolved) {
     metrics.extractionUnresolvedEndpointsTotal.inc();
     jobLog.warn({
@@ -161,7 +192,7 @@ async function processJob(job: Job) {
   try {
     const embedRes = await openai.embeddings.create({
       model: EMBEDDING_MODEL,
-      input: text,
+      input: jobData.text,
     });
     recordEmbeddingCall(metrics, 'extraction_embedding', EMBEDDING_MODEL, embeddingUsage(embedRes));
     const embedding = embedRes.data[0].embedding;

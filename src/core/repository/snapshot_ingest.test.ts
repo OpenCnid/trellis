@@ -154,6 +154,31 @@ describe('planRepositorySnapshot', () => {
     expect(plan.files.map(file => file.path)).toEqual(['good.md']);
     expect(plan.skipCounts).toEqual({ parse_error: 1 });
   });
+
+  it('excludes test/fixture files from the paid bound while keeping them planned', async () => {
+    const { deps } = harness({
+      'src/b.ts': TS_FILE,
+      'src/b.test.ts': TS_FILE.replace('alpha', 'alphaTest'),
+      '__fixtures__/sample.md': MD_FILE,
+    });
+    const plan = await planRepositorySnapshot(deps, {
+      ...OPTS,
+      policy: { mode: 'changed', maxBlocks: 100 },
+    });
+    // All three files stay in the plan (snapshot completeness), the two
+    // classified ones marked, and only the source file counts as paid.
+    expect(plan.files.map(file => [file.path, file.extractionExclusion])).toEqual([
+      ['__fixtures__/sample.md', 'test_fixture_excluded'],
+      ['src/b.test.ts', 'test_fixture_excluded'],
+      ['src/b.ts', null],
+    ]);
+    expect(plan.filesToIngest).toBe(3);
+    expect(plan.extractionExclusionCounts).toEqual({ test_fixture_excluded: 2 });
+    // b.ts has one function block; the test file (1) + fixture md (2)
+    // are excluded from the bound but counted as excluded blocks.
+    expect(plan.paidJobUpperBound).toBe(1);
+    expect(plan.blocksExcludedFromExtraction).toBe(3);
+  });
 });
 
 describe('executeRepositorySnapshot', () => {
@@ -253,6 +278,54 @@ describe('executeRepositorySnapshot', () => {
       { mode: 'changed', maxBlocks: 2 },
     ]);
   });
+
+  it('forces policy none for excluded files under changed and stamps sourceKind by language', async () => {
+    const h = harness({
+      'src/b.ts': TS_FILE,
+      'src/b.test.ts': TS_FILE.replace('alpha', 'alphaTest'),
+      'README.md': MD_FILE,
+    });
+    const options: SnapshotOptions = { ...OPTS, policy: { mode: 'changed', maxBlocks: 10 } };
+    const plan = await planRepositorySnapshot(h.deps, options);
+    const result = await executeRepositorySnapshot(h.deps, options, plan);
+
+    const byKey = new Map(h.ingested.map(request => [request.docKey, request]));
+    // The test file ingests (snapshot completeness) but its extraction
+    // policy is forced to none even under --extract changed.
+    expect(byKey.get('repo:fixture:src/b.test.ts')?.extractionPolicy).toEqual({ mode: 'none' });
+    expect(byKey.get('repo:fixture:src/b.ts')?.extractionPolicy.mode).toBe('changed');
+    expect(byKey.get('repo:fixture:README.md')?.extractionPolicy.mode).toBe('changed');
+    // The enqueuer's language → prompt-kind mapping travels on the request.
+    expect(byKey.get('repo:fixture:src/b.ts')?.sourceKind).toBe('code');
+    expect(byKey.get('repo:fixture:src/b.ts')?.language).toBe('typescript');
+    expect(byKey.get('repo:fixture:README.md')?.sourceKind).toBe('prose');
+    expect(byKey.get('repo:fixture:src/b.test.ts')?.sourceKind).toBe('code');
+
+    // b.ts (1 block) + README (2 blocks) queued; the test file's block
+    // is reported excluded, and the published summary carries the counts.
+    expect(result.blocksQueued).toBe(3);
+    expect(result.extractionExclusionCounts).toEqual({ test_fixture_excluded: 1 });
+    expect(result.blocksExcludedFromExtraction).toBe(1);
+    expect(h.published[0].summary).toMatchObject({
+      extractionExclusionCounts: { test_fixture_excluded: 1 },
+      blocksExcludedFromExtraction: 1,
+    });
+  });
+
+  it('an over-budget plan passes once exclusions bring it under budget', async () => {
+    // Total blocks 3 (b.ts 1 + test 1 + fixture md... use md fixture 2)
+    // but the budget of 1 fits because only b.ts counts.
+    const h = harness({
+      'src/b.ts': TS_FILE,
+      'tests/big.md': MD_FILE,
+    });
+    const options: SnapshotOptions = { ...OPTS, policy: { mode: 'changed', maxBlocks: 1 } };
+    const plan = await planRepositorySnapshot(h.deps, options);
+    expect(plan.paidJobUpperBound).toBe(1);
+    const result = await executeRepositorySnapshot(h.deps, options, plan);
+    expect(result.blocksQueued).toBe(1);
+    expect(result.counts.ingested).toBe(2);
+  });
 });
 
 describe('snapshot metrics', () => {
@@ -275,6 +348,7 @@ describe('snapshot metrics', () => {
     expect(text).toContain('trellis_repo_snapshots_total{result="published"} 1');
     expect(text).toContain('trellis_repo_blocks_total{stage="eligible"} 1');
     expect(text).toContain('trellis_repo_blocks_total{stage="queued"} 0');
+    expect(text).toContain('trellis_repo_blocks_total{stage="test_fixture_excluded"} 0');
   });
 });
 

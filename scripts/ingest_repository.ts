@@ -128,6 +128,11 @@ function printPlan(plan: SnapshotPlan, policy: RepositoryExtractionPolicy): void
   }, {});
   console.log(`  languages:        ${Object.entries(languages).sort().map(([language, count]) => `${language}=${count}`).join(', ') || 'none'}`);
   console.log(`  extraction:       ${policy.mode}`);
+  const exclusionEntries = Object.entries(plan.extractionExclusionCounts).sort();
+  console.log(`  test/fixture excluded from extraction: `
+    + `${exclusionEntries.reduce((sum, [, count]) => sum + count, 0)} file(s), `
+    + `${plan.blocksExcludedFromExtraction} block(s)`
+    + (exclusionEntries.length ? ` (${exclusionEntries.map(([reason, count]) => `${reason}=${count}`).join(', ')}; still ingested, never queued)` : ''));
   console.log(`  paid-job bound:   ${plan.paidJobUpperBound} block(s)`
     + (policy.mode === 'changed' ? ` against budget ${policy.maxBlocks}` : ' (no paid work will be queued)'));
 }
@@ -182,6 +187,7 @@ async function main(): Promise<number> {
   console.log(`  unchanged:  ${result.counts.unchanged}`);
   console.log(`  tombstoned: ${result.counts.tombstoned}`);
   console.log(`  blocks eligible/queued: ${result.blocksEligible}/${result.blocksQueued}`);
+  console.log(`  blocks excluded (test/fixture): ${result.blocksExcludedFromExtraction}`);
   return 0;
 }
 

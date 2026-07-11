@@ -67,6 +67,16 @@ describe('buildExtractionJobs', () => {
       version: 3,
     });
   });
+
+  it('threads Session 25 sourceKind/language routing metadata when supplied', () => {
+    const root = parseMarkdownToAST('Globex **acquired** Initech.');
+    const block = root.children![0];
+    const [job] = buildExtractionJobs(
+      [{ block, text: 'export function f() {}' }],
+      { docKey: 'repo:k:src/f.ts', version: 1, sourceKind: 'code', language: 'typescript' }
+    );
+    expect(job.data).toMatchObject({ sourceKind: 'code', language: 'typescript' });
+  });
 });
 
 describe('verified AST persistence', () => {

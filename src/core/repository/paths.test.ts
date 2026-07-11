@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   isExcludedDirectoryPath,
+  isTestOrFixturePath,
   isValidRepoKey,
   repoDocKey,
   validateRepoRelativePath,
@@ -61,6 +62,61 @@ describe('isExcludedDirectoryPath', () => {
     expect(isExcludedDirectoryPath('src/core/ast/parser.ts')).toBe(false);
     // A file merely named like a vendor dir is not excluded.
     expect(isExcludedDirectoryPath('docs/vendor')).toBe(false);
+  });
+});
+
+describe('isTestOrFixturePath', () => {
+  it('classifies test-suffix and spec-suffix files', () => {
+    expect(isTestOrFixturePath('src/core/repository/paths.test.ts')).toBe(true);
+    expect(isTestOrFixturePath('src/core/ast/block_parity.test.ts')).toBe(true);
+    expect(isTestOrFixturePath('src/api/server.spec.js')).toBe(true);
+    expect(isTestOrFixturePath('src/App.test.tsx')).toBe(true);
+    // The recorded pilot contamination source itself.
+    expect(isTestOrFixturePath('src/core/graph/alias_candidates.test.ts')).toBe(true);
+  });
+
+  it('classifies test/fixture directory segments at any depth', () => {
+    expect(isTestOrFixturePath('__tests__/setup.ts')).toBe(true);
+    expect(isTestOrFixturePath('src/__mocks__/db.ts')).toBe(true);
+    expect(isTestOrFixturePath('src/deep/__fixtures__/sample.md')).toBe(true);
+    expect(isTestOrFixturePath('test/helpers.py')).toBe(true);
+    expect(isTestOrFixturePath('tests/integration/flow.ts')).toBe(true);
+    expect(isTestOrFixturePath('fixtures/repo_ingest/README.md')).toBe(true);
+    expect(isTestOrFixturePath('pkg/testdata/golden.json')).toBe(true);
+  });
+
+  it('classifies Python test conventions and drill-script stems', () => {
+    expect(isTestOrFixturePath('conftest.py')).toBe(true);
+    expect(isTestOrFixturePath('src/conftest.py')).toBe(true);
+    expect(isTestOrFixturePath('src/util_test.py')).toBe(true);
+    expect(isTestOrFixturePath('src/test_util.py')).toBe(true);
+    // This repository's own zero-LLM drills carry seeded fixture strings
+    // — exactly the contamination class the pilot recorded.
+    expect(isTestOrFixturePath('scripts/test_repo_ingest.ts')).toBe(true);
+    expect(isTestOrFixturePath('scripts/test_modules.py')).toBe(true);
+  });
+
+  it('is case-insensitive', () => {
+    expect(isTestOrFixturePath('src/Alias.Test.ts')).toBe(true);
+    expect(isTestOrFixturePath('TESTS/flow.ts')).toBe(true);
+    expect(isTestOrFixturePath('src/__Fixtures__/a.md')).toBe(true);
+    expect(isTestOrFixturePath('CONFTEST.PY')).toBe(true);
+  });
+
+  it('does not classify ordinary source files', () => {
+    expect(isTestOrFixturePath('src/core/repository/paths.ts')).toBe(false);
+    expect(isTestOrFixturePath('src/workers/extraction_worker.ts')).toBe(false);
+    expect(isTestOrFixturePath('README.md')).toBe(false);
+    expect(isTestOrFixturePath('docs/architecture/CODE_MEDIATED_TEXT.md')).toBe(false);
+    expect(isTestOrFixturePath('data/frankenstein.txt')).toBe(false);
+    // Substrings that merely contain "test" are not tests.
+    expect(isTestOrFixturePath('src/contest.py')).toBe(false);
+    expect(isTestOrFixturePath('src/attestation.ts')).toBe(false);
+    expect(isTestOrFixturePath('src/latest/rankings.ts')).toBe(false);
+    // A basename merely named like a test directory is not one.
+    expect(isTestOrFixturePath('docs/tests')).toBe(false);
+    // testdata as a basename (not a directory) is not classified.
+    expect(isTestOrFixturePath('src/testdata.ts')).toBe(false);
   });
 });
 

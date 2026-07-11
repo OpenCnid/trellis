@@ -102,11 +102,20 @@ interface CapturedSweep {
   freshHashes: string[];
 }
 
-function makeLibraryDeps(captured: CapturedSweep[], failForPathSuffix?: string): SnapshotDeps {
+function makeLibraryDeps(
+  captured: CapturedSweep[],
+  failForPathSuffix?: string,
+  capturedExtraction?: Array<{ name: string; data: Record<string, unknown> }>
+): SnapshotDeps {
   const queues: IngestDeps['queues'] = {
     extraction: {
+      // Session 25 (Part 6): a changed-mode drill captures jobs in
+      // memory — nothing ever reaches Redis, so nothing can be paid.
       addBulk: async jobs => {
-        throw new Error(`unexpected extraction enqueue of ${jobs.length} job(s) under --extract none`);
+        if (!capturedExtraction) {
+          throw new Error(`unexpected extraction enqueue of ${jobs.length} job(s) under --extract none`);
+        }
+        capturedExtraction.push(...(jobs as Array<{ name: string; data: Record<string, unknown> }>));
       },
     },
     invalidation: {
@@ -237,14 +246,27 @@ async function main(): Promise<void> {
   } catch {
     console.log('  [NOTE] symlink creation unavailable on this host; symlink skip asserted via unit tests only');
   }
+  // Session 25: a test file and a fixture-directory file. Both must be
+  // ingested (snapshot completeness) yet never reach extraction.
+  await fs.writeFile(
+    path.join(repoRoot, 'src', 'app.test.ts'),
+    'export function fixtureFact() {\n  return "globex corporation acquired initech";\n}\n'
+  );
+  await fs.mkdir(path.join(repoRoot, '__fixtures__'), { recursive: true });
+  await fs.writeFile(
+    path.join(repoRoot, '__fixtures__', 'sample.md'),
+    '# Fixture Sample\n\nA fictional fixture paragraph.\n'
+  );
   await git(repoRoot, 'init');
   await git(repoRoot, 'add', '-A');
   await git(repoRoot, 'commit', '-m', 'fixture snapshot 1');
 
   const fixturePaths = [
     'README.md',
+    '__fixtures__/sample.md',
     'config/settings.json',
     'docs/overview.md',
+    'src/app.test.ts',
     'src/app.ts',
     'src/util.py',
   ];
@@ -261,6 +283,8 @@ async function main(): Promise<void> {
     if (cli1.code !== 0) console.log(cli1.stdout);
     check('CLI printed the paid-work plan before writes',
       cli1.stdout.includes('no paid work will be queued'), true);
+    check('CLI echoed the test/fixture extraction exclusion counts',
+      cli1.stdout.includes('test_fixture_excluded=2'), true);
 
     const snap1 = await pgPool.query(
       'SELECT snapshot_seq, published_at IS NOT NULL AS published, summary FROM repository_snapshots WHERE repo_key = $1 ORDER BY snapshot_seq',
@@ -284,7 +308,7 @@ async function main(): Promise<void> {
       [REPO_KEY]
     );
     // Sorted in JS: SQL collation orders case-insensitively.
-    check('snapshot 1 records the five accepted files as ingested',
+    check('snapshot 1 records the seven accepted files as ingested',
       paths1.rows.map((row: any) => [row.path, row.outcome]).sort(),
       fixturePaths.map(p => [p, 'ingested']).sort());
 
@@ -319,7 +343,7 @@ async function main(): Promise<void> {
       'SELECT outcome, COUNT(*)::int AS n FROM repository_snapshot_paths WHERE repo_key = $1 AND snapshot_seq = 2 GROUP BY outcome',
       [REPO_KEY]
     );
-    check('snapshot 2 is all-unchanged', paths2.rows, [{ outcome: 'unchanged', n: 5 }]);
+    check('snapshot 2 is all-unchanged', paths2.rows, [{ outcome: 'unchanged', n: 7 }]);
     for (const relPath of fixturePaths) {
       const doc = await latestVersion(docKeyFor(relPath));
       if (doc?.version !== 1) check(`${relPath} still at version 1`, doc?.version, 1);
@@ -338,7 +362,7 @@ async function main(): Promise<void> {
 
     const sweeps3: CapturedSweep[] = [];
     const { result: result3 } = await runSnapshot(makeLibraryDeps(sweeps3), repoRoot);
-    check('edit snapshot counts', result3.counts, { ingested: 1, unchanged: 4, tombstoned: 0 });
+    check('edit snapshot counts', result3.counts, { ingested: 1, unchanged: 6, tombstoned: 0 });
     const appRootV2 = await parseFixtureFile(repoRoot, 'src/app.ts');
     const appV2Members = await membership(appRootV2.id);
     const added = [...appV2Members].filter(id => !appV1Members.has(id));
@@ -407,7 +431,7 @@ async function main(): Promise<void> {
 
     const sweeps4: CapturedSweep[] = [];
     const { result: result4 } = await runSnapshot(makeLibraryDeps(sweeps4), repoRoot);
-    check('delete/rename snapshot counts', result4.counts, { ingested: 1, unchanged: 3, tombstoned: 2 });
+    check('delete/rename snapshot counts', result4.counts, { ingested: 1, unchanged: 5, tombstoned: 2 });
 
     const handbookDoc = await latestVersion(docKeyFor('docs/handbook.md'));
     const overviewDoc = await latestVersion(docKeyFor('docs/overview.md'));
@@ -465,14 +489,63 @@ async function main(): Promise<void> {
 
     const sweeps5b: CapturedSweep[] = [];
     const { result: retry } = await runSnapshot(makeLibraryDeps(sweeps5b), repoRoot);
-    // Remaining live paths: README.md (edited → ingested), settings.json
-    // and app.ts (unchanged), handbook.md (deleted → tombstoned);
-    // overview.md and util.py were already tombstoned in Part 4.
+    // Remaining live paths: README.md (edited → ingested), settings.json,
+    // app.ts, app.test.ts, and __fixtures__/sample.md (unchanged),
+    // handbook.md (deleted → tombstoned); overview.md and util.py were
+    // already tombstoned in Part 4.
     check('retry publishes with the expected outcomes',
-      retry.counts, { ingested: 1, unchanged: 2, tombstoned: 1 });
+      retry.counts, { ingested: 1, unchanged: 4, tombstoned: 1 });
     await mirrorInvalidationWorker(sweeps5b);
     check('handbook fact quarantines once its last live source dies',
       (await factState(bookEntityA))?.contested, true);
+
+    console.log('\nPart 6: changed-mode extraction — test/fixture files ingest but never enqueue');
+    // Edit BOTH the source file and the test file, then run --extract
+    // changed with the extraction queue captured in memory: the source
+    // file's new block becomes a job carrying the Session 25 routing
+    // metadata; the test file re-ingests (snapshot completeness) yet
+    // contributes zero jobs.
+    const appPath = path.join(repoRoot, 'src/app.ts');
+    await fs.writeFile(
+      appPath,
+      `${await fs.readFile(appPath, 'utf8')}\nexport function sessionTwentyFive() {\n  return 'prerequisites';\n}\n`
+    );
+    const testPath = path.join(repoRoot, 'src/app.test.ts');
+    await fs.writeFile(
+      testPath,
+      `${await fs.readFile(testPath, 'utf8')}\nexport function fixtureFactTwo() {\n  return 'initech acquires globex, fictionally';\n}\n`
+    );
+    await git(repoRoot, 'add', '-A');
+    await git(repoRoot, 'commit', '-m', 'edit source and test for changed-mode drill');
+
+    const sweeps6: CapturedSweep[] = [];
+    const jobs6: Array<{ name: string; data: Record<string, unknown> }> = [];
+    const { plan: plan6, result: result6 } = await runSnapshot(
+      makeLibraryDeps(sweeps6, undefined, jobs6),
+      repoRoot,
+      { policy: { mode: 'changed', maxBlocks: 50 } }
+    );
+    check('changed snapshot counts', result6.counts, { ingested: 2, unchanged: 3, tombstoned: 0 });
+    check('plan classifies both test/fixture files',
+      plan6.extractionExclusionCounts, { test_fixture_excluded: 2 });
+    check('plan excludes the edited test file blocks from the paid bound',
+      plan6.blocksExcludedFromExtraction >= 1, true);
+    check('exactly the source file\'s new block was enqueued',
+      jobs6.map(job => [job.data.docKey, job.data.sourceKind, job.data.language]),
+      [[docKeyFor('src/app.ts'), 'code', 'typescript']]);
+    const appRootV3 = await parseFixtureFile(repoRoot, 'src/app.ts');
+    const newFunctionBlock = collectExtractionBlocks(appRootV3)
+      .find(b => nodeText(b).includes('sessionTwentyFive'))!;
+    check('the enqueued job carries the new function block hash',
+      jobs6.map(job => job.data.astNodeId), [newFunctionBlock.id]);
+    check('the test file still ingested a new version (in the snapshot)',
+      (await latestVersion(docKeyFor('src/app.test.ts')))?.version, 2);
+    check('result reports one queued block against the excluded counts',
+      [result6.blocksQueued, result6.extractionExclusionCounts.test_fixture_excluded],
+      [1, 2]);
+    await mirrorInvalidationWorker(sweeps6);
+    check('changed-mode drill wrote zero extraction jobs to Redis',
+      await extractionQueueDepth(), extractionBaseline);
   } finally {
     console.log('\nCleanup');
     try {
