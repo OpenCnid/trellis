@@ -521,12 +521,67 @@ saved logs):
   confounded (round 3 added the disclosure clause and two new
   questions, deliberately, disclosed above).
 
+# Round 4 (Session 24, July 11, 2026) — the localization fix
+
+## What changed since round 3
+
+Round 3's recommendation (a boundary-preserving reconstruction) was
+re-pointed by the owner to an ADDITIVE fix, implemented this session:
+
+- **The kernel gained `trellis_postgres.get_ast_blocks(root_hash)`** —
+  a document's extraction blocks IN DOCUMENT ORDER as a JSON list of
+  `{id, type, text}` objects, where the block set is exactly
+  `collectExtractionBlocks`'s and the text reconstruction is exactly
+  `get_ast_texts`'s. The model localizes over engine-provided structure
+  instead of re-parsing a glued string; NO stored or reconstructed byte
+  moved (every round-1..3 number over `get_ast_texts` remains
+  byte-comparable). The walk is the dependency-free
+  `src/rlm/trellis_blocks.py`, parity-pinned block-for-block against
+  the TypeScript authority by `src/core/ast/block_parity.test.ts`; the
+  kernel prompt teaches the tool (both composed-prompt pins moved
+  wittingly — `test:modules` [4]/[7] histories record the move).
+- **`--ingest` now verifies the accessor round-trip live:** frank
+  returned 796 ordered blocks and chronicle 827, both byte-identical to
+  `collectExtractionBlocks`+`nodeText` over the stored roots, with a
+  sampled block's text byte-matching `get_ast_texts` for the same id
+  (July 11, 2026, against the durable dev corpora — root hashes
+  unchanged, re-ingest still the auditable no-op).
+- **The method classifier gained a third verdict:** `structured` — the
+  run CALLED `get_ast_blocks` (the marker requires the call's open
+  paren; the preambles name the tool paren-free, and the query is
+  echoed into the log, so offering the tool can never classify as
+  using it). Precedence: structured > line-anchored > shape > unknown,
+  because per-block texts make even anchored patterns safe (each
+  own-line heading is its own block).
+- **The locate preambles now OFFER the accessor** (the round-4
+  intervention), scoped to the locate questions only so every other
+  question's bytes stay comparable across rounds.
+
+## Round-4 protocol (the re-measure)
+
+Re-run the round-3 locate set — chronicle `syn-locate-*` ×4 + frank
+`locate-*` ×2, `--repeats 3`, both arms ≈ 36 runs — with the accessor
+taught (kernel) and offered (preamble). Success criterion, stated up
+front: the glue-class localization misses fall materially, ideally to
+~0 for runs classified `structured`; a null result (the model ignores
+the tool, or uses it and still mislocates) is a FINDING that re-opens
+the superseded reconstruction-byte row for owner adjudication.
+
+## Round-4 results
+
+PENDING — the re-measure is owner-gated paid work (estimated ≈ 36 runs
+≈ $1.6 at round-3 locate rates, under the standing ≤$5/run cap) and had
+not been approved when this section was written. The machinery above is
+landed, drilled, and zero-paid; the numbers land here when the run is
+approved.
+
 ## Standing
 
 Repeatable: `tsx scripts/exp_effective_context.ts --ingest` (zero-paid
 setup/verify for all corpora, including the 102-document relational
-set, plus the boundary quantification printout), then `--confirm-paid`
-with `--suites frank,chronicle,ledger,edit,relational`, `--arms`,
+set, the boundary quantification printout, and the Session 24
+`get_ast_blocks` round-trip), then `--confirm-paid` with
+`--suites frank,chronicle,ledger,edit,relational`, `--arms`,
 `--repeats`, `--questions` (paid — owner approval per run applies;
 `--max-spend-usd` defaults to the standing $5 cumulative abort). The
 plan-only default spawns nothing. NOT an acceptance gate; excluded
@@ -534,8 +589,11 @@ from every zero-paid suite. Measured standing after three rounds: the
 transcription channel is CLOSED (Session 22 `trellis_answer`; 144/144
 round-2+3 runs submitted by reference, zero transcription errors);
 read-fidelity holds at n=7 per question per arm (28/28 anomaly quotes
-byte-faithful); the pandas/structured-frame threshold
-sits ABOVE ~6,900 records and three-way joins (null at every scale
-measured so far); and the live failure class is localization over the
-glued reconstruction — the boundary-preservation RECOMMENDATION is
-roadmap §4 row 6, owner-gated.
+byte-faithful); the pandas/structured-frame threshold sits ABOVE
+~6,900 records and three-way joins (null at every scale measured so
+far — pillar §7's "pandas default" guidance is demoted accordingly,
+Session 24); and the live failure class is localization over the
+glued reconstruction — fixed structurally by `get_ast_blocks`
+(Session 24), with the re-measure owner-gated and the superseded
+reconstruction-byte change re-entering only if the accessor proves
+insufficient.

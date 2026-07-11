@@ -13,6 +13,7 @@ RLM_DIR = ROOT / "src" / "rlm"
 PYTHON_FILES = [
     RLM_DIR / "trellis_agent.py",
     RLM_DIR / "trellis_tools.py",
+    RLM_DIR / "trellis_blocks.py",
     RLM_DIR / "trellis_mcp.py",
     RLM_DIR / "trellis_workspace.py",
     RLM_DIR / "trellis_modules.py",
@@ -41,6 +42,7 @@ def main() -> None:
         "pandas",
         "unstructured.partition.pdf",
         "trellis_tools",
+        "trellis_blocks",
         "trellis_mcp",
         "trellis_workspace",
         "trellis_modules",

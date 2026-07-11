@@ -211,7 +211,7 @@ Ordered roughly by severity.
 | ~~3~~ | ~~Anchor-gate calibration (grounded-authoring follow-up, measured Session 21)~~ | **Core fix done (Session 21, later the same day)** — `evaluateAnchorGate` no longer scores template-forbidden numeric anchor kinds (`comparison`/`ratio`) in its denominator; the previously refused module #1 v2 draft now clears at 18/60 = 0.30. Optional residual (compound segments get exact-match, plain terms get stem credit — a minor asymmetry) left to a future gate touch, not blocking; see §5 |
 | ~~2~~ | ~~Effective-context probe, round 2 + the answer-channel fix (owner-directed next, July 10, 2026)~~ | **Done (Session 22, July 11, 2026)** — the by-reference answer channel (`trellis_answer.submit`: caller-frame evaluation, structural literal refusal, engine-side rendering; `npm run test:answer-channel`, 32 checks; both composed-prompt pins recomputed wittingly) shipped FIRST, then all four measurement arms ran paid ($2.15, 57 runs): the unmemorized synthetic chronicle isolated read-fidelity (8/8 anomaly quotes byte-faithful), the 40-ledger corpus measured the pandas null result (0/12 aggregation runs reached for a DataFrame — plain loops stayed cheap and correct), the edit round-trip was 8/8 byte-exact through `trellis_textedit`, repeats reported medians with spread, and the round-1 55→47 question came back 55 in both arms; zero transcription errors in 56 runs (round 1: 1 in 12); every remaining miss is localization-method error over the glued reconstruction (a recorded observation, not a regression); see §5 |
 | ~~3~~ | ~~Effective-context probe, round 3 (owner-directed next, July 11, 2026)~~ | **Done (Session 23, July 11, 2026)** — the relational corpus (102 generated documents: 100 season-two ledgers ≈6,859 records + a captain→guild registry + a port/material tariff schedule; every question a genuine 2- or 3-table join) measured the pandas null result PERSISTING at 3.1× round-2 scale (0/87 round-3 runs imported pandas or polars; plain dict loops answered every join digit-exact); the localization arm (30 locate runs) reproduced the round-2 failure class at rate (7/30 misses, ALL method error over the glued reconstruction, none transcription) and quantified TWO representation traps zero-paid (line anchors: chronicle 0/48 headings visible glued vs 48/48 boundary-preserved; trailing word boundaries: `\d+\b` fails at glued digit→letter junctions, producing the exact "Chapter 23" wrong answer of both rounds); higher n moved the load-bearing claims (87/87 submits, zero transcription errors at n=5/arm on counts and quotes); the disclosure clause was restored to the chronicle/ledger preambles; RECOMMENDATION recorded (then re-pointed the same day — the owner chose the additive `get_ast_blocks` accessor over the reconstruction-byte change; now §4 row 4). See §5 |
-| 4 | Boundary-aware block accessor (`get_ast_blocks`) + structure-selection demotion | **Owner-directed next, July 11, 2026 (post-round-3 re-point, §0 event-loop rule; see §5).** Fix the LIVE localization failure class (10 misses across rounds 2–3, all method error over the glued reconstruction) with a NEW ADDITIVE read tool `get_ast_blocks(rootHash)` returning a document's extraction blocks in order (`[{id, type, text}]`) — the model gets structure directly instead of re-parsing a glued string, and NO stored/reconstructed byte moves (only the composed-prompt pins move wittingly to teach the tool). This SUPERSEDES the reconstruction-byte change below: the owner chose the additive accessor over changing `get_ast_texts`/`nodeText` (July 11, both forks decided). Also demote pillar §7's "pandas is the default" guidance to "plain loops until a measured threshold" per §7's own written contingency — the round-3 null (0/87) is the continued null result §7 pre-committed to acting on; docs-only, zero-paid. Then re-measure the localization arm (paid, owner-gated) to confirm misses drop |
+| ~~4~~ | ~~Boundary-aware block accessor (`get_ast_blocks`) + structure-selection demotion~~ | **Machinery done (Session 24, July 11, 2026)** — `trellis_postgres.get_ast_blocks(root_hash)` returns a document's extraction blocks in order (`[{id, type, text}]`, exactly the `collectExtractionBlocks` set) via the dependency-free walk in `src/rlm/trellis_blocks.py`, parity-pinned block-for-block against the TS authority (`block_parity.test.ts`) and round-tripped live (frank 796 / chronicle 827 blocks byte-identical); NO stored or reconstructed byte moved; both composed-prompt pins moved wittingly to teach the tool (default `3f07295a…4b63`, omit-arm `85362b81…71bb`); pillar §7's "pandas default" DEMOTED to "plain loops until a measured threshold" per its own written contingency; the probe gained the `structured` method verdict, the paren-free locate-preamble offer, and the report's round-4 section. The paid localization re-measure stays OWNER-GATED and did not run unprompted (proposed: round-3 locate set, ≈36 runs ≈ $1.6; a null result re-opens the superseded byte-change row) — its numbers land in the report's round-4 results when approved; see §5 |
 | 5 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind the round-4 localization fix July 11, 2026; never dropped) |
 | 6 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
 | — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
@@ -2952,3 +2952,92 @@ owner-gated localization re-measure confirming the miss rate drops.
 extraction prerequisites' full concreteness is preserved in this PR's
 git history (the round-3 handoff that named them Session 24) for the
 session after.
+
+### July 11, 2026 — Session 24: the boundary-aware block accessor (`get_ast_blocks`) + the structure-selection demotion (§4 row 4)
+
+The post-round-3 re-point executed: the ONE live failure class after
+three probe rounds (localization method error over the glued
+reconstruction — 10 misses across rounds 2–3) is fixed structurally
+with an additive read tool, and pillar §7's library-choice sub-claim is
+demoted per its own written contingency. No stored or reconstructed
+byte moved; the composed-prompt pins moved once, wittingly, to teach
+the tool.
+
+1. **The accessor.** `TrellisPostgres.get_ast_blocks(root_hash)`
+   (`src/rlm/trellis_tools.py`) fetches the root's `data` JSONB once
+   and walks it into a JSON list of `{id, type, text}` in document
+   order. The walk lives in the NEW dependency-free
+   `src/rlm/trellis_blocks.py` (stdlib-only, imported by
+   trellis_tools; `_node_text` moved there verbatim and is re-exported
+   under its historical name). The block set is exactly
+   `collectExtractionBlocks`'s and the text is exactly `nodeText`'s —
+   pinned by the new cross-language parity test
+   `src/core/ast/block_parity.test.ts`, which spawns the real Python
+   walk against real parser output (markdown incl. the child-text
+   reconstruction path, unstructured/PDF childless-content nodes, and
+   code-aware trees with `code_class` traversed through). Design note,
+   recorded: CI runs `npm test` BEFORE installing the Python runtime,
+   so the walk had to live in a module that imports nothing beyond the
+   stdlib — importing `trellis_tools` (psycopg2/neo4j at module top)
+   from a unit test would fail there. The accessor counts a database
+   tool call, joins the citation-audit read set with the same
+   semantics as `get_ast_texts`, refuses non-string and unknown hashes
+   loudly, and exposes no new citable ids. `trellis_blocks.py` joined
+   `python:check` and the Dockerfile `src/rlm` COPY set.
+2. **The kernel prompt teaches it (the only pin move).** One
+   brace-free line under the `trellis_postgres` TOOLS entry in
+   `_ADDENDUM_BASE_PREFIX` (prefer walking ordered blocks in code for
+   section-structure/localization work over regexing a concatenated
+   reconstruction). Both pins recomputed in the same commit with
+   history recorded in place (`scripts/test_modules.py`): default
+   `9f09d7d2…dd68` → `3f07295a…4b63`; omit-arm `9779b5c0…9e45` →
+   `85362b81…71bb` (still structurally default minus exactly
+   `CODE_MEDIATED_TEXT_BLOCK`, re-proven by `test:modules` [7]).
+3. **The probe's round-4 machinery (zero-paid).**
+   `classifyLocalizationMethod` gained the `structured` verdict — the
+   marker is the CALL (`get_ast_blocks(` with the open paren) because
+   the query is echoed into run logs and the preambles name the tool
+   paren-free, so offering the tool can never classify as using it
+   (unit-pinned both ways). The locate preambles now OFFER the
+   accessor (`BLOCKS_OFFER`, scoped to locate questions so every other
+   question's bytes stay round-comparable), the method table prints
+   `structured`, and `--ingest` verifies the accessor round-trip live:
+   frank 796 ordered blocks and chronicle 827, byte-identical to
+   `collectExtractionBlocks`+`nodeText` over the stored roots, sampled
+   text byte-matching `get_ast_texts` (run twice July 11; re-ingest
+   stayed the auditable no-op, all root hashes unchanged).
+4. **The §7 demotion (docs-only).**
+   `docs/architecture/CODE_MEDIATED_TEXT.md` §7: "pandas is the
+   default for relational/multi-file queries" is DEMOTED to "plain
+   loops until a measured threshold" — round 3's 0/87 is the continued
+   null result the §7 status note pre-committed to acting on (round 2:
+   0/68). The micro-benchmark table, the mechanism claim, and the
+   kernel prompt's "ingestion = pandas" metaphor (mechanism, not
+   library — §0's own definition) are untouched. §6 gained item 6 (the
+   accessor) and item 3 gained the round-3 close-out; the probe report
+   gained its round-4 section.
+5. **Acceptance.** `npm test` 683 passing across 75 files (baseline
+   678/74: +3 parity, +2 classifier); `npm run build`,
+   `npm run python:check` (now importing `trellis_blocks`),
+   `docker compose --profile test config --quiet` all green. Live
+   drills all green post-change: `test:modules` 51 (both pins moved
+   wittingly), `test:answer-channel` 32, `test:textedit` 81,
+   `test:module-lifecycle` 60, `test:promotion` 41,
+   `test:rlm-workspace` 86, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
+   `test:agent-loop` 35, `test:a2a` 46, `test:repo-ingest` 45,
+   `test:benchmark-hardening` 24, `test:entity-resolution` 34,
+   `test:api-hardening` 18, `test:belief-recovery` 30,
+   `test:invalidation-sweep` 17. `drill:scale` CLOSED (results file
+   committed per house practice). Isolated Compose integration run as
+   project `trellis_s24_ci` (image rebuilt — the Dockerfile COPY set
+   gained `trellis_blocks.py`; `package.json` untouched so the
+   `npm ci` layer stayed cached), all 10 PASS, torn down with
+   `--volumes`.
+6. **The paid localization re-measure is owner-gated and did NOT run
+   unprompted.** Proposed estimate: the round-3 locate set (chronicle
+   ×4 + frank ×2, `--repeats 3`, both arms) ≈ 36 runs ≈ $1.6 at
+   round-3 rates, under the standing ≤$5 cap. Success criterion is
+   stated up front in the report's round-4 section; a null result
+   re-opens the superseded reconstruction-byte row. The report's
+   round-4 results subsection carries PENDING until the owner approves
+   the run.

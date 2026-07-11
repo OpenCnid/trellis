@@ -107,6 +107,18 @@ import { loggerFor } from '../src/core/observability/logger';
 //               gap; round-2 vs round-3 localization numbers must be
 //               read with this change in mind).
 //
+// ROUND 4 (Session 24) is the localization RE-MEASURE after the fix:
+//   the kernel gained the boundary-aware accessor
+//   trellis_postgres.get_ast_blocks(root_hash) — a document's blocks in
+//   order as id/type/text objects — and the locate questions now OFFER
+//   it (paren-free, so the query echo can never classify as usage).
+//   classifyLocalizationMethod gains the third verdict `structured`
+//   (the run called get_ast_blocks); --ingest verifies the accessor
+//   round-trip byte-for-byte against collectExtractionBlocks/nodeText.
+//   The re-measure re-runs the round-3 locate set (chronicle + frank,
+//   --questions on the locate ids) and records whether the glue-broken
+//   miss class drops for runs that use the accessor.
+//
 // --repeats N runs every selected question N times per arm; aggregates
 // report medians WITH min/max spread (n stays small — the report owes
 // the honest caveat either way).
@@ -295,6 +307,18 @@ const EDIT_NOTES_SEED = [
   '',
 ].join('\n');
 
+// Session 24: the locate questions OFFER the boundary-aware accessor
+// (the round-4 intervention). Deliberately paren-free — the query is
+// echoed into the run log, and classifyLocalizationMethod's
+// `structured` marker requires the call's open paren, so offering the
+// tool never classifies as using it. Scoped to the locate questions so
+// the count/quote/aggregate question bytes stay comparable across
+// rounds.
+const BLOCKS_OFFER =
+  `Calling trellis_postgres.get_ast_blocks with the root hash returns the document's blocks `
+  + `in document order as a JSON list of objects with keys id, type, and text; each own-line `
+  + `heading is its own block. `;
+
 function buildFrankQuestions(corpus: string, rootHash: string): ProbeQuestion[] {
   const preamble =
     `The 1831 text of the novel "Frankenstein; or, The Modern Prometheus" is stored in the `
@@ -339,10 +363,11 @@ function buildFrankQuestions(corpus: string, rootHash: string): ProbeQuestion[] 
       suite: 'frank',
       kind: 'locate',
       question:
-        `${preamble}QUESTION: The document is structured as sections introduced by the headings `
-        + `"Letter 1" through "Letter 4" and then "Chapter 1" through "Chapter 24" (a table of `
-        + `contents near the start of the text also lists them). In which section does the `
-        + `phrase "${phrase}" appear? Output FINAL_ANSWER: <Letter N or Chapter N>.`,
+        `${preamble}${BLOCKS_OFFER}QUESTION: The document is structured as sections introduced `
+        + `by the headings "Letter 1" through "Letter 4" and then "Chapter 1" through `
+        + `"Chapter 24" (a table of contents near the start of the text also lists them). In `
+        + `which section does the phrase "${phrase}" appear? `
+        + `Output FINAL_ANSWER: <Letter N or Chapter N>.`,
       expected,
       isCorrect: answer => extractAnswerSection(answer) === expected,
       locateKinds: ['Letter', 'Chapter'],
@@ -405,9 +430,9 @@ function buildChronicleQuestions(corpus: string, rootHash: string): ProbeQuestio
       suite: 'chronicle',
       kind: 'locate',
       question:
-        `${preamble}QUESTION: The document is structured as sections introduced by the `
-        + `own-line headings "Entry 1" through "Entry 48". In which entry does the phrase `
-        + `"${phrase}" appear? Output FINAL_ANSWER: Entry <N>.`,
+        `${preamble}${BLOCKS_OFFER}QUESTION: The document is structured as sections introduced `
+        + `by the own-line headings "Entry 1" through "Entry 48". In which entry does the `
+        + `phrase "${phrase}" appear? Output FINAL_ANSWER: Entry <N>.`,
       expected,
       isCorrect: answer => extractAnswerSectionBy(answer, ['Entry']) === expected,
       locateKinds: ['Entry'],
@@ -839,6 +864,87 @@ async function ingestOne(docKey: string, text: string): Promise<{ rootId: string
   return { rootId: result.rootId };
 }
 
+/** Spawns the REAL Python tool surface to read a document's ordered blocks. */
+function readBlocksViaAccessor(rootHash: string): Promise<BlockView[]> {
+  return new Promise((resolve, reject) => {
+    const code =
+      'import sys, json; sys.path.insert(0, sys.argv[1]); '
+      + 'from trellis_tools import TrellisPostgres; '
+      + 'tool = TrellisPostgres(); '
+      + 'print("BLOCK_LIST: " + tool.get_ast_blocks(sys.argv[2])); '
+      + 'tool.close()';
+    const child = spawn(
+      config.python.executable,
+      ['-c', code, path.resolve('src', 'rlm'), rootHash],
+      {
+        env: {
+          ...process.env,
+          ...(config.python.pythonPath && { PYTHONPATH: config.python.pythonPath }),
+          PG_DSN: pgDsn(),
+          PYTHONUNBUFFERED: '1',
+          PYTHONIOENCODING: 'utf-8',
+        },
+      }
+    );
+    let stdout = '';
+    let stderr = '';
+    child.stdout.setEncoding('utf-8');
+    child.stdout.on('data', (c: string) => { stdout += c; });
+    child.stderr.setEncoding('utf-8');
+    child.stderr.on('data', (c: string) => { stderr += c; });
+    child.on('error', reject);
+    child.on('close', code_ => {
+      const line = stdout.split('\n').find(l => l.startsWith('BLOCK_LIST: '));
+      if (code_ !== 0 || !line) {
+        reject(new Error(`python get_ast_blocks probe failed (exit ${code_}): ${stderr.slice(0, 400)}`));
+        return;
+      }
+      resolve(JSON.parse(line.slice('BLOCK_LIST: '.length)));
+    });
+  });
+}
+
+interface BlockView {
+  id: string;
+  type: string;
+  text: string;
+}
+
+/**
+ * Session 24 (the live accessor round-trip): the REAL Python
+ * get_ast_blocks must return exactly collectExtractionBlocks's block
+ * set — same ids, same order, same reconstructed text — and each
+ * block's text must byte-match get_ast_texts for the same id (block
+ * ids expose nothing get_ast_texts does not already return).
+ */
+async function verifyBlocksAccessor(label: string, rootId: string): Promise<void> {
+  const storedRoot = await readRootNode(rootId);
+  const expected: BlockView[] = collectExtractionBlocks(storedRoot).map(block => ({
+    id: block.id,
+    type: block.type,
+    text: nodeText(block),
+  }));
+  const viaTool = await readBlocksViaAccessor(rootId);
+  const match = JSON.stringify(viaTool) === JSON.stringify(expected);
+  console.log(
+    `  [${label}] get_ast_blocks(${rootId.slice(0, 12)}…): ${viaTool.length} ordered blocks `
+    + `${match ? '— byte-identical to collectExtractionBlocks+nodeText' : 'MISMATCH'}`
+  );
+  if (!match) {
+    throw new Error(`get_ast_blocks disagrees with the TS block authority for ${rootId}`);
+  }
+  const sample = expected[Math.floor(expected.length / 2)];
+  const viaTexts = await readBlocksViaPythonTool([sample.id]);
+  if (viaTexts[sample.id] !== sample.text) {
+    throw new Error(
+      `get_ast_blocks text for ${sample.id} differs from get_ast_texts for the same id`
+    );
+  }
+  console.log(
+    `  [${label}] sampled block ${sample.id.slice(0, 12)}…: text byte-matches get_ast_texts`
+  );
+}
+
 /** Read sampled blocks back through the REAL Python tool and byte-compare. */
 async function verifyBlockReadback(label: string, rootId: string): Promise<void> {
   const storedRoot = await readRootNode(rootId);
@@ -891,6 +997,7 @@ async function runIngest(): Promise<void> {
   console.log(`Corpus: ${FRANK_CORPUS_PATH} (${Buffer.byteLength(frank, 'utf8')} bytes)`);
   const frankResult = await ingestOne(FRANK_DOC_KEY, frank);
   await verifyBlockReadback('frank', frankResult.rootId);
+  await verifyBlocksAccessor('frank', frankResult.rootId);
   assertFrankInvariant(frank, nodeText(await readRootNode(frankResult.rootId)));
 
   // chronicle (Session 22: the unmemorized corpus).
@@ -898,6 +1005,7 @@ async function runIngest(): Promise<void> {
   console.log(`\nCorpus: ${CHRONICLE_CORPUS_PATH} (${Buffer.byteLength(chronicle, 'utf8')} bytes)`);
   const chronicleResult = await ingestOne(CHRONICLE_DOC_KEY, chronicle);
   await verifyBlockReadback('chronicle', chronicleResult.rootId);
+  await verifyBlocksAccessor('chronicle', chronicleResult.rootId);
   assertChronicleInvariant(chronicle, nodeText(await readRootNode(chronicleResult.rootId)));
 
   // ledgers (Session 22: the multi-document corpus — 40 verified ingests).
@@ -1144,7 +1252,7 @@ function printLocalizationMethods(rows: RunRow[]): void {
   if (locateRows.length === 0) return;
   console.log('\n==== LOCALIZATION METHODS (locate runs; classified from run logs) ====');
   console.log('method         runs  correct');
-  for (const method of ['line-anchored', 'shape', 'unknown']) {
+  for (const method of ['structured', 'line-anchored', 'shape', 'unknown']) {
     const rs = locateRows.filter(r => r.locMethod === method);
     if (rs.length === 0) continue;
     console.log(

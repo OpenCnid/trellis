@@ -236,6 +236,23 @@ moving, and the model estimating where text lives.
    with unmarked boundaries. Whether that reconstruction should preserve
    block boundaries is an open kernel question (it moves every pinned
    reconstruction truth — witting or not at all).
+   **Round 3 (Session 23, July 11, 2026; same report) closed both
+   threads:** (i) the structured-frame null PERSISTED at 3.1× scale
+   with genuine three-table joins — 0 of 87 runs imported pandas or
+   polars while plain dict loops answered every relational join
+   digit-exact at ~8.7k median input tokens against a ~146k-token
+   corpus — the continued null result §7 pre-committed to acting on
+   (see §7's demoted status); (ii) the localization class reproduced at
+   rate (7/30 locate misses, ALL method error, none transcription) WITH
+   the boundary disclosure present in the preamble — prompt disclosure
+   measurably does not retire the class — and a second representation
+   trap was pinned: gluing destroys trailing word boundaries, so even a
+   position-independent shape scan ending in a digit-plus-boundary
+   pattern fails at a glued digit-to-letter junction (the exact
+   "Chapter 23" mechanism of both rounds). Round 3 first recommended a
+   boundary-preserving reconstruction; the owner re-pointed the fix to
+   the ADDITIVE accessor of item 6 — same repair, no stored or
+   reconstructed byte moves.
 4. **Module #1 v2** — **DONE (Session 21, July 10, 2026):**
    workspace-discipline re-authored through the grounded-authoring mode
    with §0+§2 of this record promoted into its corpus
@@ -269,6 +286,31 @@ moving, and the model estimating where text lives.
    `npm run test:answer-channel`. Consistent with §2.8: enforcement is
    tooling shape (a structured submit that cannot carry a retyped
    value), and the prompt only teaches it.
+6. **The boundary-aware block accessor** — **IMPLEMENTED (Session 24,
+   July 11, 2026):** the localization tooling-shape fix rounds 2–3
+   demanded (10 misses across the rounds, every one the model
+   re-deriving block structure from the glued root reconstruction).
+   `trellis_postgres.get_ast_blocks(root_hash)` returns a document's
+   extraction blocks IN DOCUMENT ORDER as id/type/text objects — the
+   engine hands the model the block structure it already stores, so
+   section structure is never re-parsed out of a glued string (§1's
+   localization pathology closed at the read boundary, the way item 5
+   closed transcription at the answer boundary). The walk lives in the
+   dependency-free `src/rlm/trellis_blocks.py` and is parity-pinned
+   block-for-block, byte-for-byte against the TypeScript authority
+   (`collectExtractionBlocks`/`nodeText`) by
+   `src/core/ast/block_parity.test.ts`; the block ids are the same
+   citable hashes `get_ast_texts` already exposes; the accessor counts
+   as a database tool call and joins the citation audit's read set.
+   Reconstruction bytes did NOT change — the byte-changing
+   boundary-preservation approach is superseded by this additive read
+   (it re-enters only if the round-4 re-measure shows the accessor
+   insufficient). The kernel prompt teaches the tool, so both
+   composed-prompt pins moved wittingly in the same commit (the item 5
+   precedent). The localization re-measure (probe round 4: the round-3
+   locate set with the accessor offered, method-classified as
+   structured/line-anchored/shape) is owner-gated paid work, proposed
+   with its estimate.
 
 ## 7. Structure selection and scale bounds (measured July 9, 2026)
 
@@ -303,10 +345,12 @@ required for any tier below):
 2. **Tiering is by job, not by scale anxiety:**
    - **list-of-lines** for single-file edit frames — fastest at file scale,
      zero overhead, and the hardest structure to misuse;
-   - **pandas (object dtype)** for relational/multi-file queries — the
-     default: model fluency with pandas (training-data depth) is worth more
-     than raw speed at these scales, and fluency = fewer errored turns =
-     cheaper runs;
+   - **pandas (object dtype)** for relational/multi-file queries —
+     available and fast, but NO LONGER the default (demoted Session 24;
+     see the status note below): measured behaviour twice chose plain
+     dict/regex loops and stayed digit-exact and cheap through ~6,900
+     records and three-way joins, so the guidance is plain loops until a
+     measured threshold;
    - **`string[pyarrow]` dtype** when a corpus frame passes ~1M lines
      (halves memory, ~25% faster) — a one-line `astype`, no new dependency;
    - **polars** (already installed) is the escalation tier if a frame ever
@@ -323,23 +367,30 @@ required for any tier below):
    printed form — printing a frame wholesale is scrollback-pasting through
    the back door.
 
-**Status of this guidance (updated Session 22, July 11, 2026):** the
-table above is a MICRO-benchmark — raw query/splice timings on
-pre-built frames. It says a DataFrame is *fast enough* at every Trellis
-scale; it does NOT say the model *reaches for one* when it would help,
-which is the behaviour that actually decides whether the "pandas is the
-default for relational/multi-file queries" recommendation holds. The
-first end-to-end data point (effective-context probe round 2, §6 item
-3) is a null result: over a 40-document aggregation the model used
-plain dict/regex loops in 0 of 68 runs and stayed correct and cheap.
-That does not contradict the table — 40 small documents are far below
-where a frame's speed matters — but it means the recommendation's
-payoff is unvalidated in behaviour. Effective-context probe round 3
-(roadmap §4 row 3) tests it at genuine repo/relational scale: the open
-question is not "can pandas handle it" (measured yes) but "does the
-model use it, and does using it help." A continued null result would
-argue for demoting the "pandas default" guidance to "plain loops until
-a measured threshold."
+**Status of this guidance (updated Session 24, July 11, 2026 — the
+demotion the previous status pre-committed to):** the table above is a
+MICRO-benchmark — raw query/splice timings on pre-built frames. It says
+a DataFrame is *fast enough* at every Trellis scale; it never said the
+model *reaches for one* when it would help. The behavioural evidence is
+now in, twice: probe round 2 measured 0 of 68 runs importing pandas
+over a 40-document, 2,209-record aggregation; round 3 raised the scale
+3.1× (102 documents, 6,859 records, genuine three-table joins) and
+measured 0 of 87 — plain dict/regex loops stayed digit-exact at ~8.7k
+median input tokens against a ~146k-token corpus. That is the continued
+null result this note pre-committed to acting on, so the "pandas is the
+default for relational/multi-file queries" recommendation is DEMOTED
+to: **plain loops until a measured threshold.** pandas and polars stay
+installed, fast at every Trellis scale (the table stands), and
+available the moment a frame earns its keep; the mechanism claim —
+compute in code, effective context decoupled from attention — is
+untouched and proven by the same runs. The kernel prompt's "ingestion =
+pandas" metaphor names the mechanism, not the library (§0's own
+definition: compliance is the properties, not the import), and is
+deliberately not edited — this demotion is a spec-doc change, not a
+prompt change. The movers that could cross the threshold are recorded
+from the round-3 logs — schema heterogeneity (many record shapes),
+fuzzy joins, long interactive sessions over one corpus — and measuring
+them is a future owner-picked probe round, not a standing objective.
 
 ## 8. Relationship to the other records
 
