@@ -1695,4 +1695,8 @@ gating/containment/hash-guard pins (as corrected in Session 26: the
 splice refuses only "\n"), the Session 22 answer-channel refusals,
 the Session 24 block-walk parity pin, or the Session 25 extraction
 gates (exclusion patterns, denylist, pinned legacy prompt bytes, the
-loud payload boundary).
+loud payload boundary); implementing the Trellis-edits-Trellis
+coverage audit's findings (TRELLIS_ROADMAP.md §5 entry and §4 row 8,
+July 11, 2026) ahead of the standing 6a/6/7 sequence — recorded for
+future scheduling, not this session's scope; the first actionable
+item there is wiring `npm run test:textedit` into CI.

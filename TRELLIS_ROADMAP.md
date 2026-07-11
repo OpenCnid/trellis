@@ -216,6 +216,7 @@ Ordered roughly by severity.
 | 6a | Data-plane representation verdict follow-ups (owner-directed July 11, 2026 — inserted AHEAD of the positive control, which is unchanged) | The owner-commissioned read-only Polars/Arrow architecture review (§5 entry of the same date) concluded NO migration at any of the six data-plane boundaries — JSON/list/dict contracts stand everywhere; structure selection is operation-shaped, not size-shaped. This session records the verdict and pins its prerequisites, all zero-paid: pin polars==1.34.0 in requirements.txt + the python:check import list (the review's found inconsistency: prose claims the agent environment carries polars, no manifest declares it, the Docker image lacks it — a containerized paid run importing it would fail at runtime, not at check time); the pillar §7 verdict + cap-raise doctrine paragraph; the M1 park/seed round-trip + M7 torn-payload refusal drills as standing fixtures in test:rlm-workspace. Pinning is NOT adoption: no src/ path imports polars |
 | 6 | Estimation-discipline positive control (module #2 follow-through) | (Pushed back one session by owner direction July 11, 2026 — row 6a runs first; this row is otherwise unchanged.) Zero-paid machinery first: a module-arm flag for the effective-context probe (the `TRELLIS_EXP_OMIT_CMT` mold — byte-identical when unset) so paired runs can compose `estimation-discipline` into the selection; then the OWNER-GATED paired measurement (design recorded in `modules/estimation-discipline/RESEARCH.md`: tool calls / iterations / input tokens on sufficiency-bounded questions, ~n=5/arm ≈ $1–2). The module stays OUT of the default selection until the control measures a real effect (the briefing's rule) |
 | 7 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
+| 8 | Self-editing toolkit coverage hardening (Trellis-edits-Trellis coverage audit, July 11, 2026) | Ten gaps found, all zero-paid to close except the cross-process proof run (§5 entry of the same date has the full gap matrix). Priority order: wire `npm run test:textedit` into CI first (cheap, no new tests needed); then close the TOCTOU window in `write_back`, re-verify containment at write time (not just load time), and preserve file mode across `write_back`; then pin multi-file partial-failure semantics and add mutation-test coverage for the guard code. Does not reorder rows 6a/6/7 — queued behind them |
 | — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
@@ -3497,3 +3498,91 @@ previous edition's positive-control spec is recoverable in
 HANDOFF.md's git history and re-derivable from
 modules/estimation-discipline/RESEARCH.md). No safeguard weakened;
 items 2–4 strengthen existing invariants.
+
+### July 11, 2026 — Trellis-edits-Trellis coverage audit (owner-commissioned, read-only)
+
+A second read-only review, this time of the operator-gated editing
+toolkit's test coverage (design record CODE_MEDIATED_TEXT.md §6.1;
+kernel `src/rlm/trellis_textedit.py`) rather than data-plane
+representation. Read-only — no tracked file changed during the review
+itself; this entry and §4 row 8 are its record, and HANDOFF §8 points
+implementation at them.
+
+**Scope.** Mapped eleven stated guarantees (toolkit off by default;
+operator-only enablement; edit-root containment; bounded UTF-8 frames;
+engine-computed locations; staged splices/byte-exact writes;
+stale-digest refusal; prompt/namespace identity when disabled; no
+provenance standing; no git operation; no mid-run activation) against
+the existing 82-check live drill (`npm run test:textedit`) and the
+unit suites (`textedit_bounds.test.ts`, `rlm_job.test.ts`). Nine of
+eleven are well-covered at both the config and REPL-namespace layers;
+two (no-git-operation, no-mid-run-activation) hold only by
+code-absence/structural argument, not by an explicit pinned test.
+
+**Ten gaps found, all in previously-untested territory — no existing
+safeguard was found weakened, and none of these findings imply one:**
+
+1. **(High) Cross-process isolation is unproven.** Nothing in the
+   repository demonstrates that an edit landing mid-run cannot reach
+   an already-running RLM subprocess, and nothing technical stops
+   `TRELLIS_EDIT_ROOT` from being pointed at a live deployment
+   checkout rather than a disposable branch — "edits land between
+   runs" (WORKSPACE_AND_MODULES.md §7) is operator discipline, not a
+   runtime check.
+2. **(High) TOCTOU window in `write_back`.** The digest re-check
+   (open + compare) and the atomic `os.replace` are not one
+   operation; a second writer landing in that window is silently
+   overwritten, not detected.
+3. **(High) Containment is checked only at `load()`, not re-verified
+   at `write_back()`.** A parent-directory symlink/junction swapped
+   in after load is not caught — the OS resolves the stored absolute
+   path fresh at write time.
+4. **(High) `write_back` does not preserve file mode.**
+   `tempfile.mkstemp` + `os.replace` on POSIX replaces the inode,
+   dropping the original mode bits (e.g. the executable bit on a
+   shell script or git hook) on every edit; no test catches this, and
+   a mode-only diff line is easy to miss in review.
+5. **(Medium) No test pins multi-file partial-failure semantics**
+   (file A written, file B refused) as intentional rather than
+   accidental.
+6. **(Medium) No mutation-test harness exists for the guard code
+   itself** (containment refusals, the digest guard, budget checks) —
+   nothing proves the 82-check suite would catch a regression in the
+   safety-critical branches, only that it covers the happy and
+   documented-refusal paths.
+7. **(High, cheap) `npm run test:textedit` is not wired into CI.**
+   `.github/workflows/ci.yml`'s `offline` job runs `npm test` /
+   `npm run build` / `npm run python:check` but never the toolkit's
+   own 82-check live drill, which needs no database or network and
+   runs cleanly after the same job's Python-runtime install step.
+8. **(Low) No static guard against a future `subprocess`/git import**
+   in `trellis_textedit.py` — the "no git operation" guarantee holds
+   by inspection today, not by a pinned check.
+9. **(Low) No test exercises prompt injection carried in loaded file
+   *content*** (as opposed to the task instruction, which Session 26
+   run W4 already proved refuses live) reaching a subsequent tool
+   call.
+10. **(Low) No test covers an orphaned write-back temp file
+    surviving an abnormal process kill.**
+
+**Priority order:** #7 first (wire the existing drill into CI — zero
+marginal cost, closes the largest regression-detection gap with no
+new test-writing). Then #2, #3, #4 (the three genuine,
+previously-uncovered correctness gaps in the containment/hash-guard
+discipline itself). Then #5, #6 (semantics pinning and mutation
+coverage — confirm rather than discover). #8–#10 are hygiene/
+defense-in-depth, already safe by construction.
+
+**Next safe proof-run depth increment (defined, not run):** a
+single-file, single-line edit to a non-executable Python module's
+string constant or comment, run once through the existing Session
+26/expansion-series harness (`trellis_agent.py` spawned directly,
+`TRELLIS_EDIT_ROOT` at a disposable checkout, human `git diff` review
+before acceptance). Deliberately excludes the executable-bit case
+(#4), multi-file atomicity (#5), and cross-process concurrency (#1) —
+each needs its own narrower proof run designed to surface that one
+failure mode, not a bundled "go deeper" run.
+
+No safeguard weakened or disabled; every finding above either adds
+new test coverage or documents an existing structural/operator-
+discipline guarantee that has no runtime enforcement yet.
