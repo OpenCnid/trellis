@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+import time
 import uuid as uuid_module
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "rlm"))
@@ -29,6 +30,8 @@ from trellis_workspace import (  # noqa: E402
     parse_workspace_bounds,
     WORKSPACE_MAX_SEGMENTS_DEFAULT,
     WORKSPACE_MAX_BYTES_DEFAULT,
+    WORKSPACE_MAX_SEGMENTS_CAP,
+    WORKSPACE_MAX_BYTES_CAP,
 )
 from trellis_tools import AST_HASH_PATTERN, get_tool_call_count, _node_text  # noqa: E402
 from trellis_mcp import TrellisMcp, parse_mcp_config, get_mcp_call_count  # noqa: E402
@@ -438,6 +441,178 @@ check("seeded addendum has no braces at all (rlms .format() safety)",
       "{" not in seeded_addendum and "}" not in seeded_addendum)
 check("no workspace still means an empty addendum, seeded or not",
       build_workspace_addendum(None, seeded=True) == "")
+
+# --- 7. M1 standing fixture: park/seed round-trip at cap sizes --------------
+# Adopted from the July 11, 2026 data-plane representation review
+# (TRELLIS_ROADMAP.md §5, benchmark matrix row M1): the park/seed seam is
+# exercised at the real byte caps (4 MiB default, 32 MiB hard cap) and at
+# the segment-count hard cap (1024), asserting byte-lossless round-trips
+# and bound enforcement at exactly-cap and cap+1. Wall-clock timings are
+# PRINTED as telemetry, never asserted (CI variance) — correctness is the
+# check. Any future cap raise re-runs this fixture at the target size
+# FIRST (the review's recommendation-5 doctrine).
+print("\n[7] M1: park/seed round-trip at cap sizes (timings printed, never asserted)")
+
+
+def build_at_cap_workspace(max_bytes, segment_count, label):
+    """A workspace filled to EXACTLY max_bytes with deterministic ASCII
+    content spread over segment_count segments."""
+    ws = TrellisWorkspace(max_segments=segment_count, max_bytes=max_bytes)
+    plan = [dict(id="m1", desc=f"fill {label} to the byte cap", status="done")]
+    ws.set_plan(plan)
+    ws.add_note(f"M1 fixture at {label}")
+    used = len(json.dumps(plan).encode("utf-8")) + len(f"M1 fixture at {label}".encode("utf-8"))
+    fill = max_bytes - used
+    chunk = fill // segment_count
+    for i in range(segment_count):
+        size = chunk if i < segment_count - 1 else fill - chunk * (segment_count - 1)
+        ws.capture(server="m1", tool="fixture", args_hash="%016x" % i,
+                   content=("%08d" % i) + "x" * (size - 8), truncated=False)
+    return ws
+
+
+def roundtrip_at_cap(max_bytes, segment_count, label):
+    source_ws = build_at_cap_workspace(max_bytes, segment_count, label)
+    check(f"{label} at-cap workspace fills to exactly the byte cap",
+          json.loads(source_ws.read())["usage"]["bytes"] == max_bytes)
+
+    t0 = time.perf_counter()
+    parked = source_ws.snapshot()
+    t1 = time.perf_counter()
+    parsed = json.loads(parked)
+    t2 = time.perf_counter()
+    reseeded = TrellisWorkspace.seed_from_snapshot(
+        parsed, max_segments=segment_count, max_bytes=max_bytes)
+    t3 = time.perf_counter()
+    print(f"       {label}: snapshot {(t1 - t0) * 1000:.1f} ms, parse {(t2 - t1) * 1000:.1f} ms, "
+          f"seed {(t3 - t2) * 1000:.1f} ms ({len(parked)} serialized bytes, "
+          f"{segment_count} segments)")
+
+    check(f"{label} park/parse/seed round-trip is byte-lossless at exactly the cap",
+          reseeded.snapshot() == parked)
+    check(f"{label} seeded usage accounts every byte (usage == cap)",
+          json.loads(reseeded.read())["usage"]["bytes"] == max_bytes)
+
+    # cap+1: grow ONE segment by one byte (stamp kept consistent so the
+    # torn check cannot fire first) — the byte budget must refuse.
+    over_segments = dict(parsed["segments"])
+    grow_id = next(iter(over_segments))
+    grown = dict(over_segments[grow_id])
+    grown["content"] = grown["content"] + "y"
+    grown["bytes"] = grown["bytes"] + 1
+    over_segments[grow_id] = grown
+    expect_raises(f"{label} cap+1 seed refuses (byte budget enforced at the boundary)",
+                  lambda: TrellisWorkspace.seed_from_snapshot(
+                      {**parsed, "segments": over_segments},
+                      max_segments=segment_count, max_bytes=max_bytes),
+                  WorkspaceBudgetError, "byte budget")
+    return parsed, parked
+
+
+snap_default, parked_default = roundtrip_at_cap(
+    WORKSPACE_MAX_BYTES_DEFAULT, 8, "4 MiB (default cap)")
+snap_hard, parked_hard = roundtrip_at_cap(
+    WORKSPACE_MAX_BYTES_CAP, 16, "32 MiB (hard cap)")
+
+# The segment-count hard cap (1024): a full-width snapshot round-trips;
+# one segment more refuses.
+count_ws = TrellisWorkspace(max_segments=WORKSPACE_MAX_SEGMENTS_CAP,
+                            max_bytes=WORKSPACE_MAX_BYTES_DEFAULT)
+for i in range(WORKSPACE_MAX_SEGMENTS_CAP):
+    count_ws.capture(server="m1", tool="fixture", args_hash="%016x" % i,
+                     content="segment payload %08d" % i, truncated=False)
+t0 = time.perf_counter()
+count_parked = count_ws.snapshot()
+count_parsed = json.loads(count_parked)
+count_reseeded = TrellisWorkspace.seed_from_snapshot(
+    count_parsed, max_segments=WORKSPACE_MAX_SEGMENTS_CAP,
+    max_bytes=WORKSPACE_MAX_BYTES_DEFAULT)
+t1 = time.perf_counter()
+print(f"       1024 segments: park+parse+seed {(t1 - t0) * 1000:.1f} ms "
+      f"({len(count_parked)} serialized bytes)")
+check("1024-segment (hard cap) snapshot round-trips byte-lossless",
+      count_reseeded.snapshot() == count_parked
+      and len(json.loads(count_reseeded.read())["segments"]) == WORKSPACE_MAX_SEGMENTS_CAP)
+
+
+def synthetic_segment(content):
+    return {
+        "origin": {"server": "m7", "tool": "fixture", "argsHash": "ab12cd34ef56ab78"},
+        "fetchedAt": "2026-07-11T00:00:00+00:00",
+        "bytes": len(content.encode("utf-8")),
+        "truncated": False,
+        "content": content,
+    }
+
+
+over_count_segments = dict(count_parsed["segments"])
+over_count_segments["one-more-than-the-cap"] = synthetic_segment("the 1025th segment")
+expect_raises("a 1025-segment seed refuses at the 1024 hard cap (cap+1)",
+              lambda: TrellisWorkspace.seed_from_snapshot(
+                  {**count_parsed, "segments": over_count_segments},
+                  max_segments=WORKSPACE_MAX_SEGMENTS_CAP,
+                  max_bytes=WORKSPACE_MAX_BYTES_DEFAULT),
+              WorkspaceBudgetError, "segment budget")
+
+# --- 8. M7 standing fixture: torn-payload refusal + canonical determinism ---
+# The review's failure-injection row: one fixture per integrity class the
+# seed boundary must refuse (section [6] already pins the small-size torn
+# stamp, wrong version, stampless segment, and over-budget classes — these
+# extend per-field and at-cap, never duplicate), plus the canonical-form
+# determinism pin (snapshot → parse → re-serialize → byte-equal) that any
+# future representation change must hold to (the review's adoption
+# threshold 3).
+print("\n[8] M7: torn-payload refusal fixtures + canonical-form determinism")
+
+m7_base = {"version": 1, "plan": [], "notes": [],
+           "segments": {"seg-m7": synthetic_segment("well-formed payload")}}
+check("the well-formed M7 base fixture seeds cleanly (fixture validity control)",
+      TrellisWorkspace.seed_from_snapshot(json.loads(json.dumps(m7_base)))
+      .snapshot() == json.dumps(m7_base, sort_keys=True, separators=(",", ":")))
+
+
+def mutated_seed(**field_overrides):
+    fixture = json.loads(json.dumps(m7_base))
+    fixture["segments"]["seg-m7"].update(field_overrides)
+    return lambda: TrellisWorkspace.seed_from_snapshot(fixture)
+
+
+expect_raises("non-string segment content refuses (never coerced)",
+              mutated_seed(content=12345, bytes=5), ValueError, "stamps")
+expect_raises("non-bool truncated stamp refuses (never coerced)",
+              mutated_seed(truncated="false"), ValueError, "stamps")
+expect_raises("missing origin argsHash refuses",
+              mutated_seed(origin={"server": "m7", "tool": "fixture"}),
+              ValueError, "stamps")
+expect_raises("non-string fetchedAt stamp refuses",
+              mutated_seed(fetchedAt=1752192000), ValueError, "stamps")
+
+# Torn and wrong-version at the 4 MiB cap size — the small-size versions
+# are pinned in [6]; these prove the checks hold on real cap-scale
+# payloads.
+torn_at_cap_segments = dict(snap_default["segments"])
+torn_id = next(iter(torn_at_cap_segments))
+torn_at_cap_segments[torn_id] = {**torn_at_cap_segments[torn_id],
+                                 "bytes": torn_at_cap_segments[torn_id]["bytes"] + 1}
+expect_raises("a torn bytes stamp refuses at the 4 MiB cap size",
+              lambda: TrellisWorkspace.seed_from_snapshot(
+                  {**snap_default, "segments": torn_at_cap_segments}),
+              ValueError, "torn")
+expect_raises("a wrong-version snapshot refuses at the 4 MiB cap size",
+              lambda: TrellisWorkspace.seed_from_snapshot(
+                  {**snap_default, "version": 2}),
+              ValueError, "version-1 snapshot")
+
+# Canonical-form determinism: parse + re-serialize reproduces the parked
+# bytes exactly, at both cap sizes and at the segment-count cap. This is
+# what makes the snapshot pin-compatible — the property the data-plane
+# review found Arrow IPC could not guarantee across library versions.
+check("4 MiB snapshot parse + re-serialize is byte-identical (canonical form)",
+      json.dumps(snap_default, sort_keys=True, separators=(",", ":")) == parked_default)
+check("32 MiB snapshot parse + re-serialize is byte-identical (canonical form)",
+      json.dumps(snap_hard, sort_keys=True, separators=(",", ":")) == parked_hard)
+check("1024-segment snapshot parse + re-serialize is byte-identical (canonical form)",
+      json.dumps(count_parsed, sort_keys=True, separators=(",", ":")) == count_parked)
 
 # ---------------------------------------------------------------------------
 if failures:

@@ -407,6 +407,28 @@ from 16.9× at 100k to 2.6× at 8M. For extraction/normalization/grouping
 than model behavior, so the demotion above — plain loops until the
 model-behavior threshold is measured — stands unchanged.
 
+**The data-plane representation verdict (owner-commissioned review,
+July 11, 2026; full record in TRELLIS_ROADMAP.md §5, same date):**
+structure selection is operation-shaped, not size-shaped, and the
+data-plane contracts stay JSON at every boundary — the workspace index,
+MCP payloads, and Redis park/seed snapshots stay canonical JSON;
+PostgreSQL and Neo4j stay database-native; splice-shaped editing stays
+list-of-lines (the wall-clock report above: plain lists win insertion at
+every measured size, no crossover). Polars/Arrow storage was evaluated
+at all six boundaries and rejected everywhere: a DataFrame as a public
+contract violates the data-not-objects doctrine
+(WORKSPACE_AND_MODULES.md §4.5), Arrow payloads are unjustified at the
+4–32 MiB caps, and canonical JSON is byte-deterministic where Arrow IPC
+bytes are not guaranteed stable across library versions. polars is
+pinned in requirements.txt as the engine-side analytics tier — pinned,
+not adopted; no kernel, contract, or prompt path imports it. Cap-raise
+doctrine: if workspace corpus work ever approaches the 32 MiB cap,
+re-run the M1 park/seed drill (a standing `test:rlm-workspace` fixture
+since Session 27) at the target size BEFORE raising caps — cap raises,
+not representation changes, are the first lever; a migration re-enters
+only through the review's recorded benchmark matrix and adoption
+thresholds, with owner sign-off.
+
 ## 8. Relationship to the other records
 
 | record | relationship |

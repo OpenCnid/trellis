@@ -227,6 +227,29 @@ async function main(): Promise<void> {
   assert.deepEqual(await healthAfter.json(), { status: 'ok', scope: 'liveness' });
   console.log('[PASS] /healthz contract unchanged after metrics rollout');
 
+  // --- Session 27: the pinned engine-side polars tier ships in the image ---
+  // The data-plane review (July 11, 2026) found the prose claim "the agent
+  // environment carries polars" was untrue in-container. requirements.txt
+  // now pins it; this probe proves the image's venv actually carries it —
+  // a broken environment fails here, not in a paid run. Pinned, NOT
+  // adopted: no kernel or contract path imports polars.
+  const polarsProbe = await new Promise<{ code: number; output: string }>((resolve, reject) => {
+    const child = spawn(
+      config.python.executable,
+      ['-c', "import polars; print('POLARS_IMPORT_OK', polars.__version__)"],
+      { env: process.env }
+    );
+    let output = '';
+    child.stdout.on('data', chunk => { output += chunk.toString(); });
+    child.stderr.on('data', chunk => { output += chunk.toString(); });
+    child.on('error', reject);
+    child.on('close', code => resolve({ code: code ?? 1, output }));
+  });
+  assert.equal(polarsProbe.code, 0, `polars import probe failed:\n${polarsProbe.output}`);
+  assert.match(polarsProbe.output, /POLARS_IMPORT_OK 1\.34\.0/,
+    `unexpected polars probe output:\n${polarsProbe.output}`);
+  console.log('[PASS] pinned polars 1.34.0 imports inside the container venv');
+
   // --- Session 12: the containerized MCP tool-server pattern ---
   // The mcp-fixture service runs on the project network with no host
   // port; the registry is built with the production Zod helpers and the
