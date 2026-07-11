@@ -11,10 +11,13 @@ import { PRICE_PER_M_INPUT, PRICE_PER_M_OUTPUT } from '../src/benchmarks/oolong/
 import { extractIterations } from '../src/benchmarks/oolong/rlm_client';
 import {
   answerContainsSentence,
+  boundaryPreservedReconstruction,
+  classifyLocalizationMethod,
   countOccurrences,
   extractAnswerInteger,
   extractAnswerSection,
   extractAnswerSectionBy,
+  lineAnchoredHeadingLabels,
   normalizeWhitespace,
   replaceUniqueLine,
   sectionContaining,
@@ -30,9 +33,27 @@ import {
   type LedgerDoc,
   type LedgerRecord,
 } from '../src/benchmarks/effective_context/synthetic_corpus';
+import {
+  RELATIONAL_HOUSE_COUNT,
+  RELATIONAL_LEDGER_KEY_PREFIX,
+  RELATIONAL_REGISTRY_DOC_KEY,
+  RELATIONAL_TARIFF_DOC_KEY,
+  allRelationalDocs,
+  buildGuildIndex,
+  buildTariffIndex,
+  generateRelationalCorpus,
+  guildProfile,
+  parseRegistryRecords,
+  parseTariffRecords,
+  tariffIntoPort,
+  topGuildByTariff,
+  topGuildForMaterial,
+  type RelationalCorpus,
+  type RelationalDoc,
+} from '../src/benchmarks/effective_context/relational_corpus';
 import { loggerFor } from '../src/core/observability/logger';
 
-// The effective-context probe (Sessions 21/22; pillar §6.3 of
+// The effective-context probe (Sessions 21-23; pillar §6.3 of
 // docs/architecture/CODE_MEDIATED_TEXT.md). PAID in its run mode; the
 // --ingest mode is zero-paid setup. Extends the paired-run series
 // (WORKSPACE_PROBE_REPORT.md, WORKSPACE_LINEAGE_PROBE_REPORT.md,
@@ -64,13 +85,35 @@ import { loggerFor } from '../src/core/observability/logger';
 //               transcription bug (fixed by trellis_answer this
 //               session — answer_submits per run is recorded).
 //
+// ROUND 3 (Session 23) closes the threads round 2 left open:
+//   relational — a genuine multi-table corpus (100 season-two ledgers,
+//               ~6,900 records, plus a captain->guild registry and a
+//               (port, material)->silver tariff schedule; ~583 KB, more
+//               bytes than the Frankenstein corpus). Every question
+//               needs a JOIN across document kinds — the regime where
+//               pillar §7 says a structured frame earns its keep.
+//               usedPandas/usedPolars are measured, never required.
+//   localization — two MORE chronicle locate anomalies join the suite,
+//               and every locate run's method is classified from its
+//               log (line-anchored vs shape-based vs unknown) — the
+//               round-2 misses were all line-anchored regexes broken by
+//               the glued reconstruction. --ingest additionally prints
+//               the zero-paid boundary quantification (how many
+//               own-line headings the naive method sees over today's
+//               glued reconstruction vs a boundary-preserving one).
+//   disclosure — the chronicle and ledger preambles now carry the
+//               frank preamble's "paragraph boundaries are unmarked"
+//               clause verbatim (the recorded round-2 question-design
+//               gap; round-2 vs round-3 localization numbers must be
+//               read with this change in mind).
+//
 // --repeats N runs every selected question N times per arm; aggregates
 // report medians WITH min/max spread (n stays small — the report owes
 // the honest caveat either way).
 //
 // Ground truth is COMPUTED from committed or deterministically generated
-// bytes at run time (the ground_truth/synthetic_corpus helpers,
-// unit-pinned) — never hand-typed, never persisted as positions.
+// bytes at run time (the ground_truth/synthetic_corpus/relational_corpus
+// helpers, unit-pinned) — never hand-typed, never persisted as positions.
 //
 // Arms (paired; identical kernel-fixed questions, identical addressing):
 //   on  = today's default composed prompt — the pinned kernel
@@ -84,7 +127,7 @@ import { loggerFor } from '../src/core/observability/logger';
 //   tsx scripts/exp_effective_context.ts --ingest        (zero-paid setup + verify)
 //   tsx scripts/exp_effective_context.ts                 (plan + estimate only)
 //   tsx scripts/exp_effective_context.ts --confirm-paid  (the paid probe)
-//   flags: --suites frank,chronicle,ledger,edit  --arms on,off
+//   flags: --suites frank,chronicle,ledger,edit,relational  --arms on,off
 //          --repeats N  --questions id1,id2  --max-iterations N
 //          --max-spend-usd N
 
@@ -99,11 +142,12 @@ const MAX_ITERATIONS_DEFAULT = 8;
 const DEFAULT_MAX_SPEND_USD = 5;
 
 type Arm = 'on' | 'off';
-type Suite = 'frank' | 'chronicle' | 'ledger' | 'edit';
-const ALL_SUITES: Suite[] = ['frank', 'chronicle', 'ledger', 'edit'];
-// Round 2's default selection: the new measurements. The frank suite
-// stays selectable for baseline repeats.
-const DEFAULT_SUITES: Suite[] = ['chronicle', 'ledger', 'edit'];
+type Suite = 'frank' | 'chronicle' | 'ledger' | 'edit' | 'relational';
+const ALL_SUITES: Suite[] = ['frank', 'chronicle', 'ledger', 'edit', 'relational'];
+// Round 3's default selection: the new measurement. Every earlier suite
+// stays selectable for focused repeats (the round-3 localization and
+// higher-n invocations select chronicle/frank questions explicitly).
+const DEFAULT_SUITES: Suite[] = ['relational'];
 
 interface CliArgs {
   ingest: boolean;
@@ -194,6 +238,8 @@ interface ProbeQuestion {
   expected: string;
   isCorrect(answer: string): boolean;
   edit?: EditSpec;
+  /** locate questions only: the heading kinds the method classifier scans for. */
+  locateKinds?: readonly string[];
 }
 
 // frank (round 1, unchanged): the memorized-corpus baseline.
@@ -206,10 +252,13 @@ const LOCATE_PHRASES = [
 
 // chronicle: needles and planted-anomaly indexes (0-based; anomaly i
 // lives in Entry i+1, but every expected answer is still computed from
-// the committed bytes below).
+// the committed bytes below). Indexes 5 and 42 are the round-2
+// questions kept for comparability; 23 and 36 join in round 3 (the
+// localization arm — chosen clear of the quote anomalies 11/30 and the
+// edit anomaly 17).
 const CHRONICLE_COUNT_NEEDLES = ['Kelvorin', 'Torulf'] as const;
 const CHRONICLE_QUOTE_ANOMALIES = [11, 30] as const;
-const CHRONICLE_LOCATE_ANOMALIES = [5, 42] as const;
+const CHRONICLE_LOCATE_ANOMALIES = [5, 42, 23, 36] as const;
 
 // ledger: the cross-document aggregation targets.
 const LEDGER_TOP_MATERIAL = 'cinderpith';
@@ -217,6 +266,14 @@ const LEDGER_CAPTAIN = 'Corvath Gorsted';
 const LEDGER_CAPTAIN_MATERIAL = 'veldspar';
 const LEDGER_HOUSES_MATERIAL = 'wyrmsilk';
 const LEDGER_HOUSES_PORT = 'Port Veleth';
+
+// relational (round 3): the join-question targets. Chosen so each
+// question's answer is a DIFFERENT guild/number (tie-freedom and
+// well-posedness are enforced loudly by the helpers and unit-pinned in
+// relational_corpus.test.ts).
+const REL_TOP_MATERIAL = 'mirrowax';
+const REL_TARIFF_PORT = 'Port Galeholt';
+const REL_PROFILE_GUILD = 'Farwater';
 
 // edit: the round-trip anchors (distinct from the chronicle suite's so
 // neither contaminates the other), and the seed file.
@@ -288,17 +345,23 @@ function buildFrankQuestions(corpus: string, rootHash: string): ProbeQuestion[] 
         + `phrase "${phrase}" appear? Output FINAL_ANSWER: <Letter N or Chapter N>.`,
       expected,
       isCorrect: answer => extractAnswerSection(answer) === expected,
+      locateKinds: ['Letter', 'Chapter'],
     });
   }
   return questions;
 }
 
 function chroniclePreamble(rootHash: string): string {
+  // Round 3 (the recorded round-2 question-design fix): the disclosure
+  // clause below is verbatim from the frank preamble — round 2 scored
+  // chronicle runs on a representation quirk the preamble never
+  // disclosed.
   return (
     `A season chronicle ("The Chronicle of the Ninth Circuit Archive") is stored in the `
     + `AST database as one document (doc key ${CHRONICLE_DOC_KEY}). The hash of its root AST `
     + `node is ${rootHash}. Calling trellis_postgres.get_ast_texts with that hash returns the `
-    + `full document text, reconstructed by concatenating its paragraph blocks in order. `
+    + `full document text, reconstructed by concatenating its paragraph blocks in order `
+    + `(paragraph boundaries are unmarked; line breaks inside paragraphs are preserved). `
   );
 }
 
@@ -347,6 +410,7 @@ function buildChronicleQuestions(corpus: string, rootHash: string): ProbeQuestio
         + `"${phrase}" appear? Output FINAL_ANSWER: Entry <N>.`,
       expected,
       isCorrect: answer => extractAnswerSectionBy(answer, ['Entry']) === expected,
+      locateKinds: ['Entry'],
     });
   }
   return questions;
@@ -365,8 +429,9 @@ function buildLedgerQuestions(
     + `documents. Every record line has the exact shape "On day D, Captain <First> <Last> `
     + `shipped N crates of <material> to Port <Name>." Calling trellis_postgres.get_ast_texts `
     + `with a LIST of root hashes returns the full text of each ledger keyed by hash `
-    + `(paragraph boundaries are unmarked, so parse records by their shape, not by line `
-    + `breaks). The documents and their root AST hashes are: ${keyList}. `;
+    + `(paragraph boundaries are unmarked; line breaks inside paragraphs are preserved — `
+    + `parse records by their shape, not by line breaks). `
+    + `The documents and their root AST hashes are: ${keyList}. `;
 
   const top = topPortForMaterial(records, LEDGER_TOP_MATERIAL);
   const captainTotal = totalForCaptainMaterial(records, LEDGER_CAPTAIN, LEDGER_CAPTAIN_MATERIAL);
@@ -416,6 +481,116 @@ function buildLedgerQuestions(
         + `Output FINAL_ANSWER: <integer>.`,
       expected: String(housesWith),
       isCorrect: answer => extractAnswerInteger(answer) === housesWith,
+    },
+  ];
+}
+
+/** An integer appears in the answer as its own token (commas tolerated). */
+function answerHasInteger(answer: string, value: number): boolean {
+  return new RegExp(`\\b${value}\\b`).test(answer.replace(/,(?=\d)/g, ''));
+}
+
+function buildRelationalQuestions(
+  corpus: RelationalCorpus,
+  roots: Map<string, string>
+): ProbeQuestion[] {
+  const registry = parseRegistryRecords(corpus.registry.text);
+  const tariffs = parseTariffRecords(corpus.tariff.text);
+  const records = corpus.ledgers.flatMap(d => parseLedgerRecords(d.text));
+  const guildIndex = buildGuildIndex(registry);
+  const tariffIndex = buildTariffIndex(tariffs);
+
+  const rootOf = (docKey: string): string => {
+    const hash = roots.get(docKey);
+    if (!hash) throw new Error(`Missing relational document ${docKey}. Run --ingest.`);
+    return hash;
+  };
+  const ledgerList = corpus.ledgers.map(d => `${d.docKey}: ${rootOf(d.docKey)}`).join('; ');
+  const preamble =
+    `A season-two trading corpus is stored in the AST database as `
+    + `${corpus.ledgers.length + 2} separate documents of three kinds. (1) One captain `
+    + `registry whose record lines have the exact shape "Captain <First> <Last> sails under `
+    + `the banner of the <Guild> Guild." (2) One port tariff schedule whose record lines have `
+    + `the exact shape "Port <Name> levies a tariff of T silver per crate of <material>." `
+    + `(3) ${corpus.ledgers.length} shipping ledgers whose record lines have the exact shape `
+    + `"On day D, Captain <First> <Last> shipped N crates of <material> to Port <Name>." `
+    + `Calling trellis_postgres.get_ast_texts with a LIST of root hashes returns the full `
+    + `text of each document keyed by hash (paragraph boundaries are unmarked; line breaks `
+    + `inside paragraphs are preserved — parse records by their shape, not by line breaks). `
+    + `The documents and their root AST hashes are: `
+    + `registry ${corpus.registry.docKey}: ${rootOf(corpus.registry.docKey)}; `
+    + `tariff schedule ${corpus.tariff.docKey}: ${rootOf(corpus.tariff.docKey)}; `
+    + `ledgers ${ledgerList}. `;
+
+  const topGuild = topGuildForMaterial(records, guildIndex, REL_TOP_MATERIAL);
+  const portTariff = tariffIntoPort(records, tariffIndex, REL_TARIFF_PORT);
+  const topTariff = topGuildByTariff(records, guildIndex, tariffIndex);
+  const profile = guildProfile(records, guildIndex, REL_PROFILE_GUILD);
+
+  // Guild names are single distinctive words; integers are matched as
+  // whole tokens (the led-top-port precedent: never demand a prefix or
+  // ordering the question did not fix).
+  return [
+    {
+      id: 'rel-top-guild',
+      suite: 'relational',
+      kind: 'aggregate',
+      question:
+        `${preamble}QUESTION: Across ALL ${corpus.ledgers.length} ledgers combined, the `
+        + `captains of which guild shipped the largest total number of crates of `
+        + `${REL_TOP_MATERIAL}, and how many crates was that total? (A captain's guild is `
+        + `given by the registry.) Output FINAL_ANSWER: <Guild name>, <integer>.`,
+      expected: `${topGuild.guild}, ${topGuild.total}`,
+      isCorrect: answer =>
+        normalizeWhitespace(answer).toLowerCase().includes(topGuild.guild.toLowerCase())
+        && answerHasInteger(answer, topGuild.total),
+    },
+    {
+      id: 'rel-port-tariff',
+      suite: 'relational',
+      kind: 'aggregate',
+      question:
+        `${preamble}QUESTION: How much tariff silver in total was levied on all shipments `
+        + `into ${REL_TARIFF_PORT} across ALL ${corpus.ledgers.length} ledgers combined? `
+        + `(Each shipment pays its crate count times that port's per-crate tariff for the `
+        + `shipped material, per the tariff schedule.) Output FINAL_ANSWER: <integer>.`,
+      expected: String(portTariff),
+      isCorrect: answer => extractAnswerInteger(answer) === portTariff,
+    },
+    {
+      id: 'rel-guild-tariff',
+      suite: 'relational',
+      kind: 'aggregate',
+      question:
+        `${preamble}QUESTION: The shipments of which guild's captains incurred the largest `
+        + `total tariff silver across ALL ledgers, ports, and materials combined, and how `
+        + `much silver was that total? (Join all three document kinds: a captain's guild is `
+        + `given by the registry; each shipment pays its crate count times the per-crate `
+        + `tariff for its port and material.) Output FINAL_ANSWER: <Guild name>, <integer>.`,
+      expected: `${topTariff.guild}, ${topTariff.silver}`,
+      isCorrect: answer =>
+        normalizeWhitespace(answer).toLowerCase().includes(topTariff.guild.toLowerCase())
+        && answerHasInteger(answer, topTariff.silver),
+    },
+    {
+      // The answer-channel stress companion: a computed MULTI-PART value
+      // (two integers and a port name interpolated in code) through
+      // trellis_answer — round 2 covered single ints/sentences.
+      id: 'rel-guild-profile',
+      suite: 'relational',
+      kind: 'aggregate',
+      question:
+        `${preamble}QUESTION: For the ${REL_PROFILE_GUILD} Guild only, across ALL ledgers `
+        + `combined: how many crates in total did its captains ship (all materials), how many `
+        + `distinct captains of that guild appear shipping, and which port received the most `
+        + `${REL_PROFILE_GUILD} shipments counted by number of records? `
+        + `Output FINAL_ANSWER: <total crates>, <distinct captains>, <Port name>.`,
+      expected: `${profile.crates}, ${profile.captainCount}, ${profile.topPort}`,
+      isCorrect: answer =>
+        answerHasInteger(answer, profile.crates)
+        && answerHasInteger(answer, profile.captainCount)
+        && normalizeWhitespace(answer).toLowerCase()
+          .includes(profile.topPort.replace(/^Port /, '').toLowerCase()),
     },
   ];
 }
@@ -586,6 +761,22 @@ function assertLedgerInvariant(doc: LedgerDoc, reconstruction: string): void {
   }
 }
 
+/** Relational truths are parsed records too — one parser per document kind. */
+function assertRelationalInvariant(doc: RelationalDoc, reconstruction: string): void {
+  const parse =
+    doc.docKey === RELATIONAL_REGISTRY_DOC_KEY ? parseRegistryRecords
+    : doc.docKey === RELATIONAL_TARIFF_DOC_KEY ? parseTariffRecords
+    : parseLedgerRecords;
+  const fromFile = JSON.stringify(parse(doc.text));
+  const fromDb = JSON.stringify(parse(reconstruction));
+  if (fromFile !== fromDb) {
+    throw new Error(
+      `[relational] ${doc.docKey}: records parsed from the stored reconstruction differ from `
+      + 'the generated bytes; redesign the corpus.'
+    );
+  }
+}
+
 // --- The zero-paid setup mode (--ingest) ------------------------------------
 
 /** Spawns the REAL Python tool surface to read sampled blocks back. */
@@ -665,6 +856,35 @@ async function verifyBlockReadback(label: string, rootId: string): Promise<void>
   }
 }
 
+/**
+ * The zero-paid localization quantification (round 3, the design
+ * finding): how many own-line headings can the naive line-anchored
+ * method see over the STORED glued reconstruction, versus over a
+ * boundary-preserving reconstruction of the same stored blocks? The
+ * same numbers are unit-pinned from the committed bytes in
+ * ground_truth.test.ts; this prints them from the database's actual
+ * root nodes.
+ */
+async function printBoundaryQuantification(
+  label: string,
+  rootId: string,
+  kinds: readonly string[],
+  sourceCorpus: string
+): Promise<void> {
+  const root = await readRootNode(rootId);
+  const glued = nodeText(root);
+  const preserved = boundaryPreservedReconstruction(
+    collectExtractionBlocks(root).map(b => nodeText(b))
+  );
+  const inSource = lineAnchoredHeadingLabels(sourceCorpus, kinds).length;
+  const inGlued = lineAnchoredHeadingLabels(glued, kinds).length;
+  const inPreserved = lineAnchoredHeadingLabels(preserved, kinds).length;
+  console.log(
+    `  [${label}] own-line "${kinds.join('/')}" headings visible to a line-anchored regex: `
+    + `source ${inSource}, stored (glued) ${inGlued}, boundary-preserved ${inPreserved}`
+  );
+}
+
 async function runIngest(): Promise<void> {
   // frank (the round-1 corpus; durable — re-ingest is the auditable no-op).
   const frank = fs.readFileSync(FRANK_CORPUS_PATH, 'utf-8');
@@ -693,7 +913,27 @@ async function runIngest(): Promise<void> {
   // them all; the per-doc record invariant above already covered content).
   await verifyBlockReadback('ledger', roots[0]);
 
+  // relational (Session 23: the multi-table corpus — 102 verified ingests).
+  const relational = generateRelationalCorpus();
+  const relationalDocs = allRelationalDocs(relational);
+  console.log(
+    `\nRelational set: ${relationalDocs.length} generated documents `
+    + `(${Buffer.byteLength(relationalDocs.map(d => d.text).join(''), 'utf8')} bytes)`
+  );
+  const relationalRoots: string[] = [];
+  for (const doc of relationalDocs) {
+    const { rootId } = await ingestOne(doc.docKey, doc.text);
+    relationalRoots.push(rootId);
+    assertRelationalInvariant(doc, nodeText(await readRootNode(rootId)));
+  }
+  // Sampled Python read-back on the registry and one ledger.
+  await verifyBlockReadback('relational-registry', relationalRoots[0]);
+  await verifyBlockReadback('relational-ledger', relationalRoots[2]);
+
   console.log('\nRepresentation invariants hold for all corpora: source truths = stored truths.');
+  console.log('\nLocalization quantification (the round-3 design finding, zero-paid):');
+  await printBoundaryQuantification('chronicle', chronicleResult.rootId, ['Entry'], chronicle);
+  await printBoundaryQuantification('frank', frankResult.rootId, ['Letter', 'Chapter'], frank);
   console.log('Re-run --ingest to observe the auditable no-op (new version, empty diff, 0 queued).');
 }
 
@@ -716,6 +956,9 @@ interface RunRow {
   toolCalls: number;
   answerSubmits: number;
   usedPandas: boolean;
+  usedPolars: boolean;
+  /** locate questions only: how the run localized, where observable. */
+  locMethod: string | null;
   costUsd: number;
   answer: string;
 }
@@ -846,6 +1089,8 @@ async function runOne(
     toolCalls: (telemetry?.tool_calls as number) ?? 0,
     answerSubmits: (telemetry?.answer_submits as number) ?? 0,
     usedPandas: stdout.includes('import pandas') || stdout.includes('from pandas'),
+    usedPolars: stdout.includes('import polars') || stdout.includes('from polars'),
+    locMethod: q.locateKinds ? classifyLocalizationMethod(stdout, q.locateKinds) : null,
     costUsd: (inputTokens / 1e6) * PRICE_PER_M_INPUT + (outputTokens / 1e6) * PRICE_PER_M_OUTPUT,
     answer: normalizeWhitespace(answer).slice(0, 120),
   };
@@ -867,7 +1112,7 @@ function spread(values: number[]): string {
 function printAggregate(rows: RunRow[], suites: Suite[], arms: Arm[]): void {
   console.log('\n==== AGGREGATE (per suite × arm: median [min..max]) ====');
   console.log(
-    'suite      arm  runs  correct  inTok med[min..max]     outTok  iter  sub  db  submit  pandas  totalCost'
+    'suite      arm  runs  correct  inTok med[min..max]     outTok  iter  sub  db  submit  frames  totalCost'
   );
   for (const suite of suites) {
     for (const arm of arms) {
@@ -876,7 +1121,7 @@ function printAggregate(rows: RunRow[], suites: Suite[], arms: Arm[]): void {
       const correct = rs.filter(r => r.correct).length;
       const cost = rs.reduce((s, r) => s + r.costUsd, 0);
       const submits = rs.filter(r => r.answerSubmits > 0).length;
-      const pandas = rs.filter(r => r.usedPandas).length;
+      const pandas = rs.filter(r => r.usedPandas || r.usedPolars).length;
       console.log(
         `${suite.padEnd(10)} ${arm.padEnd(4)} ${String(rs.length).padStart(4)}  `
         + `${String(correct).padStart(4)}/${rs.length}  `
@@ -890,6 +1135,22 @@ function printAggregate(rows: RunRow[], suites: Suite[], arms: Arm[]): void {
         + `$${cost.toFixed(4)}`
       );
     }
+  }
+}
+
+/** The localization-method breakdown (locate rows only, where observable). */
+function printLocalizationMethods(rows: RunRow[]): void {
+  const locateRows = rows.filter(r => r.locMethod !== null);
+  if (locateRows.length === 0) return;
+  console.log('\n==== LOCALIZATION METHODS (locate runs; classified from run logs) ====');
+  console.log('method         runs  correct');
+  for (const method of ['line-anchored', 'shape', 'unknown']) {
+    const rs = locateRows.filter(r => r.locMethod === method);
+    if (rs.length === 0) continue;
+    console.log(
+      `${method.padEnd(13)} ${String(rs.length).padStart(5)}  `
+      + `${String(rs.filter(r => r.correct).length).padStart(5)}/${rs.length}`
+    );
   }
 }
 
@@ -935,6 +1196,31 @@ async function buildSelectedQuestions(suites: Suite[]): Promise<{
     questions.push(...buildLedgerQuestions(docs, roots));
     meta.ledger = { prefix: LEDGER_KEY_PREFIX, count: docs.length };
   }
+  if (suites.includes('relational')) {
+    const corpus = generateRelationalCorpus();
+    const docs = allRelationalDocs(corpus);
+    const roots = await currentRootsByPrefix(RELATIONAL_LEDGER_KEY_PREFIX);
+    for (const key of [RELATIONAL_REGISTRY_DOC_KEY, RELATIONAL_TARIFF_DOC_KEY]) {
+      roots.set(key, (await currentRoot(key)).rootHash);
+    }
+    if (roots.size < docs.length) {
+      throw new Error(
+        `Only ${roots.size}/${docs.length} relational documents found. Run --ingest first.`
+      );
+    }
+    for (const doc of docs) {
+      const rootHash = roots.get(doc.docKey);
+      if (!rootHash) throw new Error(`Missing relational document ${doc.docKey}. Run --ingest.`);
+      assertRelationalInvariant(doc, nodeText(await readRootNode(rootHash)));
+    }
+    questions.push(...buildRelationalQuestions(corpus, roots));
+    meta.relational = {
+      prefix: RELATIONAL_LEDGER_KEY_PREFIX,
+      houses: RELATIONAL_HOUSE_COUNT,
+      registry: RELATIONAL_REGISTRY_DOC_KEY,
+      tariff: RELATIONAL_TARIFF_DOC_KEY,
+    };
+  }
   return { questions, meta };
 }
 
@@ -949,6 +1235,13 @@ function suiteCorpusTokens(suite: Suite): number {
     case 'ledger':
       return Math.ceil(
         Buffer.byteLength(generateLedgers().map(d => d.text).join(''), 'utf8') / 4
+      );
+    case 'relational':
+      return Math.ceil(
+        Buffer.byteLength(
+          allRelationalDocs(generateRelationalCorpus()).map(d => d.text).join(''),
+          'utf8'
+        ) / 4
       );
   }
 }
@@ -968,7 +1261,7 @@ async function main(): Promise<void> {
   if (questions.length === 0) throw new Error('No questions selected.');
 
   const runCount = args.arms.length * questions.length * args.repeats;
-  console.log('Effective-context probe plan (round 2):');
+  console.log('Effective-context probe plan (round 3):');
   console.log(`  suites:            ${args.suites.join(', ')}`);
   for (const [k, v] of Object.entries(meta)) console.log(`  ${k}: ${JSON.stringify(v)}`);
   console.log(
@@ -1033,7 +1326,9 @@ async function main(): Promise<void> {
           + `${row.fileExact === null ? '' : ` file=${row.fileExact ? 'exact' : 'DIFF '}`} `
           + `in=${String(row.inputTokens).padStart(7)} out=${String(row.outputTokens).padStart(6)} `
           + `iter=${row.iterations ?? '?'} sub=${row.subcalls} db=${row.toolCalls} `
-          + `submit=${row.answerSubmits} pandas=${row.usedPandas ? 'Y' : 'n'} `
+          + `submit=${row.answerSubmits} pandas=${row.usedPandas ? 'Y' : 'n'}`
+          + `${row.usedPolars ? ' polars=Y' : ''}`
+          + `${row.locMethod ? ` loc=${row.locMethod}` : ''} `
           + `$${row.costUsd.toFixed(4)} | "${row.answer.slice(0, 60)}"`
         );
       }
@@ -1060,6 +1355,7 @@ async function main(): Promise<void> {
     }, null, 2)
   );
   printAggregate(rows, args.suites, args.arms);
+  printLocalizationMethods(rows);
   console.log(`\nTotal spend: $${total.toFixed(4)} across ${rows.length} run(s).`);
 }
 

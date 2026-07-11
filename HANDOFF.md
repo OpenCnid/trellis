@@ -390,21 +390,98 @@ planner-statistics drift after the day's bulk ingests), recorded in the
 roadmap; the gate stands CLOSED and the do-not-migrate-on-noise
 doctrine held.
 
+**Session 23 (July 11, 2026, this PR) is also complete: the
+effective-context probe round 3** (roadmap §4 row 3; owner-directed
+July 11, 2026 over extraction, which held at row 4).
+**(1) The relational corpus** (pillar §7's regime; a generated
+multi-table corpus chosen over a live `repo:ingest` snapshot because a
+repository's cross-file joins are not computable from bytes by pure
+helpers and a snapshot drill must tombstone where this corpus stays
+durable): `src/benchmarks/effective_context/relational_corpus.ts` —
+seeded (mulberry32, ASCII, concat sha256 `3bbbea18…a697` unit-pinned;
+583,128 bytes ≈ 146k tokens), 102 documents: 100 season-two ledgers
+(`ledger:synthetic:s2-house-001…100`, 6,859 records in round 2's exact
+record shape), one captain registry (`registry:synthetic:captains`, 36
+captains → 8 guilds, round-robin balanced — an rng assignment skewed
+one guild into topping EVERY aggregate; fixed at design time), one
+tariff schedule (`tariff:synthetic:port-schedule`, 108 (port, material)
+pairs). Shape-based parsers (`parseRegistryRecords`/
+`parseTariffRecords`) + tie-refusing join truths (`buildGuildIndex`/
+`buildTariffIndex`/`topGuildForMaterial`/`tariffIntoPort`/
+`totalTariffByGuild`/`topGuildByTariff`/`guildProfile`); all ingested
+zero-paid (extraction `none`), byte-exact Python read-back, re-ingest
+the auditable no-op; durable in dev PG (~293 documents total now).
+**(2) The probe script round 3** (`exp_effective_context.ts`): new
+`relational` suite (4 join questions incl. the multi-part
+answer-channel stress `rel-guild-profile`), `usedPolars` scanned, two
+new chronicle locate anomalies (Entries 24/37), per-run
+localization-method classification (`classifyLocalizationMethod`), the
+`--ingest` boundary quantification, and the disclosure fix (the
+chronicle/ledger preambles now carry the frank "paragraph boundaries
+are unmarked; line breaks inside paragraphs are preserved" clause
+verbatim). Boundary quantification unit-pinned
+(`boundaryPreservedReconstruction`/`lineAnchoredHeadingLabels`):
+line-anchored heading visibility over glued reconstruction = chronicle
+0/48 (the glued chronicle is ONE line), frank 26 ALL-misleading TOC
+labels ending at "Chapter 23"; boundary-preserved = 48/48 and 56.
+NO kernel change: both composed-prompt pins unmoved.
+**(3) The measured round 3** (87 paid runs, $3.6260 total; estimates
+printed, ≤$5 cumulative abort armed per invocation, none hit; report
+round-3 section): the pandas null result PERSISTS at 3.1× scale with
+genuine joins (0/87 runs imported pandas or polars; plain dict loops
+answered all 17 relational join runs digit-exact at ~8.7k median input
+tokens vs a ~146k-token corpus — the structured-frame threshold sits
+above one-record-shape corpora of this size; movers recorded: schema
+heterogeneity, fuzzy joins, long interactive sessions); the
+localization class reproduced at rate (7/30 locate misses, ALL method
+error, none transcription — five loud sentinels + two plausible
+"Chapter 23"; recovering runs paid 13k–27k input tokens; the
+disclosure clause was IN the preamble, so prompt disclosure measurably
+does NOT retire the class); a SECOND representation trap found live:
+gluing destroys trailing word boundaries (`\d+\b` cannot match a
+heading digit glued to the next block's first letter — the exact
+"Chapter 23" mechanism of both rounds, unit-pinned); the
+load-bearing claims moved toward settled (87/87 submits, zero
+transcription errors — cumulative 144/144 over rounds 2–3; 20/20
+quote runs byte-faithful at n=5/arm/question; multi-part stress 5/5);
+one NEW miss shape upstream of the channel (a run assumed
+`get_ast_texts` returns a list, counted over the fallback empty
+string, and submitted the computed 0 in the SAME response block —
+result-shape mishandling + same-turn submit, faithfully delivered);
+the arm effect stayed in the tail (medians indistinguishable; the
+round's single near-corpus attention pass, 84,829 input tokens through
+one `llm_query`, happened in the OFF arm; zero in 47 on-arm runs).
+**The RECOMMENDATION was recorded and then re-pointed the same day**
+(§0 event-loop rule): round 3 first recommended a boundary-preserving
+`get_ast_texts`/`nodeText` reconstruction (which repairs all 10
+cross-round misses but moves every pinned reconstruction truth), and
+the owner instead chose the ADDITIVE `get_ast_blocks` accessor — same
+repair, no reconstruction bytes moved — as the Session 24 objective
+(§3 below). Classifier defect fixed mid-session (anchored alternations
+like `^(Letter|Chapter)` initially classified as shape; report tables
+re-classified from saved logs with the committed classifier,
+disclosed). This session's `drill:scale` read 1.84x CLOSED — inside
+the recorded band; no outlier.
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 23: the effective-context probe, round 3**
-(roadmap §4 row 3; owner-directed July 11, 2026 to precede the
-repository-scale extraction prerequisites, which move to row 4), per
-§3–§6 below. Round 2 proved the transcription channel closed and
-read-fidelity holds, but left the pillar's headline §7 payoff unproven
-(structured frames earning their keep at scale — round 2's pandas null
-result) and surfaced a concrete localization/representation question
-(all three round-2 misses were line-anchored regexes failing over the
-unmarked-boundary reconstruction). Round 3 closes those threads with a
-genuine repo-scale corpus, a localization arm, higher n, and the
-recorded question-design fixes. Do not re-plan or re-implement
-completed work. RLM expands exclusively to Recursive Language Model
-(the MIT CSAIL formulation).
+Your objective is **Session 24: the boundary-aware block accessor
+(`get_ast_blocks`) + the structure-selection demotion** (roadmap §4
+row 4; owner-directed July 11, 2026 as the post-round-3 re-point — it
+precedes the repository-scale extraction prerequisites, which drop to
+row 5), per §3–§6 below. Round 3 left ONE live failure class:
+localization over the glued reconstruction (10 misses across rounds
+2–3, all method error). The fix is a small, additive read tool that
+hands the RLM a document's blocks in order so it never re-parses a
+glued string — no stored byte moves, only the composed-prompt pins
+move wittingly to teach it. The same session demotes pillar §7's
+"pandas default" guidance to "plain loops until a measured threshold"
+per §7's own written contingency (the round-3 null is the continued
+null it pre-committed to acting on; docs-only, zero-paid), and
+re-measures the localization arm (paid, owner-gated) to confirm the
+miss rate drops. Do not re-plan or re-implement completed work. RLM
+expands exclusively to Recursive Language Model (the MIT CSAIL
+formulation).
 
 ---
 
@@ -480,25 +557,32 @@ immutable, content-addressed physical location in source material.
      writes it, inside the ingest transaction.
    - `repository_snapshots`/`repository_snapshot_paths` (Session 8) record
      which paths each published repository snapshot contained.
-   - Durable measurement substrate (Sessions 21/22): `data/frankenstein.txt`
-     and `data/synthetic_chronicle.txt` (committed, byte-stability
-     unit-pinned, `.gitattributes -text`) are ingested as
-     `book:gutenberg-84:frankenstein` and
-     `book:synthetic:ninth-circuit-chronicle`, and the 40 deterministic
+   - Durable measurement substrate (Sessions 21–23):
+     `data/frankenstein.txt` and `data/synthetic_chronicle.txt`
+     (committed, byte-stability unit-pinned, `.gitattributes -text`) are
+     ingested as `book:gutenberg-84:frankenstein` and
+     `book:synthetic:ninth-circuit-chronicle`; the 40 deterministic
      ledgers (`src/benchmarks/effective_context/synthetic_corpus.ts`,
      seeded generator, concat sha unit-pinned) as
-     `ledger:synthetic:house-01…40` (all extraction `none`, no
-     embeddings) — the effective-context probe's corpora, deliberately
-     NOT drill residue. The three promoted research docs
+     `ledger:synthetic:house-01…40`; and the Session 23 relational
+     corpus (`relational_corpus.ts`, seeded, concat sha `3bbbea18…a697`
+     unit-pinned) as `ledger:synthetic:s2-house-001…100` +
+     `registry:synthetic:captains` + `tariff:synthetic:port-schedule`
+     (all extraction `none`, no embeddings) — the effective-context
+     probe's corpora, deliberately NOT drill residue. The three promoted
+     research docs
      `research:trellis/workspace-discipline/{contract,evidence,code-mediated-text}`
-     are module #1's corpus documents. NOTE (measured Session 22): the
-     root-hash reconstruction (`nodeText`/`get_ast_texts`) concatenates
-     paragraph blocks with UNMARKED boundaries — line-anchored parsing
-     over a reconstruction is not representation-invariant; parse by
-     shape (the `parseLedgerRecords` precedent). Whether the
-     reconstruction should preserve block boundaries is an open kernel
-     question (it would move every pinned reconstruction truth — witting
-     or not at all).
+     are module #1's corpus documents. NOTE (measured Sessions 22–23):
+     the root-hash reconstruction (`nodeText`/`get_ast_texts`)
+     concatenates paragraph blocks with UNMARKED boundaries — it breaks
+     BOTH line-anchored parsing AND trailing word boundaries (`\d+\b`
+     fails at glued digit→letter junctions); parse by shape without
+     trailing `\b` (the `parseLedgerRecords` precedent). Whether the
+     reconstruction should preserve block boundaries is now a RECORDED
+     RECOMMENDATION (roadmap §4 row 6, probe round 3: all 10 cross-round
+     localization misses are in the repaired class) — still owner-gated,
+     witting or not at all (it moves every pinned reconstruction
+     truth).
    - The verified ingest transaction lives in `src/core/ingestion/`
      (`ingest_document.ts`: persist → read-back re-hash verification →
      membership → registration → in-transaction Merkle diff;
@@ -692,12 +776,21 @@ immutable, content-addressed physical location in source material.
      editing toolkit) and §6.2 (the kernel prompt hard-rule block);
      Session 21 measured §6.3 round 1 and landed module #1 v2 (§6.4);
      Session 22 measured §6.3 round 2 and closed the answer channel
-     (the last unmediated channel) with `trellis_answer`. Measured
-     standing: transcription is closed in practice; the residual
-     failure class is LOCALIZATION method error over the
-     unmarked-boundary reconstruction (3/56 round-2 runs), and the
-     regime where structured frames beat plain loops remains
-     unmeasured (the pandas null result at 40 documents).
+     (the last unmediated channel) with `trellis_answer`; Session 23
+     measured §6.3 round 3 (the relational corpus, the localization
+     arm, higher n). Measured standing after three rounds:
+     transcription is CLOSED (144/144 rounds-2–3 runs submitted by
+     reference, zero retyped-value corruptions); read-fidelity holds
+     (28/28 unmemorized quotes byte-faithful); the structured-frame
+     threshold sits ABOVE ~6,900 records / three-way joins /
+     one-record-shape corpora (the pandas null result, twice); the
+     LIVE failure class is localization method error over the
+     unmarked-boundary reconstruction (10 misses across rounds 2–3,
+     all in the class a boundary-preserving reconstruction repairs —
+     the roadmap §4 row 6 recommendation, owner-gated); and the
+     residual after transcription closes is computing faithfully over
+     the WRONG input (one round-3 result-shape miss, submitted
+     same-turn before its own evidence printed).
    - **The editing toolkit (Session 20; `src/rlm/trellis_textedit.py`):**
      `TrellisTextEdit` injected as `trellis_textedit` ONLY when the
      operator sets `TRELLIS_EDIT_ROOT` (never a default; never from a
@@ -840,10 +933,9 @@ immutable, content-addressed physical location in source material.
      July 7, 2026 — third deferral); NOT this session's work unless the
      owner directs it.
    - Whole-codebase ingestion: `src/core/repository/`, `npm run
-     repo:ingest`, live drill `npm run test:repo-ingest`. The Session 23
-     probe's repo-scale arm (§3) uses `repo:ingest` to build a genuine
-     multi-file corpus; the roadmap row-4 extraction prerequisites also
-     live HERE and in `src/workers/extraction_worker.ts`.
+     repo:ingest`, live drill `npm run test:repo-ingest`. The Session 24
+     extraction prerequisites (§3) live HERE and in
+     `src/workers/extraction_worker.ts`.
    - Benchmarks: OOLONG v1 saturated baseline; anti-shortcut v2 at
      `data/oolong_pairs_dataset_hard.json`; scale evidence in
      `docs/benchmarks/SCALE_PROVENANCE_REPORT.md` and
@@ -852,10 +944,10 @@ immutable, content-addressed physical location in source material.
      and `docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md`; the
      provenance-citation A/B eval in
      `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`; the
-     effective-context probe (Sessions 21/22, pillar §6.3, rounds 1 and
-     2) in `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` over the
-     committed `data/frankenstein.txt` and the Session 22 synthetic
-     corpora.
+     effective-context probe (Sessions 21–23, pillar §6.3, rounds 1–3)
+     in `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` over the
+     committed `data/frankenstein.txt`, the Session 22 synthetic
+     corpora, and the Session 23 relational corpus.
    - The fixture MCP server (`scripts/fixture_mcp_server.py`; stdio and
      Streamable HTTP with an optional required-bearer mode) is the only
      MCP server acceptance ever configures; real web-search servers are
@@ -867,72 +959,71 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 11, 2026 Session 22 PR (the probe
-  round 2 + the answer-channel fix — the PR that carries this file).
-  Use `git log -- HANDOFF.md` to confirm the Session 22 PR landed. If
-  it is still unmerged when this session starts, STOP and merge it
-  first.
+- `master`: the head after the July 11, 2026 Session 23 PR (the probe
+  round 3 — the PR that carries this file). Use `git log -- HANDOFF.md`
+  to confirm the Session 23 PR landed. If it is still unmerged when
+  this session starts, STOP and merge it first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); the dev
   graph carries its registered entity `module:workspace-discipline`
   (`moduleVersion` 2; manifest pins 31 research hashes; the entity's
   live provenance is the audit-preserving union of both versions'
   bases, 41 hashes) and THREE promoted corpus documents
   `research:trellis/workspace-discipline/{contract,evidence,code-mediated-text}`
-  (none embedded). The dev PG also durably carries the three probe
+  (none embedded). The dev PG also durably carries the four probe
   corpora: `book:gutenberg-84:frankenstein` (root `a2f9c97c…4439`, 796
-  blocks; at version 5 after Session 22's no-op re-ingest checks),
-  `book:synthetic:ninth-circuit-chronicle` (root `f0ffaf20…7c23`, 827
-  blocks, version 3), and `ledger:synthetic:house-01…40` (versions
-  2–3) — ~191 documents total in `documents`. No module #2 exists (its
-  paid turn is owner-gated and did not run).
-- Session 22 added `src/rlm/trellis_answer.py` (+ its injection in
-  `trellis_agent.py`, the kernel prompt revision, `python:check` and
-  Dockerfile coverage), `scripts/test_answer_channel.{ts,py}` + the
-  `test:answer-channel` npm alias (`package.json` WAS touched — the
-  Docker `npm ci` layer rebuilt this session, image round trip green),
-  `data/synthetic_chronicle.txt` (+ `.gitattributes -text`),
-  `src/benchmarks/effective_context/synthetic_corpus.ts` (+ test),
-  the `ground_truth.ts` generalizations, the round-2 probe script
-  (suites/repeats/edit arm; still deliberately NO npm alias), and the
-  report's round-2 section. `TRELLIS_EXP_OMIT_CMT` remains experiment
-  instrumentation with NO `.env.example` entry.
-- Offline baseline: `npm test` = 659 passing across 73 files
-  (Session 22 added `synthetic_corpus.test.ts` and extended
+  blocks), `book:synthetic:ninth-circuit-chronicle` (root
+  `f0ffaf20…7c23`, 827 blocks), `ledger:synthetic:house-01…40`, and
+  the Session 23 relational set `ledger:synthetic:s2-house-001…100` +
+  `registry:synthetic:captains` + `tariff:synthetic:port-schedule`
+  (all at +1 version after the no-op re-ingest check) — ~293 documents
+  total in `documents`. No module #2 exists (its paid turn is
+  owner-gated and did not run).
+- Session 23 added `src/benchmarks/effective_context/
+  relational_corpus.ts` (+ test; generated, not committed — concat sha
+  pinned), the `ground_truth.ts` localization additions
+  (`boundaryPreservedReconstruction`, `lineAnchoredHeadingLabels`,
+  `classifyLocalizationMethod` + tests incl. the two glued-trap pins),
+  the probe script's `relational` suite / method classification /
+  disclosure fixes, the report's round-3 section, and roadmap §4 row 6
+  (the boundary recommendation). `package.json` was NOT touched (no
+  new npm alias — the probe script stays deliberately un-aliased);
+  no kernel prompt change; NO composed-prompt pin moved.
+  `TRELLIS_EXP_OMIT_CMT` remains experiment instrumentation with NO
+  `.env.example` entry.
+- Offline baseline: `npm test` = 678 passing across 74 files
+  (Session 23 added `relational_corpus.test.ts` and extended
   `ground_truth.test.ts`).
-- `npm run build` and `npm run python:check` pass (`python:check` now
-  imports `trellis_answer`).
-- `npm run drill:scale`: gate CLOSED at max provenance 286. NOTE
-  (Session 22): one run read the gate OPEN at 11.61x sweep-latency
-  growth and the immediate re-run read 1.48x CLOSED — a
-  non-reproducing outlier on the shared dev database (most plausibly
-  planner-statistics drift right after the day's bulk corpus ingests).
-  Recorded in the roadmap §5; the run-to-run band including Session 22
-  is ~1.48x–2.26x plus that one outlier. If a future run reads OPEN,
-  re-run before believing it — and if it REPRODUCES, that is the
-  recorded row-4 trigger and the owner adjudicates. The drill rewrites
-  the tracked `scale_drill_results.json` — commit it with the session
-  PR (house practice; the committed copy is the second, CLOSED run).
-- Live zero-LLM checks (Session 22 observed, all green):
-  `test:answer-channel` (32, NEW), `test:modules` (51 — BOTH
-  composed-prompt pins moved wittingly this session: default
-  `9f09d7d2…dd68`, omit-arm `9779b5c0…9e45`; recompute BOTH in the same
-  commit only if the kernel prompt or rubric legitimately changes),
-  `test:textedit` (81), `test:module-lifecycle` (60), `test:promotion`
-  (41), `test:rlm-workspace` (86), `test:rlm-mcp` (86),
-  `test:rlm-sandbox` (21), `test:agent-loop` (35 / ALL CHECKS PASSED),
-  `test:a2a` (46), `test:repo-ingest` (45), `test:benchmark-hardening`
-  (24), `test:entity-resolution` (34), `test:api-hardening` (18),
+- `npm run build` and `npm run python:check` pass.
+- `npm run drill:scale`: gate CLOSED at max provenance 286 (Session 23
+  read sweep growth 1.84x — inside the recorded ~1.48x–2.26x band; the
+  Session 22 11.61x outlier did not recur even right after the
+  102-document relational ingest). If a future run reads OPEN, re-run
+  before believing it — and if it REPRODUCES, that is the recorded
+  migration trigger (roadmap §4 conditional-migration row) and the
+  owner adjudicates. The drill rewrites the tracked
+  `scale_drill_results.json` — commit it with the session PR (house
+  practice; the committed copy is Session 23's CLOSED run).
+- Live zero-LLM checks (Session 23 observed, all green):
+  `test:answer-channel` (32), `test:modules` (51 — NO pin moved this
+  session: default `9f09d7d2…dd68`, omit-arm `9779b5c0…9e45`;
+  recompute BOTH in the same commit only if the kernel prompt or
+  rubric legitimately changes), `test:textedit` (81),
+  `test:module-lifecycle` (60), `test:promotion` (41),
+  `test:rlm-workspace` (86), `test:rlm-mcp` (86), `test:rlm-sandbox`
+  (21), `test:agent-loop` (35 / ALL CHECKS PASSED), `test:a2a` (46),
+  `test:repo-ingest` (45), `test:benchmark-hardening` (24),
+  `test:entity-resolution` (34), `test:api-hardening` (18),
   `test:belief-recovery` (30), `test:invalidation-sweep` (17).
 - Isolated Compose integration: 10 assertions (`--profile test`, unique
   project name, host ports 0 via `TRELLIS_*_HOST_PORT=0`; includes the
-  containerized credentialed MCP fixture probe). Session 22 ran it as
-  project `trellis_s22_ci` (all 10 PASS, image rebuilt with the new
-  `package.json` and shipped `trellis_answer.py`) and tore it down
-  with `--volumes`. NOTE: the machine's C: drive runs close to full
-  and an image rebuild needs several GB of headroom (~31 GB free at
-  Session 22's close). Changing `package.json` invalidates the Docker
-  `npm ci` layer, forcing that rebuild.
-- CI target is Node 22. Session 22's local environment was Node 20.19.2,
+  containerized credentialed MCP fixture probe). Session 23 ran it as
+  project `trellis_s23_ci` (all 10 PASS; `package.json` untouched so
+  the `npm ci` layer stayed cached) and tore it down with `--volumes`.
+  NOTE: the machine's C: drive runs close to full and a full image
+  rebuild needs several GB of headroom (~27 GB free at Session 23's
+  close). Changing `package.json` invalidates the Docker `npm ci`
+  layer, forcing that rebuild.
+- CI target is Node 22. Session 23's local environment was Node 20.19.2,
   Python 3.13.1, Docker Compose v2, PostgreSQL 16.14, Neo4j 5.11.
 - Python runtime deps are pinned in `requirements.txt` (`rlms==0.1.3`,
   `openai`, `neo4j`, `psycopg2-binary`, `unstructured`, `mcp==1.12.4`);
@@ -963,176 +1054,195 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 23 problem statement
+## 3. Session 24 problem statement
 
-**Effective-context probe, round 3 (roadmap §4 row 3; owner-directed
-July 11, 2026 over the extraction prerequisites, which drop to row 4).**
+**The boundary-aware block accessor (`get_ast_blocks`) + the
+structure-selection demotion (roadmap §4 row 4; the post-round-3
+re-point, owner-directed July 11, 2026 over the extraction
+prerequisites, which drop to row 5).**
 
-Round 2 (`docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`) settled
-the two things it set out to: the transcription channel is closed in
-practice (57/57 paid runs answered through `trellis_answer.submit`,
-zero transcription errors in 56 scored runs), and read-fidelity is
-isolated and holds (8/8 unmemorized anomaly quotes byte-faithful). But
-it left three threads open and one recorded question-design gap — and
-the pillar's headline §7 payoff is still unproven:
+Three rounds of the effective-context probe closed the transcription
+channel and confirmed read-fidelity, and left exactly ONE live failure
+class: **localization over the glued reconstruction.** Ten misses
+across rounds 2–3 (3 + 7), every one the same pathology — the model
+reconstructs a document with `get_ast_texts(rootHash)`, receives all
+the paragraph/heading blocks concatenated with NO separator (the
+blank lines that separated them in the source were never stored as
+node content — the markdown parser consumed them), and then tries to
+re-find that lost block structure with a regex over the glue. Both
+failure mechanisms are unit-pinned in `ground_truth.test.ts`:
+line-anchored heading scans (`^Entry \d+$`) see 0/48 chronicle
+headings over the glued text (which is one line) vs 48/48
+boundary-preserved; and even a position-independent shape scan ending
+in `\d+\b` fails at a glued digit→letter junction ("Chapter 5It was
+on…"), resolving nearest-heading-before to the misleading TOC line
+"Chapter 23" — the exact wrong answer of both rounds.
 
-1. **The structured-frame regime is unmeasured (the pillar's §7
-   claim).** Round 2 imported pandas in 0 of 68 runs; plain dict/regex
-   loops answered a 40-document, 2,209-record aggregation correctly and
-   cheaply. That is a NULL result, honestly reported: at ~46k tokens
-   across 40 small documents the structure choice does not matter. The
-   pillar claims a DataFrame *earns its keep* at genuine relational
-   scale — and nothing yet reaches that scale. Until it does, "code
-   holds the working set, attention stays small" is proven only at
-   book-and-ledger scale, not at the scale the claim is really about.
-2. **Localization over the unmarked-boundary reconstruction is the live
-   failure class.** Every round-2 miss (3 of 56) was the SAME pathology:
-   a line-anchored heading regex (`^Entry \d+$`, `^Chapter \d+$`) over
-   the reconstruction that `get_ast_texts` returns, which concatenates
-   paragraph blocks with NO blank line between them — so headings that
-   sat at real line-starts in the source no longer do. Two produced
-   loud sentinels ("Entry None"/"Entry ?"), one a plausible
-   TOC-anchored "Chapter 23". This is localization error (the pillar's
-   other half) invited by the representation. Whether `get_ast_texts`
-   should preserve block boundaries is an open KERNEL question — it
-   would move every pinned reconstruction truth, so it is witting or
-   not at all.
-3. **n is too small for the load-bearing claims.** Round 2 ran n=2 per
-   question on the new suites (n=1 on frank). "Transcription closed" and
-   "read-fidelity holds" are the claims the pillar now rests on; they
-   deserve more runs before they are stated as settled.
-4. **A recorded question-design gap.** The round-1 frank preamble
-   disclosed "paragraph boundaries are unmarked"; the round-2 chronicle
-   and ledger preambles omitted that clause, so the model was scored on
-   a representation quirk it was never told about. The corpora are
-   byte-pinned and correct; the SCRIPT preambles need the fix.
+Round 3 recommended repairing this by making the reconstruction
+preserve block boundaries. The owner re-pointed (July 11, both forks
+decided) to a cleaner fix found while designing the re-point: **the
+model does not need a different reconstruction — it needs the block
+structure the engine already has.** `get_ast_texts` ALREADY returns
+blocks separately when handed a LIST of block hashes (`{hash: text}`
+per block, un-glued); the model only ever gets a glued blob because it
+is handed the ROOT hash and has no tool to enumerate a document's
+ordered blocks. Its tool surface is `run_cypher` (the Neo4j semantic
+graph — no AST tree), `vector_search` (top-3 semantic hits), and
+`get_ast_texts` (needs hashes it does not have). So the fix is a small
+ADDITIVE read tool that returns the ordered blocks with their types —
+the model localizes structurally ("blocks mean, lines locate"), no
+stored or reconstructed byte moves, and the byte-changing reconstruction
+approach is superseded (roadmap §4, struck) rather than taken.
 
-The objective: close threads 1–3 with new measurement and fix gap 4 —
-all machinery zero-paid; the paid runs owner-gated per arm with printed
-estimates under the standing ≤$5/run cap. Round 3 does NOT change the
-kernel; the block-boundary question is investigated and RECOMMENDED,
-never implemented unprompted.
+The same session also does the honest documentation follow-up round 3
+earned: **demote pillar §7's "pandas is the default" guidance.** §7
+ends with its own written contingency — "A continued null result would
+argue for demoting the 'pandas default' guidance to 'plain loops until
+a measured threshold.'" Round 3 is that continued null (0/87 at
+three-table-join / 6,859-record scale), and §7's own micro-benchmark
+already showed pandas has no speed advantage below ~1M lines (orders
+of magnitude past any Trellis frame). The mechanism claim — compute in
+code, effective context decoupled from attention — stays PROVEN by the
+loop runs; only the library-choice sub-claim is retired. Docs-only,
+zero-paid, no probe: another null is the likely outcome and §7 already
+conceded the point.
 
 ## 4. Required design
 
-Extend `scripts/exp_effective_context.ts` (the round-2 suite/`--repeats`
-machinery) and the pure helpers; do not start a new script.
-
-- **(a) A genuine repo-scale / relational arm.** Build a corpus far
-  larger and more relational than the 40 small ledgers — the regime
-  where a DataFrame could actually pay off. Two viable shapes, pick per
-  what stays byte-reproducible and computable:
-  - a REAL repository snapshot via the Session 8 `repo:ingest` path
-    (many `repo:<key>:<path>` documents; ground truth = a fact that
-    requires joining across files, computed from the committed source
-    bytes at run time), or
-  - a MUCH larger generated relational corpus (the `synthetic_corpus.ts`
-    seeded-generator pattern — e.g. hundreds of ledgers, or a
-    multi-table shape whose answer needs a join/group-by across
-    documents), committed or regenerated deterministically with a
-    unit-pinned sha.
-  Measure per run: `usedPandas` (already scanned), input tokens through
-  attention, correctness, and cost. A DataFrame earning its keep looks
-  like: the model reaches for pandas AND stays cheaper/more-correct than
-  the plain-loop arm at this scale. A continued null result is a
-  finding — report the scale at which it still holds.
-- **(b) A localization arm over the glued reconstruction.** Add
-  questions whose correct answer requires locating a phrase to its
-  section, and score BOTH the answer and (where observable in the run
-  log) whether the model localized by shape (code that tolerates the
-  glued boundaries) or by a line-anchored heuristic that the
-  reconstruction breaks. Then, as a DESIGN FINDING, quantify the fix:
-  compute (zero-paid, in the ground-truth helpers) how many round-2 +
-  round-3 localization misses would disappear if `get_ast_texts`
-  preserved block boundaries (e.g. a marker or a boundary-aware
-  reconstruction), and write a RECOMMENDATION in the report. Do not
-  change `get_ast_texts`/`nodeText` this session (Guardrail: it moves
-  every pinned reconstruction truth — a witting kernel decision with
-  owner sign-off, roadmap-tracked if pursued).
-- **(c) Higher n with honest spread.** Raise `--repeats` on the claims
-  that matter (recommend n≥5 on a focused question subset:
-  transcription-sensitive counts and unmemorized quotes) and keep the
-  full matrix within the $5 cap by trimming question count, not the
-  abort. Report medians WITH min/max (the round-2 spread columns), and
-  state the n explicitly. The point is to move "directional" toward
-  "settled" on the two load-bearing claims, not to re-run everything.
-- **(d) The preamble disclosure fix.** Restore the "paragraph
-  boundaries are unmarked; line breaks inside paragraphs are preserved"
-  clause (verbatim from the frank preamble) to the chronicle and ledger
-  preambles in the script. This is a SCRIPT change; the committed
-  corpora and their sha pins do not move. Note it in the report so the
-  round-2 vs round-3 localization numbers are read fairly.
-- **Optional companion (cheap, folds into existing suites):** keep the
-  answer channel under mild stress — a question whose answer is a
-  computed multi-part string (e.g. "Port X, N crates" interpolated in
-  code) or prose-with-a-number — to confirm `trellis_answer` holds
-  beyond round 2's shapes. Round 2 already showed the dict/tuple render
-  paths work; this is confirmation, not new machinery.
-- **What does NOT change:** the answer channel (`trellis_answer`), the
-  editing toolkit, the promotion/authoring/registration gates
-  (including the Session 21 anchor-gate fix), the Session 14 write
-  path, every bound, the discipline-off flag `TRELLIS_EXP_OMIT_CMT` and
-  its byte-identity pins, and the composed-prompt pins (`9f09d7d2…` /
-  `9779b5c0…`) — NO kernel prompt change is in scope. The question
-  sets and ground-truth logic stay kernel-fixed in the script
-  (Guardrail 5), never env-tunable free text.
+- **(a) The `get_ast_blocks` accessor (the fix).** A new method on
+  `TrellisPostgres` (`src/rlm/trellis_tools.py`), injected via the
+  existing `trellis_postgres` holder: `get_ast_blocks(rootHash)`
+  returns a JSON list of a document's extraction blocks IN DOCUMENT
+  ORDER, each `{id, type, text}` — where the block set is exactly
+  `collectExtractionBlocks`'s (the TS authority in
+  `src/core/ast/traverse.ts`: top-most markdown/code block nodes,
+  containers traversed through), the ids are the already-stored AST
+  hashes, and `text` is reconstructed with the existing `_node_text`
+  (so markdown/container blocks whose text lives in children read back
+  correctly — the Session 19 fix). It is a READ accessor: it calls
+  `_count_tool_call()` like `get_ast_texts` (so a run using it still
+  satisfies the database-tool-call protocol), and `_audit_add("read",
+  ids)` the returned block ids (same read-set semantics — the citation
+  audit keeps working). Provenance is unchanged: block ids are the same
+  hashes `get_ast_texts` already exposes; nothing new becomes citable.
+  Fetch the root's `data` JSONB once, walk it with the block-type rules
+  ported from `collectExtractionBlocks`, and return the ordered list —
+  the walk reproduces the TS block set exactly (unit-pinned; see §6).
+- **(b) Teach the kernel prompt the tool (the ONLY pin move).** Add a
+  brace-free line to the TOOLS section of `TRELLIS_ADDENDUM_BASE`
+  naming `get_ast_blocks` and when to prefer it (localization /
+  section-structure questions — get blocks in order rather than
+  regexing a reconstruction). Because it sits in the shared base (not
+  the `CODE_MEDIATED_TEXT_BLOCK`), BOTH composed-prompt pins move
+  wittingly: recompute `COMPOSED_SYSTEM_PROMPT_SHA256` (default) AND the
+  omit-arm pin in the SAME commit, recording the move history in
+  `scripts/test_modules.py` (the Session 22 `trellis_answer`
+  precedent). This is the only pin that moves; `get_ast_texts`/
+  `nodeText` reconstruction bytes DO NOT change (that is the superseded
+  approach — Guardrail).
+- **(c) The §7 demotion (docs-only, zero-paid).** Edit
+  `docs/architecture/CODE_MEDIATED_TEXT.md` §7: change the "pandas
+  (object dtype) … the default" tier language and the closing status
+  paragraph to record that round 3 delivered the continued null result
+  §7 pre-committed to, so the guidance is now "plain loops until a
+  measured threshold; pandas/polars remain available and fast at every
+  Trellis scale but are not the default the model must reach for." Keep
+  the micro-benchmark table and the mechanism framing verbatim — this
+  demotes the LIBRARY-CHOICE sub-claim only, not the compute-in-code
+  doctrine. Do NOT touch the kernel `CODE_MEDIATED_TEXT_BLOCK` "ingestion
+  = pandas" metaphor (that is the mechanism, and touching it moves the
+  pins for no reason — the demotion is a spec-doc change, not a prompt
+  change). Mirror one line into pillar §6.3's round-3 note if it still
+  reads "unmeasured."
+- **(d) The localization re-measure (paid, owner-gated).** Extend the
+  probe's localization arm so the preamble offers `get_ast_blocks` and
+  the run logs let `classifyLocalizationMethod` see a THIRD method
+  ("structured" — the model called `get_ast_blocks` and walked the
+  ordered blocks) distinct from line-anchored/shape/unknown. Re-run the
+  chronicle + frank locate questions (the round-3 set, `--repeats 3`,
+  both arms ≈ 30 runs ≈ $1.3 at round-3 rates) and record whether the
+  miss rate drops when the model uses the accessor. Success criterion,
+  stated up front: the localization misses that were method error over
+  the glue fall materially (ideally to ~0 for runs that use
+  `get_ast_blocks`); a null here (model ignores the tool, or still
+  misses) is itself a finding and would re-open the byte-change row.
+- **What does NOT change:** the `get_ast_texts`/`nodeText` reconstruction
+  bytes (superseded byte-change approach — Guardrail); the answer
+  channel (`trellis_answer`), the editing toolkit, the promotion/
+  authoring/registration gates, the Session 14 write path, every bound;
+  the `TRELLIS_EXP_OMIT_CMT` flag and its byte-identity semantics (the
+  omit-arm pin still equals default-minus-`CODE_MEDIATED_TEXT_BLOCK`,
+  re-proven structurally after both pins move); the corpora and their
+  sha pins; the API/A2A/SSE contracts.
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `scripts/exp_effective_context.ts` — the round-2 suites
-  (`frank`/`chronicle`/`ledger`/`edit`), `--repeats`, the spread
-  reporting, `usedPandas`, the per-run edit-arm plumbing, the
-  representation-invariance asserts, and the preambles to fix (`(d)`).
-- `src/benchmarks/effective_context/synthetic_corpus.ts` (+ its test) —
-  the seeded generator + `parseLedgerRecords` (shape-based, because the
-  reconstruction glues blocks); the pattern to reuse or scale up for
-  the repo-scale/relational arm.
-- `src/benchmarks/effective_context/ground_truth.ts` (+ its test) —
-  the pure computed-truth helpers (`splitSectionsBy`,
-  `sectionContainingBy`, `countOccurrences`); add the localization-fix
-  quantification and any repo-scale join truth here.
-- `scripts/ingest_repository.ts` + `src/core/repository/` (`scanner.ts`,
-  `snapshot_ingest.ts`, `paths.ts`) — the `repo:ingest` path if the
-  repo-scale arm uses a real snapshot (`repo:<key>:<path>` doc keys).
-- `src/rlm/trellis_tools.py` `get_ast_texts` / `src/core/ast/traverse.ts`
-  `nodeText` — the reconstruction whose unmarked boundaries cause the
-  localization misses (the `(b)` design finding; READ, do not change).
-- `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` — extend with a
-  round-3 section (the pandas-regime result, the localization finding +
-  the boundary recommendation, the higher-n numbers); the
-  honest-caveats house style.
-- `scripts/exp_citation_ab.ts` — the `--repeats` / spend-accounting
-  house style, if a knob needs mirroring.
+- `src/rlm/trellis_tools.py` — `get_ast_texts` / `fetch_texts` /
+  `_node_text` (the reconstruction and read-set/audit precedent),
+  `_count_tool_call`, `_audit_add`; where `get_ast_blocks` belongs
+  (a sibling method on `TrellisPostgres`).
+- `src/core/ast/traverse.ts` — `collectExtractionBlocks` (the block-set
+  AUTHORITY the Python walk must reproduce) and `nodeText`.
+- `src/core/ast/parser.ts` — the `ASTNode` shape (`type`, `content`,
+  `children`) the Python walk reads out of the root's `data` JSONB.
+- The kernel prompt source: `TRELLIS_ADDENDUM_BASE` and the TOOLS list
+  (in the same module as `COMPOSED_SYSTEM_PROMPT_SHA256` /
+  `CODE_MEDIATED_TEXT_BLOCK`; `scripts/test_modules.py` pins it).
+- `scripts/test_modules.py` — recompute BOTH pins (default + omit-arm)
+  in the same commit; record the move history in place.
+- `docs/architecture/CODE_MEDIATED_TEXT.md` §7 (the demotion) and §6.3
+  (the round-3 note).
+- `scripts/exp_effective_context.ts` — the localization arm, the
+  preambles, `classifyLocalizationMethod` wiring (add the "structured"
+  method); `src/benchmarks/effective_context/ground_truth.ts` —
+  `classifyLocalizationMethod` (extend to detect a `get_ast_blocks`
+  call), unit-pinned in `ground_truth.test.ts`.
+- `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` — a short round-4
+  / re-measure section for the localization result.
+- `python:check` (`scripts/check_python_runtime.py`) and the Dockerfile
+  — `trellis_tools.py` is already covered; no new file ships, so the
+  Docker `src/rlm` set is unchanged (no `package.json` touch, cached
+  `npm ci` layer).
 
 ## 6. Test strategy and acceptance
 
-The paid probe arms are owner-gated per run (estimate first, ≤$5/run
-cap, actuals reported). Everything else is zero-paid and local.
+The accessor, the pin recompute, and the demotion are zero-paid. The
+localization re-measure is owner-gated paid: propose it with the
+printed estimate (≈30 runs ≈ $1.3 at round-3 rates) under the standing
+≤$5/run cap, and do NOT run it unprompted.
 
-Offline (joins `npm test`, baseline 659 across 73 files):
+Offline (joins `npm test`, baseline 678 across 74 files):
 
-- Any new ground-truth helpers (repo-scale join truth, the
-  localization-fix quantification) are pure and unit-tested against
-  committed or deterministically generated inputs.
-- A larger generated corpus (if that shape is chosen) is sha-pinned in
-  a unit test exactly like the chronicle/ledgers, with its
-  representation invariants asserted.
-- No composed-prompt pin moves (no kernel prompt change); `test:modules`
-  is untouched by this objective.
+- **Python↔TS block parity:** a test that ingests a small fixture
+  document, then asserts the Python `get_ast_blocks` block ids and
+  order EQUAL `collectExtractionBlocks(root).map(b => b.id)` from TS,
+  and each block's `text` equals `nodeText(block)` — the accessor must
+  agree with the authority byte-for-byte (drive the real Python via the
+  `readBlocksViaPythonTool` spawn precedent in the probe script, or a
+  dedicated tiny harness). Include a markdown document (heading +
+  paragraphs) so the `_node_text` child-reconstruction path is covered.
+- **Method classifier:** `classifyLocalizationMethod` gains a
+  `structured` verdict when the log shows a `get_ast_blocks` call;
+  existing line-anchored/shape/unknown fixtures stay green
+  (`ground_truth.test.ts`).
+- **The pins:** `test:modules` — recompute both `COMPOSED_SYSTEM_PROMPT_SHA256`
+  and the omit-arm pin in the same commit; the omit-arm is re-proven
+  structurally as default-minus-`CODE_MEDIATED_TEXT_BLOCK` (item [7]).
 
 Live zero-paid:
 
-- The new corpus ingests through the verified path and reads back
-  byte-exact (the round-2 `--ingest` precedent); identical re-ingest is
-  the auditable no-op. A repo snapshot arm publishes through
-  `repo:ingest` with its zero-paid default.
+- The accessor round-trips against a real ingested document: for a
+  document with known blocks, `get_ast_blocks(root)` returns the blocks
+  in order and each block's text byte-matches `get_ast_texts([blockId])`
+  for that id (extend the probe's `--ingest` verify, or a small live
+  check).
+- The full standing drill block (below) stays green.
 
 Paid (owner-approved; estimate first, actuals recorded):
 
-- The round-3 arms (repo-scale/relational, localization, raised
-  repeats, the optional answer-channel stress). Abort past the cap.
+- The localization re-measure (§4(d)).
 
 Required close-out (the standing block):
 
@@ -1165,28 +1275,37 @@ Required close-out (the standing block):
 Update:
 
 - `TRELLIS_ROADMAP.md`: full-dated §5 entry with exact commands,
-  counts, token/spend actuals per paid run, and defects found; strike
-  §4 row 3 only after acceptance.
-- `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`: the round-3
-  numbers, with the pandas-regime result and the localization/boundary
-  recommendation called out.
-- README: point the benchmarks section at the round-3 results.
+  counts, the pin move, and the re-measure result; strike §4 row 4
+  only after acceptance.
+- `docs/architecture/CODE_MEDIATED_TEXT.md`: the §7 demotion (and §6.3
+  note).
+- `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`: the
+  localization re-measure result.
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5 re-check.
-  With round 3 done, the next first-unstruck row is the
-  repository-scale extraction prerequisites (row 4); regenerate §3–§8
-  for it (its full concreteness is preserved in this PR's git history —
-  the Session 22-authored version named it Session 23; reuse that
-  content, re-pointed).
+  The next first-unstruck row is the repository-scale extraction
+  prerequisites (now §4 row 5); regenerate §3–§8 for it. Its full
+  concreteness is preserved in this PR's git history (the round-3
+  handoff that named it Session 24 — reuse re-pointed): (a) the
+  `isTestOrFixturePath` extraction exclusion in
+  `src/core/repository/paths.ts` (ingest everything, extract
+  selectively; a classified file gets policy `none` under `--extract
+  changed`, reported as a typed count in the plan echo, unit-pinned);
+  (b) optional additive `sourceKind: 'code' | 'prose'` on the
+  extraction job payload routing a code-tuned prompt in
+  `extraction_worker.ts` with the legacy prompt bytes pinned; (c) a
+  deterministic generic-identifier suppression filter (kernel-constant
+  denylist + length rule) after `parseLlmResponse` and before
+  `resolveExtractedGraph`, dropping entities and their relationships
+  with counted/logged drops; (d) operator visibility in the plan echo;
+  the paid pilot re-run stays owner-gated (~$0.31/112 blocks).
 
 Remaining owner-gated items (do NOT run unprompted; propose each with a
 cost estimate):
 
-- The `get_ast_texts` block-boundary change, IF the localization
-  finding recommends it — a witting kernel decision (it moves every
-  pinned reconstruction truth); roadmap-track it and get owner sign-off
-  before touching `get_ast_texts`/`nodeText`.
-- The extraction pilot RE-RUN over a repository root with the row-4
-  exclusion + suppression + code prompt (once row 4 lands).
+- The localization re-measure (§4(d)) — part of this session, but paid,
+  so it is proposed with an estimate before it runs.
+- The extraction pilot RE-RUN (once row 5 lands) over a repository root
+  with the new exclusion + suppression + code prompt.
 - The supervised Trellis-edits-Trellis proof run (operator sets
   `TRELLIS_EDIT_ROOT` at a branch checkout; one small real edit through
   the toolkit; lands as an ordinary reviewed PR).
@@ -1197,103 +1316,108 @@ cost estimate):
 
 1. Never mutate an AST. The T13 hash preimage is pinned;
    `rederiveAstNodeId` stays authoritative; nothing positional is ever
-   persisted as identity — probe ground truth is computed from
-   committed or deterministically generated bytes, never stored as
-   positions.
+   persisted as identity. `get_ast_blocks` READS the stored tree and
+   returns already-stored block ids in order — it computes nothing new
+   as identity.
 2. Never merge, rename, or delete Entity nodes. Equivalence stays an
    overlay belief; module entities are contested or retired, never
    deleted.
 3. Preserve provenance on every semantic node and edge.
-   `write_derived_insight` keeps its Session 14 enforcement. The
-   probe's runs write no insights as acceptance criteria; if a run
-   caches facts, they carry real provenance.
-4. Paid work is exactly the owner-approved probe arms, each behind a
-   printed pre-flight estimate and the standing ≤$5/run cap, actuals
-   recorded. Everything else — corpus assembly, ingestion, the
-   localization quantification — is zero-paid. Never reward citation
-   count anywhere.
+   `write_derived_insight` keeps its Session 14 enforcement. The new
+   accessor exposes no new citable hashes (the block ids are the same
+   `get_ast_texts` already returns) and counts as a database tool call.
+4. Paid work is exactly the owner-approved localization re-measure,
+   behind a printed estimate under the standing ≤$5/run cap, actuals
+   recorded. The accessor, the pin recompute, and the §7 demotion are
+   zero-paid. Never reward citation count anywhere.
 5. Gate machinery is kernel; operator control is absolute. The probe's
-   question sets and ground-truth logic are kernel-fixed in the script —
-   never env-tunable free text. The Session 20 textedit invariants, the
-   Session 19 authoring gates (as calibrated in Session 21), and the
-   Session 22 answer-channel invariants (structural literal refusal;
-   caller-frame evaluation under the REPL's own builtins; the additive
-   contract) are permanent. `TRELLIS_EXP_OMIT_CMT` stays experiment-only:
-   off by default, byte-identical unset (pinned), never set by any
-   default/worker/Compose config, never forwarded by `buildAgentEnv`.
+   question sets and ground-truth logic stay kernel-fixed in the script.
+   The Session 20 textedit invariants, the Session 19 authoring gates
+   (as calibrated in Session 21), and the Session 22 answer-channel
+   invariants (structural literal refusal; caller-frame evaluation under
+   the REPL's own builtins; the additive contract) are permanent.
+   `TRELLIS_EXP_OMIT_CMT` stays experiment-only: off by default,
+   byte-identical unset (pinned, and re-proven structurally after the
+   pins move), never set by any default/worker/Compose config, never
+   forwarded by `buildAgentEnv`.
 6. Every external interaction is bounded; corpora are committed or
    deterministically generated and byte-stable; over-budget operations
-   raise with usage — never silent truncation.
+   raise with usage — never silent truncation. `get_ast_blocks` returns
+   bounded, ordered blocks; a pathological document is bounded by the
+   same block/byte limits the ingest path already enforces.
 7. Validate at every boundary: every worker-consumed completion crosses
-   `parseLlmResponse`; new job/envelope fields are optional and bounded;
+   `parseLlmResponse`; the accessor is additive and read-only;
    `AGENT_ORACLE_ENABLED` and `TRELLIS_A2A_ENABLED` defaults stay pinned
    false.
 8. Report probes honestly: publish raw numbers, medians, AND spread,
-   with the small-n caveat; a surprising or null result is a finding,
-   not a reason to re-run until it flatters the pillar. The Session 22
-   scale-gate outlier precedent applies to any gate/metric reading
-   outside its recorded band: re-run before believing, and a
-   REPRODUCING anomaly is escalated to the owner, never silently
-   absorbed.
-9. Do not break existing consumers: the composed-prompt pins
-   (`9f09d7d2…dd68` default / `9779b5c0…9e45` omit-arm, `test:modules`
-   [4]/[7]) do NOT move — round 3 changes no kernel prompt; module #1's
-   pins hold; `TRELLIS_RESULT`/`TRELLIS_TELEMETRY` semantics are
-   additive only; the API, A2A, and SSE contracts are untouched;
-   `get_ast_texts`/`nodeText` reconstruction bytes do not change this
-   session (the boundary question is a recommendation).
+   with the small-n caveat; a null re-measure (the model ignores
+   `get_ast_blocks`, or still mislocates) is a FINDING that re-opens the
+   byte-change row, not a reason to re-run until it flatters the fix.
+   The Session 22 scale-gate outlier precedent applies to any
+   gate/metric reading outside its recorded band.
+9. Do not break existing consumers: `get_ast_texts`/`nodeText`
+   reconstruction bytes DO NOT change (the superseded byte-change
+   approach); the two composed-prompt pins move ONCE, wittingly, in the
+   same commit that teaches the tool (module #1's pins hold);
+   `TRELLIS_RESULT`/`TRELLIS_TELEMETRY` semantics are additive only; the
+   API, A2A, and SSE contracts are untouched.
 10. Respect the rlms prompt contract: extend `RLM_SYSTEM_PROMPT`, never
-    replace it; no literal curly braces in anything rlms formats; no
-    rlms library modifications.
+    replace it; no literal curly braces in anything rlms formats (the
+    new TOOLS line must be brace-free); no rlms library modifications.
 11. Follow the T16 observability house style: corpus text, quotes,
-    prompts, file paths, and diffs never become metric label values;
-    probe artifacts live in the report, not in logs.
+    prompts, block text, file paths, and diffs never become metric label
+    values; probe artifacts live in the report, not in logs.
 12. Keep API and worker processes split; project-scoped Compose
-    commands; drills clean up token-scoped temp state only — the three
-    round-1/round-2 probe corpora
-    (`book:gutenberg-84:frankenstein`, `book:synthetic:ninth-circuit-chronicle`,
-    `ledger:synthetic:house-*`) and the promoted research docs stay
-    durable; any new committed probe corpus is likewise durable, and a
-    real repo snapshot is tombstoned/cleaned per the `repo:ingest`
-    drill's own token-scoped discipline.
+    commands; drills clean up token-scoped temp state only — the four
+    probe corpora (`book:gutenberg-84:frankenstein`,
+    `book:synthetic:ninth-circuit-chronicle`, `ledger:synthetic:house-*`,
+    and the relational `ledger:synthetic:s2-house-*` /
+    `registry:synthetic:captains` / `tariff:synthetic:port-schedule`)
+    and the promoted research docs stay durable.
 13. Ship one feature branch and one PR to `master`, plain engineering
     prose, no AI attribution or generated-by trailers. Regenerate this
     file in the same PR — and re-run the §0 step 5 check before handing
     off.
 14. Code-mediated text is doctrine (permanent; survives every rewrite).
     Any new or modified surface where the RLM touches text must follow
-    `docs/architecture/CODE_MEDIATED_TEXT.md`: locations
-    engine-computed, bytes moved by code, transient frames, hash-guarded
-    writes, answers submitted by reference (`trellis_answer`) — never
-    model-estimated positions, never model-retyped existing bytes,
-    never a persistent in-memory mirror of a store. The localization
-    arm measures exactly this discipline; prompt text may reinforce it
-    but never substitutes for tooling shape.
+    `docs/architecture/CODE_MEDIATED_TEXT.md`: locations engine-computed,
+    bytes moved by code, transient frames, hash-guarded writes, answers
+    submitted by reference (`trellis_answer`) — never model-estimated
+    positions, never model-retyped existing bytes, never a persistent
+    in-memory mirror of a store. `get_ast_blocks` is this doctrine
+    applied to localization: the ENGINE returns the block structure so
+    the model never re-derives it in attention. Prompt text may reinforce
+    the discipline but never substitutes for tooling shape.
 
 ## 8. Explicit exclusions
 
 Do not include: changing `get_ast_texts`/`nodeText` block-boundary
-semantics (the localization finding RECOMMENDS; it is a witting future
-kernel decision with owner sign-off — it moves every pinned
-reconstruction truth); the repository-scale extraction prerequisites
-(now roadmap row 4 — do not start them; the round-3 repo-scale arm may
-build corpora/tooling they later reuse, but the exclusion/suppression/
-code-prompt work is a separate session); the extraction pilot re-run;
-the module #2 turn and the standalone supervised Trellis-edits-Trellis
-proof run (owner-gated — propose with estimates only); embedding or
-extracting any probe corpus (`--extract none`); weakening or toggling
-the §6.2 kernel block outside the `TRELLIS_EXP_OMIT_CMT` experiment
-flag; a prompt-text "fix" for any measured failure (it must be tooling
-shape); moving the composed-prompt pins (no kernel prompt change is in
-scope); new MCP servers or transports; A2A changes; frontend work
-(deferred unscheduled); polars adoption (reconsider ONLY if the
-round-3 repo-scale arm actually exceeds pandas comfort, pillar §7);
-`ASTRef`/`EVIDENCED_BY` migration (gate CLOSED; the Session 22 outlier
-did not reproduce — do not migrate on a noisy reading); T13 re-hashing;
-rlms library modifications; weakening the Session 14 write-path
-enforcement, the Session 15/20/22 composition pins, the Session 16
-lineage pins, the Session 17 promotion refusals, the Session 18
-registration gates, the Session 19 authoring-mode / anchor-gate /
-draft-scanner / template pins (as calibrated in Session 21), the
-Session 20 textedit gating/containment/hash-guard pins, or the
-Session 22 answer-channel refusals.
+reconstruction bytes (the SUPERSEDED byte-change approach — the
+additive accessor is the chosen fix; the byte change re-enters only if
+the re-measure shows the accessor insufficient, and then only as a
+witting kernel change with owner sign-off); the repository-scale
+extraction prerequisites (now roadmap §4 row 5 — the NEXT session; do
+not start them here); the extraction pilot re-run; a fourth
+effective-context probe round beyond the localization re-measure
+(the §7 structured-frame regime is settled by demotion, not by more
+probing — its movers, schema heterogeneity / fuzzy joins / interactive
+sessions, are a future owner-picked round only); the module #2 turn and
+the standalone supervised Trellis-edits-Trellis proof run (owner-gated
+— propose with estimates only); embedding or extracting any probe
+corpus (`--extract none`); weakening or toggling the §6.2 kernel block
+outside the `TRELLIS_EXP_OMIT_CMT` experiment flag; moving the
+composed-prompt pins for any reason OTHER than teaching `get_ast_blocks`
+(that one move is witting and recomputed in the same commit); new MCP
+servers or transports; A2A changes; frontend work (deferred
+unscheduled); polars adoption (the structured-frame threshold measured
+null through ~6,900 records and three-way joins — pillar §7, now
+demoted); `ASTRef`/`EVIDENCED_BY` migration (gate CLOSED; the Session
+22 outlier did not reproduce and Session 23 read 1.84x — do not migrate
+on a noisy reading); T13 re-hashing; rlms library modifications;
+weakening the Session 14 write-path enforcement, the Session 15/20/22
+composition pins, the Session 16 lineage pins, the Session 17 promotion
+refusals, the Session 18 registration gates, the Session 19
+authoring-mode / anchor-gate / draft-scanner / template pins (as
+calibrated in Session 21), the Session 20 textedit
+gating/containment/hash-guard pins, or the Session 22 answer-channel
+refusals.
