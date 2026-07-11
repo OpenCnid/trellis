@@ -217,6 +217,25 @@ moving, and the model estimating where text lives.
    the model retyped it into `answer['content']` as 47 — transcription
    error at the answer boundary, evidence that the residual needs
    tooling shape (a by-reference result value), not more prompt text.
+   **Round 2 (Session 22, July 11, 2026; same report) closed that
+   residual (item 5) and deepened the measurement:** an unmemorized
+   synthetic corpus isolated read-fidelity (8/8 planted-anomaly quotes
+   reproduced byte-faithfully — the model genuinely reads through the
+   REPL, not from training memory); a 40-document aggregation corpus
+   and an edit round-trip were added; across 57 paid runs the
+   transcription channel held (zero transcription errors vs 1-in-12 in
+   round 1, the round-1 55→47 question now correct in both arms) and
+   the edit round-trip was 8/8 byte-exact. TWO threads stayed open for
+   round 3: (i) the §7 structure-selection claim is still only
+   micro-benchmarked — end to end the model imported pandas in 0 of 68
+   runs and answered a 40-document aggregation correctly with plain
+   loops, so the scale at which a DataFrame actually earns its keep is
+   unmeasured; (ii) every round-2 miss (3 of 56) was LOCALIZATION error
+   (§1's other half) — a line-anchored heading regex failing over the
+   `get_ast_texts` reconstruction, which concatenates paragraph blocks
+   with unmarked boundaries. Whether that reconstruction should preserve
+   block boundaries is an open kernel question (it moves every pinned
+   reconstruction truth — witting or not at all).
 4. **Module #1 v2** — **DONE (Session 21, July 10, 2026):**
    workspace-discipline re-authored through the grounded-authoring mode
    with §0+§2 of this record promoted into its corpus
@@ -231,6 +250,25 @@ moving, and the model estimating where text lives.
    32/64 = 0.50) and the envelope landed by zero-paid replay; no gate,
    template, or threshold changed. The module's RESEARCH.md carries the
    full account.
+5. **The by-reference answer channel** — **IMPLEMENTED (Session 22,
+   July 11, 2026):** the tooling-shape fix item 3 identified for the
+   last unmediated channel — the model authoring its final answer.
+   `src/rlm/trellis_answer.py` injects `trellis_answer` into every
+   research run; `submit(expression_text)` evaluates the given Python
+   expression in the live REPL frame, structurally refuses a bare
+   literal (`ast.parse`: an expression referencing no REPL state is a
+   retyped literal — the 55→47 class), renders the value engine-side,
+   and sets `answer['content']`/`answer['ready']` itself with the
+   `FINAL_ANSWER:` prefix. The computed value flows to the answer by
+   reference; the model never retypes it, and a typo'd name is a loud
+   NameError rather than a silent wrong digit — §1's transcription
+   pathology closed at the one boundary code did not yet mediate.
+   Additive (direct assignment still works; `TRELLIS_RESULT` unchanged);
+   the kernel prompt teaches the channel, so both composed-prompt pins
+   moved wittingly (recomputed in the same commit). Pinned by
+   `npm run test:answer-channel`. Consistent with §2.8: enforcement is
+   tooling shape (a structured submit that cannot carry a retyped
+   value), and the prompt only teaches it.
 
 ## 7. Structure selection and scale bounds (measured July 9, 2026)
 
@@ -284,6 +322,24 @@ required for any tier below):
    elides rows (`...`); the model must query frames, never parse their
    printed form — printing a frame wholesale is scrollback-pasting through
    the back door.
+
+**Status of this guidance (updated Session 22, July 11, 2026):** the
+table above is a MICRO-benchmark — raw query/splice timings on
+pre-built frames. It says a DataFrame is *fast enough* at every Trellis
+scale; it does NOT say the model *reaches for one* when it would help,
+which is the behaviour that actually decides whether the "pandas is the
+default for relational/multi-file queries" recommendation holds. The
+first end-to-end data point (effective-context probe round 2, §6 item
+3) is a null result: over a 40-document aggregation the model used
+plain dict/regex loops in 0 of 68 runs and stayed correct and cheap.
+That does not contradict the table — 40 small documents are far below
+where a frame's speed matters — but it means the recommendation's
+payoff is unvalidated in behaviour. Effective-context probe round 3
+(roadmap §4 row 3) tests it at genuine repo/relational scale: the open
+question is not "can pandas handle it" (measured yes) but "does the
+model use it, and does using it help." A continued null result would
+argue for demoting the "pandas default" guidance to "plain loops until
+a measured threshold."
 
 ## 8. Relationship to the other records
 
