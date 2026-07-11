@@ -81,6 +81,10 @@ Every capability claim in the living docs traces to a dated report here:
   — the citation-laundering measurement campaign: laundering is
   incentive-driven, prompts don't stop it, only semantic entailment
   does; never reward citation count.
+- **[`EFFECTIVE_CONTEXT_PROBE_REPORT.md`](benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md)**
+  — the effective-context probe, rounds 1-4: paired-run
+  measurements of the code-mediated-text discipline over the
+  committed corpora.
 - **[`CRITIQUE_AND_FUTURE.md`](benchmarks/CRITIQUE_AND_FUTURE.md)** —
   the honest ledger: open critiques, known limits, and what has not been
   proven yet.

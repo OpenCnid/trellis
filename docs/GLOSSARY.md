@@ -57,7 +57,7 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   land it with research provenance through the sculpted pathway, verify it
   over its life, compose it forever: the RLM authoring its own userspace
   extensions so the execution substrate compounds like the belief base
-  (designed; see WORKSPACE_AND_MODULES.md §2, §9).
+  (machinery shipped; 2 modules live (estimation-discipline v1, workspace-discipline v2); see WORKSPACE_AND_MODULES.md §2, §9).
 
 ## Tiers and working state
 

@@ -1,0 +1,38 @@
+{
+  "name": "estimation-discipline",
+  "version": 1,
+  "purpose": "Teach an RLM to recognize when held evidence already determines the answer and to stop searching at that point.",
+  "research": {
+    "sourceNodeIds": [
+      "01129ba740c3516fefc4f248d9a63a9cc8225125fd6bb014e493c5d44da6197a",
+      "0e6c25d2f5eb1054e5a4b78b0c2c33291ef962aa3b3481c6d0304c11f2506415",
+      "103b40a22df5f5a1f169ebb294f8abfc39b2d78532f6c3a591480b547c73d522",
+      "2688fab1d04ef7890bb3828555bc56b6d88c5f614f73e8417f5977572acba35b",
+      "5005269b40e83bdb09e47b112d4a71080504feba83fd3986e277c10ea8771bf2",
+      "70d90afaa6a95e160b88a722f562c851db9aa271b3de5f368e1c225fd50b6386",
+      "7f3db79f0f42f20cc7caaaf7bfb0d58a98bae8f7d8f13f2184e236f3020dc8b0",
+      "831fbb8713e854a30502cc3565ccc66a3310119f558fb145fba4add3148290a2",
+      "89330acc7b765e1b61faa71c03218b9ffafbb8e06a69f684f01f95ed5c2c76a8",
+      "8e42bc3eade42f512054319387d6e9b419e012dd34911137d6b0fcb7cf5e5efb",
+      "9deaac2a90211a1b489e25518eba2cafb04839df7aa2b5cf295c2829f44c2891",
+      "a196d17c460c3929e8184426e12a24d20525f228fb87ba69cb7cc2f1da043424",
+      "a2d8f4529a4f4405ebe0d75a18ae7258b6731c6d7aaa913b65dd5331f50429f5",
+      "b2558253a63ffa0f25d4c45c669422bc8c34bd8cca5826b5236bb67c111044eb",
+      "b6ea6149a293e6ee39090d9e0b6c171ff5823b571b742e279d6f5fc147f645d1",
+      "b9289fdd7c60398fbed6d496bcdfad22a87074e6b35e6b287021c6cf0fb758d3",
+      "bf4dddce6dc61e768d515c8c11a2fb5b9dd7982259273fbdd10c0809a192033f",
+      "c7fb967d4ad1c51ddab09fb3e6190f9f25aefdc80f344f16a54fe4a0a0f4835d",
+      "cecd3fd3daaa2f1aa90d209031397a6da20042bc3c4e82aa6eece6b3c105ac11"
+    ]
+  },
+  "addendum": "addendum.txt",
+  "tools": [],
+  "bounds": {
+    "addendumMaxBytes": 8192
+  },
+  "acceptance": {
+    "zeroPaid": "npm run test:modules"
+  },
+  "status": "active",
+  "kernelCompat": 1
+}
