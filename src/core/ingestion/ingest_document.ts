@@ -12,6 +12,7 @@ import {
   persistAstNodes,
   verifyPersistedAstNodes,
   type ExtractionJob,
+  type ExtractionSourceKind,
 } from '../ast/persist.js';
 import { planExtraction, type ExtractionPolicy } from './plan_ingest.js';
 import type { Logger } from '../observability/logger.js';
@@ -51,6 +52,15 @@ export interface IngestRequest {
    * API/repository ingests leave it undefined (column stays NULL).
    */
   origin?: Record<string, unknown>;
+  /**
+   * Session 25: prompt-routing metadata stamped onto every queued
+   * extraction job. Repository snapshots supply it per file language;
+   * every other caller's content is markdown prose by construction, so
+   * an unset sourceKind defaults to 'prose' at the enqueue — which the
+   * worker maps to the exact legacy prompt bytes.
+   */
+  sourceKind?: ExtractionSourceKind;
+  language?: string;
 }
 
 export interface IngestResult {
@@ -81,7 +91,7 @@ export async function ingestDocument(
   deps: IngestDeps,
   request: IngestRequest
 ): Promise<IngestResult> {
-  const { rootNode, docKey, extractionPolicy, requestId, origin } = request;
+  const { rootNode, docKey, extractionPolicy, requestId, origin, sourceKind, language } = request;
   const allNodes = flattenAST(rootNode);
 
   let registration: VersionRegistration;
@@ -143,6 +153,8 @@ export async function ingestDocument(
       requestId,
       docKey,
       version: registration.version,
+      sourceKind: sourceKind ?? 'prose',
+      ...(language !== undefined && { language }),
     }));
   }
 

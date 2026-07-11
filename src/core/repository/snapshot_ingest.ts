@@ -1,8 +1,9 @@
 import type { ParseSourceResult, SourceLanguage } from '../ast/source_parser.js';
+import type { ExtractionSourceKind } from '../ast/persist.js';
 import { planExtraction, ExtractionBudgetExceededError } from '../ingestion/plan_ingest.js';
 import type { IngestRequest, IngestResult } from '../ingestion/ingest_document.js';
 import type { Logger } from '../observability/logger.js';
-import { repoDocKey } from './paths.js';
+import { isTestOrFixturePath, repoDocKey } from './paths.js';
 import { diffManifests } from './manifest.js';
 import {
   countSkipReasons,
@@ -66,6 +67,20 @@ export interface SnapshotDeps {
   metrics?: RepoMetricsSlice;
 }
 
+// Session 25: why an accepted, ingested file's blocks never reach
+// extraction_queue. Distinct from ScanSkipReason by design — an excluded
+// file is still scanned, parsed, ingested, versioned, and tombstoned
+// like any other (snapshot completeness is load-bearing); only its paid
+// extraction is withheld.
+export type ExtractionExclusionReason = 'test_fixture_excluded';
+
+/** The enqueuer's language → prompt-kind mapping (Session 25). */
+export function sourceKindForLanguage(language: SourceLanguage): ExtractionSourceKind {
+  return language === 'typescript' || language === 'javascript' || language === 'python'
+    ? 'code'
+    : 'prose';
+}
+
 export interface PlannedFile {
   path: string;
   docKey: string;
@@ -76,6 +91,7 @@ export interface PlannedFile {
   // bound on paid jobs under 'changed' (the Merkle diff only shrinks it).
   blockCount: number;
   action: 'ingest' | 'unchanged';
+  extractionExclusion: ExtractionExclusionReason | null;
 }
 
 export interface PlannedTombstone {
@@ -92,7 +108,13 @@ export interface SnapshotPlan {
   totalBytes: number;
   filesToIngest: number;
   filesUnchanged: number;
-  // Paid-job upper bound for this run: 0 under 'none'.
+  // Session 25: accepted files (all actions) withheld from extraction,
+  // counted per reason, and the blocks the paid bound dropped for them
+  // (to-ingest files only — the same population the bound counts).
+  extractionExclusionCounts: Record<string, number>;
+  blocksExcludedFromExtraction: number;
+  // Paid-job upper bound for this run: 0 under 'none'; excluded files
+  // contribute nothing.
   paidJobUpperBound: number;
 }
 
@@ -101,6 +123,8 @@ export interface SnapshotResult {
   snapshotSeq: number;
   counts: { ingested: number; unchanged: number; tombstoned: number };
   skipCounts: Record<string, number>;
+  extractionExclusionCounts: Record<string, number>;
+  blocksExcludedFromExtraction: number;
   blocksEligible: number;
   blocksQueued: number;
   versionsRegistered: number;
@@ -202,6 +226,7 @@ export async function planRepositorySnapshot(
           rootId: parsed.root.id,
           blockCount,
           action: prior && prior.rootHash === parsed.root.id ? 'unchanged' : 'ingest',
+          extractionExclusion: isTestOrFixturePath(entry.path) ? 'test_fixture_excluded' : null,
         });
       } finally {
         release();
@@ -223,6 +248,12 @@ export async function planRepositorySnapshot(
   }));
 
   const toIngest = files.filter(file => file.action === 'ingest');
+  const extractionExclusionCounts: Record<string, number> = {};
+  for (const file of files) {
+    if (!file.extractionExclusion) continue;
+    extractionExclusionCounts[file.extractionExclusion] =
+      (extractionExclusionCounts[file.extractionExclusion] ?? 0) + 1;
+  }
   return {
     repoKey: options.repoKey,
     files,
@@ -232,9 +263,15 @@ export async function planRepositorySnapshot(
     totalBytes: files.reduce((sum, file) => sum + file.size, 0),
     filesToIngest: toIngest.length,
     filesUnchanged: files.length - toIngest.length,
+    extractionExclusionCounts,
+    blocksExcludedFromExtraction: toIngest
+      .filter(file => file.extractionExclusion)
+      .reduce((sum, file) => sum + file.blockCount, 0),
     paidJobUpperBound: options.policy.mode === 'none'
       ? 0
-      : toIngest.reduce((sum, file) => sum + file.blockCount, 0),
+      : toIngest
+        .filter(file => !file.extractionExclusion)
+        .reduce((sum, file) => sum + file.blockCount, 0),
   };
 }
 
@@ -260,6 +297,8 @@ export async function executeRepositorySnapshot(
     filesUnchanged: plan.filesUnchanged,
     tombstones: plan.tombstones.length,
     skipCounts: plan.skipCounts,
+    extractionExclusionCounts: plan.extractionExclusionCounts,
+    blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,
     policy: options.policy.mode,
   });
   for (const [reason, count] of Object.entries(plan.skipCounts)) {
@@ -295,13 +334,18 @@ export async function executeRepositorySnapshot(
             `${file.path} became unparseable between plan and execute (${parsed.reason})`
           );
         }
+        // Session 25: a test/fixture file ingests like any other — same
+        // verified transaction, same versioning and tombstones — but its
+        // extraction policy is forced to 'none' even under 'changed'.
         const result = await deps.ingestDocument({
           rootNode: parsed.root,
           docKey: file.docKey,
-          extractionPolicy: options.policy.mode === 'changed'
+          extractionPolicy: options.policy.mode === 'changed' && !file.extractionExclusion
             ? { mode: 'changed', maxBlocks: remainingBudget }
             : { mode: 'none' },
           requestId: options.requestId,
+          sourceKind: sourceKindForLanguage(file.language),
+          language: file.language,
         });
         blocksEligible += result.blocksEligible;
         blocksQueued += result.blocksQueued;
@@ -367,6 +411,8 @@ export async function executeRepositorySnapshot(
     await deps.store.publishSnapshot(options.repoKey, snapshotSeq, rows, {
       counts,
       skipCounts: plan.skipCounts,
+      extractionExclusionCounts: plan.extractionExclusionCounts,
+      blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,
       policy: options.policy.mode,
       blocksEligible,
       blocksQueued,
@@ -374,6 +420,10 @@ export async function executeRepositorySnapshot(
     deps.metrics?.repoSnapshotsTotal.inc({ result: 'published' });
     deps.metrics?.repoBlocksTotal.inc({ stage: 'eligible' }, blocksEligible);
     deps.metrics?.repoBlocksTotal.inc({ stage: 'queued' }, blocksQueued);
+    deps.metrics?.repoBlocksTotal.inc(
+      { stage: 'test_fixture_excluded' },
+      plan.blocksExcludedFromExtraction
+    );
     log.info({
       event: 'repo.snapshot_published',
       repoKey: options.repoKey,
@@ -381,12 +431,15 @@ export async function executeRepositorySnapshot(
       ...counts,
       blocksEligible,
       blocksQueued,
+      blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,
     });
     return {
       repoKey: options.repoKey,
       snapshotSeq,
       counts,
       skipCounts: plan.skipCounts,
+      extractionExclusionCounts: plan.extractionExclusionCounts,
+      blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,
       blocksEligible,
       blocksQueued,
       versionsRegistered,

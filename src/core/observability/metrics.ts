@@ -32,6 +32,7 @@ export interface TrellisMetrics {
   extractionUnresolvedEndpointsTotal: Counter<string>;
   extractionDroppedActionsTotal: Counter<string>;
   extractionSupersededTotal: Counter<'stage'>;
+  extractionSuppressedTotal: Counter<'kind'>;
 
   // Invalidation sweep outcomes.
   invalidationCandidateHashesTotal: Counter<string>;
@@ -139,6 +140,14 @@ export function createMetrics(registry: Registry): TrellisMetrics {
         'Extraction jobs whose source bytes died: skipped before_start, '
         + 'skipped before_merge, or compensated post_merge.',
       labelNames: ['stage'],
+      registers: [registry],
+    }),
+    extractionSuppressedTotal: new Counter({
+      name: 'trellis_extraction_suppressed_total',
+      help:
+        'Generic-identifier entities and actions suppressed before '
+        + 'resolution (Session 25 kernel denylist + shape rule).',
+      labelNames: ['kind'],
       registers: [registry],
     }),
 

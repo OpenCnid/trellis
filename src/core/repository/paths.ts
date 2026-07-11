@@ -67,3 +67,44 @@ const EXCLUDED_SEGMENTS = new Set([
 export function isExcludedDirectoryPath(relativePath: string): boolean {
   return relativePath.split('/').slice(0, -1).some(segment => EXCLUDED_SEGMENTS.has(segment));
 }
+
+// Session 25: test/fixture extraction exclusion (the recorded July 6, 2026
+// pilot finding: fixture strings in alias_candidates.test.ts produced
+// fictional facts with real-looking provenance). These files stay IN
+// snapshots — Tier-1 bytes, tombstones, membership are load-bearing — but
+// their blocks never reach extraction_queue. The patterns are kernel-fixed
+// (Guardrail 5): an operator override would be a future explicit CLI flag
+// with its own confirmation, never an env knob.
+const TEST_DIRECTORY_SEGMENTS = new Set([
+  '__tests__',
+  '__mocks__',
+  '__fixtures__',
+  'test',
+  'tests',
+  'fixtures',
+  'testdata',
+]);
+
+/**
+ * Classifies a repo-relative POSIX path as test/fixture material, case-
+ * insensitively. Directory match: any non-final segment in the table
+ * above. Basename match: `*.test.*` / `*.spec.*`, `conftest.py`, and a
+ * `test_*` / `*_test` stem under any extension (covering the recorded
+ * `test_*.py` / `*_test.py` Python conventions and this repository's own
+ * `scripts/test_*.ts` drills, whose seeded fixture strings are exactly
+ * the contamination class the pilot recorded). The asymmetry is
+ * deliberate: a wrongly excluded source file merely skips semantic
+ * extraction; a wrongly included test file poisons the graph.
+ */
+export function isTestOrFixturePath(relativePath: string): boolean {
+  const segments = relativePath.toLowerCase().split('/');
+  const basename = segments[segments.length - 1];
+  if (segments.slice(0, -1).some(segment => TEST_DIRECTORY_SEGMENTS.has(segment))) {
+    return true;
+  }
+  if (basename === 'conftest.py') return true;
+  if (/\.(test|spec)\./.test(basename)) return true;
+  const dot = basename.indexOf('.');
+  const stem = dot >= 0 ? basename.slice(0, dot) : basename;
+  return stem.startsWith('test_') || stem.endsWith('_test');
+}

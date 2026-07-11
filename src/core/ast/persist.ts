@@ -8,15 +8,27 @@ export interface ExtractionJobInput {
 }
 
 /**
+ * Session 25: the source-kind signal for extraction prompt routing.
+ * `code` selects the code-tuned prompt in the extraction worker; `prose`
+ * and an ABSENT field both select the exact legacy document-generic
+ * prompt bytes (pinned in extraction_job.test.ts), so anything already
+ * queued and any pre-Session-25 producer processes byte-identically.
+ */
+export type ExtractionSourceKind = 'code' | 'prose';
+
+/**
  * Correlation context threaded from the ingest request into each queued
  * job so worker logs can answer which request/version produced a failed
  * or dropped job. Optional: jobs queued before these fields existed (or
- * enqueued by scripts) still process.
+ * enqueued by scripts) still process. sourceKind/language (Session 25)
+ * are additive prompt-routing metadata with the same back-compat rule.
  */
 export interface IngestJobContext {
   requestId?: string;
   docKey?: string;
   version?: number;
+  sourceKind?: ExtractionSourceKind;
+  language?: string;
 }
 
 export interface ExtractionJob {
