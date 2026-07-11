@@ -199,14 +199,38 @@ moving, and the model estimating where text lives.
    on them with code. Locate by query, never by counting lines or guessing
    positions. Move existing text by slicing and splicing, never by retyping
    it. Author only genuinely new text."*
-3. **The effective-context probe** (owner-gated, paid; extends the
-   workspace-probe series): a paired-run measurement on a corpus several
-   times the attention window — discipline-on vs. discipline-off — scoring
-   correctness, bytes-through-attention, and turn count. The "giant context
-   window" claim becomes a number.
-4. **Module #1 v2** (owner-gated): re-author workspace-discipline through
-   the grounded-authoring mode with the pillar in its corpus, retiring the
-   "reconstructing stored text" mitigation language.
+3. **The effective-context probe** — **MEASURED (Session 21, July 10,
+   2026; `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`; n=6 per
+   arm, directional).** Six deterministic questions over the committed
+   ~105k-token Frankenstein corpus (`book:gutenberg-84:frankenstein`),
+   the pinned kernel vs the same kernel with exactly the §6.2 block
+   omitted (`TRELLIS_EXP_OMIT_CMT=1`, experiment-only, byte-identity
+   pinned both ways). Headlines: median input 7.9k tokens (on) vs
+   14.7k (off); with the block present no run put the corpus through
+   attention, without it one run handed the ENTIRE document to a single
+   `llm_query` (110,550 input tokens — 7.6× the on arm for the same
+   question); arm cost 2.2×. Both arms otherwise worked the corpus as
+   REPL state — the tooling shape carries most of the discipline, the
+   prompt block trims iterations and suppresses the blowups. The one
+   wrong answer (on arm) was the pillar's own pathology in the one
+   unmediated channel: the engine printed the computed count (55) and
+   the model retyped it into `answer['content']` as 47 — transcription
+   error at the answer boundary, evidence that the residual needs
+   tooling shape (a by-reference result value), not more prompt text.
+4. **Module #1 v2** — **DONE (Session 21, July 10, 2026):**
+   workspace-discipline re-authored through the grounded-authoring mode
+   with §0+§2 of this record promoted into its corpus
+   (`research:trellis/workspace-discipline/code-mediated-text`); the
+   "reconstructing stored text" mitigation line is retired (pinned by
+   `test:modules` [5]). The anchor gate refused the original three-doc
+   corpus at 18/64 = 0.28 — measured cause: the evidence doc's
+   distinctive anchors are numerals the authoring template forbids a
+   draft from restating (excluding them the draft sits at exactly
+   0.30). Per the gate's documented remedy the owner re-scoped the
+   pinned corpus to the two normative docs (the same paid draft covers
+   32/64 = 0.50) and the envelope landed by zero-paid replay; no gate,
+   template, or threshold changed. The module's RESEARCH.md carries the
+   full account.
 
 ## 7. Structure selection and scale bounds (measured July 9, 2026)
 
