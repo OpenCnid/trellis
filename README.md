@@ -787,8 +787,9 @@ Session 23 round 3 — a 102-document multi-table join corpus, the
 localization-method arm with its glued-reconstruction quantification,
 and higher-n repeats through the by-reference answer channel; the
 round-4 section records the Session 24 structural fix for the one
-surviving failure class — the boundary-aware `get_ast_blocks` accessor —
-with the paid localization re-measure owner-gated). The
+surviving failure class — the boundary-aware `get_ast_blocks` accessor,
+re-measured at 0/36 misses with 36/36 accessor adoption vs round 3's
+7/30 on the same locate set). The
 honest ledger of open critiques is `CRITIQUE_AND_FUTURE.md`.
 
 ## Verification

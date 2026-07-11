@@ -307,10 +307,15 @@ moving, and the model estimating where text lives.
    (it re-enters only if the round-4 re-measure shows the accessor
    insufficient). The kernel prompt teaches the tool, so both
    composed-prompt pins moved wittingly in the same commit (the item 5
-   precedent). The localization re-measure (probe round 4: the round-3
-   locate set with the accessor offered, method-classified as
-   structured/line-anchored/shape) is owner-gated paid work, proposed
-   with its estimate.
+   precedent). **The localization re-measure ran owner-approved the
+   same day (probe round 4; $0.9452 / 36 runs): 0/36 misses vs round
+   3's 7/30 on the same locate set, with 36/36 runs adopting the
+   accessor in BOTH arms — 100% adoption, 100% correct, median input
+   ~8.2k tokens and 2 iterations (no recovery loops). The off arm
+   adopted at the same rate, so the tooling shape, not the §6.2
+   prompt block, carries the behavior — the pillar's enforcement
+   thesis measured again. The localization pathology is CLOSED; the
+   superseded byte-change stays closed.**
 
 ## 7. Structure selection and scale bounds (measured July 9, 2026)
 

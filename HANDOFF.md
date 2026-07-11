@@ -509,14 +509,24 @@ until a measured threshold" per §7's own written contingency (round
 micro-benchmark table, the mechanism claim, and the kernel's
 "ingestion = pandas" metaphor are untouched; pillar §6 gained item 6
 (the accessor) and the round-3 close-out; the probe report gained its
-round-4 section. **(5) The paid localization re-measure did NOT run
-unprompted** — it is owner-gated and stands PROPOSED with its printed
-estimate (the round-3 locate set: chronicle ×4 + frank ×2 questions,
-`--repeats 3`, both arms ≈ 36 runs ≈ $1.6 at round-3 rates, ≤$5 cap;
-success criterion pre-stated in the report's round-4 section; a null
-result re-opens the superseded byte-change row). Total Session 24
-paid spend: $0. This session's `drill:scale` read 2.11x CLOSED —
-inside the recorded band.
+round-4 section. **(5) The localization re-measure (probe round 4) was proposed with
+its estimate, OWNER-APPROVED, and MEASURED the same day** ($0.9452 /
+36 runs vs the ≈$1.6 estimate; the round-3 locate set: chronicle ×4 +
+frank ×2 questions, `--repeats 3`, both arms): **0/36 misses vs round
+3's 7/30 on the same questions, with 36/36 runs in BOTH arms calling
+`get_ast_blocks`** (classified `structured`; zero
+line-anchored/shape/unknown); the round-3 "Chapter 23" trap question
+came back "Chapter 5" 6/6; median input ~8.2k tokens (on 8,229 / off
+8,264), median 2 iterations, no recovery loops (round 3's recovering
+runs paid 13k–27k); 36/36 submitted through `trellis_answer` (180/180
+across rounds 2–4, zero transcription errors). The off arm's
+identical adoption is the pillar's enforcement thesis measured again:
+tooling shape, not the §6.2 block, carries the behavior. The
+pre-stated success criterion is met exactly; the superseded
+reconstruction-byte row STAYS closed (§0 event-loop re-check ran: a
+positive result re-opens nothing). Total Session 24 paid spend:
+$0.9452. This session's `drill:scale` read 2.11x CLOSED — inside the
+recorded band.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
@@ -529,15 +539,12 @@ repository-scale `changed` extraction run: test-fixture contamination,
 generic-identifier hubs, and the document-generic prompt improvising
 on source code. This session lands the exclusion + suppression +
 code-tuned-prompt machinery, all zero-paid; the pilot RE-RUN stays
-owner-gated and is proposed with an estimate. ALSO STANDING: the
-Session 24 localization re-measure is owner-gated and proposed
-(≈36 runs ≈ $1.6; report round-4 section carries the pre-stated
-success criterion) — if the owner approves it, run it FIRST, record
-the numbers in the report/roadmap, and apply the §0 event-loop rule
-(a null result re-opens the superseded reconstruction-byte row and
-jumps the queue). Do not re-plan or re-implement completed work. RLM
-expands exclusively to Recursive Language Model (the MIT CSAIL
-formulation).
+owner-gated and is proposed with an estimate. The Session 24
+localization re-measure already RAN owner-approved (0/36 misses,
+36/36 accessor adoption in both arms — the probe series has no open
+failure class); nothing from it re-opens. Do not re-plan or
+re-implement completed work. RLM expands exclusively to Recursive
+Language Model (the MIT CSAIL formulation).
 
 ---
 
@@ -636,10 +643,11 @@ immutable, content-addressed physical location in source material.
      trailing `\b` (the `parseLedgerRecords` precedent). Session 24
      fixed the localization class structurally WITHOUT touching those
      bytes: `get_ast_blocks(root_hash)` returns the ordered blocks
-     directly, so structure never has to be re-derived from the glue
-     (the reconstruction-byte change is SUPERSEDED, roadmap-struck; it
-     re-enters only if the owner-gated round-4 re-measure shows the
-     accessor insufficient).
+     directly, so structure never has to be re-derived from the glue —
+     measured (probe round 4): 0/36 misses vs round 3's 7/30, 36/36
+     accessor adoption. The reconstruction-byte change is SUPERSEDED
+     and stays closed (it re-enters only if a future measurement finds
+     the accessor insufficient).
    - The verified ingest transaction lives in `src/core/ingestion/`
      (`ingest_document.ts`: persist → read-back re-hash verification →
      membership → registration → in-transaction Merkle diff;
@@ -849,12 +857,12 @@ immutable, content-addressed physical location in source material.
      one-record-shape corpora (the pandas null result, twice — §7 now
      says plain loops until a measured threshold); localization method
      error over the unmarked-boundary reconstruction (10 misses across
-     rounds 2–3) is fixed structurally by the accessor, with the
-     round-4 re-measure owner-gated (a null re-opens the superseded
-     byte-change row); and the residual after transcription closes is
-     computing faithfully over the WRONG input (one round-3
-     result-shape miss, submitted same-turn before its own evidence
-     printed).
+     rounds 2–3) is CLOSED by the accessor — round 4 measured 0/36
+     misses with 36/36 adoption in both arms, so the superseded
+     byte-change row stays closed; and the residual after
+     transcription closes is computing faithfully over the WRONG input
+     (one round-3 result-shape miss, submitted same-turn before its
+     own evidence printed).
    - **The editing toolkit (Session 20; `src/rlm/trellis_textedit.py`):**
      `TrellisTextEdit` injected as `trellis_textedit` ONLY when the
      operator sets `TRELLIS_EDIT_ROOT` (never a default; never from a
@@ -1008,8 +1016,8 @@ immutable, content-addressed physical location in source material.
      and `docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md`; the
      provenance-citation A/B eval in
      `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`; the
-     effective-context probe (Sessions 21–24, pillar §6.3, rounds 1–3
-     measured + the round-4 localization-fix machinery)
+     effective-context probe (Sessions 21–24, pillar §6.3, rounds 1–4
+     measured)
      in `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` over the
      committed `data/frankenstein.txt`, the Session 22 synthetic
      corpora, and the Session 23 relational corpus.
@@ -1138,13 +1146,10 @@ Work on a feature branch and target `master`.
 first unstruck row — deferred four times by owner direction behind the
 pillar work, never dropped).**
 
-STANDING FIRST: the Session 24 localization re-measure (probe round 4)
-is owner-gated and PROPOSED (report round-4 section; ≈36 runs ≈ $1.6).
-If the owner approves it, run it BEFORE this objective, record the
-numbers in the report/roadmap, and apply the §0 event-loop rule: a
-null result (the model ignores `get_ast_blocks`, or uses it and still
-mislocates) re-opens the superseded reconstruction-byte row and jumps
-the queue for owner adjudication.
+(The Session 24 localization re-measure is DONE — owner-approved,
+0/36 misses, 36/36 accessor adoption, $0.9452; the report's round-4
+section carries the numbers. The probe series has no open failure
+class and nothing from it re-opens; this objective is unencumbered.)
 
 Trellis can ingest its own codebase (Session 8: `repo:ingest`, durable
 snapshots, code-aware ASTs), and the owner-approved extraction pilot of
@@ -1248,8 +1253,8 @@ with an estimate, never run unprompted.
   (including the four durable probe corpora, the
   `get_ast_texts`/`nodeText` reconstruction bytes, and the Session 24
   `get_ast_blocks` accessor + its parity pin — the superseded
-  reconstruction-byte change stays superseded unless the round-4
-  re-measure nulls).
+  reconstruction-byte change stays closed; the round-4 re-measure
+  confirmed the accessor, 0/36 misses).
 
 ## 5. File-level starting points
 
@@ -1281,8 +1286,7 @@ Everything this session is zero-paid. The pilot RE-RUN (paid) is
 owner-gated: propose it with the CLI's printed block count and a cost
 estimate from the recorded pilot telemetry (112 blocks ≈ 57k in / 47k
 out completion tokens ≈ $0.31 at the pilot's prices — scale linearly),
-and do NOT run it unprompted. The same discipline applies to the
-STANDING Session 24 localization re-measure (≈36 runs ≈ $1.6; see §3).
+and do NOT run it unprompted.
 
 Offline (joins `npm test`, baseline 683 across 75 files):
 
@@ -1357,12 +1361,6 @@ Update:
 Remaining owner-gated items (do NOT run unprompted; propose each with a
 cost estimate):
 
-- The Session 24 localization re-measure (probe round 4): the round-3
-  locate set (chronicle ×4 + frank ×2, `--repeats 3`, both arms)
-  ≈ 36 runs ≈ $1.6 at round-3 rates. Success criterion pre-stated in
-  the report's round-4 section; a null result re-opens the superseded
-  reconstruction-byte row (§0 event-loop rule — it would jump the
-  queue).
 - The extraction pilot RE-RUN over `src/core/graph` (or an owner-chosen
   root) with the new exclusion + suppression + code prompt — the
   measured before/after against the July 6 pilot (~$0.31/112 blocks).
@@ -1385,9 +1383,9 @@ cost estimate):
    `write_derived_insight` keeps its Session 14 enforcement; extraction
    writes keep flowing through `mergeWithAstLivenessFence`.
 4. Paid work this session is ZERO unless the owner approves a proposed
-   run (the re-measure, the pilot re-run) — each behind a printed
-   estimate under the standing ≤$5/run cap, actuals recorded. Never
-   reward citation count anywhere.
+   run (the pilot re-run) — behind a printed estimate under the
+   standing ≤$5/run cap, actuals recorded. Never reward citation count
+   anywhere.
 5. Gate machinery is kernel; operator control is absolute. The
    test/fixture patterns, the generic-identifier denylist, and both
    extraction prompts are kernel-fixed — never env-tunable free text.
@@ -1423,8 +1421,9 @@ cost estimate):
    `TRELLIS_RESULT`/`TRELLIS_TELEMETRY` semantics are additive only;
    the API, A2A, and SSE contracts are untouched; the
    `get_ast_texts`/`nodeText` reconstruction bytes do not change (the
-   byte-change row is SUPERSEDED by `get_ast_blocks` and re-enters only
-   on a null re-measure, with owner sign-off).
+   byte-change row is SUPERSEDED by `get_ast_blocks`, confirmed by the
+   round-4 re-measure, and re-enters only if a future measurement
+   finds the accessor insufficient — with owner sign-off).
 10. Respect the rlms prompt contract: extend `RLM_SYSTEM_PROMPT`, never
     replace it; no literal curly braces in anything rlms formats; no
     rlms library modifications.
@@ -1457,17 +1456,17 @@ cost estimate):
 
 ## 8. Explicit exclusions
 
-Do not include: the paid extraction pilot re-run and the paid
-localization re-measure (propose with estimates only; run only on
-owner approval); any repository-scale `changed` run; changing
-`get_ast_texts`/`nodeText` block-boundary semantics (SUPERSEDED by the
-Session 24 `get_ast_blocks` accessor; re-enters only if the owner-gated
-round-4 re-measure nulls — a witting kernel change with owner sign-off:
-it moves every pinned reconstruction truth; propose, never patch); a
-fifth effective-context probe round beyond the owner-gated round-4
-re-measure (rounds 1–3 are measured and recorded; the §7
-structured-frame regime movers — schema heterogeneity, fuzzy joins,
-interactive sessions — are a future owner-picked round); the module #2
+Do not include: the paid extraction pilot re-run (propose with an
+estimate only; run only on owner approval); any repository-scale
+`changed` run; changing `get_ast_texts`/`nodeText` block-boundary
+semantics (SUPERSEDED by the Session 24 `get_ast_blocks` accessor and
+CONFIRMED closed by the round-4 re-measure — re-enters only if a
+future measurement finds the accessor insufficient, and then as a
+witting kernel change with owner sign-off: it moves every pinned
+reconstruction truth; propose, never patch); a fifth
+effective-context probe round (rounds 1–4 are measured and recorded;
+the §7 structured-frame regime movers — schema heterogeneity, fuzzy
+joins, interactive sessions — are a future owner-picked round); the module #2
 turn and the standalone supervised Trellis-edits-Trellis proof run
 (owner-gated — propose with estimates); embedding any probe corpus;
 weakening or toggling the §6.2 kernel block outside the
