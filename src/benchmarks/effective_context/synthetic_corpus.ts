@@ -41,7 +41,7 @@ export function mulberry32(seed: number): () => number {
   };
 }
 
-class Rng {
+export class Rng {
   private readonly next: () => number;
   constructor(seed: number) {
     this.next = mulberry32(seed);

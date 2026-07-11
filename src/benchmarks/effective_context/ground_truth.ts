@@ -191,6 +191,74 @@ export function replaceUniqueLine(
   return lines.join('\n');
 }
 
+/**
+ * Session 23 (the localization design finding): the boundary-preserving
+ * reconstruction a future kernel change COULD return — the document's
+ * extraction-block texts joined with blank lines, so own-line headings
+ * sit at real line starts again. Today's real reconstruction
+ * (`nodeText`/`get_ast_texts`) joins blocks with NO separator; this
+ * helper exists to QUANTIFY, zero-paid, how much of the naive
+ * line-anchored localization method that gluing breaks. It is
+ * measurement apparatus only: changing the real reconstruction moves
+ * every pinned reconstruction truth and is a witting kernel decision.
+ */
+export function boundaryPreservedReconstruction(blocks: readonly string[]): string {
+  return blocks.join('\n\n');
+}
+
+/**
+ * The naive line-anchored localization method's view of a text: every
+ * own-line "<Kind> N" heading a `^...$` multiline regex can see. All
+ * three round-2 probe misses used exactly this method over the glued
+ * reconstruction; comparing its yield over glued vs boundary-preserved
+ * text is the quantification behind the round-3 recommendation.
+ */
+export function lineAnchoredHeadingLabels(
+  text: string,
+  kinds: readonly string[]
+): string[] {
+  return [...text.matchAll(headingPattern(kinds))].map(match => match[0]);
+}
+
+export type LocalizationMethod = 'line-anchored' | 'shape' | 'unknown';
+
+/**
+ * Classifies, from a run's raw stdout (the REPL code is echoed there),
+ * HOW the model localized a phrase to its section — best effort, scored
+ * only where observable:
+ *
+ * - `line-anchored`: the code anchored a heading pattern to line starts
+ *   (a `^<Kind>` regex, or line iteration via splitlines/startswith) —
+ *   the method the glued reconstruction breaks.
+ * - `shape`: the code matched the heading shape position-independently
+ *   (a `<Kind> \d` pattern with no `^` anchor) — glue-tolerant.
+ * - `unknown`: neither marker observed (e.g. an llm_query subcall did
+ *   the locating, or an unforeseen method).
+ *
+ * A run showing both markers is classified `line-anchored`: the anchor
+ * is what breaks over the glue, so its presence is the finding.
+ */
+export function classifyLocalizationMethod(
+  runLog: string,
+  kinds: readonly string[]
+): LocalizationMethod {
+  // "^Entry", "^(Entry", and alternations like "^(Letter|Chapter" all
+  // count as anchored: caret, optionally an open paren and other
+  // alternation members, then the kind.
+  const anchored = kinds.some(kind =>
+    new RegExp(`\\^\\(?(?:[A-Za-z]+\\|)*${kind}`).test(runLog)
+    || runLog.includes(`startswith("${kind}`)
+    || runLog.includes(`startswith('${kind}`)
+  );
+  if (anchored) return 'line-anchored';
+  // A regex literal like "Entry (\d+)" / "Entry\s+\d+": the kind followed
+  // within a few characters by a literal backslash-d, with no anchor.
+  const shape = kinds.some(kind =>
+    new RegExp(`${kind}[^\\n]{0,8}\\\\d`).test(runLog)
+  );
+  return shape ? 'shape' : 'unknown';
+}
+
 /** The first integer in a model's answer text (commas tolerated), or null. */
 export function extractAnswerInteger(answer: string): number | null {
   const match = answer.match(/\d[\d,]*/);

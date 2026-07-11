@@ -4,10 +4,13 @@ import path from 'path';
 import { describe, it, expect } from 'vitest';
 import {
   answerContainsSentence,
+  boundaryPreservedReconstruction,
+  classifyLocalizationMethod,
   countOccurrences,
   extractAnswerInteger,
   extractAnswerSection,
   extractAnswerSectionBy,
+  lineAnchoredHeadingLabels,
   normalizeForComparison,
   normalizeWhitespace,
   replaceUniqueLine,
@@ -17,6 +20,8 @@ import {
   splitSections,
   splitSectionsBy,
 } from './ground_truth';
+import { parseMarkdownToAST } from '../../core/ast/parser';
+import { collectExtractionBlocks, nodeText } from '../../core/ast/traverse';
 
 // Session 21: the probe's ground truth is computed, never hand-typed —
 // these tests pin (a) the pure helper behavior on synthetic fixtures and
@@ -211,5 +216,150 @@ describe('replaceUniqueLine', () => {
     expect(() => replaceUniqueLine(file, '<<MISSING>>', 'x')).toThrow(/found 0/);
     expect(() => replaceUniqueLine(`${file}\n<<AWAITING>>`, '<<AWAITING>>', 'x')).toThrow(/found 2/);
     expect(() => replaceUniqueLine(file, '<<AWAITING>>', 'a\nb')).toThrow(/newline-free/);
+  });
+});
+
+// --- Session 23 additions ------------------------------------------------------
+// The localization design finding (pillar §6.3 round 3): how much of the
+// naive line-anchored heading method does today's glued reconstruction
+// break, and would preserving block boundaries repair it? These numbers
+// are computed purely from the committed corpora (parse -> reconstruct),
+// no database — the same arithmetic the probe script prints during
+// --ingest against the STORED roots.
+
+describe('lineAnchoredHeadingLabels / boundaryPreservedReconstruction', () => {
+  it('sees own-line headings only where line starts survive', () => {
+    const preserved = ['Entry 1', 'body one.', 'Entry 2', 'body two.'].join('\n\n');
+    expect(lineAnchoredHeadingLabels(preserved, ['Entry'])).toEqual(['Entry 1', 'Entry 2']);
+    // Glued (no separator): no line starts, no matches.
+    expect(lineAnchoredHeadingLabels('body one.Entry 2body two.', ['Entry'])).toEqual([]);
+  });
+
+  it('quantifies the chronicle: gluing hides ALL 48 headings; boundaries restore them', () => {
+    const corpus = fs.readFileSync(
+      path.resolve(__dirname, '../../../data/synthetic_chronicle.txt'),
+      'utf-8'
+    );
+    const root = parseMarkdownToAST(corpus);
+    const glued = nodeText(root);
+    const preserved = boundaryPreservedReconstruction(
+      collectExtractionBlocks(root).map(nodeText)
+    );
+    expect(lineAnchoredHeadingLabels(corpus, ['Entry'])).toHaveLength(48);
+    // The chronicle's paragraphs are single lines, so the glued
+    // reconstruction is ONE line: the naive method finds nothing — the
+    // exact mechanism of both round-2 chronicle locate misses
+    // ("Entry None" / "Entry ?").
+    expect(glued.includes('\n')).toBe(false);
+    expect(lineAnchoredHeadingLabels(glued, ['Entry'])).toHaveLength(0);
+    expect(lineAnchoredHeadingLabels(preserved, ['Entry'])).toHaveLength(48);
+    // And the boundary-preserved text yields the SAME localization
+    // answers as the source bytes (spot-checked on a planted anomaly).
+    expect(sectionContainingBy(preserved, 'the astrolabe of Veldenmoor', ['Entry']))
+      .toBe(sectionContainingBy(corpus, 'the astrolabe of Veldenmoor', ['Entry']));
+  });
+
+  it('quantifies frank: gluing leaves ONLY misleading TOC lines; boundaries restore the real headings', () => {
+    const corpus = fs.readFileSync(
+      path.resolve(__dirname, '../../../data/frankenstein.txt'),
+      'utf-8'
+    );
+    const root = parseMarkdownToAST(corpus);
+    const glued = nodeText(root);
+    const preserved = boundaryPreservedReconstruction(
+      collectExtractionBlocks(root).map(nodeText)
+    );
+    const kinds = ['Letter', 'Chapter'];
+    // Source: exactly the 28 real headings (the TOC lines are indented).
+    expect(lineAnchoredHeadingLabels(corpus, kinds)).toHaveLength(28);
+    // Glued: every real heading loses its line start; what remains are
+    // table-of-contents lines (indentation stripped by the parse, line
+    // breaks preserved INSIDE the TOC block) — the exact mechanism of
+    // the round-2 "Chapter 23" miss, where nearest-heading-before-phrase
+    // resolved to the last visible TOC line.
+    const gluedLabels = lineAnchoredHeadingLabels(glued, kinds);
+    expect(gluedLabels).toHaveLength(26);
+    // The last visible label is "Chapter 23" — the round-2 wrong answer
+    // verbatim ("Chapter 24", the TOC's final line, loses its line END
+    // to the glue).
+    expect(gluedLabels[gluedLabels.length - 1]).toBe('Chapter 23');
+    expect(gluedLabels.filter(l => l === 'Chapter 5')).toHaveLength(1); // TOC only
+    // Boundary-preserved: all 28 real headings return (the 28 TOC lines
+    // inside the contents block still match — a caveat for the
+    // recommendation, not a repair failure: nearest-heading-before now
+    // resolves to the real heading because the real headings exist).
+    const preservedLabels = lineAnchoredHeadingLabels(preserved, kinds);
+    expect(preservedLabels).toHaveLength(28 + 28);
+    expect(sectionContainingBy(preserved, 'It was on a dreary night of November', kinds))
+      .toBe('Chapter 5');
+  });
+
+  it('quantifies the second trap: gluing destroys trailing word boundaries too', () => {
+    // Measured live in round 3 (off-arm locate-November r3): a
+    // position-independent shape scan STILL missed when its pattern
+    // ended in \b — the glue puts the next block's first letter right
+    // after the heading's final digit ("Chapter 5It was on..."), and
+    // \d+\b cannot match a digit followed by a letter. The nearest
+    // visible heading before the phrase becomes the TOC's "Chapter 23"
+    // — the exact wrong answer of BOTH rounds — while the
+    // boundary-preserved reconstruction resolves to the real Chapter 5.
+    const frank = fs.readFileSync(
+      path.resolve(__dirname, '../../../data/frankenstein.txt'),
+      'utf-8'
+    );
+    const root = parseMarkdownToAST(frank);
+    const glued = nodeText(root);
+    const preserved = boundaryPreservedReconstruction(
+      collectExtractionBlocks(root).map(nodeText)
+    );
+    const shapeWithBoundary = /(Letter|Chapter)\s+\d+\b/g;
+    expect([...glued.matchAll(shapeWithBoundary)]).toHaveLength(33);
+    expect([...preserved.matchAll(shapeWithBoundary)]).toHaveLength(56);
+    const phrase = 'It was on a dreary night of November';
+    const nearestBefore = (text: string) => {
+      const at = text.indexOf(phrase);
+      const before = [...text.matchAll(shapeWithBoundary)].filter(m => (m.index ?? 0) < at);
+      return before[before.length - 1]?.[0];
+    };
+    expect(nearestBefore(glued)).toBe('Chapter 23');
+    expect(nearestBefore(preserved)).toBe('Chapter 5');
+  });
+});
+
+describe('classifyLocalizationMethod', () => {
+  const kinds = ['Entry'];
+
+  it('detects the line-anchored method (the one gluing breaks)', () => {
+    expect(classifyLocalizationMethod(
+      'code: re.findall(r"^Entry (\\d+)$", text, re.MULTILINE)', kinds
+    )).toBe('line-anchored');
+    expect(classifyLocalizationMethod(
+      'for line in text.splitlines():\n  if line.startswith("Entry "):', kinds
+    )).toBe('line-anchored');
+    // Anchored groups and alternations still count as anchored.
+    expect(classifyLocalizationMethod(
+      're.finditer(r"^(Entry) (\\d+)$", text, re.M)', kinds
+    )).toBe('line-anchored');
+    expect(classifyLocalizationMethod(
+      're.finditer(r"^(Letter|Chapter) \\d+$", text, re.M)', ['Letter', 'Chapter']
+    )).toBe('line-anchored');
+  });
+
+  it('detects the shape-based method (glue-tolerant)', () => {
+    expect(classifyLocalizationMethod(
+      'hits = [m for m in re.finditer(r"Entry (\\d+)", text)]', kinds
+    )).toBe('shape');
+    expect(classifyLocalizationMethod(
+      're.findall(r"Entry\\s+(\\d+)", text)', kinds
+    )).toBe('shape');
+  });
+
+  it('prefers line-anchored when both markers appear, else unknown', () => {
+    expect(classifyLocalizationMethod(
+      'first tried re.findall(r"^Entry \\d+$", text, re.M) then re.finditer(r"Entry \\d+", text)',
+      kinds
+    )).toBe('line-anchored');
+    expect(classifyLocalizationMethod('answer came from an llm_query subcall', kinds))
+      .toBe('unknown');
   });
 });

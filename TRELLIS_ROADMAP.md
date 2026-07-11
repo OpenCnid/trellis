@@ -210,9 +210,10 @@ Ordered roughly by severity.
 | ~~1~~ | ~~Pillar measurement + module #1 v2 (pillar §6.3 + §6.4, owner-APPROVED July 9, 2026) + the Frankenstein corpus~~ | **Done (Session 21, July 10, 2026 — the redo; the first attempt, PR #56, was owner-discarded and reverted by PR #58 the same day)** — Frankenstein ingested zero-paid as durable Tier-1 substrate; the effective-context probe MEASURED (§6.3: 12 runs, $0.73 — with the §6.2 block no run put the corpus through attention, without it one run pushed all ~105k tokens through a single `llm_query`; the one wrong answer was an engine-computed 55 retyped as 47 — the transcription channel live in the answer path); module #1 v2 landed through grounded authoring (§6.4: anchor gate refused the three-doc corpus at 0.28, owner re-scoped to the two normative docs per the gate's documented remedy, the same paid draft landed at 0.50 by zero-paid replay; mitigation line retired, v1 history preserved); see §5 |
 | ~~3~~ | ~~Anchor-gate calibration (grounded-authoring follow-up, measured Session 21)~~ | **Core fix done (Session 21, later the same day)** — `evaluateAnchorGate` no longer scores template-forbidden numeric anchor kinds (`comparison`/`ratio`) in its denominator; the previously refused module #1 v2 draft now clears at 18/60 = 0.30. Optional residual (compound segments get exact-match, plain terms get stem credit — a minor asymmetry) left to a future gate touch, not blocking; see §5 |
 | ~~2~~ | ~~Effective-context probe, round 2 + the answer-channel fix (owner-directed next, July 10, 2026)~~ | **Done (Session 22, July 11, 2026)** — the by-reference answer channel (`trellis_answer.submit`: caller-frame evaluation, structural literal refusal, engine-side rendering; `npm run test:answer-channel`, 32 checks; both composed-prompt pins recomputed wittingly) shipped FIRST, then all four measurement arms ran paid ($2.15, 57 runs): the unmemorized synthetic chronicle isolated read-fidelity (8/8 anomaly quotes byte-faithful), the 40-ledger corpus measured the pandas null result (0/12 aggregation runs reached for a DataFrame — plain loops stayed cheap and correct), the edit round-trip was 8/8 byte-exact through `trellis_textedit`, repeats reported medians with spread, and the round-1 55→47 question came back 55 in both arms; zero transcription errors in 56 runs (round 1: 1 in 12); every remaining miss is localization-method error over the glued reconstruction (a recorded observation, not a regression); see §5 |
-| 3 | Effective-context probe, round 3 (owner-directed next, July 11, 2026) | **Owner re-pointed Session 23 to this over extraction (July 11, per the §0 event-loop rule; see §5).** Close the two measurement threads round 2 left open and the pillar's still-unproven §7 claim: (a) a GENUINE repo-scale / relational corpus (an actual repository snapshot via `repo:ingest`, or a corpus far larger than the 40 small ledgers) where a DataFrame could actually earn its keep — round 2's pandas null result (0/68 runs) means the regime where structured frames beat plain loops is still unmeasured; (b) LOCALIZATION methods over the unmarked-boundary reconstruction (all 3 round-2 misses were line-anchored heading regexes failing over glued blocks) — measure shape-based localization in code and surface, with a recommendation, whether `get_ast_texts` should preserve block boundaries (a witting kernel decision, not implemented unprompted); (c) higher n on the load-bearing claims (round 2 was n=2), with proper spread; (d) the question-design fixes round 2 recorded (restore the "boundaries are unmarked" disclosure clause to the synthetic preambles). Paid, owner-gated per run under the standing ≤$5 cap; carried at full concreteness in `HANDOFF.md` §3–§8 |
+| ~~3~~ | ~~Effective-context probe, round 3 (owner-directed next, July 11, 2026)~~ | **Done (Session 23, July 11, 2026)** — the relational corpus (102 generated documents: 100 season-two ledgers ≈6,859 records + a captain→guild registry + a port/material tariff schedule; every question a genuine 2- or 3-table join) measured the pandas null result PERSISTING at 3.1× round-2 scale (0/87 round-3 runs imported pandas or polars; plain dict loops answered every join digit-exact); the localization arm (30 locate runs) reproduced the round-2 failure class at rate (7/30 misses, ALL method error over the glued reconstruction, none transcription) and quantified TWO representation traps zero-paid (line anchors: chronicle 0/48 headings visible glued vs 48/48 boundary-preserved; trailing word boundaries: `\d+\b` fails at glued digit→letter junctions, producing the exact "Chapter 23" wrong answer of both rounds); higher n moved the load-bearing claims (87/87 submits, zero transcription errors at n=5/arm on counts and quotes); the disclosure clause was restored to the chronicle/ledger preambles; RECOMMENDATION recorded as §4 row 6. See §5 |
 | 4 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (owner deferred it once more July 11 behind probe round 3 — the round-3 repo-scale arm builds tooling this row benefits from; never dropped) |
 | 5 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
+| 6 | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText`) — owner sign-off required | RECOMMENDED by probe round 3 (July 11, 2026): all 10 cross-round localization misses (3 in round 2, 7 in round 3) are in the class a boundary-preserving reconstruction repairs, and both failure mechanisms are quantified zero-paid (unit-pinned in `ground_truth.test.ts`: line-anchored heading visibility chronicle 0→48 / frank 26-misleading→56, and the trailing-`\b` nearest-heading trap "Chapter 23"→"Chapter 5"). A WITTING kernel change: it moves every pinned reconstruction truth (probe invariants, block read-backs, entailment fetches), so it lands whole with owner sign-off or not at all — never as a patch |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -2773,3 +2774,132 @@ localization/representation question worth measuring before more
 capability work. Extraction prerequisites drop to row 4 (never dropped;
 the round-3 repo-scale arm builds tooling that row benefits from).
 `HANDOFF.md` §3–§8 were regenerated for probe round 3 in this same PR.
+
+### July 11, 2026 — Session 23: the effective-context probe round 3 (§4 row 3)
+
+**The relational corpus** (row 3 item (a); the pillar §7 regime,
+chosen over a live `repo:ingest` snapshot because a repository's
+cross-file "joins" are either trivially greppable or semantic — not
+computable from bytes by pure helpers — and because a generated corpus
+stays durable where a snapshot drill must tombstone):
+
+1. **`src/benchmarks/effective_context/relational_corpus.ts`** (+
+   test): seeded deterministic generation (mulberry32, ASCII; concat
+   sha256 `3bbbea18…a697` unit-pinned; 583,128 bytes ≈ 146k tokens —
+   more bytes than the Frankenstein corpus). 102 documents of three
+   kinds: 100 season-two ledgers (`ledger:synthetic:s2-house-001…100`,
+   6,859 records in round 2's exact canonical record shape — the
+   round-2 `parseLedgerRecords` parses them unchanged), one captain
+   registry (`registry:synthetic:captains`: 36 unique captains → 8
+   invented guilds, round-robin balanced — an `rng.pick` assignment
+   skewed memberships badly enough that one guild topped EVERY
+   aggregate, degenerating the join questions; found during corpus
+   design, fixed before ingest), and one tariff schedule
+   (`tariff:synthetic:port-schedule`: one line per (port, material)
+   pair, 108). New shape-based parsers (`parseRegistryRecords`,
+   `parseTariffRecords` — the gluing lesson applied from the start)
+   and tie-refusing join truths (`buildGuildIndex`, `buildTariffIndex`,
+   `totalsByGuildForMaterial`, `topGuildForMaterial`, `tariffIntoPort`,
+   `totalTariffByGuild`, `topGuildByTariff`, `guildProfile`; unknown
+   captains, missing tariffs, duplicates, and ties throw — Duskhollow's
+   real port-frequency tie is the committed negative fixture). All 102
+   ingested zero-paid through the verified path (extraction `none`),
+   sampled blocks read back byte-exact through the real Python
+   `get_ast_texts`, re-ingest observed as the auditable no-op (144
+   documents no-op across all four corpora). Durable substrate.
+2. **The probe script round 3** (`scripts/exp_effective_context.ts`):
+   new `relational` suite (4 kernel-fixed join questions — 2-table,
+   2-table+arithmetic, 3-table, and the multi-part guild profile as
+   the answer-channel stress companion), `usedPolars` measured
+   alongside `usedPandas`, two new chronicle locate anomalies (Entries
+   24/37 join round 2's 6/43), per-run localization-method
+   classification (`classifyLocalizationMethod` in `ground_truth.ts`:
+   line-anchored / shape / unknown, from the saved run logs), the
+   `--ingest` boundary-quantification printout, and the disclosure
+   fix (row 3 item (d)): the chronicle and ledger preambles now carry
+   the frank preamble's "paragraph boundaries are unmarked; line
+   breaks inside paragraphs are preserved" clause verbatim.
+3. **The zero-paid boundary quantification** (row 3 item (b);
+   `boundaryPreservedReconstruction`/`lineAnchoredHeadingLabels` in
+   `ground_truth.ts`, unit-pinned from the committed bytes): the glued
+   reconstruction hides ALL 48 chronicle headings from a line-anchored
+   scan (the glued chronicle is ONE line) and leaves frank with 26
+   labels that are ALL misleading TOC lines ending at "Chapter 23";
+   the boundary-preserved variant (same stored blocks joined with
+   blank lines) restores 48/48 and 56 (all 28 real + 28 TOC), and
+   `sectionContainingBy` over it equals the source-bytes truth.
+   Offline suite 659 → **678** across 74 files.
+
+**The measured runs** (owner-directed objective; estimates printed,
+≤$5 cumulative abort armed per invocation, none aborted):
+
+- Commands: one smoke run (`--suites relational --questions
+  rel-top-guild --arms on`, $0.0593), `--suites relational --repeats 2`
+  (16 runs, $0.9813), the localization arm (`--suites chronicle,frank
+  --questions syn-locate-halloway,syn-locate-crayke,
+  syn-locate-inglenook,syn-locate-vennbridge,locate-November
+  --repeats 3`, 30 runs, $1.2586), and the higher-n arm (`--suites
+  chronicle --questions syn-count-kelvorin,syn-count-torulf,
+  syn-quote-verewood,syn-quote-pickering --repeats 5`, 40 runs,
+  $1.3267). **Total Session 23 paid spend: $3.6260 across 87 runs**
+  (79/87 correct; every run ≥1 database tool call and every run
+  answered through `trellis_answer.submit`). Raw logs under
+  `benchmark_logs/effective-context-2026-07-11T09*` (gitignored); the
+  numbers live in `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`
+  (round-3 section).
+- Headline findings: **the pandas null result persists at 3.1× scale
+  with genuine joins** (0/87 runs imported pandas or polars; plain
+  dict loops answered all 17 relational join runs digit-exact at
+  ~8.7k median input tokens against a ~146k-token corpus — the
+  structured-frame threshold sits above one-record-shape corpora of
+  this size; what would plausibly move it is recorded: schema
+  heterogeneity, fuzzy joins, or a long interactive session over one
+  working set). **The localization class reproduced at rate** (7/30
+  locate misses, all method error, none transcription; five loud
+  sentinels + two plausible "Chapter 23"; recovering line-anchored
+  runs paid 13k–27k input tokens vs ~3.6k for the runs that gave up
+  — and the disclosure clause was IN the preamble, so prompt
+  disclosure measurably does not retire the class). **A second
+  representation trap found live and pinned**: gluing destroys
+  trailing word boundaries too — a shape scan ending in `\b` cannot
+  match a heading digit glued to the next block's first letter, which
+  is exactly how BOTH rounds produced "Chapter 23". **The
+  RECOMMENDATION is recorded as §4 row 6** (boundary-preserving
+  reconstruction; all 10 cross-round localization misses are in the
+  repaired class; owner sign-off required — it moves every pinned
+  reconstruction truth). **The load-bearing claims moved toward
+  settled**: 87/87 submits, zero transcription errors (cumulative
+  144/144 over rounds 2–3), 20/20 quote runs byte-faithful at
+  n=5/arm/question, and the multi-part answer stress held 5/5. **One
+  new miss shape, upstream of the channel**: a run assumed
+  `get_ast_texts` returns a list, counted over the resulting empty
+  string, and submitted the computed 0 in the SAME response block —
+  faithful delivery of a wrong computation (result-shape mishandling +
+  same-turn submit), not transcription. **The arm effect stayed in the
+  tail**: medians indistinguishable; the round's single near-corpus
+  attention pass (84,829 input tokens through one `llm_query`)
+  happened in the off arm; zero such passes in 47 on-arm runs.
+- **Defects found and fixed along the way:** (1) the skewed guild
+  assignment (item 1 — fixed at design time, before the sha pin);
+  (2) `classifyLocalizationMethod` initially missed anchored
+  ALTERNATION patterns (`^(Letter|Chapter)`) — fixed with the
+  committed classifier and the report's method tables re-classified
+  from the saved logs with it (disclosed in the report; the summary
+  aggregates in the run logs carry the pre-fix labels).
+
+**Acceptance observed (July 11, 2026):** `npm test` 678/74 · `npm run
+build` · `npm run python:check` · `docker compose --profile test
+config --quiet` · the isolated Compose integration as project
+`trellis_s23_ci` (all 10 PASS; image `trellis-backend:s23-ci`; torn
+down `--volumes`) · `test:answer-channel` 32 · `test:modules` 51 (NO
+pin moved — round 3 changed no kernel prompt) · `test:textedit` 81 ·
+`test:module-lifecycle` · `test:promotion` · `test:rlm-workspace` ·
+`test:rlm-mcp` · `test:rlm-sandbox` · `test:agent-loop` (ALL CHECKS
+PASSED) · `test:a2a` · `test:repo-ingest` · `test:benchmark-hardening`
+· `test:entity-resolution` · `test:api-hardening` ·
+`test:belief-recovery` · `test:invalidation-sweep` · `npm run
+drill:scale` gate CLOSED (max provenance 286, sweep growth 1.84x —
+inside the recorded band; the committed `scale_drill_results.json` is
+this run) · `git diff --check` clean. The dev PG now durably carries
+the relational corpus alongside the three earlier probe corpora
+(~293 documents total).
