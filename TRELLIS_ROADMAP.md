@@ -210,10 +210,11 @@ Ordered roughly by severity.
 | ~~1~~ | ~~Pillar measurement + module #1 v2 (pillar §6.3 + §6.4, owner-APPROVED July 9, 2026) + the Frankenstein corpus~~ | **Done (Session 21, July 10, 2026 — the redo; the first attempt, PR #56, was owner-discarded and reverted by PR #58 the same day)** — Frankenstein ingested zero-paid as durable Tier-1 substrate; the effective-context probe MEASURED (§6.3: 12 runs, $0.73 — with the §6.2 block no run put the corpus through attention, without it one run pushed all ~105k tokens through a single `llm_query`; the one wrong answer was an engine-computed 55 retyped as 47 — the transcription channel live in the answer path); module #1 v2 landed through grounded authoring (§6.4: anchor gate refused the three-doc corpus at 0.28, owner re-scoped to the two normative docs per the gate's documented remedy, the same paid draft landed at 0.50 by zero-paid replay; mitigation line retired, v1 history preserved); see §5 |
 | ~~3~~ | ~~Anchor-gate calibration (grounded-authoring follow-up, measured Session 21)~~ | **Core fix done (Session 21, later the same day)** — `evaluateAnchorGate` no longer scores template-forbidden numeric anchor kinds (`comparison`/`ratio`) in its denominator; the previously refused module #1 v2 draft now clears at 18/60 = 0.30. Optional residual (compound segments get exact-match, plain terms get stem credit — a minor asymmetry) left to a future gate touch, not blocking; see §5 |
 | ~~2~~ | ~~Effective-context probe, round 2 + the answer-channel fix (owner-directed next, July 10, 2026)~~ | **Done (Session 22, July 11, 2026)** — the by-reference answer channel (`trellis_answer.submit`: caller-frame evaluation, structural literal refusal, engine-side rendering; `npm run test:answer-channel`, 32 checks; both composed-prompt pins recomputed wittingly) shipped FIRST, then all four measurement arms ran paid ($2.15, 57 runs): the unmemorized synthetic chronicle isolated read-fidelity (8/8 anomaly quotes byte-faithful), the 40-ledger corpus measured the pandas null result (0/12 aggregation runs reached for a DataFrame — plain loops stayed cheap and correct), the edit round-trip was 8/8 byte-exact through `trellis_textedit`, repeats reported medians with spread, and the round-1 55→47 question came back 55 in both arms; zero transcription errors in 56 runs (round 1: 1 in 12); every remaining miss is localization-method error over the glued reconstruction (a recorded observation, not a regression); see §5 |
-| ~~3~~ | ~~Effective-context probe, round 3 (owner-directed next, July 11, 2026)~~ | **Done (Session 23, July 11, 2026)** — the relational corpus (102 generated documents: 100 season-two ledgers ≈6,859 records + a captain→guild registry + a port/material tariff schedule; every question a genuine 2- or 3-table join) measured the pandas null result PERSISTING at 3.1× round-2 scale (0/87 round-3 runs imported pandas or polars; plain dict loops answered every join digit-exact); the localization arm (30 locate runs) reproduced the round-2 failure class at rate (7/30 misses, ALL method error over the glued reconstruction, none transcription) and quantified TWO representation traps zero-paid (line anchors: chronicle 0/48 headings visible glued vs 48/48 boundary-preserved; trailing word boundaries: `\d+\b` fails at glued digit→letter junctions, producing the exact "Chapter 23" wrong answer of both rounds); higher n moved the load-bearing claims (87/87 submits, zero transcription errors at n=5/arm on counts and quotes); the disclosure clause was restored to the chronicle/ledger preambles; RECOMMENDATION recorded as §4 row 6. See §5 |
-| 4 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (owner deferred it once more July 11 behind probe round 3 — the round-3 repo-scale arm builds tooling this row benefits from; never dropped) |
-| 5 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
-| 6 | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText`) — owner sign-off required | RECOMMENDED by probe round 3 (July 11, 2026): all 10 cross-round localization misses (3 in round 2, 7 in round 3) are in the class a boundary-preserving reconstruction repairs, and both failure mechanisms are quantified zero-paid (unit-pinned in `ground_truth.test.ts`: line-anchored heading visibility chronicle 0→48 / frank 26-misleading→56, and the trailing-`\b` nearest-heading trap "Chapter 23"→"Chapter 5"). A WITTING kernel change: it moves every pinned reconstruction truth (probe invariants, block read-backs, entailment fetches), so it lands whole with owner sign-off or not at all — never as a patch |
+| ~~3~~ | ~~Effective-context probe, round 3 (owner-directed next, July 11, 2026)~~ | **Done (Session 23, July 11, 2026)** — the relational corpus (102 generated documents: 100 season-two ledgers ≈6,859 records + a captain→guild registry + a port/material tariff schedule; every question a genuine 2- or 3-table join) measured the pandas null result PERSISTING at 3.1× round-2 scale (0/87 round-3 runs imported pandas or polars; plain dict loops answered every join digit-exact); the localization arm (30 locate runs) reproduced the round-2 failure class at rate (7/30 misses, ALL method error over the glued reconstruction, none transcription) and quantified TWO representation traps zero-paid (line anchors: chronicle 0/48 headings visible glued vs 48/48 boundary-preserved; trailing word boundaries: `\d+\b` fails at glued digit→letter junctions, producing the exact "Chapter 23" wrong answer of both rounds); higher n moved the load-bearing claims (87/87 submits, zero transcription errors at n=5/arm on counts and quotes); the disclosure clause was restored to the chronicle/ledger preambles; RECOMMENDATION recorded (then re-pointed the same day — the owner chose the additive `get_ast_blocks` accessor over the reconstruction-byte change; now §4 row 4). See §5 |
+| 4 | Boundary-aware block accessor (`get_ast_blocks`) + structure-selection demotion | **Owner-directed next, July 11, 2026 (post-round-3 re-point, §0 event-loop rule; see §5).** Fix the LIVE localization failure class (10 misses across rounds 2–3, all method error over the glued reconstruction) with a NEW ADDITIVE read tool `get_ast_blocks(rootHash)` returning a document's extraction blocks in order (`[{id, type, text}]`) — the model gets structure directly instead of re-parsing a glued string, and NO stored/reconstructed byte moves (only the composed-prompt pins move wittingly to teach the tool). This SUPERSEDES the reconstruction-byte change below: the owner chose the additive accessor over changing `get_ast_texts`/`nodeText` (July 11, both forks decided). Also demote pillar §7's "pandas is the default" guidance to "plain loops until a measured threshold" per §7's own written contingency — the round-3 null (0/87) is the continued null result §7 pre-committed to acting on; docs-only, zero-paid. Then re-measure the localization arm (paid, owner-gated) to confirm misses drop |
+| 5 | Repository-scale extraction prerequisites | Scanner test/fixture exclusion plus a code-tuned extraction prompt with generic-identifier suppression, per the recorded pilot findings (deferred behind the round-4 localization fix July 11, 2026; never dropped) |
+| 6 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
+| — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
 ---
@@ -2864,10 +2865,12 @@ stays durable where a snapshot drill must tombstone):
   trailing word boundaries too — a shape scan ending in `\b` cannot
   match a heading digit glued to the next block's first letter, which
   is exactly how BOTH rounds produced "Chapter 23". **The
-  RECOMMENDATION is recorded as §4 row 6** (boundary-preserving
-  reconstruction; all 10 cross-round localization misses are in the
-  repaired class; owner sign-off required — it moves every pinned
-  reconstruction truth). **The load-bearing claims moved toward
+  RECOMMENDATION was recorded** (all 10 cross-round localization misses
+  are in the repaired class) — initially as a boundary-preserving
+  reconstruction change, then RE-POINTED the same day to the additive
+  `get_ast_blocks` accessor (§4 row 4; see the re-point entry below),
+  which fixes the same class without moving any pinned reconstruction
+  truth. **The load-bearing claims moved toward
   settled**: 87/87 submits, zero transcription errors (cumulative
   144/144 over rounds 2–3), 20/20 quote runs byte-faithful at
   n=5/arm/question, and the multi-part answer stress held 5/5. **One
@@ -2903,3 +2906,49 @@ inside the recorded band; the committed `scale_drill_results.json` is
 this run) · `git diff --check` clean. The dev PG now durably carries
 the relational corpus alongside the three earlier probe corpora
 (~293 documents total).
+
+**Next objective re-pointed (July 11, 2026, same PR #61, per the §0
+event-loop rule — step 5).** After the round-3 findings landed, the
+owner reviewed the two threads round 3 surfaced and decided both forks,
+which re-points Session 24 away from the extraction prerequisites (they
+drop one slot to §4 row 5) to a localization fix + a documentation
+demotion:
+
+1. **The localization fix is an ADDITIVE accessor, not a reconstruction
+   byte change.** Round 3 recommended repairing the glued-reconstruction
+   localization misses by making `get_ast_texts`/`nodeText` preserve
+   block boundaries (the then-§4 row 6) — but that moves every pinned
+   reconstruction truth (probe invariants, per-block read-backs,
+   entailment fetches). Investigation for the re-point found a cleaner
+   path: `get_ast_texts` ALREADY returns blocks separately when handed a
+   list of block hashes; the model only gets a glued blob because it is
+   handed the ROOT hash and has no tool to enumerate a document's
+   ordered blocks (its tools are `run_cypher` over the semantic graph,
+   `vector_search` top-3, and `get_ast_texts` needing hashes it does not
+   have). So the fix is a NEW ADDITIVE read tool `get_ast_blocks(rootHash)`
+   returning `[{id, type, text}]` in document order (the
+   `collectExtractionBlocks` set) — the model gets structure directly
+   ("blocks mean, lines locate"), no stored/reconstructed byte moves,
+   and only the composed-prompt pins move wittingly to teach the tool
+   (the Session 22 `trellis_answer` precedent). The byte-change approach
+   is SUPERSEDED (§4, struck), re-entering only if the accessor proves
+   insufficient in the re-measure.
+2. **Demote the pandas guidance per pillar §7's own contingency.** §7
+   ends: "A continued null result would argue for demoting the 'pandas
+   default' guidance to 'plain loops until a measured threshold.'" Round
+   3 IS that continued null (0/87 at three-table-join scale), and §7's
+   micro-benchmark already showed pandas has no speed advantage below
+   ~1M lines — orders of magnitude past any Trellis frame. So the honest
+   move is the pre-committed one: a docs-only, zero-paid edit to pillar
+   §7 demoting "pandas is the default" to "plain loops until a measured
+   threshold" (the mechanism claim — compute in code, effective context
+   decoupled from attention — stays PROVEN by the loop runs; only the
+   library-choice sub-claim is retired). NOT another paid probe: another
+   null is the likely outcome and §7 already conceded the point.
+
+Session 24 = the `get_ast_blocks` accessor + the §7 demotion + a paid
+owner-gated localization re-measure confirming the miss rate drops.
+`HANDOFF.md` §3–§8 were regenerated for it in this same PR; the
+extraction prerequisites' full concreteness is preserved in this PR's
+git history (the round-3 handoff that named them Session 24) for the
+session after.
