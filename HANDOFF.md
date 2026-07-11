@@ -225,7 +225,7 @@ catches it — never reward citation count), and FIXED a real bug:
 block text (`_node_text` reconstruction — the RLM could not read
 markdown or promoted research). No module #2 was authored.
 
-Session 20 (July 9, 2026, this PR) is also complete: **the
+Session 20 (July 9, 2026, PR #55) is also complete: **the
 code-mediated-text follow-ups** (core pillar record
 `docs/architecture/CODE_MEDIATED_TEXT.md` §6.1 + §6.2; owner directive
 July 9 — extraction deferred behind it). **(1) The editing toolkit**
@@ -271,18 +271,64 @@ GLOSSARY entry, identity lines updated here and in the roadmap §1 and
 the collaborator briefing, and historical banners on the three MVP-era
 architecture records — see the roadmap §5 entry of July 9, 2026.
 
+Session 21 (July 10, 2026, this PR) is also complete: **the pillar's
+measurements** (pillar §6.3 + §6.4; roadmap §4 row 1). A first attempt
+at this objective (PR #56, July 9–10) was owner-discarded and reverted
+wholesale (PR #58); this session is the fresh redo — nothing from the
+reverted tree reused. **(1) The corpus:** `data/frankenstein.txt`
+(Gutenberg #84, the 1831 text; deterministic trim; 421,536 bytes,
+sha256 + LF-ness unit-pinned; `.gitattributes -text` so autocrlf can
+never move the truths) ingested through the verified path as
+`book:gutenberg-84:frankenstein` (root `a2f9c97c…4439`, 1,708 nodes,
+796 blocks, extraction `none`; sampled blocks read back byte-exact
+through the real Python `get_ast_texts`; identical re-ingest observed
+as version 2 / same root / empty diff). Deliberately durable substrate.
+**(2) The effective-context probe (§6.3 MEASURED,
+`docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`):**
+`scripts/exp_effective_context.ts` (plan-only default, `--ingest`
+zero-paid setup, `--confirm-paid` + cumulative `--max-spend-usd` abort;
+ground truth COMPUTED from the committed bytes by the unit-pinned
+`src/benchmarks/effective_context/ground_truth.ts`). The
+discipline-off arm is `TRELLIS_EXP_OMIT_CMT=1` — experiment
+instrumentation in the `TRELLIS_CITATION_*` mold: unset composes the
+byte-identical pinned kernel (`170e9f7e…67e9`, unmoved); set composes
+exactly the §6.2 block out, byte-identical to the recorded
+pre-Session-20 kernel (`abb945a6…f9b2`); both pinned by `test:modules`
+[7]; `buildAgentEnv` strips the flag unconditionally (no config field
+exists — unit-pinned). Measured (12 runs, $0.7320, n=6/arm
+directional): median input 7.9k (on) vs 14.7k (off); with the block no
+run put the corpus through attention, without it one run handed all
+~105k corpus tokens to a single `llm_query` (110,550 input tokens,
+7.6×); the one wrong answer was the on arm RETYPING an engine-computed
+count (printed 55, answered 47) — the transcription channel live in
+the unmediated answer path; tooling shape, not prompt text, is the
+remaining fix there. **(3) Module #1 v2 (§6.4 DONE):** pillar §0+§2
+promoted as `research:trellis/workspace-discipline/code-mediated-text`
+(root `0a477d04…779e`, 17 blocks) via stub-park + the real promote CLI;
+one paid grounded-authoring run ($0.127) drafted v2; the anchor gate
+REFUSED the three-doc assembly at 18/64 = 0.28 (measured: the evidence
+doc's distinctive anchors are numerals the template forbids a draft
+from restating — with them excluded the draft sits at exactly 0.30);
+the owner re-scoped the pinned corpus to the two NORMATIVE docs per the
+gate's documented remedy (same draft: 32/64 = 0.50) and the envelope
+landed by zero-paid `--draft` replay. The swap kept the module name and
+title, set `version: 2` (test:modules [5] pin moved wittingly, plus a
+new pin that the "reconstructing stored text" mitigation line stays
+retired), pinned `research.sourceNodeIds` to the 31 driver-pinned
+blocks, and preserved v1's laundering-correction history verbatim in
+`RESEARCH.md`; re-registered live (ON MATCH refresh, `moduleVersion` 2,
+uncontested). The gate finding is roadmap §4 row 3 (anchor-gate
+calibration — a future reviewed kernel change; the corpus-choice remedy
+worked, so it does not block). Total Session 21 paid spend: $0.859.
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 21: the pillar's measurements — the
-Frankenstein corpus, the effective-context probe, and module #1 v2**
-(roadmap §4 row 1; owner directive July 9, 2026: the two formerly
-owner-gated follow-ups of `docs/architecture/CODE_MEDIATED_TEXT.md`
-§6.3/§6.4 are APPROVED, and the extraction prerequisites defer a third
-time to row 2 — deferred, not dropped), per §3–§6 below. Code-mediated
-("pandas") ingestion readiness was VERIFIED on July 9 (roadmap §5) —
-re-verify cheaply, do not re-derive. Do not re-plan or re-implement
-completed work. RLM expands exclusively to Recursive Language Model
-(the MIT CSAIL formulation).
+Your objective is **Session 22: the repository-scale extraction
+prerequisites** (roadmap §4 row 2 — deferred three times behind owner
+directives, never dropped; the recorded pilot findings in
+`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5 are NORMATIVE), per
+§3–§6 below. Do not re-plan or re-implement completed work. RLM expands
+exclusively to Recursive Language Model (the MIT CSAIL formulation).
 
 ---
 
@@ -358,6 +404,13 @@ immutable, content-addressed physical location in source material.
      writes it, inside the ingest transaction.
    - `repository_snapshots`/`repository_snapshot_paths` (Session 8) record
      which paths each published repository snapshot contained.
+   - Durable measurement substrate (Session 21): `data/frankenstein.txt`
+     (committed, byte-stability unit-pinned, `.gitattributes -text`) is
+     ingested as `book:gutenberg-84:frankenstein` (extraction `none`, no
+     embeddings) — the effective-context probe's corpus, deliberately
+     NOT drill residue. The three promoted research docs
+     `research:trellis/workspace-discipline/{contract,evidence,code-mediated-text}`
+     are module #1's corpus documents.
    - The verified ingest transaction lives in `src/core/ingestion/`
      (`ingest_document.ts`: persist → read-back re-hash verification →
      membership → registration → in-transaction Merkle diff;
@@ -567,7 +620,17 @@ immutable, content-addressed physical location in source material.
      `COMPOSED_SYSTEM_PROMPT_SHA256 = 170e9f7e…67e9` (the §6.2 kernel
      block included; the pin constant records its move history in
      `scripts/test_modules.py` — it moves only with a witting kernel
-     change, recomputed in the same commit).
+     change, recomputed in the same commit). Since Session 21 the §6.2
+     block is the named constant `CODE_MEDIATED_TEXT_BLOCK`, and
+     `TRELLIS_EXP_OMIT_CMT=1` (experiment instrumentation ONLY — the
+     `TRELLIS_CITATION_*` mold: never set by any default/worker/Compose
+     config, `buildAgentEnv` deletes it unconditionally) composes
+     exactly that block out, yielding the recorded pre-Session-20
+     prompt byte-for-byte (`abb945a6…f9b2`; both compositions pinned by
+     `test:modules` [7]). Module #1 (`workspace-discipline`) is at
+     version 2 (Session 21: re-authored through grounded authoring with
+     the pillar in its corpus; `test:modules` [5] pins name, title,
+     version, and the retired mitigation line).
    - **Grounded authoring (Session 19; `src/core/authoring/*` +
      `src/core/observability/rlm_draft.ts` + `scripts/author_module.ts`
      + `trellis_agent.py --mode author`):** the kernel mode that drafts
@@ -663,7 +726,10 @@ immutable, content-addressed physical location in source material.
      workspace probes in `docs/benchmarks/WORKSPACE_PROBE_REPORT.md`
      and `docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md`; the
      provenance-citation A/B eval in
-     `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`.
+     `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`; the
+     effective-context probe (Session 21, pillar §6.3) in
+     `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` over the
+     committed `data/frankenstein.txt`.
    - The fixture MCP server (`scripts/fixture_mcp_server.py`; stdio and
      Streamable HTTP with an optional required-bearer mode) is the only
      MCP server acceptance ever configures; real web-search servers are
@@ -675,68 +741,79 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 9, 2026 sequence ending in
-  Session 20 (the editing toolkit + the kernel prompt revision, the PR
-  that carries this file; stacked on the PR #54 pillar record). Use
-  `git log -- HANDOFF.md` to confirm the Session 20 PR landed. If it is
-  still unmerged when this session starts, STOP and merge it first.
-- `modules/workspace-discipline/` exists (module #1); the dev graph
-  carries its registered entity `module:workspace-discipline` (24 live
-  research hashes) and the promoted corpus documents
-  `research:trellis/workspace-discipline/{contract,evidence}` (50 AST
-  nodes, none embedded — promotion policy `none` writes no embeddings).
-  Sessions 19–20 added NO committed module (the module #2 paid run is
-  owner-gated and did not run).
-- Session 20 added `src/rlm/trellis_textedit.py` (in the Dockerfile
-  COPY line and `check_python_runtime.py`), the `src/config` textedit
-  validation (`TRELLIS_EDIT_ROOT` + two bounds, root existence
-  fail-fast), `buildAgentEnv` textedit forwarding with strip-when-unset,
-  the gated injection + brace-free TEXTEDIT addendum in
-  `trellis_agent.py`, the §6.2 CODE-MEDIATED TEXT block in
-  `TRELLIS_ADDENDUM_BASE` (composed-prompt pin moved wittingly to
-  `170e9f7e…67e9`), `scripts/test_textedit.{py,ts}` (`npm run
-  test:textedit`), `src/config/textedit_bounds.test.ts`, and README /
-  `.env.example` operator documentation. `TRELLIS_EDIT_ROOT` is set in
-  NO default, worker, or Compose configuration — enabling it is a
-  per-run operator decision.
-- Offline baseline: `npm test` = 621 passing across 71 files
-  (Session 20 added `textedit_bounds.test.ts` and extended
+- `master`: the head after the July 10, 2026 Session 21 PR (the
+  pillar's measurements — the PR that carries this file). Its history
+  contains the discarded first attempt as a merged-then-reverted pair
+  (#56 / revert #58); that pair is byte-neutral and its claims are
+  void. Use `git log -- HANDOFF.md` to confirm the Session 21 PR
+  landed. If it is still unmerged when this session starts, STOP and
+  merge it first.
+- `modules/workspace-discipline/` is at VERSION 2 (module #1,
+  re-authored Session 21); the dev graph carries its registered entity
+  `module:workspace-discipline` (`moduleVersion` 2; manifest pins 31
+  research hashes — contract + code-mediated-text; the entity's live
+  provenance is the audit-preserving union of both versions' bases, 41
+  hashes) and THREE promoted corpus documents
+  `research:trellis/workspace-discipline/{contract,evidence,code-mediated-text}`
+  (none embedded — promotion policy `none` writes no embeddings). The
+  dev PG also carries the durable probe corpus
+  `book:gutenberg-84:frankenstein` (versions 1+2, same root
+  `a2f9c97c…4439`, 796 blocks, no embeddings). No module #2 exists (its
+  paid turn is owner-gated and did not run).
+- Session 21 added `data/frankenstein.txt` (+ the `.gitattributes
+  -text` pin), `src/benchmarks/effective_context/ground_truth.ts`
+  (+ its test), `scripts/exp_effective_context.ts` (deliberately NO
+  npm alias — the owner-gated paid path, like the workspace probes),
+  the `CODE_MEDIATED_TEXT_BLOCK`/`TRELLIS_EXP_OMIT_CMT` composition in
+  `trellis_agent.py` with `test:modules` [7] and the `buildAgentEnv`
+  unconditional strip, module #1 v2, and the effective-context probe
+  report. `package.json` was NOT touched (no Docker `npm ci` layer
+  invalidation). `TRELLIS_EXP_OMIT_CMT` appears deliberately in NO
+  `.env.example` entry — it is experiment instrumentation, not
+  operator configuration.
+- Offline baseline: `npm test` = 639 passing across 72 files
+  (Session 21 added `ground_truth.test.ts` and extended
   `rlm_job.test.ts`).
 - `npm run build` and `npm run python:check` pass.
 - `npm run drill:scale`: gate CLOSED at max provenance 286 (run-to-run
-  sweep-growth band ~1.63x–2.26x across Sessions 12–20; Session 20
-  observed 1.70x).
-- Live zero-LLM checks (Session 20 observed counts): `test:textedit`
-  (81, NEW), `test:module-lifecycle` (60), `test:modules` (43 — the
-  composed-prompt sha256 pin moved ONCE, wittingly, with the §6.2
-  kernel block; recompute it in the same commit only if the kernel
-  prompt or rubric legitimately changes again), `test:promotion` (41),
-  `test:rlm-workspace` (86), `test:rlm-mcp` (86), `test:rlm-sandbox`
-  (21), `test:agent-loop` (35 / ALL CHECKS PASSED), `test:a2a` (46),
-  `test:repo-ingest` (45), `test:benchmark-hardening` (24),
-  `test:entity-resolution` (34), `test:api-hardening` (18),
-  `test:belief-recovery` (30), `test:invalidation-sweep` (17).
+  sweep-growth band ~1.63x–2.26x across Sessions 12–21; Session 21
+  observed 1.88x). The drill rewrites the tracked
+  `scale_drill_results.json` — commit it with the session PR (house
+  practice).
+- Live zero-LLM checks (Session 21 observed, all green): `test:modules`
+  (50 — sections [5] and [7] extended this session; the DEFAULT
+  composed-prompt pin `170e9f7e…67e9` did NOT move, the omit-arm pin
+  `abb945a6…f9b2` is the recorded pre-Session-20 value; recompute BOTH
+  in the same commit only if the kernel prompt or rubric legitimately
+  changes), `test:textedit` (81), `test:module-lifecycle` (60),
+  `test:promotion` (41), `test:rlm-workspace` (86), `test:rlm-mcp`
+  (86), `test:rlm-sandbox` (21), `test:agent-loop` (35 / ALL CHECKS
+  PASSED), `test:a2a` (46), `test:repo-ingest` (45),
+  `test:benchmark-hardening` (24), `test:entity-resolution` (34),
+  `test:api-hardening` (18), `test:belief-recovery` (30),
+  `test:invalidation-sweep` (17).
 - Isolated Compose integration: 10 assertions (`--profile test`, unique
   project name, host ports 0 via `TRELLIS_*_HOST_PORT=0`; includes the
-  containerized credentialed MCP fixture probe). Session 20 ran it as
-  project `trellis_s20_ci` (all 10 PASS) and tore it down with
+  containerized credentialed MCP fixture probe). Session 21 ran it as
+  project `trellis_s21_ci` (all 10 PASS) and tore it down with
   `--volumes`. NOTE: the machine's C: drive runs close to full and an
-  image rebuild needs several GB of headroom (Session 20 started with
-  ~31 GB free and the incremental rebuild fit). Changing `package.json`
+  image rebuild needs several GB of headroom. Changing `package.json`
   invalidates the Docker `npm ci` layer, forcing that rebuild.
-- CI target is Node 22. Session 20's local environment was Node 20.19.2,
-  Python 3.13.1, Docker Compose v2, PostgreSQL 16.x, Neo4j 5.11.
+- CI target is Node 22. Session 21's local environment was Node 20.19.2,
+  Python 3.13.1, Docker Compose v2, PostgreSQL 16.14, Neo4j 5.11.
 - Python runtime deps are pinned in `requirements.txt` (`rlms==0.1.3`,
   `openai`, `neo4j`, `psycopg2-binary`, `unstructured`, `mcp==1.12.4`);
   `npm run python:check` verifies syntax/imports/assets — including
-  `trellis_textedit.py` since Session 20 and, since the July 9
-  readiness check, the `pandas` import (pillar-load-bearing; installed
-  transitively via `unstructured`, so a broken environment must fail
-  the check, not a paid run). The agent environment carries pandas
-  2.2.3 / pyarrow 24.0.0 / polars 1.34.0 (measured; pillar §7).
+  `trellis_textedit.py` since Session 20 and the `pandas` import
+  (pillar-load-bearing; installed transitively via `unstructured`, so a
+  broken environment must fail the check, not a paid run). The agent
+  environment carries pandas 2.2.3 / pyarrow 24.0.0 / polars 1.34.0
+  (measured; pillar §7).
 - The `documents.origin` column ships in the idempotent bootstrap; run
   `npm run db:init:dev` (or restart a container) once against a
   pre-Session-17 database before using `npm run promote`.
+- Raw probe run logs live under `benchmark_logs/` (gitignored — local
+  only; the numbers live in the committed report).
 - The frontend has NO offline tests and NO CI coverage today.
 
 Fresh worktrees do not contain `node_modules`. Start with:
@@ -753,210 +830,182 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 21 problem statement
+## 3. Session 22 problem statement
 
-**The pillar's measurements (`docs/architecture/CODE_MEDIATED_TEXT.md`
-§6.3 + §6.4 — owner-APPROVED July 9, 2026; roadmap §4 row 1; the
-extraction prerequisites defer to row 2).**
+**The repository-scale extraction prerequisites (roadmap §4 row 2; the
+recorded pilot findings are NORMATIVE —
+`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5).**
 
-Three connected deliverables:
+The July 6, 2026 owner-approved extraction pilot (112 blocks from
+`src/core/graph`, zero pipeline failures, 340 entities / 318
+relationships) proved the mechanics and surfaced three blockers that
+make a full-repository `--extract changed` run irresponsible today:
 
-1. **The corpus.** Frankenstein (Project Gutenberg #84, the 1831 text,
-   ~440 KB ≈ 110k tokens of prose) becomes verified Tier-1 substrate
-   through the ordinary ingest path, zero-paid (extraction `none`, no
-   embeddings). It is the measurement substrate: large enough that
-   reading it through attention is expensive and error-prone, small
-   enough to fit every bound. Readiness was VERIFIED on July 9 (roadmap
-   §5 entry): pandas 2.2.3 / pyarrow 24.0.0 / polars 1.34.0 import in
-   the agent Python; a lines-frame round-trips bytes exactly and
-   answers substring queries by engine-computed index; the kernel
-   prompt carries the §6.2 CODE-MEDIATED TEXT block; the ~440 KB corpus
-   fits `INGEST_MAX_BODY_MB` (5 MB) and the 4 MiB workspace default;
-   `get_ast_texts` reconstructs markdown block text (`_node_text`,
-   pinned). `check_python_runtime.py` now pins the `pandas` import.
-2. **The effective-context probe (§6.3, paid).** The pillar's payoff
-   claim — effective context bounded by REPL memory, not the attention
-   window — is doctrine without a number. Nothing yet measures
-   discipline-on vs discipline-off on the SAME task set over the same
-   corpus: correctness, bytes-through-attention, turn count, spend.
-   This probe extends the paired-run series
-   (`WORKSPACE_PROBE_REPORT.md`, `WORKSPACE_LINEAGE_PROBE_REPORT.md`).
-3. **Module #1 v2 (§6.4, paid).** `modules/workspace-discipline` was
-   authored BEFORE both grounded authoring and the pillar (it is the
-   module whose paid turn observed provenance laundering live). Its
-   addendum still carries the "when reconstructing stored text,
-   preserve real newlines" line — a transcription *mitigation* for an
-   operation the pillar now forbids outright (reconstruction through
-   attention). v2 re-authors the module through the Session 19
-   grounded-authoring mode with the pillar's normative text in its
-   promoted corpus, retiring the mitigation language.
+1. **Test-fixture contamination.** Fixture strings in
+   `alias_candidates.test.ts` produced `globex corporation
+   --[acquired]-> initech`, and name-based entity identity merged those
+   onto pre-existing demo entities — fictional facts from test files
+   gain real-looking provenance. Nothing in
+   `src/core/repository/scanner.ts` / `paths.ts` distinguishes test or
+   fixture paths: `classifyRepositoryPath` knows only validation,
+   `EXCLUDED_SEGMENTS` (vendor/artifact directories), language, and
+   size. The fix must NOT drop these files from ingestion — test files
+   are legitimate verified substrate (citable bytes, liveness,
+   provenance) — it must keep their blocks out of SEMANTIC EXTRACTION.
+2. **Generic-identifier hubs.** The top pilot entity was literally
+   `entity` (14 sources), with `name`, `id`, and `action` close behind.
+   At repo scale these become mega-hubs — and a spurious fast path to
+   the 3.3 #4 migration trigger (`drill:scale` watches maximum
+   `sourceNodeIds` cardinality). Today nothing between
+   `parseLlmResponse` and `mergeExtractedGraph` filters entity names.
+3. **Prompt mismatch.** The extraction prompt
+   (`src/workers/extraction_worker.ts`, `promptData`) targets
+   "macro-level business entities"; on source code it improvises
+   (`organization --[is_default_type_for]-> organization`). The prompt
+   is one hardcoded string, blind to what kind of document the block
+   came from.
 
-Every seam exists: the verified ingest path; the paired-run experiment
-house style (`scripts/exp_citation_ab.ts` — arm loop, deterministic
-ground truth, persisted-state measurement, spend accounting); the
-opt-in instrumentation precedent (`TRELLIS_CITATION_*`: off by default,
-byte-identical unset, pinned); the zero-LLM parking path (stub
-`workspaceSnapshot`) for corpus assembly; `npm run promote`; and
-`npm run modules:author` with `estimateAuthorSpend`/`--max-spend-usd`.
+Everything needed has a seam: the pure path predicates in
+`src/core/repository/paths.ts` (the `isExcludedDirectoryPath` pattern),
+the per-file extraction policy already threaded through
+`plan_ingest.ts`/`snapshot_ingest.ts` (policy `none` produces zero
+extraction jobs for a file — finding #1 can be pure selection, no
+worker change), the extraction job payload and prompt assembly in
+`extraction_worker.ts` (finding #3), and the post-parse, pre-merge gap
+between `resolveExtractedGraph` and `mergeExtractedGraph` (finding #2).
+The extraction pilot RE-RUN that would validate all three fixes live is
+owner-gated paid work — this session ships the prerequisites with
+zero-paid acceptance.
 
 ## 4. Required design
 
-**(a) Frankenstein ingestion (zero-paid, first).** Fetch Gutenberg #84
-plain-text UTF-8 (`https://www.gutenberg.org/cache/epub/84/pg84.txt`),
-trim the Project Gutenberg boilerplate header/footer to the novel text
-(public domain; keep the trim deterministic and documented), and commit
-the result as `data/frankenstein.txt` — the committed-corpus precedent
-(OOLONG datasets): the probe's ground truth must be computable from a
-byte-stable file. Ingest through the verified path with doc key
-`book:gutenberg-84:frankenstein` and extraction policy `none` (zero
-paid work; the probe addresses blocks directly, never vector search).
-Verify: the document version registered; the block count reported;
-`get_ast_texts` returns real text for sampled blocks; re-running the
-identical ingest is an auditable no-op.
+Findings #1–#3 map to three independent, individually testable changes.
+Keep each pure and unit-pinned; keep every behavior change visible in
+CLI output and logs (counts, never silence).
 
-**(b) The effective-context probe (§6.3).** New
-`scripts/exp_effective_context.ts` in the `exp_citation_ab.ts` house
-style:
-
-- **Arms (paired, identical question set).** *Discipline-on*: today's
-  default composed prompt (the §6.2 block — the pinned kernel).
-  *Discipline-off*: the same run with exactly that block omitted and
-  nothing else changed. Recommended mechanism: an opt-in experiment
-  flag in the `TRELLIS_CITATION_*` mold — `TRELLIS_EXP_OMIT_CMT=1`
-  read by `trellis_agent.py`; unset ⇒ the composed prompt is
-  byte-identical (add the pin to an existing drill in the same commit);
-  never set by any default, worker, or Compose configuration; supplied
-  only by the experiment script's spawn env. (Alternative if the
-  session prefers zero kernel surface: experiment-owned prompt
-  composition spawning rlms directly — but the env-gated omission keeps
-  every other pipeline byte identical, which is what a paired run
-  wants. The composed-prompt sha256 pin does NOT move either way: it
-  measures the default.)
-- **Questions (kernel-fixed in the script, n≈6 per arm).**
-  Deterministically verifiable against `data/frankenstein.txt`:
-  exact-quote retrieval ("quote the sentence in which …"), occurrence
-  counting ("how many times does the name 'Justine' appear" — counting
-  is exactly what the discipline delegates to code and what the off arm
-  must push through attention), and localization ("in which
-  chapter/letter does …"). Ground truth is computed by the script from
-  the committed file — never hand-typed.
-- **Metrics per run (from `TRELLIS_TELEMETRY` + the runner):**
-  correctness; input tokens (the bytes-through-attention proxy); output
-  tokens; REPL iterations; `subcall_count`; database tool calls; spend.
-  Report per-question rows plus arm medians.
-- **Budget:** print a pre-flight estimate before any spawn (the
-  `--max-spend-usd` precedent, default $5); the off arm dominates cost
-  (it can pull the ~110k-token corpus through attention), so size n to
-  hold the standing ≤$5/run cap. OOLONG-era prices: $2.5/M input,
-  $10/M output.
-- **Report:** `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` in
-  the workspace-probe house style (arms, environment, raw numbers,
-  honest caveats — n is small and directional). Mark pillar §6.3
-  MEASURED with the headline numbers, in the record itself.
-
-**(c) Module #1 v2 (§6.4).**
-
-- **Corpus:** the two existing promoted docs
-  (`research:trellis/workspace-discipline/{contract,evidence}`) PLUS
-  the pillar's normative sections (§0 and §2 at minimum) promoted as
-  `research:trellis/workspace-discipline/code-mediated-text`. Assembly
-  is zero-LLM: park the excerpt through the stub `workspaceSnapshot`
-  path, then `npm run promote` (extraction `none`).
-- **Author:** the driver NEVER edits an existing module (Session 19
-  invariant — keep it), so author under a scratch name:
-  `npm run modules:author -- --module-name workspace-discipline-v2
-  --topic "<one bounded sentence: workspace discipline under
-  code-mediated text>" --doc-key <the three keys> --confirm-paid`
-  (drill the `--draft` replay path first). The anchor gate and the
-  64-hex draft scanner apply unchanged.
-- **Land (human):** review the assembled directory; replace the CONTENT
-  of `modules/workspace-discipline/` — addendum text, manifest
-  `version: 2`, `research.sourceNodeIds` = the driver-pinned set — and
-  refresh `RESEARCH.md` while PRESERVING the v1 laundering-correction
-  history (it is the record of the finding that produced grounded
-  authoring; add the v2 section, do not erase v1's). Keep the module
-  NAME and the addendum TITLE (`WORKSPACE DISCIPLINE PROTOCOL` —
-  `test:modules` [5] pins both). Delete the scratch directory. CONFIRM
-  the "reconstructing stored text" mitigation line is gone and no other
-  line re-imports transcription language.
-- **Re-register:** `npm run modules:register -- --module
-  workspace-discipline` — the Session 18 ON MATCH transition refreshes
-  the research hashes and `moduleVersion`; `npm run modules:verify`
-  shows the refreshed basis uncontested. No new machinery.
-- The composed-prompt pin does NOT move (module #1 is not in the
-  default selection).
-
-**(d) What does NOT change:** the Session 14 write path, the
-promotion/registration gates, the authoring template/anchor-gate/
-draft-scanner, the module loader, merge semantics, every bound, and
-the Session 20 textedit surface. New code is one experiment script,
-its ground-truth helpers, and (if chosen) the one env-gated prompt
-omission with its byte-identity pin.
+- **The test/fixture extraction exclusion (finding #1) — selection,
+  not worker.** A pure predicate `isTestOrFixturePath(relativePath)` in
+  `src/core/repository/paths.ts`: path segments `test`, `tests`,
+  `__tests__`, `spec`, `specs`, `fixtures`, `__fixtures__`, `testdata`,
+  `__mocks__`, `mocks`; basename patterns `*.test.*`, `*.spec.*`,
+  `test_*.py`, `*_test.{ts,js,py}`, `conftest.py`. Exact segment and
+  pattern matches only — `contest.ts`, `attest/`, and `latest.py` must
+  NOT match. Wire it where the repo ingest computes each file's
+  extraction policy (`snapshot_ingest.ts` / `scripts/ingest_repository.ts`):
+  under `--extract changed`, matching files get per-file policy `none`
+  — still ingested, still citable, zero extraction jobs. Report the
+  count (`extractionExcluded: N`) in the CLI summary next to the
+  existing accepted/skipped counts. An explicit `--extract-tests` flag
+  includes them wittingly (the `--confirm-extraction` double-gate house
+  style — default excluded, override loud). API-path ingest
+  (`POST /ingest`) and promotion are untouched: the predicate is
+  repository-ingest policy, keyed on repo-relative paths, not a global
+  rule. Do NOT overload `ScanSkipReason` — exclusion is not a skip; the
+  files stay in the snapshot.
+- **The generic-identifier stoplist (finding #2) — post-parse,
+  pre-merge.** A kernel-constant stoplist (never env-tunable; the
+  slice-cap precedent) of normalized generic identifiers — seed it from
+  the pilot's observed hubs (`entity`, `name`, `id`, `action`, `type`,
+  `value`, `data`, `result`, `key`, `node`, `object`, `list`, `string`,
+  `error`, `config`, and the session's judgment from the pilot report)
+  — applied by a pure helper (recommended:
+  `src/core/graph/extraction_stoplist.ts`) between
+  `resolveExtractedGraph` and the merge in `extraction_worker.ts`: drop
+  stoplisted entities AND the actions referencing them; return exact
+  dropped counts; log (`extraction.stoplist_dropped` — names allowed in
+  log content per the existing dropped-action precedent) and count (a
+  new bounded metric, `extractionStoplistDroppedTotal`). Exact
+  normalized-name match only — no fuzzy matching, no substrings.
+  Document-sourced extraction crosses the same filter (a generic hub is
+  a hub regardless of source); state this in the roadmap entry.
+- **The code-tuned extraction prompt (finding #3) — additive job
+  field.** The extraction job payload gains an optional
+  `sourceKind: 'code' | 'document'` (absent ⇒ `document` ⇒ the
+  byte-identical legacy prompt — pinned): the verified ingest path sets
+  it from the parser that produced the block (`detectLanguage` non-null
+  ⇒ `code`) when enqueueing extraction jobs. In `extraction_worker.ts`,
+  factor the prompt into a pure `buildExtractionPrompt(sourceKind,
+  text, astNodeId)` (unit-testable; the current string becomes the
+  `document` branch VERBATIM — do not reword it this session). The
+  `code` branch targets API-level facts (modules, exported
+  functions/classes, the contracts between them: "X uses Y", "X
+  validates Z"), instructs sparseness, and explicitly forbids
+  extracting generic identifiers (variable names, parameter names,
+  primitive type names) as entities — the prompt half of finding #2;
+  the stoplist stays the enforcement half (prompts request, gates
+  enforce).
+- **What does NOT change:** the extraction merge semantics
+  (`extraction_merge.ts` — transitions must keep commuting with the
+  sweep), the liveness fence, `GraphSchema`, the embedding step, the
+  `plan_ingest.ts` budget gates, and the worker retry policy. No new
+  queue, no DDL, no API surface, no Python/RLM changes this session
+  (the composed-prompt pin must not move).
 
 ## 5. File-level starting points
 
 Inspect before editing:
 
-- `docs/architecture/CODE_MEDIATED_TEXT.md` — §0/§2 (the corpus text
-  for v2), §6.3/§6.4 (the objectives), §7 (the measured structure
-  tiers the probe should observe the model actually using).
-- `scripts/exp_citation_ab.ts` — the paired-run experiment house style
-  (arm loop, deterministic ground truth, persisted-state measurement,
-  spend accounting, `--min-cite`-style knobs).
-- `src/rlm/trellis_agent.py` — the `TRELLIS_CITATION_*` opt-in
-  instrumentation pattern (where a `TRELLIS_EXP_OMIT_CMT` gate would
-  live) and `TRELLIS_ADDENDUM_BASE` (the block the off arm omits).
-- `scripts/test_modules.py` — the composed-prompt pin (must not move)
-  and the module #1 section [5] (name/title pins the v2 swap must keep
-  green).
-- `modules/workspace-discipline/` — the v1 artifacts: the addendum
-  carrying the mitigation line, `module.json`, `RESEARCH.md` (the
-  laundering-correction history to preserve).
-- `scripts/author_module.ts` + `src/core/authoring/*` —
-  `estimateAuthorSpend`, `--max-spend-usd`, the `--draft` drill path,
-  the assembly/pinning flow.
-- `src/workers/rlm_job.ts` (`RlmStubSchema.workspaceSnapshot`) +
-  `scripts/promote_segment.ts` — the zero-LLM park-then-promote path
-  for corpus assembly.
-- `docs/benchmarks/WORKSPACE_PROBE_REPORT.md` /
-  `WORKSPACE_LINEAGE_PROBE_REPORT.md` — the paired-run report format
-  this probe extends.
-- `data/oolong_pairs_dataset.json` — the committed-corpus precedent
-  for `data/frankenstein.txt`.
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5 — the three
+  findings verbatim, with the observed entity/relationship numbers.
+- `src/core/repository/paths.ts` — `EXCLUDED_SEGMENTS` /
+  `isExcludedDirectoryPath` (the pure-predicate pattern to mirror) and
+  `validateRepoRelativePath`.
+- `src/core/repository/scanner.ts` — `classifyRepositoryPath` and the
+  `ScanSkipReason` vocabulary (do not overload it; exclusion is not a
+  skip).
+- `src/core/repository/snapshot_ingest.ts` + `scripts/ingest_repository.ts`
+  — where per-file ingest requests and the extraction policy are
+  assembled and where the CLI summary counts print.
+- `src/core/ingestion/plan_ingest.ts` — the `none`/`changed` policy and
+  block-budget contract the per-file exclusion rides on.
+- `src/workers/extraction_worker.ts` — `promptData` (the string to
+  factor into `buildExtractionPrompt`), the
+  `parseLlmResponse`/`resolveExtractedGraph`/`mergeWithAstLivenessFence`
+  sequence (the stoplist insertion point), and the existing
+  dropped-action logging/metric pattern to mirror.
+- `src/core/graph/resolve_actions.ts` + `src/core/graph/schemas.ts` —
+  the resolved-graph shapes the stoplist helper consumes.
+- `src/core/observability/metrics.ts` — where
+  `extractionDroppedActionsTotal` and friends are declared (the new
+  counter's home).
+- `scripts/test_repo_ingest.ts` — the live drill to extend with the
+  exclusion counts.
 
 ## 6. Test strategy and acceptance
 
-The two paid runs are APPROVED (July 9, 2026) — each still prints a
-pre-flight estimate first and respects the standing ≤$5/run cap, with
-actuals reported after. Everything else stays zero-paid and local.
+Test first. No paid LLM calls and no external network in acceptance —
+the extraction pilot re-run over the fixed pipeline is owner-gated and
+NOT acceptance.
 
-Offline (joins `npm test`, baseline 621 across 71 files):
+Offline (joins `npm test`, baseline 639 across 72 files):
 
-- The probe script's ground-truth helpers (occurrence counts, quote
-  extraction, chapter localization over the committed file) are pure
-  and unit-tested.
-- If the `TRELLIS_EXP_OMIT_CMT` gate ships: unset ⇒ the composed prompt
-  is byte-identical (pinned); set ⇒ exactly the §6.2 block is absent
-  and nothing else changed; the flag is never forwarded by
-  `buildAgentEnv` (experiment-script spawn env only — extend the
-  payload/env hygiene pins).
+- `isTestOrFixturePath`: a table test over accepted and rejected paths
+  (segments, basenames, nested cases, case handling, lookalikes that
+  must NOT match — `contest.ts`, `attest/util.ts`, `latest.py`,
+  `protest/spec_of_work.md`).
+- Per-file policy assembly: under `--extract changed`, matching files
+  produce policy `none` and are counted; `--extract-tests` restores
+  `changed` for them; `--extract none` runs are unaffected (no counts,
+  no jobs).
+- The stoplist helper: drops stoplisted entities and their actions,
+  keeps everything else identical, returns exact counts; the empty
+  graph and the all-stoplisted graph both behave.
+- `buildExtractionPrompt`: the `document` branch is byte-identical to
+  the pre-Session-22 string (pinned); absent `sourceKind` ⇒ `document`;
+  the `code` branch carries the generic-identifier prohibition.
+- Extraction job payload: `sourceKind` is optional and bounded to the
+  two values; pre-Session-22 payloads still process.
 
-Live zero-paid:
+Live zero-paid (extend `npm run test:repo-ingest`):
 
-- Frankenstein ingest verification: version registered, blocks
-  readable via `get_ast_texts`, identical re-ingest is a no-op.
-- The v2 corpus promotion through the REAL path (park → list →
-  promote → citable hashes echoed).
-- `npm run modules:author ... --draft` replay assembles v2 from a saved
-  envelope BEFORE any paid spawn (the drill path), anchor gate green.
-- The standing close-out block below — `test:modules` MUST stay green
-  across the v1→v2 content swap (name/title pinned; brace-free; LF).
-
-Paid (approved; estimate first, actuals recorded):
-
-- The probe: n≈6 questions × 2 arms (expect the off arm to dominate
-  spend; abort past the cap).
-- One grounded-authoring run for module #1 v2.
+- A drill tree containing a test file with a distinctive fixture
+  string: under the drill's zero-paid posture, the test file is
+  ingested and citable but contributes zero extraction jobs; the
+  exclusion count matches; `--extract-tests` produces jobs for it.
+- The stoplist and prompt changes need no live drill beyond the offline
+  pins (they sit behind the paid boundary); re-run
+  `test:invalidation-sweep` and the offline suite to prove the worker
+  path is undisturbed.
 
 Required close-out (the standing block):
 
@@ -987,79 +1036,90 @@ Required close-out (the standing block):
 
 Update:
 
-- `TRELLIS_ROADMAP.md`: full-dated §5 entry with exact commands,
-  counts, token/spend actuals per paid run, and defects found; strike
-  §4 row 1 only after acceptance.
-- `docs/architecture/CODE_MEDIATED_TEXT.md`: §6.3 marked MEASURED with
-  the headline numbers; §6.4 marked DONE (v2 landed, mitigation
-  language retired).
-- `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`: the new report.
-- README: point the benchmarks section at the new report.
+- `TRELLIS_ROADMAP.md`: full-dated §5 entry with exact commands, counts,
+  and defects found; strike §4 row 2 only after acceptance.
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`: a §5 postscript
+  noting the prerequisites shipped (date, mechanism per finding).
+- README: the repo-ingest section gains the exclusion/override flags.
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5 re-check.
 
-Remaining owner-gated items (do NOT run unprompted; propose each with a
+Standing owner-gated items (do NOT run unprompted; propose each with a
 cost estimate):
 
-- **The supervised Trellis-edits-Trellis proof run** — operator sets
-  `TRELLIS_EDIT_ROOT` at a branch checkout; the RLM performs one small
-  real edit through the toolkit; it lands as an ordinary reviewed PR.
+- **The extraction pilot re-run** over the fixed pipeline (the direct
+  validation of this session's work; the July 6 pilot spent 112
+  completions ≈ 57k input / 47k output tokens — estimate before
+  proposing, per the standing $5/run policy).
+- **The supervised Trellis-edits-Trellis proof run** (Session 20's
+  standing item) — operator sets `TRELLIS_EDIT_ROOT` at a branch
+  checkout; the RLM performs one small real edit through the toolkit;
+  it lands as an ordinary reviewed PR.
 - **The module #2 turn** (topic owner-picked, prompt-movable,
-  positive-control-testable; collaborator input bears on the choice).
-- **The extraction pilot re-run** (waits on the row-2 prerequisites).
+  positive-control-testable; note the roadmap row-3 anchor-gate
+  calibration when choosing its corpus — until calibrated, prefer a
+  corpus whose distinctive anchors a compliant draft CAN restate, per
+  the Session 21 finding).
 
 ## 7. Guardrails
 
 1. **Never mutate an AST.** The T13 hash preimage is pinned;
    `rederiveAstNodeId` stays authoritative; nothing positional is ever
-   persisted as identity — probe ground truth is computed from the
-   committed file, never stored as positions.
-2. **Never merge, rename, or delete Entity nodes.** Equivalence stays
-   an overlay belief; module entities are contested or retired, never
-   deleted — v2 re-registration is the Session 18 ON MATCH refresh,
-   never a delete/recreate.
+   persisted as identity.
+2. **Never merge, rename, or delete Entity nodes.** Equivalence stays an
+   overlay belief; module entities are contested or retired, never
+   deleted. The stoplist prevents CREATION of generic entities going
+   forward — it never deletes or renames existing ones (pre-existing
+   hubs age out through the ordinary contested/liveness machinery).
 3. **Preserve provenance on every semantic node and edge.**
-   `write_derived_insight` keeps its Session 14 enforcement. The
-   probe's runs write no insights as acceptance criteria; if a run
-   caches facts, they carry real provenance like any run's.
-4. **Paid work is exactly the two approved runs,** each behind a
-   printed pre-flight estimate and the standing ≤$5/run cap, actuals
-   recorded in the roadmap entry. Everything else — ingestion, corpus
-   assembly, promotion, drills — is zero-paid. Never reward citation
-   count anywhere (the measured laundering incentive).
+   `write_derived_insight` remains the single AGENT write path with its
+   Session 14 enforcement intact. Extraction-excluded files are still
+   INGESTED — the exclusion narrows semantic extraction, never
+   provenance or citability.
+4. **Extraction spend stays operator-gated.** The `none` default, the
+   block budget, and `--confirm-extraction` are untouched;
+   `--extract-tests` widens scope only inside an already-confirmed
+   extraction run. No paid calls in acceptance.
 5. **Gate machinery is kernel; operator control is absolute.** The
-   probe's question set and ground-truth logic are kernel-fixed in the
-   script — never env-tunable free text. The Session 20 textedit
-   invariants and the Session 19 authoring gates are permanent. If the
-   `TRELLIS_EXP_OMIT_CMT` flag ships it is experiment instrumentation
-   in the `TRELLIS_CITATION_*` mold: off by default, byte-identical
-   unset (pinned), never set by any default/worker/Compose config,
-   never forwarded by `buildAgentEnv`.
-6. **Every external interaction is bounded;** the corpus is committed
-   and byte-stable; over-budget operations raise with usage — never
-   silent truncation.
+   stoplist and the prompt variants are kernel constants — never
+   env-tunable free text, never payload- or completion-selectable. The
+   Session 20 textedit invariants are permanent: `TRELLIS_EDIT_ROOT`
+   and its bounds come only from operator env (never payload, never
+   completion; unset ⇒ byte-identical, pinned); all paths resolve
+   strictly inside the root; the toolkit never touches git; landing
+   stays a human PR under standard permissions (design record §7).
+6. **Every external interaction is bounded;** listings and reports
+   cross validated bounds; over-budget raises with usage — never silent
+   truncation. Dropped extraction output is counted and logged, never
+   silent.
 7. **Validate at every boundary:** every worker-consumed completion
-   crosses `parseLlmResponse`; the draft scanner and anchor gate apply
-   to the v2 draft unchanged; `AGENT_ORACLE_ENABLED` and
-   `TRELLIS_A2A_ENABLED` defaults stay pinned false.
-8. **Report probes honestly:** n is small — publish raw numbers,
-   medians, and the directional caveat, exactly like the workspace
-   probe reports; a surprising result is a finding, not a reason to
-   re-run until it flatters the pillar.
-9. **Do not break existing consumers:** the composed-prompt sha256 pin
-   (`170e9f7e…67e9`) does NOT move this session; `test:modules` [5]
-   pins module #1's name and addendum title across the v2 swap;
-   `TRELLIS_RESULT`/`TRELLIS_TELEMETRY` semantics are additive only;
-   the API, A2A, and SSE contracts are untouched.
+   crosses `parseLlmResponse`; new job-payload fields are optional,
+   bounded, and Zod-validated; pre-existing payloads keep processing;
+   `AGENT_ORACLE_ENABLED` and `TRELLIS_A2A_ENABLED` defaults stay
+   pinned false.
+8. **Default to zero paid work and zero external network in acceptance;**
+   the pilot re-run, the proof run, the effective-context probe, and all
+   authoring turns are owner-approved, per-run, and NOT acceptance. Paid
+   runs respect the standing $5/run ceiling with a pre-flight estimate.
+9. **Do not break existing consumers:** the `document` extraction
+   prompt is byte-identical when `sourceKind` is absent (pinned); merge
+   semantics keep commuting with the sweep; `TRELLIS_RESULT`/
+   `TRELLIS_TELEMETRY` semantics are additive only; pre-Session-9 rlm
+   payloads still process; the API, A2A, and SSE contracts are
+   untouched; the Session 20 composed-prompt pin (`170e9f7e…67e9`), its
+   Session 21 omit-arm twin (`abb945a6…f9b2`, `test:modules` [7]), and
+   the module #1 v2 pins (name, `WORKSPACE DISCIPLINE PROTOCOL` title,
+   version 2, the retired-mitigation check — `test:modules` [5]) do not
+   move this session.
 10. **Respect the rlms prompt contract:** extend `RLM_SYSTEM_PROMPT`,
-    never replace it; no literal curly braces in anything rlms formats
-    (v2's addendum included); no rlms library modifications.
-11. **Follow the T16 observability house style:** corpus text, quotes,
-    prompts, and file paths never become metric label values; probe
-    artifacts live in the report, not in logs.
+    never replace it; no literal curly braces in anything rlms formats;
+    no rlms library modifications. (This session should not touch the
+    RLM prompt at all.)
+11. **Follow the T16 observability house style:** file paths, file
+    content, diffs, digests, and prompts never become metric label
+    values; new counters are bounded and label-light; entity names in
+    log CONTENT follow the existing dropped-action precedent.
 12. **Keep API and worker processes split;** project-scoped Compose
-    commands; drills clean up token-scoped temp state only —
-    `book:gutenberg-84:frankenstein` is deliberately durable (it is
-    the corpus, not drill residue).
+    commands; drills clean up token-scoped temp state only.
 13. **Ship one feature branch and one PR to `master`,** plain
     engineering prose, no AI attribution or generated-by trailers.
     Regenerate this file in the same PR — and re-run the §0 step 5
@@ -1067,31 +1127,37 @@ cost estimate):
 14. **Code-mediated text is doctrine (permanent; survives every
     rewrite).** Any new or modified surface where the RLM touches text
     must follow `docs/architecture/CODE_MEDIATED_TEXT.md`: locations
-    engine-computed, bytes moved by code, transient frames,
-    hash-guarded writes — never model-estimated positions, never
-    model-retyped existing bytes, never a persistent in-memory mirror
-    of a store. Prompt text may reinforce the discipline but never
-    substitutes for tooling shape. (This session MEASURES the doctrine;
-    the discipline-off arm exists only inside the experiment.)
+    engine-computed, bytes moved by code, transient frames, hash-guarded
+    writes — never model-estimated positions, never model-retyped
+    existing bytes, never a persistent in-memory mirror of a store.
+    Prompt text may reinforce the discipline but never substitutes for
+    tooling shape.
 
 ## 8. Explicit exclusions
 
-Do not include: the repository-scale extraction prerequisites (roadmap
-row 2 — deferred a third time by the July 9 owner directive; do not
-partially implement); the extraction pilot re-run; the supervised
-Trellis-edits-Trellis proof run and the module #2 turn (still
-owner-gated — propose with estimates only); embedding or extracting
-Frankenstein (`--extract none`; the probe needs neither); weakening or
-toggling the §6.2 kernel block outside the experiment's opt-in flag;
-moving the composed-prompt sha256 pin; editing module #1 through the
-authoring driver (author under a scratch name; landing is the human
-swap); erasing module #1's v1 laundering-correction history from
-`RESEARCH.md`; new MCP servers or transports; A2A changes; frontend
-work (deferred unscheduled); polars adoption (measured unnecessary —
-pillar §7); `ASTRef`/`EVIDENCED_BY` migration (gate closed at 286);
-T13 re-hashing; rlms library modifications; weakening the Session 14
+Do not include: the paid extraction pilot re-run (owner-gated; propose
+with the estimate); any full-repository `--extract changed` run;
+deleting, renaming, or retro-filtering EXISTING generic-hub entities
+(creation-side prevention only — the pilot's residue was already
+recovered through tombstoning); dropping test/fixture files from
+INGESTION (they stay verified substrate; only extraction is excluded);
+fuzzy or embedding-based stoplist matching (exact normalized names
+only); an env-tunable stoplist or prompt (kernel constants); rewording
+the `document` extraction prompt (byte-identical pin); `GraphSchema`
+changes; extraction-merge or sweep-semantics changes; new queues, DDL,
+or API surfaces; Python/RLM changes of any kind (the composed-prompt
+pin and its omit-arm twin must not move); the anchor-gate calibration
+(roadmap §4 row 3 — a reviewed kernel change with its own session; do
+not fold it in here); the supervised Trellis-edits-Trellis proof run
+and the module #2 turn (owner-gated standing items); re-running the
+effective-context probe (measured; repeatable only as an owner-approved
+paid run); the frontend (deferred unscheduled); polars adoption
+(measured unnecessary — pillar §7); `ASTRef`/`EVIDENCED_BY` migration
+(gate closed at 286; the stoplist REMOVES a spurious path to that
+trigger — do not treat pilot hubs as trigger evidence); T13 re-hashing;
+rlms library modifications; weakening or toggling the Session 14
 write-path enforcement, the Session 15/20 composition pins, the
-Session 16 lineage pins, the Session 17 promotion refusals, the
-Session 18 registration gates, the Session 19 authoring-mode /
-anchor-gate / draft-scanner / template pins, or the Session 20
-textedit gating/containment/hash-guard pins.
+Session 16 lineage byte-identity pins, the Session 17 promotion
+refusals, the Session 18 registration gates, the Session 19
+authoring-mode / anchor-gate / draft-scanner / template pins, or the
+Session 20 textedit gating/containment/hash-guard pins.
