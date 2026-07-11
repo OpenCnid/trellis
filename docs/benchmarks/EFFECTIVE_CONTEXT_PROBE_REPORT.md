@@ -521,21 +521,118 @@ saved logs):
   confounded (round 3 added the disclosure clause and two new
   questions, deliberately, disclosed above).
 
+# Round 4 (Session 24, July 11, 2026) — the localization fix
+
+## What changed since round 3
+
+Round 3's recommendation (a boundary-preserving reconstruction) was
+re-pointed by the owner to an ADDITIVE fix, implemented this session:
+
+- **The kernel gained `trellis_postgres.get_ast_blocks(root_hash)`** —
+  a document's extraction blocks IN DOCUMENT ORDER as a JSON list of
+  `{id, type, text}` objects, where the block set is exactly
+  `collectExtractionBlocks`'s and the text reconstruction is exactly
+  `get_ast_texts`'s. The model localizes over engine-provided structure
+  instead of re-parsing a glued string; NO stored or reconstructed byte
+  moved (every round-1..3 number over `get_ast_texts` remains
+  byte-comparable). The walk is the dependency-free
+  `src/rlm/trellis_blocks.py`, parity-pinned block-for-block against
+  the TypeScript authority by `src/core/ast/block_parity.test.ts`; the
+  kernel prompt teaches the tool (both composed-prompt pins moved
+  wittingly — `test:modules` [4]/[7] histories record the move).
+- **`--ingest` now verifies the accessor round-trip live:** frank
+  returned 796 ordered blocks and chronicle 827, both byte-identical to
+  `collectExtractionBlocks`+`nodeText` over the stored roots, with a
+  sampled block's text byte-matching `get_ast_texts` for the same id
+  (July 11, 2026, against the durable dev corpora — root hashes
+  unchanged, re-ingest still the auditable no-op).
+- **The method classifier gained a third verdict:** `structured` — the
+  run CALLED `get_ast_blocks` (the marker requires the call's open
+  paren; the preambles name the tool paren-free, and the query is
+  echoed into the log, so offering the tool can never classify as
+  using it). Precedence: structured > line-anchored > shape > unknown,
+  because per-block texts make even anchored patterns safe (each
+  own-line heading is its own block).
+- **The locate preambles now OFFER the accessor** (the round-4
+  intervention), scoped to the locate questions only so every other
+  question's bytes stay comparable across rounds.
+
+## Round-4 protocol (the re-measure)
+
+Re-run the round-3 locate set — chronicle `syn-locate-*` ×4 + frank
+`locate-*` ×2, `--repeats 3`, both arms ≈ 36 runs — with the accessor
+taught (kernel) and offered (preamble). Success criterion, stated up
+front: the glue-class localization misses fall materially, ideally to
+~0 for runs classified `structured`; a null result (the model ignores
+the tool, or uses it and still mislocates) is a FINDING that re-opens
+the superseded reconstruction-byte row for owner adjudication.
+
+## Round-4 results (July 11, 2026 — owner-approved, $0.9452 / 36 runs)
+
+| arm | runs | correct | structured | inTok med [min..max] | iter med | cost |
+|---|---|---|---|---|---|---|
+| on  | 18 | 18/18 | 18/18 | 8,229 [3,734..13,871] | 2 | $0.4852 |
+| off | 18 | 18/18 | 18/18 | 8,264 [3,680..14,158] | 2 | $0.4601 |
+
+- **The miss rate went from 7/30 (23%) to 0/36 on the same question
+  set.** Every run — BOTH arms, all six questions, all repeats —
+  called `get_ast_blocks` and localized over the ordered blocks
+  (36/36 classified `structured`; zero line-anchored, zero shape,
+  zero unknown). The success criterion pre-stated above ("ideally to
+  ~0 for runs that use the accessor") is met exactly: 100% adoption,
+  100% correct.
+- **The round-3 traps are gone at their exact sites.**
+  `locate-November` — the "Chapter 23" TOC-trap question that both
+  rounds got wrong — came back "Chapter 5" in 6/6 runs across both
+  arms; the two new round-3 anomalies (Entries 24/37) and the loud
+  sentinel producers all answered digit-exact.
+- **The fix is the tooling, not the prompt block.** The off arm
+  (§6.2 CODE-MEDIATED TEXT block absent) adopted the accessor at the
+  same 18/18 rate with indistinguishable medians — the accessor is
+  kernel surface plus a preamble offer, and that shape alone carried
+  the behavior. Consistent with rounds 1–3: tooling shape carries the
+  discipline.
+- **Cheaper AND correct.** Round 3's recovering line-anchored runs
+  paid 13k–27k input tokens; round 4's median is ~8.2k with a 14.2k
+  worst case and a median of 2 iterations — no recovery loops,
+  because the first method fits the representation. All 36 runs
+  submitted through `trellis_answer` (answer-channel record now
+  180/180 across rounds 2–4, zero transcription errors), 36/36 with
+  zero pandas imports.
+- **Consequence for the superseded row:** the re-measure is a clear
+  positive, so the reconstruction-byte change
+  (`get_ast_texts`/`nodeText` boundary preservation) stays SUPERSEDED
+  and closed; it would re-enter only if a future measurement finds the
+  accessor insufficient.
+- **Caveats.** n=3/arm/question, same as round 3's locate set; the
+  preamble OFFERS the tool (adoption in the wild without the offer is
+  unmeasured — but the kernel prompt also teaches it, and the off arm
+  proves the §6.2 block is not what carries it); the classifier's
+  `structured` precedence means a run that also ran regexes over the
+  per-block texts still counts as structured (safe over per-block
+  texts — each own-line heading is its own block).
+
 ## Standing
 
 Repeatable: `tsx scripts/exp_effective_context.ts --ingest` (zero-paid
 setup/verify for all corpora, including the 102-document relational
-set, plus the boundary quantification printout), then `--confirm-paid`
-with `--suites frank,chronicle,ledger,edit,relational`, `--arms`,
+set, the boundary quantification printout, and the Session 24
+`get_ast_blocks` round-trip), then `--confirm-paid` with
+`--suites frank,chronicle,ledger,edit,relational`, `--arms`,
 `--repeats`, `--questions` (paid — owner approval per run applies;
 `--max-spend-usd` defaults to the standing $5 cumulative abort). The
 plan-only default spawns nothing. NOT an acceptance gate; excluded
-from every zero-paid suite. Measured standing after three rounds: the
-transcription channel is CLOSED (Session 22 `trellis_answer`; 144/144
-round-2+3 runs submitted by reference, zero transcription errors);
+from every zero-paid suite. Measured standing after four rounds: the
+transcription channel is CLOSED (Session 22 `trellis_answer`; 180/180
+round-2..4 runs submitted by reference, zero transcription errors);
 read-fidelity holds at n=7 per question per arm (28/28 anomaly quotes
-byte-faithful); the pandas/structured-frame threshold
-sits ABOVE ~6,900 records and three-way joins (null at every scale
-measured so far); and the live failure class is localization over the
-glued reconstruction — the boundary-preservation RECOMMENDATION is
-roadmap §4 row 6, owner-gated.
+byte-faithful); the pandas/structured-frame threshold sits ABOVE
+~6,900 records and three-way joins (null at every scale measured so
+far — pillar §7's "pandas default" guidance is demoted accordingly,
+Session 24); and the localization failure class is CLOSED by
+`get_ast_blocks` (Session 24; round 4 measured 0/36 misses with 36/36
+accessor adoption vs round 3's 7/30 on the same questions — the
+superseded reconstruction-byte change stays closed unless a future
+measurement finds the accessor insufficient). No live failure class
+remains open in this probe series; the recorded residual is computing
+faithfully over the WRONG input (the round-3 result-shape miss).

@@ -220,13 +220,17 @@ export function lineAnchoredHeadingLabels(
   return [...text.matchAll(headingPattern(kinds))].map(match => match[0]);
 }
 
-export type LocalizationMethod = 'line-anchored' | 'shape' | 'unknown';
+export type LocalizationMethod = 'structured' | 'line-anchored' | 'shape' | 'unknown';
 
 /**
  * Classifies, from a run's raw stdout (the REPL code is echoed there),
  * HOW the model localized a phrase to its section — best effort, scored
  * only where observable:
  *
+ * - `structured` (Session 24): the code called the boundary-aware
+ *   accessor `get_ast_blocks` — the engine handed it the document's
+ *   ordered blocks, so structure never has to be re-derived from a
+ *   glued string.
  * - `line-anchored`: the code anchored a heading pattern to line starts
  *   (a `^<Kind>` regex, or line iteration via splitlines/startswith) —
  *   the method the glued reconstruction breaks.
@@ -235,13 +239,23 @@ export type LocalizationMethod = 'line-anchored' | 'shape' | 'unknown';
  * - `unknown`: neither marker observed (e.g. an llm_query subcall did
  *   the locating, or an unforeseen method).
  *
- * A run showing both markers is classified `line-anchored`: the anchor
- * is what breaks over the glue, so its presence is the finding.
+ * Precedence: `structured` wins over the regex markers — once per-block
+ * texts are in hand, even an anchored pattern sees real line starts
+ * (each own-line heading is its own block), so anchor presence stops
+ * being the breaking signal. The marker requires the call's open paren
+ * (`get_ast_blocks(`) because the probe preambles NAME the accessor
+ * paren-free (the "Calling trellis_postgres.get_ast_texts with" house
+ * wording) and trellis_agent.py echoes the query into the log — a
+ * question that merely offers the tool must not classify as using it.
+ * A run showing only the regex markers is classified `line-anchored`
+ * when the anchor is present: the anchor is what breaks over the glue,
+ * so its presence is the finding.
  */
 export function classifyLocalizationMethod(
   runLog: string,
   kinds: readonly string[]
 ): LocalizationMethod {
+  if (runLog.includes('get_ast_blocks(')) return 'structured';
   // "^Entry", "^(Entry", and alternations like "^(Letter|Chapter" all
   // count as anchored: caret, optionally an open paren and other
   // alternation members, then the kind.

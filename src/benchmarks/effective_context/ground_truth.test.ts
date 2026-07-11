@@ -362,4 +362,31 @@ describe('classifyLocalizationMethod', () => {
     expect(classifyLocalizationMethod('answer came from an llm_query subcall', kinds))
       .toBe('unknown');
   });
+
+  // Session 24: the boundary-aware accessor is the third observable
+  // method, and its marker is the CALL (open paren) — the probe
+  // preambles name the tool paren-free and the query is echoed into the
+  // run log, so an offered-but-unused tool must not classify as used.
+  it('detects the structured method by the get_ast_blocks call', () => {
+    expect(classifyLocalizationMethod(
+      'blocks = json.loads(trellis_postgres.get_ast_blocks(root_hash))', kinds
+    )).toBe('structured');
+    // The call wins over regex markers: per-block texts make anchored
+    // patterns safe (each own-line heading is its own block).
+    expect(classifyLocalizationMethod(
+      'blocks = json.loads(trellis_postgres.get_ast_blocks(root)); '
+      + '[b for b in blocks if re.match(r"^Entry \\d+$", b["text"])]',
+      kinds
+    )).toBe('structured');
+  });
+
+  it('does not classify a paren-free offer of the accessor as structured', () => {
+    const questionEcho =
+      "Starting RLM Agent for query: 'Calling trellis_postgres.get_ast_blocks with the root "
+      + "hash returns the document's blocks in document order. QUESTION: ...'";
+    expect(classifyLocalizationMethod(questionEcho, kinds)).toBe('unknown');
+    expect(classifyLocalizationMethod(
+      `${questionEcho}\nre.findall(r"^Entry \\d+$", text, re.M)`, kinds
+    )).toBe('line-anchored');
+  });
 });

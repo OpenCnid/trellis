@@ -57,7 +57,13 @@ def expect_raises(name, fn, needle=""):
 #     DISCIPLINE line, and the final-answer workflow rule — the
 #     answer-channel transcription fix the Session 21 probe demanded
 #     (tooling in src/rlm/trellis_answer.py; the prompt only teaches it).
-COMPOSED_SYSTEM_PROMPT_SHA256 = "9f09d7d2ec5f4837f0fe0ef6ae4335a1583443c466e26834384dc7ea3741dd68"
+#   3f07295a...4b63 — Session 24: the boundary-aware block accessor
+#     (trellis_postgres.get_ast_blocks) taught in the TOOLS list — the
+#     localization fix probe rounds 2-3 demanded (10/10 cross-round
+#     locate misses re-derived block structure from the glued root
+#     reconstruction; tooling in trellis_tools.py/trellis_blocks.py,
+#     the prompt only teaches it).
+COMPOSED_SYSTEM_PROMPT_SHA256 = "3f07295a9d38b4d940ff940c4e297c0c07167d29790df96eef1909a05fb24b63"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -253,7 +259,11 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     Its meaning is now purely structural: the default kernel with
 #     exactly the CODE_MEDIATED_TEXT_BLOCK absent (the check below
 #     re-proves that structure on every run).
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "9779b5c054fed729891ef548db10aabd1cc938cd4fb280c87aaa21aff9d89e45"
+#   85362b81...71bb — Session 24: the get_ast_blocks TOOLS line (see the
+#     default pin's history) lands in BOTH arms — a localization tooling
+#     fix, not part of the discipline experiment (the Session 22
+#     precedent; still structurally default minus exactly the block).
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "85362b81bc66b05b1d0b18e76049f8be3088a6cc62feb10bf10a0322409271bb"
 
 import subprocess  # noqa: E402
 

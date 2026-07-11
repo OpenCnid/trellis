@@ -5,6 +5,14 @@ import threading
 from neo4j import GraphDatabase, READ_ACCESS, WRITE_ACCESS
 import psycopg2
 
+# Session 24: the AST block walk lives in the dependency-free
+# trellis_blocks module so the TypeScript parity test can spawn it
+# without the database runtime installed. `node_text` is re-exported
+# under its historical private name — the reconstruction semantics are
+# byte-identical (test:rlm-workspace [0] still pins them through this
+# import).
+from trellis_blocks import blocks_from_root, node_text as _node_text
+
 # Session 14 (design record §10.2): an AST hash is 64 lowercase hex chars
 # (SHA-256 via digest('hex')). Tier-3 identifiers (uuids, module names)
 # are structurally disjoint from this shape, so nothing scratch-shaped
@@ -96,25 +104,6 @@ def get_citation_audit() -> dict:
 # semantic. Byte-identical when off.
 CITATION_ENTAIL_ENABLED = os.getenv("TRELLIS_CITATION_ENTAIL") == "1"
 
-
-def _node_text(node) -> str:
-    """Reconstructs a node's text from its stored `data` (mirrors
-    traverse.ts nodeText): direct content when present, else the
-    concatenation of its children's text in document order. Markdown
-    block nodes (paragraph/heading/listItem) carry no direct content —
-    their text lives in child nodes — so `data->>'content'` reads NULL
-    for them; this recovers it."""
-    if isinstance(node, str):
-        try:
-            node = json.loads(node)
-        except (json.JSONDecodeError, ValueError):
-            return node
-    if not isinstance(node, dict):
-        return ""
-    content = node.get("content")
-    if content is not None:
-        return content
-    return "".join(_node_text(child) for child in (node.get("children") or []))
 
 class TrellisNeo4j:
     def __init__(self, ast_existence_check=None, entailment_check=None):
@@ -475,6 +464,43 @@ class TrellisPostgres:
             # feedback loop.
             self.conn.rollback()
             raise RuntimeError(f"PostgresError while fetching AST texts: {e}") from e
+
+    def get_ast_blocks(self, root_hash: str) -> str:
+        """
+        Fetches a document's extraction blocks IN DOCUMENT ORDER from its
+        root AST hash. Returns a JSON list of objects with keys id (the
+        block's own AST hash — the same citable ids get_ast_texts
+        exposes), type (paragraph, heading, listItem, code, ...), and
+        text (reconstructed exactly like get_ast_texts).
+
+        Session 24 (CODE_MEDIATED_TEXT.md): the boundary-aware read. The
+        root-hash reconstruction concatenates blocks with UNMARKED
+        boundaries, so re-deriving section structure from it with line-
+        anchored patterns fails; this returns the block structure the
+        engine already has — walk the ordered blocks in code instead.
+        """
+        _count_tool_call()
+        if not isinstance(root_hash, str):
+            raise ValueError(
+                "get_ast_blocks takes ONE root hash string; pass a document's root "
+                "hash (use get_ast_texts for a list of block hashes)."
+            )
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute("SELECT data FROM ast_nodes WHERE id = %s", (root_hash,))
+                row = cur.fetchone()
+        except Exception as e:
+            self.conn.rollback()
+            raise RuntimeError(f"PostgresError while fetching AST blocks: {e}") from e
+        if row is None:
+            raise ValueError(
+                f"No AST node exists for hash {root_hash!r}; pass a document's root hash."
+            )
+        blocks = blocks_from_root(row[0])
+        # Read-set semantics match get_ast_texts: the run retrieved these
+        # blocks' bytes, so they join the citation audit's read bucket.
+        _audit_add("read", [b["id"] for b in blocks if isinstance(b["id"], str)])
+        return json.dumps(blocks)
 
     def ast_hashes_exist(self, hashes: list) -> str:
         """Returns a JSON list of the hashes that do NOT exist in
