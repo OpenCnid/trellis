@@ -397,6 +397,16 @@ from the round-3 logs — schema heterogeneity (many record shapes),
 fuzzy joins, long interactive sessions over one corpus — and measuring
 them is a future owner-picked probe round, not a standing objective.
 
+A separate engine-side wall-clock question was measured on July 11, 2026
+and recorded in docs/benchmarks/WALL_CLOCK_TEXT_OPS_REPORT.md. For
+splice-shaped insertion, the report finds plain Python lists faster at
+every measured size from 100k to 8M tokens, with insertion wins ranging
+from 16.9× at 100k to 2.6× at 8M. For extraction/normalization/grouping
+(disambiguation), polars takes over from roughly 100k tokens up; at the
+2M-token baseline it is 14× faster. That measures engine execution rather
+than model behavior, so the demotion above — plain loops until the
+model-behavior threshold is measured — stands unchanged.
+
 ## 8. Relationship to the other records
 
 | record | relationship |

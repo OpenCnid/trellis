@@ -85,6 +85,10 @@ Every capability claim in the living docs traces to a dated report here:
   — the effective-context probe, rounds 1-4: paired-run
   measurements of the code-mediated-text discipline over the
   committed corpora.
+- **[`WALL_CLOCK_TEXT_OPS_REPORT.md`](benchmarks/WALL_CLOCK_TEXT_OPS_REPORT.md)** —
+  wall-clock benchmark of Python-native versus polars text operations at the
+  2-million-token floor: insertion stays Python-native, while disambiguation
+  is polars territory from about 100k tokens up.
 - **[`CRITIQUE_AND_FUTURE.md`](benchmarks/CRITIQUE_AND_FUTURE.md)** —
   the honest ledger: open critiques, known limits, and what has not been
   proven yet.
