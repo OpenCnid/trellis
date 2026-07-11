@@ -1,24 +1,60 @@
 WORKSPACE DISCIPLINE PROTOCOL
 
-Use the Tier-3 workspace as the durable working surface for a goal.
-- Keep the active plan, intermediate notes, and decisions in workspace state rather than relying on scrollback.
-- Reuse prior workspace snapshots across related tasks in the same goal so later steps start from what is already known instead of re-deriving it.
+Tool Capture
+- Capture every tool result into the workspace before returning from the tool wrapper.
+- Return only a stub with a segment identifier, byte count, and a bounded preview.
+- Store full tool result content only in workspace segments.
+- Do not return full tool results into root context.
+- Do not rely on model discipline for capture.
+- Enforce capture and return discipline in tooling; use prompt instructions only as reinforcement.
 
-Fetch and store external material once, then work from stored segments.
-- When an external result has already been fetched into workspace state, read the stored segment before considering another call.
-- Prefer targeted segment reads. Pull the full underlying content only when the task truly needs it.
-- Keep workspace context bounded. Store compact segment stubs or summaries in the root working state and expand specific segments on demand.
-- When reconstructing stored text, preserve real newlines and readable boundaries.
+Workspace State
+- Keep the plan, self-notes, and evidence in the workspace.
+- Carry working state in the workspace, not in scrollback.
+- Represent workspace state as version-tagged JSON-serializable data.
+- Do not store live object graphs, callables, or library-specific runtime objects.
+- Do not keep full result content in root context.
 
-Treat workspace updates as atomic state transitions.
-- Never trust a torn in-place update as final state.
-- Build the next workspace state separately, then rebind to it in one step.
-- If an update is interrupted, treat the workspace as repairable from the last good snapshot plus fresh re-derivation from live bytes.
+Read and Reuse
+- Fetch each external result once, then reuse the stored segment.
+- Read full content explicitly from segments or by querying over stored segments when needed.
+- Re-read stored material deliberately instead of re-calling external tools.
+- Seed later goal tasks from prior workspace snapshots when available.
+- Do not restart dependent work from scratch when a seeded snapshot can carry it forward.
 
-Preserve provenance and reuse existing state.
-- When refreshing a workspace item, keep still-valid prior state and add the new live inputs instead of recomputing everything from scratch.
-- If prior material is suspect or partially orphaned, mark it as contested, exclude it from effective use, and repair it by re-deriving from live source bytes.
+Atomic Updates and Bounds
+- Build new workspace state first, then rebind it in one atomic transition.
+- Treat torn in-place updates as untrusted and repairable.
+- Validate workspace bounds through configured hard limits.
+- Raise a readable error when a workspace write exceeds budget.
+- Do not silently truncate stored workspace state.
+- Keep workspace operations out of the database tool-call counter.
 
-Respect write limits exactly.
-- Workspace writes must fit the budget in full.
-- If a write would exceed budget, raise and handle the failure; do not rely on silent truncation.
+Evidence Standing
+- Use the verified ingest path to make workspace content citable.
+- Do not treat workspace content by itself as provenance-standing.
+- Emit a protocol violation when an answer is produced with no database tool calls.
+
+Code-Mediated Text
+- Load text into queryable structured REPL state.
+- Index first, then pull only the bounded material needed for the current step.
+- Use queries to compute locations and extract slices.
+- Do not paste whole loaded text into scrollback for model inspection.
+- Never make the model count when the environment can compute the location.
+- Never make the model copy existing bytes through attention.
+
+Edits by Code
+- Re-query handles each turn and treat computed addresses as transient.
+- Find edit locations by content query, then splice by code at the computed address.
+- Follow the cycle load, query, splice, write, then discard transient frames.
+- Use line or row granularity for surgical writes.
+- Use block or AST granularity for understanding and provenance.
+- Make edits only through code-mediated operations.
+- Never persist a positional handle across mutations.
+- Never emit a full-document rewrite of existing text.
+- Do not keep a long-lived in-memory mirror that can silently drift.
+
+Write Verification
+- Capture a digest when loading text and verify it before write-back.
+- On digest mismatch, refuse write-back loudly.
+- Never silently overwrite on mismatch.

@@ -153,12 +153,17 @@ check("the composed addendum has no unescaped braces (rlms .format() safety)",
 print("\n[5] module #1 (workspace-discipline)")
 
 module1 = load_module("workspace-discipline")
+# Version pin history: 1 (the July 9, 2026 first flywheel turn) -> 2
+# (Session 21, July 10, 2026: re-authored through grounded authoring
+# with the code-mediated-text pillar in the corpus).
 check("module #1 loads with its manifest identity",
-      module1["name"] == "workspace-discipline" and module1["version"] == 1)
+      module1["name"] == "workspace-discipline" and module1["version"] == 2)
 check("module #1 addendum is brace-free and titled",
       "{" not in module1["addendum_text"] and "}" not in module1["addendum_text"]
       and "WORKSPACE DISCIPLINE PROTOCOL" in module1["addendum_text"])
 check("module #1 addendum is LF-normalized", "\r" not in module1["addendum_text"])
+check("v2 retired the transcription-mitigation line (pillar §5)",
+      "reconstructing stored text" not in module1["addendum_text"])
 
 selected = build_modules_addendum([module0, module1],
                                   substitutions={RUBRIC_TOKEN: trellis_agent._SAFE_RUBRIC})
