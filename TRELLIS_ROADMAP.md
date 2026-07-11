@@ -213,7 +213,8 @@ Ordered roughly by severity.
 | ~~3~~ | ~~Effective-context probe, round 3 (owner-directed next, July 11, 2026)~~ | **Done (Session 23, July 11, 2026)** — the relational corpus (102 generated documents: 100 season-two ledgers ≈6,859 records + a captain→guild registry + a port/material tariff schedule; every question a genuine 2- or 3-table join) measured the pandas null result PERSISTING at 3.1× round-2 scale (0/87 round-3 runs imported pandas or polars; plain dict loops answered every join digit-exact); the localization arm (30 locate runs) reproduced the round-2 failure class at rate (7/30 misses, ALL method error over the glued reconstruction, none transcription) and quantified TWO representation traps zero-paid (line anchors: chronicle 0/48 headings visible glued vs 48/48 boundary-preserved; trailing word boundaries: `\d+\b` fails at glued digit→letter junctions, producing the exact "Chapter 23" wrong answer of both rounds); higher n moved the load-bearing claims (87/87 submits, zero transcription errors at n=5/arm on counts and quotes); the disclosure clause was restored to the chronicle/ledger preambles; RECOMMENDATION recorded (then re-pointed the same day — the owner chose the additive `get_ast_blocks` accessor over the reconstruction-byte change; now §4 row 4). See §5 |
 | ~~4~~ | ~~Boundary-aware block accessor (`get_ast_blocks`) + structure-selection demotion~~ | **Done (Session 24, July 11, 2026)** — `trellis_postgres.get_ast_blocks(root_hash)` returns a document's extraction blocks in order (`[{id, type, text}]`, exactly the `collectExtractionBlocks` set) via the dependency-free walk in `src/rlm/trellis_blocks.py`, parity-pinned block-for-block against the TS authority (`block_parity.test.ts`) and round-tripped live (frank 796 / chronicle 827 blocks byte-identical); NO stored or reconstructed byte moved; both composed-prompt pins moved wittingly to teach the tool (default `3f07295a…4b63`, omit-arm `85362b81…71bb`); pillar §7's "pandas default" DEMOTED to "plain loops until a measured threshold" per its own written contingency; the probe gained the `structured` method verdict, the paren-free locate-preamble offer, and the report's round-4 section. The localization re-measure ran OWNER-APPROVED the same day ($0.9452, 36 runs): 0/36 misses vs round 3's 7/30 on the same locate set, 36/36 runs adopting the accessor in BOTH arms (the off arm too — tooling shape, not the prompt block, carries the behavior); the round-3 "Chapter 23" trap question came back correct 6/6; the superseded reconstruction-byte row stays closed; see §5 |
 | ~~5~~ | ~~Repository-scale extraction prerequisites~~ | **Done (Session 25, July 11, 2026)** — the three recorded pilot findings turned into machinery, all zero-paid: the kernel-fixed test/fixture extraction exclusion (`isTestOrFixturePath`; classified files still ingest but their extraction policy is forced to `none`, reported as typed `test_fixture_excluded` file/block counts in the plan echo), additive `sourceKind` payload routing selecting a code-tuned extraction prompt (legacy prose bytes unit-pinned; unknown values refused at the boundary), and deterministic generic-identifier suppression before resolution (kernel denylist + length-<3 shape rule + touched-relationship drops, counted and logged, never silent). The paid pilot RE-RUN stays owner-gated: proposed at the CLI's printed post-exclusion bound of 103 blocks ≈ $0.29; see §5 |
-| 6 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
+| 6 | Estimation-discipline positive control (module #2 follow-through) | Zero-paid machinery first: a module-arm flag for the effective-context probe (the `TRELLIS_EXP_OMIT_CMT` mold — byte-identical when unset) so paired runs can compose `estimation-discipline` into the selection; then the OWNER-GATED paired measurement (design recorded in `modules/estimation-discipline/RESEARCH.md`: tool calls / iterations / input tokens on sufficiency-bounded questions, ~n=5/arm ≈ $1–2). The module stays OUT of the default selection until the control measures a real effect (the briefing's rule) |
+| 7 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
 | — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
 
@@ -3204,3 +3205,119 @@ everything, extract selectively; prompts request, gates enforce.
    prompt-movable, positive-control-testable). Execute what the owner
    approves, record the outcome here. No new implementation scope is
    self-served while the queue is in this state.
+
+### July 11, 2026 — Session 26: the Trellis-edits-Trellis proof runs + module #2 (the adjudication session, both proposals approved)
+
+The owner approved both standing proposals in-session, delegating the
+open parameters: the proof run's edit targets ("a small supervised test
+edit, if that goes well go deeper and expand the breadth") and module
+#2's topic ("you can choose the recommended topic"). Total session paid
+spend: ≈$0.70 (proof-run series ≈$0.58 under its $1 cap; module #2
+authoring $0.122 under its $0.53 printed estimate).
+
+1. **The proof-run series (six spawns, three edits landed, one real
+   defect found and fixed).** Mechanics: `trellis_agent.py` spawned
+   directly (the probe's `armEnv` mold, temp driver deleted after use)
+   with `TRELLIS_EDIT_ROOT` at this branch checkout; every run's diff
+   reviewed by the human via `git diff` before acceptance; the toolkit
+   never touched git.
+   - **Run 1 ($0.052, REJECTED at review):** the GLOSSARY Capability
+     Flywheel status edit landed byte-precise but carried an
+     instruction ambiguity verbatim ("version 2.0 --" — the task
+     text's own dash) — the supervision gate exists for exactly this;
+     reverted, task rewritten unambiguously.
+   - **Run 1b ($0.098, honest no-write):** the revert had converted the
+     working file to CRLF (autocrlf), and the run correctly REFUSED to
+     force a write it could not stage cleanly, reporting why. File
+     re-normalized to LF.
+   - **Run 1c ($0.066, ACCEPTED):** one line changed, every other byte
+     identical: "(designed;" → "(machinery shipped; module #1 live at
+     version 2;" with the version READ FROM THE GRAPH
+     (`module:workspace-discipline`.moduleVersion) and int-rendered in
+     code — a DB-grounded edit, 2 tool calls, hash-guarded write_back,
+     answer submitted by reference.
+   - **Run 2 ($0.182, honest no-write — FOUND A REAL KERNEL DEFECT):**
+     the two-file breadth task thrashed against
+     `trellis_textedit.splice` refusing every replacement: the
+     validation rejected "\r" alongside "\n", which made CRLF files
+     (API_REFERENCE.md, docs/README.md) IMPOSSIBLE to line-replace —
+     the replacement must carry the trailing "\r" to keep bytes
+     verbatim, contradicting the toolkit's own documented
+     CRLF-verbatim behavior. Reproduced zero-paid with a local
+     harness, fixed (`src/rlm/trellis_textedit.py` now refuses only
+     "\n", the frame delimiter), regression-pinned
+     (`test:textedit` 81 → 82: replacing a CRLF line keeps the
+     carriage return byte verbatim). No pinned check asserted the old
+     behavior. THE FLYWHEEL RESULT: Trellis editing Trellis surfaced a
+     bug in Trellis's own editing toolkit on its second real edit.
+   - **Run 2b ($0.121, ACCEPTED):** on the fixed toolkit, both files
+     edited in one run — API_REFERENCE.md "all five queues" → "all
+     seven queues" (stale since Session 9; CRLF preserved) and a
+     correctly formatted 4-line benchmarks-index entry for
+     `EFFECTIVE_CONTEXT_PROBE_REPORT.md` authored and inserted into
+     docs/README.md; 15 textedit ops, 2 files, 2 writes, answer by
+     reference.
+   - **Run 3 ($0.061, ACCEPTED — the "deeper" arc):** a
+     graph-aggregation-informed edit: queried EVERY `module_manifest`
+     entity, built the replacement phrase entirely in code from the
+     query results (names prefix-stripped, versions int-rendered,
+     sorted, joined), and updated the line run 1c wrote to "(machinery
+     shipped; 2 modules live (estimation-discipline v1,
+     workspace-discipline v2);" — the flywheel turning on its own
+     prior output. Depth note: source-file edits are mechanically
+     identical to docs edits (the toolkit is file-agnostic); the next
+     depth increment is an owner-picked real code change.
+2. **Module #2: `estimation-discipline` (topic chosen per the recorded
+   constraints).** "Mechanical provenance threading" was NOT chosen —
+   `docs/COLLABORATOR_BRIEFING.md` records it as a candidate
+   ARCHITECTURE session (plumbing, not prompt) and records module
+   topics must be behavioral with a decisive positive control; the
+   briefing's own candidate list names estimation discipline ("when is
+   an answer good enough to stop searching"), which has live measured
+   evidence of the failure class. Corpus: two documents authored by
+   the operator this session (no normative estimation prose existed in
+   the repo), every evidence number verified against its committed
+   report (8-vs-4 external calls; 0-external-call seeded task;
+   110,550-token single sub-call; 13k–27k recovery-loop band vs ~8.2k
+   median; the searching-past-held-evidence laundering incident);
+   parked via the Session 21 one-shot harness shape (temp script
+   deleted) and promoted through the REAL CLI as
+   `research:trellis/estimation-discipline/contract` (root
+   `9f5c46bc…8b62`, 11 blocks) and `…/evidence` (root `f6fa47e4…b4fa`,
+   8 blocks), extraction `none`. The paid authoring run (estimate
+   $0.53 printed; **$0.122 actual**, 36,442 in / 3,047 out, 23
+   workspace ops over the 19 seeded blocks) produced a faithful
+   six-section addendum with one honest gap note; the anchor gate
+   PASSED first try at 21/58 = 0.36 ≥ 0.30; the harness pinned all 19
+   corpus hashes; assembled, human-reviewed (corpus-authorship and
+   positive-control sections added to RESEARCH.md), registered live
+   (`module:estimation-discipline`, uncontested, `modules:verify`
+   green). NOT in the default selection — both composed-prompt pins
+   unmoved; per the briefing's rule it stays out until the positive
+   control (designed this session, measurement owner-gated — new §4
+   row 6) measures a real effect.
+3. **Also answered in-session (owner question):** pandas was never
+   forced head-to-head — rounds 2–4 measured whether the model REACHES
+   for it (0/191 runs) and whether plain loops stayed correct (yes,
+   digit-exact through 6,859 records and 3-table joins at ~8.7k median
+   tokens). A forced pandas-arm vs loops-arm comparison on the
+   recorded movers (schema heterogeneity, fuzzy joins) remains an
+   owner-pickable future probe round.
+4. **Acceptance.** `npm test` 712/77 (unchanged — the toolkit fix is
+   Python, pinned by the live drill); `npm run build`,
+   `npm run python:check`, `docker compose --profile test config
+   --quiet`, `git diff --check` green; `test:textedit` **82** (the
+   CRLF regression check); `test:modules` green with BOTH pins unmoved
+   and module #2 present; full standing drill block green;
+   `drill:scale` 1.78x CLOSED (in-band); Compose integration re-run as
+   `trellis_s26_ci` (the Dockerfile COPY layer moved with
+   `trellis_textedit.py`; `package.json` untouched, `npm ci` cached).
+5. **Objective selection for Session 27 (the §0 rule).** New §4 row 6
+   is the first unstruck actionable row: the estimation-discipline
+   positive-control MACHINERY (zero-paid probe module-arm flag, the
+   `TRELLIS_EXP_OMIT_CMT` mold) with the paired measurement proposed
+   owner-gated (~$1–2). Behind it: row 7 (conditional migration) stays
+   trigger-blocked. Also owner-conditional: the next proof-run depth
+   increment (a real source-code change through the toolkit, target
+   owner-picked), and the pandas head-to-head probe round if the owner
+   wants it measured.

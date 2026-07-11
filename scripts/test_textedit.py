@@ -270,6 +270,22 @@ crlf.write_back("crlf.txt")
 check("moved CRLF lines keep their bytes verbatim; only authored lines are new",
       read_file(crlf_root, "crlf.txt") == b"first\r\nsecond\r\ninserted\nno-trailing-newline")
 
+# Session 26 regression (found live by the Trellis-edits-Trellis proof
+# run): REPLACING a line of a CRLF file must accept the replacement's
+# trailing "\r" — under the split("\n") frame it is an ordinary byte
+# within the line, and without it a CRLF line could never be replaced
+# byte-verbatim.
+crlf2_root = make_root()
+write_file(crlf2_root, "crlf2.txt", b"alpha\r\nbeta\r\n")
+crlf2 = TrellisTextEdit(crlf2_root)
+crlf2.load("crlf2.txt")
+beta_hit = json.loads(crlf2.locate("crlf2.txt", "beta"))["hits"][0]["line"]
+beta_line = json.loads(crlf2.lines("crlf2.txt", beta_hit, beta_hit + 1))["lines"][0][1]
+crlf2.splice("crlf2.txt", beta_hit, beta_hit + 1, [beta_line.replace("beta", "gamma")])
+crlf2.write_back("crlf2.txt")
+check("replacing a CRLF line keeps the carriage return byte verbatim",
+      read_file(crlf2_root, "crlf2.txt") == b"alpha\r\ngamma\r\n")
+
 # --- 5. THE GUARD ------------------------------------------------------------
 print("\n[5] the hash guard: a moved file refuses the write, byte-provably")
 

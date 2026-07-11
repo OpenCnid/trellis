@@ -337,7 +337,13 @@ class TrellisTextEdit:
                 f"{type(new_lines).__name__}. To insert one line pass a one-element list."
             )
         for l in new_lines:
-            if "\n" in l or "\r" in l:
+            # Refuse only "\n" — the frame delimiter. A "\r" is an ordinary
+            # byte WITHIN a line under the text.split("\n") frame (every
+            # line of a CRLF file ends with one), and refusing it made CRLF
+            # files impossible to line-replace: the replacement must carry
+            # the trailing "\r" to keep the moved bytes verbatim. Found
+            # live by the Session 26 Trellis-edits-Trellis proof run.
+            if "\n" in l:
                 raise ValueError(
                     "new_lines entries must not contain newline characters; split the "
                     "text into one string per line first (text.split('\\n'))."

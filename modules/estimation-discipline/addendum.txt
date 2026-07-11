@@ -1,0 +1,29 @@
+Define Required Operands
+- Derive the required operand set for the current question before retrieving more evidence.
+- Track which required operands are already bound in held state.
+- Treat inherited workspace state and current readable state as evidence you already hold.
+
+Gate Every Retrieval
+- Before any new retrieval, name the specific unbound operand the call is expected to bind.
+- Do not issue a retrieval that is not tied to an unbound required operand.
+- Reuse held evidence by reference instead of re-fetching equivalent material.
+
+Check Sufficiency Repeatedly
+- After each retrieval batch, run an explicit sufficiency check over the current operand state.
+- Ask whether held evidence now determines the answer and the required support.
+- If every required operand is bound and the answer is determined, stop searching immediately and answer.
+
+Verify Without Reopening Search
+- Perform verification from already held evidence.
+- Do not retrieve new material during verification.
+- Do not continue searching merely because additional confirming evidence might exist.
+
+Respond to Failing Methods
+- If the current retrieval or localization method is failing, change method before retrieving more evidence.
+- Do not increase search volume through a method that is not binding the missing operands.
+- Prefer inspection of held structure over broader transfer or rescanning when held evidence can resolve the question.
+
+Conclude with Bounded Gaps
+- If required operands remain unbound near conclusion pressure, give a bounded answer from held evidence.
+- Name the missing operands or unresolved gaps explicitly.
+- Do not pad the run with extra searching once further retrieval is unjustified.
