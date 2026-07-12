@@ -93,10 +93,19 @@ describe('buildExtractionPrompt', () => {
     expect(prompt.user).toBe(codeExtractionUserPrompt('export function f() {}', HASH, 'typescript'));
     expect(prompt.user).toContain('--- Source code (typescript) ---');
     expect(prompt.user).toContain(`AST Node ID: ${HASH}`);
-    // The code prompt asks for API-level sparsity and bans bare generics;
-    // the deterministic filter in generic_suppression.ts enforces the ban.
-    expect(prompt.user).toContain('NEVER emit a bare generic identifier');
+    // The code prompt asks for API-level sparsity and teaches the fact
+    // shape as a hypershot frame — bracketed instruction-bearing
+    // variables, no concrete example symbols (this repository's own
+    // identifiers would bias its own extraction). Generic-name
+    // enforcement lives in generic_suppression.ts, not here.
     expect(prompt.user).toContain('API-level facts');
+    expect(prompt.user).toContain(
+      '{Exported_Symbol_Exactly_As_Written} --[{specific_verb}]--> {Module_Config_Key_Queue_Or_Table_Exactly_As_Written}'
+    );
+    expect(prompt.user).toContain('too generic to emit');
+    // No concrete repository symbol appears as an example in the frame.
+    expect(prompt.user).not.toContain('planExtraction');
+    expect(prompt.user).not.toContain('extraction_queue');
   });
 
   it('code without a language falls back to a plain header', () => {

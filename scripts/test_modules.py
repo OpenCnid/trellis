@@ -63,7 +63,14 @@ def expect_raises(name, fn, needle=""):
 #     locate misses re-derived block structure from the glued root
 #     reconstruction; tooling in trellis_tools.py/trellis_blocks.py,
 #     the prompt only teaches it).
-COMPOSED_SYSTEM_PROMPT_SHA256 = "3f07295a9d38b4d940ff940c4e297c0c07167d29790df96eef1909a05fb24b63"
+#   5d27e474...fe2a — July 12, 2026 owner-directed prompt-engineering
+#     pass: two run-on instruction blocks restructured with hierarchical
+#     markers, semantic content unchanged — the insight-writer TOOLS
+#     bullet became sub-bullets, and the final-answer workflow rule
+#     became numbered steps with the hand-typing ban restated as a
+#     positive data-flow rule. No tool taught or removed; no behavioral
+#     measurement attached (structure-only, offline pins recomputed).
+COMPOSED_SYSTEM_PROMPT_SHA256 = "5d27e474fd1b39cf7386d79ebba2544d06c3ff83224fcc2d92bc7ed7ca19fe2a"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -263,7 +270,11 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     default pin's history) lands in BOTH arms — a localization tooling
 #     fix, not part of the discipline experiment (the Session 22
 #     precedent; still structurally default minus exactly the block).
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "85362b81bc66b05b1d0b18e76049f8be3088a6cc62feb10bf10a0322409271bb"
+#   45987904...0b56 — July 12, 2026 prompt-engineering pass (see the
+#     default pin's history) lands in BOTH arms — structural rewording,
+#     not part of the discipline experiment (still structurally default
+#     minus exactly the block).
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "45987904f296eb998cb008d7d08c4a88d0aac4e67596b6cf07f92b8fb48a0b56"
 
 import subprocess  # noqa: E402
 

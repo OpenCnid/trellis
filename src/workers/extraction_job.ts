@@ -91,9 +91,19 @@ export function legacyExtractionUserPrompt(text: string, astNodeId: string): str
 
 // The code-tuned prompt (the recorded pilot finding: the document-generic
 // prompt improvises on source code — "organization --[is_default_type_for]->
-// organization"). API-level facts, qualified names, and an explicit ban on
-// bare generic identifiers; the deterministic suppression filter in
-// generic_suppression.ts is what enforces that ban.
+// organization"). API-level facts, qualified names, extreme sparsity.
+//
+// July 12, 2026 revision (prompt-engineering pass): the fact shape is now
+// a hypershot — a structural frame whose bracketed variables carry the
+// instruction, with no concrete example symbols. The prior wording named
+// real repository identifiers (planExtraction, extraction_queue) as
+// examples; since this prompt's primary corpus is this repository's own
+// code, concrete examples are an extraction-bias vector. The prior
+// wording also enumerated banned generic names — and the Session 25
+// pilot measured that ban failing (completions still emitted "Entity";
+// the deterministic filter caught every one). The enumeration is
+// replaced by a positive specificity rule; enforcement stays where it
+// always was, in generic_suppression.ts.
 export const CODE_EXTRACTION_SYSTEM_PROMPT =
   'You are an expert code-knowledge extraction engine that strictly outputs sparse, API-level source code graphs.';
 
@@ -103,7 +113,17 @@ export function codeExtractionUserPrompt(
   language: string | null
 ): string {
   const header = language ?? 'code';
-  return `Extract the entities and actions from the following source code. Map the provided AST Node ID to the 'sourceNodeIds' array. Extract ONLY API-level facts: exported symbols (functions, classes, constants), the modules, configuration keys, queue names, or tables they use or constrain, and how they relate. Name entities by their qualified identifiers exactly as written in the code (for example a function name like planExtraction or a queue name like extraction_queue). NEVER emit a bare generic identifier (for example entity, name, id, data, value, result) as an entity. Be extremely sparse: a few load-bearing API facts beat an exhaustive listing.\n\n--- Source code (${header}) ---\nContent: ${text}\nAST Node ID: ${astNodeId}`;
+  return `Extract the entities and actions from the following source code. Map the provided AST Node ID to the 'sourceNodeIds' array.
+
+Extract ONLY API-level facts: exported symbols (functions, classes, constants), the modules, configuration keys, queue names, or tables they use or constrain, and how they relate. Each action states one such fact in this shape:
+
+{Exported_Symbol_Exactly_As_Written} --[{specific_verb}]--> {Module_Config_Key_Queue_Or_Table_Exactly_As_Written}
+
+Name every entity by its qualified identifier, verbatim from the source text. A name generic enough to describe any codebase is too generic to emit as an entity. Be extremely sparse: a few load-bearing API facts beat an exhaustive listing.
+
+--- Source code (${header}) ---
+Content: ${text}
+AST Node ID: ${astNodeId}`;
 }
 
 /**

@@ -330,6 +330,18 @@ design record is written. Item 3 (the incentive audit) remains open.
 
 ## Where you can help next
 
+When you propose — on any item below — please use this frame, one per
+proposal. The bracketed variables are yours to fill; the structure is what
+makes a proposal decidable on arrival (it forces the three distinctions our
+measurements keep turning on: mechanism vs. instruction, positive control
+vs. null, closed vs. residual):
+
+> **Claim:** {One_Sentence_Stating_What_Should_Change_Or_Hold}
+> **Mechanism:** {Where_It_Lives___Data_Path___Tooling_Shape___Or_Instruction_Text}
+> **Failure it closes:** {The_Concrete_Failing_Case_A_Positive_Control_Could_Reproduce}
+> **Measurement:** {The_Pre_Stated_Criterion_That_Would_Count_As_The_Effect}
+> **Residual:** {What_The_Mechanism_Cannot_Close_And_What_Covers_That_Remainder}
+
 1. **Module #2 topic selection, under the corrected frame.** We need
    capabilities that are genuinely *behavioral* (instruction text can move
    them), testable with a decisive positive control, and not better done

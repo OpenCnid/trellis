@@ -1161,3 +1161,85 @@ for Sessions 24–28); `docs/COLLABORATOR_BRIEFING.md` gained a second
 postscript recording the module-#2 outcome and the item-2 promotion.
 No content edited in the moves; git history and the archive file
 preserve the full ledger.
+
+### July 12, 2026 — Owner-directed prompt-engineering pass (structural prompt improvements under the prompt-engineering / hypershot protocols)
+
+Owner-requested, its own PR, all zero-paid. Targeted structural
+improvements to the system's authored prompts, applying two newly
+adopted protocols: structural-clarity prompt engineering (semantic
+structure, hierarchical markers, positive instruction framing,
+attention management) and hypershots (structural frames with
+instruction-bearing free variables in place of concrete examples,
+which contaminate — a frame primes the response's shape without
+priming its content). Four surfaces changed, each with its rationale:
+
+1. **The code-extraction prompt** (`src/workers/extraction_job.ts`):
+   the fact shape is now a hypershot frame
+   (`{Exported_Symbol_Exactly_As_Written} --[{specific_verb}]-->
+   {Module_Config_Key_Queue_Or_Table_Exactly_As_Written}`). The prior
+   wording named two REAL repository identifiers (`planExtraction`,
+   `extraction_queue`) as examples — and this prompt's primary corpus
+   is this repository's own code, so concrete examples are an
+   extraction-bias vector by construction. The enumerated generic-name
+   ban is replaced by a positive specificity rule: the Session 25
+   pilot MEASURED the ban failing (suppression fired 14 times across
+   103 blocks — completions still emitted `Entity` despite the ban;
+   naming banned tokens also primes them) while the
+   deterministic `generic_suppression.ts` gate caught every one —
+   enforcement stays in the gate, unchanged. The LEGACY prose prompt
+   bytes are UNTOUCHED (the queue-compatibility pin holds;
+   `extraction_job.test.ts` assertions updated for the code prompt
+   only).
+2. **The orchestrator prompt** (`src/core/agent/orchestrator_prompt.ts`,
+   braces legal — never rlms-formatted, unit-pinned): the dispatch
+   decision is now taught as a JSON hypershot frame whose value slots
+   carry the behavioral spec (above all
+   `{Fully_Self_Contained_Question_..._The_Sub_Agent_Shares_No_Context_With_You}`
+   at the exact position the model fills). Schema enforcement
+   (`zodResponseFormat`) unchanged; every pinned substring preserved
+   (`transcript.test.ts` green unmodified); rules 1–6 verbatim.
+3. **The kernel prompt** (`src/rlm/trellis_agent.py`) — a WITTING
+   kernel change, both composed-prompt pins recomputed in the same
+   commit with history recorded in `scripts/test_modules.py`: default
+   `3f07295a…4b63` → `5d27e474…fe2a`, omit-arm `85362b81…71bb` →
+   `45987904…0b56` (re-proven structurally default-minus-exactly-the-
+   block). Two run-on instruction blocks restructured with
+   hierarchical markers, semantic content unchanged: the
+   insight-writer TOOLS bullet became sub-bullets, and the
+   final-answer workflow rule became numbered steps with the
+   hand-typing ban restated as a positive data-flow rule
+   (`test_answer_channel.py`'s substring check updated to the new
+   sentence — same intent, the drill caught the move exactly as
+   designed).
+4. **`docs/COLLABORATOR_BRIEFING.md`**: "Where you can help next" now
+   opens with a contamination-free proposal hypershot
+   (Claim / Mechanism / Failure-it-closes / Measurement / Residual) so
+   collaborator proposals arrive pre-shaped to the house doctrine
+   (mechanism vs. instruction, positive control, honest residual).
+
+**Deliberately NOT touched, with reasons:** module #0's addendum (the
+measured OOLONG protocol — behavioral surface, no measurement budget
+this pass); module #1's addendum (grounded-authored — hand-editing
+would break the harness-holds-the-pen provenance story); module #2
+(retired, measurement provenance); the authoring template and author
+addendum (prompt-module authoring deprioritized by owner direction);
+the workspace/textedit/MCP addenda (already structurally clean);
+every probe suite's question bytes and preambles
+(round-comparability); the legacy extraction prompt (queue
+compatibility, byte-pinned).
+
+**Acceptance observed:** `npm test` 729/79 green; `npm run build`
+green; `npm run python:check` green; `npm run test:modules` all green
+against the recomputed pins; `npm run test:answer-channel` all green
+(one check updated — it correctly FAILED against the old substring
+first); `npm run test:textedit` 82 green; `npm run test:rlm-workspace`
+106 green; `npm run test:rlm-mcp` green; `git diff --check` clean.
+DB-backed drills not run (no services up; the diff touches no
+storage, queue, or ingestion code path — prompt strings, their tests,
+and docs only). **Honest bound: this pass is structure-only. No
+behavioral measurement is attached; offline suites prove composition
+integrity, not improvement. Any behavioral claim for these prompts
+needs an owner-gated paired run (the `est` suite for retrieval
+behavior, a probe round for the kernel, or an extraction pilot
+re-run for the code prompt — each propose-with-estimate under the
+standing ≤$5 cap).**
