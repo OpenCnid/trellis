@@ -1,4 +1,4 @@
-# Trellis Roadmap Progress Log — Archive (July 4–11, 2026; T-items through Session 24)
+# Trellis Roadmap Progress Log — Archive (July 4–11, 2026; T-items through Session 25)
 
 Moved verbatim from `TRELLIS_ROADMAP.md` §5 on July 12, 2026 (owner
 direction: the live roadmap keeps only the most recent five sessions).
@@ -2841,3 +2841,154 @@ the tool.
    met exactly; the superseded reconstruction-byte row STAYS closed
    (§0 event-loop re-check: the positive result re-opens nothing —
    Session 25 remains the extraction prerequisites, row 5).
+
+### July 11, 2026 — Session 25: repository-scale extraction prerequisites (§4 row 5)
+
+The July 6, 2026 extraction pilot's three recorded blockers
+(REPOSITORY_INGESTION_REPORT §5) turned into machinery, all zero-paid.
+The doctrine is the pilot's own lesson and the pillar's: ingest
+everything, extract selectively; prompts request, gates enforce.
+
+1. **The test/fixture extraction exclusion (finding 1).**
+   `isTestOrFixturePath` (`src/core/repository/paths.ts`) — pure,
+   kernel-fixed (Guardrail 5), case-insensitive: test/fixture directory
+   segments (`__tests__`, `__mocks__`, `__fixtures__`, `test`, `tests`,
+   `fixtures`, `testdata`) at any non-final depth, `*.test.*`/`*.spec.*`
+   basenames, `conftest.py`, and a `test_*`/`*_test` STEM rule under any
+   extension — deliberately wider than the recorded Python-only
+   conventions because this repository's own `scripts/test_*.ts` drills
+   carry seeded fixture strings (the exact contamination class the pilot
+   recorded); the asymmetry is safe since a wrongly excluded source file
+   merely skips semantic extraction while a wrongly included test file
+   poisons the graph. Applied in `snapshot_ingest.ts` where the per-file
+   extraction policy is selected: a classified file under
+   `--extract changed` gets policy `none` — it still scans, parses,
+   ingests, versions, and tombstones exactly as before (snapshot
+   completeness is load-bearing). Reported before any write as typed
+   counts distinct from scan skips: `PlannedFile.extractionExclusion`,
+   plan/result `extractionExclusionCounts` +
+   `blocksExcludedFromExtraction` (to-ingest files only — the same
+   population the paid bound counts), the CLI plan echo line
+   (`test_fixture_excluded=N; still ingested, never queued`), the
+   published snapshot summary, and the bounded-label
+   `trellis_repo_blocks_total{stage="test_fixture_excluded"}` counter.
+   The paid bound itself is now post-exclusion, so exclusion shrinks the
+   budget a `changed` run needs.
+2. **Source-kind prompt routing (finding 3).** The extraction job
+   payload gains OPTIONAL additive `sourceKind: 'code' | 'prose'` (+
+   `language`) threaded from `IngestRequest` through
+   `buildExtractionJobs`. The single producer (`ingestDocument`) stamps
+   it on every queued job: repository snapshots map file language
+   (`sourceKindForLanguage`: ts/js/py → `code`, markdown/text →
+   `prose`); every other caller (API `/ingest`, promotion, probe
+   corpora) is markdown prose by construction and defaults to `prose`
+   at the enqueue. The worker side is the new pure
+   `src/workers/extraction_job.ts` (the `workspace_scratch.ts` mold):
+   `parseExtractionJobData` refuses unknown sourceKind/language values
+   loudly BEFORE any I/O or paid call, and `buildExtractionPrompt`
+   selects between the UNCHANGED document-generic prompt — a payload
+   WITHOUT the field (anything already queued, any pre-Session-25
+   producer) and a `prose` payload both compose the EXACT legacy bytes,
+   unit-pinned in `extraction_job.test.ts` — and the NEW code-tuned
+   prompt (API-level facts: exported symbols, modules/config keys/queue
+   names used or constrained; qualified names as written; an explicit
+   ban on bare generic identifiers; extreme sparsity). Same
+   `GraphSchema`, same `zodResponseFormat`, same `parseLlmResponse`
+   boundary — prompt text changed, the contract did not. The rlms
+   kernel is untouched: both composed-prompt pins did NOT move.
+3. **Deterministic generic-identifier suppression (finding 2).**
+   `suppressGenericIdentifiers` (`src/core/graph/generic_suppression.ts`)
+   runs in the worker after `parseLlmResponse` and BEFORE
+   `resolveExtractedGraph`, for BOTH prompts: entities whose normalized
+   name is in the kernel-constant denylist (exactly the recorded list:
+   `entity`, `entities`, `name`, `id`, `ids`, `action`, `actions`,
+   `data`, `value`, `values`, `key`, `keys`, `type`, `types`, `item`,
+   `items`, `index`, `object`, `string`, `number`, `result`, `results`)
+   or shorter than 3 characters are dropped, plus every action touching
+   a dropped entity — and, one deliberate widening, every action whose
+   UNRESOLVED endpoint id itself fails the name test (the resolve step
+   passes unresolved ids through as names, so `subjectId: "entity"`
+   with no local entity would MATCH a pre-existing `entity` hub at
+   merge time; the filter closes that laundering hole; genuinely named
+   unresolved endpoints still pass through — that path is a feature).
+   Every drop is itemized: counts-only
+   `trellis_extraction_suppressed_total{kind}` plus a bounded
+   `extraction.generic_suppressed` log event carrying entity names in
+   content per the dropped-action precedent. Suppression drops
+   extraction CANDIDATES — it never deletes existing graph nodes
+   (Guardrail 2). The division of labor is unit-pinned: the pilot's
+   `globex corporation --[acquired]-> initech` PASSES the filter (it is
+   fixture contamination, owned by the path exclusion, not generic).
+4. **Acceptance.** `npm test` 712 passing across 77 files (baseline
+   683/75: +5 classifier fixtures in `paths.test.ts`, +12
+   `generic_suppression.test.ts`, +10 `extraction_job.test.ts`, +3
+   `snapshot_ingest.test.ts`, +1 `persist.test.ts`, minus/plus exact
+   splits per file); `npm run build`, `npm run python:check`,
+   `docker compose --profile test config --quiet`, `git diff --check`
+   all green. `test:repo-ingest` extended 45 → 56 checks with the new
+   Part 6: a changed-mode snapshot over an edited source file + edited
+   test file, extraction queue captured in memory (nothing reaches
+   Redis) — the test file re-ingests to version 2 (IN the snapshot) yet
+   contributes ZERO jobs; exactly the source file's new function block
+   enqueued, its payload carrying `sourceKind: 'code'`,
+   `language: 'typescript'`; the CLI echo pinned
+   (`test_fixture_excluded=2`). Full standing drill block green
+   (`test:answer-channel`, `test:textedit`, `test:module-lifecycle`,
+   `test:modules` — pins unmoved this session, `test:promotion`,
+   `test:rlm-workspace`, `test:rlm-mcp`, `test:rlm-sandbox`,
+   `test:agent-loop`, `test:a2a`, `test:benchmark-hardening`,
+   `test:entity-resolution`, `test:api-hardening`,
+   `test:belief-recovery`, `test:invalidation-sweep`, `drill:scale`
+   1.99x pre-pilot and 2.01x after the pilot re-run — both CLOSED,
+   in-band; the committed results file is the post-pilot run —
+   isolated Compose integration 10/10 as `trellis_s25_ci`).
+   REPOSITORY_INGESTION_REPORT gained §5a (the prerequisites
+   postscript). Defects found: none — the one behavioral judgment call
+   (the unresolved-endpoint widening in item 3) is recorded above, not
+   a defect.
+5. **The pilot RE-RUN — proposed with its estimate, approved under the
+   session's standing owner approval of paid/owner-gated tests, and
+   MEASURED the same day** (report §5b). The zero-write `--dry-run`
+   printed the plan first: 24 TypeScript files, 131,111 bytes; 10
+   files `test_fixture_excluded` (29 blocks withheld); paid bound
+   **103 blocks ≈ $0.29** at the recorded pilot telemetry. The run
+   (`--repo-key trellis-graph-pilot-2`, budget 150; extraction +
+   invalidation workers only): **103/103 jobs, zero failures, zero
+   merge-dropped actions**, 35 unresolved endpoints (name
+   pass-through, none errors), 103 embeddings, ~5 minutes.
+   **Suppression live: 14 events, 18 entities + 23 actions dropped**
+   — completions still emitted `Entity` despite the prompt ban; the
+   gate enforced it every time (prompts request, gates enforce —
+   measured). **Graph: 237 entities / 243 relationships** (July 6:
+   340/318 from 112 blocks); **top entity `ast_nodes` at 4 sources vs
+   `entity` at 14 — max hub cardinality 3.5× lower**; top-15 all
+   genuine API-level identifiers; ZERO denylist names with pilot
+   provenance (verified by live query). `globex corporation` (1
+   source) and `initech` (2) byte-unchanged before/after — the
+   fixture blocks never enqueued. Residual recorded, not acted on:
+   `concept`/`kind`/`generic` at 3 sources each — first observed
+   counts for future denylist candidates; 3 is not a hub. **Spend:
+   55,891 in / 40,545 out + 20,543 embedding tokens ≈ $0.28** (2.5%
+   fewer input, 13.5% fewer output tokens than the July 6 pilot's
+   $0.31 — the sparser code prompt, as predicted; under the $0.29
+   estimate). Cleanup: tombstone snapshot #2 (24 tombstones), the
+   invalidation worker swept, post-sweep every pilot-provenance
+   entity (521 incl. July-6 residue via shared content-addressed
+   hashes) reads contested, zero uncontested. Total Session 25 paid
+   spend: ≈$0.28.
+6. **Objective selection for Session 26 (the §0 rule, recorded; the
+   step-5 re-check ran after the pilot re-run).** Row 5 was the last
+   self-serve implementation row. What remains in §4 is the
+   trigger-blocked conditional migration (Sessions 23–25 read 1.84x /
+   2.11x / 1.99x–2.01x — all CLOSED, in-band; the trigger has not fired)
+   and the superseded/deferred dash rows. Proposal (a), the pilot
+   re-run, was executed THIS session under the standing approval and
+   surfaced NO defect in the Session 25 machinery — nothing jumps the
+   queue. Per the handoff's recorded rule for this state, Session 26
+   is an ADJUDICATION session over the two remaining owner-gated
+   proposals: the supervised Trellis-edits-Trellis proof run
+   (≈$0.10–$0.30, cap $1; edit target owner-picked) and the module #2
+   authoring turn (≈$0.13–$0.30, topic owner-picked,
+   prompt-movable, positive-control-testable). Execute what the owner
+   approves, record the outcome here. No new implementation scope is
+   self-served while the queue is in this state.

@@ -140,6 +140,25 @@ describe('RlmTelemetryScanner', () => {
     }]);
   });
 
+  it('tolerates unknown additive fields without disturbing the parsed record (Session 30 pin)', () => {
+    // The agent adds counts-only fields over time (answer_submits,
+    // textedit_*, retrieved_addresses — PROVENANCE_THREADING.md slice
+    // b). The scanner extracts named keys only, so an additive field
+    // must never change the parse result or produce a malformed event.
+    const events = scan([
+      `TRELLIS_TELEMETRY: ${JSON.stringify({
+        ...PAYLOAD,
+        answer_submits: 1,
+        retrieved_addresses: 12,
+        some_future_counter: 3,
+      })}\n`,
+      `${LINE}\n`,
+    ]);
+    expect(events).toHaveLength(2);
+    expect(events[0]).toEqual(events[1]);
+    expect(events[0].kind).toBe('telemetry');
+  });
+
   it('drops an unterminated oversized line without growing the buffer or corrupting later records', () => {
     const events: TelemetryEvent[] = [];
     const scanner = new RlmTelemetryScanner(event => events.push(event), 64);

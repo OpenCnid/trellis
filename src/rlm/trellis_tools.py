@@ -65,11 +65,40 @@ _TRACK_CITATIONS = CITATION_AUDIT_ENABLED or CITATION_HINT_ENABLED
 _audit_lock = threading.Lock()
 _audit = {"read": set(), "search": set(), "cited": set()}
 
+# --- Retrieval-set tracking (Session 30, always on) ---------------------
+# PROVENANCE_THREADING.md slice (b): the run's retrieved-address set —
+# every ast_nodes id whose BYTES a retrieval tool returned this run
+# (get_ast_texts returned keys, get_ast_blocks block ids, vector_search
+# result ids). Fed at the same seam as the citation audit's read/search
+# buckets; the cited bucket never feeds it (a citation is an assertion,
+# not a retrieval), and neither do ast_hashes_exist (write-path plumbing
+# — including it would open a probe-then-cite loophole), fetch_texts
+# (harness plumbing), or run_cypher (a sourceNodeIds property in a query
+# result is a reference to bytes, not the bytes). Unlike the audit this
+# is NOT experiment-gated: slice (d) will constrain citable addresses to
+# this set on every run. Bookkeeping only today — no write-path behavior
+# reads it yet. Telemetry reports its size, never its contents (T16).
+_retrieved_addresses = set()
+
 def _audit_add(bucket, ids):
+    clean = {i for i in ids if isinstance(i, str)}
+    if bucket in ("read", "search"):
+        with _audit_lock:
+            _retrieved_addresses.update(clean)
     if not _TRACK_CITATIONS:
         return
     with _audit_lock:
-        _audit[bucket].update(i for i in ids if isinstance(i, str))
+        _audit[bucket].update(clean)
+
+def get_retrieved_addresses() -> set:
+    """A COPY of the run's retrieved-address set (callers can never
+    mutate run state). Slice (d)'s future input."""
+    with _audit_lock:
+        return set(_retrieved_addresses)
+
+def get_retrieved_address_count() -> int:
+    with _audit_lock:
+        return len(_retrieved_addresses)
 
 def _read_set() -> set:
     with _audit_lock:

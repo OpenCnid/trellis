@@ -19,8 +19,16 @@ import os
 import sys
 import uuid
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "rlm"))
-from trellis_tools import TrellisNeo4j, TrellisPostgres, get_tool_call_count  # noqa: E402
+RLM_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "rlm")
+sys.path.insert(0, RLM_DIR)
+from trellis_tools import (  # noqa: E402
+    TrellisNeo4j,
+    TrellisPostgres,
+    get_tool_call_count,
+    get_retrieved_addresses,
+    get_retrieved_address_count,
+    get_citation_audit,
+)
 
 failures = 0
 
@@ -193,6 +201,149 @@ try:
     finally:
         counting_client.close()
 
+    # --- Session 30: retrieval-set tracking (PROVENANCE_THREADING.md b) -
+    print("\n[5] retrieval-set tracking")
+
+    # Sections [1]-[4] performed Cypher reads, existence checks, and
+    # provenance-cited WRITES — none of which are retrieval. The set
+    # must still be empty: the cited bucket never feeds it.
+    check("cypher reads, existence checks, and cited writes contribute nothing",
+          get_retrieved_address_count() == 0,
+          f"expected empty set, got {get_retrieved_address_count()} addresses")
+
+    # A Cypher read that surfaces a REAL sourceNodeIds property (the
+    # section [4] edge is still live here) puts a genuine 64-hex address
+    # in front of the run — a reference to bytes, not the bytes. It must
+    # not join the set.
+    prov_rows = json.loads(client.run_cypher(
+        "MATCH (s:Entity)-[r:DERIVED_INSIGHT]->(o:Entity) "
+        "WHERE s.name = 'sandbox probe subject' RETURN r.sourceNodeIds AS ids"
+    ))
+    check("cypher result really surfaces the probe hash as a provenance property",
+          any(PROBE_HASH in (row.get("ids") or []) for row in prov_rows),
+          f"probe edge not found in query result: {prov_rows!r}")
+    check("a provenance property read via cypher never joins the retrieval set",
+          get_retrieved_address_count() == 0)
+
+    # get_ast_texts contributes exactly its RETURNED keys: the unknown
+    # hash returns no entry, so it contributes nothing (the argument
+    # list is the model's assertion; the returned keys are what the
+    # engine served bytes for).
+    unknown_read = hashlib.sha256(b"trellis-sandbox-retrieval-unknown").hexdigest()
+    json.loads(pg.get_ast_texts([PROBE_HASH, unknown_read]))
+    check("get_ast_texts adds exactly the returned keys (unknown hash excluded)",
+          get_retrieved_addresses() == {PROBE_HASH},
+          f"got {sorted(get_retrieved_addresses())}")
+
+    # Set semantics: repeat retrieval is not new retrieval.
+    pg.get_ast_texts([PROBE_HASH])
+    check("repeat retrieval leaves the set unchanged",
+          get_retrieved_addresses() == {PROBE_HASH})
+
+    # get_ast_blocks contributes the returned BLOCK ids, never the root
+    # argument: the run received the blocks' bytes, not the root's
+    # reconstruction.
+    BLOCKS_ROOT_HASH = hashlib.sha256(b"trellis-sandbox-retrieval-blocks-root").hexdigest()
+    BLOCKS_CHILD_HASH = hashlib.sha256(b"trellis-sandbox-retrieval-blocks-child").hexdigest()
+    with pg.conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO ast_nodes (id, document_id, data) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING",
+            (BLOCKS_ROOT_HASH, "sandbox_probe_doc", json.dumps({
+                "type": "root",
+                "children": [{
+                    "id": BLOCKS_CHILD_HASH,
+                    "type": "paragraph",
+                    "children": [{"type": "text", "content": "retrieval probe paragraph"}],
+                }],
+            })),
+        )
+    pg.conn.commit()
+    blocks = json.loads(pg.get_ast_blocks(BLOCKS_ROOT_HASH))
+    check("get_ast_blocks returns the probe block",
+          [b["id"] for b in blocks] == [BLOCKS_CHILD_HASH])
+    check("get_ast_blocks adds the returned block ids",
+          BLOCKS_CHILD_HASH in get_retrieved_addresses())
+    check("the root argument itself never joins the set",
+          BLOCKS_ROOT_HASH not in get_retrieved_addresses())
+
+    # vector_search contributes its result ids — drilled zero-paid: a
+    # probe row with a deterministic embedding, and the openai module
+    # stubbed in sys.modules so the in-function `import openai` binds
+    # the stub (no network, no spend). Cosine distance 0 against itself
+    # guarantees the probe row is the top hit regardless of what else
+    # in the dev store carries embeddings.
+    EMBED_HASH = hashlib.sha256(b"trellis-sandbox-retrieval-embed").hexdigest()
+    probe_vector = [1.0] + [0.0] * 1535
+    with pg.conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO ast_nodes (id, document_id, data, embedding) VALUES (%s, %s, %s, %s::vector) "
+            "ON CONFLICT (id) DO NOTHING",
+            (EMBED_HASH, "sandbox_probe_doc",
+             json.dumps({"type": "text", "content": "retrieval embed probe"}),
+             json.dumps(probe_vector)),
+        )
+    pg.conn.commit()
+
+    import types
+    stub_openai = types.ModuleType("openai")
+    stub_openai.OpenAI = lambda: types.SimpleNamespace(
+        embeddings=types.SimpleNamespace(
+            create=lambda **kwargs: types.SimpleNamespace(
+                data=[types.SimpleNamespace(embedding=list(probe_vector))])))
+    real_openai = sys.modules.get("openai")
+    sys.modules["openai"] = stub_openai
+    try:
+        search_rows = json.loads(pg.vector_search("retrieval embed probe"))
+    finally:
+        if real_openai is not None:
+            sys.modules["openai"] = real_openai
+        else:
+            del sys.modules["openai"]
+    check("vector_search returns the embedded probe row first (distance 0)",
+          bool(search_rows) and search_rows[0]["id"] == EMBED_HASH,
+          f"got {[r['id'][:12] for r in search_rows]}")
+    check("vector_search result ids join the retrieval set",
+          EMBED_HASH in get_retrieved_addresses())
+    check("every returned search id joined the set (bytes travel with addresses)",
+          all(row["id"] in get_retrieved_addresses() for row in search_rows))
+
+    # ast_hashes_exist stays outside the set even while tracking is
+    # active — including it would open a probe-then-cite loophole.
+    count_before_exist = get_retrieved_address_count()
+    pg.ast_hashes_exist([PROBE_HASH, EMBED_HASH, unknown_read])
+    check("ast_hashes_exist never contributes, even mid-run",
+          get_retrieved_address_count() == count_before_exist)
+
+    # The accessor returns a COPY: callers can never mutate run state.
+    snapshot = get_retrieved_addresses()
+    snapshot.add(unknown_read)
+    check("get_retrieved_addresses returns a copy (caller mutation is inert)",
+          unknown_read not in get_retrieved_addresses())
+    check("count accessor agrees with the set accessor",
+          get_retrieved_address_count() == len(get_retrieved_addresses()))
+
+    # Gating separation: the retrieval set is ALWAYS on; the citation
+    # audit stays opt-in. With TRELLIS_CITATION_AUDIT/_HINT unset (the
+    # drill default), the audit buckets must still be empty while the
+    # retrieval set is populated.
+    audit = get_citation_audit()
+    check("citation audit buckets stay empty while the always-on set is populated",
+          audit["read"] == [] and audit["search"] == [] and audit["cited"] == [],
+          f"audit unexpectedly populated: {audit}")
+
+    # Static pins (the Session 29 audit-#8 mold): Tier-3 surfaces never
+    # touch the tracking seam, and the agent's telemetry dict carries
+    # the counts-only field.
+    for tier3_module in ("trellis_mcp.py", "trellis_workspace.py", "trellis_textedit.py"):
+        with open(os.path.join(RLM_DIR, tier3_module), "r", encoding="utf-8") as fh:
+            source = fh.read()
+        check(f"{tier3_module} never references the retrieval-tracking seam",
+              "_retrieved_addresses" not in source and "_audit_add" not in source)
+    with open(os.path.join(RLM_DIR, "trellis_agent.py"), "r", encoding="utf-8") as fh:
+        agent_source = fh.read()
+    check("agent telemetry carries the counts-only retrieved_addresses field",
+          '"retrieved_addresses": get_retrieved_address_count()' in agent_source)
+
     # Cleanup of the probe facts — the test owns a direct write session;
     # this is not the sandbox path.
     with client.driver.session() as s:
@@ -204,7 +355,12 @@ try:
 finally:
     try:
         with pg.conn.cursor() as cur:
-            cur.execute("DELETE FROM ast_nodes WHERE id = %s", (PROBE_HASH,))
+            # All rows this drill owns (the section [5] retrieval probes
+            # are token-scoped like the original probe row).
+            cur.execute(
+                "DELETE FROM ast_nodes WHERE document_id = %s",
+                ("sandbox_probe_doc",),
+            )
         pg.conn.commit()
     finally:
         pg.close()
