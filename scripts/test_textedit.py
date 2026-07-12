@@ -27,7 +27,12 @@
 #  [11] write_back hardening (Session 29, coverage audit #2/#3/#4) —
 #       mode preservation, write-time containment re-verification,
 #       resolution-change refusal, second-writer detection inside the
-#       narrowed window, no orphaned temp file on refusal.
+#       narrowed window, no orphaned temp file on refusal,
+#  [12] multi-file partial-failure semantics (audit #5) — per-file
+#       independence is intentional, pinned in both orders,
+#  [13] guard adversarial checks (audit #6) — one check per previously
+#       untested guard branch, plus the static no-subprocess/no-git
+#       import guard (audit #8).
 import ast
 import hashlib
 import json
@@ -573,6 +578,89 @@ check("the detected race left the second writer's bytes on disk",
       read_file(narrow_root, "narrow.txt") == second_writer)
 check("the refused write left no orphaned temp file behind",
       [n for n in os.listdir(narrow_root) if n.startswith(".trellis-textedit-")] == [])
+
+# --- 12. Multi-file partial-failure semantics (audit #5) ---------------------
+print("\n[12] multi-file writes: per-file independence is intentional, both orders")
+
+multi_root = make_root()
+write_file(multi_root, "a.txt", b"alpha\n")
+write_file(multi_root, "b.txt", b"beta\n")
+multi = TrellisTextEdit(multi_root)
+multi.load("a.txt")
+multi.load("b.txt")
+multi.splice("a.txt", 0, 1, ["alpha EDITED"])
+multi.splice("b.txt", 0, 1, ["beta EDITED"])
+write_file(multi_root, "b.txt", b"beta MOVED\n")
+check("file A writes back even though file B's guard would refuse",
+      json.loads(multi.write_back("a.txt"))["bytesWritten"] > 0
+      and read_file(multi_root, "a.txt") == b"alpha EDITED\n")
+expect_raises("file B refuses on its own digest, unaffected by A's success",
+              lambda: multi.write_back("b.txt"), StaleFileError, "digest mismatch")
+check("the partial outcome is intentional: A landed, B kept the second writer's bytes",
+      read_file(multi_root, "a.txt") == b"alpha EDITED\n"
+      and read_file(multi_root, "b.txt") == b"beta MOVED\n")
+check("B's staged splice survives the refusal for re-derivation after re-load",
+      json.loads(multi.diff("b.txt"))["pendingSplices"] == 1)
+
+write_file(multi_root, "c.txt", b"gamma\n")
+write_file(multi_root, "d.txt", b"delta\n")
+multi2 = TrellisTextEdit(multi_root)
+multi2.load("c.txt")
+multi2.load("d.txt")
+multi2.splice("c.txt", 0, 1, ["gamma EDITED"])
+multi2.splice("d.txt", 0, 1, ["delta EDITED"])
+write_file(multi_root, "c.txt", b"gamma MOVED\n")
+expect_raises("a refusal FIRST (file C) is per-file too",
+              lambda: multi2.write_back("c.txt"), StaleFileError, "digest mismatch")
+check("file D still writes back after C's refusal",
+      json.loads(multi2.write_back("d.txt"))["bytesWritten"] > 0
+      and read_file(multi_root, "d.txt") == b"delta EDITED\n")
+
+# --- 13. Guard adversarial checks (audit #6) + static import guard (#8) ------
+print("\n[13] guard branches: one check per previously untested refusal branch")
+
+adv_root = make_root()
+write_file(adv_root, "adv.txt", b"one\ntwo\nthree\n")
+adv = TrellisTextEdit(adv_root)
+adv.load("adv.txt")
+expect_raises("a boolean line index is refused (bool passes isinstance int)",
+              lambda: adv.lines("adv.txt", True, 2), ValueError, "integer")
+expect_raises("a boolean splice index is refused",
+              lambda: adv.splice("adv.txt", 0, True, ["x"]), ValueError, "integer")
+expect_raises("a boolean constructor bound is refused",
+              lambda: TrellisTextEdit(adv_root, max_files=True),
+              ValueError, "positive integer")
+expect_raises("a non-string locate pattern is refused",
+              lambda: adv.locate("adv.txt", 123), ValueError, "string")
+expect_raises("a non-string path is refused before any I/O",
+              lambda: adv.load(123), ValueError, "non-empty")
+expect_raises("a non-string element inside new_lines is refused",
+              lambda: adv.splice("adv.txt", 0, 1, ["ok", 5]), ValueError, "list")
+adv.splice("adv.txt", 0, 1, ["staged-then-discarded"])
+adv.load("adv.txt")
+check("re-load refreshes from disk and discards staged splices (documented semantics)",
+      json.loads(adv.diff("adv.txt"))["pendingSplices"] == 0
+      and json.loads(adv.lines("adv.txt", 0, 1))["lines"] == [[0, "one"]])
+
+# Audit #8: the no-git/no-subprocess guarantee held by inspection only —
+# pin it statically. The import set is exact: a future subprocess or git
+# surface fails this check before any reviewer has to catch it.
+with open(tt_module.__file__, "r", encoding="utf-8") as f:
+    toolkit_source = f.read()
+imported = set()
+for node in ast.walk(ast.parse(toolkit_source)):
+    if isinstance(node, ast.Import):
+        imported |= {alias.name.split(".")[0] for alias in node.names}
+    elif isinstance(node, ast.ImportFrom):
+        imported.add((node.module or "").split(".")[0])
+allowed_imports = {"hashlib", "json", "os", "posixpath", "re", "stat",
+                   "tempfile", "threading", "difflib"}
+check("toolkit imports stay inside the pinned stdlib set",
+      bool(imported) and imported <= allowed_imports,
+      f"unexpected imports: {sorted(imported - allowed_imports)}")
+check("no git or subprocess token anywhere in the toolkit source",
+      re.search(r"\bgit\b", toolkit_source) is None
+      and "subprocess" not in toolkit_source)
 
 # ---------------------------------------------------------------------------
 for stale_root in temp_roots:
