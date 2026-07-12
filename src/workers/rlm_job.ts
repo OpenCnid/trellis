@@ -202,6 +202,11 @@ export function buildAgentEnv(
   // onto the discipline-off kernel. Only the experiment runner's own
   // spawn env can set it.
   delete env.TRELLIS_EXP_OMIT_CMT;
+  // Session 28: the probe's module-arm flag, same mold. The runner
+  // resolves it into the canonical TRELLIS_MODULES before any spawn;
+  // an inherited value can never move a production run's module
+  // selection off the validated config path above.
+  delete env.TRELLIS_EXP_MODULES;
   // Explicitly set the credential variables the registry names, so the
   // forwarding contract holds regardless of what the base env carries.
   for (const [name, value] of Object.entries(cfg.mcpCredentialEnv ?? {})) {
