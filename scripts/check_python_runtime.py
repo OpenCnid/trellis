@@ -41,6 +41,11 @@ def main() -> None:
         # for the code-mediated-text pillar (in-REPL frames — pillar §7),
         # so its absence must fail this check, not a paid run.
         "pandas",
+        # polars is the pinned engine-side analytics tier (pillar §7
+        # postscript; requirements.txt). No kernel or contract path
+        # imports it — the pin exists so a broken environment fails this
+        # check, not a paid run (the data-plane review, July 11, 2026).
+        "polars",
         "unstructured.partition.pdf",
         "trellis_tools",
         "trellis_blocks",

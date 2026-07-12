@@ -213,7 +213,7 @@ Ordered roughly by severity.
 | ~~3~~ | ~~Effective-context probe, round 3 (owner-directed next, July 11, 2026)~~ | **Done (Session 23, July 11, 2026)** — the relational corpus (102 generated documents: 100 season-two ledgers ≈6,859 records + a captain→guild registry + a port/material tariff schedule; every question a genuine 2- or 3-table join) measured the pandas null result PERSISTING at 3.1× round-2 scale (0/87 round-3 runs imported pandas or polars; plain dict loops answered every join digit-exact); the localization arm (30 locate runs) reproduced the round-2 failure class at rate (7/30 misses, ALL method error over the glued reconstruction, none transcription) and quantified TWO representation traps zero-paid (line anchors: chronicle 0/48 headings visible glued vs 48/48 boundary-preserved; trailing word boundaries: `\d+\b` fails at glued digit→letter junctions, producing the exact "Chapter 23" wrong answer of both rounds); higher n moved the load-bearing claims (87/87 submits, zero transcription errors at n=5/arm on counts and quotes); the disclosure clause was restored to the chronicle/ledger preambles; RECOMMENDATION recorded (then re-pointed the same day — the owner chose the additive `get_ast_blocks` accessor over the reconstruction-byte change; now §4 row 4). See §5 |
 | ~~4~~ | ~~Boundary-aware block accessor (`get_ast_blocks`) + structure-selection demotion~~ | **Done (Session 24, July 11, 2026)** — `trellis_postgres.get_ast_blocks(root_hash)` returns a document's extraction blocks in order (`[{id, type, text}]`, exactly the `collectExtractionBlocks` set) via the dependency-free walk in `src/rlm/trellis_blocks.py`, parity-pinned block-for-block against the TS authority (`block_parity.test.ts`) and round-tripped live (frank 796 / chronicle 827 blocks byte-identical); NO stored or reconstructed byte moved; both composed-prompt pins moved wittingly to teach the tool (default `3f07295a…4b63`, omit-arm `85362b81…71bb`); pillar §7's "pandas default" DEMOTED to "plain loops until a measured threshold" per its own written contingency; the probe gained the `structured` method verdict, the paren-free locate-preamble offer, and the report's round-4 section. The localization re-measure ran OWNER-APPROVED the same day ($0.9452, 36 runs): 0/36 misses vs round 3's 7/30 on the same locate set, 36/36 runs adopting the accessor in BOTH arms (the off arm too — tooling shape, not the prompt block, carries the behavior); the round-3 "Chapter 23" trap question came back correct 6/6; the superseded reconstruction-byte row stays closed; see §5 |
 | ~~5~~ | ~~Repository-scale extraction prerequisites~~ | **Done (Session 25, July 11, 2026)** — the three recorded pilot findings turned into machinery, all zero-paid: the kernel-fixed test/fixture extraction exclusion (`isTestOrFixturePath`; classified files still ingest but their extraction policy is forced to `none`, reported as typed `test_fixture_excluded` file/block counts in the plan echo), additive `sourceKind` payload routing selecting a code-tuned extraction prompt (legacy prose bytes unit-pinned; unknown values refused at the boundary), and deterministic generic-identifier suppression before resolution (kernel denylist + length-<3 shape rule + touched-relationship drops, counted and logged, never silent). The paid pilot RE-RUN stays owner-gated: proposed at the CLI's printed post-exclusion bound of 103 blocks ≈ $0.29; see §5 |
-| 6a | Data-plane representation verdict follow-ups (owner-directed July 11, 2026 — inserted AHEAD of the positive control, which is unchanged) | The owner-commissioned read-only Polars/Arrow architecture review (§5 entry of the same date) concluded NO migration at any of the six data-plane boundaries — JSON/list/dict contracts stand everywhere; structure selection is operation-shaped, not size-shaped. This session records the verdict and pins its prerequisites, all zero-paid: pin polars==1.34.0 in requirements.txt + the python:check import list (the review's found inconsistency: prose claims the agent environment carries polars, no manifest declares it, the Docker image lacks it — a containerized paid run importing it would fail at runtime, not at check time); the pillar §7 verdict + cap-raise doctrine paragraph; the M1 park/seed round-trip + M7 torn-payload refusal drills as standing fixtures in test:rlm-workspace. Pinning is NOT adoption: no src/ path imports polars |
+| ~~6a~~ | ~~Data-plane representation verdict follow-ups (owner-directed July 11, 2026 — inserted AHEAD of the positive control, which is unchanged)~~ | **Done (Session 27, July 11, 2026)** — all three adopted recommendations landed zero-paid: `polars==1.34.0` pinned in requirements.txt + the `python:check` import list + an in-container import probe in the Compose integration (11 assertions now — the found prose-vs-manifest inconsistency is closed; pinning is NOT adoption, no src/ path imports polars); the pillar §7 verdict + cap-raise doctrine paragraph (docs-only, both composed-prompt pins unmoved); the M1 park/seed round-trip at cap sizes (byte-lossless at exactly 4 MiB/32 MiB/1024 segments, refusal at cap+1, timings printed never asserted) and M7 per-field torn-payload refusal + canonical-form determinism fixtures as standing sections [7]/[8] of `test:rlm-workspace` (86 → 106 checks); see §5 |
 | 6 | Estimation-discipline positive control (module #2 follow-through) | (Pushed back one session by owner direction July 11, 2026 — row 6a runs first; this row is otherwise unchanged.) Zero-paid machinery first: a module-arm flag for the effective-context probe (the `TRELLIS_EXP_OMIT_CMT` mold — byte-identical when unset) so paired runs can compose `estimation-discipline` into the selection; then the OWNER-GATED paired measurement (design recorded in `modules/estimation-discipline/RESEARCH.md`: tool calls / iterations / input tokens on sufficiency-bounded questions, ~n=5/arm ≈ $1–2). The module stays OUT of the default selection until the control measures a real effect (the briefing's rule) |
 | 7 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
 | 8 | Self-editing toolkit coverage hardening (Trellis-edits-Trellis coverage audit, July 11, 2026) | Ten gaps found, all zero-paid to close except the cross-process proof run (§5 entry of the same date has the full gap matrix). Priority order: wire `npm run test:textedit` into CI first (cheap, no new tests needed); then close the TOCTOU window in `write_back`, re-verify containment at write time (not just load time), and preserve file mode across `write_back`; then pin multi-file partial-failure semantics and add mutation-test coverage for the guard code. Does not reorder rows 6a/6/7 — queued behind them |
@@ -3586,3 +3586,114 @@ failure mode, not a bundled "go deeper" run.
 No safeguard weakened or disabled; every finding above either adds
 new test coverage or documents an existing structural/operator-
 discipline guarantee that has no runtime enforcement yet.
+
+### July 11, 2026 — Session 27: the data-plane representation verdict recorded and its prerequisites pinned (§4 row 6a)
+
+The July 11 data-plane review's three adopted recommendations (plus the
+recommendation-5 doctrine line), all zero-paid — no LLM call anywhere in
+the session.
+
+**1. The polars pin (recommendation 2 — the found inconsistency
+closed).** `requirements.txt` gains `polars==1.34.0` with a comment
+recording what the pin is (the engine-side analytics tier of the
+wall-clock report) and is not (adoption — no kernel, contract, or
+prompt path imports it; the §8 exclusion stands).
+`scripts/check_python_runtime.py` adds `polars` to the import list
+under the pandas precedent's rationale: a broken environment must fail
+the check, not a paid run. `scripts/bench_wallclock_text.py` (already
+in the syntax-compile list) is now runnable in-container. The Compose
+integration (`scripts/test_compose_roundtrip.ts`) gains an in-container
+probe — `python -c "import polars"` via `config.python.executable`,
+asserting exit 0 and the exact pinned version string — so the image's
+venv is proven to carry it, not merely the local dev machine (10 → 11
+assertions). No src/ file imports polars (verified by grep before
+commit).
+
+**2. The pillar §7 verdict paragraph (recommendation 3 + the
+recommendation-5 doctrine, docs-only).** One paragraph in
+`docs/architecture/CODE_MEDIATED_TEXT.md` §7 directly after the July 11
+engine-side postscript: structure selection is operation-shaped, not
+size-shaped; the data-plane contracts stay JSON at every boundary
+(workspace index / MCP payloads / Redis snapshots canonical JSON,
+PG/Neo4j database-native, splice-shaped editing list-of-lines); Option
+C rejected by §4.5 doctrine, Option B unjustified at the 4–32 MiB caps,
+canonical JSON byte-deterministic where Arrow IPC is not; polars pinned
+not adopted; and the cap-raise doctrine — approach the 32 MiB cap ⇒
+re-run the M1 drill at the target size BEFORE raising caps; cap raises,
+not representation changes, are the first lever; a migration re-enters
+only through the review's benchmark matrix and adoption thresholds with
+owner sign-off. Both composed-prompt pins unmoved (`test:modules` [4]
+and [7] green, default `3f07295a…4b63` / omit-arm `85362b81…71bb`).
+
+**3. M1/M7 standing fixtures (recommendation 4).**
+`scripts/test_rlm_workspace.py` gains sections [7] and [8], pure
+stdlib, no new dependencies, **86 → 106 checks**:
+
+- **[7] M1 park/seed round-trip at cap sizes:** workspaces filled to
+  EXACTLY the byte cap (deterministic ASCII segments; plan + note
+  accounted byte-for-byte), then `snapshot()` → `json.loads` →
+  `seed_from_snapshot` at 4 MiB (default cap, 8 segments), 32 MiB
+  (hard cap, 16 segments), and 1024 segments (the count hard cap):
+  byte-lossless round-trips (`reseeded.snapshot()` byte-equal to the
+  parked bytes), usage exactly == cap after seeding, and refusal at
+  cap+1 (one segment grown one byte with a consistent stamp ⇒
+  `WorkspaceBudgetError` byte budget; a synthetic 1025th segment ⇒
+  segment budget). Wall-clock timings are PRINTED as telemetry, never
+  asserted (CI variance) — observed locally: 32 MiB snapshot ~84 ms /
+  parse ~27 ms / seed ~11 ms; 4 MiB ~9/4/0.3 ms; 1024 segments ~9 ms
+  total. The Node-side Zod twin pins in `rlm_job.test.ts` were not
+  duplicated.
+- **[8] M7 torn-payload refusal + canonical determinism:** a
+  validity-control fixture that seeds cleanly, then one mutation per
+  previously-unpinned integrity class — non-string content, non-bool
+  `truncated`, missing `origin.argsHash`, non-string `fetchedAt`
+  (section [6] already pins the small-size torn stamp, wrong version,
+  fully-stampless segment, and over-budget classes — extended, not
+  duplicated) — plus torn-stamp and wrong-version refusals re-proven
+  at the 4 MiB cap size, and the canonical-form determinism pin
+  (parse + re-serialize byte-identical to the parked snapshot) at all
+  three cap shapes — the property the review found Arrow IPC could
+  not guarantee across library versions (adoption threshold 3).
+
+**4. Prose reconciliation (the rest of recommendation 2).** HANDOFF §2's
+environment line now states polars as pinned and the image's pandas as
+3.0.3 (requirements-pdf-fast.txt) vs the local 2.2.3.
+`docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` was verified to
+carry NO container-availability claim about polars (grepped for
+environment/installed/container and the version strings before
+editing), so per HANDOFF §4(d)'s verify-before-editing instruction it
+was left untouched.
+
+**Verification (all commands run, zero LLM calls end to end).**
+Offline: `npm test` = 712 passing across 77 files (unchanged — no new
+offline tests; the drill additions are live-drill checks). `npm run
+build`, `npm run python:check` (import list now includes polars —
+verified green locally at 1.34.0), `docker compose --profile test
+config --quiet` pass. The isolated Compose integration ran as project
+`trellis_s27_ci` (host ports 0): the requirements.txt change
+invalidated the pip layer as predicted, the image rebuilt (npm ci
+layers stayed cached — `package.json` untouched), and all **11**
+assertions passed including the new `pinned polars 1.34.0 imports
+inside the container venv`; torn down with `--volumes`. Live zero-LLM:
+`test:rlm-workspace` **106** (86 baseline + 20), `test:modules` green
+with BOTH pins unmoved, `test:answer-channel` 32, `test:textedit` 82,
+`test:module-lifecycle` 60, `test:promotion` 41, `test:rlm-mcp` 86,
+`test:rlm-sandbox` 21, `test:agent-loop` ALL CHECKS PASSED, `test:a2a`
+ALL CHECKS PASSED, `test:repo-ingest` 56, `test:benchmark-hardening`
+24, `test:entity-resolution` 34, `test:api-hardening` 18,
+`test:belief-recovery` 30, `test:invalidation-sweep` 17. `drill:scale`
+read sweep growth **1.99x, gate CLOSED** (in the recorded
+~1.48x–2.26x band); the rewritten `scale_drill_results.json` is
+committed per house practice. `git diff --check` passes.
+
+**Defects found: none.** One environment note: the fresh worktree's
+stale `node_modules` initially resolved `tsx` from the parent
+checkout and failed on a missing `dotenv` — `npm ci` in the worktree
+fixed it (the documented fresh-worktree step, not a defect).
+
+**Deliberately not included** (the §8 exclusions held): any
+representation migration at any boundary; polars imports in src/;
+cap raises; asserting on drill timings; the estimation-discipline
+positive control (next session, unchanged); module #2 default-selection
+entry or edits; extraction re-runs; reconstruction byte changes; a
+fifth probe round; frontend work; `ASTRef` migration.

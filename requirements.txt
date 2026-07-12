@@ -6,3 +6,10 @@ neo4j==6.2.0
 psycopg2-binary==2.9.12
 unstructured==0.23.1
 mcp==1.12.4
+# Engine-side analytics tier only (wall-clock report, July 11, 2026 —
+# docs/benchmarks/WALL_CLOCK_TEXT_OPS_REPORT.md). Pinned so the prose
+# claim "the agent environment carries polars" is true in every
+# environment python:check accepts; NOT adopted by any kernel, contract,
+# or prompt path (the data-plane review verdict, roadmap §5 July 11,
+# 2026: no representation migration at any boundary).
+polars==1.34.0
