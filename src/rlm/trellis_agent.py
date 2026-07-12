@@ -10,6 +10,7 @@ from trellis_tools import (
     TrellisNeo4j,
     TrellisPostgres,
     get_tool_call_count,
+    get_retrieved_address_count,
     RUBRIC_TEXT,
     CITATION_AUDIT_ENABLED,
     CITATION_ENTAIL_ENABLED,
@@ -333,9 +334,11 @@ def run_author_mode(args):
             "output_tokens": usage.total_output_tokens if usage else 0,
             "reported_cost_usd": usage.total_cost if usage else None,
             "subcall_count": _subcall_stats["count"],
-            # Author mode makes no database or MCP calls by construction.
+            # Author mode makes no database or MCP calls by construction,
+            # so its retrieved-address set is empty by the same token.
             "tool_calls": get_tool_call_count(),
             "mcp_calls": get_mcp_call_count(),
+            "retrieved_addresses": get_retrieved_address_count(),
             **workspace.stats(),
             "execution_time_s": getattr(result, "execution_time", None),
             "model_usage": usage_dict.get("model_usage_summaries", {}),
@@ -542,6 +545,11 @@ def main():
             # the mediated by-reference channel — a count only, additive
             # (the Node scanner tolerates and ignores unknown fields).
             "answer_submits": get_answer_submit_count(),
+            # Session 30 (PROVENANCE_THREADING.md slice b): the size of
+            # the run's retrieved-address set — a count only, never the
+            # addresses (T16). Bookkeeping; slice (d) will constrain
+            # citable addresses to the set itself.
+            "retrieved_addresses": get_retrieved_address_count(),
             "execution_time_s": getattr(result, "execution_time", None),
             "model_usage": usage_dict.get("model_usage_summaries", {}),
         }
