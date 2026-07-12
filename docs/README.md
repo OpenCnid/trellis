@@ -50,6 +50,12 @@ system-level framing is the root `README.md`.
   from the first flywheel turn and the structural remediation (scoped
   access, harness-pinned attribution, derivation gates, verification
   tiers).
+- **[`PROVENANCE_THREADING.md`](architecture/PROVENANCE_THREADING.md)**
+  — the write-path closure design record (roadmap §4 row 9): the
+  retrieval-set definition, the claim→block factorization (mechanical
+  membership vs the sampled semantic residual), and the slice map that
+  constrains citable addresses to what the deriving run actually
+  retrieved.
 - **[`MATHEMATICAL_FOUNDATIONS.md`](architecture/MATHEMATICAL_FOUNDATIONS.md)**
   — the timeless substrate math: Merkle trees, content addressing, and
   why cryptographic identity solves the Shift Problem that positional
