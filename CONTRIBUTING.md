@@ -3,6 +3,11 @@
 Welcome to the Trellis Engine. This project relies on extremely strict, non-traditional architectural invariants. 
 To avoid corrupting the determinism of the pipeline, all contributors must adhere to the following rules.
 
+> Working with a coding agent, CLI, or harness? Its entry point is
+> [`AGENTS.md`](AGENTS.md) at the repository root — the study protocol,
+> the navigation map, and the permanent hard rules (which include and
+> extend the rules below). Session-volatile state lives in `HANDOFF.md`.
+
 ## 1. Modifying Graph Schemas
 The Trellis LLM extraction pipeline enforces structure using strictly typed JSON (via Zod). 
 If you need to add a new property to an Entity or Action:

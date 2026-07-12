@@ -1062,7 +1062,15 @@ Repository state at handoff creation:
   consumers BEFORE any paid enqueue; a worker instance orphaned by
   parent-only kill on Windows — kill worker trees by child PID).
   Total July 12 paid spend ≈$1.30 measured (+≈$0.18 estimated on the
-  orphaned instance's jobs).
+  orphaned instance's jobs). The same PR also added the root
+  `AGENTS.md` — the invariant-only agent entry point (study protocol,
+  navigation map, the behavior→enforcement→pin frame, permanent hard
+  rules) with pointers from README/CONTRIBUTING/docs-index. Its layer
+  contract is deliberate and PERMANENT: AGENTS.md carries ONLY
+  cross-session invariants and POINTS here for everything volatile
+  (objective, counts, pins, DB state) — never duplicate volatile facts
+  into it, and keep it consistent when a permanent guardrail genuinely
+  changes.
 - Offline baseline: `npm test` = 728 passing across 79 files
   (712/77 + Session 28's 16 across 2 new files).
 - `npm run build` and `npm run python:check` pass (the check now

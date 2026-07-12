@@ -12,6 +12,11 @@ system-level framing is the root `README.md`.
 
 ### 1. Orientation (start here)
 
+- **Root `AGENTS.md`** — the entry point for coding agents, CLIs, and
+  harnesses: the study protocol, the navigation map (which directory
+  owns what; where each behavior's enforcement and pins live), and the
+  permanent hard rules. Deliberately invariant-only; everything
+  volatile stays in `HANDOFF.md`.
 - **Root `README.md`** — what Trellis is (a Recursive Language Model
   runtime over a provenance-enforced substrate), the five commitments,
   and the full operator manual.
