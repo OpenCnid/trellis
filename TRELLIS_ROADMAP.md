@@ -214,7 +214,7 @@ Ordered roughly by severity.
 | ~~4~~ | ~~Boundary-aware block accessor (`get_ast_blocks`) + structure-selection demotion~~ | **Done (Session 24, July 11, 2026)** — `trellis_postgres.get_ast_blocks(root_hash)` returns a document's extraction blocks in order (`[{id, type, text}]`, exactly the `collectExtractionBlocks` set) via the dependency-free walk in `src/rlm/trellis_blocks.py`, parity-pinned block-for-block against the TS authority (`block_parity.test.ts`) and round-tripped live (frank 796 / chronicle 827 blocks byte-identical); NO stored or reconstructed byte moved; both composed-prompt pins moved wittingly to teach the tool (default `3f07295a…4b63`, omit-arm `85362b81…71bb`); pillar §7's "pandas default" DEMOTED to "plain loops until a measured threshold" per its own written contingency; the probe gained the `structured` method verdict, the paren-free locate-preamble offer, and the report's round-4 section. The localization re-measure ran OWNER-APPROVED the same day ($0.9452, 36 runs): 0/36 misses vs round 3's 7/30 on the same locate set, 36/36 runs adopting the accessor in BOTH arms (the off arm too — tooling shape, not the prompt block, carries the behavior); the round-3 "Chapter 23" trap question came back correct 6/6; the superseded reconstruction-byte row stays closed; see §5 |
 | ~~5~~ | ~~Repository-scale extraction prerequisites~~ | **Done (Session 25, July 11, 2026)** — the three recorded pilot findings turned into machinery, all zero-paid: the kernel-fixed test/fixture extraction exclusion (`isTestOrFixturePath`; classified files still ingest but their extraction policy is forced to `none`, reported as typed `test_fixture_excluded` file/block counts in the plan echo), additive `sourceKind` payload routing selecting a code-tuned extraction prompt (legacy prose bytes unit-pinned; unknown values refused at the boundary), and deterministic generic-identifier suppression before resolution (kernel denylist + length-<3 shape rule + touched-relationship drops, counted and logged, never silent). The paid pilot RE-RUN stays owner-gated: proposed at the CLI's printed post-exclusion bound of 103 blocks ≈ $0.29; see §5 |
 | ~~6a~~ | ~~Data-plane representation verdict follow-ups (owner-directed July 11, 2026 — inserted AHEAD of the positive control, which is unchanged)~~ | **Done (Session 27, July 11, 2026)** — all three adopted recommendations landed zero-paid: `polars==1.34.0` pinned in requirements.txt + the `python:check` import list + an in-container import probe in the Compose integration (11 assertions now — the found prose-vs-manifest inconsistency is closed; pinning is NOT adoption, no src/ path imports polars); the pillar §7 verdict + cap-raise doctrine paragraph (docs-only, both composed-prompt pins unmoved); the M1 park/seed round-trip at cap sizes (byte-lossless at exactly 4 MiB/32 MiB/1024 segments, refusal at cap+1, timings printed never asserted) and M7 per-field torn-payload refusal + canonical-form determinism fixtures as standing sections [7]/[8] of `test:rlm-workspace` (86 → 106 checks); see §5 |
-| 6 | Estimation-discipline positive control (module #2 follow-through) | **Machinery + measurement DONE (Session 28, July 11, 2026); the row stays open on exactly one item — the owner's candidacy decision on the numbers.** The module-arm flag `TRELLIS_EXP_MODULES` and the `est` suite landed zero-paid; the 50-run paired control ran under the session's standing approval ($2.3981 actual vs the ~$1–2 estimate, disclosed). Result MIXED against the pre-stated criterion: correctness 25/25 in BOTH arms; median db calls on 1 vs off 2 (the targeted behavior moved, minimal-evidence attainment 15/25 vs 10/25); pooled median input tokens on 13,240 vs off 9,217 (FAILS pooled — the on arm wins by ~6k median tokens on the two largest-corpus questions and loses on the three small ones). Per the recorded rule the module stays OUT of the default selection; the owner decides retire vs re-scope composition to large-corpus/aggregate task shapes (see §5 and the report's control section) |
+| ~~6~~ | ~~Estimation-discipline positive control (module #2 follow-through)~~ | **Done (Session 28, July 11, 2026) — measured, then RETIRED by owner decision the same day.** The module-arm flag `TRELLIS_EXP_MODULES` and the `est` suite landed zero-paid; the 50-run paired control ran under the session's standing approval ($2.3981 actual vs the ~$1–2 estimate, disclosed). Result MIXED against the pre-stated criterion: correctness 25/25 in BOTH arms; median db calls on 1 vs off 2 (the targeted behavior moved); pooled median input tokens on 13,240 vs off 9,217 (FAILS pooled; reverses on the two largest-corpus questions). **Owner retired module #2 on the numbers** (manifest `status: retired`, loader refuses composition — pinned in `test:modules` [8]; the graph entity stays as the historical record) **and recorded the broader direction: behavioral failure classes close by TOOLING SHAPE, not prompt modules** — the recorded successors are kernel-level retrieval dedup/budgets (the `est` suite is their acceptance harness) and mechanical provenance threading (see the §5 addendum) |
 | 7 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
 | 8 | Self-editing toolkit coverage hardening (Trellis-edits-Trellis coverage audit, July 11, 2026) | Ten gaps found, all zero-paid to close except the cross-process proof run (§5 entry of the same date has the full gap matrix). Priority order: wire `npm run test:textedit` into CI first (cheap, no new tests needed); then close the TOCTOU window in `write_back`, re-verify containment at write time (not just load time), and preserve file mode across `write_back`; then pin multi-file partial-failure semantics and add mutation-test coverage for the guard code. Does not reorder rows 6a/6/7 — queued behind them |
 | — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
@@ -3804,3 +3804,52 @@ change; a fifth probe round (the control is a module measurement —
 round numbering untouched); representation migrations; polars
 imports in src/; cap raises; extraction re-runs; row-8 coverage
 hardening (queued next); frontend work; `ASTRef` migration.
+### July 11, 2026 — Addendum to Session 28 (same day, in-session owner adjudication): module #2 RETIRED; direction re-pointed at tooling shape
+
+On the control's numbers the owner retired `estimation-discipline`
+outright ("completely useless" as a default-selection candidate) and
+rejected the underlying target class: *"prove the prompt text moves
+behavior" is not a proper engineering target* — prompt engineering is
+not a valid capability increment. The repository's own measurements
+agree (probe rounds 2–4: the prompt arm indistinguishable; every
+decisive win — `trellis_answer`, `get_ast_blocks`, the suppression
+gate, the splice fix — was tooling shape).
+
+**Mechanics of the retirement (this PR):**
+`modules/estimation-discipline/module.json` status `active` →
+`retired` (the lifecycle transition, not a content edit); the ordinary
+loader now REFUSES composition (`test:modules` [8] rewritten to pin
+the refusal — the historical record, the 19 pinned research hashes,
+and the parse-vs-load distinction; both composed-prompt pins never
+felt any of it); `module_arm.test.ts` re-pinned (the historical
+ON-arm selection now refuses through the real registry; the
+active-module path re-proven with `workspace-discipline`);
+`modules:verify` shows `module:estimation-discipline (version 1;
+manifest: status retired), contested: false` — the graph entity stays
+as the historical record (module entities are contested or retired,
+never deleted). RESEARCH.md carries the retirement note.
+
+**Recorded successor directions (owner-endorsed, pending scheduling —
+NOT self-serve):**
+
+1. **Kernel-level retrieval discipline** — mechanical closure of the
+   behavior module #2 nudged: tool-layer dedup (a re-fetch of an
+   already-held root serves from held state or refuses with a typed
+   pointer) and a per-run retrieval budget with a typed over-budget
+   refusal carrying the held-state inventory. The Session 28 `est`
+   suite + minimal-evidence bounds are the acceptance harness
+   (criterion: repeat-fetches 0 by construction, tokens ≤ baseline,
+   correctness non-inferior).
+2. **Mechanical provenance threading** (the collaborator briefing's
+   item 2, already logged as a candidate architecture session) — the
+   LAST transcription channel: `write_derived_insight` still takes
+   model-asserted `sourceNodeIds`; thread addresses from the
+   retrieval set by plumbing, constrain citable addresses to what the
+   deriving run actually retrieved, sampled entailment for the
+   semantic residual.
+
+Prompt-module authoring is DEPRIORITIZED as a capability increment;
+the module registry, gates, and flywheel machinery stay (they are the
+mechanism for any future module class, including tool-bearing ones),
+but no new protocol-module authoring turn is proposed without
+explicit owner request.

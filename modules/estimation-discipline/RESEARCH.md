@@ -101,3 +101,17 @@ arm was cheaper by ~6k median tokens.
 default selection. The candidacy decision on these numbers — retire,
 or re-scope composition to large-corpus/aggregate task shapes where
 the effect pays — is the owner's.
+
+## Retired (owner decision, July 11, 2026)
+
+The owner retired the module on the control's numbers the same day
+(manifest `status: retired`; the graph entity
+`module:estimation-discipline` remains as the historical record —
+module entities are contested or retired, never deleted). The decision
+carried a broader direction, recorded in the roadmap: behavioral
+failure classes are closed by TOOLING SHAPE (mechanical enforcement
+with typed refusals), not by prompt modules — the retrieval-discipline
+behavior this module nudged is a candidate for kernel-level retrieval
+dedup and budgets, with the Session 28 `est` suite as the acceptance
+harness for that intervention. This directory stays as provenance for
+the measurement.

@@ -301,36 +301,32 @@ check("flag set: exactly the block is absent and nothing else changed",
       _omitted.get("sha")
       == hashlib.sha256(_default_minus_block.encode("utf-8")).hexdigest())
 
-# --- 8. Module #2 (estimation-discipline) — the positive-control selection ---
-# Session 28: the control's ON arm is the ordinary operator selection
-# ["spatial-flywheel", "estimation-discipline"] — no new prompt path.
-# Loading and composing it here proves the selection is valid through
-# the ORDINARY loader while the module stays OUT of the default
-# selection, so the byte-identical pins in [4]/[7] are untouched (the
-# section-[5] precedent).
-print("\n[8] module #2 (estimation-discipline) — the positive-control selection")
+# --- 8. Module #2 (estimation-discipline) — RETIRED ------------------------
+# Session 28 measured the positive control (criterion not met) and the
+# owner retired the module the same day (roadmap §5, July 11, 2026).
+# The manifest stays in the registry as the historical record with
+# status "retired"; the ordinary loader must REFUSE to compose it, the
+# name must still parse (selection shape is independent of status), and
+# the default selection stays untouched — so the byte-identical pins in
+# [4]/[7] never felt any of this.
+print("\n[8] module #2 (estimation-discipline) — retired; the loader refuses it")
 
-module2 = load_module("estimation-discipline")
-check("module #2 loads with its manifest identity",
-      module2["name"] == "estimation-discipline" and module2["version"] == 1)
-check("module #2 addendum is brace-free and carries its protocol headings",
-      "{" not in module2["addendum_text"] and "}" not in module2["addendum_text"]
-      and "Define Required Operands" in module2["addendum_text"]
-      and "Gate Every Retrieval" in module2["addendum_text"])
-check("module #2 addendum is LF-normalized", "\r" not in module2["addendum_text"])
-
-control = build_modules_addendum([module0, module2],
-                                 substitutions={RUBRIC_TOKEN: trellis_agent._SAFE_RUBRIC})
-check("module #2 composes after module #0 in selection order",
-      "Define Required Operands" in control
-      and control.index("Define Required Operands")
-      > control.index("SPATIAL FLYWHEEL PROTOCOL"))
-control_stripped = control.replace("{{", "").replace("}}", "")
-check("the control selection stays brace-safe after substitution",
-      "{" not in control_stripped and "}" not in control_stripped)
+_manifest_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "modules",
+    "estimation-discipline", "module.json")
+with open(_manifest_path, "r", encoding="utf-8") as _fh:
+    _manifest2 = json.load(_fh)
+check("module #2 manifest survives as the historical record (retired, v1)",
+      _manifest2["name"] == "estimation-discipline"
+      and _manifest2["version"] == 1
+      and _manifest2["status"] == "retired")
+check("module #2 still pins its 19 research hashes (provenance is history, not status)",
+      len(_manifest2["research"]["sourceNodeIds"]) == 19)
+expect_raises("the ordinary loader refuses to compose a retired module",
+              lambda: load_module("estimation-discipline"), "cannot be composed")
 check("module #2 is NOT in the default selection (the byte-identical pin is untouched)",
       "estimation-discipline" not in list(DEFAULT_SELECTION))
-check("the control selection parses through the ordinary selection parser",
+check("the retired name still parses as selection shape (refusal happens at load)",
       parse_module_selection('["spatial-flywheel","estimation-discipline"]')
       == ["spatial-flywheel", "estimation-discipline"])
 

@@ -49,14 +49,22 @@ describe('resolveProbeModuleSelection / probeModulesJson', () => {
     expect(resolveProbeModuleSelection(undefined)).toEqual(['spatial-flywheel']);
   });
 
-  it('resolves the positive-control selection through the real registry', () => {
-    // The §4(c) ON arm: module #2 joins module #0 through the ORDINARY
-    // loader (existence + active status + addendum gates) — the same
-    // path a real operator TRELLIS_MODULES selection crosses.
+  it('refuses the retired module #2 through the real registry', () => {
+    // The Session 28 control ran while estimation-discipline was
+    // active; the owner retired it on the measured numbers the same
+    // day. The historical ON-arm selection must now refuse through the
+    // ORDINARY loader (status gate) — the same path a real operator
+    // TRELLIS_MODULES selection crosses.
     const raw = '["spatial-flywheel","estimation-discipline"]';
+    expect(() => resolveProbeModuleSelection(raw)).toThrow(/cannot be composed/);
+  });
+
+  it('resolves a real multi-module selection through the real registry', () => {
+    // The ordinary loader path with a registered ACTIVE second module.
+    const raw = '["spatial-flywheel","workspace-discipline"]';
     expect(resolveProbeModuleSelection(raw)).toEqual([
       'spatial-flywheel',
-      'estimation-discipline',
+      'workspace-discipline',
     ]);
     expect(probeModulesJson(raw)).toBe(raw);
   });

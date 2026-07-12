@@ -751,8 +751,8 @@ from committed bytes (Kelvorin 163/Torulf 125; anomaly 8 → Entry 9;
 frank → Chapter 5/Ingolstadt 16; Zelvane Wendrick × morrowleaf →
 1046/13; Glasswind → 41,793 crates/4 captains; scored-pair
 distinctness enforced loudly). `test_modules.py` gained section [8]
-(module #2 loads + composes with module #0 through the ordinary
-loader; NOT in the default selection). **(3) The measured control:
+(post-retirement: pins the loader REFUSING the retired module #2, the
+historical manifest record, and the parse-vs-load distinction). **(3) The measured control:
 50 runs, $2.3981 (vs the ~$1–2 estimate, disclosed), 10 chunked
 question×arm invocations, `--repeats 5`, both arms the pinned default
 kernel. Correctness 25/25 BOTH arms; median db calls on 1 vs off 2
@@ -761,11 +761,17 @@ minimal-evidence attainment 15/25 vs 10/25); pooled median input
 tokens on 13,240 vs off 9,217 — the token half of the pre-stated
 criterion FAILS pooled, REVERSING on the two largest-corpus questions
 (led-captain 13,268 vs 19,335; rel-guild 23,033 vs 29,287). Verdict
-per the recorded rule: criterion NOT met; module #2 stays OUT of the
-default selection; the candidacy decision (retire vs re-scope to
-large-corpus/aggregate shapes) is the OWNER'S, on the recorded
-numbers** (report: the probe report's control section; RESEARCH.md
-measurement section). All 50 runs submitted through `trellis_answer`
+per the recorded rule: criterion NOT met — and the owner ADJUDICATED
+in-session the same day: module #2 RETIRED outright (manifest status
+`retired`, loader refuses composition — `test:modules` [8] pins the
+refusal; the graph entity survives as the historical record), with
+the broader direction that behavioral failure classes close by
+TOOLING SHAPE, not prompt modules — prompt-module authoring is
+DEPRIORITIZED as a capability increment, and the recorded successors
+are kernel-level retrieval dedup/budgets (the `est` suite is their
+acceptance harness) and mechanical provenance threading (roadmap §5
+July 11 addendum)** (report: the probe report's control section;
+RESEARCH.md measurement + retirement sections). All 50 runs submitted through `trellis_answer`
 (230/230 cumulative, zero transcription errors); zero pandas/polars.
 Defect found by the zero-paid drill in this session's own new code
 before any spend: the est branch never assigned `relationalData` and
@@ -1196,18 +1202,21 @@ immutable, content-addressed physical location in source material.
      (Session 21: re-authored through grounded authoring with the
      pillar in its corpus; `test:modules` [5] pins name, title,
      version, and the retired mitigation line). Module #2
-     (`estimation-discipline`, Session 26) is at version 1, registered
-     live and uncontested, NOT in the default selection. Its positive
-     control was MEASURED in Session 28 (50 runs, both arms 25/25
-     correct; median db calls on 1 vs off 2 — the targeted behavior
-     moved; pooled median input tokens on 13,240 vs off 9,217 — the
-     token criterion FAILED pooled, reversing on the two
-     largest-corpus questions): the pre-stated criterion is NOT met,
-     the module stays out, and the candidacy decision (retire vs
-     re-scope to large-corpus/aggregate task shapes) is the OWNER'S on
-     the recorded numbers; its corpus is
-     `research:trellis/estimation-discipline/{contract,evidence}` and
-     its RESEARCH.md carries the control design + measurement.
+     (`estimation-discipline`, Session 26) is RETIRED (owner decision,
+     July 11, 2026, on the Session 28 control's numbers: both arms
+     25/25 correct, db calls median on 1 vs off 2, but pooled input
+     tokens on 13,240 vs off 9,217 — criterion not met). Manifest
+     status `retired`; the ordinary loader REFUSES to compose it
+     (`test:modules` [8] pins the refusal); the graph entity
+     `module:estimation-discipline` survives as the historical record.
+     The owner's accompanying direction is PERMANENT: behavioral
+     failure classes close by tooling shape, not prompt modules —
+     prompt-module authoring is deprioritized as a capability
+     increment (no new authoring turn without explicit owner request);
+     the recorded successors are kernel-level retrieval dedup/budgets
+     and mechanical provenance threading (roadmap §5 July 11
+     addendum). The corpus docs and RESEARCH.md stay as measurement
+     provenance.
    - **Grounded authoring (Session 19; `src/core/authoring/*` +
      `src/core/observability/rlm_draft.ts` + `scripts/author_module.ts`
      + `trellis_agent.py --mode author`):** the kernel mode that drafts
@@ -1354,12 +1363,12 @@ Repository state at handoff creation:
   contested — the standard lazy-recovery residue, same as after the
   July 6 pilot; Session 26 added the two promoted
   `research:trellis/estimation-discipline/{contract,evidence}` docs).
-  Module #2 (`modules/estimation-discipline/`, version 1) EXISTS as of
-  Session 26: registered live (`module:estimation-discipline`,
-  uncontested, 19 pinned research hashes), NOT in the default
-  selection — the dev graph carries TWO module entities. Its positive
-  control is MEASURED as of Session 28 (criterion NOT met — the
-  owner's candidacy decision is the open item on roadmap §4 row 6).
+  Module #2 (`modules/estimation-discipline/`, version 1) is RETIRED
+  (Session 28 owner decision on the measured control; manifest status
+  `retired`, loader refuses composition). The graph still carries TWO
+  module entities — `module:estimation-discipline` persists as the
+  historical record (uncontested, 19 research hashes; `modules:verify`
+  reports its manifest status). Roadmap §4 row 6 is STRUCK.
 - Session 25 added `src/core/graph/generic_suppression.ts` +
   `generic_suppression.test.ts` (the kernel denylist/shape filter),
   `src/workers/extraction_job.ts` + `extraction_job.test.ts` (payload
@@ -1440,7 +1449,7 @@ Repository state at handoff creation:
   1.77x CLOSED run).
 - Live zero-LLM checks (Session 28 observed, all green):
   `test:answer-channel` (32), `test:modules` (green with section [8]
-  — module #2 composes through the ordinary loader; pins unmoved),
+  — the loader refuses the retired module #2; pins unmoved),
   `test:textedit` (82), `test:module-lifecycle`
   (60), `test:promotion` (41), `test:rlm-workspace` (106),
   `test:rlm-mcp` (86), `test:rlm-sandbox` (21),
@@ -1504,9 +1513,15 @@ Work on a feature branch and target `master`.
 ## 3. Session 29 problem statement
 
 **Self-editing toolkit coverage hardening (roadmap §4 row 8 — the
-first actionable row; all zero-paid).** Row 6 stays open on exactly
-one item no session can self-serve (the owner's module-#2 candidacy
-decision on the Session 28 numbers), and row 7 stays trigger-blocked.
+first unstruck actionable row; all zero-paid).** Row 6 is STRUCK
+(module #2 retired by owner decision, July 11 — see the roadmap §5
+addendum), row 7 stays trigger-blocked. Two owner-endorsed successor
+directions are recorded and PENDING OWNER SCHEDULING (do not
+self-serve; propose ordering if the owner has not slotted them by
+session start): kernel-level retrieval dedup/budgets, and mechanical
+provenance threading — both tooling-shape sessions per the owner's
+July 11 direction. If the owner schedules either ahead of row 8, that
+displaces this objective.
 
 The July 11, 2026 owner-commissioned Trellis-edits-Trellis coverage
 audit (roadmap §5 entry of that date — read it in full before
@@ -1570,10 +1585,10 @@ injection, orphaned temp files) are hygiene — include only if cheap.
   (`TRELLIS_EDIT_ROOT` only), the byte-identical-when-unset pins, the
   splice "\n"-only refusal, `StaleFileError` on digest mismatch, the
   kernel prompt and both composed-prompt pins (`3f07295a…4b63` /
-  `85362b81…71bb`), the module registry, module #2's manifest and
-  registration, the est suite and its truths, every probe suite's
-  question bytes, and the four durable corpora. Git stays OUT of the
-  toolkit.
+  `85362b81…71bb`), the module registry, module #2's RETIRED status
+  and historical record, the est suite and its truths, every probe
+  suite's question bytes, and the four durable corpora. Git stays OUT
+  of the toolkit.
 
 ## 5. File-level starting points
 
@@ -1651,12 +1666,12 @@ Update:
   counts, and defects found; strike §4 row 8 items as they close
   (the row may take more than one session — record what landed).
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5 re-check.
-  NOTE for objective selection: row 6 closes only when the owner
-  makes the module-#2 candidacy decision on the Session 28 numbers
-  (retire vs re-scope composition to large-corpus/aggregate shapes) —
-  if the owner decides in-session, record it and strike the row. Row
-  7 stays trigger-blocked. The standing owner-conditional items are
-  the next proof-run depth increment (the narrower
+  NOTE for objective selection: rows 6/6a are struck; row 7 stays
+  trigger-blocked. The two owner-endorsed tooling-shape directions
+  (retrieval dedup/budgets; mechanical provenance threading — roadmap
+  §5 July 11 addendum) are pending owner scheduling and outrank any
+  new prompt-module work permanently. The standing owner-conditional
+  items are the next proof-run depth increment (the narrower
   single-failure-mode run defined in the coverage-audit entry — NOTE:
   it pairs naturally with row 8's #4 executable-bit fix), the pandas
   head-to-head probe round, and a broader-root extraction run — all
@@ -1722,8 +1737,8 @@ Update:
 9. Do not break existing consumers: the composed-prompt pins
    (`3f07295a…4b63` default / `85362b81…71bb` omit-arm, `test:modules`
    [4]/[7]) do NOT move this session (row 8 touches the toolkit and
-   its drill, never the kernel prompt; module #2 stays out of the
-   default selection pending the owner's decision);
+   its drill, never the kernel prompt; module #2 is RETIRED — the
+   loader refuses it, pinned);
    module #1's pins hold; the legacy extraction-job payload (no
    `sourceKind`) and the `prose` payload both process with the exact
    pinned legacy prompt bytes (`extraction_job.test.ts`);
@@ -1765,14 +1780,16 @@ Update:
 
 ## 8. Explicit exclusions
 
-Do not include: adding module #2 to the DEFAULT selection or striking
-roadmap §4 row 6 (the candidacy decision on the Session 28 numbers is
-the owner's — record it only if the owner makes it in-session);
-re-running or extending the Session 28 control (its numbers are
-recorded; a re-scope proposal is owner-conditional); editing module
-#2's addendum or manifest (a registered module changes only through
-re-review + re-registration, and a content change means re-promotion
-of its research first); running the cross-process concurrency proof
+Do not include: un-retiring module #2 or authoring ANY new protocol
+module (prompt-module authoring is deprioritized by owner direction,
+July 11, 2026 — a new authoring turn happens only on explicit owner
+request); re-running or extending the Session 28 control (its numbers
+are recorded and adjudicated); editing module #2's addendum or
+research content (the directory is measurement provenance now);
+starting the retrieval-dedup or provenance-threading implementation
+without the owner slotting it (recorded directions, pending
+scheduling — propose, don't self-serve); running the cross-process
+concurrency proof
 run (coverage-audit gap #1) or any proof-run depth increment without
 owner approval — propose with estimates; OS-level file locking or any
 claim of full TOCTOU closure (narrow and DOCUMENT the residual window
