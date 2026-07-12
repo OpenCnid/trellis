@@ -301,6 +301,35 @@ check("flag set: exactly the block is absent and nothing else changed",
       _omitted.get("sha")
       == hashlib.sha256(_default_minus_block.encode("utf-8")).hexdigest())
 
+# --- 8. Module #2 (estimation-discipline) — RETIRED ------------------------
+# Session 28 measured the positive control (criterion not met) and the
+# owner retired the module the same day (roadmap §5, July 11, 2026).
+# The manifest stays in the registry as the historical record with
+# status "retired"; the ordinary loader must REFUSE to compose it, the
+# name must still parse (selection shape is independent of status), and
+# the default selection stays untouched — so the byte-identical pins in
+# [4]/[7] never felt any of this.
+print("\n[8] module #2 (estimation-discipline) — retired; the loader refuses it")
+
+_manifest_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "modules",
+    "estimation-discipline", "module.json")
+with open(_manifest_path, "r", encoding="utf-8") as _fh:
+    _manifest2 = json.load(_fh)
+check("module #2 manifest survives as the historical record (retired, v1)",
+      _manifest2["name"] == "estimation-discipline"
+      and _manifest2["version"] == 1
+      and _manifest2["status"] == "retired")
+check("module #2 still pins its 19 research hashes (provenance is history, not status)",
+      len(_manifest2["research"]["sourceNodeIds"]) == 19)
+expect_raises("the ordinary loader refuses to compose a retired module",
+              lambda: load_module("estimation-discipline"), "cannot be composed")
+check("module #2 is NOT in the default selection (the byte-identical pin is untouched)",
+      "estimation-discipline" not in list(DEFAULT_SELECTION))
+check("the retired name still parses as selection shape (refusal happens at load)",
+      parse_module_selection('["spatial-flywheel","estimation-discipline"]')
+      == ["spatial-flywheel", "estimation-discipline"])
+
 # ---------------------------------------------------------------------------
 if failures:
     print(f"\n{failures} check(s) failed.")

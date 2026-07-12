@@ -254,6 +254,15 @@ describe('buildAgentEnv', () => {
     const env = buildAgentEnv({ TRELLIS_EXP_OMIT_CMT: '1' }, CFG);
     expect('TRELLIS_EXP_OMIT_CMT' in env).toBe(false);
   });
+
+  it('always strips the experiment module-arm flag (Session 28)', () => {
+    // TRELLIS_EXP_MODULES follows the identical mold: no config field,
+    // never forwarded — the probe runner resolves it into the canonical
+    // TRELLIS_MODULES itself, so an inherited value can never move a
+    // production run's module selection.
+    const env = buildAgentEnv({ TRELLIS_EXP_MODULES: '["evil-module"]' }, CFG);
+    expect('TRELLIS_EXP_MODULES' in env).toBe(false);
+  });
 });
 
 describe('buildAgentArgs', () => {

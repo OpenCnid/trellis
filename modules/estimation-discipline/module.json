@@ -33,6 +33,6 @@
   "acceptance": {
     "zeroPaid": "npm run test:modules"
   },
-  "status": "active",
+  "status": "retired",
   "kernelCompat": 1
 }

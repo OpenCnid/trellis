@@ -51,6 +51,25 @@ import {
   type RelationalCorpus,
   type RelationalDoc,
 } from '../src/benchmarks/effective_context/relational_corpus';
+import {
+  EST_CHRONICLE_ANOMALY,
+  EST_CHRONICLE_NEEDLES,
+  EST_FRANK_NEEDLE,
+  EST_FRANK_PHRASE,
+  EST_LEDGER_CAPTAIN,
+  EST_LEDGER_MATERIAL,
+  EST_MIN_EVIDENCE_CALLS,
+  EST_REL_GUILD,
+  estChronicleCounts,
+  estChronicleQuoteEntry,
+  estFrankLocateCount,
+  estLedgerCaptainMaterial,
+  estRelationalGuild,
+} from '../src/benchmarks/effective_context/estimation_suite';
+import {
+  MODULE_ARM_ENV_VAR,
+  probeModulesJson,
+} from '../src/benchmarks/effective_context/module_arm';
 import { loggerFor } from '../src/core/observability/logger';
 
 // The effective-context probe (Sessions 21-23; pillar §6.3 of
@@ -136,10 +155,25 @@ import { loggerFor } from '../src/core/observability/logger';
 //         no default, worker, or Compose configuration sets it, and
 //         buildAgentEnv strips it (rlm_job.test.ts).
 //
+// SESSION 28 (the estimation-discipline positive control) adds:
+//   est       — the sufficiency-bounded question suite (five two-part
+//               questions whose parts share ONE read, over the four
+//               durable corpora; truths + minimal-evidence bounds in
+//               src/benchmarks/effective_context/estimation_suite.ts).
+//   TRELLIS_EXP_MODULES — the module-arm flag (the TRELLIS_EXP_OMIT_CMT
+//               mold): unset composes the byte-identical historical
+//               spawn env; a JSON array REPLACES the spawned agent's
+//               TRELLIS_MODULES for this invocation, validated against
+//               the module registry BEFORE any spawn (module_arm.ts).
+//               The control's arms are two invocations of this script:
+//               module-off (flag unset) vs module-on
+//               (TRELLIS_EXP_MODULES='["spatial-flywheel","estimation-discipline"]'),
+//               both on the pinned default kernel (--arms on).
+//
 //   tsx scripts/exp_effective_context.ts --ingest        (zero-paid setup + verify)
 //   tsx scripts/exp_effective_context.ts                 (plan + estimate only)
 //   tsx scripts/exp_effective_context.ts --confirm-paid  (the paid probe)
-//   flags: --suites frank,chronicle,ledger,edit,relational  --arms on,off
+//   flags: --suites frank,chronicle,ledger,edit,relational,est  --arms on,off
 //          --repeats N  --questions id1,id2  --max-iterations N
 //          --max-spend-usd N
 
@@ -154,8 +188,8 @@ const MAX_ITERATIONS_DEFAULT = 8;
 const DEFAULT_MAX_SPEND_USD = 5;
 
 type Arm = 'on' | 'off';
-type Suite = 'frank' | 'chronicle' | 'ledger' | 'edit' | 'relational';
-const ALL_SUITES: Suite[] = ['frank', 'chronicle', 'ledger', 'edit', 'relational'];
+type Suite = 'frank' | 'chronicle' | 'ledger' | 'edit' | 'relational' | 'est';
+const ALL_SUITES: Suite[] = ['frank', 'chronicle', 'ledger', 'edit', 'relational', 'est'];
 // Round 3's default selection: the new measurement. Every earlier suite
 // stays selectable for focused repeats (the round-3 localization and
 // higher-n invocations select chronicle/frank questions explicitly).
@@ -252,6 +286,12 @@ interface ProbeQuestion {
   edit?: EditSpec;
   /** locate questions only: the heading kinds the method classifier scans for. */
   locateKinds?: readonly string[];
+  /**
+   * est suite only (Session 28): the recorded number of database tool
+   * calls a disciplined run needs. Documentation for the control's
+   * report — printed and recorded, never asserted against a run.
+   */
+  minEvidenceCalls?: number;
 }
 
 // frank (round 1, unchanged): the memorized-corpus baseline.
@@ -319,13 +359,18 @@ const BLOCKS_OFFER =
   + `in document order as a JSON list of objects with keys id, type, and text; each own-line `
   + `heading is its own block. `;
 
-function buildFrankQuestions(corpus: string, rootHash: string): ProbeQuestion[] {
-  const preamble =
+function frankPreamble(rootHash: string): string {
+  return (
     `The 1831 text of the novel "Frankenstein; or, The Modern Prometheus" is stored in the `
     + `AST database as one document (doc key ${FRANK_DOC_KEY}). The hash of its root AST node is `
     + `${rootHash}. Calling trellis_postgres.get_ast_texts with that hash returns the full `
     + `document text, reconstructed by concatenating its paragraph blocks in order (paragraph `
-    + `boundaries are unmarked; line breaks inside paragraphs are preserved). `;
+    + `boundaries are unmarked; line breaks inside paragraphs are preserved). `
+  );
+}
+
+function buildFrankQuestions(corpus: string, rootHash: string): ProbeQuestion[] {
+  const preamble = frankPreamble(rootHash);
 
   const questions: ProbeQuestion[] = [];
   for (const needle of COUNT_NEEDLES) {
@@ -441,22 +486,27 @@ function buildChronicleQuestions(corpus: string, rootHash: string): ProbeQuestio
   return questions;
 }
 
-function buildLedgerQuestions(
-  docs: LedgerDoc[],
-  roots: Map<string, string>
-): ProbeQuestion[] {
-  const records: LedgerRecord[] = docs.flatMap(d => parseLedgerRecords(d.text));
+function ledgerPreamble(docs: LedgerDoc[], roots: Map<string, string>): string {
   const keyList = docs
     .map(d => `${d.docKey}: ${roots.get(d.docKey)}`)
     .join('; ');
-  const preamble =
+  return (
     `${docs.length} shipping ledgers are stored in the AST database as ${docs.length} separate `
     + `documents. Every record line has the exact shape "On day D, Captain <First> <Last> `
     + `shipped N crates of <material> to Port <Name>." Calling trellis_postgres.get_ast_texts `
     + `with a LIST of root hashes returns the full text of each ledger keyed by hash `
     + `(paragraph boundaries are unmarked; line breaks inside paragraphs are preserved — `
     + `parse records by their shape, not by line breaks). `
-    + `The documents and their root AST hashes are: ${keyList}. `;
+    + `The documents and their root AST hashes are: ${keyList}. `
+  );
+}
+
+function buildLedgerQuestions(
+  docs: LedgerDoc[],
+  roots: Map<string, string>
+): ProbeQuestion[] {
+  const records: LedgerRecord[] = docs.flatMap(d => parseLedgerRecords(d.text));
+  const preamble = ledgerPreamble(docs, roots);
 
   const top = topPortForMaterial(records, LEDGER_TOP_MATERIAL);
   const captainTotal = totalForCaptainMaterial(records, LEDGER_CAPTAIN, LEDGER_CAPTAIN_MATERIAL);
@@ -515,23 +565,14 @@ function answerHasInteger(answer: string, value: number): boolean {
   return new RegExp(`\\b${value}\\b`).test(answer.replace(/,(?=\d)/g, ''));
 }
 
-function buildRelationalQuestions(
-  corpus: RelationalCorpus,
-  roots: Map<string, string>
-): ProbeQuestion[] {
-  const registry = parseRegistryRecords(corpus.registry.text);
-  const tariffs = parseTariffRecords(corpus.tariff.text);
-  const records = corpus.ledgers.flatMap(d => parseLedgerRecords(d.text));
-  const guildIndex = buildGuildIndex(registry);
-  const tariffIndex = buildTariffIndex(tariffs);
-
+function relationalPreamble(corpus: RelationalCorpus, roots: Map<string, string>): string {
   const rootOf = (docKey: string): string => {
     const hash = roots.get(docKey);
     if (!hash) throw new Error(`Missing relational document ${docKey}. Run --ingest.`);
     return hash;
   };
   const ledgerList = corpus.ledgers.map(d => `${d.docKey}: ${rootOf(d.docKey)}`).join('; ');
-  const preamble =
+  return (
     `A season-two trading corpus is stored in the AST database as `
     + `${corpus.ledgers.length + 2} separate documents of three kinds. (1) One captain `
     + `registry whose record lines have the exact shape "Captain <First> <Last> sails under `
@@ -545,7 +586,20 @@ function buildRelationalQuestions(
     + `The documents and their root AST hashes are: `
     + `registry ${corpus.registry.docKey}: ${rootOf(corpus.registry.docKey)}; `
     + `tariff schedule ${corpus.tariff.docKey}: ${rootOf(corpus.tariff.docKey)}; `
-    + `ledgers ${ledgerList}. `;
+    + `ledgers ${ledgerList}. `
+  );
+}
+
+function buildRelationalQuestions(
+  corpus: RelationalCorpus,
+  roots: Map<string, string>
+): ProbeQuestion[] {
+  const registry = parseRegistryRecords(corpus.registry.text);
+  const tariffs = parseTariffRecords(corpus.tariff.text);
+  const records = corpus.ledgers.flatMap(d => parseLedgerRecords(d.text));
+  const guildIndex = buildGuildIndex(registry);
+  const tariffIndex = buildTariffIndex(tariffs);
+  const preamble = relationalPreamble(corpus, roots);
 
   const topGuild = topGuildForMaterial(records, guildIndex, REL_TOP_MATERIAL);
   const portTariff = tariffIntoPort(records, tariffIndex, REL_TARIFF_PORT);
@@ -676,6 +730,120 @@ function buildEditQuestions(chronicle: string, chronicleRoot: string): ProbeQues
           [EDIT_NOTES_PATH]: replaceUniqueLine(EDIT_NOTES_SEED, EDIT_TALLY_MARKER, tallyLine),
         },
       },
+    },
+  ];
+}
+
+// est (Session 28): the estimation-discipline positive control's
+// sufficiency-bounded questions — five two-part questions whose parts
+// share ONE read, over the four durable corpora (truths and the
+// recorded minimal-evidence bounds live in estimation_suite.ts,
+// unit-pinned). The suite is ADDITIVE: every earlier suite's question
+// bytes are untouched, so rounds 1–4 stay round-comparable.
+interface EstimationInputs {
+  frank: string;
+  frankRoot: string;
+  chronicle: string;
+  chronicleRoot: string;
+  ledgerDocs: LedgerDoc[];
+  ledgerRoots: Map<string, string>;
+  relational: RelationalCorpus;
+  relationalRoots: Map<string, string>;
+}
+
+function buildEstimationQuestions(inputs: EstimationInputs): ProbeQuestion[] {
+  const chrPre = chroniclePreamble(inputs.chronicleRoot);
+  const frankPre = frankPreamble(inputs.frankRoot);
+  const ledPre = ledgerPreamble(inputs.ledgerDocs, inputs.ledgerRoots);
+  const relPre = relationalPreamble(inputs.relational, inputs.relationalRoots);
+
+  const counts = estChronicleCounts(inputs.chronicle);
+  const quoteEntry = estChronicleQuoteEntry(inputs.chronicle);
+  const frankTruth = estFrankLocateCount(inputs.frank);
+  const ledgerTruth = estLedgerCaptainMaterial(inputs.ledgerDocs);
+  const relTruth = estRelationalGuild(inputs.relational);
+  const [needleA, needleB] = EST_CHRONICLE_NEEDLES;
+
+  return [
+    {
+      id: 'est-chr-counts',
+      suite: 'est',
+      kind: 'count',
+      question:
+        `${chrPre}QUESTION: How many times does the exact character sequence "${needleA}" `
+        + `occur in the document text, and how many times does the exact character sequence `
+        + `"${needleB}" occur? Count case-sensitively. `
+        + `Output FINAL_ANSWER: <${needleA} count>, <${needleB} count>.`,
+      expected: `${counts.first}, ${counts.second}`,
+      isCorrect: answer =>
+        answerHasInteger(answer, counts.first) && answerHasInteger(answer, counts.second),
+      minEvidenceCalls: EST_MIN_EVIDENCE_CALLS['est-chr-counts'],
+    },
+    {
+      id: 'est-chr-quote-entry',
+      suite: 'est',
+      kind: 'quote',
+      question:
+        `${chrPre}${BLOCKS_OFFER}QUESTION: The document is structured as sections introduced `
+        + `by the own-line headings "Entry 1" through "Entry 48". Quote the single complete `
+        + `sentence of the document that contains the phrase "${quoteEntry.phrase}", exactly `
+        + `as it appears in the document text, and state in which entry it appears. `
+        + `Output FINAL_ANSWER: Entry <N> - <the sentence>.`,
+      expected: `${quoteEntry.entry} - ${quoteEntry.sentence}`,
+      isCorrect: answer =>
+        extractAnswerSectionBy(answer, ['Entry']) === quoteEntry.entry
+        && answerContainsSentence(answer, quoteEntry.sentence),
+      locateKinds: ['Entry'],
+      minEvidenceCalls: EST_MIN_EVIDENCE_CALLS['est-chr-quote-entry'],
+    },
+    {
+      id: 'est-frank-locate-count',
+      suite: 'est',
+      kind: 'locate',
+      question:
+        `${frankPre}${BLOCKS_OFFER}QUESTION: The document is structured as sections introduced `
+        + `by the headings "Letter 1" through "Letter 4" and then "Chapter 1" through `
+        + `"Chapter 24" (a table of contents near the start of the text also lists them). In `
+        + `which section does the phrase "${EST_FRANK_PHRASE}" appear, and how many times does `
+        + `the exact character sequence "${EST_FRANK_NEEDLE}" occur in the whole document text `
+        + `(count case-sensitively)? Output FINAL_ANSWER: <Letter N or Chapter N>, <integer>.`,
+      expected: `${frankTruth.section}, ${frankTruth.count}`,
+      isCorrect: answer =>
+        extractAnswerSection(answer) === frankTruth.section
+        && answerHasInteger(answer, frankTruth.count),
+      locateKinds: ['Letter', 'Chapter'],
+      minEvidenceCalls: EST_MIN_EVIDENCE_CALLS['est-frank-locate-count'],
+    },
+    {
+      id: 'est-led-captain',
+      suite: 'est',
+      kind: 'aggregate',
+      question:
+        `${ledPre}QUESTION: Across ALL ${inputs.ledgerDocs.length} ledgers combined, how many `
+        + `crates of ${EST_LEDGER_MATERIAL} in total did Captain ${EST_LEDGER_CAPTAIN} ship, `
+        + `and how many of the ${inputs.ledgerDocs.length} ledgers record at least one `
+        + `shipment of ${EST_LEDGER_MATERIAL} by Captain ${EST_LEDGER_CAPTAIN}? `
+        + `Output FINAL_ANSWER: <total crates>, <ledger count>.`,
+      expected: `${ledgerTruth.total}, ${ledgerTruth.ledgersWith}`,
+      isCorrect: answer =>
+        answerHasInteger(answer, ledgerTruth.total)
+        && answerHasInteger(answer, ledgerTruth.ledgersWith),
+      minEvidenceCalls: EST_MIN_EVIDENCE_CALLS['est-led-captain'],
+    },
+    {
+      id: 'est-rel-guild',
+      suite: 'est',
+      kind: 'aggregate',
+      question:
+        `${relPre}QUESTION: For the ${EST_REL_GUILD} Guild only, across ALL ledgers combined: `
+        + `how many crates in total did its captains ship (all materials), and how many `
+        + `distinct captains of that guild appear shipping? (A captain's guild is given by `
+        + `the registry.) Output FINAL_ANSWER: <total crates>, <distinct captains>.`,
+      expected: `${relTruth.crates}, ${relTruth.captainCount}`,
+      isCorrect: answer =>
+        answerHasInteger(answer, relTruth.crates)
+        && answerHasInteger(answer, relTruth.captainCount),
+      minEvidenceCalls: EST_MIN_EVIDENCE_CALLS['est-rel-guild'],
     },
   ];
 }
@@ -1067,6 +1235,8 @@ interface RunRow {
   usedPolars: boolean;
   /** locate questions only: how the run localized, where observable. */
   locMethod: string | null;
+  /** est questions only: the recorded minimal-evidence bound (Session 28). */
+  minEvidenceCalls: number | null;
   costUsd: number;
   answer: string;
 }
@@ -1087,12 +1257,15 @@ function safeJson(raw: string | null): Record<string, unknown> | null {
  * The spawn environment: exactly the pinned default kernel for the on
  * arm, plus TRELLIS_EXP_OMIT_CMT=1 for the off arm — and nothing else
  * that could move either prompt off its pinned bytes (no MCP servers,
- * no goal id / workspace, no citation instrumentation, the canonical
- * default module selection). The edit suite adds exactly the
+ * no goal id / workspace, no citation instrumentation). The module
+ * selection is the runner-resolved canonical serialization (Session
+ * 28): '["spatial-flywheel"]' with TRELLIS_EXP_MODULES unset — the
+ * byte-identical historical value — or the registry-validated override
+ * for a module-arm invocation. The edit suite adds exactly the
  * operator-owned TRELLIS_EDIT_ROOT (the Session 20 gating mechanism,
  * pointed at this run's scratch root).
  */
-function armEnv(arm: Arm, editRoot: string | null): NodeJS.ProcessEnv {
+function armEnv(arm: Arm, editRoot: string | null, modulesJson: string): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     ...(config.python.pythonPath && { PYTHONPATH: config.python.pythonPath }),
@@ -1100,7 +1273,7 @@ function armEnv(arm: Arm, editRoot: string | null): NodeJS.ProcessEnv {
     NEO4J_USER: config.neo4j.user,
     NEO4J_PASSWORD: config.neo4j.password,
     PG_DSN: pgDsn(),
-    TRELLIS_MODULES: JSON.stringify(['spatial-flywheel']),
+    TRELLIS_MODULES: modulesJson,
     PYTHONUNBUFFERED: '1',
     PYTHONIOENCODING: 'utf-8',
   };
@@ -1112,6 +1285,9 @@ function armEnv(arm: Arm, editRoot: string | null): NodeJS.ProcessEnv {
   delete env.TRELLIS_CITATION_HINT;
   delete env.TRELLIS_CITATION_ENTAIL;
   delete env.TRELLIS_EXP_OMIT_CMT;
+  // The module-arm flag is the RUNNER's input, resolved into
+  // TRELLIS_MODULES above before any spawn — the child never sees it.
+  delete env.TRELLIS_EXP_MODULES;
   if (arm === 'off') env.TRELLIS_EXP_OMIT_CMT = '1';
   if (editRoot) env.TRELLIS_EDIT_ROOT = editRoot;
   return env;
@@ -1121,14 +1297,15 @@ function spawnRun(
   arm: Arm,
   question: string,
   maxIterations: number,
-  editRoot: string | null
+  editRoot: string | null,
+  modulesJson: string
 ): Promise<{ stdout: string }> {
   return new Promise((resolve, reject) => {
     const script = path.resolve('src', 'rlm', 'trellis_agent.py');
     const child = spawn(
       config.python.executable,
       [script, '--query', question, '--max-iterations', String(maxIterations)],
-      { env: armEnv(arm, editRoot) }
+      { env: armEnv(arm, editRoot, modulesJson) }
     );
     let stdout = '';
     child.stdout.setEncoding('utf-8');
@@ -1144,7 +1321,8 @@ async function runOne(
   q: ProbeQuestion,
   repeat: number,
   maxIterations: number,
-  logDir: string
+  logDir: string,
+  modulesJson: string
 ): Promise<RunRow> {
   // Edit runs get a FRESH scratch root per run: seeds written before the
   // spawn, bytes scored after it, directory removed once captured.
@@ -1160,7 +1338,7 @@ async function runOne(
   let fileExact: boolean | null = null;
   let stdout = '';
   try {
-    ({ stdout } = await spawnRun(arm, q.question, maxIterations, editRoot));
+    ({ stdout } = await spawnRun(arm, q.question, maxIterations, editRoot, modulesJson));
     fs.writeFileSync(path.join(logDir, `${runTag}.log`), stdout);
     if (q.edit && editRoot) {
       fileExact = true;
@@ -1199,6 +1377,7 @@ async function runOne(
     usedPandas: stdout.includes('import pandas') || stdout.includes('from pandas'),
     usedPolars: stdout.includes('import polars') || stdout.includes('from polars'),
     locMethod: q.locateKinds ? classifyLocalizationMethod(stdout, q.locateKinds) : null,
+    minEvidenceCalls: q.minEvidenceCalls ?? null,
     costUsd: (inputTokens / 1e6) * PRICE_PER_M_INPUT + (outputTokens / 1e6) * PRICE_PER_M_OUTPUT,
     answer: normalizeWhitespace(answer).slice(0, 120),
   };
@@ -1268,18 +1447,33 @@ async function buildSelectedQuestions(suites: Suite[]): Promise<{
 }> {
   const questions: ProbeQuestion[] = [];
   const meta: Record<string, unknown> = {};
+  // Session 28: the est suite reads all four corpora, so each corpus is
+  // loaded (and its representation invariant asserted) once and shared.
+  const est = suites.includes('est');
 
-  if (suites.includes('frank')) {
+  let frankData: { corpus: string; rootHash: string } | null = null;
+  if (suites.includes('frank') || est) {
     const corpus = fs.readFileSync(FRANK_CORPUS_PATH, 'utf-8');
     const { rootHash, version } = await currentRoot(FRANK_DOC_KEY);
     assertFrankInvariant(corpus, nodeText(await readRootNode(rootHash)));
-    questions.push(...buildFrankQuestions(corpus, rootHash));
+    if (suites.includes('frank')) {
+      questions.push(...buildFrankQuestions(corpus, rootHash));
+    }
     meta.frank = { docKey: FRANK_DOC_KEY, version, rootHash };
+    frankData = { corpus, rootHash };
   }
-  if (suites.includes('chronicle') || suites.includes('edit')) {
+  let chronicleData: { corpus: string; rootHash: string } | null = null;
+  if (suites.includes('chronicle') || suites.includes('edit') || est) {
     const corpus = fs.readFileSync(CHRONICLE_CORPUS_PATH, 'utf-8');
     const { rootHash, version } = await currentRoot(CHRONICLE_DOC_KEY);
-    assertChronicleInvariant(corpus, nodeText(await readRootNode(rootHash)));
+    const reconstruction = nodeText(await readRootNode(rootHash));
+    assertChronicleInvariant(corpus, reconstruction);
+    if (est) {
+      // The est anomaly is not in the standing chronicle list; its
+      // phrase truth must hold over the stored reconstruction too.
+      assertPhraseInvariant('est', corpus, reconstruction, [],
+        [chronicleAnomalyPhrase(EST_CHRONICLE_ANOMALY)]);
+    }
     if (suites.includes('chronicle')) {
       questions.push(...buildChronicleQuestions(corpus, rootHash));
     }
@@ -1287,8 +1481,10 @@ async function buildSelectedQuestions(suites: Suite[]): Promise<{
       questions.push(...buildEditQuestions(corpus, rootHash));
     }
     meta.chronicle = { docKey: CHRONICLE_DOC_KEY, version, rootHash };
+    chronicleData = { corpus, rootHash };
   }
-  if (suites.includes('ledger')) {
+  let ledgerData: { docs: LedgerDoc[]; roots: Map<string, string> } | null = null;
+  if (suites.includes('ledger') || est) {
     const docs = generateLedgers();
     const roots = await currentRootsByPrefix(LEDGER_KEY_PREFIX);
     if (roots.size < docs.length) {
@@ -1301,10 +1497,14 @@ async function buildSelectedQuestions(suites: Suite[]): Promise<{
       if (!rootHash) throw new Error(`Missing ledger document ${doc.docKey}. Run --ingest.`);
       assertLedgerInvariant(doc, nodeText(await readRootNode(rootHash)));
     }
-    questions.push(...buildLedgerQuestions(docs, roots));
+    if (suites.includes('ledger')) {
+      questions.push(...buildLedgerQuestions(docs, roots));
+    }
     meta.ledger = { prefix: LEDGER_KEY_PREFIX, count: docs.length };
+    ledgerData = { docs, roots };
   }
-  if (suites.includes('relational')) {
+  let relationalData: { corpus: RelationalCorpus; roots: Map<string, string> } | null = null;
+  if (suites.includes('relational') || est) {
     const corpus = generateRelationalCorpus();
     const docs = allRelationalDocs(corpus);
     const roots = await currentRootsByPrefix(RELATIONAL_LEDGER_KEY_PREFIX);
@@ -1321,13 +1521,35 @@ async function buildSelectedQuestions(suites: Suite[]): Promise<{
       if (!rootHash) throw new Error(`Missing relational document ${doc.docKey}. Run --ingest.`);
       assertRelationalInvariant(doc, nodeText(await readRootNode(rootHash)));
     }
-    questions.push(...buildRelationalQuestions(corpus, roots));
+    if (suites.includes('relational')) {
+      questions.push(...buildRelationalQuestions(corpus, roots));
+    }
     meta.relational = {
       prefix: RELATIONAL_LEDGER_KEY_PREFIX,
       houses: RELATIONAL_HOUSE_COUNT,
       registry: RELATIONAL_REGISTRY_DOC_KEY,
       tariff: RELATIONAL_TARIFF_DOC_KEY,
     };
+    relationalData = { corpus, roots };
+  }
+  if (est) {
+    // The branches above are est-gated, so every corpus is loaded here;
+    // a missing one is an internal wiring error, refused loudly (never a
+    // silently empty question set).
+    if (!frankData || !chronicleData || !ledgerData || !relationalData) {
+      throw new Error('est suite: corpus loading incomplete despite est gating.');
+    }
+    questions.push(...buildEstimationQuestions({
+      frank: frankData.corpus,
+      frankRoot: frankData.rootHash,
+      chronicle: chronicleData.corpus,
+      chronicleRoot: chronicleData.rootHash,
+      ledgerDocs: ledgerData.docs,
+      ledgerRoots: ledgerData.roots,
+      relational: relationalData.corpus,
+      relationalRoots: relationalData.roots,
+    }));
+    meta.est = { minEvidenceCalls: EST_MIN_EVIDENCE_CALLS };
   }
   return { questions, meta };
 }
@@ -1345,6 +1567,9 @@ function suiteCorpusTokens(suite: Suite): number {
         Buffer.byteLength(generateLedgers().map(d => d.text).join(''), 'utf8') / 4
       );
     case 'relational':
+    // est spans all four corpora; the relational set is the largest, so
+    // it drives the worst-case attention cost.
+    case 'est':
       return Math.ceil(
         Buffer.byteLength(
           allRelationalDocs(generateRelationalCorpus()).map(d => d.text).join(''),
@@ -1356,6 +1581,12 @@ function suiteCorpusTokens(suite: Suite): number {
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
+
+  // Session 28: the module-arm flag is resolved and registry-validated
+  // BEFORE anything else — an invalid selection refuses the whole
+  // invocation, spawn-free.
+  const modulesJson = probeModulesJson(process.env[MODULE_ARM_ENV_VAR]);
+  const moduleArmed = process.env[MODULE_ARM_ENV_VAR] !== undefined;
 
   if (args.ingest) {
     await runIngest();
@@ -1371,6 +1602,10 @@ async function main(): Promise<void> {
   const runCount = args.arms.length * questions.length * args.repeats;
   console.log('Effective-context probe plan (round 3):');
   console.log(`  suites:            ${args.suites.join(', ')}`);
+  console.log(
+    `  module selection:  ${modulesJson} `
+    + `(${moduleArmed ? `${MODULE_ARM_ENV_VAR} override, registry-validated` : 'default'})`
+  );
   for (const [k, v] of Object.entries(meta)) console.log(`  ${k}: ${JSON.stringify(v)}`);
   console.log(
     `  arms × questions × repeats: ${args.arms.join(',')} × ${questions.length} × `
@@ -1382,6 +1617,7 @@ async function main(): Promise<void> {
     console.log(
       `    ${q.id.padEnd(20)} [${q.suite}/${q.kind}]  expected: `
       + `${q.expected.slice(0, 60)}${q.expected.length > 60 ? '…' : ''}`
+      + (q.minEvidenceCalls !== undefined ? `  (min evidence: ${q.minEvidenceCalls} db call)` : '')
     );
   }
   // Pre-flight estimate (stated assumptions, conservative): a run that
@@ -1425,7 +1661,7 @@ async function main(): Promise<void> {
     for (const q of questions) {
       for (let repeat = 1; repeat <= args.repeats; repeat++) {
         if (total > args.maxSpendUsd) { aborted = true; break; }
-        const row = await runOne(arm, q, repeat, args.maxIterations, logDir);
+        const row = await runOne(arm, q, repeat, args.maxIterations, logDir, modulesJson);
         rows.push(row);
         total += row.costUsd;
         console.log(
@@ -1456,6 +1692,8 @@ async function main(): Promise<void> {
     JSON.stringify({
       suites: args.suites,
       meta,
+      moduleSelection: JSON.parse(modulesJson),
+      moduleArmFlag: moduleArmed,
       maxIterations: args.maxIterations,
       repeats: args.repeats,
       aborted,

@@ -70,5 +70,48 @@ effect:
   3's recovery loops), so a real effect is detectable at modest n.
 - **Plumbing note:** the probe script pins `TRELLIS_MODULES` to the
   default; the control needs a module-arm flag in the
-  `TRELLIS_EXP_OMIT_CMT` mold (byte-identical when unset). Not built
-  this session.
+  `TRELLIS_EXP_OMIT_CMT` mold (byte-identical when unset). Built in
+  Session 28 (`TRELLIS_EXP_MODULES`,
+  `src/benchmarks/effective_context/module_arm.ts`).
+
+## The measured control (Session 28, July 11, 2026)
+
+The control ran as designed: the `est` probe suite (five
+sufficiency-bounded two-part questions whose parts share one read,
+truths and minimal-evidence bounds unit-pinned in
+`src/benchmarks/effective_context/estimation_suite.ts`), n=5 per
+question per arm, 50 runs, $2.3981 total, both arms on the pinned
+default kernel. Full tables:
+`docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`, "The
+estimation-discipline module control".
+
+**The pre-stated decisive criterion is NOT met — a mixed result.**
+Correctness saturated at 25/25 in BOTH arms. Median database tool
+calls moved the way the module intends (on 1 vs off 2 pooled; the
+worst off-arm question's median 4 halved to 2; minimal-evidence
+attainment 15/25 vs 10/25) — the retrieval-gating instruction
+measurably gates retrieval. But pooled median input tokens went UP
+(on 13,240 vs off 9,217): on the three small-corpus questions the
+explicit operand/sufficiency bookkeeping cost more iterations than
+the saved reads repaid, while on the two largest questions
+(est-led-captain, est-rel-guild) the direction reversed and the on
+arm was cheaper by ~6k median tokens.
+
+**Standing per the recorded rule:** the module stays OUT of the
+default selection. The candidacy decision on these numbers — retire,
+or re-scope composition to large-corpus/aggregate task shapes where
+the effect pays — is the owner's.
+
+## Retired (owner decision, July 11, 2026)
+
+The owner retired the module on the control's numbers the same day
+(manifest `status: retired`; the graph entity
+`module:estimation-discipline` remains as the historical record —
+module entities are contested or retired, never deleted). The decision
+carried a broader direction, recorded in the roadmap: behavioral
+failure classes are closed by TOOLING SHAPE (mechanical enforcement
+with typed refusals), not by prompt modules — the retrieval-discipline
+behavior this module nudged is a candidate for kernel-level retrieval
+dedup and budgets, with the Session 28 `est` suite as the acceptance
+harness for that intervention. This directory stays as provenance for
+the measurement.
