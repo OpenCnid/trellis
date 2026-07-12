@@ -306,6 +306,28 @@ The record drives four owner-scheduled follow-ups: the self-editing
 toolkit, a kernel prompt revision, a paired-run effective-context probe,
 and a module #1 re-authoring.
 
+## Postscript 2 — where these threads landed (added July 12, 2026)
+
+Item 1 below ran to completion and closed the question it was asking.
+Module #2 (`estimation-discipline`, your candidate topic #1) was
+authored under grounded authoring, measured with a decisive paired
+positive control (50 runs: correctness saturated in both arms; the
+module halved retrieval calls — its target behavior — but cost more
+input tokens except on the largest corpora), and **retired by the
+owner on the numbers**. The owner's accompanying direction is now
+doctrine: *"does instruction text move behavior" is not an engineering
+target* — behavioral failure classes are closed by tooling shape
+(mechanical enforcement with typed refusals), and prompt-module
+authoring is deprioritized. This is your item (3)'s logic carried to
+its conclusion: define the task as a system property, then engineer
+the system.
+
+Consequently item 2 below — **mechanical provenance threading** — is
+promoted from candidate to scheduled work (roadmap §4 row 9), preceded
+only by a short toolkit-hardening session; the claim→block
+factorization question is live and your input is wanted before the
+design record is written. Item 3 (the incentive audit) remains open.
+
 ## Where you can help next
 
 1. **Module #2 topic selection, under the corrected frame.** We need
