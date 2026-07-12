@@ -110,6 +110,14 @@ and the validation strategy. They record why the substrate was built the
 way it was; the system-level framing has since moved on (root
 `README.md`, "What Trellis is").
 
+### 6. Progress-log archive (`/archive` — historical)
+
+- **`archive/ROADMAP_HISTORY.md`** — the dated engineering ledger from
+  July 4, 2026 (the first Phase-1 commit) through Session 23, moved
+  verbatim out of `TRELLIS_ROADMAP.md` §5 on July 12, 2026. The live
+  roadmap keeps only the most recent five sessions; older entries land
+  here unedited.
+
 ---
 *For immediate tactical setup (Docker, env vars, running the code, API
 endpoints), see the root `README.md` and `API_REFERENCE.md`.*
