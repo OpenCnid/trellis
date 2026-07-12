@@ -214,7 +214,7 @@ Ordered roughly by severity.
 | ~~4~~ | ~~Boundary-aware block accessor (`get_ast_blocks`) + structure-selection demotion~~ | **Done (Session 24, July 11, 2026)** — `trellis_postgres.get_ast_blocks(root_hash)` returns a document's extraction blocks in order (`[{id, type, text}]`, exactly the `collectExtractionBlocks` set) via the dependency-free walk in `src/rlm/trellis_blocks.py`, parity-pinned block-for-block against the TS authority (`block_parity.test.ts`) and round-tripped live (frank 796 / chronicle 827 blocks byte-identical); NO stored or reconstructed byte moved; both composed-prompt pins moved wittingly to teach the tool (default `3f07295a…4b63`, omit-arm `85362b81…71bb`); pillar §7's "pandas default" DEMOTED to "plain loops until a measured threshold" per its own written contingency; the probe gained the `structured` method verdict, the paren-free locate-preamble offer, and the report's round-4 section. The localization re-measure ran OWNER-APPROVED the same day ($0.9452, 36 runs): 0/36 misses vs round 3's 7/30 on the same locate set, 36/36 runs adopting the accessor in BOTH arms (the off arm too — tooling shape, not the prompt block, carries the behavior); the round-3 "Chapter 23" trap question came back correct 6/6; the superseded reconstruction-byte row stays closed; see §5 |
 | ~~5~~ | ~~Repository-scale extraction prerequisites~~ | **Done (Session 25, July 11, 2026)** — the three recorded pilot findings turned into machinery, all zero-paid: the kernel-fixed test/fixture extraction exclusion (`isTestOrFixturePath`; classified files still ingest but their extraction policy is forced to `none`, reported as typed `test_fixture_excluded` file/block counts in the plan echo), additive `sourceKind` payload routing selecting a code-tuned extraction prompt (legacy prose bytes unit-pinned; unknown values refused at the boundary), and deterministic generic-identifier suppression before resolution (kernel denylist + length-<3 shape rule + touched-relationship drops, counted and logged, never silent). The paid pilot RE-RUN stays owner-gated: proposed at the CLI's printed post-exclusion bound of 103 blocks ≈ $0.29; see §5 |
 | ~~6a~~ | ~~Data-plane representation verdict follow-ups (owner-directed July 11, 2026 — inserted AHEAD of the positive control, which is unchanged)~~ | **Done (Session 27, July 11, 2026)** — all three adopted recommendations landed zero-paid: `polars==1.34.0` pinned in requirements.txt + the `python:check` import list + an in-container import probe in the Compose integration (11 assertions now — the found prose-vs-manifest inconsistency is closed; pinning is NOT adoption, no src/ path imports polars); the pillar §7 verdict + cap-raise doctrine paragraph (docs-only, both composed-prompt pins unmoved); the M1 park/seed round-trip at cap sizes (byte-lossless at exactly 4 MiB/32 MiB/1024 segments, refusal at cap+1, timings printed never asserted) and M7 per-field torn-payload refusal + canonical-form determinism fixtures as standing sections [7]/[8] of `test:rlm-workspace` (86 → 106 checks); see §5 |
-| 6 | Estimation-discipline positive control (module #2 follow-through) | (Pushed back one session by owner direction July 11, 2026 — row 6a runs first; this row is otherwise unchanged.) Zero-paid machinery first: a module-arm flag for the effective-context probe (the `TRELLIS_EXP_OMIT_CMT` mold — byte-identical when unset) so paired runs can compose `estimation-discipline` into the selection; then the OWNER-GATED paired measurement (design recorded in `modules/estimation-discipline/RESEARCH.md`: tool calls / iterations / input tokens on sufficiency-bounded questions, ~n=5/arm ≈ $1–2). The module stays OUT of the default selection until the control measures a real effect (the briefing's rule) |
+| 6 | Estimation-discipline positive control (module #2 follow-through) | **Machinery + measurement DONE (Session 28, July 11, 2026); the row stays open on exactly one item — the owner's candidacy decision on the numbers.** The module-arm flag `TRELLIS_EXP_MODULES` and the `est` suite landed zero-paid; the 50-run paired control ran under the session's standing approval ($2.3981 actual vs the ~$1–2 estimate, disclosed). Result MIXED against the pre-stated criterion: correctness 25/25 in BOTH arms; median db calls on 1 vs off 2 (the targeted behavior moved, minimal-evidence attainment 15/25 vs 10/25); pooled median input tokens on 13,240 vs off 9,217 (FAILS pooled — the on arm wins by ~6k median tokens on the two largest-corpus questions and loses on the three small ones). Per the recorded rule the module stays OUT of the default selection; the owner decides retire vs re-scope composition to large-corpus/aggregate task shapes (see §5 and the report's control section) |
 | 7 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
 | 8 | Self-editing toolkit coverage hardening (Trellis-edits-Trellis coverage audit, July 11, 2026) | Ten gaps found, all zero-paid to close except the cross-process proof run (§5 entry of the same date has the full gap matrix). Priority order: wire `npm run test:textedit` into CI first (cheap, no new tests needed); then close the TOCTOU window in `write_back`, re-verify containment at write time (not just load time), and preserve file mode across `write_back`; then pin multi-file partial-failure semantics and add mutation-test coverage for the guard code. Does not reorder rows 6a/6/7 — queued behind them |
 | — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
@@ -3697,3 +3697,110 @@ cap raises; asserting on drill timings; the estimation-discipline
 positive control (next session, unchanged); module #2 default-selection
 entry or edits; extraction re-runs; reconstruction byte changes; a
 fifth probe round; frontend work; `ASTRef` migration.
+
+### July 11, 2026 — Session 28: the estimation-discipline positive control (§4 row 6 — machinery + the measured control)
+
+The Session 26 module #2 follow-through: the control machinery landed
+zero-paid, and the paired measurement ran the same day under the
+session's standing owner approval of paid/owner-gated tests. Branch
+`session-28-estimation-control`.
+
+1. **The probe module-arm flag (`TRELLIS_EXP_MODULES`, the
+   `TRELLIS_EXP_OMIT_CMT` mold).** New pure
+   `src/benchmarks/effective_context/module_arm.ts`:
+   `resolveProbeModuleSelection` returns the default selection when
+   the flag is unset (the serialized value is byte-identical to the
+   probe's historical hardcoded `'["spatial-flywheel"]'` — pinned in
+   `module_arm.test.ts`) and otherwise validates the JSON array
+   through the ORDINARY `parseModuleSelection` + `loadModules` path
+   (shape, max 4, duplicates, registry existence, active status,
+   addendum gates) BEFORE any spawn — malformed JSON, unknown names,
+   and contested modules refuse the whole invocation spawn-free
+   (verified live against `'["ghost-module"]'` and `'{bad'`).
+   `armEnv` now takes the runner-resolved canonical `TRELLIS_MODULES`
+   serialization and deletes `TRELLIS_EXP_MODULES` from the child env;
+   `buildAgentEnv` deletes the flag unconditionally (no config field
+   exists — unit-pinned mirroring the `TRELLIS_EXP_OMIT_CMT` pin). NO
+   kernel change: both composed-prompt pins unmoved (the ON arm is an
+   ordinary operator selection through the ordinary loader).
+2. **The `est` suite (sufficiency-bounded, additive).** Five two-part
+   questions whose parts share ONE read, over the four durable
+   corpora; every earlier suite's question bytes untouched (rounds
+   1–4 stay round-comparable; the shared preambles were extracted
+   into `frankPreamble`/`ledgerPreamble`/`relationalPreamble`
+   byte-identically). Truths + the recorded minimal-evidence bounds
+   (1 db call per question, rationale on the constant) live in the
+   new pure `src/benchmarks/effective_context/estimation_suite.ts`,
+   unit-pinned from committed bytes in `estimation_suite.test.ts`
+   (chronicle Kelvorin 163 / Torulf 125; anomaly 8 → Entry 9 with the
+   pinned sentence; frank "dreary night" → Chapter 5, Ingolstadt 16;
+   ledger Zelvane Wendrick × morrowleaf → 1046 crates / 13 ledgers;
+   relational Glasswind → 41,793 crates / 4 captains; distinctness of
+   every scored pair enforced loudly — equal values would make
+   token-match scoring trivially satisfiable). The est anomaly (8) is
+   pinned disjoint from every other suite's anomalies.
+   `scripts/test_modules.py` gained section [8]: module #2 loads and
+   composes with module #0 through the ordinary loader, brace-safe,
+   NOT in the default selection.
+3. **The measured control (50 runs, $2.3981 vs the ~$1–2 estimate —
+   over estimate, disclosed; the per-invocation $5 abort never
+   armed-fired).** 10 chunked invocations (question × module-arm,
+   `--repeats 5`, both arms on the pinned default kernel).
+   **Correctness 25/25 in BOTH arms. Median db tool calls: on 1 vs
+   off 2 pooled (frank question median halved 4 → 2;
+   minimal-evidence attainment 15/25 vs 10/25). Pooled median input
+   tokens: on 13,240 vs off 9,217 — the token half of the pre-stated
+   criterion FAILS pooled**, with the direction REVERSING on the two
+   largest-corpus questions (est-led-captain on 13,268 vs off 19,335;
+   est-rel-guild on 23,033 vs off 29,287). The 66k on-arm tail run is
+   4 iterations re-feeding the 102-hash relational preamble, not an
+   attention blowup (2 db calls, 0 subcalls). All 50 runs submitted
+   through `trellis_answer` (230/230 cumulative, zero transcription
+   errors); zero pandas/polars imports. **Verdict per the recorded
+   rule: the criterion is NOT met; module #2 stays OUT of the default
+   selection.** The candidacy decision on these numbers (retire vs
+   re-scope to large-corpus/aggregate task shapes) is the owner's —
+   §4 row 6 stays open on exactly that item. Full tables in the
+   probe report's control section; per-invocation `summary.json`
+   records `moduleSelection`/`moduleArmFlag`.
+
+**Verification.** Offline: `npm test` = **728 passing across 79
+files** (baseline 712/77; +16: module_arm 6, estimation_suite 9, the
+`buildAgentEnv` strip pin 1). `npm run build`, `npm run python:check`,
+`docker compose --profile test config --quiet` pass. Isolated Compose
+integration as project `trellis_s28_ci` (host ports 0): **11/11
+PASS**, all image layers cached (`package.json` and `requirements.txt`
+untouched), torn down with `--volumes`. Live zero-LLM:
+`test:modules` green with section [8] and BOTH pins unmoved
+(`3f07295a…4b63` / `85362b81…71bb`), `test:answer-channel` 32,
+`test:textedit` 82, `test:module-lifecycle` 60, `test:promotion` 41,
+`test:rlm-workspace` 106, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
+`test:agent-loop` ALL CHECKS PASSED, `test:a2a` ALL CHECKS PASSED,
+`test:repo-ingest` 56, `test:benchmark-hardening` 24,
+`test:entity-resolution` 34, `test:api-hardening` 18,
+`test:belief-recovery` 30, `test:invalidation-sweep` 17. Probe plan
+mode verified in all three flag states (unset/override/refusals).
+`drill:scale`: first reading **2.65x CLOSED** — outside the recorded
+~1.48x–2.26x band, so it was re-run per the Session 22 precedent and
+came back **1.77x CLOSED** (in-band; the outlier did not reproduce —
+most plausibly the day's drill traffic on the shared dev database;
+the committed `scale_drill_results.json` is the 1.77x run).
+`git diff --check` passes.
+
+**Defects found: one, in this session's own new code, caught by the
+zero-paid drill before any spend.** The est branch of
+`buildSelectedQuestions` initially never assigned `relationalData`,
+and the `&&`-chained guard SILENTLY skipped the whole est question
+set ("No questions selected"). Fixed by assigning the data and
+replacing the silent guard with a loud refusal (incomplete corpus
+loading under est gating now throws). Lesson recorded: a guard that
+degrades a wiring error into an empty selection hides the bug —
+refuse loudly.
+
+**Deliberately not included** (the §8 exclusions held): adding module
+#2 to the default selection (owner's decision on the numbers);
+editing module #2's addendum/manifest; any kernel or composed-prompt
+change; a fifth probe round (the control is a module measurement —
+round numbering untouched); representation migrations; polars
+imports in src/; cap raises; extraction re-runs; row-8 coverage
+hardening (queued next); frontend work; `ASTRef` migration.

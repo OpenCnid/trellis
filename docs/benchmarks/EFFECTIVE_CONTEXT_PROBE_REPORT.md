@@ -636,3 +636,95 @@ superseded reconstruction-byte change stays closed unless a future
 measurement finds the accessor insufficient). No live failure class
 remains open in this probe series; the recorded residual is computing
 faithfully over the WRONG input (the round-3 result-shape miss).
+
+# The estimation-discipline module control (Session 28, July 11, 2026)
+
+NOT a probe round: a MODULE measurement run over the probe machinery
+(the positive control module #2 has owed since Session 26 —
+`modules/estimation-discipline/RESEARCH.md`, "Positive control"). The
+round numbering above is untouched and every round suite's question
+bytes are unchanged (the `est` suite is additive).
+
+## Protocol
+
+- **Machinery (Session 28, zero-paid):** the module-arm flag
+  `TRELLIS_EXP_MODULES` (the `TRELLIS_EXP_OMIT_CMT` mold — no config
+  field, stripped unconditionally by `buildAgentEnv`, byte-identical
+  spawn env when unset, registry-validated through the ordinary
+  `parseModuleSelection` + `loadModules` path BEFORE any spawn), and
+  the `est` suite: five sufficiency-bounded TWO-PART questions whose
+  parts share ONE read, over the four durable corpora, each with a
+  unit-pinned ground truth and a recorded minimal-evidence bound of 1
+  database call (`src/benchmarks/effective_context/estimation_suite.ts`).
+- **Arms:** two invocations per question on the PINNED DEFAULT kernel
+  (`--arms on` both): module-off = flag unset (selection
+  `["spatial-flywheel"]`, the historical spawn bytes) vs module-on =
+  `TRELLIS_EXP_MODULES='["spatial-flywheel","estimation-discipline"]'`.
+  Both composed-prompt pins unmoved — the on arm is an ordinary
+  operator selection through the ordinary loader.
+- **Run shape:** `--repeats 5`, chunked one invocation per
+  question × arm (10 invocations, 5 runs each), estimates printed, the
+  $5 cumulative abort armed per invocation (never hit).
+- **Pre-stated decisive criterion (from RESEARCH.md):** the on arm's
+  median tool calls AND input tokens at or below the off arm's with
+  non-inferior correctness.
+
+## Results (July 11, 2026 — 50 runs, $2.3981)
+
+| question | arm | n | correct | inTok med [min..max] | iter med | db med [min..max] | cost |
+|---|---|---|---|---|---|---|---|
+| est-chr-counts         | off | 5 | 5/5 | 3,698 [3,698..12,734] | 1 | 1 [1..2] | $0.1030 |
+| est-chr-counts         | on  | 5 | 5/5 | 8,819 [8,348..18,414] | 2 | 1 [1..1] | $0.1696 |
+| est-chr-quote-entry    | off | 5 | 5/5 | 3,761 [3,761..20,273] | 1 | 2 [1..3] | $0.1656 |
+| est-chr-quote-entry    | on  | 5 | 5/5 | 9,295 [4,072..28,246] | 2 | 1 [1..3] | $0.2187 |
+| est-frank-locate-count | off | 5 | 5/5 | 9,309 [3,803..15,017] | 2 | 4 [2..4] | $0.1747 |
+| est-frank-locate-count | on  | 5 | 5/5 | 14,453 [4,114..17,144] | 3 | 2 [2..6] | $0.1888 |
+| est-led-captain        | off | 5 | 5/5 | 19,335 [5,571..27,684] | 3 | 1 [1..2] | $0.2364 |
+| est-led-captain        | on  | 5 | 5/5 | 13,268 [5,882..23,433] | 2 | 1 [1..2] | $0.2130 |
+| est-rel-guild          | off | 5 | 5/5 | 29,287 [8,712..41,310] | 3 | 2 [1..3] | $0.3628 |
+| est-rel-guild          | on  | 5 | 5/5 | 23,033 [9,023..66,252] | 2 | 1 [1..2] | $0.5654 |
+
+Pooled: off 25/25 correct, inTok median 9,217, db median 2, $1.0425;
+on 25/25 correct, inTok median 13,240, db median 1, $1.3556. Runs
+at/below the recorded minimal-evidence bound (1 db call): on 15/25 vs
+off 10/25. All 50 runs submitted through `trellis_answer` (the
+by-reference record is now 230/230 across rounds 2–4 plus this
+control, zero transcription errors); zero pandas/polars imports.
+
+## Reading — the pre-stated criterion is NOT met (a mixed result)
+
+- **The module moves exactly the behavior it targets.** Median
+  database tool calls: on 1 vs off 2 pooled; on the frank question the
+  off arm's median 4 calls halved to 2; minimal-evidence attainment
+  rose 10/25 → 15/25. The retrieval-gating instruction measurably
+  gates retrieval.
+- **The token half of the criterion FAILS pooled.** On the three
+  small-corpus questions the on arm paid roughly 5k more median input
+  tokens — the runs spent extra iterations on explicit
+  operand/sufficiency bookkeeping the questions were too small to
+  repay (median iterations 2 vs 1). On the two largest questions
+  (est-led-captain 40 documents, est-rel-guild 102 documents) the
+  direction REVERSES: on medians 13,268 vs 19,335 and 23,033 vs
+  29,287 — fewer, better-targeted reads win once the corpus is big
+  enough that a wasted read is expensive. The 66,252-token on-arm
+  tail run is 4 iterations re-feeding the 102-hash relational
+  preamble (2 db calls, 0 subcalls) — session length, not an
+  attention blowup.
+- **Correctness is saturated at 50/50**, so this question set cannot
+  show a correctness effect either way; the under-search risk the
+  criterion guards against (Guardrail 4: never reward low call counts
+  alone) did not materialize — every on-arm run still made at least
+  the minimal evidence read and answered exactly.
+- **Verdict per the recorded rule:** the criterion ("median tool
+  calls AND input tokens at or below, non-inferior correctness") is
+  not met, so module #2 does NOT enter the default selection on these
+  numbers. The honest shape of the result — a real, directionally
+  correct effect on retrieval discipline that pays for itself only on
+  large-corpus/aggregate tasks — is recorded for the owner's
+  candidacy decision (retire, or re-scope composition to the task
+  shapes where it wins; that decision is the owner's, on these
+  numbers, per the briefing's rule).
+
+Raw logs: `benchmark_logs/effective-context-2026-07-12T*` (gitignored,
+local); per-invocation `summary.json` records `moduleSelection` and
+`moduleArmFlag` per arm.
