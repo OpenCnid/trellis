@@ -23,11 +23,18 @@
 #       brace-free and teaches the discipline,
 #   [9] LocalREPL persistence — the holder survives turns and scaffold
 #       restore; the name does not exist when not injected,
-#  [10] telemetry — counts only, never a path, pattern, or content.
+#  [10] telemetry — counts only, never a path, pattern, or content,
+#  [11] write_back hardening (Session 29, coverage audit #2/#3/#4) —
+#       mode preservation, write-time containment re-verification,
+#       resolution-change refusal, second-writer detection inside the
+#       narrowed window, no orphaned temp file on refusal.
+import ast
 import hashlib
 import json
 import os
+import re
 import shutil
+import stat
 import sys
 import tempfile
 
@@ -459,6 +466,113 @@ check("stats() reports exactly the three counters",
       and all(isinstance(v, int) for v in stats.values()))
 check("toolkit activity never increments the database tool-call count",
       get_tool_call_count() == 0)
+
+# --- 11. write_back hardening (Session 29, coverage audit #2/#3/#4) ----------
+print("\n[11] write_back hardening: mode, write-time containment, narrowed window")
+
+import trellis_textedit as tt_module  # noqa: E402
+
+# Audit #4: the replacement inode carries the source's mode. On POSIX the
+# executable bit is the recorded failure (a script or git hook silently
+# losing +x on every edit); on Windows mode equality is asserted so the
+# behavior is pinned not-regressed on both platforms (handoff §6).
+mode_root = make_root()
+mode_path = write_file(mode_root, "hook.sh", b"#!/bin/sh\necho one\n")
+if os.name == "posix":
+    os.chmod(mode_path, 0o755)
+mode_before = stat.S_IMODE(os.stat(mode_path).st_mode)
+mode_ted = TrellisTextEdit(mode_root)
+mode_ted.load("hook.sh")
+mode_ted.splice("hook.sh", 1, 2, ["echo two"])
+mode_ted.write_back("hook.sh")
+check("write_back preserves the source file mode across the replacement",
+      stat.S_IMODE(os.stat(mode_path).st_mode) == mode_before
+      and read_file(mode_root, "hook.sh") == b"#!/bin/sh\necho two\n")
+if os.name == "posix":
+    check("the executable bit survives the replacement inode",
+          os.stat(mode_path).st_mode & 0o111 == 0o111)
+else:
+    print("  [SKIP] executable-bit check (POSIX-only; mode equality asserted above)")
+
+# Audit #3: containment re-verified at write time — a parent directory
+# swapped for a symlink AFTER load is refused by the same load-time code
+# path, re-run against the current filesystem.
+def try_dir_symlink(src, dst):
+    try:
+        os.symlink(src, dst, target_is_directory=True)
+        return True
+    except (OSError, NotImplementedError):
+        return False
+
+
+swap_root = make_root()
+write_file(swap_root, "sub/target.txt", b"inside sub\n")
+outside_dir = make_root()
+write_file(outside_dir, "target.txt", b"outside bytes\n")
+swap = TrellisTextEdit(swap_root)
+swap.load("sub/target.txt")
+swap.splice("sub/target.txt", 0, 1, ["edited"])
+shutil.rmtree(os.path.join(swap_root, "sub"))
+if try_dir_symlink(outside_dir, os.path.join(swap_root, "sub")):
+    expect_raises("a parent symlink swapped in after load refuses at write_back",
+                  lambda: swap.write_back("sub/target.txt"),
+                  ValueError, "outside the edit root")
+    check("the refused write left the outside file untouched",
+          read_file(outside_dir, "target.txt") == b"outside bytes\n"
+          and not [n for n in os.listdir(outside_dir)
+                   if n.startswith(".trellis-textedit-")])
+
+    # A swap that stays INSIDE the root is caught by the resolution-change
+    # refusal even when the target's bytes are identical (the digest guard
+    # alone cannot see it — the resolution check is what refuses).
+    move_root = make_root()
+    write_file(move_root, "a/file.txt", b"same bytes\n")
+    write_file(move_root, "b/file.txt", b"same bytes\n")
+    mover = TrellisTextEdit(move_root)
+    mover.load("a/file.txt")
+    mover.splice("a/file.txt", 0, 1, ["edited"])
+    shutil.rmtree(os.path.join(move_root, "a"))
+    if try_dir_symlink(os.path.join(move_root, "b"), os.path.join(move_root, "a")):
+        expect_raises("an in-root resolution change refuses even with identical bytes",
+                      lambda: mover.write_back("a/file.txt"),
+                      StaleFileError, "no longer resolves")
+        check("the resolution-change refusal wrote nothing",
+              read_file(move_root, "b/file.txt") == b"same bytes\n")
+    else:
+        print("  [SKIP] in-root resolution-change check (directory symlinks unavailable)")
+else:
+    print("  [SKIP] write-time containment swap checks (directory symlinks unavailable)")
+
+# Audit #2: the narrowed window. A second writer landing while the temp
+# file is being built (after the first digest check) is detected by the
+# final re-check immediately before os.replace — simulated by wrapping
+# mkstemp so the mutation lands deterministically inside the window.
+narrow_root = make_root()
+write_file(narrow_root, "narrow.txt", b"first bytes\n")
+narrow = TrellisTextEdit(narrow_root)
+narrow.load("narrow.txt")
+narrow.splice("narrow.txt", 0, 1, ["edited bytes"])
+second_writer = b"SECOND WRITER LANDED MID-WRITE\n"
+real_mkstemp = tt_module.tempfile.mkstemp
+
+
+def racing_mkstemp(*args, **kwargs):
+    result = real_mkstemp(*args, **kwargs)
+    write_file(narrow_root, "narrow.txt", second_writer)
+    return result
+
+
+tt_module.tempfile.mkstemp = racing_mkstemp
+try:
+    expect_raises("a second writer landing while the temp file is built is detected",
+                  lambda: narrow.write_back("narrow.txt"),
+                  StaleFileError, "second writer")
+finally:
+    tt_module.tempfile.mkstemp = real_mkstemp
+check("the detected race left the second writer's bytes on disk",
+      read_file(narrow_root, "narrow.txt") == second_writer)
+check("the refused write left no orphaned temp file behind",
+      [n for n in os.listdir(narrow_root) if n.startswith(".trellis-textedit-")] == [])
 
 # ---------------------------------------------------------------------------
 for stale_root in temp_roots:

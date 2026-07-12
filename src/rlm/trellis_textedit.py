@@ -46,6 +46,7 @@ import json
 import os
 import posixpath
 import re
+import stat
 import tempfile
 import threading
 
@@ -424,11 +425,35 @@ class TrellisTextEdit:
         the file moved, so the frame's addresses are meaningless; re-load
         and re-derive. On a match, writes the working frame atomically
         (temp file + rename in the same directory) and refreshes the held
-        snapshot to the just-written state."""
+        snapshot to the just-written state.
+
+        Session 29 hardening (coverage audit #2/#3/#4): containment is
+        re-verified against the CURRENT resolved path (the load-time
+        `_resolve` re-run, never a second implementation) and a path
+        that resolves differently than it did at load is refused as
+        stale; the original file mode is preserved onto the replacement
+        (POSIX-meaningful — the executable bit on a script or hook no
+        longer vanishes; Windows mode bits are a no-op); and the digest
+        is re-checked immediately before the atomic replace. That final
+        re-check NARROWS the check-to-replace race to the microseconds
+        between the last re-hash and os.replace — it does not eliminate
+        it. Full elimination needs OS file locking, which is out of
+        scope; a second writer landing inside the residual window is
+        still silently overwritten."""
         self._count_op()
         with self._lock:
             key, frame = self._require_frame(relpath)
-            resolved = frame["abs"]
+            # Coverage audit #3: a parent directory swapped for a
+            # symlink/junction AFTER load must be refused here too — the
+            # OS resolves the stored path fresh at write time, so the
+            # load-time check alone does not cover the write.
+            _, resolved = self._resolve(key)
+            if resolved != frame["abs"]:
+                raise StaleFileError(
+                    f"{key!r} no longer resolves to the path it resolved to at load "
+                    f"(the directory tree changed underneath the frame). Nothing was "
+                    f"written. Re-load the file and re-derive your edits by query."
+                )
             if not os.path.isfile(resolved):
                 raise StaleFileError(
                     f"{key!r} no longer exists on disk; the held frame is stale. "
@@ -443,12 +468,28 @@ class TrellisTextEdit:
                     f"{self._digest(current)[:12]}...). Nothing was written. Re-load the "
                     f"file and re-derive your edits by query — never retype them."
                 )
+            source_mode = stat.S_IMODE(os.stat(resolved).st_mode)
             data = "\n".join(frame["lines"]).encode("utf-8")
             fd, temp_path = tempfile.mkstemp(
                 prefix=".trellis-textedit-", dir=os.path.dirname(resolved))
             try:
                 with os.fdopen(fd, "wb") as f:
                     f.write(data)
+                # Coverage audit #4: mkstemp creates 0600 — carry the
+                # source's mode onto the replacement before it lands.
+                os.chmod(temp_path, source_mode)
+                # Coverage audit #2: the narrowed window — re-hash one
+                # final time immediately before the replace, so a second
+                # writer landing while the temp file was being built is
+                # detected instead of overwritten.
+                with open(resolved, "rb") as f:
+                    final = f.read()
+                if self._digest(final) != frame["digest"]:
+                    raise StaleFileError(
+                        f"Digest mismatch for {key!r}: a second writer changed the file "
+                        f"while the replacement was being prepared. Nothing was written. "
+                        f"Re-load the file and re-derive your edits by query."
+                    )
                 os.replace(temp_path, resolved)
             except BaseException:
                 try:
