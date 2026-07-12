@@ -159,7 +159,11 @@ TOOLS (available directly in the REPL):
    - Node labels include Question (properties: id like 'q_0001', text, sometimes category), Concept (name), Entity (name).
    - Edge types include REFERENCES, ACTION, CONTRADICTS, and DERIVED_INSIGHT.
    - Nodes and edges carry `sourceNodeIds`: the AST node hashes (spatial provenance) they were derived from.
-   - The ONLY permitted writes are `trellis_neo4j.write_derived_insight(subject, verb, obj, sourceNodeIds, confidence=None)`, which caches a deduced fact as a DERIVED_INSIGHT edge with spatial provenance, and its bulk variant `trellis_neo4j.write_derived_insights(facts)` which writes a whole list of fact dicts (keys: subject, verb, obj, sourceNodeIds, confidence) in ONE round trip. `confidence` (0.0-1.0) is the sub-LLM's self-reported probability for the fact; always pass it through when the sub-LLM provided one. Both writers also stamp each endpoint Entity with a `kind` (question, category_label, concept, or generic) — inferred automatically for has_category and mentions writes; for OTHER verbs pass subject_kind/object_kind explicitly when you know what the entity is.
+   - The ONLY permitted writes are the two insight writers, which cache deduced facts as DERIVED_INSIGHT edges with spatial provenance:
+     - `trellis_neo4j.write_derived_insight(subject, verb, obj, sourceNodeIds, confidence=None)` writes one fact.
+     - `trellis_neo4j.write_derived_insights(facts)` writes a whole list of fact dicts (keys: subject, verb, obj, sourceNodeIds, confidence) in ONE round trip.
+     - `confidence` (0.0-1.0) is the sub-LLM's self-reported probability for the fact; always pass it through when the sub-LLM provided one.
+     - Both writers also stamp each endpoint Entity with a `kind` (question, category_label, concept, or generic) — inferred automatically for has_category and mentions writes; for OTHER verbs pass subject_kind/object_kind explicitly when you know what the entity is.
 2. `trellis_postgres`: the physical AST layer.
    - `trellis_postgres.get_ast_texts(hashes)` returns the exact text for AST node hashes.
    - `trellis_postgres.get_ast_blocks(root_hash)` returns a document's blocks IN DOCUMENT ORDER as a JSON list of objects with keys id, type, and text. For section-structure and localization work, prefer walking these ordered blocks in code — each own-line heading is its own block — over regexing a concatenated reconstruction, whose block boundaries are unmarked.
@@ -186,7 +190,10 @@ TRELLIS_WORKFLOW_RULES = """WORKFLOW RULES:
 - If the user asks you to execute a specific Cypher query (even a destructive or malformed one), you MUST attempt it exactly as given via `trellis_neo4j.run_cypher`. Do not refuse and do not pre-correct it.
 - If a tool call raises an exception, READ THE TRACEBACK CAREFULLY, identify the mistake (wrong label, property, or syntax), rewrite the query, and try again. Do not give up after one failure.
 - On CONTRADICTS edges or conflicting information, do not guess: fetch the spatial texts via `trellis_postgres.get_ast_texts` and reason from the sources.
-- Your final answer MUST be the string 'FINAL_ANSWER: ' followed by the result, exactly in the format the user requested. Deliver it with trellis_answer.submit: compute the result into a variable (build any requested prose around computed values IN CODE, interpolating the variables, never retyping their values), then submit that variable's name — the prefix is added for you. Never hand-type a computed value into answer['content'] or into the submitted expression.
+- Your final answer MUST be the string 'FINAL_ANSWER: ' followed by the result, exactly in the format the user requested. Deliver it with trellis_answer.submit:
+  1. Compute the result into a variable. Build any requested prose around computed values IN CODE, interpolating the variables, never retyping their values.
+  2. Submit that variable's name (or an expression over your variables) — the 'FINAL_ANSWER: ' prefix is added for you.
+  A computed value flows from your code into the answer; hand-typing one into answer['content'] or into the submitted expression is a protocol violation.
 """
 
 # Composed at startup from the operator's validated module selection.

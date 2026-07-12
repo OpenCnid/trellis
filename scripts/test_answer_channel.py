@@ -237,7 +237,8 @@ import trellis_agent  # noqa: E402
 check("TOOLS section teaches trellis_answer.submit",
       "trellis_answer.submit" in trellis_agent.SYSTEM_PROMPT)
 check("the workflow rule forbids hand-typing computed values",
-      "Never hand-type a computed value" in trellis_agent.SYSTEM_PROMPT)
+      "hand-typing one into answer['content'] or into the submitted "
+      "expression is a protocol violation" in trellis_agent.SYSTEM_PROMPT)
 check("the turn-discipline line routes completion through the channel",
       "finish by calling trellis_answer.submit" in trellis_agent.SYSTEM_PROMPT)
 check("the taught surface is brace-free beyond the rlms base (format safety)",

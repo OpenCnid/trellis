@@ -254,6 +254,80 @@ file bytes share content-addressed block hashes across repo keys)
 reads contested, zero uncontested. The standard lazy recovery path
 applies, exactly as after the July 6 pilot.
 
+## 5c. Owner-approved pilot RE-RUN with the decontaminated code prompt (July 12, 2026)
+
+The same root through the same CLI, one day after §5b, with the July 12
+prompt-engineering revision of the code-tuned extraction prompt live
+(hypershot fact frame, no concrete repository-symbol examples, positive
+specificity rule in place of the enumerated generic-name ban —
+`extraction_job.ts`, commit 0c090d7):
+`repo:ingest --repo-key trellis-graph-pilot-3 --root src/core/graph
+--extract changed --max-blocks 150 --confirm-extraction` (workers:
+local `dev:workers`; only extraction + invalidation saw jobs).
+
+**Corpus delta vs §5b, recorded:** 26 files / 142,383 bytes vs 24 /
+131,111 — the Session 25 `generic_suppression.ts` + test pair landed
+after §5b's checkout. 11 files `test_fixture_excluded` (34 blocks
+withheld); paid bound 107 blocks vs §5b's 103; the 103 shared blocks
+are byte-identical (content-addressed).
+
+**Pipeline:** 107/107 extraction jobs completed, zero failures, queue
+drained in ~7 minutes.
+
+**Operational defects found and fixed during the run (recorded per
+Guardrail 8):** (1) a STALE §5b-era pilot worker process from another
+worktree (`_pilot_workers.tmp.ts`, running for days, holding metrics
+port 9464) was still consuming `extraction_queue` — killed BEFORE
+enqueueing, or the jobs would have run under the OLD prompt bytes;
+(2) this session's own first `dev:workers` instance was orphaned by a
+parent-process stop (Windows: killing the npm wrapper leaves the node
+child alive) and consumed 53 of the 107 jobs — SAME worktree and SAME
+new prompt bytes, so the graph measurement is unaffected, but token
+and suppression counters cover only the surviving instance's 54 jobs.
+Lesson recorded: kill worker trees by child PID on Windows, and check
+for stale queue consumers before any paid enqueue.
+
+**Spend (54-job measured basis, extrapolated for the full 107):**
+measured 31,742 input / 9,997 output completion tokens + 12,034
+embedding tokens. Per queued block: 588 input (+8% vs §5b's 543 — the
+revised prompt is slightly longer) and **185 output (−53% vs §5b's
+394)**. Extrapolated full run ≈62.9k in / 19.8k out — at any single
+price basis roughly one-third cheaper than §5b
+(≈$0.18 at §5b's own reported basis; §5b was $0.28).
+
+**Graph produced:** 160 entities and 90 relationships carrying pilot
+provenance (§5b: 237/243 from 103 blocks) — the revised prompt is
+substantially sparser, which is the prompt's stated design goal ("a
+few load-bearing API facts"); whether the extra sparsity loses
+task-relevant facts is NOT decidable from graph shape alone and is
+recorded as an open question for a retrieval-task eval. Top hubs:
+`same_as` and `ast_nodes` at 4 pilot sources (max hub cardinality
+unchanged vs §5b), top 15 all genuine API-level identifiers
+(`trec_labels`, `module_entity_kind`, `current_rubric_version`,
+`select_resolution_entities_cypher`, `config.llm.extractionmodel`, …).
+
+**The decontamination checks (the run's purpose):**
+- **ZERO denylist names with pilot provenance** — parity with §5b,
+  now achieved WITHOUT naming the banned tokens in the prompt.
+- **ZERO hypershot-variable leakage**: no entity name contains any
+  frame-variable fragment (`exported_symbol`, `specific_verb`,
+  `exactly_as_written`, `module_config_key`) — the frame primed
+  structure without priming content, live-verified.
+- **Residual near-generics shrank**: `concept` at 1 pilot source
+  (§5b: `concept`/`kind`/`generic` at 3 each).
+- **Suppression (partial accounting)**: the measured instance logged 4
+  `extraction.generic_suppressed` events (4 entities + 5 actions) over
+  its 54 jobs vs §5b's 14 events (18 + 23) over 103 — directionally
+  fewer generic candidates emitted upstream, consistent with the
+  positive-rule change, but the orphaned instance's counters were lost
+  so this is indicative, not conclusive.
+
+**Cleanup:** snapshot #2 tombstoned all 26 paths (zero accepted
+files); the invalidation sweep quarantined exactly the 160
+pilot-provenance entities (contested 394 → 554; entity total unchanged
+at 796 — quarantine, never delete); both queues drained; the standard
+lazy recovery path applies.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

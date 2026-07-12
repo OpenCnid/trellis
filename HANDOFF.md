@@ -1020,6 +1020,49 @@ Repository state at handoff creation:
   `requirements.txt` untouched (all Docker layers stayed cached).
   Like `TRELLIS_EXP_OMIT_CMT`, `TRELLIS_EXP_MODULES` has NO
   `.env.example` entry — experiment instrumentation only.
+- July 12, 2026 (owner-directed prompt-engineering pass, its own PR):
+  targeted structural prompt improvements under the prompt-engineering
+  / hypershot protocols — the code-extraction prompt's concrete
+  repository-symbol examples and its enumerated generic-name ban
+  (measured failing in the Session 25 pilot; the deterministic gate is
+  the enforcement) replaced by a contamination-free hypershot fact
+  frame + positive specificity rule (`extraction_job.ts`, assertions
+  updated; legacy prose bytes UNTOUCHED — the queue-compat pin holds);
+  the orchestrator prompt teaches the dispatch decision as a JSON
+  hypershot frame with instruction-bearing value slots (schema
+  enforcement unchanged; all pinned substrings preserved); two kernel
+  run-on instruction blocks restructured with hierarchical markers
+  (insight-writer TOOLS bullet → sub-bullets; final-answer workflow
+  rule → numbered steps), semantic content unchanged — a WITTING
+  kernel prompt change: BOTH composed-prompt pins recomputed in the
+  same commit with history recorded (`test_modules.py`): default
+  `3f07295a…4b63` → `5d27e474…fe2a`; omit-arm `85362b81…71bb` →
+  `45987904…0b56` (still structurally default minus exactly the
+  block); `docs/COLLABORATOR_BRIEFING.md` gained a proposal hypershot
+  frame heading "Where you can help next". Deliberately NOT touched:
+  module addenda (module #0 is the measured OOLONG protocol; module #1
+  is grounded-authored — hand-editing breaks its provenance story),
+  the authoring template/addendum (prompt-module authoring
+  deprioritized), workspace/textedit addenda (already structurally
+  clean), probe question bytes and preambles (round-comparability),
+  and the legacy extraction prompt (queue compatibility). The owner
+  approved the paired measurements the same day and both RAN: the
+  est-suite kernel check ($0.9402, 25 runs, new kernel vs the Session
+  28 off arm — 25/25 correct, per-question median db calls IDENTICAL,
+  pooled tokens/cost non-inferior; verdict SAFE, no improvement
+  claimed; probe report kernel-pass section; answer-channel record
+  255/255) and the extraction pilot re-run (`trellis-graph-pilot-3`,
+  report §5c — 107/107 jobs, ZERO denylist names, ZERO
+  hypershot-variable leakage, residual near-generics shrank, output
+  tokens per block −53%, entities/relationships sparser 160/90 vs
+  237/243 with the sparsity-vs-coverage question recorded open;
+  cleaned up: tombstoned + swept, contested 394 → 554). §5c also
+  records the two operational defects found mid-run (a stale pilot
+  worker from another worktree consuming the queue — check for stale
+  consumers BEFORE any paid enqueue; a worker instance orphaned by
+  parent-only kill on Windows — kill worker trees by child PID).
+  Total July 12 paid spend ≈$1.30 measured (+≈$0.18 estimated on the
+  orphaned instance's jobs).
 - Offline baseline: `npm test` = 728 passing across 79 files
   (712/77 + Session 28's 16 across 2 new files).
 - `npm run build` and `npm run python:check` pass (the check now
@@ -1173,8 +1216,9 @@ injection, orphaned temp files) are hygiene — include only if cheap.
 - **What does NOT change:** the toolkit's operator gating
   (`TRELLIS_EDIT_ROOT` only), the byte-identical-when-unset pins, the
   splice "\n"-only refusal, `StaleFileError` on digest mismatch, the
-  kernel prompt and both composed-prompt pins (`3f07295a…4b63` /
-  `85362b81…71bb`), the module registry, module #2's RETIRED status
+  kernel prompt and both composed-prompt pins (`5d27e474…fe2a` /
+  `45987904…0b56` since the July 12, 2026 owner-directed
+  prompt-engineering pass — see §2), the module registry, module #2's RETIRED status
   and historical record, the est suite and its truths, every probe
   suite's question bytes, and the four durable corpora. Git stays OUT
   of the toolkit.
@@ -1328,7 +1372,8 @@ Update:
    the migration trigger, escalated to the owner, never silently
    absorbed.
 9. Do not break existing consumers: the composed-prompt pins
-   (`3f07295a…4b63` default / `85362b81…71bb` omit-arm, `test:modules`
+   (`5d27e474…fe2a` default / `45987904…0b56` omit-arm since the
+   July 12, 2026 prompt-engineering pass, `test:modules`
    [4]/[7]) do NOT move this session (row 8 touches the toolkit and
    its drill, never the kernel prompt; module #2 is RETIRED — the
    loader refuses it, pinned);
