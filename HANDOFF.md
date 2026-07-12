@@ -1045,10 +1045,24 @@ Repository state at handoff creation:
   the authoring template/addendum (prompt-module authoring
   deprioritized), workspace/textedit addenda (already structurally
   clean), probe question bytes and preambles (round-comparability),
-  and the legacy extraction prompt (queue compatibility). NO
-  behavioral measurement attached: offline suites prove composition
-  integrity only; any behavioral claim needs an owner-gated paired
-  run (the `est` suite or a probe round).
+  and the legacy extraction prompt (queue compatibility). The owner
+  approved the paired measurements the same day and both RAN: the
+  est-suite kernel check ($0.9402, 25 runs, new kernel vs the Session
+  28 off arm — 25/25 correct, per-question median db calls IDENTICAL,
+  pooled tokens/cost non-inferior; verdict SAFE, no improvement
+  claimed; probe report kernel-pass section; answer-channel record
+  255/255) and the extraction pilot re-run (`trellis-graph-pilot-3`,
+  report §5c — 107/107 jobs, ZERO denylist names, ZERO
+  hypershot-variable leakage, residual near-generics shrank, output
+  tokens per block −53%, entities/relationships sparser 160/90 vs
+  237/243 with the sparsity-vs-coverage question recorded open;
+  cleaned up: tombstoned + swept, contested 394 → 554). §5c also
+  records the two operational defects found mid-run (a stale pilot
+  worker from another worktree consuming the queue — check for stale
+  consumers BEFORE any paid enqueue; a worker instance orphaned by
+  parent-only kill on Windows — kill worker trees by child PID).
+  Total July 12 paid spend ≈$1.30 measured (+≈$0.18 estimated on the
+  orphaned instance's jobs).
 - Offline baseline: `npm test` = 728 passing across 79 files
   (712/77 + Session 28's 16 across 2 new files).
 - `npm run build` and `npm run python:check` pass (the check now

@@ -1243,3 +1243,41 @@ needs an owner-gated paired run (the `est` suite for retrieval
 behavior, a probe round for the kernel, or an extraction pilot
 re-run for the code prompt — each propose-with-estimate under the
 standing ≤$5 cap).**
+
+**The owner approved both paired runs the same day, and they ran
+(total paid spend: $0.9402 + measured $0.18, plus ≈$0.18 estimated on
+the orphaned instance's 53 jobs — all under caps):**
+
+1. **The est-suite kernel check ($0.9402, 25 runs)** — the new
+   default kernel (`5d27e474…fe2a`) on the est questions vs the
+   Session 28 control's off arm (old kernel, same question bytes, one
+   day earlier). 25/25 correct; per-question median db calls
+   IDENTICAL (1/2/4/1/2 — no retrieval movement, as intended for a
+   structure-only rewording); token/iteration profile mixed
+   (chronicle pair +1 median iteration, frank/led/rel −1); pooled
+   inTok median 8,843 vs 9,217 and cost $0.9402 vs $1.0425 — inside
+   noise at n=5. Verdict: behaviorally SAFE, no improvement claimed.
+   Full table in the probe report's kernel-pass section;
+   answer-channel record now 255/255.
+2. **The extraction pilot re-run (`trellis-graph-pilot-3`; report
+   §5c)** — the same root as §5b one day later, decontaminated code
+   prompt live. 107/107 jobs, zero failures. **The decontamination
+   held on every check: ZERO denylist names with pilot provenance
+   (parity with §5b, now without enumerating the banned tokens),
+   ZERO hypershot-variable leakage (live-queried), residual
+   near-generics shrank (`concept`@1 vs three names @3), max hub
+   cardinality unchanged (4), top-15 all genuine API identifiers.**
+   Output tokens per block −53% (185 vs 394; input +8%) — sparser per
+   the design goal; whether the extra sparsity loses task-relevant
+   facts is an open question for a retrieval-task eval (160
+   entities / 90 relationships vs §5b's 237/243). Cleanup complete
+   (snapshot #2 tombstoned 26 paths; the sweep quarantined exactly
+   the 160 pilot-provenance entities, contested 394 → 554, nothing
+   deleted). Two operational defects found and fixed mid-run,
+   recorded in §5c: a stale §5b-era pilot worker from ANOTHER
+   worktree still consuming the queue days later (killed BEFORE
+   enqueue — it would have processed the jobs with OLD prompt bytes),
+   and this session's own first worker instance orphaned by a
+   parent-only kill on Windows (same worktree and code, so the
+   measurement stands; token/suppression accounting partial — 54/107
+   jobs measured).

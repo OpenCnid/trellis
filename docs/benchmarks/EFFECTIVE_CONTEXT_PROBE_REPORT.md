@@ -728,3 +728,54 @@ control, zero transcription errors); zero pandas/polars imports.
 Raw logs: `benchmark_logs/effective-context-2026-07-12T*` (gitignored,
 local); per-invocation `summary.json` records `moduleSelection` and
 `moduleArmFlag` per arm.
+
+# The kernel prompt-engineering pass check (July 12, 2026 — 25 runs, $0.9402)
+
+The July 12 owner-directed prompt-engineering pass restructured two
+kernel instruction blocks (hierarchical markers, semantic content
+unchanged; pins moved wittingly — `test_modules.py` history). This
+check re-ran the `est` suite on the NEW default kernel
+(`5d27e474…fe2a`), single arm, 5 questions × 5 repeats, and compares
+against the Session 28 control's off arm — the OLD default kernel
+(`3f07295a…4b63`) on the same question bytes, measured one day
+earlier. This is a before/after across commits, not a same-day paired
+A/B: cross-day model-side nondeterminism is an unremoved confound, and
+n=5 per cell is small. Read direction, not decimals.
+
+| question | kernel | n | correct | inTok med [min..max] | iter med | db med | cost |
+|---|---|---|---|---|---|---|---|
+| est-chr-counts         | old | 5 | 5/5 | 3,698 [3,698..12,734] | 1 | 1 | $0.1030 |
+| est-chr-counts         | new | 5 | 5/5 | 8,087 [3,742..9,503] | 2 | 1 | $0.1222 |
+| est-chr-quote-entry    | old | 5 | 5/5 | 3,761 [3,761..20,273] | 1 | 2 | $0.1656 |
+| est-chr-quote-entry    | new | 5 | 5/5 | 13,731 [13,068..18,418] | 3 | 2 | $0.2151 |
+| est-frank-locate-count | old | 5 | 5/5 | 9,309 [3,803..15,017] | 2 | 4 | $0.1747 |
+| est-frank-locate-count | new | 5 | 5/5 | 3,847 [3,847..8,930] | 1 | 4 | $0.1076 |
+| est-led-captain        | old | 5 | 5/5 | 19,335 [5,571..27,684] | 3 | 1 | $0.2364 |
+| est-led-captain        | new | 5 | 5/5 | 12,606 [5,615..20,565] | 2 | 1 | $0.1853 |
+| est-rel-guild          | old | 5 | 5/5 | 29,287 [8,712..41,310] | 3 | 2 | $0.3628 |
+| est-rel-guild          | new | 5 | 5/5 | 18,899 [8,756..32,193] | 2 | 2 | $0.3102 |
+
+Pooled (new): 25/25 correct, inTok median 8,843 (old off arm: 9,217),
+total $0.9402 (old: $1.0425). All 25 runs submitted through
+`trellis_answer` (the by-reference record is now 255/255, zero
+transcription errors); 4/5 frank runs found an identical 1-iteration
+path (in=3,847 four times — a stable early-answer route the old
+kernel's runs hit less often).
+
+**Reading (mixed, no-regression):**
+- **Retrieval behavior did not move**: per-question median database
+  calls are IDENTICAL old vs new on all five questions (1/2/4/1/2).
+  The restructure changed no tool-use profile — as intended for a
+  structure-only rewording.
+- **The token/iteration profile shifted, both directions**: the two
+  small-corpus chronicle questions paid more (+1 median iteration
+  each); frank and both large-corpus aggregates paid less (−1 median
+  iteration each). Pooled input tokens −4% and cost −10% — inside
+  plausible noise at this n.
+- **Correctness stayed saturated** (25/25 both kernels), so this
+  suite cannot show a correctness effect either way.
+- **Verdict:** the structural pass is behaviorally SAFE on this suite
+  (no retrieval regression, no correctness regression, cost
+  non-inferior). No improvement claim is made on these numbers; the
+  per-question splits are recorded for whoever designs a
+  higher-powered comparison.
