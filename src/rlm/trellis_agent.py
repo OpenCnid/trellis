@@ -10,6 +10,7 @@ from trellis_tools import (
     TrellisNeo4j,
     TrellisPostgres,
     get_tool_call_count,
+    get_retrieved_addresses,
     get_retrieved_address_count,
     RUBRIC_TEXT,
     CITATION_AUDIT_ENABLED,
@@ -403,12 +404,16 @@ def main():
 
     # Initialize tools. The Neo4j write path verifies cited AST hashes
     # against ast_nodes through the Postgres tool (Session 14 §10.2) —
-    # unconditional, no toggle.
+    # unconditional, no toggle — and constrains citable addresses to the
+    # run's retrieved-address set (Session 31, PROVENANCE_THREADING.md
+    # slice d: the T1 closure, wired here and only here; bare
+    # construction elsewhere keeps writing exactly as before).
     postgres_tool = TrellisPostgres()
     entailment_check = make_entailment_check(postgres_tool) if CITATION_ENTAIL_ENABLED else None
     neo4j_tool = TrellisNeo4j(
         ast_existence_check=postgres_tool.ast_hashes_exist,
         entailment_check=entailment_check,
+        retrieved_addresses_check=get_retrieved_addresses,
     )
     mcp_tool = None
 
