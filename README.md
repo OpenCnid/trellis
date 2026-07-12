@@ -12,6 +12,11 @@ survives intact — but it is now the *substrate* of the system, not the
 system. What follows explains the difference; the operational manual
 starts at [Getting started](#getting-started).
 
+> **Coding agents, CLIs, and harnesses start at [`AGENTS.md`](AGENTS.md)**
+> — the study protocol, the navigation map, and the permanent hard
+> rules. Human contributors: [`CONTRIBUTING.md`](CONTRIBUTING.md) and
+> [`docs/README.md`](docs/README.md) (the documentation reading order).
+
 ## What Trellis is
 
 **RLM** expands exclusively to *Recursive Language Model* — the MIT CSAIL

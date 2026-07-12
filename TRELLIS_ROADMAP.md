@@ -1281,3 +1281,25 @@ the orphaned instance's 53 jobs — all under caps):**
    parent-only kill on Windows (same worktree and code, so the
    measurement stands; token/suppression accounting partial — 54/107
    jobs measured).
+
+**Same PR, third commit — the agent onboarding layer (docs-only,
+owner-requested):** the repository gained a root `AGENTS.md`, the
+entry point for any coding agent/CLI/harness, designed under the same
+two protocols: it teaches the STUDY order (this file → HANDOFF →
+glossary → README → task-directed depth), the NAVIGATION map (a
+directory-ownership table plus the house change pattern taught as a
+hypershot frame — `{Behavior_You_Want} → {Tooling_That_Enforces_It} →
+{Pin_That_Detects_Drift}` — with the six worked enforcement-home rows),
+the one-paragraph connection model, the permanent hard rules (the
+never-changing core of HANDOFF §7: AST immutability, provenance
+enforcement, code-mediated text, the rlms brace contract, owner-gated
+spend, tooling-over-prompts, no attribution, honest reporting), and
+the invariant command block. Its LAYER CONTRACT is the design decision
+of record: AGENTS.md carries ONLY cross-session invariants and points
+to `HANDOFF.md` for everything volatile (objective, counts, pins,
+database state) — the same system-layer/data-layer split the hypershot
+protocol prescribes for prompts, applied to onboarding docs. Pointers
+added at the top of `README.md`, `CONTRIBUTING.md`, and
+`docs/README.md` §1; every path named in the navigation map verified
+to exist. `src/frontend/AGENTS.md` remains the nested example of the
+directory-scoped convention.
