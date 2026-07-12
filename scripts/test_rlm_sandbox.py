@@ -11,8 +11,10 @@
 # The Session 14 checks pin the two hardening layers at the single write
 # path: `sourceNodeIds` elements must match ^[0-9a-f]{64}$, and the
 # deduped union of a batch's hashes must exist in ast_nodes before the
-# WRITE session opens. The probe AST row is token-scoped: inserted by
-# this test, deleted by this test.
+# WRITE session opens. Section [5] pins the Session 30 retrieval-set
+# tracking; section [6] pins the Session 31 retrieval-membership write
+# gate (PROVENANCE_THREADING.md slice d) on top of it. Probe AST rows
+# are token-scoped: inserted by this test, deleted by this test.
 import hashlib
 import json
 import os
@@ -58,7 +60,11 @@ def expect_provenance_violation(name, fn, needle):
 PROBE_HASH = hashlib.sha256(b"trellis-sandbox-hardening-probe-v1").hexdigest()
 
 pg = TrellisPostgres()
-client = TrellisNeo4j(ast_existence_check=pg.ast_hashes_exist)  # the trellis_agent.py wiring
+# The Session 14 layers only (format + existence): sections [1]-[4]
+# write BEFORE anything is retrieved, so this client deliberately does
+# not wire the Session 31 retrieval-membership seam. The full
+# trellis_agent.py research wiring is drilled in section [6].
+client = TrellisNeo4j(ast_existence_check=pg.ast_hashes_exist)
 try:
     with pg.conn.cursor() as cur:
         cur.execute(
@@ -344,12 +350,158 @@ try:
     check("agent telemetry carries the counts-only retrieved_addresses field",
           '"retrieved_addresses": get_retrieved_address_count()' in agent_source)
 
+    # --- Session 31: the write-path retrieval-membership gate (slice d) -
+    print("\n[6] retrieval-membership write gate")
+
+    # The gated client — constructed exactly the way trellis_agent.py
+    # wires it for research runs (existence + retrieval membership;
+    # entailment stays None when TRELLIS_CITATION_ENTAIL is unset).
+    gated = TrellisNeo4j(
+        ast_existence_check=pg.ast_hashes_exist,
+        retrieved_addresses_check=get_retrieved_addresses,
+    )
+    try:
+        # Probe rows this section owns: all existent in ast_nodes, none
+        # retrieved by any tool call yet (token-scoped via the shared
+        # document_id, so the finally-block cleanup catches them).
+        UNRETRIEVED_HASH = hashlib.sha256(b"trellis-sandbox-gate-unretrieved").hexdigest()
+        GATE_BATCH_HASH = hashlib.sha256(b"trellis-sandbox-gate-batch").hexdigest()
+        GATE_BOUND_HASHES = [
+            hashlib.sha256(f"trellis-sandbox-gate-bound-{i}".encode()).hexdigest()
+            for i in range(7)
+        ]
+        with pg.conn.cursor() as cur:
+            for h in [UNRETRIEVED_HASH, GATE_BATCH_HASH] + GATE_BOUND_HASHES:
+                cur.execute(
+                    "INSERT INTO ast_nodes (id, document_id, data) VALUES (%s, %s, %s) "
+                    "ON CONFLICT (id) DO NOTHING",
+                    (h, "sandbox_probe_doc", json.dumps({"type": "text", "content": "gate probe"})),
+                )
+        pg.conn.commit()
+
+        # An existent-but-unretrieved hash refuses with the full typed
+        # message: Provenance Violation + the offending hash + the
+        # re-retrieval teaching sentence.
+        try:
+            gated.write_derived_insight(
+                "sandbox gate subject", "mentions", "sandbox gate object", [UNRETRIEVED_HASH])
+            check("existent-but-unretrieved hash refuses", False, "nothing raised")
+            check("the refusal names the offending hash", False, "nothing raised")
+            check("the refusal teaches re-retrieval", False, "nothing raised")
+        except ValueError as e:
+            msg = str(e)
+            check("existent-but-unretrieved hash refuses",
+                  "Provenance Violation" in msg and "never retrieved" in msg, msg[:200])
+            check("the refusal names the offending hash", UNRETRIEVED_HASH in msg, msg[:200])
+            check("the refusal teaches re-retrieval",
+                  "get_ast_texts" in msg and "re-derive" in msg, msg[:200])
+        except Exception as e:  # noqa: BLE001
+            check("existent-but-unretrieved hash refuses", False, f"got {type(e).__name__}: {e}")
+            check("the refusal names the offending hash", False, "no ValueError")
+            check("the refusal teaches re-retrieval", False, "no ValueError")
+
+        # Fail fast means fail EMPTY: the refused write left no partial
+        # state in the graph.
+        rows = json.loads(client.run_cypher(
+            "MATCH (n:Entity) WHERE n.name = 'sandbox gate subject' RETURN n.name AS name"))
+        check("the refused write left no partial state in the graph", rows == [])
+
+        # Bounded echo: >5 unretrieved hashes report first 5 + count.
+        try:
+            gated.write_derived_insight(
+                "sandbox gate subject", "mentions", "sandbox gate object", GATE_BOUND_HASHES)
+            check("unretrieved-hash echo is bounded (first 5 + count)", False, "nothing raised")
+        except ValueError as e:
+            check("unretrieved-hash echo is bounded (first 5 + count)", "+2 more" in str(e),
+                  str(e)[:200])
+
+        # Check ORDER is pinned: a hash that is both nonexistent and
+        # unretrieved reports the EXISTENCE violation (the Session 14
+        # layer runs first), never the retrieval violation.
+        unknown_gate = hashlib.sha256(b"trellis-sandbox-gate-unknown").hexdigest()
+        try:
+            gated.write_derived_insight(
+                "sandbox gate subject", "mentions", "sandbox gate object", [unknown_gate])
+            check("check order pinned: existence reported before retrieval", False, "nothing raised")
+        except ValueError as e:
+            check("check order pinned: existence reported before retrieval",
+                  "do not exist in ast_nodes" in str(e) and "never retrieved" not in str(e),
+                  str(e)[:200])
+
+        # The cited audit bucket records the refused ATTEMPT when the
+        # audit is enabled (the A/B eval's measure-the-attempt
+        # discipline). The drill runs with the audit env flags unset, so
+        # the module gate is flipped directly and restored afterward.
+        import trellis_tools as _tt
+        _tt._TRACK_CITATIONS = True
+        try:
+            try:
+                gated.write_derived_insight(
+                    "sandbox gate subject", "mentions", "sandbox gate object", [UNRETRIEVED_HASH])
+            except ValueError:
+                pass
+            check("the cited bucket records the refused attempt when the audit is enabled",
+                  UNRETRIEVED_HASH in get_citation_audit()["cited"])
+        finally:
+            _tt._TRACK_CITATIONS = False
+            with _tt._audit_lock:
+                _tt._audit["cited"].clear()
+        check("audit state restored after the attempt pin (cited bucket empty again)",
+              get_citation_audit()["cited"] == [])
+
+        # The remedy the refusal teaches WORKS: retrieve the hash, then
+        # the SAME write succeeds through the same gated client.
+        json.loads(pg.get_ast_texts([UNRETRIEVED_HASH]))
+        out = json.loads(gated.write_derived_insight(
+            "sandbox gate subject", "mentions", "sandbox gate object", [UNRETRIEVED_HASH]))
+        check("the SAME write succeeds after get_ast_texts retrieves the hash",
+              bool(out) and out[0].get("verb") == "mentions")
+
+        # Batch semantics: one unretrieved hash refuses the ENTIRE batch
+        # before any session opens — the retrieved fact is not written
+        # either. (PROBE_HASH was retrieved in section [5].)
+        try:
+            gated.write_derived_insights([
+                dict(subject="sandbox gate batch subject", verb="mentions",
+                     obj="sandbox gate object", sourceNodeIds=[PROBE_HASH]),
+                dict(subject="sandbox gate batch subject", verb="mentions",
+                     obj="sandbox gate batch object", sourceNodeIds=[GATE_BATCH_HASH]),
+            ])
+            check("a batch with one unretrieved hash refuses entirely", False, "nothing raised")
+        except ValueError as e:
+            check("a batch with one unretrieved hash refuses entirely",
+                  "never retrieved" in str(e) and GATE_BATCH_HASH in str(e), str(e)[:200])
+        rows = json.loads(client.run_cypher(
+            "MATCH (n:Entity) WHERE n.name = 'sandbox gate batch subject' RETURN n.name AS name"))
+        check("the refused batch opened no write session (no partial state)", rows == [])
+
+        # The injection-mold pin: a bare-constructed client (no seam
+        # wired) writes an existent-but-unretrieved hash exactly as
+        # today — the gate activates only through explicit agent wiring.
+        bare = TrellisNeo4j(ast_existence_check=pg.ast_hashes_exist)
+        try:
+            out = json.loads(bare.write_derived_insight(
+                "sandbox gate bare subject", "mentions", "sandbox gate object", [GATE_BATCH_HASH]))
+            check("bare construction (no seam) writes an unretrieved hash exactly as today",
+                  bool(out) and out[0].get("verb") == "mentions")
+        finally:
+            bare.close()
+
+        # Static pin (the section [5] mold): the agent wires the seam
+        # for research runs.
+        check("trellis_agent.py wires the retrieval-membership seam",
+              "retrieved_addresses_check=get_retrieved_addresses" in agent_source)
+    finally:
+        gated.close()
+
     # Cleanup of the probe facts — the test owns a direct write session;
     # this is not the sandbox path.
     with client.driver.session() as s:
         s.run(
             "MATCH (n:Entity) WHERE n.name IN "
-            "['sandbox probe subject', 'sandbox probe object', 'sandbox bulk object'] "
+            "['sandbox probe subject', 'sandbox probe object', 'sandbox bulk object', "
+            "'sandbox gate subject', 'sandbox gate object', 'sandbox gate batch subject', "
+            "'sandbox gate batch object', 'sandbox gate bare subject'] "
             "DETACH DELETE n"
         )
 finally:
