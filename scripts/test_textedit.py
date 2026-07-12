@@ -23,11 +23,23 @@
 #       brace-free and teaches the discipline,
 #   [9] LocalREPL persistence — the holder survives turns and scaffold
 #       restore; the name does not exist when not injected,
-#  [10] telemetry — counts only, never a path, pattern, or content.
+#  [10] telemetry — counts only, never a path, pattern, or content,
+#  [11] write_back hardening (Session 29, coverage audit #2/#3/#4) —
+#       mode preservation, write-time containment re-verification,
+#       resolution-change refusal, second-writer detection inside the
+#       narrowed window, no orphaned temp file on refusal,
+#  [12] multi-file partial-failure semantics (audit #5) — per-file
+#       independence is intentional, pinned in both orders,
+#  [13] guard adversarial checks (audit #6) — one check per previously
+#       untested guard branch, plus the static no-subprocess/no-git
+#       import guard (audit #8).
+import ast
 import hashlib
 import json
 import os
+import re
 import shutil
+import stat
 import sys
 import tempfile
 
@@ -459,6 +471,196 @@ check("stats() reports exactly the three counters",
       and all(isinstance(v, int) for v in stats.values()))
 check("toolkit activity never increments the database tool-call count",
       get_tool_call_count() == 0)
+
+# --- 11. write_back hardening (Session 29, coverage audit #2/#3/#4) ----------
+print("\n[11] write_back hardening: mode, write-time containment, narrowed window")
+
+import trellis_textedit as tt_module  # noqa: E402
+
+# Audit #4: the replacement inode carries the source's mode. On POSIX the
+# executable bit is the recorded failure (a script or git hook silently
+# losing +x on every edit); on Windows mode equality is asserted so the
+# behavior is pinned not-regressed on both platforms (handoff §6).
+mode_root = make_root()
+mode_path = write_file(mode_root, "hook.sh", b"#!/bin/sh\necho one\n")
+if os.name == "posix":
+    os.chmod(mode_path, 0o755)
+mode_before = stat.S_IMODE(os.stat(mode_path).st_mode)
+mode_ted = TrellisTextEdit(mode_root)
+mode_ted.load("hook.sh")
+mode_ted.splice("hook.sh", 1, 2, ["echo two"])
+mode_ted.write_back("hook.sh")
+check("write_back preserves the source file mode across the replacement",
+      stat.S_IMODE(os.stat(mode_path).st_mode) == mode_before
+      and read_file(mode_root, "hook.sh") == b"#!/bin/sh\necho two\n")
+if os.name == "posix":
+    check("the executable bit survives the replacement inode",
+          os.stat(mode_path).st_mode & 0o111 == 0o111)
+else:
+    print("  [SKIP] executable-bit check (POSIX-only; mode equality asserted above)")
+
+# Audit #3: containment re-verified at write time — a parent directory
+# swapped for a symlink AFTER load is refused by the same load-time code
+# path, re-run against the current filesystem.
+def try_dir_symlink(src, dst):
+    try:
+        os.symlink(src, dst, target_is_directory=True)
+        return True
+    except (OSError, NotImplementedError):
+        return False
+
+
+swap_root = make_root()
+write_file(swap_root, "sub/target.txt", b"inside sub\n")
+outside_dir = make_root()
+write_file(outside_dir, "target.txt", b"outside bytes\n")
+swap = TrellisTextEdit(swap_root)
+swap.load("sub/target.txt")
+swap.splice("sub/target.txt", 0, 1, ["edited"])
+shutil.rmtree(os.path.join(swap_root, "sub"))
+if try_dir_symlink(outside_dir, os.path.join(swap_root, "sub")):
+    expect_raises("a parent symlink swapped in after load refuses at write_back",
+                  lambda: swap.write_back("sub/target.txt"),
+                  ValueError, "outside the edit root")
+    check("the refused write left the outside file untouched",
+          read_file(outside_dir, "target.txt") == b"outside bytes\n"
+          and not [n for n in os.listdir(outside_dir)
+                   if n.startswith(".trellis-textedit-")])
+
+    # A swap that stays INSIDE the root is caught by the resolution-change
+    # refusal even when the target's bytes are identical (the digest guard
+    # alone cannot see it — the resolution check is what refuses).
+    move_root = make_root()
+    write_file(move_root, "a/file.txt", b"same bytes\n")
+    write_file(move_root, "b/file.txt", b"same bytes\n")
+    mover = TrellisTextEdit(move_root)
+    mover.load("a/file.txt")
+    mover.splice("a/file.txt", 0, 1, ["edited"])
+    shutil.rmtree(os.path.join(move_root, "a"))
+    if try_dir_symlink(os.path.join(move_root, "b"), os.path.join(move_root, "a")):
+        expect_raises("an in-root resolution change refuses even with identical bytes",
+                      lambda: mover.write_back("a/file.txt"),
+                      StaleFileError, "no longer resolves")
+        check("the resolution-change refusal wrote nothing",
+              read_file(move_root, "b/file.txt") == b"same bytes\n")
+    else:
+        print("  [SKIP] in-root resolution-change check (directory symlinks unavailable)")
+else:
+    print("  [SKIP] write-time containment swap checks (directory symlinks unavailable)")
+
+# Audit #2: the narrowed window. A second writer landing while the temp
+# file is being built (after the first digest check) is detected by the
+# final re-check immediately before os.replace — simulated by wrapping
+# mkstemp so the mutation lands deterministically inside the window.
+narrow_root = make_root()
+write_file(narrow_root, "narrow.txt", b"first bytes\n")
+narrow = TrellisTextEdit(narrow_root)
+narrow.load("narrow.txt")
+narrow.splice("narrow.txt", 0, 1, ["edited bytes"])
+second_writer = b"SECOND WRITER LANDED MID-WRITE\n"
+real_mkstemp = tt_module.tempfile.mkstemp
+
+
+def racing_mkstemp(*args, **kwargs):
+    result = real_mkstemp(*args, **kwargs)
+    write_file(narrow_root, "narrow.txt", second_writer)
+    return result
+
+
+tt_module.tempfile.mkstemp = racing_mkstemp
+try:
+    expect_raises("a second writer landing while the temp file is built is detected",
+                  lambda: narrow.write_back("narrow.txt"),
+                  StaleFileError, "second writer")
+finally:
+    tt_module.tempfile.mkstemp = real_mkstemp
+check("the detected race left the second writer's bytes on disk",
+      read_file(narrow_root, "narrow.txt") == second_writer)
+check("the refused write left no orphaned temp file behind",
+      [n for n in os.listdir(narrow_root) if n.startswith(".trellis-textedit-")] == [])
+
+# --- 12. Multi-file partial-failure semantics (audit #5) ---------------------
+print("\n[12] multi-file writes: per-file independence is intentional, both orders")
+
+multi_root = make_root()
+write_file(multi_root, "a.txt", b"alpha\n")
+write_file(multi_root, "b.txt", b"beta\n")
+multi = TrellisTextEdit(multi_root)
+multi.load("a.txt")
+multi.load("b.txt")
+multi.splice("a.txt", 0, 1, ["alpha EDITED"])
+multi.splice("b.txt", 0, 1, ["beta EDITED"])
+write_file(multi_root, "b.txt", b"beta MOVED\n")
+check("file A writes back even though file B's guard would refuse",
+      json.loads(multi.write_back("a.txt"))["bytesWritten"] > 0
+      and read_file(multi_root, "a.txt") == b"alpha EDITED\n")
+expect_raises("file B refuses on its own digest, unaffected by A's success",
+              lambda: multi.write_back("b.txt"), StaleFileError, "digest mismatch")
+check("the partial outcome is intentional: A landed, B kept the second writer's bytes",
+      read_file(multi_root, "a.txt") == b"alpha EDITED\n"
+      and read_file(multi_root, "b.txt") == b"beta MOVED\n")
+check("B's staged splice survives the refusal for re-derivation after re-load",
+      json.loads(multi.diff("b.txt"))["pendingSplices"] == 1)
+
+write_file(multi_root, "c.txt", b"gamma\n")
+write_file(multi_root, "d.txt", b"delta\n")
+multi2 = TrellisTextEdit(multi_root)
+multi2.load("c.txt")
+multi2.load("d.txt")
+multi2.splice("c.txt", 0, 1, ["gamma EDITED"])
+multi2.splice("d.txt", 0, 1, ["delta EDITED"])
+write_file(multi_root, "c.txt", b"gamma MOVED\n")
+expect_raises("a refusal FIRST (file C) is per-file too",
+              lambda: multi2.write_back("c.txt"), StaleFileError, "digest mismatch")
+check("file D still writes back after C's refusal",
+      json.loads(multi2.write_back("d.txt"))["bytesWritten"] > 0
+      and read_file(multi_root, "d.txt") == b"delta EDITED\n")
+
+# --- 13. Guard adversarial checks (audit #6) + static import guard (#8) ------
+print("\n[13] guard branches: one check per previously untested refusal branch")
+
+adv_root = make_root()
+write_file(adv_root, "adv.txt", b"one\ntwo\nthree\n")
+adv = TrellisTextEdit(adv_root)
+adv.load("adv.txt")
+expect_raises("a boolean line index is refused (bool passes isinstance int)",
+              lambda: adv.lines("adv.txt", True, 2), ValueError, "integer")
+expect_raises("a boolean splice index is refused",
+              lambda: adv.splice("adv.txt", 0, True, ["x"]), ValueError, "integer")
+expect_raises("a boolean constructor bound is refused",
+              lambda: TrellisTextEdit(adv_root, max_files=True),
+              ValueError, "positive integer")
+expect_raises("a non-string locate pattern is refused",
+              lambda: adv.locate("adv.txt", 123), ValueError, "string")
+expect_raises("a non-string path is refused before any I/O",
+              lambda: adv.load(123), ValueError, "non-empty")
+expect_raises("a non-string element inside new_lines is refused",
+              lambda: adv.splice("adv.txt", 0, 1, ["ok", 5]), ValueError, "list")
+adv.splice("adv.txt", 0, 1, ["staged-then-discarded"])
+adv.load("adv.txt")
+check("re-load refreshes from disk and discards staged splices (documented semantics)",
+      json.loads(adv.diff("adv.txt"))["pendingSplices"] == 0
+      and json.loads(adv.lines("adv.txt", 0, 1))["lines"] == [[0, "one"]])
+
+# Audit #8: the no-git/no-subprocess guarantee held by inspection only —
+# pin it statically. The import set is exact: a future subprocess or git
+# surface fails this check before any reviewer has to catch it.
+with open(tt_module.__file__, "r", encoding="utf-8") as f:
+    toolkit_source = f.read()
+imported = set()
+for node in ast.walk(ast.parse(toolkit_source)):
+    if isinstance(node, ast.Import):
+        imported |= {alias.name.split(".")[0] for alias in node.names}
+    elif isinstance(node, ast.ImportFrom):
+        imported.add((node.module or "").split(".")[0])
+allowed_imports = {"hashlib", "json", "os", "posixpath", "re", "stat",
+                   "tempfile", "threading", "difflib"}
+check("toolkit imports stay inside the pinned stdlib set",
+      bool(imported) and imported <= allowed_imports,
+      f"unexpected imports: {sorted(imported - allowed_imports)}")
+check("no git or subprocess token anywhere in the toolkit source",
+      re.search(r"\bgit\b", toolkit_source) is None
+      and "subprocess" not in toolkit_source)
 
 # ---------------------------------------------------------------------------
 for stale_root in temp_roots:

@@ -189,7 +189,18 @@ moving, and the model estimating where text lives.
    exact inverse — an unedited load → write_back round-trips
    byte-identically, and moved CRLF lines keep their bytes verbatim (only
    authored lines are new bytes). Landing stays human: the toolkit never
-   touches git.
+   touches git. **Session 29 hardening (July 12, 2026, coverage audit
+   #2/#3/#4):** `write_back` re-verifies containment against the CURRENT
+   resolved path (the load-time check re-run — a parent symlink swapped in
+   after load is refused at write time, and an in-root resolution change
+   is refused as stale even when the bytes match), preserves the source
+   file's mode onto the replacement inode (the executable bit survives
+   edits), and re-checks the digest immediately before the atomic replace.
+   That final re-check NARROWS the check-to-replace race to the interval
+   between the last re-hash and `os.replace`; it does not eliminate it —
+   full elimination needs OS file locking, deliberately out of scope. A
+   second writer landing inside the residual window is still silently
+   overwritten; the window is documented, not denied.
 2. **Kernel prompt revision** — **IMPLEMENTED (Session 20, July 9, 2026):**
    the candidate wording below was adopted verbatim into
    `TRELLIS_ADDENDUM_BASE` in its own commit, with the `test:modules`

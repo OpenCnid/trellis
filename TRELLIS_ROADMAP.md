@@ -216,7 +216,7 @@ Ordered roughly by severity.
 | ~~6a~~ | ~~Data-plane representation verdict follow-ups (owner-directed July 11, 2026 — inserted AHEAD of the positive control, which is unchanged)~~ | **Done (Session 27, July 11, 2026)** — all three adopted recommendations landed zero-paid: `polars==1.34.0` pinned in requirements.txt + the `python:check` import list + an in-container import probe in the Compose integration (11 assertions now — the found prose-vs-manifest inconsistency is closed; pinning is NOT adoption, no src/ path imports polars); the pillar §7 verdict + cap-raise doctrine paragraph (docs-only, both composed-prompt pins unmoved); the M1 park/seed round-trip at cap sizes (byte-lossless at exactly 4 MiB/32 MiB/1024 segments, refusal at cap+1, timings printed never asserted) and M7 per-field torn-payload refusal + canonical-form determinism fixtures as standing sections [7]/[8] of `test:rlm-workspace` (86 → 106 checks); see §5 |
 | ~~6~~ | ~~Estimation-discipline positive control (module #2 follow-through)~~ | **Done (Session 28, July 11, 2026) — measured, then RETIRED by owner decision the same day.** The module-arm flag `TRELLIS_EXP_MODULES` and the `est` suite landed zero-paid; the 50-run paired control ran under the session's standing approval ($2.3981 actual vs the ~$1–2 estimate, disclosed). Result MIXED against the pre-stated criterion: correctness 25/25 in BOTH arms; median db calls on 1 vs off 2 (the targeted behavior moved); pooled median input tokens on 13,240 vs off 9,217 (FAILS pooled; reverses on the two largest-corpus questions). **Owner retired module #2 on the numbers** (manifest `status: retired`, loader refuses composition — pinned in `test:modules` [8]; the graph entity stays as the historical record) **and recorded the broader direction: behavioral failure classes close by TOOLING SHAPE, not prompt modules** — the recorded successors are kernel-level retrieval dedup/budgets (the `est` suite is their acceptance harness) and mechanical provenance threading (see the §5 addendum) |
 | 7 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
-| 8 | Self-editing toolkit coverage hardening (Trellis-edits-Trellis coverage audit, July 11, 2026) | **NEXT (Session 29).** Ten gaps found, all zero-paid to close except the cross-process proof run (the §5 coverage-audit entry of July 11 has the full gap matrix). Priority order: wire `npm run test:textedit` into CI first (cheap, no new tests needed); then close the TOCTOU window in `write_back`, re-verify containment at write time (not just load time), and preserve file mode across `write_back`; then pin multi-file partial-failure semantics and add per-guard-branch adversarial checks. Rationale for going first: the editing toolkit is the substrate the source-editing flywheel (row 11) runs on — harden it before deepening it |
+| ~~8~~ | ~~Self-editing toolkit coverage hardening (Trellis-edits-Trellis coverage audit, July 11, 2026)~~ | **Done (Session 29, July 12, 2026)** — the recorded priority items closed zero-paid in three commits: the 82-check drill wired into CI's `offline` job (audit #7); `write_back` hardened inside the existing contract (audit #2/#3/#4 — write-time containment re-verification via the load-time `_resolve` re-run, an in-root resolution-change refusal that catches what the digest guard cannot, source-mode preservation onto the replacement inode, and a final digest re-check immediately before `os.replace` that NARROWS the TOCTOU window — residual honestly documented, not claimed closed); multi-file partial-failure semantics pinned in both orders (audit #5), per-guard-branch adversarial checks (audit #6), and the static no-subprocess/no-git import-allowlist pin (audit #8). Drill 82 → 105 checks on Windows, 106 on POSIX. Remaining audit items stay open by design: #1 (cross-process proof run) is owner-gated propose-with-estimate; #9 content-borne injection and the abnormal-kill half of #10 are unpinned hygiene (the refusal-path temp-file cleanup IS now pinned); see §5 |
 | 9 | Mechanical provenance threading (owner-approved July 12, 2026 — the tooling-shape sequence, step 2 of 4) | The LAST transcription channel: `write_derived_insight` still takes model-asserted `sourceNodeIds`. **Decompose before building (owner direction: decompose so each slice is completable, then engineer to working solutions).** Recorded slices: (a) design record first (`docs/architecture/` — the claim→block factorization; loop the collaborator in per briefing item 2); (b) retrieval-set tracking in the tool layer (every `get_ast_texts`/`get_ast_blocks`/`vector_search` result already knows its addresses — record the run's retrieved-address set engine-side); (c) address-in-header threading (retrieved content travels with its address; no model retyping); (d) the write-path constraint (citable addresses ⊆ the run's retrieval set — a typed refusal outside it, additive to the Session 14 existence gate); (e) the sampled-entailment tier for the claim→block semantic residual (the citation eval proved only entailment catches it); (f) compat: existing insight rows untouched, `TRELLIS_RESULT` additive only. Each slice lands with its own pins; kernel prompt changes only if a tool signature moves (witting, both pins recomputed together) |
 | 10 | Kernel-level retrieval discipline: dedup + budgets (owner-approved July 12, 2026 — step 3 of 4; may fold into row 9's tool-layer work if the seams coincide) | Mechanical closure of the behavior retired module #2 nudged. Slices: (a) held-root tracking (which roots/blocks this run already fetched — engine-side, zero model judgment); (b) dedup: a re-fetch of a held root serves from held state or refuses with a typed pointer to the holding frame; (c) per-run retrieval budget (kernel constant + operator env twin, bounded like every other budget) with a typed over-budget refusal carrying the held-state inventory; (d) acceptance = the Session 28 `est` suite + minimal-evidence bounds re-run as a paired measurement (criterion: repeat-fetches 0 by construction, tokens ≤ baseline, correctness non-inferior — calls and correctness reported TOGETHER, never calls alone) |
 | 11 | Trellis-on-Trellis: full-repo extraction + graph-informed self-edits (owner-approved July 12, 2026 — step 4 of 4, the scaling flywheel) | Two stages, each owner-gated at its paid step. Stage 1: the broader-root extraction run over the full repository (Session 25 prerequisites are DONE — exclusion, code-tuned prompt routing, generic suppression; propose with the CLI's printed post-exclusion block bound and estimate) — Trellis's own codebase becomes a queryable semantic substrate. Stage 2: self-edit depth increments that QUERY the graph about the code they edit (the Session 26/expansion harness, escalating from string constants toward reviewed kernel diffs; each increment a single named failure mode, human `git diff` review before acceptance, toolkit never touches git). This is the large-corpus regime where the Session 28 control showed discipline pays — the corpus is Trellis itself |
@@ -229,112 +229,12 @@ Ordered roughly by severity.
 ## 5. Progress Log
 
 
-*(Entries from July 4, 2026 through Session 23 — the Phase-1/T-item work,
-Sessions 1–23, and their follow-ups — are archived verbatim in
+*(Entries from July 4, 2026 through Session 24 — the Phase-1/T-item work,
+Sessions 1–24, and their follow-ups — are archived verbatim in
 [`docs/archive/ROADMAP_HISTORY.md`](docs/archive/ROADMAP_HISTORY.md);
-moved July 12, 2026 by owner direction. The live ledger below keeps the
-most recent five sessions.)*
-
-### July 11, 2026 — Session 24: the boundary-aware block accessor (`get_ast_blocks`) + the structure-selection demotion (§4 row 4)
-
-The post-round-3 re-point executed: the ONE live failure class after
-three probe rounds (localization method error over the glued
-reconstruction — 10 misses across rounds 2–3) is fixed structurally
-with an additive read tool, and pillar §7's library-choice sub-claim is
-demoted per its own written contingency. No stored or reconstructed
-byte moved; the composed-prompt pins moved once, wittingly, to teach
-the tool.
-
-1. **The accessor.** `TrellisPostgres.get_ast_blocks(root_hash)`
-   (`src/rlm/trellis_tools.py`) fetches the root's `data` JSONB once
-   and walks it into a JSON list of `{id, type, text}` in document
-   order. The walk lives in the NEW dependency-free
-   `src/rlm/trellis_blocks.py` (stdlib-only, imported by
-   trellis_tools; `_node_text` moved there verbatim and is re-exported
-   under its historical name). The block set is exactly
-   `collectExtractionBlocks`'s and the text is exactly `nodeText`'s —
-   pinned by the new cross-language parity test
-   `src/core/ast/block_parity.test.ts`, which spawns the real Python
-   walk against real parser output (markdown incl. the child-text
-   reconstruction path, unstructured/PDF childless-content nodes, and
-   code-aware trees with `code_class` traversed through). Design note,
-   recorded: CI runs `npm test` BEFORE installing the Python runtime,
-   so the walk had to live in a module that imports nothing beyond the
-   stdlib — importing `trellis_tools` (psycopg2/neo4j at module top)
-   from a unit test would fail there. The accessor counts a database
-   tool call, joins the citation-audit read set with the same
-   semantics as `get_ast_texts`, refuses non-string and unknown hashes
-   loudly, and exposes no new citable ids. `trellis_blocks.py` joined
-   `python:check` and the Dockerfile `src/rlm` COPY set.
-2. **The kernel prompt teaches it (the only pin move).** One
-   brace-free line under the `trellis_postgres` TOOLS entry in
-   `_ADDENDUM_BASE_PREFIX` (prefer walking ordered blocks in code for
-   section-structure/localization work over regexing a concatenated
-   reconstruction). Both pins recomputed in the same commit with
-   history recorded in place (`scripts/test_modules.py`): default
-   `9f09d7d2…dd68` → `3f07295a…4b63`; omit-arm `9779b5c0…9e45` →
-   `85362b81…71bb` (still structurally default minus exactly
-   `CODE_MEDIATED_TEXT_BLOCK`, re-proven by `test:modules` [7]).
-3. **The probe's round-4 machinery (zero-paid).**
-   `classifyLocalizationMethod` gained the `structured` verdict — the
-   marker is the CALL (`get_ast_blocks(` with the open paren) because
-   the query is echoed into run logs and the preambles name the tool
-   paren-free, so offering the tool can never classify as using it
-   (unit-pinned both ways). The locate preambles now OFFER the
-   accessor (`BLOCKS_OFFER`, scoped to locate questions so every other
-   question's bytes stay round-comparable), the method table prints
-   `structured`, and `--ingest` verifies the accessor round-trip live:
-   frank 796 ordered blocks and chronicle 827, byte-identical to
-   `collectExtractionBlocks`+`nodeText` over the stored roots, sampled
-   text byte-matching `get_ast_texts` (run twice July 11; re-ingest
-   stayed the auditable no-op, all root hashes unchanged).
-4. **The §7 demotion (docs-only).**
-   `docs/architecture/CODE_MEDIATED_TEXT.md` §7: "pandas is the
-   default for relational/multi-file queries" is DEMOTED to "plain
-   loops until a measured threshold" — round 3's 0/87 is the continued
-   null result the §7 status note pre-committed to acting on (round 2:
-   0/68). The micro-benchmark table, the mechanism claim, and the
-   kernel prompt's "ingestion = pandas" metaphor (mechanism, not
-   library — §0's own definition) are untouched. §6 gained item 6 (the
-   accessor) and item 3 gained the round-3 close-out; the probe report
-   gained its round-4 section.
-5. **Acceptance.** `npm test` 683 passing across 75 files (baseline
-   678/74: +3 parity, +2 classifier); `npm run build`,
-   `npm run python:check` (now importing `trellis_blocks`),
-   `docker compose --profile test config --quiet` all green. Live
-   drills all green post-change: `test:modules` 51 (both pins moved
-   wittingly), `test:answer-channel` 32, `test:textedit` 81,
-   `test:module-lifecycle` 60, `test:promotion` 41,
-   `test:rlm-workspace` 86, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
-   `test:agent-loop` 35, `test:a2a` 46, `test:repo-ingest` 45,
-   `test:benchmark-hardening` 24, `test:entity-resolution` 34,
-   `test:api-hardening` 18, `test:belief-recovery` 30,
-   `test:invalidation-sweep` 17. `drill:scale` CLOSED (results file
-   committed per house practice). Isolated Compose integration run as
-   project `trellis_s24_ci` (image rebuilt — the Dockerfile COPY set
-   gained `trellis_blocks.py`; `package.json` untouched so the
-   `npm ci` layer stayed cached), all 10 PASS, torn down with
-   `--volumes`.
-6. **The paid localization re-measure (probe round 4) — proposed with
-   its estimate, OWNER-APPROVED, and MEASURED the same day.** Proposed
-   ≈36 runs ≈ $1.6; actual $0.9452 across 36 runs (the round-3 locate
-   set: chronicle ×4 + frank ×2, `--repeats 3`, both arms; run in
-   question×arm chunks of 3 with the $5 abort armed per invocation,
-   never hit). Result: **0/36 misses vs round 3's 7/30 (23%) on the
-   same questions, with 36/36 runs classified `structured`** — every
-   run in BOTH arms called `get_ast_blocks` and walked the ordered
-   blocks; zero line-anchored, zero shape, zero unknown. The round-3
-   "Chapter 23" TOC-trap question (`locate-November`) came back
-   "Chapter 5" 6/6. Median input ~8.2k tokens (on 8,229 / off 8,264),
-   median 2 iterations, no recovery loops (round 3's recovering runs
-   paid 13k–27k); 36/36 submitted through `trellis_answer`
-   (answer-channel record 180/180 across rounds 2–4); 0/36 pandas.
-   The off arm's identical adoption rate is the pillar's enforcement
-   thesis measured again: the tooling shape, not the §6.2 prompt
-   block, carries the behavior. The pre-stated success criterion is
-   met exactly; the superseded reconstruction-byte row STAYS closed
-   (§0 event-loop re-check: the positive result re-opens nothing —
-   Session 25 remains the extraction prerequisites, row 5).
+Sessions 1–23 moved July 12, 2026 by owner direction, Session 24 moved
+the same day with the Session 29 PR under the same five-session window
+rule. The live ledger below keeps the most recent five sessions.)*
 
 ### July 11, 2026 — Session 25: repository-scale extraction prerequisites (§4 row 5)
 
@@ -1303,3 +1203,96 @@ added at the top of `README.md`, `CONTRIBUTING.md`, and
 `docs/README.md` §1; every path named in the navigation map verified
 to exist. `src/frontend/AGENTS.md` remains the nested example of the
 directory-scoped convention.
+
+### July 12, 2026 — Session 29: self-editing toolkit coverage hardening (§4 row 8)
+
+The July 11 coverage audit's recorded priority items closed, all
+zero-paid, three commits (CI wiring / kernel hardening / drill pins) —
+the toolkit hardened before the source-editing flywheel (row 11)
+deepens on it.
+
+1. **CI wiring (audit #7, first commit).**
+   `.github/workflows/ci.yml`'s `offline` job now runs
+   `npm run test:textedit` directly after the existing Python-runtime
+   install step (the drill needs no database or network). Zero new
+   tests in this commit; the whole drill became regression-detected.
+2. **`write_back` hardening (audit #2/#3/#4, kernel change — witting,
+   its own commit).** All three closed INSIDE the existing contract:
+   `StaleFileError` semantics, temp + rename atomicity, and the
+   Session 26 splice semantics (refuse only `"
+"`) did not move, and
+   `TEXTEDIT_ADDENDUM` is byte-unchanged (both composed-prompt pins
+   untouched: default `5d27e474…fe2a`, omit-arm `45987904…0b56`).
+   (a) **Write-time containment (audit #3):** `write_back` re-runs the
+   load-time `_resolve` against the CURRENT filesystem — a parent
+   directory swapped for a symlink after load is refused at write
+   time; additionally a path that resolves DIFFERENTLY than at load is
+   refused as stale even when the target's bytes are identical (the
+   in-root swap the digest guard alone cannot see). (b) **Mode
+   preservation (audit #4):** the source's `stat.S_IMODE` is carried
+   onto the mkstemp temp file (created 0600) before `os.replace` — the
+   executable bit on a script or hook no longer vanishes on every
+   edit; Windows mode bits are a harmless no-op. (c) **The narrowed
+   TOCTOU window (audit #2):** the digest is re-checked immediately
+   before `os.replace`, so a second writer landing while the temp file
+   was being built is DETECTED (StaleFileError, temp unlinked, disk
+   untouched) instead of overwritten. Honesty per the audit's own
+   framing: the residual race between the final re-hash and
+   `os.replace` remains — full elimination needs OS file locking,
+   deliberately out of scope — and is documented in the `write_back`
+   docstring and CODE_MEDIATED_TEXT.md §6 item 1, not claimed closed.
+3. **Drill extension (`scripts/test_textedit.py` 82 → 105 checks on
+   this Windows host; 106 on POSIX, where the executable-bit check
+   also runs).** Section [11] pins each hardening behavior — mode
+   preservation, the outside-root symlink-swap refusal (outside file
+   untouched, no temp residue), the in-root resolution-change refusal,
+   deterministic second-writer detection (a wrapped `mkstemp` lands
+   the mutation inside the narrowed window), and no orphaned temp file
+   after a refusal (the refusal-path half of audit #10, pinned in
+   passing). Section [12] pins multi-file partial-failure semantics
+   (audit #5) as INTENTIONAL per-file independence, in both orders:
+   file A lands although B refuses (B keeps the second writer's bytes
+   and its staged splice for re-derivation), and a refusal first never
+   blocks a later independent write. Section [13] adds one adversarial
+   check per previously untested guard branch (audit #6: boolean
+   line/splice indexes, a boolean constructor bound, a non-string
+   locate pattern, a non-string path, a non-string `new_lines`
+   element, reload-discards-staging) — each fails if its branch is
+   deleted, the cheap deterministic core of mutation coverage with
+   zero new dependencies — plus the audit-#8 hygiene item: the
+   toolkit's import set is pinned to an exact stdlib allowlist and its
+   source must carry no git or subprocess token (the no-git guarantee
+   now held by a check, not inspection).
+4. **Audit disposition after this session:** #2 narrowed + documented,
+   #3/#4/#5/#6/#7/#8 closed, #10 half-closed (refusal-path cleanup
+   pinned; the abnormal-kill orphan stays unpinned hygiene), #9
+   (content-borne injection) untouched — the Session 26 W4 live
+   refusal stands as the evidence of record; #1 (cross-process
+   isolation) is a proof run, owner-gated propose-with-estimate, never
+   self-served.
+5. **Acceptance (all green, commands per HANDOFF §6).** Offline:
+   `npm test` 729 passing across 79 files observed BEFORE any Session
+   29 change (the HANDOFF-recorded 728 was one short of the post-PR-69
+   suite; no Session 29 change touches the unit suite), `npm run
+   build`, `npm run python:check`,
+   `docker compose --profile test config --quiet`. Live zero-paid:
+   `test:answer-channel` 32, `test:textedit` 105 (was 82),
+   `test:module-lifecycle` 60, `test:modules` green (section [8]
+   refusal pinned, both prompt pins unmoved), `test:promotion` 41,
+   `test:rlm-workspace` 106, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
+   `test:agent-loop` 35 (ALL CHECKS PASSED), `test:a2a` 46 (ALL CHECKS
+   PASSED), `test:repo-ingest` 56, `test:benchmark-hardening` 24,
+   `test:entity-resolution` 34, `test:api-hardening` 18,
+   `test:belief-recovery` 30, `test:invalidation-sweep` 17.
+   `drill:scale` 1.97x CLOSED (in-band ~1.48x–2.26x; max provenance
+   286; results file committed per house practice). Isolated Compose
+   integration run as project `trellis_s29_ci` (host ports 0, torn
+   down with `--volumes`): 11/11 PASS, every image layer cached (no
+   manifest changed). `git diff --check` clean. No defect found in
+   existing code — the audit's gaps were coverage gaps, and every
+   pre-existing guard held under the new adversarial checks; the
+   three hardening behaviors added enforcement where none existed.
+6. **Documentation window (owner rule, July 12).** The Session 24 §5
+   entry moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the
+   live ledger keeps the most recent five sessions: 25–29); HANDOFF
+   regenerated for row 9 with Session 24 compressed into its digest.

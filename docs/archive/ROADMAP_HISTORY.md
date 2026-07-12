@@ -1,9 +1,11 @@
-# Trellis Roadmap Progress Log — Archive (July 4–11, 2026; T-items through Session 23)
+# Trellis Roadmap Progress Log — Archive (July 4–11, 2026; T-items through Session 24)
 
 Moved verbatim from `TRELLIS_ROADMAP.md` §5 on July 12, 2026 (owner
 direction: the live roadmap keeps only the most recent five sessions).
 Entries below are the dated ledger from the first Phase-1 commit through
-Session 23; nothing was edited in the move. The live ledger continues in
+Session 24 (Sessions 1–23 moved July 12, 2026; the Session 24 entry
+followed the same day with the Session 29 PR, appended at the end under
+the same window rule); nothing was edited in the moves. The live ledger continues in
 `TRELLIS_ROADMAP.md` §5.
 
 ### July 4, 2026 — Phase 1: Foundations & Portability (items 3.1 #1–3, #7)
@@ -2738,3 +2740,104 @@ extraction prerequisites' full concreteness is preserved in this PR's
 git history (the round-3 handoff that named them Session 24) for the
 session after.
 
+
+### July 11, 2026 — Session 24: the boundary-aware block accessor (`get_ast_blocks`) + the structure-selection demotion (§4 row 4)
+
+The post-round-3 re-point executed: the ONE live failure class after
+three probe rounds (localization method error over the glued
+reconstruction — 10 misses across rounds 2–3) is fixed structurally
+with an additive read tool, and pillar §7's library-choice sub-claim is
+demoted per its own written contingency. No stored or reconstructed
+byte moved; the composed-prompt pins moved once, wittingly, to teach
+the tool.
+
+1. **The accessor.** `TrellisPostgres.get_ast_blocks(root_hash)`
+   (`src/rlm/trellis_tools.py`) fetches the root's `data` JSONB once
+   and walks it into a JSON list of `{id, type, text}` in document
+   order. The walk lives in the NEW dependency-free
+   `src/rlm/trellis_blocks.py` (stdlib-only, imported by
+   trellis_tools; `_node_text` moved there verbatim and is re-exported
+   under its historical name). The block set is exactly
+   `collectExtractionBlocks`'s and the text is exactly `nodeText`'s —
+   pinned by the new cross-language parity test
+   `src/core/ast/block_parity.test.ts`, which spawns the real Python
+   walk against real parser output (markdown incl. the child-text
+   reconstruction path, unstructured/PDF childless-content nodes, and
+   code-aware trees with `code_class` traversed through). Design note,
+   recorded: CI runs `npm test` BEFORE installing the Python runtime,
+   so the walk had to live in a module that imports nothing beyond the
+   stdlib — importing `trellis_tools` (psycopg2/neo4j at module top)
+   from a unit test would fail there. The accessor counts a database
+   tool call, joins the citation-audit read set with the same
+   semantics as `get_ast_texts`, refuses non-string and unknown hashes
+   loudly, and exposes no new citable ids. `trellis_blocks.py` joined
+   `python:check` and the Dockerfile `src/rlm` COPY set.
+2. **The kernel prompt teaches it (the only pin move).** One
+   brace-free line under the `trellis_postgres` TOOLS entry in
+   `_ADDENDUM_BASE_PREFIX` (prefer walking ordered blocks in code for
+   section-structure/localization work over regexing a concatenated
+   reconstruction). Both pins recomputed in the same commit with
+   history recorded in place (`scripts/test_modules.py`): default
+   `9f09d7d2…dd68` → `3f07295a…4b63`; omit-arm `9779b5c0…9e45` →
+   `85362b81…71bb` (still structurally default minus exactly
+   `CODE_MEDIATED_TEXT_BLOCK`, re-proven by `test:modules` [7]).
+3. **The probe's round-4 machinery (zero-paid).**
+   `classifyLocalizationMethod` gained the `structured` verdict — the
+   marker is the CALL (`get_ast_blocks(` with the open paren) because
+   the query is echoed into run logs and the preambles name the tool
+   paren-free, so offering the tool can never classify as using it
+   (unit-pinned both ways). The locate preambles now OFFER the
+   accessor (`BLOCKS_OFFER`, scoped to locate questions so every other
+   question's bytes stay round-comparable), the method table prints
+   `structured`, and `--ingest` verifies the accessor round-trip live:
+   frank 796 ordered blocks and chronicle 827, byte-identical to
+   `collectExtractionBlocks`+`nodeText` over the stored roots, sampled
+   text byte-matching `get_ast_texts` (run twice July 11; re-ingest
+   stayed the auditable no-op, all root hashes unchanged).
+4. **The §7 demotion (docs-only).**
+   `docs/architecture/CODE_MEDIATED_TEXT.md` §7: "pandas is the
+   default for relational/multi-file queries" is DEMOTED to "plain
+   loops until a measured threshold" — round 3's 0/87 is the continued
+   null result the §7 status note pre-committed to acting on (round 2:
+   0/68). The micro-benchmark table, the mechanism claim, and the
+   kernel prompt's "ingestion = pandas" metaphor (mechanism, not
+   library — §0's own definition) are untouched. §6 gained item 6 (the
+   accessor) and item 3 gained the round-3 close-out; the probe report
+   gained its round-4 section.
+5. **Acceptance.** `npm test` 683 passing across 75 files (baseline
+   678/74: +3 parity, +2 classifier); `npm run build`,
+   `npm run python:check` (now importing `trellis_blocks`),
+   `docker compose --profile test config --quiet` all green. Live
+   drills all green post-change: `test:modules` 51 (both pins moved
+   wittingly), `test:answer-channel` 32, `test:textedit` 81,
+   `test:module-lifecycle` 60, `test:promotion` 41,
+   `test:rlm-workspace` 86, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
+   `test:agent-loop` 35, `test:a2a` 46, `test:repo-ingest` 45,
+   `test:benchmark-hardening` 24, `test:entity-resolution` 34,
+   `test:api-hardening` 18, `test:belief-recovery` 30,
+   `test:invalidation-sweep` 17. `drill:scale` CLOSED (results file
+   committed per house practice). Isolated Compose integration run as
+   project `trellis_s24_ci` (image rebuilt — the Dockerfile COPY set
+   gained `trellis_blocks.py`; `package.json` untouched so the
+   `npm ci` layer stayed cached), all 10 PASS, torn down with
+   `--volumes`.
+6. **The paid localization re-measure (probe round 4) — proposed with
+   its estimate, OWNER-APPROVED, and MEASURED the same day.** Proposed
+   ≈36 runs ≈ $1.6; actual $0.9452 across 36 runs (the round-3 locate
+   set: chronicle ×4 + frank ×2, `--repeats 3`, both arms; run in
+   question×arm chunks of 3 with the $5 abort armed per invocation,
+   never hit). Result: **0/36 misses vs round 3's 7/30 (23%) on the
+   same questions, with 36/36 runs classified `structured`** — every
+   run in BOTH arms called `get_ast_blocks` and walked the ordered
+   blocks; zero line-anchored, zero shape, zero unknown. The round-3
+   "Chapter 23" TOC-trap question (`locate-November`) came back
+   "Chapter 5" 6/6. Median input ~8.2k tokens (on 8,229 / off 8,264),
+   median 2 iterations, no recovery loops (round 3's recovering runs
+   paid 13k–27k); 36/36 submitted through `trellis_answer`
+   (answer-channel record 180/180 across rounds 2–4); 0/36 pandas.
+   The off arm's identical adoption rate is the pillar's enforcement
+   thesis measured again: the tooling shape, not the §6.2 prompt
+   block, carries the behavior. The pre-stated success criterion is
+   met exactly; the superseded reconstruction-byte row STAYS closed
+   (§0 event-loop re-check: the positive result re-opens nothing —
+   Session 25 remains the extraction prerequisites, row 5).

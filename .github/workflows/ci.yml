@@ -30,6 +30,10 @@ jobs:
           python -m pip install --requirement requirements.txt --requirement requirements-pdf-fast.txt
           python -m pip install --no-deps --requirement requirements-pdf-fast-nodeps.txt
       - run: npm run python:check
+      # The editing toolkit's live zero-LLM drill: needs the Python
+      # runtime installed above, no database or network (coverage
+      # audit gap #7 — the drill was previously not regression-detected).
+      - run: npm run test:textedit
 
   image:
     runs-on: ubuntu-latest
