@@ -76,8 +76,8 @@ _audit = {"read": set(), "search": set(), "cited": set()}
 # (harness plumbing), or run_cypher (a sourceNodeIds property in a query
 # result is a reference to bytes, not the bytes). Unlike the audit this
 # is NOT experiment-gated: slice (d) will constrain citable addresses to
-# this set on every run. Bookkeeping only today — no write-path behavior
-# reads it yet. Telemetry reports its size, never its contents (T16).
+# this set on research runs: the write gate _verify_hashes_retrieved
+# consumes this set through the retrieved_addresses_check seam; bare construction is unaffected. Telemetry reports its size, never its contents (T16).
 _retrieved_addresses = set()
 
 def _audit_add(bucket, ids):
@@ -92,7 +92,7 @@ def _audit_add(bucket, ids):
 
 def get_retrieved_addresses() -> set:
     """A COPY of the run's retrieved-address set (callers can never
-    mutate run state). Slice (d)'s future input."""
+    mutate run state). Slice (d) is live on research runs: the write gate _verify_hashes_retrieved consumes this set through the retrieved_addresses_check seam; bare construction is unaffected."""
     with _audit_lock:
         return set(_retrieved_addresses)
 
