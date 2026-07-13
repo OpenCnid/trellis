@@ -23,6 +23,7 @@ PYTHON_FILES = [
     ROOT / "scripts" / "fixture_mcp_server.py",
     ROOT / "scripts" / "compose_mcp_probe.py",
     ROOT / "scripts" / "bench_wallclock_text.py",
+    ROOT / "scripts" / "test_selfedit_rehearsal.py",
 ]
 
 

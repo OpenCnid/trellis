@@ -47,6 +47,8 @@
     "test:invalidation-sweep": "tsx scripts/test_invalidation_sweep.ts",
     "test:belief-recovery": "tsx scripts/test_belief_recovery.ts",
     "test:rlm-sandbox": "tsx scripts/test_rlm_sandbox.ts",
+    "test:selfedit-harness": "tsx scripts/test_selfedit_harness.ts",
+    "stage2:check": "tsx scripts/stage2_selfedit_check.ts",
     "test:rlm-mcp": "tsx scripts/test_rlm_mcp.ts",
     "test:rlm-workspace": "tsx scripts/test_rlm_workspace.ts",
     "test:textedit": "tsx scripts/test_textedit.ts",

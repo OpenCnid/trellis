@@ -3470,3 +3470,119 @@ deepens on it.
    entry moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the
    live ledger keeps the most recent five sessions: 25–29); HANDOFF
    regenerated for row 9 with Session 24 compressed into its digest.
+
+### July 12, 2026 — Session 30: mechanical provenance threading — the design record + retrieval-set tracking (§4 row 9, slices a + b)
+
+Row 9's first two recorded slices, all zero-paid, two implementation
+commits (the record, then the tracking), per the owner's
+decompose-into-completable-slices direction.
+
+1. **Slice (a) — the design record**
+   (`docs/architecture/PROVENANCE_THREADING.md`, indexed in
+   `docs/README.md`), document-first per the house DDD pattern. What it
+   decides and records: **(i) the threat model as a two-channel
+   taxonomy** — T1 transcription/choice (the model retypes an address:
+   corrupted digits, scrollback memory, second-hand citation of another
+   edge's provenance list — closable mechanically and completely) vs
+   T2 semantic laundering (retrieved-but-unsupporting bytes cited —
+   the A/B eval measured the readership gate flagging ZERO laundered
+   runs because the model reads the decoy then cites it; only
+   entailment catches T2). The record is explicit that the slice-(d)
+   constraint closes T1, NOT T2 — the honest scope statement is in the
+   record so nobody later claims more than the machinery delivers.
+   **(ii) The claim→block factorization** (the collaborator briefing's
+   live question): membership (`cited ⊆ retrieved(run)`) is engine-
+   decidable and made total; support (`supports(text(h), claim)`) is
+   structurally NOT engine-decidable (a claim is new text — no taint
+   trail from retrieved bytes through attention), so it is sampled
+   (slice e). Intermediate dataflow-narrowing designs were considered
+   and rejected on §4.5 data-not-objects grounds. **(iii) The
+   retrieval-set definition**: `get_ast_texts` returned keys
+   (existence-filtered by construction), `get_ast_blocks` returned
+   block ids (never the root argument — bytes for address, uniformly),
+   `vector_search` result ids (content travels with them). Never
+   contributing: `ast_hashes_exist` (probe-then-cite loophole),
+   `fetch_texts` (harness plumbing), `run_cypher` (a `sourceNodeIds`
+   property in a query result is a reference to bytes, not the bytes —
+   re-read before citing, mechanically enforcing read-before-cite at
+   the address level), MCP/workspace/textedit (Tier 3 has no
+   standing), and seeded snapshots (a seeded run inherits NOTHING —
+   a re-derivation re-retrieves). **(iv) Set semantics**: per run =
+   per process (the `_tool_call_stats` mold); `llm_query` sub-frames
+   at `max_depth` 1 are plain completions so process scope = run scope
+   holds trivially (and nested tool-bearing frames would correctly
+   join the same set); monotone within the run, dies with the process,
+   never parked (a retrieval set in a snapshot would be a provenance
+   claim Tier 3 cannot make). **(v) Slice (d)'s shape recorded**:
+   membership check after format + existence, a typed `ValueError`
+   naming unretrieved hashes (bounded first-5+count echo) teaching
+   re-retrieval, wired by the `ast_existence_check` injection mold so
+   bare construction (operator scripts, drills) is unaffected; no
+   compat migration — write-time only, existing rows untouched.
+   **(vi) Slice (e)'s sketch**: sampled post-hoc DETECTOR (flagged
+   edges enter the ordinary contested machinery, never deleted), the
+   inline gate stays experiment-gated for where a count incentive
+   cannot be removed (the eval measured it correct but ~1.5–2× cost
+   and it uncaches facts under impossible demands); rate/budget
+   proposed with the slice's estimate, owner-gated. Row 10's
+   held-root tracking is recorded as a DIFFERENT structure sharing
+   call sites, not the set — nothing pre-implemented.
+2. **Slice (b) — retrieval-set tracking** (`src/rlm/trellis_tools.py`):
+   a module-level always-on `_retrieved_addresses` set fed INSIDE
+   `_audit_add` when the bucket is `read` or `search` — the exact seam
+   the opt-in citation audit already maintains at the three
+   contributing call sites; one function, one lock, no parallel
+   instrumentation. The `cited` bucket never feeds it. Unlike the
+   audit buckets the set is NOT experiment-gated (slice d will consult
+   it on every run); the audit's own gating and `get_citation_audit`
+   semantics are byte-unchanged. Accessors return a copy and a count;
+   `TRELLIS_TELEMETRY` gains counts-only `retrieved_addresses` in the
+   `mcp_calls`/`answer_submits` mold (both research and author
+   payloads; addresses never appear — T16), and the Node scanner's
+   unknown-field tolerance — previously structural only — is now
+   pinned explicitly (`rlm_telemetry.test.ts`, 9 → 10 tests). NO
+   write-path behavior change, NO prompt bytes: both composed-prompt
+   pins unmoved (`5d27e474…fe2a` / `45987904…0b56`).
+3. **Pins** — `test:rlm-sandbox` section [5], 21 → 40 checks, all live
+   against the dev stack: Cypher reads + existence checks +
+   provenance-cited writes contribute nothing (including a live Cypher
+   read that demonstrably surfaces the probe hash as a `sourceNodeIds`
+   property); `get_ast_texts` adds exactly its returned keys (unknown
+   hash excluded); repeat retrieval is inert (set semantics);
+   `get_ast_blocks` adds the returned block id and never the root
+   argument (a probe root row with an embedded paragraph child);
+   `vector_search` drilled ZERO-PAID — a probe row inserted with a
+   deterministic 1536-dim embedding and the `openai` module stubbed in
+   `sys.modules` (the in-function import binds the stub; cosine
+   distance 0 guarantees the probe is the top hit), every returned id
+   joins the set; `ast_hashes_exist` stays outside even mid-run; the
+   accessor returns a copy; audit buckets stay EMPTY while the
+   always-on set is populated (the gating separation pinned); static
+   pins in the Session 29 audit-#8 mold (the three Tier-3 modules
+   never reference the tracking seam; the agent telemetry dict carries
+   the field). Drill cleanup now deletes by the drill-owned
+   `document_id` (covers the two new probe rows).
+4. **Acceptance (all green, July 12, 2026).** `npm test` 730 passing /
+   79 files (baseline 729/79 — the one new test is the telemetry
+   tolerance pin), `npm run build`, `npm run python:check`,
+   `docker compose --profile test config --quiet`. Live zero-paid:
+   `test:answer-channel` 32, `test:textedit` 105 (Windows host),
+   `test:module-lifecycle` 60, `test:modules` green (pins unmoved),
+   `test:promotion` 41, `test:rlm-workspace` 106, `test:rlm-mcp` 86,
+   `test:rlm-sandbox` 40 (was 21), `test:agent-loop` 35 (ALL CHECKS
+   PASSED), `test:a2a` 46 (ALL CHECKS PASSED), `test:repo-ingest` 56,
+   `test:benchmark-hardening` 24, `test:entity-resolution` 34,
+   `test:api-hardening` 18, `test:belief-recovery` 30,
+   `test:invalidation-sweep` 17. `drill:scale` run ALONE: 1.89x CLOSED
+   (in-band ~1.48x–2.26x, first try; max provenance 286; results file
+   committed per house practice). Isolated Compose integration as
+   project `trellis_s30_ci` (host ports 0, torn down with
+   `--volumes`): 11/11 PASS (no manifest changed — `package.json` and
+   `requirements.txt` untouched). `git diff --check` clean. No defect
+   found in existing code; the section [5] checks all passed on first
+   run.
+5. **Documentation window (owner rule, July 12).** The Session 25 §5
+   entry moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the live
+   ledger keeps the most recent five sessions: 26–30); HANDOFF
+   regenerated for the row-9 continuation (slice c next) with Session
+   25 compressed into its digest.
