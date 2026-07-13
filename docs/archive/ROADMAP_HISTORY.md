@@ -4612,3 +4612,93 @@ embedding calls (150 tokens, <$0.001). The full measured record is
    then the re-proposed run with task text v3) with Session 33
    compressed into the digest.
 
+
+### July 13, 2026 — Session 39: stage-2 increment 2 RETRY — the comment-class diff gate landed zero-paid; the approved run LANDED all five criterion items first shot (§4 row 11 stage 2)
+
+The retry closed Session 37 run 2's measured escape mechanically,
+then landed the same owner-scoped edit in one run. Session paid total
+**$0.504** (run $0.347 + split-scope refresh $0.157). Design record:
+`REPOSITORY_INGESTION_REPORT.md` §5g (written before the run).
+
+1. **The comment-class diff gate (zero-paid, landed first, stays
+   regardless).** `named_file_noncomment_change` joins the checker's
+   typed findings: for a named file the increment DECLARES
+   comment-class (new repeatable CLI flag `--comment-class`), every
+   changed content line in its diff — removed AND added sides — must
+   be blank or a line comment for the file's language (`#` for `.py`,
+   `//` for `.ts`/`.js`; block-comment interiors honestly out of
+   scope, flagged conservatively). Pure pieces in `check.ts`
+   (`parseUnifiedDiffChangedLines`, `commentMarkerForFile`,
+   `checkCommentClassDiff`); the read-only `git diff -- <file>`
+   gatherer beside the status gatherer (the recorded widening of the
+   harness's git surface — still read-only, the toolkit never touches
+   git); declarations validate BEFORE any I/O (must be a named file,
+   must have a wired marker, refused under `--pre` — all three
+   refusals observed). Post-run mechanical check only, never a write
+   gate; undeclared increments never see it. Pins: 13 unit tests
+   (`npm test` 823 → 836/85) with the EXACT preserved run-2 failed
+   diff inline as the reference violation, + drill section [7]
+   (`test:selfedit-harness`) planting the run-2 shape in a scratch
+   repo: the parse gate observed structurally BLIND to it, the new
+   gate fires through the real git binary, a genuine comment-only
+   edit stays silent.
+2. **Live evidence re-verification (§5g.2, the §3 handoff
+   requirement).** The pilot re-chunk moved everything: the wiring
+   now lives in `code_statement` block `9b4c3159…6a730` (2,961
+   chars), the stale comment in a SEPARATE `code_statement` block
+   `ab87725e…f883` (2,949 chars) — both verified byte-verbatim on
+   disk (no pre-run refresh needed). The §5f route through entity
+   `main` is DEAD (contested since the pilot); task v3 re-routes
+   step 1 through `get_retrieved_addresses`'s two undirected ACTION
+   edges (`constrains_with` citing the wiring block; `returns_copy_of`
+   citing a `trellis_tools.py` block — a live re-test of the run-1
+   bridge trap). `stage2:check --pre` PASS over four entities.
+3. **The run (LANDED, $0.347 — 110,447 in / 7,089 out; 9 db calls;
+   32 textedit ops / 1 write_back; 1 retrieval fetch + 1 live dedup
+   refusal; `answer_submits` 1).** Task v3 = v2 + splice-minimal-span
+   + coded neighbor-preservation assertions. The citation audit read
+   both hashes and cited ONLY the wiring block (the tools.py hash
+   fetched, correctly not cited); the diff was one hunk, 2 comment
+   lines removed / 3 added, the executable line and the `# Session
+   33` head untouched CONTEXT lines this time; `stage2:check` ZERO
+   findings across all four layers (scope, evidence, parse,
+   comment-class); human `git diff` review ACCEPTED; offline gates
+   green with the diff applied. Criterion items 1–5 ALL PASS —
+   increment 2 CLOSED by the retry, no contingency run. Recorded
+   observation: `write_back` wrote the three new lines LF into the
+   CRLF file (641/3 on disk) — the Session 36 mixed-EOL commit
+   class, git normalizes on commit.
+4. **The split-scope refresh (the §5d.6 cadence under the §10.4
+   recipe; $0.157 — 34,756 in / 6,936 out / 13,148 embedding
+   tokens).** Plan echoes first, ZERO tombstones both scopes.
+   `trellis#7` (policy 1, everything except `src/rlm`): 12 files —
+   this session's four harness files + Session 38's machinery files
+   re-hashed whole (checkout-EOL churn class, third observation).
+   `trellis#8` (policy 2, `src/rlm`): exactly `trellis_agent.py` v3,
+   Merkle-precise — 23 blocks retained / 3 orphaned / 3 added.
+   **59/59 jobs, zero failures**; 13 invalidation sweeps contested
+   63 nodes / 30 relationships (audit preserved, lazy recovery).
+   Churn verification: the old stale-comment block DEAD, the wiring
+   block RETAINED — all three standing beliefs (`wires` / `consumes`
+   / `returns_copy_of`) uncontested on live provenance with NO
+   recovery needed (first refresh where the standing insights rode
+   through on retained blocks alone).
+5. **Worker hygiene (the Session 37/38 class, managed).** Fresh
+   `dev:workers` instance for the refresh; after the drain the child
+   process tree was killed and zero node/tsx consumers verified
+   before the queue drills. One self-inflicted kill artifact (the
+   taskkill matched the killing shell's own command line) — noted,
+   harmless, queues already drained.
+6. **Acceptance (all green; commands per HANDOFF §6).** Offline:
+   `npm test` 836 passing across 85 files, `npm run build`,
+   `npm run python:check`, `docker compose --profile test config
+   --quiet`. Live zero-LLM drill block green (counts in the HANDOFF
+   §2 baseline); `drill:scale` run ALONE (see the committed results
+   file); isolated Compose integration green. `git diff --check`
+   clean. Defects found in existing kernel code: NONE.
+7. **Documentation window (owner rule).** The Session 34 §5 entry
+   moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the live
+   ledger keeps Sessions 35–39); HANDOFF regenerated — the row-11
+   increment ladder now stands at the owner's judgment (increment 1
+   landed on contingency; increment 2 failed twice, both classes
+   closed mechanically, retry landed first shot).

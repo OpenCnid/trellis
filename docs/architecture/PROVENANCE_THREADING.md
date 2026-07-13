@@ -501,3 +501,114 @@ the section they amend.)*
      are the quarantine sweep's territory, never a semantic verdict.
   The oracle-mode machinery is zero-paid end to end; the first real
   judged sweep stays owner-gated propose-with-estimate per §5.4.
+
+## 10. The judge-calibration measurement (Session 44)
+
+*Pre-stated before the run (the RETRIEVAL_DISCIPLINE.md §9 mold: the
+question, the selection, and the estimate are fixed here first; the
+measured record in §10.2 is appended after and never retunes them.)*
+
+### 10.1 Pre-statement (written before the run)
+
+- **Question.** The first real judged sweep (July 13, 2026; seed 32,
+  25 pairs, $0.0093) returned 8 strict-judge verdicts on
+  derived-classification `has_category` claims alongside 9 confirmed
+  weak heading-block citations. The standing owner decision — accept
+  the strict judge or recalibrate its rubric for derived-classification
+  claims — needs a rate, not an anecdote. This measurement asks: is
+  the strict behavior class-shaped (concentrated in `has_category`,
+  absent from verbatim-supportable `mentions`) and rate-stable at a
+  4× sample?
+- **Instrument.** The existing sweep CLI byte-unchanged
+  (`npx tsx scripts/entailment_sweep.ts`), `--sync`, real judge. No
+  machinery, config, or rubric change of any kind; the detector's
+  invariants (detector-not-gate, at-most-once per pair,
+  judge-all-then-write) stand as recorded.
+- **Selection (pre-stated; dry-run echoed before the run).**
+  `--prefix q_ --rate 0.2 --budget 100 --seed 44`: pool 268 edges /
+  528 unchecked pairs; seeded Bernoulli sampling selects 106, budget
+  keeps 100 (74 `has_category`, 26 `mentions`), 6 deferred (counted).
+  The `q_` prefix targets exactly the OOLONG-era classification
+  corpus the calibration question is about; the three standing
+  repo-substrate beliefs are outside the prefix and cannot be
+  sampled by this run.
+- **Estimate.** 100 pairs at the July 13 per-pair actual
+  (~$0.00037/pair) ≈ $0.037; ceiling $0.10. Well under the ≤$5/run
+  cap. Owner approval was given up front for this session's
+  recommended plan and spend.
+- **What will be reported (and nothing else claimed).** Supported /
+  flagged / skipped counts split by verb class; judge sub-calls and
+  token usage; edges contested. The rates are reported with the
+  claim (guardrail 8); flagged pairs contest their edges through the
+  ordinary belief machinery (durable, lazy recovery — the same class
+  as the July 13 residue). This is a measurement for the owner's
+  calibration decision, not a pass/fail acceptance: no criterion, no
+  retuning, the decision stays the owner's.
+
+### 10.2 The measured record (July 13, 2026 — run exactly as pre-stated, no retuning)
+
+- **Execution.** `npx tsx scripts/entailment_sweep.ts --prefix q_
+  --rate 0.2 --budget 100 --seed 44 --sync`; selection matched the
+  §10.1 dry-run echo exactly (pool 268 edges / 528 unchecked pairs;
+  106 sampled, 100 within budget, 6 deferred). 100 judged, 0 skipped
+  (no live text), 0 skipped (no answer), 100 judge sub-calls.
+  Judge model `gpt-5.4-2026-03-05` (config `EXTRACTION_MODEL`
+  default). Usage 8,695 input / 1,500 output tokens = **$0.0367
+  actual** (estimate was $0.037; ceiling $0.10).
+- **Verdicts.** 12 supported / 88 flagged; **83 edges contested**
+  (68 `has_category`, 15 `mentions`), every one through the ordinary
+  belief machinery (`contestedReason = 'unsupported_citation'`,
+  audit preserved, lazy recovery — the same class as the July 13
+  first-sweep residue).
+- **The class split** (per-verb, recovered from the graph — see the
+  incident note below): `has_category` **73 flagged / 74 judged**
+  (1 supported, 98.6% flagged); `mentions` **15 flagged / 26 judged**
+  (11 supported, 57.7% flagged). Rates are per this seeded 100-pair
+  sample of a 528-pair pool — a sampled measure, not a census.
+- **Answer to the pre-stated question.** The strict behavior is NOT
+  confined to the derived-classification class, but it is
+  class-shaped in degree: `has_category` claims flag near-uniformly
+  (the category label is a dataset-derived classification no
+  question's block text states), while `mentions` claims flag
+  per-pair where the SPECIFIC cited block lacks the mention —
+  multi-hash `sourceNodeIds` writes whose weakest citations fail
+  individually (the July 13 "weak heading-block citation" class,
+  now measured at scale: 15 of 26). The judge is consistent; the
+  flags measure real per-pair citation weakness of the OOLONG-era
+  write style, not judge noise. The calibration DECISION stays the
+  owner's; the data now on the table: accepting the strict judge
+  means the remaining unchecked `q_` pool (356 pairs after this run,
+  the post-run dry-run header's count; `has_category` dominates it)
+  contests at high rates as sampling reaches it; treating
+  derived-classification verbs as a distinct judged class is a
+  rubric change — a recorded owner decision, not a session edit.
+- **Incident, investigated and resolved AGAINST the initial
+  diagnosis (the honesty rule at work).** The session's observation
+  pipeline captured only 54 of the 88 `FLAGGED` detail lines, and the
+  first diagnosis blamed `scripts/entailment_sweep.ts`'s
+  `process.exit(0)` for terminating before the piped stdout buffer
+  drained — seemingly "reproduced" by a `--dry-run --rate 1
+  --budget 500` run that printed 359 lines against an EXPECTED 431.
+  Both halves of that story were then falsified: the 431 expectation
+  had assumed pool = 528 − 100 judged, but contesting 83 edges also
+  removes their unchecked sibling pairs, and the dry-run's own header
+  read `356 unchecked pair(s)` — 3 header + 356 = **exactly the 359
+  lines delivered, zero lost** (confirmed identical piped and
+  file-redirected). The real culprit was the session's own capture
+  pipeline (`... | tee log | head -40`: head exits at 40 lines, tee
+  dies on the resulting EPIPE, the log freezes at 58 lines). The CLI
+  is exonerated; no code defect; the candidate was REJECTED as a
+  Session 44 self-edit target for failing falsifiability. The
+  per-verb split above was recovered from the graph
+  (`contestedAt`-windowed, fresh edges only — previously-contested
+  edges are excluded from selection, so a fresh edge's
+  `unsupportedHashes` are exactly this run's), which is authoritative
+  regardless of any console capture: judge-all-then-write atomicity
+  had committed every stamp and contest before the first report line
+  printed. The detector machinery (selection, judging, stamps,
+  contests) behaved exactly as pinned. Durable note for future
+  operators: `process.exit(0)` exists in that CLI because all seven
+  BullMQ queues share one IORedis connection that
+  `verificationQueue.close()` alone does not quit — output loss was
+  NOT observed through it at these volumes, and any future change
+  there needs its own demonstrated failure first.
