@@ -1,4 +1,5 @@
 import { execFile } from 'child_process';
+import * as crypto from 'crypto';
 import * as path from 'path';
 import util from 'util';
 import { neo4jDriver, pgPool } from '../src/config/db';
@@ -45,6 +46,10 @@ function checkClose(label: string, actual: number | null | undefined, expected: 
 
 const TOKEN = `test-verify-${Date.now()}`;
 const Q = (n: string) => `${TOKEN}-${n}`;
+// The single write path enforces the sourceNodeIds format (^[0-9a-f]{64}$,
+// Session 14) — provenance hashes must be real 64-hex, so the drill derives
+// them from token-scoped names. Still unique per run, still cleanable.
+const H = (n: string) => crypto.createHash('sha256').update(`${TOKEN}:${n}`).digest('hex');
 
 const PY_ENV = {
   ...process.env,
@@ -148,8 +153,8 @@ async function main(): Promise<void> {
     // Belief whose provenance has no live bytes: must be skipped, not crash.
     { q: 'qg', stored: 'abbr', truth: 'abbr', confidence: 0.3, text: null }
   ];
-  const hashes = beliefs.filter(b => b.text != null).map(b => `${TOKEN}-hash-${b.q}`);
-  const freshHash = `${TOKEN}-hash-qf-fresh`;
+  const hashes = beliefs.filter(b => b.text != null).map(b => H(`hash-${b.q}`));
+  const freshHash = H('hash-qf-fresh');
   const oracle: Record<string, string> = {};
   for (const b of beliefs) oracle[Q(b.q)] = b.truth;
 
@@ -163,12 +168,12 @@ async function main(): Promise<void> {
   try {
     // Seed: PG texts + beliefs through the real Python bulk writer.
     for (const b of beliefs) {
-      if (b.text != null) await insertAstText(`${TOKEN}-hash-${b.q}`, b.text);
+      if (b.text != null) await insertAstText(H(`hash-${b.q}`), b.text);
     }
     await writeBeliefsViaPython(
       beliefs.map(b => ({
         subject: Q(b.q), verb: 'HAS_CATEGORY', obj: b.stored,
-        sourceNodeIds: [`${TOKEN}-hash-${b.q}`], confidence: b.confidence
+        sourceNodeIds: [H(`hash-${b.q}`)], confidence: b.confidence
       }))
     );
     // qd was written under the legacy rubric; qe has already graduated.
@@ -272,7 +277,7 @@ async function main(): Promise<void> {
     const qaCandidate: BeliefCandidate = {
       subject: Q('qa'), label: 'loc', confidence: qaFinal!.confidence,
       rubricVersion: CURRENT_RUBRIC_VERSION, verifiedCount: 3,
-      sourceNodeIds: [`${TOKEN}-hash-qa`], tier: 'graduated'
+      sourceNodeIds: [H('hash-qa')], tier: 'graduated'
     };
     const job = await verificationQueue.add(
       'verification_sweep',
