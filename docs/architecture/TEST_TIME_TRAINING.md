@@ -694,3 +694,83 @@ machinery — pre-stated criteria, paired arms, verdicts recorded
 pass-or-fail with actuals — is a reproduction-study harness by
 construction. Gates unchanged: each rung still enters as its own
 owner-approved proposal.
+
+### 12.6 The chunking — RATIFIED (owner, July 13, 2026): phases 0–3 and the feature-class self-edit rung
+
+The owner ratified the following decomposition the same day, together
+with the proposal that Trellis itself authors the Trellis-side code
+("a prime target for Trellis editing Trellis and expanding
+functionality … build this using Trellis, then we come back and
+review it"). Ratification covers the SHAPE — every increment and
+every paid run below still enters as its own owner-approved proposal
+with its own estimate (the standing gate ceremony is untouched).
+
+**The new rung class this creates, defined here:** a **feature-class
+self-edit increment** — a TASK-ASSIGNED functionality increment
+authored by Trellis through the stage-2 harness, in the lineage of
+the Session 26 W-series and stage-2 increments 1–2 (which were
+assigned tasks, not discovered defects). This is DISTINCT from the
+defect-class increment 3, whose never-manufacture rule is untouched:
+a planted defect invalidates a discovery measurement; an assigned
+feature task is not a discovery claim and manufactures nothing.
+Feature-class criterion mold (assembled from the standing pieces):
+the standing five items (named-file-only diff; the evidence
+contract's one recorded insight through the Session 31 gate;
+`stage2:check` zero findings; human `git diff` review acceptance;
+spend within estimate) PLUS guarded-only (`textedit_raw_splices ==
+0`) PLUS the parse gate PLUS the increment's own new unit pins green.
+The toolkit never touches git; every diff is human-reviewed; landing
+is a human PR — "build using Trellis" means Trellis AUTHORS under the
+harness, humans land.
+
+**The spec-before-pen rule (the grounded-authoring lesson applied):**
+the seam design record is HUMAN-authored before any T-increment runs
+— self-edit runs are only as well-posed as their task text, and the
+ratified record is what task texts derive from.
+
+**Phase 0 — human-authored spec sessions:**
+- **R2a** — the backend-seam census + the rlms verdict (Session 46's
+  §3 objective; read-only, zero-paid; §7 R2 items a/b).
+- **R2b** — the seam design record (§7 R2 items c/d): config shape,
+  typed refusals, the three-way split backend (root completion /
+  worker completions / embedder), today's behavior as the
+  byte-identical default; each T-increment's scope and task-text
+  skeleton pre-stated in it.
+
+**Phase 1 — the Trellis-edits-Trellis T-series (feature-class
+increments; each owner-gated ≤$5, one increment-record each in the
+§5e/§5g mold, human-reviewed diff each; smallest first — the
+executable-class ladder has never landed a run, so the first rung is
+deliberately tiny):**
+- **T1** — the config surface: backend config keys + validation +
+  typed refusals + unit pins (no call-site change).
+- **T2** — `buildAgentEnv` forwarding/strip for the new config, with
+  its unit pins (the experiment-flag mold).
+- **T3** — the `trellis_agent.py` construction-site rewire
+  (`backend_kwargs` from config; default byte-identical; the policy-2
+  substrate already covers this file, so graph-informed editing works
+  today).
+- **T4** — the fixture-endpoint drill: a zero-LLM stub
+  OpenAI-compatible server (the fixture-MCP-server precedent) proving
+  the byte-identical default and the seam switch.
+A failed T-increment gets the increments-1/2 treatment: diagnose,
+close the class mechanically, retry as its own proposal.
+
+**Phase 2 — measurement sessions (runs, not edits):** R3a serving
+bring-up + protocol smoke; R3b the paired baseline measurement (the
+reproduction half); then the R4 chunks when the collaborator's
+retrofit checkpoint lands (exact-pinned): R4a checkpoint acceptance +
+smoke, R4b the paired C2 measurement, R4c the C3 adherence
+measurement, R4d the adaptation-data-policy record (for Family-A
+layers the adaptation data IS the token stream — the policy chunk
+states what enters context and how the §12.3 provenance gating
+applies).
+
+**Phase 3 — R5** (meta-prompt fast-state, H2 isolated).
+
+**Dependencies named:** (1) this record lives in `docs/` — outside
+extraction scope — so T-series runs cannot query the graph about the
+spec; task text carries the spec verbatim (the increments-1/2
+channel) until stage-1b chunk A lands (a natural synergy, not a
+prerequisite). (2) Refresh-before-use applies to every T-increment's
+target area (the split-scope recipe; `src/rlm` is the policy-2 leg).

@@ -644,15 +644,33 @@ Landscape check: LaCT is ICLR 2026; official code exists
 setup; NO external study covers C2 or C3 — the empiricals are the
 only route, and the ladder is already shaped as the study (R3 = the
 reproduction half, R4 = the expansion half). Gates unchanged.
+**(8) The chunking RATIFIED (owner, same day; record §12.6):**
+phases 0–3 as recorded, and the FEATURE-CLASS self-edit rung defined
+— the T-series (T1 config surface, T2 `buildAgentEnv`, T3 the
+`trellis_agent.py` rewire, T4 the fixture-endpoint drill) will be
+AUTHORED BY TRELLIS through the stage-2 harness as task-assigned
+functionality increments (the W-series / increments-1/2 lineage —
+distinct from defect-class increment 3, whose never-manufacture rule
+is untouched; criterion = the standing five + guarded-only + parse
+gate + new unit pins; every diff human-reviewed, landing stays a
+human PR). Spec-before-pen: R2b is human-authored before any
+T-increment runs. HANDOFF re-pointed accordingly (§3 = R2a).
 
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 46: TTT-track rung R2 — the backend-seam
-audit** (roadmap §4 row 13; `docs/architecture/TEST_TIME_TRAINING.md`
-§7), per §3–§6 below: a zero-paid, READ-ONLY census of every site
-that assumes the OpenAI transport, the gpt-5.4 model id, its pricing,
-or its token accounting, answered into a backend-seam design record —
-NO implementation, NO backend change, NO rlms modification. At
+Your objective is **Session 46: TTT-track rung R2a — the backend-seam
+census** (roadmap §4 row 13; `docs/architecture/TEST_TIME_TRAINING.md`
+§7 + the RATIFIED chunking §12.6), per §3–§6 below: a zero-paid,
+READ-ONLY census of every site that assumes the OpenAI transport, the
+gpt-5.4 model id, its pricing, or its token accounting, plus the rlms
+verdict — NO implementation, NO backend change, NO rlms modification.
+Queued behind it (owner-ratified July 13, 2026, record §12.6; each
+step its own owner-approved proposal): **R2b** — the HUMAN-authored
+seam design record (spec-before-pen) — then the **Trellis-edits-
+Trellis T-series** (feature-class self-edit increments T1 config
+surface → T2 `buildAgentEnv` → T3 the `trellis_agent.py` rewire → T4
+the fixture-endpoint drill), then the Phase-2 measurements (R3a/R3b;
+R4 when the collaborator's retrofit checkpoint lands). At
 session START, present the owner the judge-calibration decision with
 the Session 44 data (`PROVENANCE_THREADING.md` §10.2 — the strict
 judge is consistent; `has_category` flags at 98.6%, `mentions` at
@@ -1229,9 +1247,9 @@ Repository state at handoff creation:
   several GB of headroom. `requirements.txt` and `package.json`
   unchanged in Sessions 39–45 — both layers stay cached.
 - The standing owner-conditional items — all propose-with-estimate,
-  never self-served: **(1) TTT-track rung R2 — THE OBJECTIVE (§3)**
-  (zero-paid, read-only; needs no spend approval — the audit and its
-  design record are the session's own work); **(2) the
+  never self-served: **(1) TTT-track rung R2a — THE OBJECTIVE (§3)**
+  (zero-paid, read-only; needs no spend approval; the RATIFIED queue
+  behind it: R2b → T1–T4 → Phase 2 — record §12.6); **(2) the
   judge-calibration decision** for derived-classification claims —
   **its data is DELIVERED and the presentation duty has carried TWO
   sessions** (Session 44, `PROVENANCE_THREADING.md` §10.2:
@@ -1273,22 +1291,26 @@ Repository state at handoff creation:
   the record §10.3 + §11.4 together); **(10) the
   superseded-embedding SWEEP** (storage reclamation only;
   destructive, re-buys embeddings on recovery; stays unchosen);
-  **(11) TTT-track rungs R3–R5** (each its own owner-approved
-  proposal per `TEST_TIME_TRAINING.md` §7; R3 needs serving
-  infrastructure — GPU-hours or a hosted open-model endpoint, priced
-  in the proposal under the record's cost-doctrine re-expression —
-  and its baseline arm should be the SAME open checkpoint the
-  retrofit will start from; R4/R5 need R3's PASS. R1 question 1 is
-  ANSWERED — the collaborator selected LaCT, record §12: R4's arms
-  are the same checkpoint ± trained-in large-chunk fast-weight
-  layers, the retrofit training job is COLLABORATOR-SIDE, and the
-  reliance claim is decomposed C1 supported / C2 extrapolated — the
-  load-bearing gap / C3 untested; questions 2–4 stand, question 4
-  sharpened to "eligibility boundary = the run's retrieval set?".
-  The owner framed the undertaking as a PRIVATE REPRO STUDY WITH
-  EXPANSION — record §12.5: R3 = the reproduction half on our
-  workload, R4 = the expansion half (C2/C3, which NO external study
-  covers); official LaCT code exists, ICLR 2026). Row 10's measurement
+  **(11) the TTT-track RATIFIED QUEUE beyond R2a** (record §12.6;
+  each step its own owner-approved proposal): **R2b** the
+  human-authored seam design record (zero-paid, the next session
+  after R2a — spec-before-pen); **the T-series T1–T4** (Phase 1:
+  feature-class Trellis-edits-Trellis increments, each owner-gated
+  ≤$5, each an increment record in the §5e/§5g mold, each diff
+  human-reviewed — T1 config surface, T2 `buildAgentEnv`
+  forwarding/strip, T3 the `trellis_agent.py` construction-site
+  rewire, T4 the zero-LLM fixture-endpoint drill); **Phase 2** R3a
+  serving bring-up + protocol smoke, R3b the paired baseline (the
+  reproduction half; the baseline arm = the SAME open checkpoint the
+  retrofit starts from; GPU-hours or hosted per-token, priced in the
+  proposal), then R4a–R4d when the collaborator's retrofit
+  checkpoint lands exact-pinned (the expansion half — C2/C3, which
+  NO external study covers); **Phase 3** R5. Context: R1 question 1
+  ANSWERED (LaCT, record §12; retrofit training COLLABORATOR-SIDE;
+  the reliance claim decomposed C1 supported / C2 extrapolated — the
+  load-bearing gap / C3 untested); questions 2–4 stand, question 4
+  sharpened to "eligibility boundary = the run's retrieval set?";
+  official LaCT code exists (ICLR 2026). Row 10's measurement
   (Session 43) and the judge-calibration MEASUREMENT (Session 44)
   are DONE and off this list — only the calibration DECISION
   remains. If the owner approves nothing this session, the zero-paid
@@ -1336,33 +1358,37 @@ Work on a feature branch and target `master`.
 
 ## 3. Session 46 problem statement
 
-**TTT-track rung R2: the backend-seam audit** — a READ-ONLY census
+**TTT-track rung R2a: the backend-seam census** — a READ-ONLY census
 answering, precisely and against the code, what it would take to
 point the RLM at a different completion backend WITHOUT changing one
-byte of behavior for the current one, written into a backend-seam
-design record. Recorded by Session 45
-(`docs/architecture/TEST_TIME_TRAINING.md` §7) as the only TTT rung
-executable without new infrastructure or budget. The facts a new
-session must act on:
+byte of behavior for the current one. Phase 0 step 1 of the
+owner-RATIFIED chunking (`TEST_TIME_TRAINING.md` §12.6; the ratified
+sequence behind this session: R2b the human-authored seam design
+record, then the feature-class T-series T1–T4, then Phase-2
+measurement). The facts a new session must act on:
 
-- **What R2 delivers, exactly four things:** (a) THE CENSUS — every
-  site that assumes the OpenAI transport, the `gpt-5.4-2026-03-05`
-  model id, its pricing, or its token accounting, in a table (site,
-  assumption, moves-with-the-backend?, pinned-by which test); (b)
-  THE RLMS ANSWER — does rlms==0.1.3 admit a base-URL/backend
-  override WITHOUT library modification (guardrail 10)? Inspect the
-  installed package READ-ONLY (the project venv's site-packages);
-  if it does not, the seam is an OpenAI-compatible serving endpoint,
-  full stop, and the record says so plainly; (c) THE SPLIT-BACKEND
-  DESIGN — the root RLM completion, the worker completions
-  (extraction, entailment judge, authoring checker), and the
-  embedder are THREE separable choices; design the configuration
-  seam config-shaped and refusal-typed with today's behavior as the
-  byte-identical default (any new env twin follows the
-  `TRELLIS_EXP_*`/`buildAgentEnv` molds); (d) THE NON-GOALS stated —
-  the embedder does NOT move (schema-coupled `vector(1536)`, a
-  substrate-identity event; record §4.2) and NO implementation lands
-  in R2.
+- **What R2a delivers, exactly two things** (items c/d below moved to
+  R2b under the ratified chunking — do NOT fold them into this
+  session): (a) THE CENSUS — every site that assumes the OpenAI
+  transport, the `gpt-5.4-2026-03-05` model id, its pricing, or its
+  token accounting, in a table (site, assumption,
+  moves-with-the-backend?, pinned-by which test); (b) THE RLMS
+  ANSWER — does rlms==0.1.3 admit a base-URL/backend override
+  WITHOUT library modification (guardrail 10)? Inspect the installed
+  package READ-ONLY (the project venv's site-packages); if it does
+  not, the seam is an OpenAI-compatible serving endpoint, full stop,
+  and the record says so plainly.
+- **What R2b (the NEXT session, human-authored — spec-before-pen)
+  will deliver on top of the census:** (c) THE SPLIT-BACKEND DESIGN —
+  the root RLM completion, the worker completions (extraction,
+  entailment judge, authoring checker), and the embedder are THREE
+  separable choices; the configuration seam config-shaped and
+  refusal-typed with today's behavior as the byte-identical default
+  (any new env twin follows the `TRELLIS_EXP_*`/`buildAgentEnv`
+  molds); each T-increment's scope and task-text skeleton pre-stated;
+  (d) THE NON-GOALS — the embedder does NOT move (schema-coupled
+  `vector(1536)`, a substrate-identity event; record §4.2) and NO
+  implementation lands before the T-series.
 - **Known anchor facts (Session 45's initial greps; the census
   completes and corrects them):**
   `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}` at both
@@ -1409,13 +1435,14 @@ session must act on:
   READ-ONLY rlms package inspection. Every hit disposed in the
   census table; many sites are unit-pinned — the census notes which
   pins WOULD move under a backend seam while moving nothing.
-- **The record (zero-paid, document-first):** the census table; the
-  rlms verdict with its inspection evidence quoted; the three-way
-  split-backend configuration design (config-shaped, refusal-typed,
-  byte-identical default); the non-goals; an R3 proposal skeleton
-  (what the owner would approve next, its estimate class in
-  GPU-hours or hosted per-token dollars — the record §7 cost
-  doctrine).
+- **The record (zero-paid, document-first):** the census table and
+  the rlms verdict with its inspection evidence quoted — R2a's two
+  deliverables, appended as `TEST_TIME_TRAINING.md` §13. The
+  three-way split-backend configuration design, the non-goals, the
+  T-increment task-text skeletons, and the R3 proposal skeleton
+  (estimate class in GPU-hours or hosted per-token dollars — the
+  record §7 cost doctrine) belong to R2b, the NEXT session, which
+  builds directly on this census.
 - **What does NOT change:** ANY code byte (a defect found = the
   event-loop rule: record, fix if in-scope with pins in the same
   commit, or queue-jump with the reason recorded); the rlms library
@@ -1508,21 +1535,22 @@ Update:
 - `TRELLIS_ROADMAP.md`: full-dated §5 entry (the calibration
   decision ALWAYS; the census summary and rlms verdict; defects
   found, if any, with their disposition); row 13's cell gains the
-  R2 outcome.
-- `docs/architecture/TEST_TIME_TRAINING.md` §12 (or
-  `MODEL_BACKEND_SEAM.md`): the census + the seam design record.
+  R2a outcome.
+- `docs/architecture/TEST_TIME_TRAINING.md` §13: the R2a census +
+  the rlms verdict (the seam design record is R2b's, next session).
 - The per-PR refresh for this session's changed in-scope files
   (split-scope recipe; docs-only owes nothing).
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5
-  re-check. NOTE for objective selection: after this session the
-  largest standing decisions are the TTT R3 gate (owner +
-  collaborator input on the record's §9 questions), the stage-1b
-  prose chunk, the judge-calibration follow-through (if the owner
-  picked rubric-change), the row-12 rollout continuation, and
-  row-11 increment 3 whenever a real target surfaces. Keep the
-  five-session narrative window (42–46 after this session):
-  compress Session 41 into the digest and move its roadmap §5 entry
-  verbatim to `docs/archive/ROADMAP_HISTORY.md`.
+  re-check. NOTE for objective selection: the RATIFIED queue makes
+  the default next objective **R2b (the seam design record)**,
+  then the T-series in order; the other standing decisions (the
+  stage-1b prose chunk, the judge-calibration follow-through if the
+  owner picked rubric-change, the row-12 rollout continuation,
+  row-11 defect-class increment 3 whenever a real target surfaces)
+  remain owner alternates. Keep the five-session narrative window
+  (42–46 after this session): compress Session 41 into the digest
+  and move its roadmap §5 entry verbatim to
+  `docs/archive/ROADMAP_HISTORY.md`.
 
 ## 7. Guardrails
 
@@ -1676,7 +1704,13 @@ Update:
    completion backend moving; any TTT arm flag follows the
    `TRELLIS_EXP_*` mold; no rung changes any default without a
    recorded owner decision; the rlms library is never modified —
-   the seam, if built, is config + an OpenAI-compatible endpoint).
+   the seam, if built, is config + an OpenAI-compatible endpoint;
+   and the FEATURE-CLASS self-edit rung (ratified July 13, 2026,
+   record §12.6) keeps its definition: task-assigned functionality
+   increments are a class of their own — they never count as, and
+   never weaken, the defect-class never-manufacture rule; each
+   T-increment is owner-gated with the full criterion mold, every
+   diff human-reviewed, landing always a human PR).
    The Session 37
    operator-cleanup precedent is BOUNDED, permanently: deleting a
    graph edge is legitimate only for a failed acceptance-run's own
@@ -1828,11 +1862,18 @@ target or split threshold, or reverting the pilot); ANY paid run
 without explicit owner approval (R2 is zero-paid by construction —
 anything that spends is R3+ or another standing item, each needing
 the owner's yes on its pre-stated estimate and criterion);
-implementing ANY TTT or backend-seam machinery this session (R2 is a
-read-only census + design record; serving infrastructure, model
-downloads, backend config code, GPU or hosted-endpoint spend are all
-R3+ owner-approved proposals); modifying the rlms library in any
-form (the R2 inspection is READ-ONLY; guardrail 10); moving,
+implementing ANY TTT or backend-seam machinery this session (R2a is
+a read-only census; the seam design is R2b's; seam CODE belongs to
+the T-series — each T-increment its own owner-approved proposal;
+serving infrastructure, model downloads, GPU or hosted-endpoint
+spend are Phase-2 owner-approved proposals); running any T-series
+increment without its own owner-approved proposal and increment
+record (ratification of the §12.6 chunking covers the SHAPE, never
+individual spend); conflating the feature-class rung with
+defect-target discovery (task-assigned increments are not
+"surfaced targets" and never satisfy or weaken the increment-3
+never-manufacture rule); modifying the rlms library in any
+form (the R2a inspection is READ-ONLY; guardrail 10); moving,
 re-keying, or re-embedding the embedding backend (schema-coupled
 `vector(1536)`; a substrate-identity event, out of R2's scope by
 the record's §4.2); persisting fast weights across runs, designing
