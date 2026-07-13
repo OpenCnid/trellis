@@ -4,6 +4,17 @@ import { z } from 'zod';
 import { parse as parseBabel, type ParserPlugin } from '@babel/parser';
 import { createASTNode, parseMarkdownToAST, type ASTNode } from './parser.js';
 import { nodeText } from './traverse.js';
+import {
+  chunkGenericTree,
+  StructuralChunkError,
+  type ChunkSegment,
+} from './structural_chunker.js';
+import { GenericTreeValidationError } from './generic_tree.js';
+import {
+  grammarForFile,
+  parseGenericTree,
+  profileForGrammar,
+} from './treesitter_engine.js';
 
 // Session 8: code-aware parsing for whole-codebase ingestion.
 //
@@ -342,12 +353,64 @@ async function parsePythonSource(
 }
 
 // ---------------------------------------------------------------------------
-// Dispatch.
+// Session 38 (STRUCTURAL_CHUNKING.md): chunking policy 2 — tree-sitter
+// through the generic tree seam into the cAST split-merge walk. Policy
+// 1 (absent/1) is the Session 8 path above, byte-identical. Policy 2
+// applies to the three code languages only; markdown, text, and every
+// prose corpus keep their pinned geometry under every policy.
+
+export type ChunkingPolicy = 1 | 2;
+
+function segmentToNode(segment: ChunkSegment): ASTNode {
+  if ('text' in segment) return createASTNode(segment.kind, segment.text);
+  return createASTNode(
+    CODE_CLASS_TYPE,
+    undefined,
+    segment.children.map(segmentToNode)
+  );
+}
+
+async function parseStructural(
+  filePath: string,
+  source: string,
+  language: SourceLanguage
+): Promise<ParseSourceResult> {
+  const grammar = grammarForFile(filePath);
+  if (!grammar) {
+    return {
+      ok: false,
+      reason: 'unsupported_extension',
+      detail: `no structural grammar wired for ${filePath}`,
+    };
+  }
+  const parsed = await parseGenericTree(grammar, source);
+  if (!parsed.ok) {
+    return { ok: false, reason: 'parse_error', detail: parsed.detail };
+  }
+  let segments: ChunkSegment[];
+  try {
+    segments = chunkGenericTree(parsed.root, source, profileForGrammar(grammar));
+  } catch (error) {
+    if (error instanceof StructuralChunkError || error instanceof GenericTreeValidationError) {
+      return { ok: false, reason: 'coverage_error', detail: error.message };
+    }
+    throw error;
+  }
+  const root = createASTNode('root', undefined, segments.map(segmentToNode));
+  if (!coversSource(root, source)) {
+    return { ok: false, reason: 'coverage_error' };
+  }
+  return { ok: true, language, root };
+}
 
 export interface ParseSourceOptions {
   // Interpreter for the Python segmenter; callers pass
   // config.python.executable so this module stays config-free.
   pythonExecutable: string;
+  // Session 38: absent or 1 = the Session 8 chunking above,
+  // byte-identical; 2 = structural chunking (operator-explicit per run
+  // — nothing defaults to 2).
+  chunkingPolicy?: ChunkingPolicy;
 }
 
 /**
@@ -372,14 +435,19 @@ export async function parseSourceFile(
     return { ok: false, reason: 'decode_error' };
   }
 
+  const structural = options.chunkingPolicy === 2;
   switch (language) {
     case 'markdown':
       return { ok: true, language, root: parseMarkdownToAST(source) };
     case 'typescript':
     case 'javascript':
-      return parseEcmaSource(filePath, source, language);
+      return structural
+        ? parseStructural(filePath, source, language)
+        : parseEcmaSource(filePath, source, language);
     case 'python':
-      return parsePythonSource(source, bytes, options.pythonExecutable);
+      return structural
+        ? parseStructural(filePath, source, language)
+        : parsePythonSource(source, bytes, options.pythonExecutable);
     case 'text': {
       const root = createASTNode('root', undefined, chunkNodes(source, OPAQUE_TEXT_TYPE));
       if (!coversSource(root, source)) {
