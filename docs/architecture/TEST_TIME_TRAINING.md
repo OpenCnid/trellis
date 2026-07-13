@@ -774,3 +774,218 @@ spec; task text carries the spec verbatim (the increments-1/2
 channel) until stage-1b chunk A lands (a natural synergy, not a
 prerequisite). (2) Refresh-before-use applies to every T-increment's
 target area (the split-scope recipe; `src/rlm` is the policy-2 leg).
+
+## 13. R2a — the backend-seam census and the rlms verdict (Session 46, July 13, 2026)
+
+Rung R2a executed as ratified (§12.6 Phase 0): a READ-ONLY census,
+zero paid spend, zero code bytes moved. Method: grep-driven sweep of
+`src/rlm/`, `src/workers/`, `src/core/`, `src/config/`, and
+`scripts/` for transport constructions, model-id literals, pricing
+constants, token accounting, and embedding calls (every
+`chat.completions.create` and `embeddings.create` site in the tree is
+disposed below), plus a read-only inspection of the installed
+`rlms==0.1.3` package (import name `rlm`, site-packages; guardrail 10
+respected — nothing modified). The seam design built on this census
+is R2b's, the next session.
+
+### 13.1 The rlms verdict — YES, with quoted evidence
+
+**rlms==0.1.3 admits a base-URL/backend override WITHOUT library
+modification.** The evidence, from the installed package:
+
+1. `rlm/core/rlm.py` — the constructor's first two parameters:
+   `RLM(backend: ClientBackend = "openai", backend_kwargs: dict[str,
+   Any] | None = None, ...)`. Trellis today passes only
+   `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}` and takes
+   the `"openai"` default backend.
+2. `rlm/clients/__init__.py::get_client` routes eight backends:
+   `['openai', 'vllm', 'portkey', 'openrouter', 'anthropic',
+   'azure_openai', 'gemini', 'vercel']`. The `vllm` arm is the
+   OpenAI client with a mandatory endpoint: it asserts
+   `"base_url is required to be set to local vLLM server address
+   for vLLM"` and then constructs the same `OpenAIClient`.
+3. `rlm/clients/openai.py::OpenAIClient.__init__(self, api_key=None,
+   model_name=None, base_url=None, sampling_args=None, **kwargs)` —
+   `base_url` is a FIRST-CLASS constructor parameter, passed straight
+   into `openai.OpenAI(**client_kwargs)`. The class docstring says it
+   plainly: "LM Client for running models with the OpenAI API. Works
+   with vLLM as well."
+4. Sub-call separability exists in the library itself:
+   `other_backends`/`other_backend_kwargs` (exactly one additional
+   backend supported) lets depth-1 sub-calls run a DIFFERENT
+   backend from the root — relevant to R4 arm design, unused today.
+
+**The seam call is therefore additive kwargs at the two existing
+construction sites** (T3's exact scope):
+`RLM(backend="openai"|"vllm", backend_kwargs={"model_name": ...,
+"base_url": ..., "api_key": ...})`. No rlms byte moves.
+
+**Recorded caveats the T-series and R3 must respect:**
+
+- **The usage requirement (the one hard compatibility constraint
+  beyond chat-completions shape):** `OpenAIClient._track_cost`
+  RAISES `ValueError("No usage data received. Tracking tokens not
+  possible.")` when a completion response lacks `usage`. Any serving
+  endpoint must return usage on non-streaming completions (vLLM does
+  by default). The R3a smoke test asserts this before anything else.
+- **Token/context coupling is soft:** `rlm/utils/token_utils.py`
+  keys context limits and tokenizers by model name with safe
+  fallbacks (unknown model → 128,000-token default; tiktoken →
+  `cl100k_base` → chars/4). Consulted only under `compaction=True`,
+  which Trellis never sets. Non-blocking.
+- **API-key resolution:** known base URLs map to their own env keys
+  (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `AI_GATEWAY_API_KEY`,
+  `PRIME_API_KEY`, read at import time); an unrecognized/local
+  base_url leaves `api_key=None`, which the openai SDK resolves from
+  `OPENAI_API_KEY` env — a local endpoint typically wants an explicit
+  dummy `api_key` kwarg so runs do not depend on an unrelated real
+  key being present.
+- **rlms calls `load_dotenv()` at import** (both
+  `rlm/clients/openai.py` and `rlm/clients/__init__.py`): a `.env`
+  file in the spawned agent's working directory is read into its
+  environment. An unmanaged credential input channel, recorded here
+  for R2b's forwarding design.
+
+### 13.2 The census
+
+Legend: "moves?" = does the site have to change (or change meaning)
+when the completion backend moves. Classes ordered by seam relevance.
+
+**Class 1 — root RLM completion (the seam; T3 rewires exactly these).**
+
+| Site | Assumption | Moves? | Pinned by |
+|---|---|---|---|
+| `src/rlm/trellis_agent.py:329` (author mode) | `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}`; backend defaults to `"openai"`; transport+key from ambient env | YES — T3 | No direct pin (paid-run surface; `test:rlm-sandbox` stubs the `openai` module) |
+| `src/rlm/trellis_agent.py:532` (research mode) | same | YES — T3 | same |
+| `src/rlm/trellis_agent.py:87,101` (`make_entailment_check`) | direct `openai.OpenAI()` + hardcoded model literal; constructed only under `TRELLIS_CITATION_ENTAIL=1` (experimental) | YES if the checker is kept; R2b decides whether it follows the seam or stays a frozen instrument | none |
+| `scripts/probe_workspace_lineage.py:157`, `scripts/probe_workspace_paired.py:89` | same `backend_kwargs` mold | NO — frozen measurement instruments; retrofitting them would invalidate comparability with their recorded runs | recorded here |
+
+**Class 2 — worker/engine completions (model id ALREADY
+config-shaped; only the transport is assumed).**
+
+The model id routes through ONE seam today: `EXTRACTION_MODEL`
+(`src/config/index.ts:109`, zod default `'gpt-5.4-2026-03-05'`) →
+`config.llm.extractionModel` (`index.ts:327`). Consumers:
+`extraction_worker.ts:77`, `supervisor_worker.ts:76`,
+`verification.ts:217` (`makeOpenAIClassifier`),
+`entailment_detection.ts:208` (`makeOpenAIEntailmentJudge`),
+`alias_resolution.ts:199` (`makeOpenAIAdjudicator`),
+`decision_source.ts:51` (`makeOpenAIDecisionSource`),
+`resolution_worker.ts:50,65`, `agent_worker.ts:188` +
+`verification_worker.ts:79,135` (metric labels),
+`scripts/resolve_sweep.ts:67`. **A worker-side model change is an
+env-var change today; no code moves.** The transport is zero-arg
+`new OpenAI()` at seven sites (`extraction_worker.ts:26`,
+`supervisor_worker.ts:25`, `verification.ts:220`,
+`entailment_detection.ts:211`, `alias_resolution.ts:202`,
+`decision_source.ts:54`, `api/server.ts:263`) — SDK-default
+transport, see §13.3. `parseLlmResponse` at the consumption boundary
+is model-agnostic by construction (guardrail 7 holds under any
+backend).
+
+**Class 3 — the embedder (NON-GOAL, §4.2; listed so the boundary is
+explicit).**
+
+| Site | Call |
+|---|---|
+| `src/workers/extraction_worker.ts:30,193–197` | `EMBEDDING_MODEL = 'text-embedding-3-small'` literal; per-block `embeddings.create` |
+| `src/rlm/trellis_tools.py:804–806` | `vector_search` query embedding, same literal |
+| `src/api/server.ts:263–265` | `/retrieve` vector-fallback embedding, same literal |
+| `scripts/chunking_seam_queries.ts:83–84` | the eight PINNED seam queries (standing instrument — never tuned) |
+| `scripts/exp_citation_ab.ts:43,98` | experiment instrument, frozen |
+
+All three production embedding sites are schema-coupled
+(`vector(1536)` + HNSW, `src/config/schema.ts` /
+`search_ast_nodes`). The embedder does NOT move with the completion
+backend; an embedder move is a substrate-identity event. §13.3 names
+the one place this boundary is currently soft.
+
+**Class 4 — pricing constants (estimate-only by design; a backend
+move re-prices them, never silently).**
+
+| Site | Constant | Consumers | Pinned by |
+|---|---|---|---|
+| `src/benchmarks/oolong/scoring.ts:13–14` | `PRICE_PER_M_INPUT = 2.5`, `PRICE_PER_M_OUTPUT = 10` ("used when the backend does not report exact cost") | `poison_drill_runner.ts`, `exp_effective_context.ts` (spend gate, lines 1628–1630), `exp_citation_ab.ts`, `exp_citation_metadata.ts` | `scoring.test.ts:132` |
+| `src/core/authoring/estimate.ts:16` | `AUTHOR_EST_PRICE_PER_1K_USD = 0.02` | `author_module.ts` refuse-before-spend ceiling (line 370, `--max-spend-usd`) | `estimate.test.ts` |
+
+These gates bound OPENAI spend. An R3 serving arm prices in
+GPU-hours or hosted per-token dollars per the §7 cost doctrine — its
+proposal restates cost in those units rather than stretching these
+constants.
+
+**Class 5 — token accounting (moves cleanly; one recorded
+asymmetry).**
+
+- Python: the telemetry payload's `input_tokens` / `output_tokens` /
+  `reported_cost_usd` come from rlms's `UsageSummary`; `model_usage`
+  is `usage_dict["model_usage_summaries"]`, keyed BY MODEL NAME — a
+  new backend appears as a new key, no shape change; the Node
+  telemetry scanner tolerates additive fields (pinned).
+- TypeScript: `llm_usage.ts` `chatUsage`/`embeddingUsage` tolerate a
+  MISSING `usage` block (count the call, zero tokens, never throw) —
+  the recorded asymmetry with rlms's `_track_cost`, which THROWS
+  (§13.1). Metric labels are `operation`/`model` — the model name is
+  already a bounded label value, so a backend change changes label
+  VALUES only, within the T16 house style.
+- `reported_cost_usd` is `None` on plain OpenAI endpoints today
+  (rlms extracts cost only from OpenRouter-shaped responses); every
+  house spend gate uses token counts × Class-4 constants, so nothing
+  breaks when a new backend also reports no cost.
+
+**Class 6 — report stamps and prose (recorded strings; they gate
+nothing and move as wording only).** `oolong_runner.ts:137`,
+`update_drill_runner.ts:199`, `poison_drill_runner.ts:467` (report
+`model` fields; the poison drill already stamps `'ground-truth
+oracle (LLM-free)'` in rehearsal), `author_module.ts:402`
+(provenance prose), the comments at `oolong/scoring.ts:11` and
+`estimate.ts:8`, `exp_citation_ab.ts:44` (`CHECKER_MODEL`, frozen
+experiment instrument), and `scripts/pocs/*` (`gpt-5.4-mini`
+literals; PoC archive class, frozen).
+
+### 13.3 The unmanaged pass-through (the census's one real discovery)
+
+Every production client in the tree — the seven zero-arg
+`new OpenAI()` constructions (Node SDK `openai@^6.45.0`), the two
+Python `openai.OpenAI()` constructions, and rlms's own
+`OpenAIClient` with `base_url=None` — resolves its base URL from the
+SDK's ambient `OPENAI_BASE_URL` environment variable when unset.
+Verified in both installed SDKs (`node_modules/openai/client.js`
+line 140; site-packages `openai/_client.py` line 251). Three
+consequences, recorded:
+
+1. **The transport is ALREADY overridable today with zero code
+   change** — but UNMANAGED: no config validation, no typed refusal,
+   no telemetry visibility, no test pin.
+2. **`buildAgentEnv` (`src/workers/rlm_job.ts`) spreads `...base`
+   and neither deliberately forwards nor strips `OPENAI_BASE_URL`**
+   (`OPENAI_API_KEY` inherits the same way, by design — the agent
+   needs it). An `OPENAI_BASE_URL` inherited from the worker's
+   environment would silently redirect the child agent's root
+   completions, the experimental checker client, AND the
+   `vector_search` EMBEDDER together — exactly the coupling §4.2
+   forbids (the embedder must never move as a side effect of the
+   completion backend moving). The worker-side clients read the same
+   ambient variable, so engine completions and the extraction
+   embedder are coupled the same way.
+3. **This is not a defect today** — no environment sets the
+   variable, no behavior has changed, nothing is broken; it is a
+   designed-in SDK affordance that the house config discipline does
+   not yet manage. It is the precise gap the ratified T-series
+   closes: T1 gives backend choice a validated config surface with
+   typed refusals; T2 makes `buildAgentEnv` forward-or-strip it
+   under the experiment-flag mold (the `TRELLIS_MCP_SERVERS`
+   discipline); T3 passes explicit `backend_kwargs` so the child
+   never resolves its transport from ambient env. **R2b's design
+   must decide:** whether the config seam strips `OPENAI_BASE_URL`
+   unconditionally so backend choice is expressible ONLY through
+   validated config — the recommendation this census hands R2b.
+
+### 13.4 What R2a does not do
+
+No implementation, no config key, no env twin, no default change —
+the seam design (config shape, typed refusals, the three-way root /
+worker / embedder split, T-increment task-text skeletons, the R3
+proposal skeleton) is R2b's deliverable, human-authored
+spec-before-pen per §12.6. The embedder stays a non-goal (§4.2). The
+probe scripts and experiment instruments named frozen above stay
+frozen.
