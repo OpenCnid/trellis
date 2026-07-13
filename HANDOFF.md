@@ -8,12 +8,12 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–39 and their same-day follow-ons (July 4–13, 2026; PRs
-#21–#81) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–40 and their same-day follow-ons (July 4–13, 2026; PRs
+#21–#82) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 39 with the Session 44 PR — this file keeps full
+recently Session 40 with the Session 45 PR — this file keeps full
 narrative only for the most recent five sessions). The one-paragraph
 digest, oldest first; §1 below carries everything from this span that
 a new session must actually know:
@@ -305,42 +305,24 @@ a new session must actually know:
   increment 2 failed twice, each class closed mechanically, retry
   landed first shot.
 
-**Session 40 (July 13, 2026, PR #82) is also complete: the
-`search_ast_nodes` liveness filter — dead-block embedding pollution
-CLOSED at the T15 seam, then the pinned seam queries re-measured
-(roadmap §4 row 12 continuation; zero-paid except 8 embedding calls
-/ 75 tokens ≈$0.000002).** Design record `STRUCTURAL_CHUNKING.md`
-§11 (written BEFORE implementation); measured record §11.4. **(1)
-The filter:** one `CREATE OR REPLACE FUNCTION` in
-`POSTGRES_SCHEMA_SQL` (`src/config/schema.ts`) — LIVENESS =
-membership in the CURRENT (max-version) root of at least one
-document, exactly the stage-2 checker's `gatherHashEvidence` bridge
-mirrored into SQL (an EXISTS clause applied BEFORE `LIMIT`);
-signature unchanged, so BOTH callers (`vector_search` in
-`trellis_tools.py`, `POST /retrieve`) changed ZERO bytes and the
-idempotent bootstrap upgrades every stack on boot. Tombstones
-compose; superseded history stays queryable by hash through every
-other surface — only vector search filters. The honest residual
-recorded, not denied: a filtered HNSW scan can under-fill below
-pgvector's candidate truncation — NO under-fill observed. **(2)
-Pins + drill:** the `schema.test.ts` filter pin moved in the SAME
-commit (`npm test` 836 → 837/85); `test:repo-ingest` Part 8 = the
-planted-dead-twin drill (raw distance order ranks the dead twin
-FIRST, the tool returns ONLY the live successor). One witting
-fixture consequence: `test:rlm-sandbox` [5]'s embedded probe row now
-registers as its own single-node document (`sandbox:probe:embed`,
-FK-ordered cleanup). **(3) The re-measure:** seam queries through
-the raw tool **4/8 → 5/8 — criterion ≥5/8 PASS**; the pilot's
-headline miss (the `trellis_agent.py` telemetry query) FIXED at
-live rank 2; NO query moved down. Persisting misses NAMED, not
-chased: `trellis_blocks.py` (merge-density) and the two both-column
-misses (cross-file semantic competition). **(4)** The §1 "name the
-pollution" reporting duty is RETIRED for tool-shaped vector-search
-results; the superseded-embedding SWEEP stays on the owner menu
-unchosen (storage, not correctness). The same day the owner RATIFIED
-the general rule: superseded versions are ARCHIVE, not search space
-— any default-discovery surface reads LIVE blocks only, history
-solely by explicit address (roadmap §5 entry; HANDOFF guardrail 5).
+- **Session 40 (PR #82)** closed dead-block embedding pollution at
+  the T15 seam zero-paid (≈$0.000002 re-measure spend): the
+  `search_ast_nodes` liveness filter — LIVENESS = current
+  (max-version) root membership, the `gatherHashEvidence` bridge
+  mirrored into SQL, EXISTS before `LIMIT`; signature unchanged, both
+  callers zero bytes, the idempotent bootstrap carries it; superseded
+  history stays queryable BY HASH everywhere else; the filtered-HNSW
+  under-fill residual documented, none observed. Pins: the
+  `schema.test.ts` filter pin (`npm test` 836 → 837/85) +
+  `test:repo-ingest` Part 8 (planted dead twin: raw distance ranks it
+  FIRST, the tool returns only the live successor) + the
+  `sandbox:probe:embed` fixture consequence. Re-measure: seam queries
+  through the raw tool 4/8 → 5/8 (criterion PASS; the
+  `trellis_agent.py` headline miss FIXED at live rank 2; persisting
+  misses NAMED, not chased). Same day the owner RATIFIED the general
+  rule: superseded versions are ARCHIVE, not search space —
+  default-discovery surfaces read LIVE blocks only, history solely by
+  explicit address (HANDOFF guardrail 5).
 
 **Session 41 (July 13, 2026, PR #83) is also complete: structural
 splice addressing — the design record + the guarded splice family
@@ -571,27 +553,92 @@ long-output CLI through `tee | head`. **(4) Bookkeeping:**
 Session 39 compressed to the digest; its §5 entry moved verbatim to
 the archive (window now 40–44).
 
+**Session 45 (July 13, 2026, this PR) is complete: the
+test-time-training research track OPENED by owner direction —
+research record + rung ladder + collaborator questions; roadmap §4
+row 13; zero runtime bytes, $0.0000 spent, docs-only PR (five
+markdown files).** The owner relayed the external collaborator's
+active line (increasingly optimized sparse models in this harness;
+fast-weight layers trained during test time each turn on the RLM's
+REPL-resident context and on the harness's own meta-prompts) and
+directed a session that researches it, roadmaps it, and documents it
+for future sessions and collaborators — jumping the §4 queue per §0
+step 3, reason recorded; the stage-1b prose chunk stays a standing
+item, undiminished. **(1) The record:**
+`docs/architecture/TEST_TIME_TRAINING.md` (the document-first mold
+one stage earlier — the record that decides whether a design record
+is ever warranted). The relayed claim is DECOMPOSED into three
+separable hypotheses — H1 context adaptation, H2 meta-prompt
+adaptation, H3 the sparse-model vehicle — each testable or
+rejectable alone; the July-2026 literature is mapped into three
+mechanism families (architectural fast-weight layers: TTT-Linear
+arXiv:2407.04620, Titans arXiv:2501.00663, ATLAS; per-instance
+adaptation of pretrained weights: ARC-TTT arXiv:2411.07279, TTT-NTP
+arXiv:2606.21803, agentic TTT arXiv:2607.03441; compiled-state
+cousins: Cartridges, SEAL, Transformer²) with two calibrating 2026
+findings adopted verbatim — agentic-TTT gains are STABILITY-shaped,
+not capability-shaped (~1.9× serving cost), and TTT perplexity wins
+frequently fail to appear behaviorally (Beyond Perplexity,
+arXiv:2607.00368) — criteria are task-behavior counts, never loss
+curves. NOT found, recorded: any unified TTT×sparse-MoE literature;
+any direct study of H2. **(2) The seams, named against the code:**
+rlms `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}` hardcoded
+at BOTH `trellis_agent.py` construction sites + the direct
+`openai.OpenAI()` checker client; the `vector(1536)` + HNSW
+embedder-schema coupling (`POSTGRES_SCHEMA_SQL`) — the embedding
+backend is schema-coupled and SEPARABLE from the completion backend,
+and an embedder move is a substrate-identity event; the
+composed-prompt byte pins are the natural cache key for any prefix
+fast-state (H2's mechanism, if it exists). **(3) The trust-model
+verdict:** fast weights = Tier-3 analog — ZERO provenance standing,
+per-run ephemeral ABSOLUTE (cross-run persistence is a
+promotion-shaped event needing its own record); every gate is
+engine-side and model-agnostic, so a backend swap changes NONE of
+them (the tooling-shape doctrine paying out); three named threats —
+injection amplification via adaptation data (any R4 proposal
+pre-states its adaptation-data policy as precisely as the retrieval
+set defines citability), cross-run contamination, reproducibility
+(model checkpoints join grammar wasm blobs as exact-pinned
+substrate-identity objects). **(4) The owner-gated ladder:** R1
+collaborator exchange (record §9's four questions, owner-mediated;
+`COLLABORATOR_BRIEFING.md` Postscript 3 corrects the July 9 item-(4)
+answer — the registry is PROMPT-level adaptation, the collaborator's
+line is WEIGHT-level) → R2 backend-seam audit (zero-paid, next
+actionable — the §3 objective below) → R3 open-sparse baseline (the
+GATING question: protocol competence, before TTT enters at all) →
+R4 paired TTT arms → R5 meta-prompt fast-state. Honest scope pinned
+(record §8): TTT is IMPOSSIBLE on the current API backend; "quality
+of response overall" is an unmeasured hypothesis; H2 has no direct
+literature support. **(5) Bookkeeping:** Session 40 compressed to
+the digest; its §5 entry moved verbatim to the archive (window now
+41–45); found in passing and repaired: the roadmap §5
+archive-pointer paragraph was three moves stale (read "37–41" while
+Sessions 42–44 each moved an entry). `npm test` 837/85 observed
+green in the session worktree after `npm ci`; live drills NOT re-run
+(zero non-markdown bytes moved — recorded reason); no refresh owed
+(docs-only; `docs/` is outside extraction scope until stage-1b).
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 45: stage-1b — extend the durable
-self-substrate to the repository's prose (`docs/` + root markdown)
-through a CHUNKED proposal that respects the ≤$5/run cap**, per
-§3–§6 below. The full bound was priced at ~2,900 blocks ≈ $7.8
-(Session 34), so the work splits into owner-gated scoped runs. At
+Your objective is **Session 46: TTT-track rung R2 — the backend-seam
+audit** (roadmap §4 row 13; `docs/architecture/TEST_TIME_TRAINING.md`
+§7), per §3–§6 below: a zero-paid, READ-ONLY census of every site
+that assumes the OpenAI transport, the gpt-5.4 model id, its pricing,
+or its token accounting, answered into a backend-seam design record —
+NO implementation, NO backend change, NO rlms modification. At
 session START, present the owner the judge-calibration decision with
 the Session 44 data (`PROVENANCE_THREADING.md` §10.2 — the strict
 judge is consistent; `has_category` flags at 98.6%, `mentions` at
-57.7%; the remaining `q_` pool is 356 pairs): the owner picks accept
-/ rubric-change / defer, and a rubric change becomes its own designed
-session, never an inline edit. If the owner instead directs the
-row-12 rollout continuation or a surfaced row-11 increment-3 target,
-take that. The environmental prerequisites are the Session 43 trio
-(OpenAI key + `api.openai.com` egress + the owner's durable dev PG —
-check all three at session start; a `curl -sS -o /dev/null -w
-'%{http_code}' https://api.openai.com/v1/models` returning 401
-proves egress without spending). The toolkit never touches git. Do
-not re-plan or re-implement completed work. RLM expands exclusively
-to Recursive Language Model (the MIT CSAIL formulation).
+57.7%; the remaining `q_` pool is 356 pairs; this duty has carried
+two sessions — it is presented BEFORE any R2 work): the owner picks
+accept / rubric-change / defer, and a rubric change becomes its own
+designed session, never an inline edit. If the owner instead directs
+the stage-1b prose chunk (standing item, fully specified in §2 item
+list + the Session 44-era HANDOFF preserved in git history), the
+row-12 rollout continuation, or a surfaced row-11 increment-3 target,
+take that. The toolkit never touches git. Do not re-plan or
+re-implement completed work. RLM expands exclusively to Recursive
+Language Model (the MIT CSAIL formulation).
 
 ---
 
@@ -939,6 +986,20 @@ immutable, content-addressed physical location in source material.
      doubling). `LocalREPL` persists `self.locals` across turns; on
      exception, rebindings are lost but in-place mutations persist;
      underscore-prefixed names never persist.
+   - **The TTT research track (Session 45;
+     `docs/architecture/TEST_TIME_TRAINING.md`):** research-only — no
+     machinery, no runtime byte; the owner-gated rung ladder R1–R5
+     (roadmap §4 row 13). The seam facts a session needs: the model
+     backend is HARDCODED (`backend_kwargs={"model_name":
+     "gpt-5.4-2026-03-05"}` at both `trellis_agent.py` construction
+     sites; whether rlms==0.1.3 admits a base-URL override without
+     library modification is UNKNOWN — R2's first question); the
+     embedding backend is SCHEMA-COUPLED (`vector(1536)` + HNSW) and
+     SEPARABLE from the completion backend — an embedder move is a
+     substrate-identity event; fast weights, if ever present, are a
+     Tier-3 analog (zero provenance standing, per-run ephemeral
+     absolute) and every provenance gate is engine-side and
+     model-agnostic by construction.
    - The orchestrator (Sessions 9/16) lives in `src/core/agent/` and
      is a pure decision maker with NO tools and no database access;
      it routes workspace lineage BY REFERENCE. Zero-LLM drills:
@@ -1009,10 +1070,9 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 13, 2026 Session 44 PR
-  (the increment-3 no-target finding + the judge-calibration
-  measurement — the PR that carries this file; docs + the committed
-  drill artifact only).
+- `master`: the head after the July 13, 2026 Session 45 PR
+  (the TTT research-track record + roadmap row 13 — the PR that
+  carries this file; docs-only, five markdown files).
   Use `git log -- HANDOFF.md` to confirm this PR landed; if it is
   still unmerged when this session starts, STOP and merge it first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); module
@@ -1059,7 +1119,7 @@ Repository state at handoff creation:
   describes the OWNER'S durable dev PG (Session 43 ran on it;
   Session 42's ephemeral container staging died with the container,
   by design).
-- Sessions 43 and 44 changed NO code byte at all (docs and the
+- Sessions 43–45 changed NO code byte at all (docs and the
   Session 43 committed drill artifact only) and NO prompt byte —
   both composed-prompt pins unmoved (default `5d27e474…fe2a`,
   omit-arm `45987904…0b56` — recompute BOTH in the same commit only
@@ -1082,8 +1142,8 @@ Repository state at handoff creation:
   blob-CDN denials are recoverable with
   `registry-mirrors: ["https://mirror.gcr.io"]`.
 - Offline baseline: `npm test` = 837 passing across 85 files
-  (UNCHANGED by Sessions 42–44; Session 44 observed it green
-  first-try on the owner's Windows machine after `npm ci`).
+  (UNCHANGED by Sessions 42–45; Session 45 observed it green
+  first-try in its fresh worktree after `npm ci`).
 - `npm run build` and `npm run python:check` pass (the check imports
   polars — an environment without it fails the check by design).
 - `npm run drill:scale`: gate CLOSED at max provenance 286.
@@ -1097,9 +1157,10 @@ Repository state at handoff creation:
   REPRODUCING open reading is the migration trigger (roadmap §4
   row 7) and the owner adjudicates. The drill rewrites the tracked
   `scale_drill_results.json` — commit it with the session PR (the
-  committed copy is Session 44's 1.54x CLOSED run). Run the scale
-  drill ALONE — never concurrently with other live drills on the
-  shared dev database.
+  committed copy is Session 44's 1.54x CLOSED run; Session 45,
+  docs-only, did not run the drill). Run the scale drill ALONE —
+  never concurrently with other live drills on the shared dev
+  database.
 - Live zero-LLM checks: Session 44 observed ALL 18 standing drills
   green on the owner's Windows machine against the durable dev PG
   (post-measurement, one sequential chain): `test:selfedit-harness`
@@ -1119,7 +1180,9 @@ Repository state at handoff creation:
   `test:api-hardening`, `test:belief-recovery`,
   `test:invalidation-sweep`. The Session 42-repaired non-standing
   drills `test:confidence-writes` and `test:entity-kinds` read "All
-  checks passed" (first green since Session 14).
+  checks passed" (first green since Session 14). Session 45
+  (docs-only, zero non-markdown bytes) did not re-run the drill
+  block — the Session 44 observation stands as the latest reading.
 - Isolated Compose integration: 11 assertions (`--profile test`,
   unique project name; includes the containerized credentialed MCP
   fixture probe and the in-container `polars 1.34.0` import probe).
@@ -1137,44 +1200,62 @@ Repository state at handoff creation:
   `TRELLIS_REDIS_HOST_PORT`, `TRELLIS_API_HOST_PORT` — set each to 0.
   NOTE: C: runs tight on free space; a FULL image rebuild needs
   several GB of headroom. `requirements.txt` and `package.json`
-  unchanged in Sessions 39–44 — both layers stay cached.
+  unchanged in Sessions 39–45 — both layers stay cached.
 - The standing owner-conditional items — all propose-with-estimate,
-  never self-served: **(1) the stage-1b prose chunk — THE OBJECTIVE
-  (§3)** (~2,900 blocks ≈ $7.8 full bound, so it runs as CHUNKED
-  owner-gated scoped runs under the ≤$5/run cap); **(2) the
+  never self-served: **(1) TTT-track rung R2 — THE OBJECTIVE (§3)**
+  (zero-paid, read-only; needs no spend approval — the audit and its
+  design record are the session's own work); **(2) the
   judge-calibration decision** for derived-classification claims —
-  **its data is now DELIVERED** (Session 44,
-  `PROVENANCE_THREADING.md` §10.2: `has_category` 73/74 flagged,
-  `mentions` 15/26, judge consistent; present it at session start —
-  the owner picks accept / rubric-change / defer; a rubric change is
-  its own designed session); **(3) the row-11 executable-class
-  increment 3** (prerequisite SATISFIED by Session 41; guarded-only
-  criterion — `textedit_raw_splices == 0` joins the standing five
-  items; the Session 44 search found NO real target — it re-enters
-  as a NEW proposal only when one genuinely surfaces, never
-  manufactured); (4) the pandas head-to-head probe round; (5)
-  the cross-process concurrency proof run (coverage-audit gap #1);
-  **(6) the substrate freshness cadence** (ADOPTED July 13: one
-  scoped refresh per merged PR + refresh-before-use ahead of stage-2
-  edit runs; each refresh's extraction spend still gated per run —
-  UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; the Session 44 PR is
-  docs-only, so Session 45 owes a refresh only for files its OWN PR
-  changes — a landed stage-1b ingestion is its own snapshot, not a
-  refresh); **(7) the targeted stage-1 entailment sweep AS WORDED IS
-  BLOCKED BY SHAPE** (recorded by Session 44: stage-1 extraction
-  wrote ACTION edges; the detector selects DERIVED_INSIGHT only —
-  widening its selection is a recorded owner-visible design change
-  to row-9 machinery, not a flag; the item stays on the menu as
-  that design decision); **(8) the row-12 rollout
-  continuation** (widening policy-2 scope, retuning merge density,
-  or reverting the pilot — owner's call with the record §10.3 +
-  §11.4 together); **(9) the superseded-embedding SWEEP** (storage
-  reclamation only; destructive, re-buys embeddings on recovery;
-  stays unchosen). Row 10's measurement (Session 43) and the
-  judge-calibration MEASUREMENT (Session 44) are DONE and off this
-  list — only the calibration DECISION remains. If the owner
-  approves nothing this session, the zero-paid §3 proposal work
-  still stands alone. OPERATIONAL NOTES (Windows): stopping
+  **its data is DELIVERED and the presentation duty has carried TWO
+  sessions** (Session 44, `PROVENANCE_THREADING.md` §10.2:
+  `has_category` 73/74 flagged, `mentions` 15/26, judge consistent;
+  present it at session START — the owner picks accept /
+  rubric-change / defer; a rubric change is its own designed
+  session); **(3) the stage-1b prose chunk** (~2,900 blocks ≈ $7.8
+  full bound at Session 34 pricing — re-derive with a zero-paid plan
+  echo before proposing; CHUNKED owner-gated scoped runs under the
+  ≤$5/run cap; the recorded partition strawman: run A =
+  `docs/architecture`, run B = `docs/benchmarks` + remaining
+  `docs/`, run C = root markdown; the churn question the proposal
+  MUST price for the owner: `HANDOFF.md`/`TRELLIS_ROADMAP.md` are
+  rewritten every session — exclude them, include-and-price the
+  recurring refresh, or include only the append-mostly
+  `docs/archive/ROADMAP_HISTORY.md`; prose chunks under policy 1;
+  the stage-1 criterion mold adapted to prose; a landed stage-1b
+  joins the policy-1 refresh leg — full §3-grade spec preserved in
+  the Session 44-era HANDOFF in git history); **(4) the row-11
+  executable-class increment 3** (prerequisite SATISFIED by
+  Session 41; guarded-only criterion — `textedit_raw_splices == 0`
+  joins the standing five items; the Session 44 search found NO real
+  target — it re-enters as a NEW proposal only when one genuinely
+  surfaces, never manufactured); (5) the pandas head-to-head probe
+  round; (6) the cross-process concurrency proof run (coverage-audit
+  gap #1); **(7) the substrate freshness cadence** (ADOPTED July 13:
+  one scoped refresh per merged PR + refresh-before-use ahead of
+  stage-2 edit runs; each refresh's extraction spend still gated per
+  run — UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; the Session 44 and
+  45 PRs are docs-only and owed nothing — Session 46 owes a refresh
+  only for files its OWN PR changes); **(8) the targeted stage-1
+  entailment sweep AS WORDED IS BLOCKED BY SHAPE** (recorded by
+  Session 44: stage-1 extraction wrote ACTION edges; the detector
+  selects DERIVED_INSIGHT only — widening its selection is a
+  recorded owner-visible design change to row-9 machinery, not a
+  flag; the item stays on the menu as that design decision); **(9)
+  the row-12 rollout continuation** (widening policy-2 scope,
+  retuning merge density, or reverting the pilot — owner's call with
+  the record §10.3 + §11.4 together); **(10) the
+  superseded-embedding SWEEP** (storage reclamation only;
+  destructive, re-buys embeddings on recovery; stays unchosen);
+  **(11) TTT-track rungs R3–R5** (each its own owner-approved
+  proposal per `TEST_TIME_TRAINING.md` §7; R3 needs serving
+  infrastructure — GPU-hours or a hosted open-model endpoint, priced
+  in the proposal under the record's cost-doctrine re-expression;
+  R4/R5 need R3's PASS; R1, the collaborator exchange, is
+  owner-mediated and needs no session). Row 10's measurement
+  (Session 43) and the judge-calibration MEASUREMENT (Session 44)
+  are DONE and off this list — only the calibration DECISION
+  remains. If the owner approves nothing this session, the zero-paid
+  §3 audit still stands alone. OPERATIONAL NOTES (Windows): stopping
   `npm run dev:workers` through the session harness — OR a failed
   pipeline start (a missing `benchmark_logs/` directory broke a Tee
   and orphaned the npm tree, Session 38) — leaves stale consumers
@@ -1216,59 +1297,50 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 45 problem statement
+## 3. Session 46 problem statement
 
-**Stage-1b: extend the durable self-substrate to the repository's
-prose — `docs/` and the root markdown — through a chunked,
-owner-gated proposal.** Recorded by Session 34 as the deferred
-remainder of stage 1 (~2,900 blocks ≈ $7.8 at the time — over the
-≤$5/run cap, hence chunked), it is now the first standing item whose
-work is self-contained and zero-risk to the flywheel machinery. The
-facts a new session must act on:
+**TTT-track rung R2: the backend-seam audit** — a READ-ONLY census
+answering, precisely and against the code, what it would take to
+point the RLM at a different completion backend WITHOUT changing one
+byte of behavior for the current one, written into a backend-seam
+design record. Recorded by Session 45
+(`docs/architecture/TEST_TIME_TRAINING.md` §7) as the only TTT rung
+executable without new infrastructure or budget. The facts a new
+session must act on:
 
-- **Why this matters to the flywheel:** the extraction substrate
-  today is code-only (`src`+`scripts`+`modules`). The architecture
-  records, the benchmark reports, and the roadmap carry the
-  invariants, design decisions, and session history the RLM's
-  self-knowledge currently lacks — the prose is where "why" lives.
-  Session 34's §5d record and the Session 35–41 design records are
-  the highest-value corpus in the repository for graph-informed
-  self-work.
-- **The recorded starting bound:** ~2,900 blocks ≈ $7.8 full
-  (Session 34 pricing; re-derive the CURRENT bound with a zero-paid
-  plan echo before proposing — the docs tree has grown since).
-  `repo:ingest --include <prefix>` scoping + carry-forward
-  (Session 34 machinery, pinned) means each chunk is an ordinary
-  scoped snapshot; out-of-scope paths carry forward untouched.
-- **The chunk partition is the proposal's core decision.** A sane
-  strawman (the proposal validates or replaces it): run A =
-  `docs/architecture` (the design records — highest value); run B =
-  `docs/benchmarks` + remaining `docs/`; run C = root markdown. Each
-  run's post-exclusion block bound printed BEFORE any spend
-  (`plan_ingest`'s hard budget + `--confirm-extraction`, exactly the
-  stage-1 gates).
-- **The churn question the proposal MUST put to the owner:**
-  `HANDOFF.md` and `TRELLIS_ROADMAP.md` are rewritten every session —
-  ingesting them re-buys their extraction on every per-PR refresh
-  under the adopted cadence. Options: exclude the high-churn root
-  files from scope (cheapest, loses session-history prose), include
-  them and accept the recurring refresh cost (price it), or include
-  `docs/archive/ROADMAP_HISTORY.md` only (append-mostly, cheap
-  refreshes). This is an owner decision; pre-state the per-refresh
-  cost of each option in the proposal.
-- **Prose chunks under policy 1** (markdown keeps its pinned
-  geometry under every policy; policy 2 exists for the three code
-  languages only and stays operator-explicit). The split-scope
-  refresh recipe is UNTOUCHED by this session; if stage-1b lands,
-  the prose prefixes join the POLICY-1 leg of the recipe going
-  forward — record that in the report and the recipe's §10.4 note.
-- **The criterion mold is stage-1's, adapted to prose** (pre-stated
-  per run in the proposal): zero job failures; max hub cardinality
-  under the recorded bar; zero denylist names; named design-record
-  concepts thread to real blocks (spot-check by query, counts and
-  evidence together); spend within estimate. A criterion miss is a
-  FAILED run, recorded, owner adjudicates — no retuning.
-- **At session START (before stage-1b work): present the
+- **What R2 delivers, exactly four things:** (a) THE CENSUS — every
+  site that assumes the OpenAI transport, the `gpt-5.4-2026-03-05`
+  model id, its pricing, or its token accounting, in a table (site,
+  assumption, moves-with-the-backend?, pinned-by which test); (b)
+  THE RLMS ANSWER — does rlms==0.1.3 admit a base-URL/backend
+  override WITHOUT library modification (guardrail 10)? Inspect the
+  installed package READ-ONLY (the project venv's site-packages);
+  if it does not, the seam is an OpenAI-compatible serving endpoint,
+  full stop, and the record says so plainly; (c) THE SPLIT-BACKEND
+  DESIGN — the root RLM completion, the worker completions
+  (extraction, entailment judge, authoring checker), and the
+  embedder are THREE separable choices; design the configuration
+  seam config-shaped and refusal-typed with today's behavior as the
+  byte-identical default (any new env twin follows the
+  `TRELLIS_EXP_*`/`buildAgentEnv` molds); (d) THE NON-GOALS stated —
+  the embedder does NOT move (schema-coupled `vector(1536)`, a
+  substrate-identity event; record §4.2) and NO implementation lands
+  in R2.
+- **Known anchor facts (Session 45's initial greps; the census
+  completes and corrects them):**
+  `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}` at both
+  `trellis_agent.py` construction sites (research + author modes);
+  the direct `openai.OpenAI()` checker client in the same file;
+  worker-side completion clients behind `parseLlmResponse`; pricing
+  constants in the runner spend gates (gpt-5.4 $2.50/M in, $10/M
+  out); `model_usage_summaries` telemetry assembly; the embedding
+  call sites (extraction worker per-block embedding, the probe
+  runner, and whatever else the census finds).
+- **The design-record home:** append §12 to
+  `TEST_TIME_TRAINING.md`, or create
+  `docs/architecture/MODEL_BACKEND_SEAM.md` if it outgrows a section
+  — document-first mold, NO code.
+- **At session START (before any R2 work): present the
   judge-calibration decision.** The data is delivered
   (`PROVENANCE_THREADING.md` §10.2): the strict judge is consistent;
   `has_category` flags 73/74 (98.6%), `mentions` 15/26 (57.7%);
@@ -1277,60 +1349,67 @@ facts a new session must act on:
   reaches it — benchmark-era corpus, lazy recovery, no action),
   RUBRIC CHANGE for derived-classification verbs (a recorded
   row-9-machinery design session of its own — never an inline
-  edit), or DEFER. Record the choice in the roadmap §5 entry
-  whatever it is.
+  edit), or DEFER. This duty has carried TWO sessions — record the
+  choice in the roadmap §5 entry whatever it is.
+- **The gate:** R2 itself needs no spend approval. Anything beyond
+  R2 — serving infrastructure, model downloads, GPU or
+  hosted-endpoint spend, ANY paid run — is R3+ and enters ONLY as
+  its own owner-approved proposal with its estimate.
 
 ## 4. Required design
 
-- **Pre-flight (zero-paid):** confirm the Session 44 PR merged
-  (`git log -- HANDOFF.md`); the Session 43 trio (key, egress 401
-  probe, durable dev PG); `npm ci`; full offline gates; the three
-  standing beliefs still uncontested; stale-worker check before any
-  queue-touching drill (§2 operational notes).
+- **Pre-flight (zero-paid):** confirm the Session 45 PR merged
+  (`git log -- HANDOFF.md`); `npm ci`; `npm test` (837/85 expected;
+  the worktree caveat in §2 stands); stale-worker check only if any
+  queue-touching drill will run (§2 operational notes — R2 itself
+  touches no queue).
 - **The calibration decision presentation (zero-paid):** §10.2
   numbers, the three options with costs, owner picks, record it.
-- **The proposal document (zero-paid, document-first):** a new
-  stage-1b section in `REPOSITORY_INGESTION_REPORT.md` (the §5d
-  mold): the CURRENT plan-echo block counts per candidate prefix,
-  the chunk partition with per-run estimates, the churn-option
-  pricing, the per-run criterion, the refresh-recipe consequence.
-  The zero-paid plan echoes come from the ingest CLI's plan-only
-  path (no `--confirm-extraction` = plan and refuse, exactly the
-  Session 42-verified spend gate).
-- **The runs (each owner-gated, ≤$5, actuals disclosed):** ordinary
-  scoped snapshots under repo key `trellis` — `repo:ingest
-  --include docs/architecture …` etc., extraction policy `changed`,
-  `--confirm-extraction`, the printed post-exclusion bound checked
-  against the estimate BEFORE confirming. After each run: the
-  criterion measured and recorded item-by-item; churn quarantines
-  are lazy recovery (never cleaned).
-- **What does NOT change:** no machinery — the scope/carry-forward/
-  budget/refusal surfaces ship as recorded (Session 34, guardrail
-  5); the detector, write gate, retrieval discipline, chunker, and
-  guarded family are untouched; no prompt byte (both pins stand). A
-  defect found anywhere = the event-loop rule (record, fix if
-  in-scope, or queue-jump with the reason recorded).
-- **The refresh duty:** the Session 45 PR's own in-scope files under
-  the split-scope recipe (a docs-only PR owes nothing; the stage-1b
-  snapshots themselves are the ingestion, not a refresh).
+- **The census (zero-paid, read-only):** grep-driven over
+  `src/rlm/`, `src/workers/`, `src/core/`, `src/config/`, and
+  `scripts/` — transport/client constructions, model-id literals,
+  pricing constants, token accounting, embedding calls; plus the
+  READ-ONLY rlms package inspection. Every hit disposed in the
+  census table; many sites are unit-pinned — the census notes which
+  pins WOULD move under a backend seam while moving nothing.
+- **The record (zero-paid, document-first):** the census table; the
+  rlms verdict with its inspection evidence quoted; the three-way
+  split-backend configuration design (config-shaped, refusal-typed,
+  byte-identical default); the non-goals; an R3 proposal skeleton
+  (what the owner would approve next, its estimate class in
+  GPU-hours or hosted per-token dollars — the record §7 cost
+  doctrine).
+- **What does NOT change:** ANY code byte (a defect found = the
+  event-loop rule: record, fix if in-scope with pins in the same
+  commit, or queue-jump with the reason recorded); the rlms library
+  (inspection is read-only); any default, pin, gate, or prompt byte
+  (both composed-prompt pins stand).
+- **The refresh duty:** a docs-only PR owes nothing; code-touching
+  files (none expected) under the split-scope recipe.
 
 ## 5. File-level starting points
 
-- `REPOSITORY_INGESTION_REPORT.md` §5d — the stage-1 run record and
-  criteria mold; the stage-1b deferral is recorded there.
-- `scripts/ingest_repository.ts` + `src/core/repository/`
-  (`scanner.ts`, `snapshot_ingest.ts`) — the scoped-snapshot CLI,
-  `--include` semantics, carry-forward, the plan echo.
-- `src/core/ingestion/plan_ingest.ts` — the hard block budget and
-  extraction policy; `EXTRACTION_INELIGIBLE_BLOCK_TYPES`.
-- `docs/architecture/STRUCTURAL_CHUNKING.md` §10.4 — the split-scope
-  refresh recipe the prose prefixes must join (policy-1 leg).
+- `src/rlm/trellis_agent.py` — both `backend_kwargs` construction
+  sites (research + author modes); the direct `openai.OpenAI()`
+  checker client; the `model_usage_summaries` telemetry assembly.
+- `requirements.txt` (`rlms==0.1.3`, `openai`) + the installed rlms
+  package in the project venv — READ-ONLY inspection (guardrail 10).
+- `src/workers/extraction_worker.ts` — the worker completion and the
+  per-block embedding call; `parseLlmResponse` at the boundary.
+- `src/core/graph/entailment_detection.ts` — the judge-model call
+  site (sweep-side).
+- `scripts/exp_effective_context.ts` + the author driver — pricing
+  constants and spend gates.
+- `src/config/schema.ts` — `vector(1536)` + HNSW +
+  `search_ast_nodes`: the embedder coupling, a NON-GOAL the record
+  names.
+- `src/workers/rlm_job.ts` (`buildAgentEnv`) — where any future
+  backend env twin would be forwarded or stripped; its unit pins.
+- `docs/architecture/TEST_TIME_TRAINING.md` §4/§7 — the track record
+  R2 executes; §9 — the collaborator questions (answers may have
+  arrived via the owner; fold them into the record if so).
 - `docs/architecture/PROVENANCE_THREADING.md` §10 — the
-  judge-calibration data to present, and the §10.2 incident record
-  (the `tee | head` lesson).
-- `src/core/ingestion/plan_ingest.ts` + `src/workers/extraction_worker.ts`
-  — `sourceKind` routing: markdown prose takes the legacy prose
-  prompt (byte-pinned).
+  judge-calibration data to present at session start.
 
 ## 6. Test strategy and acceptance
 
@@ -1338,18 +1417,23 @@ The expected machinery footprint is ZERO unless a defect is found
 (then the event-loop rule applies and pins move in the same commit,
 recorded).
 
-- **Zero-paid:** the calibration decision recorded; the proposal
-  document with CURRENT plan-echo counts; the full standing drill
-  block green; `npm test` 837/85 (or grown with a recorded reason).
-- **Paid (owner-gated per run):** each stage-1b chunk run with its
-  pre-stated criterion, measured and recorded verbatim — pass or
-  fail, no retuning after the numbers exist.
+- **Zero-paid:** the calibration decision recorded; the census table
+  complete (spot-checkable — every grep hit disposed); the rlms
+  verdict stated with its inspection evidence; the record written;
+  `npm test` 837/85 (or grown with a recorded reason).
+- **Paid:** NOTHING in R2. An R3 proposal, if the owner asks for
+  one, is a document this session — the run belongs to a future
+  session under its own approval.
 - **The refresh duty:** per-PR split-scope for whatever this
   session's PR changes; docs-only changes owe nothing.
-- Run `drill:scale` ALONE (never concurrent with other live
-  drills).
+- Run `drill:scale` ALONE if run at all (never concurrent with other
+  live drills). A docs-only session may skip the live drill block
+  with the reason recorded — the Session 45 precedent; a session
+  that touches ANY non-markdown byte runs the full standing block
+  below.
 
-Required close-out (the standing block):
+Required close-out (the standing block; see the docs-only note
+above):
 
 ```
  npm test
@@ -1384,22 +1468,23 @@ Required close-out (the standing block):
 Update:
 
 - `TRELLIS_ROADMAP.md`: full-dated §5 entry (the calibration
-  decision ALWAYS; per-run records for whatever ran — plan echo,
-  criterion verdict item-by-item, actual dollars); the §4 cells the
-  session touches.
-- `REPOSITORY_INGESTION_REPORT.md`: the stage-1b proposal section
-  (before any run) and the measured-run records (after).
+  decision ALWAYS; the census summary and rlms verdict; defects
+  found, if any, with their disposition); row 13's cell gains the
+  R2 outcome.
+- `docs/architecture/TEST_TIME_TRAINING.md` §12 (or
+  `MODEL_BACKEND_SEAM.md`): the census + the seam design record.
 - The per-PR refresh for this session's changed in-scope files
-  (split-scope recipe; the prose prefixes join the policy-1 leg
-  once landed).
+  (split-scope recipe; docs-only owes nothing).
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5
   re-check. NOTE for objective selection: after this session the
-  largest standing items are the row-12 rollout continuation, the
-  judge-calibration follow-through (if the owner picked
-  rubric-change), and row-11 increment 3 whenever a real target
-  surfaces. Keep the five-session narrative window (41–45 after
-  this session): compress Session 40 into the digest and move its
-  roadmap §5 entry verbatim to `docs/archive/ROADMAP_HISTORY.md`.
+  largest standing decisions are the TTT R3 gate (owner +
+  collaborator input on the record's §9 questions), the stage-1b
+  prose chunk, the judge-calibration follow-through (if the owner
+  picked rubric-change), the row-12 rollout continuation, and
+  row-11 increment 3 whenever a real target surfaces. Keep the
+  five-session narrative window (42–46 after this session):
+  compress Session 41 into the digest and move its roadmap §5 entry
+  verbatim to `docs/archive/ROADMAP_HISTORY.md`.
 
 ## 7. Guardrails
 
@@ -1542,7 +1627,19 @@ Update:
    changes are recorded owner-visible decisions; the block walks
    (`collectExtractionBlocks` / `trellis_blocks.py`) stay
    byte-identical and parity-pinned; the SPLIT-SCOPE refresh recipe
-   holds until the owner widens the rollout). The Session 37
+   holds until the owner widens the rollout), and the Session 45
+   TTT-track invariants (the track is RESEARCH-ONLY until a rung
+   lands machinery through its own owner-approved proposal; fast
+   weights, if ever present, have NO provenance standing and are
+   per-run ephemeral ABSOLUTE — cross-run persistence is a
+   promotion-shaped event needing its own design record; model
+   checkpoints and embedders are exact-pinned substrate-identity
+   objects, and the embedder NEVER moves as a side effect of the
+   completion backend moving; any TTT arm flag follows the
+   `TRELLIS_EXP_*` mold; no rung changes any default without a
+   recorded owner decision; the rlms library is never modified —
+   the seam, if built, is config + an OpenAI-compatible endpoint).
+   The Session 37
    operator-cleanup precedent is BOUNDED, permanently: deleting a
    graph edge is legitimate only for a failed acceptance-run's own
    residual write, before its contingency, with the exact Cypher and
@@ -1596,7 +1693,13 @@ Update:
    and edge-neighbor retypes and makes removal EXPLICIT — it does
    NOT prevent a correctly-declared manifest from dropping a kept
    line; never describe it as "closing" the run-2 class outright
-   (the drill pins the staging deliberately).
+   (the drill pins the staging deliberately). Session 45's version:
+   "increases quality of response overall" is an UNMEASURED
+   hypothesis — no TTT claim exists until a paired arm exists; any
+   future TTT number is reported with the record's calibration
+   attached (external evidence predicts stability-shaped gains at
+   ~2× serving cost; behavioral criteria only, perplexity recorded
+   never criterial).
 9. Do not break existing consumers: the composed-prompt pins
    (`5d27e474…fe2a` default / `45987904…0b56` omit-arm since the
    July 12, 2026 prompt-engineering pass, `test:modules` [4]/[7])
@@ -1678,16 +1781,28 @@ changing the `est` suite's pinned truths,
 bounds, or question set; changing the discipline machinery's refusal
 bytes, identities, telemetry shape, or wiring;
 the superseded-embedding SWEEP (storage reclamation, owner decision);
-any refresh extraction beyond the adopted per-PR cadence (Session 45
-owes one for files its own PR changes — docs-only changes owe
-nothing; the stage-1b snapshots are the objective's own gated
-ingestion, not refreshes);
+any refresh extraction beyond the adopted per-PR cadence (Session 46
+owes one only for files its own PR changes — docs-only changes owe
+nothing);
 the row-12 rollout
 continuation (widening policy 2 beyond `src/rlm`, retuning the merge
 target or split threshold, or reverting the pilot); ANY paid run
-without explicit owner approval (every §3 stage-1b chunk run
-INCLUDED — the proposal and plan echoes are zero-paid, each RUN
-needs the owner's yes on its pre-stated estimate and criterion);
+without explicit owner approval (R2 is zero-paid by construction —
+anything that spends is R3+ or another standing item, each needing
+the owner's yes on its pre-stated estimate and criterion);
+implementing ANY TTT or backend-seam machinery this session (R2 is a
+read-only census + design record; serving infrastructure, model
+downloads, backend config code, GPU or hosted-endpoint spend are all
+R3+ owner-approved proposals); modifying the rlms library in any
+form (the R2 inspection is READ-ONLY; guardrail 10); moving,
+re-keying, or re-embedding the embedding backend (schema-coupled
+`vector(1536)`; a substrate-identity event, out of R2's scope by
+the record's §4.2); persisting fast weights across runs, designing
+warm-start conveniences, or giving any adapted state provenance
+standing (per-run ephemeral is ABSOLUTE within the track;
+cross-run persistence needs its own design record); treating H1/H2
+as findings or writing any "TTT increases quality" claim without a
+paired measurement (guardrail 8's Session 45 version);
 manufacturing or planting a row-11 increment-3 target (the
 Session 44 search verdict stands: none exists today — the increment
 re-enters only when a real one surfaces);
