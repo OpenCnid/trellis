@@ -2223,6 +2223,73 @@ edits, record no insight, and report the contradiction.
 - One retrieval call per REPL cell.
 ```
 
+### 5h.10 The Session 49 retry attempt (July 13, 2026 — ENVIRONMENTALLY BLOCKED; $0.0000 spent; the staged proposal STANDS)
+
+The retry was presented at session start per §5h.9 and approved by
+the owner. Every staged premise was re-verified live and read-only
+BEFORE the proposal (all held): the
+`trellis_retrieval_budget_per_run` `-uses_config_key-` `config`
+edge uncontested with `sourceNodeIds` =
+[`fc17205c4b1e129508c7fb5c675944300b124939b4c609bfe77352b39ab76311`]
+(the contested `reads_config` churn residue present exactly as
+§5h.3 records it); that block's bytes verbatim on disk in
+`src/config/index.ts` (raw byte-substring check, CRLF intact) and
+carrying BOTH molds (the `TRELLIS_RETRIEVAL_BUDGET_PER_RUN` schema
+line, the "Fail fast at startup" comment, the
+`resolveMcpCredentialEnv(mcpServers, process.env)` call);
+`stage2:check --pre` PASS zero findings on
+`resolvemcpcredentialenv` + `mcpcredentialenv` with
+`src/config/index.ts`; `test:selfedit-harness` ALL CHECKS PASSED;
+the split-scope policy-1 `--dry-run` echo 0 to ingest / 301
+unchanged / 0 tombstones (no drift since the §5h.3 echo — no
+pre-run refresh owed); `npm test` 837/85 green after `npm ci`.
+
+**The run never executed. Two environmental failures, both
+pre-billing, $0.0000 total:**
+
+- **Spawn 1: a Windows console-encoding crash inside the `RLM(...)`
+  constructor, before any API call.** The rlms verbose logger
+  prints a rich header panel whose box glyphs include U+25C6; with
+  stdout redirected to a file the Python stream encoder was cp1252
+  and the process died on `UnicodeEncodeError` — zero root
+  iterations, zero tool calls, zero tokens
+  (`benchmark_logs/s49_t1_retry_run1.log`). Driver requirement
+  recorded: any Windows spawn that redirects the agent's stdout
+  sets `PYTHONUTF8=1` (Session 48's spawns did not hit this; the
+  stream encoding is shell-environment-shaped).
+- **Spawn 1b (with `PYTHONUTF8=1`): the first root completion was
+  refused `429 insufficient_quota`** — the OpenAI account behind
+  the ambient `OPENAI_API_KEY` has exhausted its billing quota
+  (`benchmark_logs/s49_t1_retry_run1b.log`). The decisive probe,
+  recorded: `models.list` succeeds (the key AUTHENTICATES; 131
+  models) while a minimal `chat.completions.create` refuses with
+  the same `insufficient_quota` code — authentication proves
+  nothing about completion quota. Rejected requests do not bill;
+  the run spent $0.0000.
+
+**Verdict: ENVIRONMENTALLY BLOCKED, not a failed run** (the
+Session 42 precedent: owner approval was given and was never the
+blocker). Task v3 is UNCONSUMED — zero LLM iterations, zero staged
+edits, zero disk writes, zero graph writes — and this attempt does
+NOT count against the §5g.3 attempt ladder; T1 still stands at ONE
+failed attempt (Session 48). The §5h.9 proposal, its estimate, and
+its escalation rule all stand as staged.
+
+**Cleanup per §5h.2:** the stub was created and committed only
+after approval (porcelain clean at spawn) and removed in a recorded
+commit when the blockage was confirmed — the suite reads 837/85
+green at every shipped state; the branch history carries the stub
+add/remove pair (net zero), the Session 48 pattern.
+
+**Unblock condition + the next spawn's pre-flight (recorded for
+Session 50):** the owner restores OpenAI billing quota; the spawn
+pre-flight then runs the minimal completion probe FIRST (a
+fraction of a cent, inside the run envelope — `models.list` alone
+is NOT sufficient), sets `PYTHONUTF8=1`, and proceeds under the
+unchanged §5h.9 mechanics. Premise re-verification stays cheap and
+read-only; re-run it if any substrate-touching work lands between
+sessions.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

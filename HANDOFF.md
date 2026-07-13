@@ -391,52 +391,22 @@ a new session must actually know:
   refresh; no policy-2 leg, `src/rlm` unchanged since
   `trellis#10`).
 
-**Session 44 (July 13, 2026, PR #88) is complete as a RECORDED
-NO-TARGET FINDING plus the judge-calibration measurement: the row-11
-increment-3 target search ran in full and NO real executable-class
-target survived scrutiny — the row stays OPEN — and the session took
-the §2 menu, running the judge-calibration measurement through the
-UNCHANGED Session 32 detector ($0.0367 actual).** Docs + the
-committed drill artifact only: zero code bytes, zero prompt bytes
-(both composed-prompt pins unmoved), no refresh owed. **(1) The target search (the full record is the
-roadmap §5 entry):** 22 recorded query families over LIVE blocks
-(the `search_ast_nodes` EXISTS join mirrored in SQL) and the graph —
-defect markers, the Session 42 portability classes, Python defect
-patterns, staleness vocabulary, env-var/counter/cardinality censuses,
-churn-map-directed block reading of the guarded family, sync-claim
-twin verification, dead-export/dead-def analysis, pricing and wiring
-claims, a semantic defect-smell probe through the live vector seam —
-every candidate REJECTED with its reason recorded. Closest three: an
-UNREACHABLE twin divergence (`_is_private_mcp_host` `strip("[]")`
-vs the TS anchored strip — both gated behind URL parsers that refuse
-the diverging forms), ten superfluous `export` keywords (style), and
-a falsified CLI-truncation suspicion (below). The verdict: no
-genuine falsifiable executable-class defect exists in extraction
-scope today; a manufactured target would invalidate the ladder, so
-none was manufactured. **(2) The judge-calibration measurement
-(PROVENANCE_THREADING.md §10, pre-stated document-first, run exactly
-as stated):** `entailment_sweep.ts --prefix q_ --rate 0.2
---budget 100 --seed 44 --sync` over the OOLONG-era pool (268 edges /
-528 unchecked pairs; 106 sampled, 100 judged, 0 skipped): 12
-supported / 88 flagged, 83 edges contested (lazy recovery, the
-July 13 residue class). Class split (graph-recovered): `has_category`
-73/74 flagged (98.6% — the label is never in the block text),
-`mentions` 15/26 flagged (57.7% — per-pair weak citations in
-multi-hash writes). $0.0367 actual vs $0.037 estimate. The judge is
-CONSISTENT; the calibration DECISION now has its data and stays the
-owner's (§10.2 records both options). Remaining unchecked `q_` pool:
-356 pairs. **(3) The honesty incident (recorded in §10.2):** the
-first diagnosis blamed `process.exit(0)` in the sweep CLI for
-truncating piped output and produced a plausible "reproduction"
-(359 lines vs an expected 431); the expectation was FALSIFIED —
-contesting 83 edges removes their unchecked sibling pairs, the
-post-run pool header reads 356, and 3 + 356 = exactly 359, zero
-lost. The observed loss was the session's own `tee | head` capture
-pipeline (head exits, tee dies on EPIPE). The CLI is exonerated; the
-rejected candidate is recorded; operational lesson: never measure a
-long-output CLI through `tee | head`. **(4) Bookkeeping:**
-Session 39 compressed to the digest; its §5 entry moved verbatim to
-the archive (window now 40–44).
+- **Session 44 (PR #88)** recorded the row-11 increment-3 NO-TARGET
+  FINDING (22 query families over live blocks + the graph; every
+  candidate rejected with its reason — closest: the UNREACHABLE
+  `_is_private_mcp_host` twin divergence, ten superfluous `export`
+  keywords, a falsified CLI-truncation suspicion; no target was
+  manufactured, the row stays OPEN) and ran the judge-calibration
+  measurement through the UNCHANGED Session 32 detector ($0.0367:
+  106 sampled / 100 judged over the OOLONG-era `q_` pool — 12
+  supported / 88 flagged / 83 edges contested as lazy-recovery
+  residue; class split `has_category` 98.6% flagged vs `mentions`
+  57.7%; the judge is CONSISTENT; the decision data delivered,
+  remaining unchecked pool 356 pairs). The honesty incident
+  recorded in §10.2: a plausible `process.exit(0)` truncation
+  diagnosis was FALSIFIED (3 + 356 = exactly 359; the loss was the
+  session's own `tee | head` capture — never measure a long-output
+  CLI through `tee | head`).
 
 **Session 45 (July 13, 2026, PR #89) is complete: the
 test-time-training research track OPENED by owner direction —
@@ -767,24 +737,69 @@ class closes by TOOLING SHAPE (a harness-side read-only citability
 query), owner-gated, never a write gate. Session 49 presents the
 staged proposal; the run is still the owner's per-run decision.
 
+**Session 49 (July 13, 2026, this PR) presented the §5h.9 retry,
+got the owner's approval, and was ENVIRONMENTALLY BLOCKED at the
+spawn — $0.0000 spent; the proposal STANDS UNCONSUMED (the full
+record is `REPOSITORY_INGESTION_REPORT.md` §5h.10; the shipped
+tree is docs-only; the branch history carries the stub add/remove
+pair, net zero, the Session 48 pattern).** **(1) Every staged
+premise re-verified live first (zero-paid, read-only, ALL HELD):**
+the `trellis_retrieval_budget_per_run` `-uses_config_key-`
+`config` edge uncontested citing `fc17205c…6311` (the contested
+`reads_config` churn residue present exactly as §5h.3 records);
+the block's 3,961 bytes verbatim in `src/config/index.ts` by raw
+byte-substring check, carrying BOTH molds; `stage2:check --pre`
+PASS zero findings on the two clean entities;
+`test:selfedit-harness` ALL CHECKS PASSED; the split-scope
+policy-1 `--dry-run` echo 0 to ingest / 301 unchanged / 0
+tombstones (no drift, no refresh owed); `npm test` 837/85 after
+`npm ci`. **(2) Spawn 1: a pre-API crash, $0** — the rlms verbose
+logger prints a rich header panel (U+25C6 glyphs); with stdout
+redirected to a file the Python stream encoder was cp1252 and the
+process died on `UnicodeEncodeError` inside the `RLM(...)`
+constructor, zero iterations, zero tool calls. Driver requirement
+recorded: set `PYTHONUTF8=1` for any Windows spawn with redirected
+stdout. **(3) Spawn 1b (with `PYTHONUTF8=1`):
+`429 insufficient_quota`, $0** — the OpenAI account behind the
+ambient `OPENAI_API_KEY` has EXHAUSTED its billing quota. The
+decisive probe: `models.list` succeeds (the key authenticates)
+while a minimal completion refuses with the same code —
+authentication proves nothing about quota; rejected requests do
+not bill. **(4) Verdict: ENVIRONMENTALLY BLOCKED, not a failed
+run** (the Session 42 precedent — approval was never the blocker).
+Task v3 is UNCONSUMED; T1 still stands at ONE failed attempt
+(Session 48); the §5g.3 three-failure ladder is untouched.
+**(5) Cleanup + close-out:** the stub (committed post-approval,
+porcelain clean at spawn) removed in a recorded commit on
+confirmation; `npm test` 837/85 at every shipped state; docs-only
+close-out mold (build, python:check, compose config green; live
+drills beyond the two run this session not re-run, reason
+recorded). **(6) Bookkeeping:** Session 44 compressed to the
+digest, its §5 entry moved verbatim to the archive (window now
+45–49).
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 49: the T1 RETRY — the backend config
-surface re-proposed with the Session 48 failure classes closed in
-task text** (roadmap §4 row 13, Phase 1 step 1; ratified shape
+Your objective is **Session 50: the T1 RETRY RE-SPAWN — the same
+approved §5h.9 proposal, executed once the OpenAI billing quota is
+restored** (roadmap §4 row 13, Phase 1 step 1; ratified shape
 `docs/architecture/TEST_TIME_TRAINING.md` §12.6; the spec is
 UNCHANGED — `docs/architecture/MODEL_BACKEND_SEAM.md` §3–§4 layer 1
-+ §8 T1; the failed attempt and the retry material are
-`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5h), per §3–§6
-below. **The retry proposal is ALREADY STAGED: §5h.9 carries task
-text v3 IN FULL** (drafted under the prompt-engineering + hypershot
-protocols, owner-directed post-verdict), the resolved `--pre`
-design point, the re-based estimate ($0.9–$1.3, ONE run, no
-pre-bundled contingency), and the recorded escalation rule. The
-session's job: re-verify the staged premises live (zero-paid),
-present §5h.9 with the estimate at session START, and run ONLY on
-the owner's yes — a session that ends with the proposal presented
-and unapproved is a legitimate zero-paid outcome. Queued
++ §8 T1; the failed attempt, the retry material, and the Session 49
+blockage record are `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`
+§5h), per §3–§6 below. **The retry proposal is STAGED AND
+UNCONSUMED: §5h.9 carries task text v3 IN FULL**, the resolved
+`--pre` design point, the re-based estimate ($0.9–$1.3, ONE run, no
+pre-bundled contingency), and the recorded escalation rule;
+Session 49 verified every premise live and they all held. The
+session's job: confirm quota is restored (the minimal completion
+probe FIRST — `models.list` alone proves nothing), re-verify the
+staged premises (cheap, read-only), re-present §5h.9 with the
+estimate at session START, and run ONLY on the owner's yes — a
+session that ends still quota-blocked or unapproved is a legitimate
+zero-paid outcome (record it and hand off; Sessions 42 and 49 are
+the mold). Spawn requirements from §5h.10: `PYTHONUTF8=1` in the
+run environment; ONE log file, never `tee | head`. Queued
 behind it (owner-ratified July 13, 2026, record §12.6): T2
 `buildAgentEnv` forward/strip → T3 the `trellis_agent.py`
 construction-site rewire → T4 the fixture-endpoint drill, then the
@@ -1145,11 +1160,12 @@ immutable, content-addressed physical location in source material.
      doubling). `LocalREPL` persists `self.locals` across turns; on
      exception, rebindings are lost but in-place mutations persist;
      underscore-prefixed names never persist.
-   - **The TTT research track (Sessions 45–48;
+   - **The TTT research track (Sessions 45–49;
      `docs/architecture/TEST_TIME_TRAINING.md` +
      `docs/architecture/MODEL_BACKEND_SEAM.md`):** research + design
      only so far — no machinery, no runtime byte (Session 48's T1
-     attempt FAILED and its diff was reverted; the attempt record is
+     attempt FAILED and its diff was reverted; Session 49's re-spawn
+     was quota-blocked pre-edit; the attempt record is
      `REPOSITORY_INGESTION_REPORT.md` §5h); the owner-gated
      rung ladder R1–R5 (roadmap §4 row 13). The seam facts a session
      needs (the R2a census, record §13, is the authoritative site
@@ -1253,12 +1269,13 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 13, 2026 Session 48 PR
-  (the T1 attempt: increment record §5h with the FAILED verdict —
-  the PR that carries this file; the final tree is docs-only across
-  four markdown files: the increment record, the roadmap, the
-  archive, this handoff; the branch HISTORY contains the stub
-  add/remove commits, net zero).
+- `master`: the head after the July 13, 2026 Session 49 PR
+  (the T1 retry attempt: increment record §5h.10 with the
+  ENVIRONMENTALLY BLOCKED verdict — the PR that carries this file;
+  the final tree is docs-only across four markdown files: the
+  increment record, the roadmap, the archive, this handoff; the
+  branch HISTORY contains the stub add/remove commits, net zero —
+  the Session 48 pattern repeated).
   Use `git log -- HANDOFF.md` to confirm this PR landed; if it is
   still unmerged when this session starts, STOP and merge it first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); module
@@ -1305,7 +1322,7 @@ Repository state at handoff creation:
   describes the OWNER'S durable dev PG (Session 43 ran on it;
   Session 42's ephemeral container staging died with the container,
   by design).
-- Sessions 43–48 changed NO code byte in any SHIPPED tree (docs and
+- Sessions 43–49 changed NO code byte in any SHIPPED tree (docs and
   the Session 43 committed drill artifact only) and NO prompt byte —
   both composed-prompt pins unmoved (default `5d27e474…fe2a`,
   omit-arm `45987904…0b56` — recompute BOTH in the same commit only
@@ -1313,7 +1330,10 @@ Repository state at handoff creation:
   `test:modules` green). Session 48's run-2 diff existed in the
   worktree and was REVERTED with the failed verdict (preserved in
   `benchmark_logs/s48_t1_run2.diff`, local); a retry re-authors it,
-  never resurrects it. A LANDED T1 retry changes this bullet: its
+  never resurrects it. Session 49's two spawn attempts wrote
+  NOTHING (both died pre-edit; logs
+  `benchmark_logs/s49_t1_retry_run1.log`/`run1b.log`, local). A
+  LANDED T1 retry changes this bullet: its
   diff is `src/config/index.ts` + the NEW
   `src/config/rlm_backend.test.ts` and nothing else. Session 42's
   code surface (the drill portability/fixture repairs) and
@@ -1334,10 +1354,10 @@ Repository state at handoff creation:
   blob-CDN denials are recoverable with
   `registry-mirrors: ["https://mirror.gcr.io"]`.
 - Offline baseline: `npm test` = 837 passing across 85 files
-  (UNCHANGED by Sessions 42–48 in every shipped tree; Session 48
-  observed it green three times — at staging, and again after the
-  failed run's revert; the diagnostic reading WITH the failed diff
-  applied was 846/86, all green — that diff did not ship). A landed
+  (UNCHANGED by Sessions 42–49 in every shipped tree; Session 49
+  observed it green after `npm ci` first try; Session 48's
+  diagnostic reading WITH the failed diff applied was 846/86, all
+  green — that diff did not ship). A landed
   T1 retry GROWS this by the new pin file's tests — record the new
   counts.
 - `npm run build` and `npm run python:check` pass (the check imports
@@ -1353,7 +1373,7 @@ Repository state at handoff creation:
   REPRODUCING open reading is the migration trigger (roadmap §4
   row 7) and the owner adjudicates. The drill rewrites the tracked
   `scale_drill_results.json` — commit it with the session PR (the
-  committed copy is Session 44's 1.54x CLOSED run; Sessions 45–48,
+  committed copy is Session 44's 1.54x CLOSED run; Sessions 45–49,
   docs-only trees, did not run the drill). Run the scale drill ALONE —
   never concurrently with other live drills on the shared dev
   database.
@@ -1378,9 +1398,10 @@ Repository state at handoff creation:
   drills `test:confidence-writes` and `test:entity-kinds` read "All
   checks passed" (first green since Session 14). Sessions 45–47
   (docs-only, zero non-markdown bytes) did not re-run the drill
-  block; Session 48 re-ran `test:selfedit-harness` (ALL CHECKS
-  PASSED, at staging) and shipped a docs-only tree (the run bytes
-  reverted), so the Session 44 observation stands as the latest
+  block; Sessions 48 and 49 each re-ran `test:selfedit-harness`
+  (ALL CHECKS PASSED, at staging; Session 49 also ran
+  `stage2:check --pre` PASS) and shipped docs-only trees, so the
+  Session 44 observation stands as the latest
   full-block reading. A session that LANDS the T1 retry
   (non-markdown bytes) runs the FULL standing block.
 - Isolated Compose integration: 11 assertions (`--profile test`,
@@ -1400,15 +1421,20 @@ Repository state at handoff creation:
   `TRELLIS_REDIS_HOST_PORT`, `TRELLIS_API_HOST_PORT` — set each to 0.
   NOTE: C: runs tight on free space; a FULL image rebuild needs
   several GB of headroom. `requirements.txt` and `package.json`
-  unchanged in Sessions 39–48 — both layers stay cached.
+  unchanged in Sessions 39–49 — both layers stay cached.
 - The standing owner-conditional items — all propose-with-estimate,
-  never self-served: **(1) the T1 RETRY — THE OBJECTIVE (§3)**
-  (Session 48's attempt FAILED and is recorded in §5h; the retry
-  proposal is STAGED — §5h.9 carries task v3 verbatim, drafted
+  never self-served: **(1) the T1 RETRY RE-SPAWN — THE OBJECTIVE
+  (§3)** (Session 48's attempt FAILED and is recorded in §5h;
+  Session 49's re-spawn was approved but ENVIRONMENTALLY BLOCKED —
+  quota exhausted, $0.0000, record §5h.10; the retry
+  proposal is STAGED AND UNCONSUMED — §5h.9 carries task v3
+  verbatim, drafted
   under the prompt-engineering + hypershot protocols, with the
   re-based $0.9–$1.3 ONE-run estimate and the recorded
   tooling-shape escalation rule; owner-gated ≤$5, presented at
-  session START; the RATIFIED queue behind it: T2 → T3 → T4 →
+  session START; UNBLOCK = the owner restores OpenAI billing
+  quota, and the spawn pre-flight runs the minimal completion
+  probe FIRST; the RATIFIED queue behind it: T2 → T3 → T4 →
   Phase 2 — record §12.6, spec MODEL_BACKEND_SEAM.md);
   **(2) the judge-calibration decision — RESOLVED July 13, 2026: the
   owner picked ACCEPT the strict judge** (presented Session 46;
@@ -1440,9 +1466,10 @@ Repository state at handoff creation:
   gap #1); **(7) the substrate freshness cadence** (ADOPTED July 13:
   one scoped refresh per merged PR + refresh-before-use ahead of
   stage-2 edit runs; each refresh's extraction spend still gated per
-  run — UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; the Session 44–47
-  PRs are docs-only and owed nothing — Session 48 owes a policy-1
-  refresh for T1's changed `src/config` files IF T1 lands); **(8)
+  run — UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; the Session 44–49
+  PRs are docs-only and owed nothing — the session that LANDS T1
+  owes a policy-1
+  refresh for T1's changed `src/config` files); **(8)
   the targeted stage-1 entailment sweep AS WORDED IS BLOCKED BY
   SHAPE** (recorded by
   Session 44: stage-1 extraction wrote ACTION edges; the detector
@@ -1492,7 +1519,14 @@ Repository state at handoff creation:
   metrics BEFORE killing workers). Session 44's lesson: NEVER
   capture a long-output CLI through `tee | head` — head's early
   exit kills tee on EPIPE mid-stream and manufactures a truncation
-  (redirect to a file, then read the file).
+  (redirect to a file, then read the file). Session 49's lessons:
+  set `PYTHONUTF8=1` when spawning `trellis_agent.py` with
+  redirected stdout on Windows (the rlms rich logger prints U+25C6
+  panel glyphs; a cp1252 stream encoder kills the process inside
+  the `RLM(...)` constructor, pre-API); and `models.list`
+  succeeding proves the key AUTHENTICATES, not that the account
+  has completion quota — the minimal completion probe is the
+  decisive pre-flight check before any paid spawn.
 - CI target is Node 22 (the `offline` job also runs `test:textedit`
   after its Python-runtime install). Local environment: Node
   20.19.2, Python 3.13.1, Docker Compose v2, PostgreSQL 16.14,
@@ -1521,11 +1555,11 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 49 problem statement
+## 3. Session 50 problem statement
 
-**The T1 RETRY: the backend config surface re-proposed with
-Session 48's two failure classes closed in task text** — the same
-ratified feature-class increment (`TEST_TIME_TRAINING.md` §12.6),
+**The T1 RETRY RE-SPAWN: the same staged §5h.9 proposal, executed
+once the OpenAI billing quota is restored** — the same ratified
+feature-class increment (`TEST_TIME_TRAINING.md` §12.6),
 implementing exactly `MODEL_BACKEND_SEAM.md` §3 + §4 layer 1, scoped
 by the §8 T1 skeleton. Session 48's attempt is recorded in
 `REPOSITORY_INGESTION_REPORT.md` §5h: run 1 self-refused on its own
@@ -1534,8 +1568,14 @@ discipline); run 2 wrote a CONTENT-CORRECT insert-only diff
 (diagnostic `npm test` 846/86 all green with it applied) but cited a
 `mcp_servers.ts` block — the only address in its retrieval set after
 a dedup refusal killed the evidence cell before `vector_search`
-executed — and `stage2:check` flagged `unbridged_evidence`. The
-facts a new session must act on:
+executed — and `stage2:check` flagged `unbridged_evidence`.
+Session 49's re-spawn is recorded in §5h.10: presented, approved,
+then ENVIRONMENTALLY BLOCKED at the spawn ($0.0000 — a pre-API
+Windows cp1252 crash in the rlms rich logger, then
+`429 insufficient_quota` on the first root completion; the account's
+billing quota is exhausted). Task v3 is UNCONSUMED; T1 still stands
+at ONE failed attempt; every §5h.9 premise was re-verified live on
+July 13, 2026 and held. The facts a new session must act on:
 
 - **What the retry lands (UNCHANGED spec — quote
   MODEL_BACKEND_SEAM.md §3/§4-layer-1/§8-T1 verbatim into the task
@@ -1593,41 +1633,53 @@ facts a new session must act on:
   reason — record it in the proposal). The post-landing split-scope
   policy-1 refresh adds ≈$0.05–$0.15. All under the ≤$5/run cap.
 - **The gate:** owner-approved per run, proposal + estimate at
-  session START. Unapproved = zero-paid session: stage the v3
-  proposal and hand off. Do NOT resurrect the reverted run-2 diff
+  session START. Unapproved or still quota-blocked = zero-paid
+  session: record the state and hand off (Sessions 42 and 49 are
+  the mold). Do NOT resurrect the reverted run-2 diff
   bytes (`benchmark_logs/s48_t1_run2.diff` is diagnostic evidence,
   not a patch source) — a retry run re-authors under the fixed
   discipline.
 
 ## 4. Required design
 
-- **Pre-flight (zero-paid):** confirm the Session 48 PR merged
+- **Pre-flight (zero-paid):** confirm the Session 49 PR merged
   (`git log -- HANDOFF.md`); `npm ci`; `npm test` (837/85 expected);
   re-read `REPOSITORY_INGESTION_REPORT.md` §5h end to end — the
   attempt record IS the design input; the Windows stale-worker check
   before any queue use (§2 operational notes).
+- **The quota check decides the session shape:** the minimal
+  completion probe (ONE `chat.completions.create`, a few tokens,
+  fractions of a cent inside the run envelope) — `models.list`
+  succeeding proves only authentication (§5h.10). Still
+  `insufficient_quota` = record it, skip the spawn, hand off
+  zero-paid.
 - **The retry record is ALREADY WRITTEN (§5h.9, staged Session 48
-  owner-directed):** task text v3 in full, the resolved `--pre`
+  owner-directed; §5h.10 records the blocked Session 49 spawn):**
+  task text v3 in full, the resolved `--pre`
   design point, the re-based estimate, the escalation rule.
-  Session 49 PRESENTS it at session START — no re-drafting; a
+  Session 50 RE-PRESENTS it at session START — no re-drafting; a
   material correction discovered during re-verification is a
-  recorded §5h.9 amendment, never a silent rewrite.
+  recorded §5h.9/§5h.10 amendment, never a silent rewrite.
 - **Verify the evidence chain live BEFORE proposing (the §5g.2
-  mold, read-only):** the `config` `-uses_config_key-`
+  mold, read-only; Sessions 48 AND 49 both ran it green — it is
+  cheap, re-run it):** the `config` `-uses_config_key-`
   `trellis_retrieval_budget_per_run` edge still exists uncontested
   citing `fc17205c…6311`; that block's bytes still verbatim in
-  `src/config/index.ts` (Session 48 verified all four seam blocks —
-  re-verify, the file must still be unchanged since `trellis#11`);
-  `stage2:check --pre` PASS on the chosen pre-gate entities.
+  `src/config/index.ts` (raw byte-substring check, CRLF intact —
+  the file must still be unchanged since `trellis#11`);
+  `stage2:check --pre` PASS on the chosen pre-gate entities;
+  `test:selfedit-harness` green.
 - **Refresh-before-use:** the zero-paid dry-run plan echo
   (`repo:ingest` policy-1 split-scope, no `--confirm-extraction`);
-  Session 48's echo read 0 to ingest / 301 unchanged — refresh only
-  if the new echo shows drift.
+  Sessions 48 and 49 both read 0 to ingest / 301 unchanged —
+  refresh only if the new echo shows drift.
 - **The run mechanics (the §5g.3/§5g.4 mold; Session 48's driver
-  pattern):** stub re-created + committed on approval (porcelain
+  pattern + the §5h.10 driver requirements):** stub re-created +
+  committed on approval (porcelain
   clean at spawn); `trellis_agent.py` spawned directly, research
   mode, `--max-iterations 16`, `TRELLIS_EDIT_ROOT` at the worktree,
-  `TRELLIS_CITATION_AUDIT=1`, full stdout to ONE log file (never
+  `TRELLIS_CITATION_AUDIT=1`, `PYTHONUTF8=1` (the Session 49 cp1252
+  crash class), full stdout to ONE log file (never
   `tee | head`); post-run `stage2:check` (scope, evidence, parse;
   comment-class not declared); human `git diff` review; the human
   runs `npm test` for the new pins.
@@ -1669,13 +1721,17 @@ facts a new session must act on:
 - `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` **§5h — THE
   attempt record:** §5h.5 task v1 verbatim, §5h.7 run 1 + the v2
   deltas, §5h.8 run 2, the verdict, the cleanup, and the four retry
-  lessons v3 is built from; §5e.4 / §5g.3 / §5g.4 — the
+  lessons v3 is built from; §5h.9 task v3 verbatim + the resolved
+  design points; §5h.10 the Session 49 blocked spawn (the driver
+  requirements + the quota probe); §5e.4 / §5g.3 / §5g.4 — the
   run-proposal mold and what a landed run's record looks like.
 - `src/benchmarks/selfedit/check.ts` + `npm run stage2:check` — the
   harness; `test:selfedit-harness` — the zero-LLM rehearsal.
 - `benchmark_logs/s48_t1_run1.log` / `s48_t1_run2.log` /
-  `s48_t1_run2.diff` (LOCAL, gitignored — on the owner's machine
-  only): the full transcripts and the preserved reverted diff;
+  `s48_t1_run2.diff` / `s49_t1_retry_run1.log` /
+  `s49_t1_retry_run1b.log` (LOCAL, gitignored — on the owner's
+  machine only): the full transcripts, the preserved reverted diff,
+  and the two blocked-spawn logs;
   diagnostic evidence, never a patch source.
 
 ## 6. Test strategy and acceptance
@@ -1701,10 +1757,10 @@ documents.
   bytes); `drill:scale` ALONE; the isolated Compose integration in
   the §2 CI mold; the split-scope policy-1 refresh for the changed
   files.
-- **If the session ends zero-paid** (proposal staged, not approved):
-  the docs-only close-out mold applies (npm test + build +
-  python:check + compose config; live drills skipped with the
-  reason recorded — the Session 45–47 precedent).
+- **If the session ends zero-paid** (still quota-blocked, or not
+  approved): the docs-only close-out mold applies (npm test + build
+  + python:check + compose config; live drills skipped with the
+  reason recorded — the Session 45–47 and 49 precedent).
 
 Required close-out (the standing block; docs-only note above):
 
@@ -1756,12 +1812,14 @@ Update:
   MODEL_BACKEND_SEAM.md §8 T2)**; if the retry FAILED, T1 has two
   failed attempts and the three-failure question goes to the OWNER
   before any further T1 work — the next objective is whatever the
-  owner directs from the §2 menu; if the retry was not approved,
-  re-present it. The other standing decisions (the stage-1b prose
+  owner directs from the §2 menu; if the retry was blocked again or
+  not approved, re-present it (the §5h.10 unblock condition stands
+  until the owner restores quota). The other standing decisions
+  (the stage-1b prose
   chunk, the row-12 rollout continuation, row-11 defect-class
   increment 3 whenever a real target surfaces) remain owner
-  alternates. Keep the five-session narrative window (45–49 after
-  this session): compress Session 44 into the digest and move its
+  alternates. Keep the five-session narrative window (46–50 after
+  this session): compress Session 45 into the digest and move its
   roadmap §5 entry verbatim to `docs/archive/ROADMAP_HISTORY.md`
   (and update the archive-pointer paragraph in the same commit).
 
@@ -2096,7 +2154,7 @@ changing the `est` suite's pinned truths,
 bounds, or question set; changing the discipline machinery's refusal
 bytes, identities, telemetry shape, or wiring;
 the superseded-embedding SWEEP (storage reclamation, owner decision);
-any refresh extraction beyond the adopted per-PR cadence (Session 49
+any refresh extraction beyond the adopted per-PR cadence (Session 50
 owes one only for files its own PR changes — a zero-paid session
 owes nothing);
 the row-12 rollout
