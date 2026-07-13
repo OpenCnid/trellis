@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import util from 'util';
 import { neo4jDriver, pgPool } from '../src/config/db';
+import { config } from '../src/config/index';
 import {
   defaultPolicy,
   selectVerificationCandidates,
@@ -81,7 +82,7 @@ const EQ = (n: string) => `${TOKEN}-ent-${n}`;
 
 const PY_ENV = {
   ...process.env,
-  PYTHONPATH: 'C:\\Users\\Darian\\AppData\\Roaming\\Python\\Python313\\site-packages',
+  ...(config.python.pythonPath && { PYTHONPATH: config.python.pythonPath }),
   PYTHONIOENCODING: 'utf-8'
 };
 
@@ -94,7 +95,7 @@ async function writeBeliefsViaPython(facts: unknown[]): Promise<void> {
     'print(t.write_derived_insights(json.loads(sys.argv[1])))',
     't.close()'
   ].join('\n');
-  await execFileAsync('python', ['-c', py, JSON.stringify(facts)], {
+  await execFileAsync(config.python.executable, ['-c', py, JSON.stringify(facts)], {
     cwd: path.resolve('src/rlm'),
     env: PY_ENV
   });
@@ -119,7 +120,7 @@ async function writeGatedViaPython(facts: unknown[], retrieveHashes: string[]): 
     't.close()',
     'pg.close()'
   ].join('\n');
-  await execFileAsync('python', ['-c', py, JSON.stringify(facts), JSON.stringify(retrieveHashes)], {
+  await execFileAsync(config.python.executable, ['-c', py, JSON.stringify(facts), JSON.stringify(retrieveHashes)], {
     cwd: path.resolve('src/rlm'),
     env: PY_ENV
   });

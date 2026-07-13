@@ -4355,3 +4355,121 @@ proposal; refresh $0.102 vs the ≈$0.05–$0.25 band).
    stage-2 increment 2 (run landed AND refresh ran, per the
    recorded selection rule), owner-scoped.
 
+### July 13, 2026 — Session 37: stage-2 increment 2 — the parse gate landed; BOTH edit runs failed and are recorded (§4 row 11 stage 2)
+
+The session split exactly as designed: the run-1-escape closure landed
+zero-paid FIRST; the owner-approved increment-2 runs then both FAILED
+under the pre-stated criterion and are recorded — the increment's
+product this session is measurement, not a landed diff. Paid total
+$0.6356 (runs $0.3994 + $0.2362 vs the ≤$0.90 proposal) plus the
+close-out refresh (recorded below). Design record:
+`REPOSITORY_INGESTION_REPORT.md` §5f (written before the run).
+
+1. **The parse gate (zero-paid, LANDED).** `named_file_unparseable`
+   joins the checker's typed findings: `stage2:check` post-run mode
+   now parses every named file — `.py` via the configured interpreter
+   (`config.python.executable`) running builtin `compile()` over the
+   file bytes (py_compile's check WITHOUT its bytecode write; the
+   checker stays read-only), `.ts`/`.js` via the TypeScript
+   single-file parse diagnostics (no project resolution, no type
+   check, no emit); unwired extensions are honestly unchecked, never
+   a finding. Pure evaluation in `check.ts` (`checkParseResults`,
+   `parseGateLanguage`); gatherers in
+   `src/benchmarks/selfedit/parse_gate.ts`; composes ADDITIVELY in
+   the CLI — `evaluateSelfEditRun` and every Session 35 pin
+   unchanged. Pins: 11 unit tests (`npm test` 771 → 782 across 82
+   files; the planted run-1 shape per language, clean/unwired
+   silence, the missing-file case) + drill section [6]
+   (`test:selfedit-harness`, 36 → 41 [PASS] observed on this stack)
+   planting the EXACT preserved run-1 failed-diff shape and observing
+   the finding fire through the real interpreter. Post-run mechanical
+   check only, never a write gate (guardrail 5).
+2. **Candidate selection by substrate query (§5f.2).** The
+   `slice (d) will` staleness family has exactly three surviving
+   occurrences in the current `repo:trellis:*` versions: the
+   `trellis_agent.py` research-mode telemetry comment (SELECTED —
+   doubly false: the same `main()` block wires
+   `retrieved_addresses_check=get_retrieved_addresses` eleven lines
+   up), the landed increment-1 residue in `trellis_tools.py:78`
+   (REJECTED — measured evidence, never hand-touched), and the drill
+   fixture's deliberately planted stale line (REJECTED — fixture
+   bytes). Broader staleness families queried EMPTY — the honest
+   ladder consequence recorded: surviving falsifiable staleness is
+   comment-class, so the step up was taken on depth (inside the
+   13.7 KB `main()` body), near-duplicate disambiguation (twin
+   telemetry sites at lines ~352/~579), and the
+   verify-in-its-own-iteration task discipline. New named failure
+   mode: near-duplicate mis-targeting.
+3. **Run 1 — FAILED on a harness flag ($0.3994; 134,387 in / 6,343
+   out).** The diff was CORRECT (one hunk, right site, comment-only)
+   but `stage2:check` fired 2 × `unbridged_evidence` — the FIRST
+   live firing of the Session 35 bridge check: the recorded insight
+   cited two `trellis_tools.py` blocks, not the named file. Diagnosed
+   deterministic (directional Cypher → 0 edges on `trellis_agent` →
+   the task's vector_search widening branch → semantically-similar
+   wrong-document blocks; the in-file wiring was confirmed through
+   textedit reads, which correctly never feed the retrieval set).
+   Tree reverted; the failed run's residual edge DELETED before the
+   contingency (operator cleanup, recorded with the Cypher in §5f.5:
+   the MERGE unions edge provenance, so the rejected hashes would
+   have made the pre-stated contract mechanically unpassable;
+   contest-instead-of-delete would equally have blocked it).
+4. **Run 2 (contingency, task text v2 — amendments per the recorded
+   diagnosis) — FAILED at human `git diff` review ($0.2362; 76,860
+   in / 4,402 out).** The evidence chain was PERFECT (118 undirected
+   edges → 26 provenance hashes → the in-file block `2f703511…2514`
+   identified and cited; checker zero findings INCLUDING the parse
+   gate) — but the splice replaced a 6-line window with 6
+   HAND-RETYPED comment lines whose retype dropped two neighbors:
+   the executable `"retrieved_addresses":
+   get_retrieved_address_count(),` line and the Session 33 comment's
+   first line. The file parses — the gate and checker are
+   structurally blind to a parseable semantic deletion — and human
+   review caught it, exactly where the criterion places diff
+   semantics. The verify-in-its-own-iteration discipline WAS followed
+   but its predicate checked only stale-text absence, never neighbor
+   preservation. Failure named: retype-splice neighbor deletion (the
+   CODE_MEDIATED_TEXT §1 pathology — the model re-typed existing
+   bytes through attention instead of splicing the changed span).
+   Tree reverted; both failed diffs preserved locally
+   (`benchmark_logs/session37_run{1,2}_failed_diff.patch`).
+5. **Increment verdict: FAILED under the pre-stated criterion; both
+   proposed runs consumed; recorded and stopped — no third run.**
+   What the failures bought: the bridge check's first live catch of
+   real evidence substitution; confirmation the parse gate changes
+   the review surface (run 1's diff was gate-clean AND
+   checker-flagged — the layers separate concerns correctly); and
+   the NEXT mechanically closable class named — a comment-class edit
+   that deletes parseable executable neighbors, decidable from the
+   diff alone (every changed named-file line must be comment/blank).
+   That comment-class diff gate is the recorded zero-paid first step
+   for the increment-2 RETRY (Session 38), per the
+   tooling-over-prompt-modules direction. Run 2's insight edge
+   (`trellis_agent` `wires` `get_retrieved_addresses`, citing the
+   in-file block) STANDS — a true belief with live gate- and
+   checker-verified provenance; the run's diff failed, its recorded
+   evidence did not. The `trellis_agent.py` stale comment remains in
+   place: still a valid target.
+6. **Close-out.** The §5d.6 refresh executed post-landing (plan echo
+   first: 7 files / 66-block bound / 0 tombstones; snapshot
+   `trellis#3`, 17/17 jobs zero failures; $0.0656 actual — 10,326 in
+   / 3,969 out / 4,101 embedding, metrics-port actuals; the
+   `trellis_tools.py` re-ingest is checkout EOL-normalization churn,
+   not an edit — recorded in §5f.5; both standing insight edges
+   verified uncontested with live provenance after the refresh;
+   session paid TOTAL $0.7012). The standing drill block green;
+   `drill:scale` ALONE (result in the committed
+   `scale_drill_results.json`); Compose isolated (`trellis_s37_ci`);
+   `git diff --check` clean. NO kernel prompt byte; both
+   composed-prompt pins unmoved; the only kernel-adjacent code diff
+   this session is harness tooling (`src/benchmarks/selfedit/*`,
+   `scripts/stage2_selfedit_check.ts`, the drill).
+7. **Documentation window (owner rule).** The Session 32 §5 entry
+   moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the live
+   ledger keeps the most recent five sessions: 33–37);
+   `REPOSITORY_INGESTION_REPORT.md` gained §5f (the increment-2
+   design record) and §5f.5 (the measured-runs record); HANDOFF
+   regenerated per §0 — next objective selected as the increment-2
+   RETRY: the comment-class diff gate zero-paid first, then the
+   re-proposed run (owner-gated).
+
