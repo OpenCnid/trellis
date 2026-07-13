@@ -1340,3 +1340,9 @@ runs"), so approval was never the blocker; the environment was. Spend:
    container's stack was ephemeral and never touched the durable
    substrate). No kernel byte, no prompt byte, no contract change
    anywhere in the session.
+
+### July 13, 2026 — Owner invitation: MCP server surface design record
+
+owner invited a document-first design record for Trellis serving MCP;
+the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
+(PR #87), unsequenced.
