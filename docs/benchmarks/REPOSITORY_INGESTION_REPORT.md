@@ -526,6 +526,44 @@ against the live substrate:
   (concurrent same-name entity merges are undrilled) — a reviewed
   kernel change, not a config flip.
 
+### 5d.6 Substrate freshness policy (recommended, July 13, 2026 — owner adoption pending)
+
+The residue ages as code changes. The Merkle diff makes refresh
+INCREMENTAL by construction — unchanged files are auditable no-ops and
+only changed blocks re-extract — so a typical session's refresh is
+tens of blocks (≈ $0.05–$0.25 at the measured stage-1 rate), not a
+re-run of the $2.75 baseline.
+
+- **Not real-time.** Extraction spend is operator-gated per run
+  (Guardrail 4, permanent), and nothing consults the substrate between
+  merges — per-commit refresh would buy churn, not freshness.
+- **Recommended cadence:** one scoped-snapshot refresh per MERGED
+  session PR (the zero-paid plan echo prints the changed-block bound;
+  the operator approves the increment), and ALWAYS a refresh before
+  any stage-2 edit run whose target area changed since the last
+  snapshot (refresh-before-use).
+- **Why stale is tolerable between refreshes — the failure shape is
+  right:** staleness can degrade ADVICE (a query may cite a
+  previous-effective version's blocks), but it cannot corrupt an
+  ACTION. The stage-2 edit path re-reads current bytes through
+  `trellis_textedit.load` and the hash-guarded `write_back` refuses on
+  any divergence (`StaleFileError`, write-time containment
+  re-verification) — an edit premised on stale knowledge is REFUSED at
+  the disk boundary, never silently applied. Advisory reads mitigate
+  the same way the write gate teaches: fetch the cited bytes and
+  confirm before relying.
+- **Quality follow-up, propose-with-estimate:** a one-time targeted
+  entailment sweep over stage-1 provenance pairs (~100 pairs ≈ $0.04
+  at the measured July 13 sweep rate) would convert the semantic
+  layer's sampled-audit coverage from opportunistic to deliberate for
+  this corpus — standing owner item.
+- **Model portability note:** the extraction pipeline is
+  model-agnostic at its boundaries — `EXTRACTION_MODEL` is env
+  configuration and every completion crosses `parseLlmResponse` — so a
+  future local-model deployment is a configuration change plus a
+  re-embedding pass, not a rearchitecture. Third-party pricing is an
+  economics input, not a structural dependency.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

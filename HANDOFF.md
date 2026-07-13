@@ -1187,8 +1187,14 @@ Repository state at handoff creation:
   cap, and a prose-prompt value question answered; recorded in
   `REPOSITORY_INGESTION_REPORT.md` §5d.2); (4) the pandas
   head-to-head probe round; (5) the cross-process concurrency proof
-  run (coverage-audit gap #1). The Session 35 stage-2 edit run is the
-  OBJECTIVE's own owner-gated step, not a conditional item.
+  run (coverage-audit gap #1); **(6) the substrate freshness policy**
+  (recommended in `REPOSITORY_INGESTION_REPORT.md` §5d.6: one scoped
+  refresh per merged PR + refresh-before-use ahead of stage-2 edit
+  runs; incremental by Merkle diff, ≈$0.05–$0.25 typical — owner
+  adoption pending); **(7) the targeted stage-1 entailment sweep**
+  (~100 pairs ≈ $0.04 — deliberate sampled-audit coverage over the
+  new substrate's semantic layer). The Session 35 stage-2 edit run is
+  the OBJECTIVE's own owner-gated step, not a conditional item.
 - CI target is Node 22 (the `offline` job also runs `test:textedit`
   after its Python-runtime install — Session 29). Session 33's local
   environment was Node 20.19.2, Python 3.13.1, Docker Compose v2,
