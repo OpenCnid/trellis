@@ -24,7 +24,8 @@ export type SelfEditFindingCode =
   | 'target_entity_missing'
   | 'contested_target'
   | 'doc_missing'
-  | 'named_file_unparseable';
+  | 'named_file_unparseable'
+  | 'named_file_noncomment_change';
 
 export interface SelfEditFinding {
   code: SelfEditFindingCode;
@@ -209,6 +210,104 @@ export function checkParseResults(results: FileParseResult[]): SelfEditFinding[]
         detail: `named file does not parse (${r.language}): ${r.file} — ${r.error ?? 'no parser detail'}`,
       });
     }
+  }
+  return findings;
+}
+
+// --- The comment-class diff gate (Session 39, §5g) --------------------
+// Post-run mechanical check for increments DECLARED comment-class: every
+// changed content line in the named file's diff — the removed side AND
+// the added side — must be blank or a line comment for the file's
+// language. The Session 37 run-2 escape (a splice that replaced a
+// comment window with hand-retyped comment lines and dropped an
+// executable neighbor, leaving a file that still PARSES) is mechanically
+// decidable from the diff alone: the dropped executable line appears as
+// a non-comment removed line. Never a write gate (guardrail 5's mold);
+// evaluated ONLY for files the increment declared comment-class — an
+// executable-class increment never sees it. Line comments only this
+// edition (# for .py, // for .ts/.js); block-comment interiors and
+// docstrings are OUT of scope, so a comment-class edit touching them
+// flags conservatively (recorded honestly in §5g). The diff gatherer
+// (read-only `git diff -- <file>`) lives in the CLI beside the
+// git-status gatherer.
+
+export interface DiffChangedLine {
+  side: 'removed' | 'added';
+  /** Line content without the leading -/+ marker. */
+  text: string;
+}
+
+/**
+ * Extracts changed content lines from unified diff text. Only in-hunk
+ * -/+ lines contribute: file headers (diff --git, index, ---/+++, mode
+ * lines) precede the first @@ and are skipped, context lines carry no
+ * change, and the "\ No newline at end of file" marker is ignored.
+ * Trailing CR is stripped. Bounded to the structure `git diff` actually
+ * emits — not a general patch parser.
+ */
+export function parseUnifiedDiffChangedLines(diffText: string): DiffChangedLine[] {
+  const changed: DiffChangedLine[] = [];
+  let inHunk = false;
+  for (const rawLine of diffText.split('\n')) {
+    const line = rawLine.replace(/\r$/, '');
+    if (line.startsWith('diff --git ')) {
+      inHunk = false;
+      continue;
+    }
+    if (line.startsWith('@@')) {
+      inHunk = true;
+      continue;
+    }
+    if (!inHunk) continue;
+    if (line.startsWith('\\')) continue;
+    if (line.startsWith('-')) changed.push({ side: 'removed', text: line.slice(1) });
+    else if (line.startsWith('+')) changed.push({ side: 'added', text: line.slice(1) });
+  }
+  return changed;
+}
+
+const COMMENT_LINE_MARKERS: Record<ParseGateLanguage, string> = {
+  python: '#',
+  typescript: '//',
+};
+
+/**
+ * Line-comment marker for a declared comment-class file; null when no
+ * comment syntax is wired for the extension. The CLI REFUSES a
+ * comment-class declaration whose file has no wired marker before any
+ * I/O — a declared gate that silently checks nothing would be worse
+ * than no gate.
+ */
+export function commentMarkerForFile(file: string): string | null {
+  const language = parseGateLanguage(file);
+  return language === null ? null : COMMENT_LINE_MARKERS[language];
+}
+
+/** Bound carried into finding details; keep refusal-style short. */
+const CHANGED_LINE_DETAIL_MAX_CHARS = 120;
+
+/**
+ * Every changed line in a comment-class file's diff must be blank or a
+ * line comment; anything else — either side — is a typed finding. The
+ * Session 37 run-2 removed executable line is the reference violation.
+ */
+export function checkCommentClassDiff(
+  file: string,
+  marker: string,
+  changedLines: DiffChangedLine[]
+): SelfEditFinding[] {
+  const findings: SelfEditFinding[] = [];
+  for (const line of changedLines) {
+    const trimmed = line.text.trim();
+    if (trimmed === '' || trimmed.startsWith(marker)) continue;
+    const shown =
+      trimmed.length > CHANGED_LINE_DETAIL_MAX_CHARS
+        ? `${trimmed.slice(0, CHANGED_LINE_DETAIL_MAX_CHARS)}…`
+        : trimmed;
+    findings.push({
+      code: 'named_file_noncomment_change',
+      detail: `comment-class file has a non-comment ${line.side} line: ${file} — "${shown}"`,
+    });
   }
   return findings;
 }

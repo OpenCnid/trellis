@@ -27,6 +27,13 @@
 //      tail left below it as dead bytes — fires named_file_unparseable
 //      through the real interpreter; clean files and unwired
 //      extensions stay silent.
+//   7. The comment-class diff gate (Session 39, §5g): the EXACT
+//      Session 37 run-2 escape shape — a comment window replaced with
+//      comment-only lines that DROP the executable neighbor and a
+//      comment head, leaving a file that still parses — fires
+//      named_file_noncomment_change through the real git binary; the
+//      parse gate's structural blindness to the same edit is observed;
+//      a genuine comment-only edit stays silent.
 //
 // All database state is token-scoped: inserted by this drill, deleted
 // by this drill. The repo:trellis substrate is only ever READ.
@@ -39,16 +46,20 @@ import util from 'util';
 import { neo4jDriver, pgPool } from '../src/config/db';
 import { config, pgDsn } from '../src/config/index';
 import {
+  checkCommentClassDiff,
   checkEditScope,
   checkEvidence,
   checkParseResults,
+  commentMarkerForFile,
   evaluatePreCheck,
   evaluateSelfEditRun,
+  parseUnifiedDiffChangedLines,
   SelfEditFinding,
 } from '../src/benchmarks/selfedit/check';
 import { gatherParseResults } from '../src/benchmarks/selfedit/parse_gate';
 import {
   gatherEvidenceEdge,
+  gatherGitDiff,
   gatherGitStatus,
   gatherHashEvidence,
   gatherPreState,
@@ -466,6 +477,92 @@ async function main(): Promise<void> {
     'the clean-arm named file (unwired extension) adds no parse finding',
     checkParseResults(repoBParse).length === 0,
     JSON.stringify(repoBParse)
+  );
+
+  // --- [7] The comment-class diff gate (Session 39, §5g) ---------------
+  console.log('\n[7] comment-class diff gate — the run-2 escape shape');
+  const repoE = await makeScratchRepo();
+  const gitE = (...a: string[]) => execFileAsync('git', ['-C', repoE, ...a]);
+  const telemetryPath = path.join(repoE, 'telemetry.py');
+  const seedLines = [
+    'def main():',
+    '    stats = {',
+    '        "answer_submits": get_answer_submit_count(),',
+    '        # Session 30: the size of the retrieved-address set -- a',
+    '        # count only, never the addresses (T16). Bookkeeping;',
+    '        # slice (d) will constrain citable addresses to the set.',
+    '        "retrieved_addresses": get_retrieved_address_count(),',
+    '        # Session 33: retrieval-discipline activity -- counts',
+    '        # only, never an identity (T16).',
+    '    }',
+    '    return stats',
+    '',
+  ];
+  await fs.promises.writeFile(telemetryPath, seedLines.join('\n'), 'utf-8');
+  await gitE('add', 'telemetry.py');
+  await gitE('-c', 'user.name=selfedit-harness', '-c', 'user.email=selfedit@localhost', 'commit', '-q', '-m', 'seed telemetry');
+
+  // The EXACT run-2 shape: the stale comment window is replaced with
+  // comment-only lines, but the hand-retyped window DROPS the
+  // executable "retrieved_addresses" line and the Session 33 comment
+  // head. The file still parses.
+  const run2Lines = [...seedLines];
+  run2Lines.splice(5, 3, // replaces the stale comment + executable + comment head
+    '        # slice (d) is live: this file wires the accessor into',
+    '        # the write gate through the constructor seam on',
+    '        # research runs.'
+  );
+  await fs.promises.writeFile(telemetryPath, run2Lines.join('\n'), 'utf-8');
+
+  const run2Parse = checkParseResults(await gatherParseResults(repoE, ['telemetry.py'], config.python.executable));
+  check(
+    'the run-2 shape still PARSES (the blindness this gate closes)',
+    run2Parse.length === 0,
+    JSON.stringify(run2Parse)
+  );
+  const marker = commentMarkerForFile('telemetry.py');
+  check('the .py marker is wired', marker === '#', String(marker));
+  const run2Diff = await gatherGitDiff(repoE, 'telemetry.py');
+  const run2Changed = parseUnifiedDiffChangedLines(run2Diff);
+  check(
+    'the real git diff surfaces the dropped executable line on the removed side',
+    run2Changed.some(l => l.side === 'removed' && l.text.includes('get_retrieved_address_count')),
+    JSON.stringify(run2Changed.slice(0, 8))
+  );
+  const run2Findings = checkCommentClassDiff('telemetry.py', marker as string, run2Changed);
+  check(
+    'run-2 shape fires named_file_noncomment_change through the real git binary',
+    run2Findings.length >= 1 && run2Findings.every(f => f.code === 'named_file_noncomment_change'),
+    JSON.stringify(run2Findings)
+  );
+  check(
+    'the finding names the dropped executable line',
+    run2Findings.some(f => f.detail.includes('retrieved_addresses') && f.detail.includes('removed')),
+    JSON.stringify(run2Findings)
+  );
+
+  // Clean arm: a genuine comment-only correction (the executable line
+  // and its neighbors preserved) stays silent.
+  const cleanLines = [...seedLines];
+  cleanLines[5] = '        # slice (d) is live: the constructor seam wires the set.';
+  await fs.promises.writeFile(telemetryPath, cleanLines.join('\n'), 'utf-8');
+  const cleanDiff = await gatherGitDiff(repoE, 'telemetry.py');
+  const cleanFindings = checkCommentClassDiff(
+    'telemetry.py',
+    marker as string,
+    parseUnifiedDiffChangedLines(cleanDiff)
+  );
+  check('a genuine comment-only edit stays silent', cleanFindings.length === 0, JSON.stringify(cleanFindings));
+  const cleanParse = checkParseResults(await gatherParseResults(repoE, ['telemetry.py'], config.python.executable));
+  check('the clean comment edit also parses', cleanParse.length === 0, JSON.stringify(cleanParse));
+
+  // An undeclared (unchanged) file: empty diff, zero changed lines,
+  // zero findings — the gate never fires where nothing changed.
+  const untouchedDiff = await gatherGitDiff(repoE, 'other.txt');
+  check(
+    'an unchanged file yields an empty diff and zero changed lines',
+    untouchedDiff === '' && parseUnifiedDiffChangedLines(untouchedDiff).length === 0,
+    JSON.stringify(untouchedDiff.slice(0, 80))
   );
 }
 

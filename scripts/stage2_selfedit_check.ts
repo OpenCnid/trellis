@@ -16,11 +16,19 @@
 //               interpreter, .ts/.js via a TypeScript single-file
 //               parse) must still parse — the Session 36 run-1 escape
 //               (a syntax-broken named file) is a typed finding now,
-//               not a human catch.
+//               not a human catch. Since Session 39 the post-run mode
+//               also runs the comment-class diff gate (§5g) for files
+//               the increment DECLARED comment-class via
+//               --comment-class: every changed line in the named
+//               file's diff (removed and added sides both) must be
+//               blank or a line comment — the Session 37 run-2 escape
+//               (a comment splice that dropped a parseable executable
+//               neighbor) is a typed finding now, not a human catch.
 //
-// Read-only everywhere: the only git invocation is `git status
-// --porcelain` (the toolkit itself never touches git — the harness
-// merely reads the working-tree state the human will review), and both
+// Read-only everywhere: the git surface is exactly `git status
+// --porcelain` plus, for declared comment-class files, `git diff --
+// <file>` (the toolkit itself never touches git — the harness merely
+// reads the working-tree state the human will review), and both
 // database clients issue reads only. Non-empty findings exit 1.
 //
 // Usage:
@@ -28,20 +36,24 @@
 //     --entity get_retrieved_addresses \
 //     --named-file src/rlm/trellis_tools.py [--doc-prefix repo:trellis:]
 //   tsx scripts/stage2_selfedit_check.ts \
-//     --edit-root <checkout> --named-file src/rlm/trellis_tools.py \
-//     --subject _verify_hashes_retrieved --verb consumes \
+//     --edit-root <checkout> --named-file src/rlm/trellis_agent.py \
+//     --comment-class src/rlm/trellis_agent.py \
+//     --subject trellis_agent --verb wires \
 //     --object get_retrieved_addresses [--doc-prefix repo:trellis:]
 import { execFile } from 'child_process';
 import util from 'util';
 import { neo4jDriver, pgPool } from '../src/config/db';
 import { config } from '../src/config/index';
 import {
+  checkCommentClassDiff,
   checkEvidence,
   checkParseResults,
+  commentMarkerForFile,
   evaluatePreCheck,
   EvidenceEdge,
   HashEvidence,
   parseGitStatusPorcelain,
+  parseUnifiedDiffChangedLines,
   checkEditScope,
   SelfEditFinding,
   SelfEditPreState,
@@ -54,6 +66,7 @@ interface CliArgs {
   pre: boolean;
   editRoot?: string;
   namedFiles: string[];
+  commentClassFiles: string[];
   entities: string[];
   subject?: string;
   verb?: string;
@@ -62,7 +75,13 @@ interface CliArgs {
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { pre: false, namedFiles: [], entities: [], docPrefix: 'repo:trellis:' };
+  const args: CliArgs = {
+    pre: false,
+    namedFiles: [],
+    commentClassFiles: [],
+    entities: [],
+    docPrefix: 'repo:trellis:',
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     const next = () => {
@@ -74,6 +93,7 @@ function parseArgs(argv: string[]): CliArgs {
     if (a === '--pre') args.pre = true;
     else if (a === '--edit-root') args.editRoot = next();
     else if (a === '--named-file') args.namedFiles.push(next());
+    else if (a === '--comment-class') args.commentClassFiles.push(next());
     else if (a === '--entity') args.entities.push(next());
     else if (a === '--subject') args.subject = next();
     else if (a === '--verb') args.verb = next();
@@ -89,6 +109,16 @@ export async function gatherGitStatus(editRoot: string): Promise<string[]> {
     maxBuffer: 1024 * 1024,
   });
   return parseGitStatusPorcelain(stdout);
+}
+
+/** Read-only working-tree diff for one declared comment-class file —
+ *  the Session 39 widening of the harness's git surface (§5g); the
+ *  toolkit and the run still never touch git. */
+export async function gatherGitDiff(editRoot: string, file: string): Promise<string> {
+  const { stdout } = await execFileAsync('git', ['-C', editRoot, 'diff', '--', file], {
+    maxBuffer: 4 * 1024 * 1024,
+  });
+  return stdout;
 }
 
 export async function gatherEvidenceEdge(
@@ -205,6 +235,9 @@ async function main(): Promise<number> {
 
   if (args.pre) {
     if (args.entities.length === 0) throw new Error('--pre requires at least one --entity');
+    if (args.commentClassFiles.length > 0) {
+      throw new Error('--comment-class is a post-run declaration; it has no --pre meaning');
+    }
     const state = await gatherPreState(args.entities, args.namedFiles, args.docPrefix);
     return report(evaluatePreCheck(state));
   }
@@ -213,6 +246,19 @@ async function main(): Promise<number> {
   if (!args.subject || !args.verb || !args.object) {
     throw new Error('--subject, --verb, and --object are required for the post-run check');
   }
+  // Declared comment-class files validate BEFORE any I/O: each must be
+  // a named file (the diff gate only ever narrows a named file's
+  // allowed diff) and must have a wired line-comment marker (a
+  // declared gate that checks nothing would be worse than no gate).
+  const named = new Set(args.namedFiles.map(f => f.replace(/\\/g, '/')));
+  for (const f of args.commentClassFiles) {
+    if (!named.has(f.replace(/\\/g, '/'))) {
+      throw new Error(`--comment-class file is not a --named-file: ${f}`);
+    }
+    if (commentMarkerForFile(f) === null) {
+      throw new Error(`--comment-class file has no wired line-comment marker: ${f}`);
+    }
+  }
   const changedPaths = await gatherGitStatus(args.editRoot);
   const edge = await gatherEvidenceEdge(args.subject, args.verb, args.object);
   const hashes: HashEvidence[] = [];
@@ -220,6 +266,13 @@ async function main(): Promise<number> {
     hashes.push(await gatherHashEvidence(h));
   }
   const parseResults = await gatherParseResults(args.editRoot, args.namedFiles, config.python.executable);
+  const commentClassFindings: SelfEditFinding[] = [];
+  for (const f of args.commentClassFiles) {
+    const marker = commentMarkerForFile(f);
+    if (marker === null) continue; // unreachable: validated above
+    const diffText = await gatherGitDiff(args.editRoot, f);
+    commentClassFindings.push(...checkCommentClassDiff(f, marker, parseUnifiedDiffChangedLines(diffText)));
+  }
   const findings = [
     ...checkEditScope(changedPaths, args.namedFiles),
     ...checkEvidence({
@@ -230,6 +283,7 @@ async function main(): Promise<number> {
       hashes,
     }),
     ...checkParseResults(parseResults),
+    ...commentClassFindings,
   ];
   return report(findings);
 }

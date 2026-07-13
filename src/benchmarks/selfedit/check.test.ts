@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  checkCommentClassDiff,
   checkEditScope,
   checkEvidence,
   checkParseResults,
+  commentMarkerForFile,
   evaluatePreCheck,
   evaluateSelfEditRun,
   FileParseResult,
   parseGitStatusPorcelain,
+  parseUnifiedDiffChangedLines,
   SelfEditRunEvidence,
 } from './check';
 
@@ -183,6 +186,155 @@ describe('checkParseResults', () => {
 
   it('never flags an extension with no parser wired, even marked unparseable', () => {
     expect(checkParseResults([{ file: 'c.md', language: null, parseable: false }])).toEqual([]);
+  });
+});
+
+// Session 39 (§5g): the comment-class diff gate. The reference
+// violation is the EXACT preserved Session 37 run-2 failed diff
+// (benchmark_logs/session37_run2_failed_diff.patch, reproduced inline
+// below): a comment splice whose hand-retyped window dropped the
+// executable "retrieved_addresses" line and the Session 33 comment
+// head — the file still parses, so only this gate can see it.
+const RUN2_FAILED_DIFF = [
+  'diff --git a/src/rlm/trellis_agent.py b/src/rlm/trellis_agent.py',
+  'index 6ba03cf..af6bca0 100644',
+  '--- a/src/rlm/trellis_agent.py',
+  '+++ b/src/rlm/trellis_agent.py',
+  '@@ -574,10 +574,10 @@ def main():',
+  '             "answer_submits": get_answer_submit_count(),',
+  '             # Session 30 (PROVENANCE_THREADING.md slice b): the size of',
+  "             # the run's retrieved-address set — a count only, never the",
+  '-            # addresses (T16). Bookkeeping; slice (d) will constrain',
+  '-            # citable addresses to the set itself.',
+  '-            "retrieved_addresses": get_retrieved_address_count(),',
+  '-            # Session 33 (RETRIEVAL_DISCIPLINE.md §6): retrieval-',
+  '+            # addresses (T16). Bookkeeping; slice (d) is live: this',
+  '+            # file wires get_retrieved_addresses into the write gate',
+  '+            # through the retrieved_addresses_check constructor seam on',
+  '+            # research runs.',
+  '             # discipline activity — counts only, never an identity',
+  '             # (T16). The Node scanner tolerates unknown fields (pinned).',
+  '             **get_retrieval_discipline_stats(),',
+].join('\n');
+
+describe('parseUnifiedDiffChangedLines', () => {
+  it('extracts exactly the -/+ lines of the run-2 diff, headers and context skipped', () => {
+    const lines = parseUnifiedDiffChangedLines(RUN2_FAILED_DIFF);
+    expect(lines).toHaveLength(8);
+    expect(lines.filter(l => l.side === 'removed')).toHaveLength(4);
+    expect(lines.filter(l => l.side === 'added')).toHaveLength(4);
+    expect(lines.map(l => l.text)).toContain(
+      '            "retrieved_addresses": get_retrieved_address_count(),'
+    );
+    // The ---/+++ file headers are NOT changed lines.
+    expect(lines.some(l => l.text.startsWith('-- a/'))).toBe(false);
+    expect(lines.some(l => l.text.startsWith('++ b/'))).toBe(false);
+  });
+
+  it('ignores the no-newline marker and tolerates CRLF', () => {
+    const diff = [
+      'diff --git a/x.py b/x.py',
+      '--- a/x.py\r',
+      '+++ b/x.py\r',
+      '@@ -1 +1 @@\r',
+      '-# old\r',
+      '+# new\r',
+      '\\ No newline at end of file\r',
+    ].join('\n');
+    expect(parseUnifiedDiffChangedLines(diff)).toEqual([
+      { side: 'removed', text: '# old' },
+      { side: 'added', text: '# new' },
+    ]);
+  });
+
+  it('handles an in-hunk removed line that itself starts with dashes', () => {
+    const diff = ['@@ -1 +1 @@', '--- not a header, a removed line', '+# fine'].join('\n');
+    const lines = parseUnifiedDiffChangedLines(diff);
+    expect(lines[0]).toEqual({ side: 'removed', text: '-- not a header, a removed line' });
+  });
+
+  it('resets hunk state on a new file section', () => {
+    const diff = [
+      '@@ -1 +1 @@',
+      '-# a',
+      'diff --git a/y.py b/y.py',
+      '--- a/y.py',
+      '+++ b/y.py',
+      '@@ -1 +1 @@',
+      '+# b',
+    ].join('\n');
+    expect(parseUnifiedDiffChangedLines(diff)).toEqual([
+      { side: 'removed', text: '# a' },
+      { side: 'added', text: '# b' },
+    ]);
+  });
+
+  it('returns empty for an empty diff', () => {
+    expect(parseUnifiedDiffChangedLines('')).toEqual([]);
+  });
+});
+
+describe('commentMarkerForFile', () => {
+  it('wires # for python and // for typescript/javascript', () => {
+    expect(commentMarkerForFile('a.py')).toBe('#');
+    expect(commentMarkerForFile('b.ts')).toBe('//');
+    expect(commentMarkerForFile('c.js')).toBe('//');
+  });
+
+  it('returns null for unwired extensions', () => {
+    expect(commentMarkerForFile('notes.txt')).toBeNull();
+    expect(commentMarkerForFile('README.md')).toBeNull();
+  });
+});
+
+describe('checkCommentClassDiff', () => {
+  it('fires on the run-2 shape: the removed executable line, exactly once', () => {
+    const lines = parseUnifiedDiffChangedLines(RUN2_FAILED_DIFF);
+    const findings = checkCommentClassDiff('src/rlm/trellis_agent.py', '#', lines);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].code).toBe('named_file_noncomment_change');
+    expect(findings[0].detail).toContain('removed');
+    expect(findings[0].detail).toContain('retrieved_addresses');
+  });
+
+  it('is silent on a comment-only edit with blank lines', () => {
+    const findings = checkCommentClassDiff('a.py', '#', [
+      { side: 'removed', text: '  # stale sentence' },
+      { side: 'added', text: '  # corrected sentence' },
+      { side: 'added', text: '   ' },
+    ]);
+    expect(findings).toEqual([]);
+  });
+
+  it('fires on an ADDED executable line too', () => {
+    const findings = checkCommentClassDiff('a.py', '#', [
+      { side: 'added', text: 'x = 1  # trailing comment does not save it' },
+    ]);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].code).toBe('named_file_noncomment_change');
+    expect(findings[0].detail).toContain('added');
+  });
+
+  it('respects the language marker (// for typescript)', () => {
+    expect(
+      checkCommentClassDiff('a.ts', '//', [{ side: 'removed', text: '  // old note' }])
+    ).toEqual([]);
+    const findings = checkCommentClassDiff('a.ts', '//', [
+      { side: 'removed', text: '  # not a ts comment' },
+    ]);
+    expect(findings).toHaveLength(1);
+  });
+
+  it('bounds the quoted line in the detail', () => {
+    const long = `const x = '${'y'.repeat(300)}';`;
+    const findings = checkCommentClassDiff('a.ts', '//', [{ side: 'added', text: long }]);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].detail.length).toBeLessThan(250);
+    expect(findings[0].detail).toContain('…');
+  });
+
+  it('is silent on an empty diff (unchanged declared file)', () => {
+    expect(checkCommentClassDiff('a.py', '#', [])).toEqual([]);
   });
 });
 
