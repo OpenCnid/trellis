@@ -121,10 +121,22 @@ an outer training loop learns the learning rule itself.
   scales past 2M-token context. **ATLAS** (arXiv:2505.23735) and the
   test-time-regression unifying framework (arXiv:2501.12352) generalize
   the family.
-- **Large-chunk TTT / "Test-Time Training Done Right"** (OpenReview
-  Tb9qAxT3xv): makes nonlinear fast-weight updates hardware-efficient by
-  batching updates over large chunks — the engineering answer to why
-  earlier TTT layers underused GPUs.
+- **Large-chunk TTT / "Test-Time Training Done Right" (LaCT)** (Zhang
+  et al., MIT + Adobe, arXiv:2505.23884; OpenReview Tb9qAxT3xv): makes
+  nonlinear fast-weight updates hardware-efficient by batching updates
+  over extremely large chunks (2K–1M tokens) — lifting fast-weight
+  FLOPs utilization from <5% by orders of magnitude and scaling
+  nonlinear state to ~40% of model parameters. Demonstrated in three
+  domains: novel view synthesis (0.3B, 1M-token context, from
+  scratch), language modeling (760M + 3B at 32,768 context, FROM
+  SCRATCH — lower per-token loss at large token indices than GLA and
+  DeltaNet, competitive with full attention), and autoregressive video
+  diffusion — the one RETROFIT instance: the pretrained Wan 2.1 model
+  fine-tuned with all bidirectional attention REPLACED by LaCT +
+  sliding-window attention, quality COMPARABLE to the full-attention
+  baseline while enabling autoregressive generation. Authors' stated
+  limitation: state-based models are weaker at reasoning. **This is
+  the collaborator's selected mechanism — see §12.**
 - **Lineage** (the collaborator's "FastWeights" vocabulary): fast weights
   are Schmidhuber 1992 (*Learning to Control Fast-Weight Memories*) and
   Ba et al. 2016 (*Using Fast Weights to Attend to the Recent Past*,
@@ -499,7 +511,7 @@ the roadmap §5 entry — unchanged ceremony). Hosted open-model endpoints
 | 8 | *No Time Like the Present: Agentic TTT*, arXiv:2607.03441 | the multi-turn agent result + the stability-not-capability finding |
 | 9 | *Beyond Perplexity*, arXiv:2607.00368 | the behavioral-evaluation framework §6 adopts |
 | 10 | *Cartridges*, arXiv:2506.06266; *SEAL*, arXiv:2506.10943 | Family C: compiled prefix state; persistent self-edits (out of scope) |
-| 11 | *Self-Guided TTT*, arXiv:2607.09415; LaCT, OpenReview Tb9qAxT3xv | span-selected adaptation; hardware-efficient large-chunk TTT |
+| 11 | *Self-Guided TTT*, arXiv:2607.09415; LaCT, arXiv:2505.23884 | span-selected adaptation; hardware-efficient large-chunk TTT — the §12 selected mechanism |
 
 ## 11. Interaction with standing guardrails (nothing weakened)
 
@@ -522,3 +534,118 @@ the roadmap §5 entry — unchanged ceremony). Hosted open-model endpoints
 - **No default changes**: today's backend, prompt bytes, and pins are the
   baseline every rung is measured against; a rung that lands still
   changes no default without its own recorded owner decision.
+
+## 12. The R1 exchange — the collaborator's selection and the reliance claim (added July 13, 2026, same day)
+
+The owner relayed the collaborator's response to this record the same
+day it was written, referring to §3.1's LaCT entry. Verbatim:
+
+> "This is the model we aim to use. With open weights, we can add a
+> synthetic set layers that are the fast weights. Trellis can do this.
+> It has provenance to check procedure. It can ensure the meta-prompts
+> are followed as strongly as possible based on the data in the REPL.
+> Each can be combined to ensure all meta-prompts perform as well as
+> possible for output sculpting and efficiency. The research shows this
+> improves base model performance. That's the claim we're relying on
+> for our application."
+
+This answers §9 question 1 and sharpens questions 2–4. What it
+settles, what it opens, and what the house doctrine requires before
+the reliance claim carries weight:
+
+### 12.1 The selection, verified against the primary source
+
+LaCT (arXiv:2505.23884) was re-verified against the paper on July 13,
+2026; the §3.1 entry now carries the full experimental facts. The two
+that matter for the plan as stated:
+
+1. **"Add a synthetic set of layers that are the fast weights" is the
+   Wan-2.1 retrofit pattern, and it is a TRAINING JOB** — the paper's
+   only pretrained-model instance fine-tunes the model with the new
+   layers in place (attention layers replaced by LaCT + sliding-window
+   attention). It is not an inference-time configuration. In this
+   record's terms the selection is **Family A obtained by retrofit**.
+2. **The retrofit result reads COMPARABLE, not improved** — quality on
+   par with the full-attention baseline while enabling autoregressive
+   generation at linear long-context cost. The paper's superiority
+   results are from-scratch architecture comparisons (760M/3B language
+   models at 32k context beating GLA and DeltaNet on long-context
+   per-token loss; competitive with full attention).
+
+### 12.2 The reliance claim, decomposed (the Session 28 discipline: a premise relied on is a premise measured)
+
+- **C1 — SUPPORTED.** Large-chunk fast-weight layers are
+  hardware-efficient (utilization lifted from <5% by orders of
+  magnitude; state to ~40% of parameters) and match or beat
+  efficient-architecture baselines on long-context tasks; the retrofit
+  path is feasible and quality-preserving. The *efficiency* half of
+  "output sculpting and efficiency" has real support.
+- **C2 — EXTRAPOLATED.** "The research shows this improves base model
+  performance," applied to retrofitting an open LLM: LaCT does NOT
+  show this. Its LM results are from-scratch comparisons at ≤3B/32k
+  against linear-attention baselines; its one retrofit reads
+  comparable, not improved. The nearest direct support for
+  pretrained-LLM improvement is TTT-NTP (Family B, +3–4 RULER points)
+  and aTTT (stability-shaped, §3.4). **C2 is the load-bearing gap that
+  R3/R4 exist to measure** — stated here so nobody mistakes the
+  premise for a result.
+- **C3 — UNTESTED.** "Ensure the meta-prompts are followed as strongly
+  as possible … output sculpting" = H2. No literature, LaCT included,
+  measures prompt-adherence effects of fast weights. Trellis's
+  instruments (protocol-violation counts, answer-channel compliance,
+  criterion items) are exactly the right meter; R5 — or an explicit R4
+  criterion item — carries it.
+- **One overlap named honestly:** LaCT's measured wins are
+  LONG-CONTEXT modeling — the job the RLM harness already removes from
+  attention by construction (context lives in the REPL, fetched by
+  code). For THIS application the expected win therefore narrows to
+  serving efficiency plus C3's adherence effect; §3.4's
+  stability-shaped expectation remains the calibration.
+- **The authors' own limitation transfers:** state-based models are
+  weaker at REASONING — the capability the RLM leans on hardest (LaCT
+  pairs fast weights with window attention partly for this reason).
+  Any R3/R4 criterion must include reasoning-shaped items; the est
+  suite already is.
+
+### 12.3 What "Trellis can do this" means, precisely
+
+Trellis cannot train layers and acquires no training pipeline under
+this track. What Trellis contributes — and why the collaboration is
+shaped right:
+
+1. **The acceptance instrument:** backend-independent paired-arm
+   measurement with pre-stated criteria (§6) — the est suite, the
+   protocol counters, OOLONG-hard, the probe suites.
+2. **Provenance-gated adaptation data** — the collaborator's "it has
+   provenance to check procedure," read in this record's terms: the
+   §5.3 adaptation-data policy can be ENFORCED by the substrate. The
+   fast-weight training signal can be restricted to engine-verified
+   LIVE blocks with the run's retrieval set as the eligibility
+   boundary, making *what the model absorbed* auditable the way *what
+   the model cited* is today — and directly bounding the §5.3 threat 1
+   injection amplification. This is a design seed for the R4 proposal,
+   not machinery.
+3. **The serving seam:** R2's audit, unchanged by this exchange.
+
+Division of labor recorded: the retrofit training job is
+COLLABORATOR-SIDE (or its own owner-funded proposal — either way it is
+not a rung of this repo's ladder); Trellis-side rungs R2→R5 are
+unchanged in order.
+
+### 12.4 Ladder deltas from this exchange
+
+- **R1:** question 1 ANSWERED (LaCT). Questions 2–4 stand — and
+  §12.3's enforcement offer sharpens question 4 into a concrete
+  proposal for the collaborator: shall the adaptation-data eligibility
+  boundary BE the run's retrieval set?
+- **R3** gains a checkpoint requirement: the baseline arm should be
+  the SAME open checkpoint the retrofit will start from, so R4's
+  comparison isolates the added layers.
+- **R4** arms are now concrete: the base open checkpoint vs the same
+  checkpoint with trained-in large-chunk fast-weight layers, same
+  instruments, adaptation-data policy pre-stated. Its criterion
+  inherits C2 and C3 explicitly — a stability-only result is a
+  finding, not a failure, but it is not C2, and it gets reported at
+  exactly its size (guardrail 8, Session 45's version).
+- No rung's gate moved: everything remains owner-approved
+  propose-with-estimate.

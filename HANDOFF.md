@@ -617,6 +617,24 @@ Sessions 42–44 each moved an entry). `npm test` 837/85 observed
 green in the session worktree after `npm ci`; live drills NOT re-run
 (zero non-markdown bytes moved — recorded reason); no refresh owed
 (docs-only; `docs/` is outside extraction scope until stage-1b).
+**(6) The same-day R1 return (record §12 + the roadmap §5 exchange
+entry; folded into this PR under §0 step 5):** the collaborator
+SELECTED LaCT (arXiv:2505.23884 — verified against the paper) as the
+mechanism: open-weights retrofit with added fast-weight layers, which
+is the paper's Wan-2.1 pattern and a TRAINING JOB (collaborator-side,
+not a rung of this repo's ladder). Their reliance claim ("the
+research shows this improves base model performance") is DECOMPOSED,
+not accepted: C1 SUPPORTED (hardware efficiency + quality-preserving
+retrofit feasibility), C2 EXTRAPOLATED (LaCT's one retrofit reads
+COMPARABLE, not improved; its superiority results are from-scratch
+comparisons — C2 is the load-bearing gap R3/R4 measure), C3 UNTESTED
+(meta-prompt adherence = H2; the protocol counters are the meter).
+R4's arms are now fixed: the same open checkpoint ± trained-in
+large-chunk fast-weight layers. The "provenance-gated adaptation
+data" design seed is recorded (eligibility boundary = the run's
+retrieval set — §9 question 4, sharpened, back to the collaborator).
+LaCT's own stated limitation (state-based models weaker at REASONING)
+transfers to any R3/R4 criterion.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
@@ -1249,9 +1267,15 @@ Repository state at handoff creation:
   **(11) TTT-track rungs R3–R5** (each its own owner-approved
   proposal per `TEST_TIME_TRAINING.md` §7; R3 needs serving
   infrastructure — GPU-hours or a hosted open-model endpoint, priced
-  in the proposal under the record's cost-doctrine re-expression;
-  R4/R5 need R3's PASS; R1, the collaborator exchange, is
-  owner-mediated and needs no session). Row 10's measurement
+  in the proposal under the record's cost-doctrine re-expression —
+  and its baseline arm should be the SAME open checkpoint the
+  retrofit will start from; R4/R5 need R3's PASS. R1 question 1 is
+  ANSWERED — the collaborator selected LaCT, record §12: R4's arms
+  are the same checkpoint ± trained-in large-chunk fast-weight
+  layers, the retrofit training job is COLLABORATOR-SIDE, and the
+  reliance claim is decomposed C1 supported / C2 extrapolated — the
+  load-bearing gap / C3 untested; questions 2–4 stand, question 4
+  sharpened to "eligibility boundary = the run's retrieval set?"). Row 10's measurement
   (Session 43) and the judge-calibration MEASUREMENT (Session 44)
   are DONE and off this list — only the calibration DECISION
   remains. If the owner approves nothing this session, the zero-paid
@@ -1336,8 +1360,8 @@ session must act on:
   out); `model_usage_summaries` telemetry assembly; the embedding
   call sites (extraction worker per-block embedding, the probe
   runner, and whatever else the census finds).
-- **The design-record home:** append §12 to
-  `TEST_TIME_TRAINING.md`, or create
+- **The design-record home:** append §13 to
+  `TEST_TIME_TRAINING.md` (§12 is the R1 exchange record), or create
   `docs/architecture/MODEL_BACKEND_SEAM.md` if it outgrows a section
   — document-first mold, NO code.
 - **At session START (before any R2 work): present the
@@ -1406,8 +1430,9 @@ session must act on:
 - `src/workers/rlm_job.ts` (`buildAgentEnv`) — where any future
   backend env twin would be forwarded or stripped; its unit pins.
 - `docs/architecture/TEST_TIME_TRAINING.md` §4/§7 — the track record
-  R2 executes; §9 — the collaborator questions (answers may have
-  arrived via the owner; fold them into the record if so).
+  R2 executes; §12 — the R1 exchange (question 1 ANSWERED: LaCT;
+  questions 2–4 outstanding — fold further collaborator answers into
+  §12 as addenda).
 - `docs/architecture/PROVENANCE_THREADING.md` §10 — the
   judge-calibration data to present at session start.
 

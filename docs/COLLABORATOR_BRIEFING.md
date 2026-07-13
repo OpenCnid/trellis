@@ -355,6 +355,17 @@ work in your formulation or is the economics, the mechanism behind the
 meta-prompt claim, and your adaptation-data policy. The five-line
 proposal frame below applies.
 
+*Same-day update:* your answer to the first question arrived — LaCT —
+and is recorded with our reading of it in the record's §12: the
+retrofit is a training job (your side); the reliance claim decomposes
+into a supported efficiency half, an extrapolated improvement half
+(the gap our R3/R4 measurements exist to close), and the untested
+meta-prompt-adherence half our protocol counters will meter. One
+sharpened question back to you (§12.4): should the adaptation-data
+eligibility boundary BE the run's retrieval set — provenance-gated
+fast-weight training, so what the model absorbed is auditable the way
+what it cited is today?
+
 ## Where you can help next
 
 When you propose — on any item below — please use this frame, one per
