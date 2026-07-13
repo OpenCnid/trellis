@@ -826,6 +826,241 @@ instead.
   paid total $0.667 ($0.565 runs vs ≤$0.90; $0.102 refresh vs
   ≈$0.05–$0.25).
 
+## 5f. Stage 2, increment 2: the parse gate + the deep-context self-edit (design record, Session 37, July 13, 2026)
+
+Recorded BEFORE the run, per the house document-first pattern.
+Increment 1's measured lesson (§5e.5): run 1 shipped a syntax-broken
+named file that the checker passed — correctly, per its recorded scope
+— and only human review caught. Increment 2 (a) closes that escape
+mechanically with the parse gate, landed zero-paid FIRST, and (b)
+takes one owner-scoped step deeper on the edit ladder with a NEW named
+failure mode. Cross-referenced from the roadmap §5 Session 37 entry.
+
+### 5f.1 The parse gate (zero-paid, landed before the run)
+
+`named_file_unparseable` joins the typed finding list: the post-run
+mode of `stage2:check` now parses every named file — `.py` through the
+operator-configured interpreter (`config.python.executable`) running
+the builtin `compile()` over the file bytes (the same syntax check
+`python -m py_compile` performs WITHOUT its bytecode write into the
+edit root: the checker stays read-only, so `__pycache__` residue in
+the reviewed tree is not acceptable), `.ts`/`.js` through the
+TypeScript compiler's single-file parse diagnostics (no project
+resolution, no type check, no emit). Extensions with no parser wired
+are recorded as unchecked and never flag — the gate is honest about
+what it checks. Post-run mechanical check only, never a write gate
+(guardrail 5's mold). Pure evaluation (`checkParseResults`,
+`parseGateLanguage`) in `check.ts`; gatherers in `parse_gate.ts`;
+11 unit pins (`npm test` 771 → 782) including the planted run-1 shape
+per language; drill section [6] (`test:selfedit-harness`) plants the
+EXACT preserved run-1 failed-diff shape — the stale docstring tail
+left as dead bytes below a live function body — and observes
+`named_file_unparseable` fire through the real interpreter.
+
+### 5f.2 Candidate selection (by substrate query, the increment mold)
+
+Selection ran as queries over the CURRENT versions of `repo:trellis:*`
+documents (PG `documents`/`document_nodes`/`ast_nodes` joins) plus
+Neo4j entity/edge state — not by reading the working tree. The
+staleness family that produced increment 1 (`content ~* 'slice \(d\)
+will'`) has exactly THREE surviving occurrences:
+
+1. **SELECTED — `src/rlm/trellis_agent.py` (block `2f703511…2514`,
+   `code_function`, 13,656 bytes, the `main()` body):** the
+   research-mode telemetry comment reads "Bookkeeping; slice (d)
+   will constrain citable addresses to the set itself." — written in
+   Session 30, falsified by Session 31, and doubly false in THIS
+   file: eleven lines of the same block earlier, the research path
+   itself constructs `TrellisNeo4j(...,
+   retrieved_addresses_check=get_retrieved_addresses)` — the file
+   carrying the stale "will" claim is the file that wires the live
+   consumer.
+2. **REJECTED — `src/rlm/trellis_tools.py:78`** ("slice (d) will
+   constrain citable addresses to this set on research runs: …"):
+   future-tense residue INSIDE the landed increment-1 diff. That diff
+   is measured evidence (HANDOFF §8: never hand-improved; any change
+   there is a NEW owner-visible edit) — recorded as data, not a
+   target.
+3. **REJECTED — `scripts/test_selfedit_harness.ts:102`**: the
+   rehearsal fixture's deliberately planted stale line ("STALE:
+   slice (d) will constrain this set…") — fixture bytes, not a stale
+   claim; editing it would break the drill.
+
+Broader staleness families were queried and came back EMPTY of
+genuine hits: future-session claims (`a future session|later session
+will|once (row|slice|session)|not yet wired|no (consumer|reader|
+caller)|forward note`), stale count-claims in string literals, and
+executable-string staleness in refusal/teaching/CLI-help text (all
+current — sessions that changed behavior updated their strings). The
+honest consequence for the ladder: the substrate's surviving
+falsifiable staleness is comment-class. Inventing an executable-line
+edit with no graph-derived falsifiable basis would break the
+increment mold (graph-derived staleness IS the point), so the step up
+is taken on the axes the target genuinely offers:
+
+- **Depth:** the target sits ~578 lines into the file, INSIDE the
+  13.7 KB `main()` function body, dense executable neighbors on both
+  sides — exactly the region class where run 1's mis-splice broke the
+  file, now with the parse gate watching mechanically.
+- **Near-duplicate disambiguation:** the file contains TWO telemetry
+  dict constructions each carrying an identical
+  `"retrieved_addresses": get_retrieved_address_count(),` line — the
+  author-mode dict (~line 352, whose comment is NOT stale) and the
+  research-mode dict (~line 579, the target). A `locate` on the
+  shared bytes returns multiple engine-computed addresses; the run
+  must disambiguate by address and surrounding bytes, not by
+  attention.
+- **Task-text discipline (the run-1 lesson):** the verification read
+  must sit in its OWN REPL iteration, with submission only in a LATER
+  iteration after the printed confirmation — run input, never a
+  kernel prompt byte.
+
+### 5f.3 The named failure mode and how it is detected
+
+**Near-duplicate mis-targeting:** the run edits the WRONG one of two
+near-identical sites in the named file. By construction this is
+invisible to the scope check (the edit is in the named file) AND to
+the parse gate (a comment edit at the wrong site still parses) — it
+is the next escape class after increment 1's two. Detection is
+pre-stated and mechanical at review:
+
+1. The diff has exactly ONE hunk, and its `@@` range lies within the
+   research-mode telemetry region (after the research path's
+   `TrellisNeo4j` construction; the author-mode region byte-identical
+   — `git diff -U0` hunk header + a byte comparison of the
+   author-mode comment block).
+2. Every changed content line is a comment line (leading whitespace
+   then `#`) — zero executable-line changes.
+3. The standing checks continue: scope (`out_of_scope_edit` /
+   `named_file_unchanged`), evidence (the Session 31 gate-verified
+   insight), and the NEW parse gate (`named_file_unparseable`).
+
+These review-time checks are recorded criterion items with exact
+commands, not new checker machinery — the session's mechanical
+machinery budget went to the parse gate, and the increment stays a
+single named failure mode.
+
+HONEST SCOPE (§5e.2 carried forward): the checker proves the recorded
+evidence chain, diff scope, and now parseability — not diff semantics
+and not which of two parseable comment edits is the right one; the
+pre-stated hunk-location criterion and the human review carry that.
+
+### 5f.4 The run proposal (owner-approved up front this session; estimate honored regardless)
+
+- **Live evidence verified before the run (the §5e.1 parallel):**
+  block `2f7035116064e95888bd8a89908ffc84a93e2c1ae897e193ad0a1b499fde2514`
+  is a member of the CURRENT version of
+  `repo:trellis:src/rlm/trellis_agent.py`, its stored bytes appear
+  verbatim in the on-disk file (substrate mirrors disk — no pre-run
+  refresh needed for the target), and it contains BOTH the stale
+  comment and the live wiring. The hash is discoverable in-graph: it
+  is `sourceNodeIds` provenance on entity `main`'s ACTION edges
+  (`uses_config_key` → `trellis_edit_root` / `trellis_mcp_servers`).
+  Entities `trellis_agent` and `get_retrieved_address_count` exist,
+  uncontested, zero contested attached ACTION edges (the `--pre`
+  list). Entity `get_retrieved_addresses` (the insight's object) is
+  itself uncontested but deliberately NOT on the `--pre` list: its
+  one attached contested ACTION edge is the Session 36 churn
+  demonstration standing as the recorded audit — the post-run
+  evidence check (entity contested state) still applies. No
+  DERIVED_INSIGHT `trellis_agent` → `get_retrieved_addresses`
+  exists — the run's recorded insight fills a real gap.
+- **Edit root / spawn:** identical mechanics to §5e.4 — the session
+  branch checkout, `trellis_agent.py` spawned directly, research
+  mode, `--max-iterations 12`, `TRELLIS_EDIT_ROOT` +
+  `TRELLIS_CITATION_AUDIT=1` in the run's own environment.
+- **The task text (the run INPUT, verbatim — never a kernel prompt
+  byte; both composed-prompt pins stay unmoved):**
+
+```
+Stage-2 self-edit task (increment 2).
+
+The file src/rlm/trellis_agent.py contains one stale comment written
+before Session 31. The file has TWO telemetry dict constructions that
+each contain a "retrieved_addresses" entry: an author-mode one
+(earlier in the file) and a research-mode one (later in the file, in
+the research path). The stale comment sits ONLY above the
+research-mode entry and ends: "Bookkeeping; slice (d) will constrain
+citable addresses to the set itself." The author-mode telemetry
+comment is NOT stale and must not change.
+
+Verify against the knowledge graph and the stored source bytes what
+actually consumes the retrieved-address set today, then correct ONLY
+the stale research-mode comment.
+
+1. Resolve the graph entities named 'trellis_agent' and 'main'
+   (entity names are lowercase-normalized) with
+   trellis_neo4j.run_cypher; list their ACTION edges and the
+   sourceNodeIds provenance hashes on those edges.
+2. Fetch those provenance blocks with trellis_postgres.get_ast_texts
+   and read them. Confirm from the fetched bytes that this same file
+   wires the live consumer: the research path constructs TrellisNeo4j
+   with retrieved_addresses_check=get_retrieved_addresses, so the
+   write gate _verify_hashes_retrieved consumes the set on research
+   runs. If the fetched blocks do not show the wiring, widen with
+   trellis_postgres.vector_search (for example 'retrieved addresses
+   telemetry count') and fetch what it surfaces.
+3. Edit ONLY src/rlm/trellis_agent.py through trellis_textedit
+   (load, locate, splice, diff, write_back): correct the stale
+   research-mode comment so it says slice (d) is live - this file
+   wires get_retrieved_addresses into the write gate through the
+   retrieved_addresses_check constructor seam on research runs.
+   Keep the edit comment-lines-only; change no executable line;
+   preserve the sentences that are still true (the count-only /
+   never-the-addresses T16 sentence). The string
+   "retrieved_addresses" appears at TWO telemetry sites; use the
+   engine-computed locate addresses and the surrounding bytes to
+   target the research-mode site only. Do NOT touch the author-mode
+   telemetry comment or any other part of the file.
+4. Verify in its OWN iteration: after write_back, in a NEW REPL
+   iteration, re-load or locate the edited region and PRINT it;
+   confirm the stale sentence is gone and the author-mode region is
+   untouched. Do not submit in the same iteration as this
+   verification read.
+5. Only after you have seen the printed confirmation, in a LATER
+   iteration: record exactly one derived insight
+   trellis_neo4j.write_derived_insight(
+     subject='trellis_agent', verb='wires',
+     obj='get_retrieved_addresses',
+     sourceNodeIds=[the hashes of the blocks you fetched that show
+     the wiring]),
+   then submit a short report via trellis_answer.submit describing
+   what the graph said, what the bytes confirmed, and what you
+   changed.
+
+Edit no other file. If the graph or the fetched bytes contradict the
+task premise, stop, make no edit, and report the contradiction
+instead.
+```
+
+- **The pre-scoped edit (semantic acceptance for the diff):** exactly
+  ONE hunk in `src/rlm/trellis_agent.py`, comment lines only, in the
+  research-mode telemetry comment (currently "# Session 30
+  (PROVENANCE_THREADING.md slice b): the size of / # the run's
+  retrieved-address set — a count only, never the / # addresses
+  (T16). Bookkeeping; slice (d) will constrain / # citable addresses
+  to the set itself."). The correction keeps the count-only/T16
+  sentence and replaces the stale tail with the live fact — slice (d)
+  landed (Session 31); this file wires `get_retrieved_addresses` into
+  the write gate via the `retrieved_addresses_check` constructor seam
+  on research runs. Exact wording is the run's; the human review
+  judges it against the fetched bytes. The executable line below the
+  comment and the author-mode twin region are byte-identical.
+- **Estimate:** the increment-1 basis (W2 complexity + a gated
+  write): **$0.15–$0.45 for one run; one contingency re-run after a
+  diagnosed clean failure at most — ≤$0.90 total**, under the ≤$5/run
+  cap. Actuals recorded in the roadmap regardless of outcome.
+- **Acceptance criterion (pre-stated; also in the roadmap entry):**
+  (1) scope AND site: exactly the named file changed; exactly ONE
+  hunk, located in the research-mode telemetry region; every changed
+  content line a comment line; the author-mode region byte-identical;
+  (2) the pre-scoped edit lands only after human `git diff` review;
+  (3) `stage2:check` reports ZERO findings INCLUDING the parse gate;
+  (4) counts and the diff and dollars reported TOGETHER — db tool
+  calls, retrieval-discipline counts, textedit ops, `answer_submits`,
+  actual dollars vs the estimate; (5) a harness flag means the
+  increment FAILED — record it and stop, no silent retry.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).
