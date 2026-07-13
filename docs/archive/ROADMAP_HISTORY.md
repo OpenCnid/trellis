@@ -5120,3 +5120,165 @@ measurement itself; no prompt byte; both composed-prompt pins unmoved.
    after the metrics read; zero node/tsx consumers verified. This
    session's own PR is docs + committed-drill-artifact only — it
    owes no further refresh.
+
+### July 13, 2026 — Session 44: row-11 increment-3 target search — NO real executable-class target survived scrutiny (recorded finding); the §2 menu taken: the judge-calibration measurement RAN ($0.0367)
+
+The recorded shape (Session 41's delegated ladder decision) requires
+a REAL target surfaced by substrate query, never manufactured. The
+search was executed and is recorded in full; nothing survived; per
+the standing instruction the session took the menu and produced the
+data the judge-calibration decision was waiting on. Session paid
+total **$0.0367** (the measurement) + ~$0.000003 (8 target-search
+embedding calls). NO machinery footprint: zero code bytes moved,
+docs + the committed drill artifact only, both composed-prompt pins
+unmoved, no refresh owed (nothing in extraction scope changed).
+
+1. **Pre-flight (the Session 43 trio, verified before anything
+   else).** Egress probe `curl … /v1/models` → 401 (reachable,
+   nothing spent); `OPENAI_API_KEY` present; the durable dev PG live
+   (snapshots `trellis#11`/`#10` current; 1,427 documents, 313
+   `repo:trellis:*` doc keys; 11,084 `ast_nodes`). `npm ci`;
+   `npm test` 837/85 first try; build + python:check green. All
+   three standing DERIVED_INSIGHT beliefs read `contested: FALSE`
+   with live provenance (the `wires` evidence block
+   `9b4c3159…6a730` retained).
+
+2. **The target search (the §3 finding duty — every query family
+   and every rejection recorded).** All queries ran against LIVE
+   blocks only (current-version membership, the `search_ast_nodes`
+   EXISTS join mirrored in SQL) plus the graph:
+   1. Defect markers (`TODO|FIXME|XXX|HACK`) over live extraction
+      scope: **zero hits**.
+   2. Hardcoded `spawn('python')` (the Session 42 class): **zero** —
+      the class is fully closed.
+   3. Hardcoded absolute paths / drive letters: **zero**.
+   4. Python defect patterns (mutable default args, silent
+      `except: pass`, `== None`): one candidate —
+      `trellis_mcp.py` `call_tool(... arguments: dict = None)`
+      annotation/default mismatch. REJECTED: no behavior defect
+      (style dressed as defect).
+   5. Staleness vocabulary (deprecated/obsolete/workaround/"no
+      longer"): 3 hits, all informational comments about EXTERNAL
+      deprecations (Neo4j `id()`, the MCP HTTP+SSE transport).
+      REJECTED.
+   6. `TRELLIS_*` env-var census over live blocks: 33 names, all
+      live surfaces; no stale reference.
+   7. Telemetry counter-name census (producer, fallback dict,
+      drills): the five counters consistent at every site.
+   8. Duplicate function definitions across `src/rlm`: only
+      `__init__`/`close` (ordinary methods). Nothing.
+   9. Churn map (`MAX(version)` per doc): directed block-level
+      reading of the top of the list — `trellis_agent.py` v4
+      telemetry block (fallback dict five-key consistent),
+      `trellis_textedit.py` v3 guarded family read block-by-block
+      (`_verify_anchor_lines`, `_stage_window`, `replace_lines`,
+      `insert_lines`, `delete_lines`, `diff`): no defect found.
+   10. sha256-regex site survey (12 sites): all deliberate mirrors,
+       no drift.
+   11. `time.time()` sites: drill timing prints only.
+   12. Graph ACTION-claim sample over kernel-surface entities
+       (40 edges): claims consistent with current blocks.
+   13. PYTHONPATH / interpreter portability audit: all 28 sites use
+       the house `config.python.*` pattern.
+   14. The §1 "all seven queues" gauge claim vs `metrics_server.ts`:
+       all seven wired.
+   15. Semantic defect-smell probe through the live
+       `search_ast_nodes` seam (8 queries, bare `TrellisPostgres`
+       construction, ≈$0.000003): topical matches only; one
+       marginal candidate (`mutate_oolong_dataset.ts` `parseInt`
+       NaN on a malformed `--seed`) REJECTED as an operator-CLI
+       robustness nit, not a falsifiable defect.
+   16. Cross-file sync claims ("must mirror"/"twin"/"keep in
+       sync"), each verified mechanically: textedit bounds mirror
+       HOLDS (4 MiB/32 MiB/16/64 both sides); workspace bounds
+       mirror HOLDS (128/1024/4 MiB/32 MiB);
+       `_is_private_mcp_host` vs `isPrivateMcpHost` — a REAL
+       textual divergence found (Python `strip("[]")` strips
+       unbounded from both ends; TS strips one anchored pair) but
+       UNREACHABLE: both validators parse the URL first and both
+       parsers reject the malformed-bracket forms that could
+       diverge. REJECTED — no reachable input falsifies the twin
+       claim.
+   17. Cardinality claims ("three/five counters", "seven queues"):
+       consistent everywhere.
+   18. Dead TS exports (defined, exported, referenced by no other
+       live document): 10 candidates; ground-truth grep confirmed
+       ALL are definition + in-file use — the `export` keyword is
+       superfluous, the code is live. REJECTED (style).
+   19. Same analysis over `src/rlm` Python defs: all in-file used.
+       REJECTED.
+   20. Pricing constants vs the recorded gpt-5.4 rates: match
+       ($2.50/M in, $10/M out).
+   21. `trellis_agent.py` research-construction wiring vs its own
+       comment claims: verified line-for-line.
+   22. The three standing beliefs re-verified by Cypher: uncontested,
+       live-cited.
+   One further candidate surfaced DURING the menu measurement (item
+   3 below) and was REJECTED after investigation — see the
+   `PROVENANCE_THREADING.md` §10.2 incident record: the suspected
+   `process.exit(0)` stdout truncation in
+   `scripts/entailment_sweep.ts` was falsified (exact-count
+   verification, 359 = 359; the session's own `tee | head` capture
+   pipeline caused the observed loss). The CLI is exonerated;
+   changing it has no demonstrated failure to stand on. **Verdict:
+   no genuine executable-class stale-code/defect item exists in the
+   extraction scope today that a bounded self-edit could fix. Row 11
+   stays OPEN; the guarded-only criterion stands ready for the first
+   real target.**
+
+3. **The menu item executed: the judge-calibration measurement
+   (owner-approved plan and spend up front; menu item 2's data via
+   the existing detector, machinery byte-unchanged).** Pre-stated
+   document-first in `PROVENANCE_THREADING.md` §10.1 (question,
+   selection, estimate — with the dry-run echo), then run exactly as
+   stated: `entailment_sweep.ts --prefix q_ --rate 0.2 --budget 100
+   --seed 44 --sync` over the OOLONG-era `q_*` pool (268 edges / 528
+   unchecked pairs; 106 sampled, 100 judged, 6 deferred, 0 skipped).
+   **Verdicts: 12 supported / 88 flagged; 83 edges contested**
+   (ordinary belief machinery, audit preserved, lazy recovery — the
+   July 13 first-sweep residue class). Class split (graph-recovered,
+   `contestedAt`-windowed): `has_category` 73 flagged / 74 judged
+   (98.6%); `mentions` 15 flagged / 26 judged (57.7%). Usage 8,695
+   input / 1,500 output tokens = **$0.0367 actual** vs the $0.037
+   estimate. The measured answer for the owner: the strict judge is
+   consistent, and the strictness is class-shaped in degree —
+   derived-classification `has_category` claims flag near-uniformly
+   (the label is never in the block text), `mentions` claims flag
+   per-pair where the specific cited block lacks the mention (the
+   "weak heading-block citation" class at scale). The remaining
+   unchecked `q_` pool after this run: 356 pairs. The calibration
+   DECISION stays the owner's; both options and their costs are
+   recorded in §10.2. Rates are per this seeded 100-pair sample —
+   reported with the claim (guardrail 8).
+
+4. **Honesty record (guardrail 8, the §10.2 incident).** The first
+   diagnosis of the missing FLAGGED lines blamed the CLI and even
+   produced a plausible-looking "reproduction" (359 lines vs an
+   EXPECTED 431); the expectation was then falsified — contesting 83
+   edges removes their unchecked sibling pairs from the pool, the
+   post-run pool header reads 356, and 3 + 356 = exactly the 359
+   lines delivered, piped and file-redirected alike. The initial
+   §10.2 incident paragraph was rewritten to the corrected story the
+   same hour, before commit. The lesson joins the Session 42/43
+   operational notes: never measure a long-output CLI through
+   `tee | head` — head's early exit kills tee mid-stream and
+   manufactures a truncation.
+
+5. **Close-out (all green on the owner's Windows machine against the
+   durable dev PG, post-measurement).** `npm test` 837/85; build;
+   python:check; `docker compose --profile test config --quiet`; the
+   isolated Compose integration as project `trellis_s44_ci` (all
+   assertions PASS incl. the containerized MCP fixture and the
+   in-container polars import; torn down `--volumes`); ALL 18
+   standing drills green in one sequential chain; `drill:scale`
+   ALONE read 1.04x CLOSED (below the recorded band) then, per the
+   guardrail-8 re-run, 1.54x CLOSED in-band — max provenance 286
+   both; the committed `scale_drill_results.json` carries the 1.54x
+   run; `git diff --check` clean.
+
+6. **Bookkeeping.** Session 39 compressed to the HANDOFF digest; its
+   §5 entry moved verbatim to `docs/archive/ROADMAP_HISTORY.md`
+   (window now 40–44). This PR is docs + the committed drill
+   artifact only (two architecture-record sections, this entry, the
+   row-11 cell, the regenerated HANDOFF): no refresh owed, no code
+   byte, no prompt byte.
