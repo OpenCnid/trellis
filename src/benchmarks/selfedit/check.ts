@@ -23,7 +23,8 @@ export type SelfEditFindingCode =
   | 'unbridged_evidence'
   | 'target_entity_missing'
   | 'contested_target'
-  | 'doc_missing';
+  | 'doc_missing'
+  | 'named_file_unparseable';
 
 export interface SelfEditFinding {
   code: SelfEditFindingCode;
@@ -164,9 +165,52 @@ export function checkEvidence(evidence: SelfEditRunEvidence): SelfEditFinding[] 
   return findings;
 }
 
-/** The full post-run evaluation: scope + evidence. */
+/** The full post-run evaluation: scope + evidence. The parse gate
+ *  (Session 37) composes ADDITIVELY beside this in the CLI — this
+ *  function's contract and the Session 35 pins over it are unchanged. */
 export function evaluateSelfEditRun(evidence: SelfEditRunEvidence): SelfEditFinding[] {
   return [...checkEditScope(evidence.changedPaths, evidence.namedFiles), ...checkEvidence(evidence)];
+}
+
+// --- The parse gate (Session 37, §5f) --------------------------------
+// Post-run mechanical check: a self-edit that leaves a named file
+// unparseable is a typed finding, not a human catch (the Session 36
+// run-1 escape). Pure evaluation here; the file reads and interpreter
+// spawn live in parse_gate.ts.
+
+export type ParseGateLanguage = 'python' | 'typescript';
+
+export interface FileParseResult {
+  file: string;
+  /** null = no parser wired for this extension; never a finding. */
+  language: ParseGateLanguage | null;
+  parseable: boolean;
+  /** Bounded one-line parse error when !parseable. */
+  error?: string;
+}
+
+/** Extension -> parser mapping. Exactly .py and .ts/.js this edition;
+ *  anything else is honestly unchecked (language null). */
+export function parseGateLanguage(file: string): ParseGateLanguage | null {
+  const lower = file.toLowerCase();
+  if (lower.endsWith('.py')) return 'python';
+  if (lower.endsWith('.ts') || lower.endsWith('.js')) return 'typescript';
+  return null;
+}
+
+/** A named file with a wired parser that does not parse is a finding;
+ *  unwired extensions never flag (the gate reports what it checked). */
+export function checkParseResults(results: FileParseResult[]): SelfEditFinding[] {
+  const findings: SelfEditFinding[] = [];
+  for (const r of results) {
+    if (r.language !== null && !r.parseable) {
+      findings.push({
+        code: 'named_file_unparseable',
+        detail: `named file does not parse (${r.language}): ${r.file} — ${r.error ?? 'no parser detail'}`,
+      });
+    }
+  }
+  return findings;
 }
 
 /**

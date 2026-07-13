@@ -3696,3 +3696,162 @@ verdict, the gate, the pins). No paid spend.
    propose-with-estimate + the slice (f) verify-and-strike, then row
    10) with Session 26 and its same-day follow-on compressed into the
    digest.
+
+### July 12, 2026 — Session 32: mechanical provenance threading FINISHES — the slice (e) sampled-entailment detector + the slice (f) compat verify-and-strike (§4 row 9 closed)
+
+Row 9's remainder, all machinery zero-paid, four commits (the drill
+repair, the detector, the pins, the docs). No paid spend; the first
+real judged sweep stands PROPOSED owner-gated (item 3).
+
+0. **Pre-existing defect found and fixed FIRST (its own commit).**
+   `test:verification-sweep` had been broken since the Session 14
+   format enforcement landed (July 7): the drill seeded beliefs whose
+   `sourceNodeIds` were token-scoped strings
+   (`test-verify-<ts>-hash-qa`), which `_normalize_fact` refuses
+   (`^[0-9a-f]{64}$`). The drill was absent from every close-out block
+   since, so the breakage went unobserved — found by this session's
+   first run into its own target area. Fix: provenance hashes are now
+   sha256 digests of the token-scoped names (real 64-hex, unique per
+   run, token-scoped teardown unchanged). All 35 pre-existing checks
+   pass again. The drill joins the standing close-out block from this
+   session on (the HANDOFF §6 instruction), so it cannot silently rot
+   again.
+1. **Slice (e) — the sampled entailment detector**
+   (`src/core/graph/entailment_detection.ts`, the verification-sweep
+   mold; the finalized design decisions recorded in
+   `PROVENANCE_THREADING.md` §9 amending §5.4, per §4's
+   decide-and-record-before-code instruction). The T2 residual tier: a
+   post-hoc DETECTOR over persisted DERIVED_INSIGHT (edge, cited-hash)
+   pairs — never a write gate, never a delete. The candidate pool is
+   every non-contested DERIVED_INSIGHT edge with provenance (uniform
+   class, `has_category` included — the verification sweep asks a
+   different question of the same edges); the pure sampler expands
+   unchecked pairs (cited minus judged, deduped), samples each at the
+   operator-visible rate, and hard-caps selection at the judge budget
+   with the overflow counted as `deferred`, never silently dropped
+   (seeded `mulberry32` RNG for deterministic drills). Each pair is
+   judged AT MOST ONCE, ever: a supported verdict appends the hash to
+   the edge's additive `entailmentCheckedHashes`
+   (+ `entailmentCheckedAt`); an unsupported verdict contests the edge
+   through the ordinary Phase 4/5 transition with the typed reason
+   `unsupported_citation` and appends the hash to the durable
+   `unsupportedHashes` audit (+ `entailmentFlaggedAt`). Provenance
+   fields are never mutated; recovery is re-derivation; a recovered
+   edge never flaps back into contest over an already-judged pair (the
+   `unsupportedHashes` record carries the finding for the human gate).
+   The judge is one bounded completion per sampled pair through
+   `parseLlmResponse` (`EntailmentResponseSchema`, the
+   `make_entailment_check` prompt shape — the semantic reference; the
+   `TRELLIS_CITATION_*` env flags untouched), with judge-all-then-write
+   atomicity: every verdict is collected before any write, so an
+   infrastructure failure aborts with ZERO partial state. Oracle mode
+   (`makeOracleEntailmentJudge`, a pair-key -> verdict map) drills the
+   whole path zero-LLM. Config twins `ENTAILMENT_SAMPLE_RATE` (0.1,
+   the record's strawman) and `ENTAILMENT_JUDGE_BUDGET_PER_SWEEP`
+   (25, max 500). Transport: the `entailment_sweep` job name on the
+   existing `verification_queue`/worker — every other job name
+   processes byte-identically; counts-only metric
+   `trellis_entailment_pairs_total{result}` (T16: hashes never in
+   labels or pino log content; the operator CLI prints them, the
+   `promote` precedent). Scheduler `scripts/entailment_sweep.ts`
+   (`npm run entailment:sweep`: `--rate`, `--budget`, `--seed`,
+   `--prefix`, `--oracle`, `--sync`, `--dry-run`).
+2. **Slice (e) pins.** Unit level (`entailment_detection.test.ts`, 10
+   tests, `npm test` 730 → 740): pair expansion/dedup, the
+   judged-at-most-once pool definition (a checked pair is never
+   re-selected; a NEW hash on a re-derived edge is), per-edge pair
+   identity, seeded determinism, rate-0 counting, the budget cap with
+   deferred overflow, the pair key, oracle verdict/decline semantics.
+   Drill level (`test:verification-sweep` sections [7]–[9], 35 → 66
+   checks, all green on FIRST run): a planted unsupported citation
+   (real ingested bytes, wrong claim — invisible to the existence and
+   retrieval layers by construction) is flagged with the typed reason,
+   the unsupported hash recorded, `sourceNodeIds` and the orphan
+   ledger untouched, the supported pair on the SAME edge still
+   stamped; contested edges and checked pairs leave the pool; recovery
+   composes with the slice (d) gate (an unretrieved re-derivation is
+   refused "Provenance Violation", a retrieval-gated one recovers the
+   edge, the audit survives recovery, no contest flap); a judge
+   infrastructure failure raises and contests NOTHING; the budget
+   defers loudly; dead-byte pairs are skipped and counted; the
+   entailment job name round-trips through the real worker over
+   Redis/BullMQ (the worker/queue now close at the END of the drill so
+   section [9] shares section [6]'s worker).
+3. **The measured sweep — RAN July 13, 2026, owner-approved (the
+   standing proposal executed the next day; proposal record: dev-graph
+   dry-run read 283 non-contested DERIVED_INSIGHT edges / 566 unchecked
+   pairs, default policy = 25 judge calls, estimate ≈ $0.02–$0.05).**
+   Selection reproduced the recorded dry-run
+   (`npm run entailment:sweep -- --sync --seed 32`): 60 sampled, 25
+   within budget (35 deferred). Judged 25/25 — 8 supported, 17
+   flagged, 15 edges contested; zero skips, zero judge failures,
+   whole-batch atomicity held. ACTUALS: 2,176 input + 375 output
+   tokens = $0.0093 (vs the $0.02–$0.05 estimate; the sync CLI now
+   prints usage tokens — patched in this PR). Every flagged block was
+   then verified against its stored bytes; the 17 flags decompose
+   into two classes: **(i) 9 CONFIRMED weak citations** — the cited
+   block is a HEADING whose entire text is the question id (e.g.
+   bytes "q_0034" cited as provenance for `q_0034 mentions cairo`):
+   real ingested bytes that do not support the claim, invisible to
+   the format/existence/retrieval layers BY CONSTRUCTION — exactly
+   the wrong-block class the detector was built to surface (the
+   OOLONG-era extraction attributed facts to heading blocks alongside
+   body blocks); **(ii) 8 strict-judge verdicts on
+   derived-classification claims** — question-body paragraphs flagged
+   for `has_category` (e.g. "What does HTTP stand for?" vs
+   `has_category abbr`): the text supports the classification
+   semantically but does not STATE it, and the judge (the recorded
+   `make_entailment_check` prompt shape) reads "state or directly
+   support" strictly. Recorded as a calibration observation for a
+   future owner-picked decision (a classification-aware judge
+   variant vs accepting conservative contests — recovery is one
+   re-derivation either way); the judge prompt shape is NOT changed
+   now. The 15 contested edges are OOLONG-era cache rows on the dev
+   graph — standard lazy-recovery residue (a re-derivation citing the
+   body block recovers each). No machinery defect: every behavior
+   matched the section [7]–[9] pins.
+4. **Slice (f) — compat VERIFIED against the code, no gap, row 9
+   struck.** Every §5.3/§5.5 claim checked (the Session 27
+   verify-first standard): **(i)** the (d) gate is write-time only —
+   `_verify_hashes_retrieved` has exactly one caller
+   (`_run_insight_writes`, `trellis_tools.py:396`); no sweep,
+   migration, or read path references it; existing insight rows are
+   never re-checked (the detector's stamps are additive audit
+   properties, not migrations). **(ii)** Envelopes additive only —
+   `TRELLIS_RESULT` is exactly `{status, answer, toolCalls}`
+   (`trellis_agent.py:582–594`, no slice-(d) field);
+   `TRELLIS_TELEMETRY` gained only slice (b)'s counts-only
+   `retrieved_addresses` (both research and author payloads); a gate
+   refusal is a raised ValueError the run recovers from in-REPL.
+   **(iii)** No pre-threading writer class — the only gated
+   construction is the agent's research-run wiring
+   (`trellis_agent.py:413–417`); every other `TrellisNeo4j(`
+   construction site (drills, probes, operator scripts, the poison
+   drill runner) is bare/existence-only BY DESIGN under the injection
+   mold, not a compat class; the TypeScript extraction door
+   (`mergeWithAstLivenessFence`) is out of scope per the record §7.
+   Nothing needed correcting in the record, so its §9 carries only the
+   slice (e) decisions entry.
+5. **Acceptance (all green, July 12, 2026).** `npm test` 740 passing /
+   80 files (was 730/79), `npm run build`, `npm run python:check`,
+   `docker compose --profile test config --quiet`. Live zero-paid:
+   `test:answer-channel` 32, `test:textedit` 105 (Windows host),
+   `test:module-lifecycle` 60, `test:modules` green (pins unmoved),
+   `test:promotion` 41, `test:rlm-workspace` 106, `test:rlm-mcp` 86,
+   `test:rlm-sandbox` 53, `test:verification-sweep` 66 (was 35 — and
+   was BROKEN at session start, item 0), `test:agent-loop` 35 (ALL
+   CHECKS PASSED), `test:a2a` 46 (ALL CHECKS PASSED),
+   `test:repo-ingest` 56, `test:benchmark-hardening` 24,
+   `test:entity-resolution` 34, `test:api-hardening` 18,
+   `test:belief-recovery` 30, `test:invalidation-sweep` 17.
+   `drill:scale` run ALONE: 2.04x CLOSED (in-band ~1.48x–2.26x, first
+   try; max provenance 286; results file committed per house
+   practice). Isolated Compose integration as project `trellis_s32_ci`:
+   11/11 PASS (`package.json` changed — the npm ci layer rebuilt as
+   expected; the pip layer stayed cached). `git diff --check` clean.
+6. **Documentation window (owner rule).** The Session 27 §5 entry
+   moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the live
+   ledger keeps the most recent five sessions: 28–32); HANDOFF
+   regenerated for row 10 (kernel-level retrieval dedup + budgets —
+   the owner-approved step 3 of 4) with Session 27 compressed into the
+   digest.

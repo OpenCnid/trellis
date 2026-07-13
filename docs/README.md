@@ -62,6 +62,12 @@ system-level framing is the root `README.md`.
   retrieval budget at the three Tier-1 retrieval surfaces — the
   code-mediated-text pillar applied to retrieval spend, closing the
   failure class the retired module #2 nudged.
+- **[`STRUCTURAL_CHUNKING.md`](architecture/STRUCTURAL_CHUNKING.md)**
+  — the code-substrate granularity upgrade (roadmap §4 row 12,
+  CANDIDATE, owner-gated, nothing implemented): cAST-style
+  size-budgeted syntax-aligned chunking over a generic tree seam,
+  `web-tree-sitter` as the scaling engine, typed gap blocks as
+  extraction-spend control; five-part pilot criterion pre-stated.
 - **[`MATHEMATICAL_FOUNDATIONS.md`](architecture/MATHEMATICAL_FOUNDATIONS.md)**
   — the timeless substrate math: Merkle trees, content addressing, and
   why cryptographic identity solves the Shift Problem that positional
