@@ -236,6 +236,10 @@ retuning of the budget until a recorded owner decision).
   `repo:ingest --chunking-policy` with the snapshot-summary stamp;
   policy 1 byte-identity pinned. Shadow measured, pilot executed —
   the numbers are §10.
+- July 13, 2026 (Session 40) — the §10.3 item-3 root cause closed at
+  the schema seam: the `search_ast_nodes` liveness filter, designed
+  in §11 (record written before implementation) and measured in
+  §11.4.
 
 ## 10. Measured record (Session 38, July 13, 2026)
 
@@ -389,3 +393,101 @@ record.
   make this safe by construction.
 - Nothing defaults to policy 2 anywhere; `--chunking-policy` is
   operator-explicit per run.
+
+## 11. The `search_ast_nodes` liveness filter (design record — Session 40, July 13, 2026)
+
+Written BEFORE implementation (the row-9/10/12 document-first mold).
+This closes §10.3 finding (a): dead-block embedding pollution. The
+change is migration-grade under guardrail 9's byte-identity rule — it
+CHANGES what the agent-visible vector-search tool returns — so it
+enters through this record, a pre-stated criterion, a zero-paid
+drill, and a recorded before/after measurement.
+
+### 11.1 The measured problem (restated from §10.3)
+
+`search_ast_nodes` (`src/config/schema.ts`, the T15 seam — the single
+schema-level SQL function both `trellis_postgres.vector_search` and
+`POST /retrieve` call) orders ALL embedded `ast_nodes` rows by cosine
+distance with no liveness condition. Superseded blocks keep their
+embeddings forever; every re-ingest adds dead near-twins of the same
+bytes that outrank the live re-chunks. Measured on the dev substrate
+at this record's writing (July 13, 2026, after the Session 39
+refresh): 1,731 embedded rows, of which **286 are dead** — embedded
+but a member of no document's current version. The Session 38 pilot's
+criterion item 3 failed on exactly this: raw seam queries 5/8 → 4/8
+while the live-only diagnostic read 5/8 → 5/8 with the headline case
+fixed. Left unfixed, pollution compounds with the adopted per-PR
+refresh cadence.
+
+### 11.2 The design decisions
+
+1. **Liveness = current-version membership.** A node is live iff it
+   is a `document_nodes` member of a `root_hash` that is the CURRENT
+   (max-version) root of at least one document — exactly the bridge
+   semantics the stage-2 checker already uses
+   (`gatherHashEvidence`'s max-version join in
+   `scripts/stage2_selfedit_check.ts`). Consequences that fall out
+   correctly: tombstones compose (a tombstoned doc's current version
+   is the empty root, so its blocks drop out); the durable corpora
+   are unaffected (their blocks are current-version members); a block
+   shared by several documents is live if ANY of them currently
+   carries it; superseded history stays queryable by hash — the
+   filter touches ONLY vector search, never `fetch_texts`,
+   `get_ast_texts`, `get_ast_blocks`, or `ast_hashes_exist`.
+2. **The filter lives INSIDE `search_ast_nodes`.** One
+   `CREATE OR REPLACE FUNCTION` in `POSTGRES_SCHEMA_SQL`, signature
+   unchanged (`query_embedding vector(1536)`, `match_count INTEGER
+   DEFAULT 3` → `TABLE (id VARCHAR, content TEXT)`). Both callers
+   change zero bytes; the idempotent bootstrap upgrades every stack
+   on boot (no migration script); reversal is one
+   `CREATE OR REPLACE` back to the §10.3-era body.
+3. **The filter applies BEFORE `LIMIT`** (`WHERE a.embedding IS NOT
+   NULL AND EXISTS (current-version membership)`), so `match_count`
+   fills from live rows. Honest residual, recorded not denied: the
+   HNSW index scan is approximate — under a filter, pgvector (0.8.3
+   on the dev stack; iterative scan OFF by default) can exhaust its
+   candidate set before `match_count` live rows are found, returning
+   fewer rows than requested. The declarative SQL is exact when the
+   planner chooses a non-index plan; whichever plan the dev stack
+   picks, the observed row counts and timings are PRINTED in the
+   measurement, never asserted. No planner GUC is set in the
+   function (a `SET hnsw.iterative_scan` qualifier would break
+   older pgvector installs at call time).
+4. **The unchosen alternative stays unchosen:** the
+   superseded-embedding SWEEP (deleting embeddings on dead rows) is
+   destructive, re-buys embeddings on recovery, and remains on the
+   standing owner menu.
+
+### 11.3 Pre-stated acceptance criterion
+
+1. **Planted-dead-twin drill (zero-paid):** in the repo-ingest drill
+   (which owns snapshot lifecycle), ingest a document v1 and give its
+   block a synthetic deterministic embedding equal to the drill's
+   query vector; supersede with v2 whose re-hashed block gets a
+   slightly perturbed embedding. The RAW nearest-embedded-row query
+   must rank the dead v1 block first (proving the twin would win
+   without the filter); `search_ast_nodes` must return the live v2
+   block and NOT the dead v1 block. Tombstone the document;
+   `search_ast_nodes` must return neither.
+2. **The eight PINNED seam queries** re-run once through the raw tool
+   (`scripts/chunking_seam_queries.ts`, queries never tuned) read
+   **≥ 5/8 top-3** — the Session 38 live-only diagnostic value. The
+   before-numbers are §10.3's after-numbers (4/8 raw); the two tables
+   are recorded together in §11.4.
+3. **Every other retrieval surface's first fetch stays
+   byte-identical:** `get_ast_texts`, `get_ast_blocks`,
+   `fetch_texts`, `ast_hashes_exist`, and the dedup/budget refusal
+   bytes untouched — pinned by the existing `test:rlm-sandbox`
+   [5]/[6]/[7] sections staying green with zero byte changed in
+   `trellis_tools.py`.
+4. **Paid spend ≈ 8 query embeddings** (text-embedding-3-small, well
+   under a cent), stated before the re-measure runs; actuals
+   recorded.
+5. **A genuine regression, if observed, is NAMED, not chased.** The
+   §10.3 `trellis_blocks.py` merge-dilution case is a merge-density
+   property, not pollution — it may persist; the chunker is not
+   retuned for it (guardrail 8).
+
+### 11.4 Measured record
+
+(To be filled after implementation and the re-measure.)
