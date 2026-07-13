@@ -1934,6 +1934,295 @@ make no edit, and report the contradiction instead.
   content-correct; a retry re-authors it under the fixed evidence
   discipline rather than resurrecting bytes from a failed run.
 
+### 5h.9 The retry proposal (staged same day, owner-directed; the run itself is Session 49's owner-approved decision)
+
+Staged after the verdict under the §0 step-5 rule: the owner
+directed drafting task text v3 NOW so the next session presents a
+ready proposal. v3 was authored under the house prompt-engineering
+and hypershot protocols (the July 12, 2026 kernel-prompt precedent,
+applied to a task text for the first time): semantic tags to stop
+context bleeding between the spec and the protocols, the two
+decisive rules placed in attention zones at the head AND tail
+(run 2's violated citation rule had been buried mid-step-3 prose),
+positive instruction framing, and hypershot frames for every shape
+the run must generate (the one free variable in the insight call is
+instruction-bearing; no concrete filler content that could
+contaminate the run's output — invariant tokens like tool names,
+entity names, the spec bounds, and the exact guard message stay
+concrete by the invariance test: they are the task's vocabulary,
+identical across any run of this increment).
+
+**Design decisions resolved here (closing §5h.8's open point):**
+
+- **The `--pre` gate keeps the two clean entities**
+  (`resolvemcpcredentialenv`, `mcpcredentialenv` — the insight
+  object's neighborhood) while the task's evidence chain queries
+  `trellis_retrieval_budget_per_run` with an explicit
+  uncontested-edges-only filter in the Cypher. Reasoning: the
+  pre-gate contract refuses edits premised on quarantined beliefs;
+  the premise rides the UNCONTESTED `uses_config_key` edge, and the
+  one contested edge on that entity (`reads_config`, churn residue,
+  named in §5h.3) is filtered in-query and never consulted. Both
+  contested edges stay recorded in §5h.3 for the owner's review; no
+  residue recovery is proposed (lazy recovery stands).
+- **The evidence chain, re-verified live this session (read-only):**
+  `trellis_retrieval_budget_per_run` `-uses_config_key-` `config`
+  reads uncontested with `sourceNodeIds` = [`fc17205c…6311`], and
+  that block carries BOTH molds (the budget line in the export and
+  the fail-fast comment + `resolveMcpCredentialEnv` call — §5h.3's
+  probe), so it alone grounds the insight and bridges to the named
+  file. `vector_search` is demoted to a bounded fallback (at most
+  two calls, each its own cell).
+- **Escalation rule (recorded now, so a recurrence is not
+  re-litigated):** if the retry fails on the SAME evidence class,
+  the next step is TOOLING SHAPE per the owner doctrine — a
+  harness-side, read-only "citability" query (retrieval-set
+  membership ∧ named-file bridge, the `gatherHashEvidence` join
+  exposed to the run), proposed owner-gated as its own increment;
+  never a write gate (the Session 35 invariant stands).
+- **Estimate: $0.9–$1.3 for ONE run** (the §5h.8 re-based class);
+  NO pre-bundled contingency — a second run, if ever, is its own
+  owner decision, and a second T1 failure puts the three-failure
+  question to the owner (the §5g.3 stopping rule). The criterion is
+  §5h.6's, unchanged, with "spend within estimate" judged against
+  THIS estimate.
+
+**Task text v3 (the run INPUT, verbatim — no kernel prompt byte;
+both composed-prompt pins unmoved):**
+
+```
+Stage-2 self-edit task (feature-class increment T1 retry: the
+backend config surface).
+
+<mission>
+Implement a new validated configuration surface in
+src/config/index.ts and author its unit pins in
+src/config/rlm_backend.test.ts. The specification inside
+<specification> is quoted from docs/architecture/MODEL_BACKEND_SEAM.md
+(its section 3 and section 4 layer 1); this task text is the spec
+channel - follow it exactly.
+</mission>
+
+<hard_rules>
+*** CRITICAL - read these four rules first; re-read them before the
+completion protocol. A violation fails the increment. ***
+1. CITABILITY. The one derived insight you will record may cite
+   ONLY hashes that satisfy BOTH conditions: (a) you retrieved the
+   hash THIS RUN through trellis_postgres.get_ast_texts or
+   trellis_postgres.vector_search, and (b) the retrieved text for
+   that hash appears verbatim inside src/config/index.ts. Bytes
+   visible in a trellis_textedit frame do not make a hash citable -
+   only retrieval does.
+2. STOP RULE. If you reach the completion protocol and NO hash
+   satisfies rule 1, record NO insight: revert every staged edit
+   with trellis_textedit.revert, and submit a report describing the
+   situation via trellis_answer.submit. Citing a related block from
+   another file is a violation, never a fallback.
+3. ONE RETRIEVAL CALL PER CELL. Place every
+   trellis_postgres.get_ast_texts and every
+   trellis_postgres.vector_search call in its OWN REPL cell with
+   nothing after it in that cell. A typed "Retrieval Discipline"
+   refusal is a raised exception - it kills everything later in the
+   same cell. If a refusal says a hash was already retrieved, reuse
+   the variable holding the earlier result; re-fetch nothing.
+4. GUARDED EDITS ONLY. Edit files only through
+   trellis_textedit.replace_lines / insert_lines / delete_lines.
+   The increment fails if textedit_raw_splices is nonzero.
+</hard_rules>
+
+<specification>
+Part 1 - four new OPTIONAL environment keys in EnvSchema:
+- TRELLIS_RLM_BACKEND: z.enum(['openai', 'vllm']).optional()
+- TRELLIS_RLM_MODEL: z.string().min(1).max(256).optional()
+- TRELLIS_RLM_BASE_URL: z.url().optional(), plus a refinement
+  requiring the URL scheme to be http: or https:
+- TRELLIS_RLM_API_KEY_ENV: z.string().min(1).max(128).optional()
+Each key gets a comment block in the file's house style naming
+MODEL_BACKEND_SEAM.md as the design record and stating that no
+consumer reads these values yet (T2/T3 wire them).
+
+Part 2 - imperative fail-fast checks after the schema parse (the
+existing editRoot / mcpCredentialEnv precedent in the same file),
+each throwing a plain Error whose message names every key involved:
+1. If OPENAI_BASE_URL is present in process.env (any value,
+   including empty), throw with EXACTLY this single-line message:
+   Backend config: OPENAI_BASE_URL is not honored; set
+   TRELLIS_RLM_BASE_URL (root agent) — worker transport is not yet
+   configurable.
+   (the dash between "(root agent)" and "worker" is an em dash,
+   exactly as written above)
+2. TRELLIS_RLM_BACKEND set to 'vllm' with TRELLIS_RLM_BASE_URL
+   unset: refuse.
+3. TRELLIS_RLM_API_KEY_ENV set with TRELLIS_RLM_BASE_URL unset:
+   refuse.
+4. TRELLIS_RLM_API_KEY_ENV set: the variable it names must be
+   present and non-empty in process.env; otherwise refuse. Resolve
+   the value once here into a local.
+A base URL WITHOUT a backend is allowed - add no check for it.
+
+Part 3 - a new export block on the config object:
+  rlmBackend: { backend, model, baseUrl, apiKeyEnv, apiKeyValue }
+where the first four are the validated values (each undefined when
+its key is unset) and apiKeyValue is the fail-fast resolved value
+of the named key variable (undefined when TRELLIS_RLM_API_KEY_ENV
+is unset). With every key unset every field is undefined and every
+existing config consumer reads exactly what it read before. The
+comment on the block follows the config.mcp.credentialEnv
+precedent: the resolved value never appears in logs or
+serializations. No other code reads rlmBackend yet - change NO call
+site anywhere.
+</specification>
+
+<evidence_protocol>
+Goal: put at least one citable src/config/index.ts hash into your
+retrieval set and confirm the task premise from its bytes.
+1. (one cell) Query the graph with trellis_neo4j.run_cypher for the
+   ACTION edges around the entity named
+   'trellis_retrieval_budget_per_run' (entity names are
+   lowercase-normalized; edges carry provenance in either
+   direction, so use an undirected pattern in this shape:
+   MATCH (e:Entity)-[r:ACTION]-(o:Entity)
+   WHERE e.name = '{The_Entity_Named_Above}'
+   RETURN r.verb, o.name, r.sourceNodeIds,
+          coalesce(r.contested, false) AS contested).
+   Keep ONLY uncontested edges. Among them, the edge with verb
+   'uses_config_key' toward the entity named 'config' carries a
+   sourceNodeIds hash whose block is part of src/config/index.ts -
+   your primary citation candidate. Collect the distinct hashes
+   from the uncontested edges.
+2. (one cell - hard rule 3) Fetch ALL collected hashes in ONE
+   trellis_postgres.get_ast_texts call. Print the first lines of
+   each returned text.
+3. (one cell) Load src/config/index.ts with trellis_textedit.load.
+   Build the file text by joining the frame's lines with "\n"
+   (frame lines keep their trailing "\r" on this CRLF file).
+   Classify every fetched hash and PRINT the classification:
+   CITABLE when its full retrieved text appears verbatim in the
+   file text; NOT-CITABLE otherwise (blocks from other files, for
+   example src/workers/rlm_job.ts or src/rlm/trellis_tools.py,
+   inform you but stay uncitable - hard rule 1). Hold the citable
+   hash(es) in a variable for the completion protocol. Confirm from
+   the citable bytes: the TRELLIS_RETRIEVAL_BUDGET_PER_RUN
+   validation (the optional-env-twin mold your new keys follow) and
+   the "Fail fast at startup" comment with the
+   resolveMcpCredentialEnv(mcpServers, process.env) call (the
+   credential mold your key resolution follows) exist in this file.
+4. (fallback, only if step 3 classified NO hash citable) You may
+   make at most TWO trellis_postgres.vector_search calls - each in
+   its own cell (hard rule 3) - with queries you compose about the
+   budget validation or the credential fail-fast resolution in
+   src/config/index.ts; fetch nothing you already hold; then
+   re-classify. If still no citable hash: hard rule 2 applies.
+</evidence_protocol>
+
+<editing_protocol>
+5. (one cell) Load src/config/rlm_backend.test.ts and
+   src/config/textedit_bounds.test.ts. Verify the test stub is
+   exactly a four-line header comment; read the bounds test to
+   learn the house per-topic config-test mold: a managed-keys env
+   save/restore helper, vi.resetModules() plus a dynamic
+   import('./index') per load, afterEach restore. You will author
+   fresh code in those conventions - never re-type another file's
+   bytes as your own.
+6. Edit src/config/index.ts with exactly three guarded inserts
+   (hard rule 4): (a) the four keys with their comments inside
+   EnvSchema, anchored after the TRELLIS_RETRIEVAL_BUDGET_PER_RUN
+   line's comment block; (b) the ambient guard and the three
+   cross-field refusals with the resolved local, after the existing
+   editRoot fail-fast block; (c) the rlmBackend block inside the
+   config object literal, anchored between existing export blocks
+   (for example after textedit). Discipline for every insert: read
+   the neighborhood with trellis_textedit.lines() in the same cell
+   as the insert; anchors are byte-exact and include the trailing
+   "\r"; line addresses SHIFT after every staged insert, so
+   re-locate before EACH insert and never reuse an address computed
+   before an earlier one; an AnchorMismatchError stages nothing -
+   re-locate and retry. Do not modify, re-type, or re-wrap ANY
+   existing line.
+7. Author the test body in src/config/rlm_backend.test.ts below the
+   byte-intact four-line header with guarded insert_lines anchored
+   on the header's last line. Manage these keys in the helper: the
+   four TRELLIS_RLM_* keys, OPENAI_BASE_URL, and one scratch
+   variable name of your choice for the key-env pins. One describe
+   block with these pins:
+   (a) unset default: config.rlmBackend deep-equals the
+       all-undefined five-field shape;
+   (b) backend accepts 'openai' alone and 'vllm' with a base URL;
+       refuses an unknown enum value;
+   (c) model accepts an ordinary id; refuses '' and a 257-char
+       string;
+   (d) base URL accepts http://127.0.0.1:8000/v1 and an https URL
+       with no backend set; refuses a non-URL and ftp://host/;
+   (e) 'vllm' without base URL refuses and the message names both
+       keys;
+   (f) key-env without base URL refuses and the message names both
+       keys;
+   (g) key-env with base URL and the named variable set populates
+       apiKeyEnv and apiKeyValue;
+   (h) key-env naming an absent variable refuses; naming a present
+       but empty variable refuses;
+   (i) ambient OPENAI_BASE_URL set makes config load throw with the
+       exact Part-2 guard message.
+8. Review each file's staged state with trellis_textedit.diff, then
+   write_back each file.
+</editing_protocol>
+
+<verification_protocol>
+9. In its OWN REPL iteration (never the cell of any write or the
+   submit): re-read the three edited regions of src/config/index.ts
+   and the whole test file with trellis_textedit.lines(), PRINT
+   them, and assert in code with each result printed. ASSERTION
+   DISCIPLINE: lines() returns [index, text] pairs where text is
+   one line WITHOUT its terminating newline (each line still
+   carries its trailing "\r"). Compare multi-line regions as LISTS
+   of consecutive line texts, in this shape:
+   [t for _, t in region] == [{Expected_Line}, {Expected_Line}, ...]
+   or join with "\n" before comparing. Never concatenate line texts
+   without terminators and then substring-check a multi-line
+   string - that check reads false even when the region is correct.
+   Assert: (a) each of the four TRELLIS_RLM_* schema entries
+   appears exactly once; (b) the ambient-guard message appears
+   exactly once in index.ts; (c) the TRELLIS_RETRIEVAL_BUDGET_PER_RUN
+   line is byte-unchanged and the editRoot fail-fast block's line
+   list is byte-unchanged; (d) the rlmBackend block sits inside the
+   config object literal with its neighboring blocks intact; (e)
+   the four stub header lines compare equal AS A LIST to the four
+   expected header lines, and the first non-header line of the test
+   file is your own import line.
+10. If an assertion prints false while the PRINTED region shows the
+   intended content, the assertion is the bug: fix the assertion
+   and re-verify in a new iteration. Only a genuine content
+   mismatch, visible in the printed region itself, means hard
+   rule 2: revert, no insight, report.
+</verification_protocol>
+
+<completion_protocol>
+11. Re-read <hard_rules>. Only after every step-9 assertion has
+   printed true, in a LATER iteration, record exactly one derived
+   insight:
+   trellis_neo4j.write_derived_insight(
+     subject='config', verb='resolves_fail_fast',
+     obj='mcpcredentialenv',
+     sourceNodeIds=[{Citable_Index_Ts_Hashes_Held_From_Step_3}])
+   where the list contains ONLY hashes your step-3 classification
+   printed CITABLE (hard rules 1 and 2).
+12. Submit a short report via trellis_answer.submit describing what
+   the graph said, what the retrieved bytes confirmed, what you
+   added, the anchors you used, and which hash(es) you cited and
+   why they were citable.
+</completion_protocol>
+
+Edit no other file. If the graph, the retrieved bytes, or the file
+contents contradict this task (the molds are absent, the stub
+header is absent, or no citable hash exists), stop: revert staged
+edits, record no insight, and report the contradiction.
+
+*** THE TWO DECISIVE RULES, ONCE MORE ***
+- Cite only hashes RETRIEVED THIS RUN whose bytes live verbatim in
+  src/config/index.ts; none citable means NO insight at all.
+- One retrieval call per REPL cell.
+```
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

@@ -1456,3 +1456,24 @@ no prompt byte; both composed-prompt pins unmoved; no refresh owed
    cell gains the T1 outcome; HANDOFF regenerated per §0 with the
    step-5 re-check (next objective: the T1 RETRY as its own
    owner-approved proposal, task v3 built from §5h.8).
+7. **Same-day addendum (owner-directed, the §0 step-5 rule):** task
+   text v3 was DRAFTED and staged in §5h.9 so Session 49 presents a
+   ready proposal — authored under the house prompt-engineering and
+   hypershot protocols (the July 12 kernel-prompt precedent applied
+   to a task text for the first time: semantic tags, the two
+   decisive rules in attention zones at head AND tail, positive
+   framing, hypershot frames with instruction-bearing variables;
+   run 2's violated citation rule had been buried mid-step prose).
+   The §5h.8 open `--pre` design point is RESOLVED in §5h.9 (clean
+   pre-gate entities kept; the task filters uncontested edges
+   in-query; the evidence chain re-verified live read-only — the
+   `uses_config_key` edge uncontested, its provenance `fc17205c…`
+   carrying BOTH molds). The escalation rule is recorded: a
+   recurrence of the evidence class closes by TOOLING SHAPE (a
+   harness-side read-only citability query — retrieval-set
+   membership AND named-file bridge), proposed owner-gated, never a
+   write gate. The mechanical-vs-task-text position is recorded:
+   detection layers are already mechanical and all fired per
+   contract; the retry closes run competence in task text first,
+   tooling on recurrence (the increment-2 ladder shape). Estimate
+   for the retry: $0.9–$1.3, ONE run, no pre-bundled contingency.

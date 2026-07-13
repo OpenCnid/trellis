@@ -753,7 +753,19 @@ authoring run. NO machinery change anywhere: every layer fired per
 contract — the failure class is task discipline, closed in task
 text. **(6) Bookkeeping:** Session 43 compressed to the digest, its
 §5 entry moved verbatim to the archive (window now 44–48); row 13's
-cell gains the T1 outcome.
+cell gains the T1 outcome. **(7) Same-day addendum (owner-directed,
+§0 step 5): task text v3 is DRAFTED and staged in §5h.9** — authored
+under the house prompt-engineering + hypershot protocols (semantic
+tags; the two decisive rules in attention zones at head AND tail;
+hypershot frames, no contaminating filler; invariant tokens — tool
+names, entity names, spec bounds, the exact guard message — stay
+concrete by the invariance test). The §5h.8 `--pre` design point is
+RESOLVED (clean pre-gate entities kept; the task filters
+uncontested edges in-query; the `uses_config_key` chain re-verified
+live). The escalation rule is recorded: recurrence of the evidence
+class closes by TOOLING SHAPE (a harness-side read-only citability
+query), owner-gated, never a write gate. Session 49 presents the
+staged proposal; the run is still the owner's per-run decision.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
@@ -763,13 +775,16 @@ task text** (roadmap §4 row 13, Phase 1 step 1; ratified shape
 `docs/architecture/TEST_TIME_TRAINING.md` §12.6; the spec is
 UNCHANGED — `docs/architecture/MODEL_BACKEND_SEAM.md` §3–§4 layer 1
 + §8 T1; the failed attempt and the retry material are
-`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5h, especially
-§5h.7–§5h.8), per §3–§6 below. The retry enters as its OWN
-owner-approved proposal with a RE-BASED estimate ($0.9–$1.3 per
-run): draft the retry section of the increment record
-document-first, present it with the estimate at session START, and
-run ONLY on the owner's yes — a session that ends with the proposal
-staged and unapproved is a legitimate zero-paid outcome. Queued
+`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5h), per §3–§6
+below. **The retry proposal is ALREADY STAGED: §5h.9 carries task
+text v3 IN FULL** (drafted under the prompt-engineering + hypershot
+protocols, owner-directed post-verdict), the resolved `--pre`
+design point, the re-based estimate ($0.9–$1.3, ONE run, no
+pre-bundled contingency), and the recorded escalation rule. The
+session's job: re-verify the staged premises live (zero-paid),
+present §5h.9 with the estimate at session START, and run ONLY on
+the owner's yes — a session that ends with the proposal presented
+and unapproved is a legitimate zero-paid outcome. Queued
 behind it (owner-ratified July 13, 2026, record §12.6): T2
 `buildAgentEnv` forward/strip → T3 the `trellis_agent.py`
 construction-site rewire → T4 the fixture-endpoint drill, then the
@@ -1388,11 +1403,13 @@ Repository state at handoff creation:
   unchanged in Sessions 39–48 — both layers stay cached.
 - The standing owner-conditional items — all propose-with-estimate,
   never self-served: **(1) the T1 RETRY — THE OBJECTIVE (§3)**
-  (Session 48's attempt FAILED and is recorded in §5h; the retry is
-  its own owner-approved proposal with task v3 from §5h.8 and the
-  re-based $0.9–$1.3/run estimate; owner-gated ≤$5, proposal
-  presented at session START; the RATIFIED queue behind it: T2 → T3
-  → T4 → Phase 2 — record §12.6, spec MODEL_BACKEND_SEAM.md);
+  (Session 48's attempt FAILED and is recorded in §5h; the retry
+  proposal is STAGED — §5h.9 carries task v3 verbatim, drafted
+  under the prompt-engineering + hypershot protocols, with the
+  re-based $0.9–$1.3 ONE-run estimate and the recorded
+  tooling-shape escalation rule; owner-gated ≤$5, presented at
+  session START; the RATIFIED queue behind it: T2 → T3 → T4 →
+  Phase 2 — record §12.6, spec MODEL_BACKEND_SEAM.md);
   **(2) the judge-calibration decision — RESOLVED July 13, 2026: the
   owner picked ACCEPT the strict judge** (presented Session 46;
   recorded in the roadmap §5 entry; no action — the contested `q_`
@@ -1533,26 +1550,28 @@ facts a new session must act on:
   change; the kernel default model literal stays in
   `trellis_agent.py` (T3). Session 48's task v1+v2 texts are
   recorded verbatim in §5h.5/§5h.7 — v3 = v2 plus the §5h.8 deltas.
-- **The three v3 task-text deltas (the §5h.8 retry material —
-  closing run 2's class):** (1) the citable chain arrives
-  GRAPH-FIRST: query the `config` `-uses_config_key-`
-  `trellis_retrieval_budget_per_run` ACTION edge, whose provenance
-  IS an `index.ts` block (`fc17205c…6311` under `trellis#11`) —
-  fetched via `get_ast_texts`, it enters the retrieval set directly;
-  (2) the explicit STOP rule: if at insight time NO address in the
-  retrieval set has bytes verbatim in `src/config/index.ts`, write
-  NOTHING and report (never substitute a related block from another
-  file — frames confer no citability); (3) evidence cells make ONE
-  retrieval-surface call each (a typed refusal kills the entire
-  cell — run 2's `vector_search` calls died collaterally this way).
-  OPEN DESIGN POINT the proposal must resolve: entity `config`
-  carries one contested attached ACTION edge (`-uses-`
-  `scripts/stage2_selfedit_check.ts`, churn residue), so a `--pre`
-  naming `config` flags `contested_target` — the proposal either
-  keeps the clean pre-gate entities (`resolvemcpcredentialenv`,
-  `mcpcredentialenv`) while the task queries the `uses_config_key`
-  edge (record the reasoning, §5h.3 mold), or proposes the bounded
-  recovery of that residue first (owner-visible, its own decision).
+- **Task text v3 is STAGED VERBATIM in §5h.9** (do not re-derive
+  it; present it). Its shape: `<hard_rules>` up top with the four
+  critical rules (citability — retrieved-this-run AND
+  bytes-verbatim-in-`index.ts`; the STOP rule — no citable hash
+  means NO insight; one retrieval call per cell; guarded-only), the
+  spec parts 1–3 in `<specification>`, then evidence / editing /
+  verification / completion protocols, with the two decisive rules
+  repeated at the tail (attention zones — run 2's violated rule had
+  been buried mid-step prose). The evidence chain arrives
+  GRAPH-FIRST: the `trellis_retrieval_budget_per_run`
+  `-uses_config_key-` `config` edge (uncontested, re-verified live
+  in Session 48) carries `fc17205c…6311`, an `index.ts` block
+  holding BOTH molds; `vector_search` is a bounded fallback (max
+  two calls, own cells). The `--pre` design point is RESOLVED in
+  §5h.9: clean pre-gate entities (`resolvemcpcredentialenv`,
+  `mcpcredentialenv`) kept, the task filters uncontested edges
+  in-query, both contested edges stay recorded in §5h.3. The
+  ESCALATION RULE is recorded: if the retry fails on the same
+  evidence class, the closure is TOOLING SHAPE — a harness-side
+  read-only citability query (retrieval-set membership ∧
+  named-file bridge), its own owner-gated proposal, never a write
+  gate.
 - **The stub (the §5h.2 recorded shape):** the toolkit cannot create
   files — re-create the four-line stub header (bytes recorded in
   §5h.2) and commit it only AFTER owner approval, immediately before
@@ -1587,13 +1606,12 @@ facts a new session must act on:
   re-read `REPOSITORY_INGESTION_REPORT.md` §5h end to end — the
   attempt record IS the design input; the Windows stale-worker check
   before any queue use (§2 operational notes).
-- **The retry record FIRST (document-first):** a new §5h.9 (or the
-  recorded alternative) in the §5h increment record carrying: task
-  text v3 IN FULL (v2 verbatim from §5h.5+§5h.7 with the three
-  §5h.8 deltas folded in — quote the complete v3, the §5g.3
-  precedent), the resolved `--pre` design point (§3), the re-based
-  estimate, and the criterion re-stated. Present to the owner at
-  session START.
+- **The retry record is ALREADY WRITTEN (§5h.9, staged Session 48
+  owner-directed):** task text v3 in full, the resolved `--pre`
+  design point, the re-based estimate, the escalation rule.
+  Session 49 PRESENTS it at session START — no re-drafting; a
+  material correction discovered during re-verification is a
+  recorded §5h.9 amendment, never a silent rewrite.
 - **Verify the evidence chain live BEFORE proposing (the §5g.2
   mold, read-only):** the `config` `-uses_config_key-`
   `trellis_retrieval_budget_per_run` edge still exists uncontested
@@ -1666,12 +1684,13 @@ The expected machinery footprint IS the T1 diff (two named files) —
 authored by the run, landed by the human PR — plus this session's
 documents.
 
-- **Zero-paid (unconditional):** the §5h.9 retry section complete
-  with task v3 IN FULL, the resolved `--pre` design point, the
-  re-based estimate, and the criterion re-stated; the live evidence
-  chain re-verified read-only (§4); `stage2:check --pre` green;
-  `test:selfedit-harness` green (rehearsal unchanged —
-  environment-shaped count); the dry-run refresh plan echo read.
+- **Zero-paid (unconditional):** the staged §5h.9 premises
+  re-verified live read-only (the `uses_config_key` edge
+  uncontested with `fc17205c…` provenance; the four seam blocks
+  still byte-verbatim on disk); `stage2:check --pre` green on the
+  two clean entities; `test:selfedit-harness` green (rehearsal
+  unchanged — environment-shaped count); the dry-run refresh plan
+  echo read; the proposal presented.
 - **Paid (owner-approved only):** ONE run, within the re-based
   estimate; the full criterion of §3 judged item by item, counts
   recorded (actuals in the roadmap §5 entry; telemetry counters
