@@ -8,12 +8,12 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–41 and their same-day follow-ons (July 4–13, 2026; PRs
-#21–#83) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–42 and their same-day follow-ons (July 4–13, 2026; PRs
+#21–#85) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 41 with the Session 46 PR — this file keeps full
+recently Session 42 with the Session 47 PR — this file keeps full
 narrative only for the most recent five sessions). The one-paragraph
 digest, oldest first; §1 below carries everything from this span that
 a new session must actually know:
@@ -261,7 +261,6 @@ a new session must actually know:
   EOL-normalization churn class (refresh `trellis#3`) and the
   Windows orphaned-worker tell (kill the child process tree; verify
   zero node/tsx workers before any queue drill).
-
 - **Session 38 (PR #80)** landed structural chunking increment 1
   zero-paid (roadmap §4 row 12; full record
   `docs/architecture/STRUCTURAL_CHUNKING.md` §10): the generic tree
@@ -286,7 +285,6 @@ a new session must actually know:
   the ordinary write path (the third live churn-loop observation).
   Incidents recorded: the missing-`benchmark_logs/` orphaned-npm-tree
   worker trap; npm not forwarding `--include` to `chunking:shadow`.
-
 - **Session 39 (PR #81)** ran the increment-2 RETRY to a first-shot
   LANDING ($0.504 total): the comment-class diff gate
   (`named_file_noncomment_change`, declared via `--comment-class`,
@@ -304,7 +302,6 @@ a new session must actually know:
   recovery). Ladder record: increment 1 landed on contingency;
   increment 2 failed twice, each class closed mechanically, retry
   landed first shot.
-
 - **Session 40 (PR #82)** closed dead-block embedding pollution at
   the T15 seam zero-paid (≈$0.000002 re-measure spend): the
   `search_ast_nodes` liveness filter — LIVENESS = current
@@ -323,7 +320,6 @@ a new session must actually know:
   rule: superseded versions are ARCHIVE, not search space —
   default-discovery surfaces read LIVE blocks only, history solely by
   explicit address (HANDOFF guardrail 5).
-
 - **Session 41 (PR #83)** landed structural splice addressing
   zero-paid (design record `docs/architecture/STRUCTURAL_SPLICE.md`,
   document-first; the row-11 executable-class prerequisite
@@ -350,61 +346,30 @@ a new session must actually know:
   decision recorded: row 11 stays OPEN; increment 3 = guarded-only
   criterion, a NEW proposal when a REAL target surfaces — never
   manufactured.
-
-**Session 42 (July 13, 2026, PR #85) is complete as a RECORDED
-ENVIRONMENTAL BLOCK: the row-10 slice (d) acceptance measurement
-did NOT run — the session executed in a Claude Code remote Linux
-container whose egress policy denies `api.openai.com` (CONNECT 403
-at the session proxy) and which carries no `OPENAI_API_KEY`; owner
-approval was given up front and was never the blocker. $0.0000
-spent; Session 43 then ran the measurement.** What the
-session DID establish, all zero-paid: **(1) The measurement is
-proven NOT dev-DB-bound.** On a fresh stack (pgvector/pg16 +
-Neo4j 5.11 + Redis 7 via compose, `npm run db:init:dev`), `npx tsx
-scripts/exp_effective_context.ts --ingest` staged all four durable
-est corpora (144 documents, representation invariants green:
-"source truths = stored truths"). The ON/OFF mechanics re-verified
-in code: `armEnv` does NOT strip `TRELLIS_EXP_OMIT_RETRIEVAL`
-(passes through to the spawned agent), and `trellis_agent.py`
-resolves it to `retrieval_discipline=not EXP_OMIT_RETRIEVAL_ENABLED`
-at the research construction. The runner's spend gate observed
-live: plan-only without `--confirm-paid`; the ≤$5.00 cumulative
-hard stop printed with it. A zero-paid probe run with a placeholder
-key traversed the ENTIRE path and failed exactly at the OpenAI call
-(`APIConnectionError`, $0.0000) — the recorded evidence that ONLY
-key+egress block the run. **(2) Defect class 1 found and fixed (the
-event-loop rule): hardcoded `'python'` + a hardcoded Windows
-`PYTHONPATH`** in four drill/benchmark scripts
-(`test_verification_sweep.ts` ×2 sites, `test_confidence_writes.ts`
-×2, `test_entity_kinds.ts` ×1, `poison_drill_runner.ts` ×1) — all
-six sites now use `config.python.executable` + the house
-`config.python.pythonPath` pattern. This had `test:verification-sweep`
-(a STANDING-BLOCK drill) failing on any non-owner host; post-fix
-66/66. **(3) Defect class 2 found and fixed (Session 32's precedent
-finished):** `test:confidence-writes` and `test:entity-kinds` seeded
-non-sha256 fixture provenance — broken since Session 14 on EVERY
-machine, unnoticed because neither is in the standing block
-(Session 32 repaired only the sweep drill). Both now seed real
-sha256 `ast_nodes` fixture rows with cleanup; both read "All checks
-passed." The write path itself untouched (guardrail 3). **(4)
-Close-out on this environment:** `npm test` 837/85 first try
-(Linux, Python 3.11 venv); build; python:check (recipe:
-requirements.txt + requirements-pdf-fast-nodeps.txt + pandas —
-uv/clean-resolver installs do NOT get pandas transitively);
-18/18 standing drills green (textedit 130 = the POSIX pin;
-selfedit-harness 52, environment-shaped); `drill:scale` ALONE:
-1.10x CLOSED (below-band → guardrail-8 re-run) then 1.52x CLOSED
-in-band, max provenance 286 both, committed file carries 1.52x.
-The isolated Compose INTEGRATION could not run — the image build's
-apt stage is denied by the same egress class (`deb.debian.org`
-403); recorded, not routed around. **(5) Bookkeeping:** Session 37
-compressed to the digest; its §5 entry moved verbatim to the
-archive (window now 38–42). **The adopted per-PR refresh cadence:
-this PR changes four in-scope script files, so a scoped policy-1
-refresh is OWED and DEFERRED to the next session with the owner's
-durable dev PG** (this container's stack was ephemeral; the durable
-substrate was never touched). No kernel byte, no prompt byte, no
-contract change.
+- **Session 42 (PR #85)** ran in a policy-restricted remote Linux
+  container and recorded the row-10 acceptance measurement as
+  ENVIRONMENTALLY BLOCKED ($0.0000): the container's egress policy
+  denied `api.openai.com` (CONNECT 403) and carried no
+  `OPENAI_API_KEY` — owner approval was given up front and was never
+  the blocker. What it proved zero-paid: the measurement is NOT
+  dev-DB-bound (a fresh Compose stack staged all four durable est
+  corpora, 144 documents, invariants green; a placeholder-key probe
+  traversed the ENTIRE path and failed exactly at the OpenAI call);
+  the ON/OFF arm mechanics re-verified in code; the runner's spend
+  gate observed live. Two drill-defect classes found and fixed
+  (the event-loop rule): hardcoded `'python'` + a hardcoded Windows
+  `PYTHONPATH` at six sites in four drill/benchmark scripts (all now
+  `config.python.executable` + the house `config.python.pythonPath`;
+  `test:verification-sweep` — a STANDING drill — 66/66 post-fix on
+  any host), and non-sha256 fixture provenance in
+  `test:confidence-writes`/`test:entity-kinds` (broken since
+  Session 14 on every machine; both now seed real sha256 `ast_nodes`
+  rows with cleanup and pass — the write path itself untouched).
+  Restricted-container bring-up notes recorded (§2); the isolated
+  Compose integration could not run there (the image build's apt
+  stage denied by the same egress class — recorded, not routed
+  around); the four-file scoped refresh was DEFERRED and executed by
+  Session 43.
 
 **Session 43 (July 13, 2026, PR #86) is complete: the row-10
 slice (d) acceptance measurement RAN owner-approved on the owner's
@@ -560,8 +525,8 @@ substrate-identity objects). **(4) The owner-gated ladder:** R1
 collaborator exchange (record §9's four questions, owner-mediated;
 `COLLABORATOR_BRIEFING.md` Postscript 3 corrects the July 9 item-(4)
 answer — the registry is PROMPT-level adaptation, the collaborator's
-line is WEIGHT-level) → R2 backend-seam audit (zero-paid, next
-actionable — the §3 objective below) → R3 open-sparse baseline (the
+line is WEIGHT-level) → R2 backend-seam audit (zero-paid; executed
+as R2a/R2b, Sessions 46–47) → R3 open-sparse baseline (the
 GATING question: protocol competence, before TTT enters at all) →
 R4 paired TTT arms → R5 meta-prompt fast-state. Honest scope pinned
 (record §8): TTT is IMPOSSIBLE on the current API backend; "quality
@@ -613,7 +578,7 @@ gate + new unit pins; every diff human-reviewed, landing stays a
 human PR). Spec-before-pen: R2b is human-authored before any
 T-increment runs. HANDOFF re-pointed accordingly (§3 = R2a).
 
-**Session 46 (July 13, 2026, this PR) is complete: TTT-track rung
+**Session 46 (July 13, 2026, PR #90) is complete: TTT-track rung
 R2a — the backend-seam census + the rlms verdict — delivered
 docs-only, zero-paid, READ-ONLY (roadmap §4 row 13, Phase 0 step 1;
 the full deliverable is `TEST_TIME_TRAINING.md` §13). Zero code
@@ -676,33 +641,117 @@ re-run (zero non-markdown bytes — the Session 45 precedent, reason
 recorded); Session 41 compressed to the digest, its §5 entry moved
 verbatim to the archive (window now 42–46).
 
+**Session 47 (July 13, 2026, this PR) is complete: TTT-track rung
+R2b — the HUMAN-authored model-backend seam design record —
+delivered docs-only, zero-paid (roadmap §4 row 13, Phase 0 step 2;
+the deliverable is `docs/architecture/MODEL_BACKEND_SEAM.md`, its
+own file by recorded choice — it is quoted verbatim by four
+T-increment task texts and one R3 proposal, so it gets one stable
+address). Zero code bytes, zero prompt bytes (both composed-prompt
+pins unmoved), zero config keys, zero env twins, zero rlms bytes;
+no refresh owed; NO census correction needed (§13 stands as
+recorded).** **(1) The three-way split, decided per lane (record
+§2):** the root RLM completion moves via the T-series; the worker
+TRANSPORT is DEFERRED with its prerequisite named — the worker
+completion client and the embedding client are today ONE
+`new OpenAI()` construction (`extraction_worker.ts:26` serves both
+call classes), so any future worker-transport override must first
+SPLIT the two clients or it moves the embedder as a side effect,
+the forbidden §4.2 coupling (until that split exists, the T1
+ambient guard makes the coupling structurally unreachable, not just
+unmanaged); the embedder does not move; the worker MODEL id needs
+nothing (already config-shaped via `EXTRACTION_MODEL`). **(2) The
+T1 config strawman (record §3):** four optional keys —
+`TRELLIS_RLM_BACKEND` (`z.enum(['openai','vllm'])`; only the two
+arms the track needs, widening is a later recorded decision),
+`TRELLIS_RLM_MODEL` (the kernel default literal STAYS in
+`trellis_agent.py` Python-side, the `RETRIEVAL_BUDGET_DEFAULT` mold
+— unset is byte-identical trivially), `TRELLIS_RLM_BASE_URL`
+(`z.url()` + http/https refinement), `TRELLIS_RLM_API_KEY_ENV`
+(name-indirection, the `mcpCredentialEnv` mold, resolved
+fail-fast); three cross-field refusals (vllm requires base URL;
+key-env requires base URL; the named variable must resolve
+non-empty); the credential three-part rule (§3.3: default endpoint
+= no `api_key` kwarg, ambient `OPENAI_API_KEY` inheritance
+unchanged by design; custom endpoint without a named key = the
+explicit literal dummy `api_key="trellis-local"`; custom with a
+real key = named-env value forwarded under its own name, never
+logged). **(3) The ambient-transport disposition (record §4) — the
+census §13.3 recommendation ADOPTED, three layers:** T1 refuses
+ambient `OPENAI_BASE_URL` fail-fast at config load with a typed
+message naming the validated keys; T2 deletes it unconditionally in
+`buildAgentEnv` (the `TRELLIS_EXP_*` deletion-block mold); T3
+deletes it from the agent's own environment before construction
+unless a validated base URL was configured — which also closes the
+rlms `load_dotenv()` re-introduction channel for this variable
+(import-time dotenv runs before `main()`; construction happens
+inside `main()`; the delete wins). Recorded residual: the dotenv
+channel stays open for OTHER variables (`OPENAI_API_KEY` is
+wanted); managing it wholesale would mean modifying rlms
+(guardrail 10) — named, bounded, not denied. **(4) The checker
+decision (record §5): FOLLOWS the seam (T3 scope)** — it already
+shares the root's ambient transport by construction; freezing it
+would take NEW code and recreate the §13.3 split inside one
+process; it is off by default, and a cross-backend run that enables
+it records the checker's backend with the run. The frozen
+instruments (probe scripts, archived experiment scripts) stay
+frozen. **(5) Refusals and telemetry (record §6–§7):** every
+backend-config check is construction-time — no in-run refusal
+surface exists; the Python twin `parse_rlm_backend()` raises in the
+`parse_retrieval_budget` message mold before any paid work.
+Telemetry: two additive `TRELLIS_TELEMETRY` fields (`rlm_backend`
+enum echo, `rlm_base_url_set` boolean — the URL itself NEVER, T16);
+`model_usage` already keys by model name; no Prometheus change.
+**(6) The T-increment skeletons (record §8), all four pre-stated**
+with scope, named files, task-text skeleton, and the full
+feature-class criterion: T1 `src/config/index.ts` + NEW
+`src/config/rlm_backend.test.ts` (no call-site change); T2
+`src/workers/rlm_job.ts` + `rlm_job.test.ts`; T3
+`src/rlm/trellis_agent.py` only (unset-arm construction-kwargs
+byte-identity pinned); T4 NEW `scripts/fixture_openai_server.py` +
+`scripts/test_backend_seam.ts` + the `package.json` entry (the stub
+MUST return `usage` and gains a no-usage misbehaving mode). Task
+texts carry spec sections VERBATIM (the record lives in `docs/`,
+outside extraction scope); refresh-before-use per increment under
+the split-scope recipe. **(7) The R3 skeleton (record §9):** R3a
+serving bring-up + protocol smoke (FIRST assertion: the endpoint
+returns `usage` on non-streaming completions); R3b the paired
+est-suite + protocol-adherence baseline against a same-day gpt-5.4
+arm, arm assignment verified per run from telemetry both directions
+(the Session 43 mold — the `rlm_backend` echo exists for exactly
+this); estimate class = GPU-hours under an owner-set per-run
+compute budget, or hosted per-token under the ≤$5/run cap.
+**(8) Close-out (docs-only mold):** `npm test` 837/85 green first
+try after `npm ci`; build, python:check, compose config green; live
+drills NOT re-run (zero non-markdown bytes — the Session 45/46
+precedent, reason recorded); Session 42 compressed to the digest,
+its §5 entry moved verbatim to the archive (window now 43–47; the
+archive-pointer paragraph updated in the same commit).
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 47: TTT-track rung R2b — the
-HUMAN-authored model-backend seam design record** (roadmap §4
-row 13, Phase 0 step 2; `docs/architecture/TEST_TIME_TRAINING.md`
-§12.6 + the R2a census in §13), per §3–§6 below: a zero-paid,
-document-first design session — the config shape, the typed
-refusals, the three-way split backend (root RLM completion / worker
-completions / embedder), today's behavior as the byte-identical
-default, each T-increment's scope and task-text skeleton pre-stated,
-and the R3 proposal skeleton — NO implementation, NO config key, NO
-env twin, NO rlms modification (seam CODE belongs to the T-series,
-each increment its own owner-approved proposal). Queued behind it
-(owner-ratified July 13, 2026, record §12.6): the
-**Trellis-edits-Trellis T-series** (feature-class self-edit
-increments T1 config surface → T2 `buildAgentEnv` → T3 the
-`trellis_agent.py` rewire → T4 the fixture-endpoint drill), then the
-Phase-2 measurements (R3a/R3b; R4 when the collaborator's retrofit
-checkpoint lands). The judge-calibration decision is RESOLVED
-(owner picked ACCEPT, July 13, 2026 — do not re-open it without new
-data). If the owner instead directs the stage-1b prose chunk
-(standing item, fully specified in §2 item list + the Session 44-era
-HANDOFF preserved in git history), the row-12 rollout continuation,
-or a surfaced row-11 increment-3 target, take that. The toolkit
-never touches git. Do not re-plan or re-implement completed work.
-RLM expands exclusively to Recursive Language Model (the MIT CSAIL
-formulation).
+Your objective is **Session 48: TTT-track increment T1 — the
+backend config surface, the FIRST Trellis-edits-Trellis
+feature-class self-edit increment** (roadmap §4 row 13, Phase 1
+step 1; ratified shape `docs/architecture/TEST_TIME_TRAINING.md`
+§12.6; the spec is `docs/architecture/MODEL_BACKEND_SEAM.md` §3–§4
+layer 1 + §8 T1), per §3–§6 below. T1 enters as its OWN
+owner-approved proposal: draft the increment record document-first,
+present it with the estimate at session START, and run ONLY on the
+owner's yes — a session that ends with the proposal staged and
+unapproved is a legitimate zero-paid outcome. Queued behind it
+(owner-ratified July 13, 2026, record §12.6): T2 `buildAgentEnv`
+forward/strip → T3 the `trellis_agent.py` construction-site rewire
+→ T4 the fixture-endpoint drill, then the Phase-2 measurements
+(R3a/R3b; R4 when the collaborator's retrofit checkpoint lands).
+The judge-calibration decision is RESOLVED (owner picked ACCEPT,
+July 13, 2026 — do not re-open it without new data). If the owner
+instead directs the stage-1b prose chunk (standing item, fully
+specified in §2 item list + the Session 44-era HANDOFF preserved in
+git history), the row-12 rollout continuation, or a surfaced row-11
+increment-3 target, take that. The toolkit never touches git. Do
+not re-plan or re-implement completed work. RLM expands exclusively
+to Recursive Language Model (the MIT CSAIL formulation).
 
 ---
 
@@ -1050,33 +1099,42 @@ immutable, content-addressed physical location in source material.
      doubling). `LocalREPL` persists `self.locals` across turns; on
      exception, rebindings are lost but in-place mutations persist;
      underscore-prefixed names never persist.
-   - **The TTT research track (Sessions 45–46;
-     `docs/architecture/TEST_TIME_TRAINING.md`):** research-only — no
-     machinery, no runtime byte; the owner-gated rung ladder R1–R5
-     (roadmap §4 row 13). The seam facts a session needs (the R2a
-     census, record §13, is the authoritative site table): the model
+   - **The TTT research track (Sessions 45–47;
+     `docs/architecture/TEST_TIME_TRAINING.md` +
+     `docs/architecture/MODEL_BACKEND_SEAM.md`):** research + design
+     only so far — no machinery, no runtime byte; the owner-gated
+     rung ladder R1–R5 (roadmap §4 row 13). The seam facts a session
+     needs (the R2a census, record §13, is the authoritative site
+     table; the R2b design record is the buildable spec): the model
      backend is HARDCODED at the root (`backend_kwargs={"model_name":
      "gpt-5.4-2026-03-05"}` at both `trellis_agent.py` construction
      sites — T3's exact scope) but the worker-side model id is
      ALREADY config-shaped (`EXTRACTION_MODEL` →
-     `config.llm.extractionModel`, ten consumers); **the rlms verdict
+     `config.llm.extractionModel`, ten consumers); the rlms verdict
      is ANSWERED (Session 46): rlms==0.1.3 admits a base-URL/backend
-     override without library modification** (`OpenAIClient` takes
+     override without library modification (`OpenAIClient` takes
      `base_url` first-class; explicit `vllm` backend; one hard
      caveat — the endpoint MUST return `usage` or `_track_cost`
      raises); the transport everywhere else is zero-arg
      `new OpenAI()`/`openai.OpenAI()`, which reads the UNMANAGED
      ambient `OPENAI_BASE_URL` (the §13.3 discovery — not a defect,
-     the T1/T2/T3 gap; the census recommendation is to strip it
-     unconditionally and express backend choice only through
-     validated config); the embedding backend is SCHEMA-COUPLED
+     the T1/T2/T3 gap); **the R2b seam design (Session 47,
+     MODEL_BACKEND_SEAM.md) decides everything the T-series
+     implements:** the `TRELLIS_RLM_*` config surface (§3), the
+     three-layer ambient-variable disposition (§4: T1 config
+     refusal / T2 `buildAgentEnv` delete / T3 delete-unless-
+     configured), the checker FOLLOWS the seam (§5), two additive
+     telemetry fields (§7), the four T-increment skeletons (§8), the
+     R3 skeleton (§9); the embedding backend is SCHEMA-COUPLED
      (`vector(1536)` + HNSW) and SEPARABLE from the completion
-     backend — an embedder move is a substrate-identity event and the
-     embedder NEVER moves as a side effect of the completion backend
-     moving; fast weights, if ever present, are a Tier-3 analog (zero
-     provenance standing, per-run ephemeral absolute) and every
-     provenance gate is engine-side and model-agnostic by
-     construction.
+     backend — an embedder move is a substrate-identity event and
+     the embedder NEVER moves as a side effect of the completion
+     backend moving (the worker-transport prerequisite: split the
+     completion client from the embedding client BEFORE any worker
+     override — record §2.2); fast weights, if ever present, are a
+     Tier-3 analog (zero provenance standing, per-run ephemeral
+     absolute) and every provenance gate is engine-side and
+     model-agnostic by construction.
    - The orchestrator (Sessions 9/16) lives in `src/core/agent/` and
      is a pure decision maker with NO tools and no database access;
      it routes workspace lineage BY REFERENCE. Zero-LLM drills:
@@ -1147,10 +1205,11 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 13, 2026 Session 46 PR
-  (the R2a backend-seam census + rlms verdict, `TEST_TIME_TRAINING.md`
-  §13, and the recorded judge-calibration ACCEPT decision — the PR
-  that carries this file; docs-only, four markdown files).
+- `master`: the head after the July 13, 2026 Session 47 PR
+  (the R2b model-backend seam design record
+  `docs/architecture/MODEL_BACKEND_SEAM.md` — the PR that carries
+  this file; docs-only, four markdown files: the record, the
+  roadmap, the archive, this handoff).
   Use `git log -- HANDOFF.md` to confirm this PR landed; if it is
   still unmerged when this session starts, STOP and merge it first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); module
@@ -1197,12 +1256,15 @@ Repository state at handoff creation:
   describes the OWNER'S durable dev PG (Session 43 ran on it;
   Session 42's ephemeral container staging died with the container,
   by design).
-- Sessions 43–46 changed NO code byte at all (docs and the
+- Sessions 43–47 changed NO code byte at all (docs and the
   Session 43 committed drill artifact only) and NO prompt byte —
   both composed-prompt pins unmoved (default `5d27e474…fe2a`,
   omit-arm `45987904…0b56` — recompute BOTH in the same commit only
   if the kernel prompt or rubric legitimately changes;
-  `test:modules` green). Session 42's code surface (the drill
+  `test:modules` green). A LANDED T1 changes that: it is the first
+  code-touching step since Session 42's drill repairs — its diff is
+  `src/config/index.ts` + the NEW `src/config/rlm_backend.test.ts`
+  and nothing else. Session 42's code surface (the drill
   portability/fixture repairs) and Session 41's (the guarded
   family) are recorded in the archive and roadmap. Reminder from Session 24: `block_parity.test.ts` SPAWNS
   the real Python walk inside plain `npm test` — a machine without
@@ -1220,8 +1282,9 @@ Repository state at handoff creation:
   blob-CDN denials are recoverable with
   `registry-mirrors: ["https://mirror.gcr.io"]`.
 - Offline baseline: `npm test` = 837 passing across 85 files
-  (UNCHANGED by Sessions 42–46; Session 46 observed it green
-  first-try in its fresh worktree after `npm ci`).
+  (UNCHANGED by Sessions 42–47; Session 47 observed it green
+  first-try in its fresh worktree after `npm ci`). A landed T1 GROWS
+  this by the new pin file's tests — record the new counts.
 - `npm run build` and `npm run python:check` pass (the check imports
   polars — an environment without it fails the check by design).
 - `npm run drill:scale`: gate CLOSED at max provenance 286.
@@ -1235,7 +1298,7 @@ Repository state at handoff creation:
   REPRODUCING open reading is the migration trigger (roadmap §4
   row 7) and the owner adjudicates. The drill rewrites the tracked
   `scale_drill_results.json` — commit it with the session PR (the
-  committed copy is Session 44's 1.54x CLOSED run; Sessions 45–46,
+  committed copy is Session 44's 1.54x CLOSED run; Sessions 45–47,
   docs-only, did not run the drill). Run the scale drill ALONE —
   never concurrently with other live drills on the shared dev
   database.
@@ -1258,9 +1321,11 @@ Repository state at handoff creation:
   `test:api-hardening`, `test:belief-recovery`,
   `test:invalidation-sweep`. The Session 42-repaired non-standing
   drills `test:confidence-writes` and `test:entity-kinds` read "All
-  checks passed" (first green since Session 14). Sessions 45 and 46
+  checks passed" (first green since Session 14). Sessions 45–47
   (docs-only, zero non-markdown bytes) did not re-run the drill
   block — the Session 44 observation stands as the latest reading.
+  A session that lands T1 (non-markdown bytes) runs the FULL
+  standing block.
 - Isolated Compose integration: 11 assertions (`--profile test`,
   unique project name; includes the containerized credentialed MCP
   fixture probe and the in-container `polars 1.34.0` import probe).
@@ -1278,17 +1343,18 @@ Repository state at handoff creation:
   `TRELLIS_REDIS_HOST_PORT`, `TRELLIS_API_HOST_PORT` — set each to 0.
   NOTE: C: runs tight on free space; a FULL image rebuild needs
   several GB of headroom. `requirements.txt` and `package.json`
-  unchanged in Sessions 39–46 — both layers stay cached.
+  unchanged in Sessions 39–47 — both layers stay cached.
 - The standing owner-conditional items — all propose-with-estimate,
-  never self-served: **(1) TTT-track rung R2b — THE OBJECTIVE (§3)**
-  (zero-paid, document-first; needs no spend approval; the RATIFIED
-  queue behind it: T1–T4 → Phase 2 — record §12.6); **(2) the
-  judge-calibration decision — RESOLVED July 13, 2026: the owner
-  picked ACCEPT the strict judge** (presented Session 46; recorded
-  in the roadmap §5 entry; no action — the contested `q_` edges stay
-  lazy-recovery residue; a rubric change re-enters only with new
-  data, as its own designed session); **(3) the stage-1b prose
-  chunk** (~2,900 blocks ≈ $7.8
+  never self-served: **(1) TTT-track increment T1 — THE OBJECTIVE
+  (§3)** (the first feature-class self-edit run; owner-gated ≤$5,
+  proposal presented at session START; the RATIFIED queue behind it:
+  T2 → T3 → T4 → Phase 2 — record §12.6, spec MODEL_BACKEND_SEAM.md);
+  **(2) the judge-calibration decision — RESOLVED July 13, 2026: the
+  owner picked ACCEPT the strict judge** (presented Session 46;
+  recorded in the roadmap §5 entry; no action — the contested `q_`
+  edges stay lazy-recovery residue; a rubric change re-enters only
+  with new data, as its own designed session); **(3) the stage-1b
+  prose chunk** (~2,900 blocks ≈ $7.8
   full bound at Session 34 pricing — re-derive with a zero-paid plan
   echo before proposing; CHUNKED owner-gated scoped runs under the
   ≤$5/run cap; the recorded partition strawman: run A =
@@ -1300,7 +1366,10 @@ Repository state at handoff creation:
   `docs/archive/ROADMAP_HISTORY.md`; prose chunks under policy 1;
   the stage-1 criterion mold adapted to prose; a landed stage-1b
   joins the policy-1 refresh leg — full §3-grade spec preserved in
-  the Session 44-era HANDOFF in git history); **(4) the row-11
+  the Session 44-era HANDOFF in git history; NOTE: a landed
+  stage-1b would also make MODEL_BACKEND_SEAM.md queryable from the
+  substrate — a synergy for the T-series, not a prerequisite);
+  **(4) the row-11
   executable-class increment 3** (prerequisite SATISFIED by
   Session 41; guarded-only criterion — `textedit_raw_splices == 0`
   joins the standing five items; the Session 44 search found NO real
@@ -1310,10 +1379,11 @@ Repository state at handoff creation:
   gap #1); **(7) the substrate freshness cadence** (ADOPTED July 13:
   one scoped refresh per merged PR + refresh-before-use ahead of
   stage-2 edit runs; each refresh's extraction spend still gated per
-  run — UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; the Session 44–46
-  PRs are docs-only and owed nothing — Session 47 owes a refresh
-  only for files its OWN PR changes); **(8) the targeted stage-1
-  entailment sweep AS WORDED IS BLOCKED BY SHAPE** (recorded by
+  run — UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; the Session 44–47
+  PRs are docs-only and owed nothing — Session 48 owes a policy-1
+  refresh for T1's changed `src/config` files IF T1 lands); **(8)
+  the targeted stage-1 entailment sweep AS WORDED IS BLOCKED BY
+  SHAPE** (recorded by
   Session 44: stage-1 extraction wrote ACTION edges; the detector
   selects DERIVED_INSIGHT only — widening its selection is a
   recorded owner-visible design change to row-9 machinery, not a
@@ -1323,18 +1393,19 @@ Repository state at handoff creation:
   the record §10.3 + §11.4 together); **(10) the
   superseded-embedding SWEEP** (storage reclamation only;
   destructive, re-buys embeddings on recovery; stays unchosen);
-  **(11) the TTT-track RATIFIED QUEUE beyond R2b** (record §12.6;
-  each step its own owner-approved proposal): **the T-series T1–T4**
-  (Phase 1:
-  feature-class Trellis-edits-Trellis increments, each owner-gated
-  ≤$5, each an increment record in the §5e/§5g mold, each diff
-  human-reviewed — T1 config surface, T2 `buildAgentEnv`
-  forwarding/strip, T3 the `trellis_agent.py` construction-site
-  rewire, T4 the zero-LLM fixture-endpoint drill); **Phase 2** R3a
+  **(11) the TTT-track RATIFIED QUEUE beyond T1** (record §12.6;
+  each step its own owner-approved proposal): **T2–T4** (Phase 1
+  continues: T2 `buildAgentEnv` forwarding/strip per
+  MODEL_BACKEND_SEAM.md §4 layer 2 + §8, T3 the `trellis_agent.py`
+  construction-site rewire per §3/§4 layer 3/§5/§7 + §8, T4 the
+  zero-LLM fixture-endpoint drill per §8 — each owner-gated ≤$5,
+  each an increment record in the §5e/§5g mold, each diff
+  human-reviewed); **Phase 2** R3a
   serving bring-up + protocol smoke, R3b the paired baseline (the
   reproduction half; the baseline arm = the SAME open checkpoint the
   retrofit starts from; GPU-hours or hosted per-token, priced in the
-  proposal), then R4a–R4d when the collaborator's retrofit
+  proposal — the skeleton is MODEL_BACKEND_SEAM.md §9), then R4a–R4d
+  when the collaborator's retrofit
   checkpoint lands exact-pinned (the expansion half — C2/C3, which
   NO external study covers); **Phase 3** R5. Context: R1 question 1
   ANSWERED (LaCT, record §12; retrofit training COLLABORATOR-SIDE;
@@ -1343,10 +1414,11 @@ Repository state at handoff creation:
   sharpened to "eligibility boundary = the run's retrieval set?";
   official LaCT code exists (ICLR 2026). Row 10's measurement
   (Session 43), the judge-calibration MEASUREMENT (Session 44), the
-  calibration DECISION (ACCEPT, Session 46), and the R2a census
-  (Session 46) are DONE and off this list. If the owner approves
-  nothing this session, the zero-paid §3 design record still stands
-  alone. OPERATIONAL NOTES (Windows): stopping
+  calibration DECISION (ACCEPT, Session 46), the R2a census
+  (Session 46), and the R2b design record (Session 47) are DONE and
+  off this list. If the owner approves
+  nothing this session, the zero-paid proposal-staging work in §3
+  still stands alone. OPERATIONAL NOTES (Windows): stopping
   `npm run dev:workers` through the session harness — OR a failed
   pipeline start (a missing `benchmark_logs/` directory broke a Tee
   and orphaned the npm tree, Session 38) — leaves stale consumers
@@ -1388,158 +1460,166 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 47 problem statement
+## 3. Session 48 problem statement
 
-**TTT-track rung R2b: the model-backend seam design record** — the
-HUMAN-authored, document-first spec (spec-before-pen, record §12.6)
-that turns the Session 46 census (`TEST_TIME_TRAINING.md` §13) into
-a buildable seam design from which the T-series task texts derive.
-Zero-paid; NO implementation. The facts a new session must act on:
+**TTT-track increment T1: the backend config surface, authored BY
+TRELLIS through the stage-2 self-edit harness** — the first
+feature-class increment of the ratified T-series
+(`TEST_TIME_TRAINING.md` §12.6), implementing exactly
+`MODEL_BACKEND_SEAM.md` §3 + §4 layer 1, scoped by the §8 T1
+skeleton. The facts a new session must act on:
 
-- **What R2b delivers, exactly four things** (record §12.6 items c/d
-  + the skeletons the T-series needs):
-  (a) **THE SPLIT-BACKEND DESIGN** — three separable choices, each
-  with its own seam: the root RLM completion (the two
-  `trellis_agent.py` `backend_kwargs` construction sites, lines
-  329/532 — the rlms verdict says the seam is additive kwargs:
-  `backend`, `model_name`, `base_url`, `api_key`), the worker
-  completions (model id ALREADY config-shaped via `EXTRACTION_MODEL`
-  → `config.llm.extractionModel`; only the transport is assumed —
-  seven zero-arg `new OpenAI()` sites), and the embedder (does NOT
-  move — the §4.2 non-goal, restated). Config-shaped, refusal-typed,
-  today's behavior as the byte-identical default.
-  (b) **THE CONFIG SURFACE STRAWMAN** — key names, zod bounds, and
-  the Python twin parse, in the `TRELLIS_RETRIEVAL_BUDGET_PER_RUN`
-  mold (TS validates fail-fast; Python re-validates with identical
-  bounds; unset = stripped = kernel default byte-identical).
-  Decisions the record MUST make, each with its reason: whether
-  `buildAgentEnv` strips ambient `OPENAI_BASE_URL` unconditionally
-  (the census §13.3 recommendation — backend choice expressible ONLY
-  through validated config, the `TRELLIS_MCP_SERVERS` discipline);
-  whether root-agent backend config rides `buildAgentEnv` as new
-  `TRELLIS_*` variables (T2's scope); whether the experimental
-  checker client (`trellis_agent.py:87,101`) follows the seam or
-  stays frozen; how a local endpoint's dummy `api_key` is expressed
-  without new credential handling (the `mcpCredentialEnv`
-  precedent); what counts-only telemetry (T16) a backend switch
-  emits.
-  (c) **THE T-INCREMENT TASK-TEXT SKELETONS** — T1 config surface
-  (keys + validation + typed refusals + unit pins; NO call-site
-  change), T2 `buildAgentEnv` forward/strip + unit pins (the
-  experiment-flag mold), T3 the `trellis_agent.py` construction-site
-  rewire (backend kwargs from validated env; default byte-identical;
-  the policy-2 substrate covers the file), T4 the fixture-endpoint
-  drill (a zero-LLM stub OpenAI-compatible server, the
-  `fixture_mcp_server.py` precedent — the stub MUST return `usage`
-  on completions, the rlms hard caveat from §13.1). Each skeleton
-  pre-states scope, named files, and the feature-class criterion
-  (the standing five + guarded-only `textedit_raw_splices == 0` +
-  the parse gate + the increment's new unit pins).
-  (d) **THE R3 PROPOSAL SKELETON** — R3a serving bring-up + protocol
-  smoke (FIRST assertion: the endpoint returns `usage` on
-  non-streaming completions), R3b the paired baseline; estimate
-  class in GPU-hours or hosted per-token dollars (the record §7 cost
-  doctrine; hosted endpoints stay under the ≤$5/run cap as-is).
-- **The record home:** `docs/architecture/MODEL_BACKEND_SEAM.md`
-  (its own file — the census stayed §13; the design record is the
-  artifact T-series task texts quote verbatim). If it comes out
-  small, appending as `TEST_TIME_TRAINING.md` §14 is acceptable —
-  record the choice either way.
-- **The inputs are RECORDED — do not re-derive them:** the census
-  §13.2 site table, the rlms verdict §13.1 with its caveats
-  (usage-required; token-utils compaction-only; `load_dotenv()` at
-  import; api-key resolution), and the §13.3 unmanaged
-  `OPENAI_BASE_URL` pass-through. Correct the census only with
-  evidence, recorded as a §13 addendum.
-- **The judge-calibration decision is RESOLVED** (owner picked
-  ACCEPT, Session 46, roadmap §5) — no presentation duty this
-  session; do not re-open without new data.
-- **The gate:** R2b needs no spend approval. Anything that spends —
-  T-series runs, serving infrastructure, model downloads, GPU or
-  hosted-endpoint spend — enters ONLY as its own owner-approved
-  proposal with its estimate.
+- **What T1 lands (the spec, quoted from MODEL_BACKEND_SEAM.md §8
+  T1 — the task text carries §3/§4/§8-T1 VERBATIM):** in
+  `src/config/index.ts` — the four optional keys
+  (`TRELLIS_RLM_BACKEND` `z.enum(['openai','vllm'])`,
+  `TRELLIS_RLM_MODEL` `z.string().min(1).max(256)`,
+  `TRELLIS_RLM_BASE_URL` `z.url()` + http/https refinement,
+  `TRELLIS_RLM_API_KEY_ENV` `z.string().min(1).max(128)`, all
+  `.optional()`); the three cross-field refusals (vllm requires
+  base URL; key-env requires base URL; a named key variable must
+  resolve non-empty at config load); the ambient `OPENAI_BASE_URL`
+  fail-fast guard with the typed message from §4 layer 1; the
+  `config.rlmBackend` export (`{ backend?, model?, baseUrl?,
+  apiKeyEnv? }` + the fail-fast resolved key value, never logged —
+  the `config.mcp.credentialEnv` precedent). In NEW
+  `src/config/rlm_backend.test.ts` (the per-topic
+  `textedit_bounds.test.ts` / `workspace_bounds.test.ts` mold) —
+  the pins: accept/refuse per key bound, each cross-field refusal,
+  the ambient guard, and unset-config byte-identity of the export.
+  **NO call-site change: no consumer reads `config.rlmBackend` in
+  T1** (T2/T3's scope). The kernel default model literal does NOT
+  move (it stays in `trellis_agent.py`, T3's scope).
+- **How it lands (the ratified rung class, §12.6):** Trellis AUTHORS
+  the diff under the stage-2 harness (`TRELLIS_EDIT_ROOT` at the
+  worktree, the increments-1/2 lineage); humans review and land.
+  The task text derives from the design record verbatim (the record
+  lives in `docs/`, outside extraction scope — the substrate cannot
+  be queried about the spec, so the task text IS the spec channel);
+  the evidence contract is one recorded insight citing fetched
+  blocks (the natural target: the config seam molds the task reads —
+  `TRELLIS_RETRIEVAL_BUDGET_PER_RUN`'s validation block or the
+  `mcpCredentialEnv` resolution — through the Session 31 gate).
+- **The criterion (the feature-class mold, pre-stated in the
+  proposal):** the standing five items (named-file-only diff —
+  exactly `src/config/index.ts` + `src/config/rlm_backend.test.ts`;
+  the one recorded insight through the Session 31 gate;
+  `stage2:check` zero findings; human `git diff` review acceptance;
+  spend within estimate) PLUS guarded-only
+  (`textedit_raw_splices == 0`) PLUS the parse gate (both named
+  files are `.ts` — the single-file parse diagnostics are wired)
+  PLUS the increment's own new unit pins green (`npm test` grows by
+  the new file; ALL tests green, counts recorded).
+- **The estimate class:** stage-2 landed runs priced $0.347–$0.352
+  each; T1 is a comparable one-file-plus-new-test edit. Propose
+  ≈$0.40/run with a diagnosed-contingency allowance (the
+  increments-1/2 pattern: a failed run gets diagnosed, its class
+  closed, and retried as its own proposal) — total well under the
+  standing ≤$5 cap. Refresh-before-use and the post-landing refresh
+  add cents (Session 43's refresh: $0.0161).
+- **The gate:** the run is owner-approved per run. Present the
+  increment record + estimate at session START. Unapproved =
+  zero-paid session: stage the proposal (increment record, task
+  text, harness rehearsal) and hand off.
 
 ## 4. Required design
 
-- **Pre-flight (zero-paid):** confirm the Session 46 PR merged
-  (`git log -- HANDOFF.md`); `npm ci`; `npm test` (837/85 expected;
-  the worktree caveat in §2 stands); no stale-worker check needed —
-  R2b touches no queue.
-- **The record (zero-paid, document-first, the row-9/10/12 mold):**
-  sections mirroring §3's four deliverables — the three-way split
-  design, the config strawman with every named decision made and
-  reasoned, the four T-increment skeletons, the R3 proposal
-  skeleton. Every site referenced is quoted from the census §13
-  (site + line), not re-derived. The non-goals section restates
-  §4.2 (the embedder) and adds: NO implementation lands in R2b — T1
-  is the first code-touching step and enters as its own proposal.
-- **The molds to follow, named:** the env twin =
-  `TRELLIS_RETRIEVAL_BUDGET_PER_RUN` (config validates fail-fast,
-  `buildAgentEnv` forwards-or-strips, the Python twin re-validates
-  with identical bounds); the strip discipline =
-  `TRELLIS_MCP_SERVERS` / the experiment-flag deletions; the typed
-  refusal = the `Retrieval Discipline:` / workspace-bounds shapes;
-  the fixture drill = `scripts/fixture_mcp_server.py`; the increment
-  record = `REPOSITORY_INGESTION_REPORT.md` §5e/§5g.
-- **What does NOT change:** ANY code byte (a defect found = the
-  event-loop rule: record, fix if in-scope with pins in the same
-  commit, or queue-jump with the reason recorded); the rlms library;
-  any default, pin, gate, or prompt byte (both composed-prompt pins
-  stand).
-- **The refresh duty:** a docs-only PR owes nothing; code-touching
-  files (none expected) under the split-scope recipe.
+- **Pre-flight (zero-paid):** confirm the Session 47 PR merged
+  (`git log -- HANDOFF.md`); `npm ci`; `npm test` (837/85 expected);
+  `npm run stage2:check -- --pre` semantics per the harness (the
+  `--pre` gate refuses dirty state); the Windows stale-worker check
+  before any queue use (§2 operational notes).
+- **The increment record FIRST (document-first):** a new section in
+  `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` (the §5e/§5g
+  mold — §5h is the natural slot; record the choice) carrying: the
+  target (the §3 spec, quoted), the task text v1 (spec sections
+  verbatim + the run discipline below), the named failure modes and
+  which mechanical layer catches each, the run proposal with the
+  estimate, and the pre-stated criterion (§3). Present to the owner.
+- **Task-text discipline (the measured lessons, all three):**
+  guarded family ONLY with splice-minimal-span + coded
+  neighbor-preservation assertions (the §5g.3 v3 mold — the
+  retype-splice class); verify-then-submit in SEPARATE REPL cells
+  (the increment-1 run-1 lesson); evidence fetched from the live
+  substrate BEFORE editing (the §5g.2 re-verification step — the
+  policy-1 blocks for `src/config/index.ts` under `trellis#11`).
+- **Refresh-before-use:** `src/config` is unchanged since
+  `trellis#11`, so the substrate should already be current — verify
+  with the zero-paid dry-run plan echo (`repo:ingest` policy-1
+  split-scope, no `--confirm-extraction`); refresh only if the echo
+  shows drift.
+- **The run mechanics (the §5g.3/§5g.4 mold):** `stage2:check
+  --pre`; the run with `TRELLIS_EDIT_ROOT` at the worktree and the
+  named files declared; post-run gatherers (`stage2:check` all four
+  layers — scope, evidence, parse, comment-class not declared);
+  human `git diff` review reads the transcript and the diff
+  semantics (the layer the checker deliberately does not judge);
+  then the human runs `npm test` to prove the new pins green.
+- **Post-landing duties:** the split-scope policy-1 refresh for the
+  changed `src/config` files (owner-gated extraction spend, the
+  per-PR cadence); the roadmap §5 entry with actuals; HANDOFF
+  regeneration (§0 step 5 re-check).
+- **What does NOT change:** any call site (`config.rlmBackend` has
+  zero consumers in T1); `buildAgentEnv` (T2); `trellis_agent.py`
+  (T3); the rlms library; any default, pin, gate, or prompt byte
+  (both composed-prompt pins stand); the census (§13) and the design
+  record (corrections only with evidence, recorded).
+- **Failure handling:** a failed run gets the increments-1/2
+  treatment — diagnose, close the class mechanically (if the class
+  is new), retry as its own proposal. Never argue away a harness
+  flag; never re-run silently.
 
 ## 5. File-level starting points
 
-- `docs/architecture/TEST_TIME_TRAINING.md` §13 — the R2a census +
-  rlms verdict (THE input; §13.2 site table, §13.1 caveats, §13.3
-  the pass-through discovery and its recommendation); §12.6 — the
-  ratified chunking and the feature-class criterion; §7 — the ladder
-  and the cost doctrine the R3 skeleton follows.
-- `src/workers/rlm_job.ts` (`buildAgentEnv`) — the forward-or-strip
-  seam T2 will touch; the experiment-flag deletion block and the
-  unit-pin mold live here.
-- `src/config/index.ts` — `EXTRACTION_MODEL` (line 109, the
-  already-config-shaped worker model id) and
-  `TRELLIS_RETRIEVAL_BUDGET_PER_RUN` (line 133, the env-twin mold
-  with its design comment).
-- `src/rlm/trellis_agent.py` — the two construction sites (lines
-  329/532, T3's scope); `parse_retrieval_budget` /
-  `parse_workspace_bounds` (the Python twin validation mold); the
-  checker client (lines 87/101, the follows-or-frozen decision).
-- `scripts/fixture_mcp_server.py` — the T4 stub-server precedent.
-- `docs/architecture/RETRIEVAL_DISCIPLINE.md` §4 — the env-twin
-  design prose mold the config section follows.
-- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5e/§5g — the
-  increment-record mold the T-skeletons reference.
+- `docs/architecture/MODEL_BACKEND_SEAM.md` — THE spec: §3 (keys,
+  bounds, cross-field rules, credential three-part rule), §4
+  layer 1 (the ambient guard + its typed message), §8 T1 (scope,
+  named files, task-text skeleton, pins). Quote verbatim into the
+  task text.
+- `docs/architecture/TEST_TIME_TRAINING.md` §12.6 — the
+  feature-class rung definition and criterion mold; §13 — the
+  census (the site table backing every §3 fact).
+- `src/config/index.ts` — the env schema; the molds T1 mirrors:
+  `TRELLIS_RETRIEVAL_BUDGET_PER_RUN` (line 133, with its design
+  comment), `EXTRACTION_MODEL` (line 109), `A2A_AGENT_URL`
+  (`z.url()` house usage), the `mcpCredentialEnv` fail-fast
+  resolution and the `config.mcp.credentialEnv` export comment
+  (values never logged).
+- `src/config/textedit_bounds.test.ts` /
+  `src/config/workspace_bounds.test.ts` — the per-topic config test
+  mold the new pin file follows.
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5e.4 / §5g.3 /
+  §5g.4 — the run-proposal mold, the exact run mechanics and
+  command lines, and what a landed run's record looks like.
+- `src/benchmarks/selfedit/check.ts` + `npm run stage2:check` — the
+  harness; `test:selfedit-harness` — the zero-LLM rehearsal.
 
 ## 6. Test strategy and acceptance
 
-The expected machinery footprint is ZERO unless a defect is found
-(then the event-loop rule applies and pins move in the same commit,
-recorded).
+The expected machinery footprint IS the T1 diff (two named files) —
+authored by the run, landed by the human PR — plus this session's
+documents.
 
-- **Zero-paid:** the record complete — all four §3 deliverables
-  present; every named decision made WITH its reason (no "TBD"
-  cells: an undecidable point is recorded as an owner question, not
-  left blank); each T-increment skeleton carries scope, named files,
-  and the full feature-class criterion; the R3 skeleton carries its
-  estimate class; `npm test` 837/85 (or grown with a recorded
-  reason).
-- **Paid:** NOTHING in R2b. The R3 proposal is a document this
-  session — the run belongs to a future session under its own
-  approval; the T-series increments each enter as their own
-  proposals.
-- **The refresh duty:** per-PR split-scope for whatever this
-  session's PR changes; docs-only changes owe nothing.
-- Run `drill:scale` ALONE if run at all (never concurrent with other
-  live drills). A docs-only session may skip the live drill block
-  with the reason recorded — the Session 45/46 precedent; a session
-  that touches ANY non-markdown byte runs the full standing block
-  below.
+- **Zero-paid (unconditional):** the increment record complete in
+  the §5e/§5g mold with the criterion and estimate pre-stated; the
+  task text assembled with the spec verbatim; `stage2:check --pre`
+  green; `test:selfedit-harness` green (rehearsal unchanged —
+  environment-shaped count); the dry-run refresh plan echo read.
+- **Paid (owner-approved only):** the run(s), within estimate;
+  the full criterion of §3 judged item by item, counts recorded
+  (actuals in the roadmap §5 entry; telemetry counters echoed —
+  `textedit_raw_splices` MUST read 0).
+- **Post-landing:** `npm test` with the GROWN count recorded; the
+  full standing drill block (this session touches non-markdown
+  bytes); `drill:scale` ALONE; the isolated Compose integration in
+  the §2 CI mold; the split-scope policy-1 refresh for the changed
+  files.
+- **If the session ends zero-paid** (proposal staged, not approved):
+  the docs-only close-out mold applies (npm test + build +
+  python:check + compose config; live drills skipped with the
+  reason recorded — the Session 45–47 precedent).
 
-Required close-out (the standing block; see the docs-only note
-above):
+Required close-out (the standing block; docs-only note above):
 
 ```
  npm test
@@ -1573,25 +1653,26 @@ above):
 
 Update:
 
-- `TRELLIS_ROADMAP.md`: full-dated §5 entry (the record summary and
-  every decision it made; defects found, if any, with their
-  disposition); row 13's cell gains the R2b outcome.
-- `docs/architecture/MODEL_BACKEND_SEAM.md` (or
-  `TEST_TIME_TRAINING.md` §14 — record the choice): the seam design
-  record.
+- `TRELLIS_ROADMAP.md`: full-dated §5 entry (the proposal, the
+  run(s) with per-run outcomes and actuals, the criterion verdict
+  item by item, defects found with disposition); row 13's cell gains
+  the T1 outcome.
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`: the T1 increment
+  record (the §5h slot or the recorded alternative).
 - The per-PR refresh for this session's changed in-scope files
-  (split-scope recipe; docs-only owes nothing).
+  (split-scope recipe; a zero-paid session owes nothing).
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5
-  re-check. NOTE for objective selection: the RATIFIED queue makes
-  the default next objective **T1 (the config surface — the first
-  Trellis-edits-Trellis feature-class increment, entering as its own
-  owner-approved proposal built from R2b's T1 skeleton)**; the other
-  standing decisions (the stage-1b prose chunk, the row-12 rollout
-  continuation, row-11 defect-class increment 3 whenever a real
-  target surfaces) remain owner alternates. Keep the five-session
-  narrative window (43–47 after this session): compress Session 42
-  into the digest and move its roadmap §5 entry verbatim to
-  `docs/archive/ROADMAP_HISTORY.md`.
+  re-check. NOTE for objective selection: if T1 LANDED, the RATIFIED
+  queue makes the default next objective **T2 (the `buildAgentEnv`
+  forward/strip increment, from MODEL_BACKEND_SEAM.md §8 T2)**; if
+  T1 FAILED, the diagnosed retry is the default; if T1 was not
+  approved, re-present it. The other standing decisions (the
+  stage-1b prose chunk, the row-12 rollout continuation, row-11
+  defect-class increment 3 whenever a real target surfaces) remain
+  owner alternates. Keep the five-session narrative window (44–48
+  after this session): compress Session 43 into the digest and move
+  its roadmap §5 entry verbatim to `docs/archive/ROADMAP_HISTORY.md`
+  (and update the archive-pointer paragraph in the same commit).
 
 ## 7. Guardrails
 
@@ -1713,8 +1794,8 @@ Update:
    (shared edge lines) and names the minimal window; the
    honest-scope pin is deliberate — a correctly-declared removal
    manifest STAGES, and converting that documented residual into
-   prevention is a recorded design change, never a silent "fix"; the
-   telemetry split stays counts-only and additive; the guarded
+   prevention is a recorded design change, never a silent "fix";
+   the telemetry split stays counts-only and additive; the guarded
    family never becomes a write gate, never gains provenance
    standing, and never touches git; the rejected `py-tree-sitter`
    allowlist widening re-enters ONLY through the record's revisit
@@ -1751,7 +1832,18 @@ Update:
    increments are a class of their own — they never count as, and
    never weaken, the defect-class never-manufacture rule; each
    T-increment is owner-gated with the full criterion mold, every
-   diff human-reviewed, landing always a human PR).
+   diff human-reviewed, landing always a human PR), and the
+   Session 47 seam-design invariants (the T-series implements
+   MODEL_BACKEND_SEAM.md as written — a deviation discovered
+   mid-increment is a recorded design-record correction, never a
+   silent drift; backend choice is expressible ONLY through the
+   validated `TRELLIS_RLM_*` config surface once T1 lands — the
+   ambient `OPENAI_BASE_URL` disposition is refusal/strip/delete at
+   its three layers, never a fourth channel; the kernel default
+   model literal lives Python-side and unset config stays
+   byte-identical at every layer; credential values ride the
+   `mcpCredentialEnv` mold — name-indirection, fail-fast resolution,
+   never logged, never in argv or telemetry).
    The Session 37
    operator-cleanup precedent is BOUNDED, permanently: deleting a
    graph edge is legitimate only for a failed acceptance-run's own
@@ -1812,7 +1904,11 @@ Update:
    future TTT number is reported with the record's calibration
    attached (external evidence predicts stability-shaped gains at
    ~2× serving cost; behavioral criteria only, perplexity recorded
-   never criterial).
+   never criterial). Session 47's version: the seam design manages
+   the `OPENAI_BASE_URL` channel and closes the `load_dotenv()`
+   re-introduction for THAT VARIABLE only — the dotenv channel
+   stays open for other variables by design; never describe T1–T3
+   as having "sealed" the child's environment.
 9. Do not break existing consumers: the composed-prompt pins
    (`5d27e474…fe2a` default / `45987904…0b56` omit-arm since the
    July 12, 2026 prompt-engineering pass, `test:modules` [4]/[7])
@@ -1831,7 +1927,10 @@ Update:
    shape byte-for-byte; `parseSourceFile` WITHOUT `chunkingPolicy`
    (or with 1) stays byte-identical to Session 8 output; `splice`
    and every pre-Session-41 textedit method stay byte-identical for
-   existing callers; and the drills and probe scripts that fetch
+   existing callers; T1's config block is ADDITIVE — every existing
+   config consumer reads exactly what it read before, and unset
+   `TRELLIS_RLM_*` keys change nothing anywhere; and the drills and
+   probe scripts that fetch
    repeatedly today keep passing (their construction is bare by
    design).
 10. Respect the rlms prompt contract: extend `RLM_SYSTEM_PROMPT`,
@@ -1841,7 +1940,10 @@ Update:
     extraction text, hashes, and retrieved addresses never become
     metric label values; counts are label-bounded; entity names may
     appear in log CONTENT per the dropped-action precedent; operator
-    CLIs may print hashes (the `promote` precedent).
+    CLIs may print hashes (the `promote` precedent). Base URLs and
+    credential values join the never-a-label-value list (the
+    Session 47 record §7: `rlm_base_url_set` is a boolean echo, the
+    URL itself never appears).
 12. Keep API and worker processes split; project-scoped Compose
     commands; drills clean up token-scoped temp state only — the four
     probe corpora (`book:gutenberg-84:frankenstein`,
@@ -1895,34 +1997,41 @@ changing the `est` suite's pinned truths,
 bounds, or question set; changing the discipline machinery's refusal
 bytes, identities, telemetry shape, or wiring;
 the superseded-embedding SWEEP (storage reclamation, owner decision);
-any refresh extraction beyond the adopted per-PR cadence (Session 47
-owes one only for files its own PR changes — docs-only changes owe
-nothing);
+any refresh extraction beyond the adopted per-PR cadence (Session 48
+owes one only for files its own PR changes — a zero-paid session
+owes nothing);
 the row-12 rollout
 continuation (widening policy 2 beyond `src/rlm`, retuning the merge
 target or split threshold, or reverting the pilot); ANY paid run
-without explicit owner approval (R2 is zero-paid by construction —
-anything that spends is R3+ or another standing item, each needing
-the owner's yes on its pre-stated estimate and criterion);
-implementing ANY TTT or backend-seam machinery this session (R2b is
-a design record — no config key, no env twin, no code byte; seam
-CODE belongs to the T-series — each T-increment its own
-owner-approved proposal; serving infrastructure, model downloads,
-GPU or hosted-endpoint spend are Phase-2 owner-approved proposals);
-acting on the census §13.3 pass-through finding by editing
-`buildAgentEnv` inline (the strip decision is R2b's to DESIGN and
-T2's to LAND — it is recorded as not-a-defect); running any T-series
+without explicit owner approval (the T1 run itself included — the
+proposal is presented at session START and the run happens only on
+the owner's yes; serving infrastructure, model downloads, GPU or
+hosted-endpoint spend are Phase-2 owner-approved proposals);
+implementing T2/T3/T4 scope inside T1 (no call-site change, no
+`buildAgentEnv` byte, no `trellis_agent.py` byte, no fixture server
+— each is its own increment with its own proposal; a T1 diff that
+touches a call site FAILS the named-file/scope criterion); widening
+the backend enum beyond `openai`/`vllm`, adding config keys beyond
+the four specified, or "improving" the design record mid-increment
+(a deviation is a recorded design-record correction with owner
+visibility, never a silent drift); acting on the ambient
+`OPENAI_BASE_URL` disposition at any layer other than T1's (the
+`buildAgentEnv` delete is T2's, the agent-side delete is T3's —
+never inline edits); running any T-series
 increment without its own owner-approved proposal and increment
 record (ratification of the §12.6 chunking covers the SHAPE, never
 individual spend); conflating the feature-class rung with
 defect-target discovery (task-assigned increments are not
 "surfaced targets" and never satisfy or weaken the increment-3
 never-manufacture rule); modifying the rlms library in any
-form (the R2a inspection was READ-ONLY and is done; guardrail 10);
+form (guardrail 10);
 moving,
 re-keying, or re-embedding the embedding backend (schema-coupled
-`vector(1536)`; a substrate-identity event, out of R2's scope by
-the record's §4.2); persisting fast weights across runs, designing
+`vector(1536)`; a substrate-identity event, out of the T-series'
+scope by the record's §4.2 and MODEL_BACKEND_SEAM.md §2.3); giving
+the worker transport a config surface (deferred behind the
+completion/embedding client split — MODEL_BACKEND_SEAM.md §2.2, its
+own future proposal); persisting fast weights across runs, designing
 warm-start conveniences, or giving any adapted state provenance
 standing (per-run ephemeral is ABSOLUTE within the track;
 cross-run persistence needs its own design record); treating H1/H2
@@ -2015,7 +2124,9 @@ optimal (they close repeats and bound spend — guardrail 8); claiming
 structural chunking fixed retrieval (the pilot's item 3 FAILED as
 worded — guardrail 8); claiming the guarded splice family closed the
 run-2 class outright (guardrail 8 — the honest-scope pin exists
-precisely because it did not); ANY data-plane representation
+precisely because it did not); claiming T1–T3 "seal" the child
+environment (guardrail 8's Session 47 version — the dotenv residual
+stands); ANY data-plane representation
 migration at ANY boundary (the Session 27 verdict stands; re-entry
 only through the review's benchmark matrix with owner sign-off);
 importing polars in any `src/` path, kernel surface, or prompt;
@@ -2038,7 +2149,7 @@ Sessions 23–41 read 1.84x, 2.11x, 1.99x–2.01x, 1.78x, 1.99x,
 CLOSED — do not migrate on a noisy reading); T13 re-hashing; rlms
 library modifications; treating the checkout EOL-normalization churn
 class as a defect to "fix" in the ingestion layer (recorded
-environmental behavior, four observations); weakening the Session 14
+environmental behavior, five observations); weakening the Session 14
 write-path enforcement, the Session 15/20/22/24 composition pins,
 the Session 16 lineage pins, the Session 17 promotion refusals, the
 Session 18 registration gates, the Session 19 authoring-mode /

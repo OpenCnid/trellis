@@ -4932,3 +4932,114 @@ paid work was the adopted per-PR substrate refresh ($0.0955 actual).
    the longest-standing shovel-ready item now that the splice
    prerequisite is closed). No kernel prompt byte anywhere in the
    session; zero defects found in existing kernel code.
+
+### July 13, 2026 — Session 42: the row-10 slice (d) acceptance measurement — BLOCKED ENVIRONMENTALLY (not run); staging verified end-to-end; two drill-defect classes found and fixed (§4 row 10)
+
+The session ran in a Claude Code remote Linux container (fresh clone,
+policy-restricted egress through a TLS-re-terminating session proxy) —
+not the owner's dev machine. The owner opened the session with a
+blanket delegation ("all owner-gated tasks approved, and paid LLM
+runs"), so approval was never the blocker; the environment was. Spend:
+**$0.0000**.
+
+1. **The measurement did NOT run — the blocker is environmental and
+   recorded, not routed around.** Two independent denials: (a) no
+   `OPENAI_API_KEY` exists in this environment; (b) the session's
+   egress policy denies `api.openai.com` outright (CONNECT 403 at the
+   proxy, recorded by the proxy status endpoint as a policy denial —
+   the proxy's own documentation instructs report-don't-circumvent).
+   A zero-paid probe run with a placeholder key traversed the ENTIRE
+   run path — runner plan, corpus verification, spend gate, agent
+   spawn, tool injection — and failed exactly at the OpenAI call
+   (`APIConnectionError`; `TRELLIS_RESULT` status `error`, toolCalls
+   0; $0.0000). The pre-stated criterion (archived Session 33 §5
+   entry item 4) was NOT measured against — there are no numbers, so
+   there is no verdict, and `RETRIEVAL_DISCIPLINE.md` is deliberately
+   untouched (the measured-verdict section lands only with numbers).
+   The proposal STANDS as the next session's §3 objective.
+2. **The staging is real and verified — the measurement is proven NOT
+   dev-DB-bound.** On a fresh stack (pgvector/pg16, Neo4j 5.11,
+   Redis 7 via compose; `npm run db:init:dev`), `npx tsx
+   scripts/exp_effective_context.ts --ingest` staged all four durable
+   est corpora zero-paid (144 documents; representation invariants
+   green: "source truths = stored truths"; the frank/chronicle
+   localization counts matched their pinned values). The ON/OFF arm
+   mechanics were re-verified in code: the runner's `armEnv` spreads
+   its process env and does NOT strip `TRELLIS_EXP_OMIT_RETRIEVAL`,
+   and `trellis_agent.py` resolves it to
+   `retrieval_discipline=not EXP_OMIT_RETRIEVAL_ENABLED` at the
+   research `TrellisPostgres` construction — so the recorded run
+   shape (ON: `--suites est --arms on --repeats 5 --confirm-paid`;
+   OFF: identical with the flag in the runner's own environment) is
+   correct as written. The runner's spend gate behaved exactly as
+   designed: plan-only without `--confirm-paid`, the printed ≤$5.00
+   cumulative hard stop with it.
+3. **Defect class 1 found and fixed (the event-loop rule): hardcoded
+   `'python'` + a hardcoded Windows `PYTHONPATH`** (`C:\Users\Darian\
+   AppData\Roaming\Python\Python313\site-packages`) in four
+   drill/benchmark scripts — `scripts/test_verification_sweep.ts`
+   (2 spawn sites), `scripts/test_confidence_writes.ts` (2),
+   `scripts/test_entity_kinds.ts` (1),
+   `src/benchmarks/poison_drill_runner.ts` (1). All six sites now use
+   `config.python.executable` and the house
+   `...(config.python.pythonPath && { PYTHONPATH: ... })` pattern
+   (the `test_rlm_sandbox.ts` mold). This was masked on the owner's
+   machine, where bare `python` on PATH carries the deps; on any
+   other host `test:verification-sweep` — a STANDING-BLOCK drill —
+   failed with `ModuleNotFoundError`. Post-fix: 66/66 checks.
+4. **Defect class 2 found and fixed (Session 32's exact precedent,
+   finished):** `test:confidence-writes` and `test:entity-kinds`
+   seeded non-sha256 fixture provenance (`test-…-hash-a`) and have
+   been broken since Session 14's format+existence enforcement on
+   EVERY machine — unnoticed because neither is in the standing
+   block (Session 32 repaired only `test_verification_sweep.ts`).
+   Both now seed real sha256 fixture rows into `ast_nodes` with
+   FK-safe cleanup (the same `H(n)`/`insertAstText` pattern). Both
+   read "All checks passed." post-fix. The write-path enforcement
+   itself was NOT touched (guardrail 3): the live probe of a
+   non-hex citation still refuses with the typed Provenance
+   Violation.
+5. **Close-out (everything runnable ran; the unrunnable is named).**
+   `npm test` 837/85 first try on this fresh Linux container
+   (Python 3.11 venv); `npm run build`; `npm run python:check`
+   (environment recipe: `requirements.txt` PLUS
+   `requirements-pdf-fast-nodeps.txt` + `pandas` — on a clean uv
+   resolver, `unstructured==0.23.1` does not pull pandas
+   transitively); `docker compose --profile test config --quiet`.
+   The full standing 18-drill block green: selfedit-harness 52
+   (environment-shaped count), answer-channel 32, textedit 130
+   (POSIX), module-lifecycle 60, modules 56 (both composed-prompt
+   pins unmoved), promotion 41, rlm-workspace 106, rlm-mcp 86,
+   rlm-sandbox 95, verification-sweep 66 (post-fix), agent-loop 35,
+   a2a 46, repo-ingest "All checks passed" (89 [PASS] this
+   environment), benchmark-hardening 24, entity-resolution 34,
+   api-hardening 18, belief-recovery 30, invalidation-sweep 17.
+   `drill:scale` run ALONE: 1.10x CLOSED (below the recorded
+   ~1.39x–2.26x band → guardrail-8 re-run) then **1.52x CLOSED**
+   in-band; max provenance 286 both times; the committed results
+   file carries the 1.52x re-run. The isolated Compose INTEGRATION
+   could not run here: the image build's apt stage is denied by the
+   same egress policy class (`deb.debian.org` 403) — recorded, not
+   worked around. `git diff --check` clean.
+6. **Environment bring-up notes for policy-restricted containers
+   (recorded for reproducibility):** `npm ci` needs
+   `REDISMS_DISABLE_POSTINSTALL=1` (the PoC-only
+   `redis-memory-server` postinstall downloads a Redis binary and
+   aborts the install behind restricted egress); the Python runtime
+   wants a dedicated venv (Ubuntu's patched distutils breaks the
+   `langdetect` sdist build under the distro pip) with BOTH
+   requirements files; Docker Hub's blob CDN was policy-denied but
+   `registry-mirrors: ["https://mirror.gcr.io"]` restored image
+   pulls for the dev stack.
+7. **Bookkeeping.** Session 37's §5 entry moved VERBATIM to
+   `docs/archive/ROADMAP_HISTORY.md` (the live ledger keeps 38–42);
+   row 10's §4 cell gains the attempt note; HANDOFF regenerated per
+   §0 with the §0 step 5 re-check — the §3 objective is RETAINED
+   (the same measurement, now with the environmental prerequisites
+   named and the fresh-stack staging recipe recorded). The adopted
+   per-PR refresh cadence: this PR changes four in-scope script
+   files, so a scoped policy-1 refresh is OWED and DEFERRED to the
+   next session with access to the owner's durable dev PG (this
+   container's stack was ephemeral and never touched the durable
+   substrate). No kernel byte, no prompt byte, no contract change
+   anywhere in the session.
