@@ -4238,3 +4238,120 @@ ladder complete.
    standing owner-conditional menu plus the increment-1 run itself
    carry forward).
 
+
+### July 13, 2026 — Session 36: Trellis-on-Trellis stage 2, increment 1 EXECUTED — the graph-informed self-edit run landed + the first freshness-policy refresh (§4 row 11 stage 2)
+
+The owner approved gated and paid runs for the session up front. Two
+paid steps ran: the increment-1 self-edit run (one contingency re-run
+after a diagnosed clean failure — both recorded below) and the scoped
+refresh. Total paid spend **$0.667** (runs $0.565 vs the ≤$0.90
+proposal; refresh $0.102 vs the ≈$0.05–$0.25 band).
+
+1. **Pre-flight (zero-paid), all green on the merged Session 35
+   baseline:** `npm ci`; `npm test` 771/81; `npm run build`;
+   `npm run python:check`; `docker compose config --quiet`;
+   `test:selfedit-harness` 39/39; then
+   `npm run stage2:check -- --pre --entity get_retrieved_addresses
+   --named-file src/rlm/trellis_tools.py` → PASS, zero findings.
+   Edit root = this session's worktree checkout,
+   `git status --porcelain` empty before the spawn. The stale
+   Session 30 bytes confirmed still in place (the module comment and
+   the `get_retrieved_addresses` docstring).
+2. **Run 1 — FAILED at human `git diff` review; recorded, reverted,
+   diagnosed (criterion item 2; $0.2134 actual — 72,279 in / 3,268
+   out).** Spawn per the §5e.4 recipe (research mode,
+   `--max-iterations 12`, `TRELLIS_EDIT_ROOT` = the clean checkout,
+   `TRELLIS_CITATION_AUDIT=1`; task text verbatim). The run resolved
+   the graph entity, fetched the provenance and consumer blocks,
+   produced a CORRECT hunk A — then mis-ranged hunk B's splice
+   ([93,95) covered the `def` line instead of the docstring tail),
+   observed the wrong diff preview and wrote back anyway, repaired
+   with a second splice that still left the stale docstring tail as
+   dead bytes below the function body, and — decisive — placed its
+   final verification read and `trellis_answer.submit` in the SAME
+   REPL cell, so the printout showing the leftover stale line could
+   not inform the already-submitted success claim. The file was left
+   syntax-broken (`SyntaxError: unmatched ')'` at line 100) with 11
+   LF-only replacement lines. `stage2:check` reported zero findings
+   (scope and evidence chain were genuinely clean — the checker
+   proves consultation and scope, not diff semantics; §5e.2's honest
+   scope, working as recorded) and the failure was caught exactly
+   where the criterion places it: human `git diff` review. The
+   toolkit behaved per contract throughout (splice did what was
+   asked; `diff` told the truth; `write_back` wrote). Failure class:
+   the run's own localization/verify discipline — verify-then-submit
+   collapsed into one cell. Diff preserved at
+   `benchmark_logs/session36_run1_failed_diff.patch` (gitignored);
+   working tree reverted; original bytes re-verified compiling.
+3. **Run 2 — the contingency re-run (identical spawn, task text
+   byte-identical): LANDED ($0.3520 actual — 120,135 in / 5,165
+   out).** All five criterion items: **(1)** named-file-only diff
+   (`git status --porcelain` = exactly `src/rlm/trellis_tools.py`);
+   **(2)** the pre-scoped edit — two comment/docstring-only hunks,
+   zero executable lines, both stale claims excised, the correction
+   naming `_verify_hashes_retrieved` and the
+   `retrieved_addresses_check` seam with bare construction noted,
+   the NOT-experiment-gated and telemetry sentences preserved —
+   human-reviewed via the ordinary session-PR review (§5e.4's
+   recorded location for it); **(3)** `stage2:check` zero findings
+   (evidence edge present/uncontested, hashes live, bridged to the
+   named file); **(4)** counts and diff together: 8 db tool calls, 5
+   retrieval fetches / 1 dedup refusal / 0 budget refusals
+   (retrieval discipline observed live in a real run), 33 textedit
+   ops / 1 write_back, `answer_submits` 1, `py_compile` green,
+   `npm test` 771/81 + `python:check` + `test:textedit` green with
+   the diff applied; **(5)** no harness flag. The run recorded ONE
+   derived insight (`_verify_hashes_retrieved` `consumes`
+   `get_retrieved_addresses`) citing the two consumer blocks it
+   fetched (`66750136…`, `3e478e14…`) — the Session 31 gate makes
+   that write proof of consultation. Two long unwrapped comment
+   lines (style-only) accepted at review. Three replacement lines
+   are LF-only in the working copy; git normalizes on commit
+   (in-repo representation unchanged).
+4. **The refresh demonstration — the freshness policy's first
+   execution ($0.102 actual — 14,751 in / 6,531 out / 5,991
+   embedding tokens; 24 jobs, zero failures).** Stale-consumer check
+   (none), fresh workers, zero-paid plan echo FIRST:
+   `repo:ingest --repo-key trellis --root . --include src --include
+   scripts --include modules --extract changed --max-blocks 200
+   --confirm-extraction --dry-run` → 8 files to ingest (Session 35's
+   harness files + the landed edit), 59-block paid bound, 0
+   tombstones. Confirmed run published snapshot `trellis#2`: 8
+   ingested / 295 unchanged / 24 blocks queued (19 test/fixture
+   excluded); `trellis_tools.py` → version 2 (root `ca3e9a28…`, 3
+   orphaned / 3 added / 38 retained). Churn loop verified live with
+   counts: the old docstring block `1f594ea9…` is DEAD in v2
+   (membership 0) and the invalidation sweep CONTESTED the stage-1
+   `returns_copy_of` ACTION edge (provenance preserved in
+   `orphanedSourceIds` — audit-preserving quarantine, as built);
+   run 2's insight edge SURVIVED uncontested because it cites the
+   unedited consumer blocks — the evidence outlived the edit it
+   justified (better than the handoff's prediction that it would
+   contest; recorded as observed). Recovery: an operator
+   re-derivation citing the NEW v2 block
+   (`09281f45…`) wrote the live `returns_copy_of` belief through the
+   ordinary write path; the contested ACTION edge remains as the
+   audit record per the standard lazy-recovery precedent — the
+   refresh's own re-extraction did NOT spontaneously reproduce that
+   exact triple (extraction variance, the recorded base-rate
+   behavior; 1 generic-identifier suppression and 2 unresolved
+   endpoints counted across the 24 jobs).
+5. **Close-out (all green):** `npm test` 771/81; `npm run build`;
+   `python:check`; `docker compose --profile test config --quiet`;
+   the full standing drill block including `test:selfedit-harness`
+   (ALL CHECKS PASSED × 18 suites); `drill:scale` run ALONE — 1.63x
+   CLOSED (in-band ~1.48x–2.26x, first try; max provenance 286;
+   results file committed per house practice). Isolated Compose
+   integration as project `trellis_s36_ci` (host ports 0, torn down
+   with `--volumes`): 11/11 PASS (no manifest changed — all layers
+   cached). `git diff --check` clean. No defect found in existing
+   machinery: run 1's failure was the run's, not the harness's, and
+   every harness behavior matched its pins.
+6. **Documentation window (owner rule).** The Session 31 §5 entry
+   moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the live
+   ledger keeps the most recent five sessions: 32–36);
+   `REPOSITORY_INGESTION_REPORT.md` gained §5e.5 (the measured-run
+   record); HANDOFF regenerated per §0 — next objective selected as
+   stage-2 increment 2 (run landed AND refresh ran, per the
+   recorded selection rule), owner-scoped.
+

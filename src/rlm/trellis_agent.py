@@ -567,7 +567,8 @@ def main():
             # path, pattern, or content (T16). Like mcp_calls, none of it
             # feeds the provenance requirement.
             **(textedit.stats() if textedit is not None else
-               {"textedit_ops": 0, "textedit_files": 0, "textedit_writes": 0}),
+               {"textedit_ops": 0, "textedit_files": 0, "textedit_writes": 0,
+                "textedit_guarded_ops": 0, "textedit_raw_splices": 0}),
             # Session 22: how many times the run set its answer through
             # the mediated by-reference channel — a count only, additive
             # (the Node scanner tolerates and ignores unknown fields).

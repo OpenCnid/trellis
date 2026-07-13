@@ -39,6 +39,19 @@ no staged splices re-writes the file byte-identically; CR characters in
 CRLF files stay embedded in line content and survive moves verbatim.
 Addresses are 0-based, half-open [start, end) — Python slice semantics,
 computed by `locate`, never estimated by the model.
+
+The guarded splice family (Session 41; design record
+docs/architecture/STRUCTURAL_SPLICE.md): `replace_lines`,
+`insert_lines`, and `delete_lines` are anchor-guarded, minimal-span
+staging operations — every call states the exact bytes it removes (or
+inserts beside) and the engine verifies that statement against the
+frame byte-exactly BEFORE staging; divergence raises
+AnchorMismatchError and stages nothing. A window sharing an unchanged
+leading/trailing line between expected and new content is refused as
+over-wide with the minimal window named. This is the mechanical answer
+to the retype-splice neighbor-deletion class (the record's §1): the
+removal set is an explicit, verified declaration, never a side effect
+of an index pair. `splice` is unchanged for existing callers.
 """
 
 import hashlib
@@ -74,6 +87,14 @@ class StaleFileError(Exception):
     """Raised by write_back when the bytes on disk no longer match the
     load-time digest: the file moved underneath the frame. The remedy is
     re-load and re-derive — never a silent overwrite (§2.6)."""
+
+
+class AnchorMismatchError(Exception):
+    """Raised by the guarded splice family (Session 41,
+    STRUCTURAL_SPLICE.md §3) when the caller's stated bytes diverge
+    from the held frame: the model's belief about the window drifted.
+    Nothing is staged. The remedy is re-read (`lines`/`locate`) and
+    re-derive by query — never retype lines from memory."""
 
 
 def _require_bound(value, name, default, cap):
@@ -138,6 +159,8 @@ class TrellisTextEdit:
         self._lock = threading.RLock()
         self._ops = 0
         self._writes = 0
+        self._raw_splices = 0
+        self._guarded_ops = 0
         self._frames = {}
 
     # --- internal helpers ------------------------------------------------
@@ -362,6 +385,7 @@ class TrellisTextEdit:
                 )
             frame["lines"] = staged
             frame["splices"] += 1
+            self._raw_splices += 1
             return json.dumps({
                 "path": key,
                 "start": start,
@@ -370,6 +394,224 @@ class TrellisTextEdit:
                 "inserted": len(new_lines),
                 "lineCount": len(staged),
                 "pendingSplices": frame["splices"],
+            })
+
+    # --- the guarded splice family (Session 41, STRUCTURAL_SPLICE.md) ----
+
+    @staticmethod
+    def _require_guarded_lines(name, value):
+        """The splice line-list contract, applied to a guarded argument:
+        a list of newline-free strings ("\\r" is an ordinary byte within
+        a line, the CRLF precedent)."""
+        if not isinstance(value, list) or any(not isinstance(l, str) for l in value):
+            raise ValueError(
+                f"{name} must be a LIST of strings (one per line) — got "
+                f"{type(value).__name__}."
+            )
+        for l in value:
+            if "\n" in l:
+                raise ValueError(
+                    f"{name} entries must not contain newline characters; split the "
+                    "text into one string per line first (text.split('\\n'))."
+                )
+
+    def _verify_anchor_lines(self, key, frame, start, expected_lines, name):
+        """Byte-exact verification of the caller's stated bytes against
+        the frame. Divergence raises AnchorMismatchError naming the
+        first divergent absolute line with bounded previews — nothing
+        is staged."""
+        for offset, expected in enumerate(expected_lines):
+            actual = frame["lines"][start + offset]
+            if actual != expected:
+                raise AnchorMismatchError(
+                    f"Anchor mismatch for {key!r} at line {start + offset} ({name}): "
+                    f"expected {expected[:TEXTEDIT_PREVIEW_CHARS]!r}, the frame holds "
+                    f"{actual[:TEXTEDIT_PREVIEW_CHARS]!r}. Nothing was staged. Re-read "
+                    f"the window with trellis_textedit.lines() and re-derive the edit "
+                    f"by query — never retype lines from memory."
+                )
+
+    def _stage_window(self, key, frame, start, end, new_lines):
+        """Shared staging for the guarded family: the splice staging
+        semantics (budget check first, nothing staged on refusal),
+        counted as a guarded operation."""
+        staged = frame["lines"][:start] + new_lines + frame["lines"][end:]
+        staged_bytes = self._frame_bytes(staged)
+        if staged_bytes > self._max_file_bytes:
+            raise TextEditBudgetError(
+                f"File budget exceeded: the staged frame for {key!r} would be "
+                f"{staged_bytes} bytes, over the {self._max_file_bytes}-byte per-file "
+                f"maximum (current usage: {json.dumps(self._usage())})."
+            )
+        frame["lines"] = staged
+        frame["splices"] += 1
+        self._guarded_ops += 1
+        return staged
+
+    def replace_lines(self, relpath, start, end, expected_lines, new_lines) -> str:
+        """The guarded replacement (STRUCTURAL_SPLICE.md §3.1): replaces
+        working lines[start:end] with new_lines ONLY after verifying
+        that expected_lines byte-matches the removed window. The removal
+        set is an explicit declaration, never a side effect of an index
+        pair. A window sharing an unchanged leading/trailing line with
+        new_lines is refused as over-wide with the minimal window named
+        — unchanged neighbors stay OUTSIDE a guarded edit. Nothing
+        touches disk until write_back."""
+        self._count_op()
+        self._require_guarded_lines("expected_lines", expected_lines)
+        self._require_guarded_lines("new_lines", new_lines)
+        if not expected_lines:
+            raise ValueError(
+                "replace_lines() needs a non-empty expected_lines — a pure "
+                "insertion is insert_lines()."
+            )
+        if not new_lines:
+            raise ValueError(
+                "replace_lines() needs a non-empty new_lines — a pure deletion "
+                "is delete_lines()."
+            )
+        with self._lock:
+            key, frame = self._require_frame(relpath)
+            self._require_index_pair(start, end, len(frame["lines"]))
+            if end - start != len(expected_lines):
+                raise ValueError(
+                    f"expected_lines must state exactly the removed window: "
+                    f"[{start}, {end}) is {end - start} line(s) but "
+                    f"{len(expected_lines)} expected line(s) were given."
+                )
+            self._verify_anchor_lines(key, frame, start, expected_lines, "expected_lines")
+            if expected_lines == new_lines:
+                raise ValueError(
+                    f"expected_lines and new_lines are identical for {key!r}: the "
+                    f"window is entirely unchanged neighbors — nothing to edit."
+                )
+            lead = 0
+            max_lead = min(len(expected_lines), len(new_lines))
+            while lead < max_lead and expected_lines[lead] == new_lines[lead]:
+                lead += 1
+            trail = 0
+            max_trail = min(len(expected_lines), len(new_lines)) - lead
+            while trail < max_trail and expected_lines[-1 - trail] == new_lines[-1 - trail]:
+                trail += 1
+            if lead or trail:
+                raise ValueError(
+                    f"Over-wide window for {key!r}: expected_lines and new_lines "
+                    f"share {lead} leading and {trail} trailing unchanged line(s); "
+                    f"unchanged neighbors stay OUTSIDE a guarded edit. The minimal "
+                    f"window is [{start + lead}, {end - trail}) — retry with the "
+                    f"{len(expected_lines) - lead - trail} changed expected line(s) "
+                    f"and the {len(new_lines) - lead - trail} changed new line(s)."
+                )
+            staged = self._stage_window(key, frame, start, end, new_lines)
+            return json.dumps({
+                "path": key,
+                "start": start,
+                "end": end,
+                "removed": end - start,
+                "inserted": len(new_lines),
+                "lineCount": len(staged),
+                "pendingSplices": frame["splices"],
+                "guarded": True,
+            })
+
+    def insert_lines(self, relpath, at, new_lines,
+                     anchor_before=None, anchor_after=None) -> str:
+        """The guarded insertion (STRUCTURAL_SPLICE.md §3.2): inserts
+        new_lines at index `at` — nothing is removed, so nothing can be
+        dropped, by construction. At least one anchor is REQUIRED:
+        anchor_before is the expected full text of line at-1,
+        anchor_after of line at; each supplied anchor is verified
+        byte-exactly, which is what makes an address-drift insertion
+        refusable instead of silent."""
+        self._count_op()
+        self._require_guarded_lines("new_lines", new_lines)
+        if not new_lines:
+            raise ValueError("insert_lines() needs a non-empty new_lines list.")
+        for name, anchor in (("anchor_before", anchor_before),
+                             ("anchor_after", anchor_after)):
+            if anchor is not None:
+                if not isinstance(anchor, str):
+                    raise ValueError(
+                        f"{name} must be a string (the expected full text of the "
+                        f"neighboring line), got {type(anchor).__name__}."
+                    )
+                if "\n" in anchor:
+                    raise ValueError(
+                        f"{name} must be a single line (no newline characters)."
+                    )
+        if anchor_before is None and anchor_after is None:
+            raise ValueError(
+                "insert_lines() requires at least one anchor (anchor_before "
+                "and/or anchor_after): the expected text of a neighboring line "
+                "is what makes an address-drift insertion refusable. Read the "
+                "neighbors with trellis_textedit.lines() first."
+            )
+        with self._lock:
+            key, frame = self._require_frame(relpath)
+            line_count = len(frame["lines"])
+            if not isinstance(at, int) or isinstance(at, bool) or not 0 <= at <= line_count:
+                raise ValueError(
+                    f"at must be an integer insertion index in [0, {line_count}], "
+                    f"got {at!r}."
+                )
+            if anchor_before is not None:
+                if at == 0:
+                    raise ValueError(
+                        "anchor_before is impossible at index 0: no line exists "
+                        "above the insertion point."
+                    )
+                self._verify_anchor_lines(key, frame, at - 1, [anchor_before],
+                                          "anchor_before")
+            if anchor_after is not None:
+                if at == line_count:
+                    raise ValueError(
+                        f"anchor_after is impossible at index {at}: no line exists "
+                        f"below the insertion point."
+                    )
+                self._verify_anchor_lines(key, frame, at, [anchor_after],
+                                          "anchor_after")
+            staged = self._stage_window(key, frame, at, at, new_lines)
+            return json.dumps({
+                "path": key,
+                "at": at,
+                "inserted": len(new_lines),
+                "lineCount": len(staged),
+                "pendingSplices": frame["splices"],
+                "guarded": True,
+            })
+
+    def delete_lines(self, relpath, start, end, expected_lines) -> str:
+        """The guarded deletion (STRUCTURAL_SPLICE.md §3.3): removes
+        [start, end) ONLY after verifying that expected_lines
+        byte-matches the removed window. Deletion under the guarded
+        family is an explicit, verified declaration — never a retype
+        side effect."""
+        self._count_op()
+        self._require_guarded_lines("expected_lines", expected_lines)
+        if not expected_lines:
+            raise ValueError(
+                "delete_lines() needs a non-empty expected_lines stating exactly "
+                "the lines being removed."
+            )
+        with self._lock:
+            key, frame = self._require_frame(relpath)
+            self._require_index_pair(start, end, len(frame["lines"]))
+            if end - start != len(expected_lines):
+                raise ValueError(
+                    f"expected_lines must state exactly the removed window: "
+                    f"[{start}, {end}) is {end - start} line(s) but "
+                    f"{len(expected_lines)} expected line(s) were given."
+                )
+            self._verify_anchor_lines(key, frame, start, expected_lines, "expected_lines")
+            staged = self._stage_window(key, frame, start, end, [])
+            return json.dumps({
+                "path": key,
+                "start": start,
+                "end": end,
+                "removed": end - start,
+                "lineCount": len(staged),
+                "pendingSplices": frame["splices"],
+                "guarded": True,
             })
 
     def diff(self, relpath) -> str:
@@ -513,12 +755,17 @@ class TrellisTextEdit:
 
     def stats(self):
         """Bounded counters for the TRELLIS_TELEMETRY line (T16). Counts
-        only: never a path, a pattern, file content, or a digest."""
+        only: never a path, a pattern, file content, or a digest. The
+        Session 41 split (guarded vs raw staging counts) is the lever an
+        executable-class acceptance criterion can pre-state:
+        a guarded-only run is textedit_raw_splices == 0."""
         with self._lock:
             return {
                 "textedit_ops": self._ops,
                 "textedit_files": len(self._frames),
                 "textedit_writes": self._writes,
+                "textedit_guarded_ops": self._guarded_ops,
+                "textedit_raw_splices": self._raw_splices,
             }
 
 
@@ -533,6 +780,10 @@ TEXTEDIT_ADDENDUM = """
 - `trellis_textedit.lines(relpath, start, end)` returns the slice [start, end) as pairs of line index and text (bounded per call).
 - `trellis_textedit.locate(relpath, pattern, regex=False)` returns engine-computed line addresses for a content query: bounded hits plus the total count. LOCATE, NEVER COUNT: query for every address; never estimate a line number by reading the file.
 - `trellis_textedit.splice(relpath, start, end, new_lines)` stages the replacement of lines start..end with new_lines, a LIST of newline-free strings. Author only genuinely NEW lines; move existing text by slicing it out of the frame in code — never retype lines that already exist. Addresses are transient: re-locate after every splice.
+- PREFER THE GUARDED FAMILY for every edit. Each guarded call states the exact bytes it removes or inserts beside, and the engine verifies that statement against the frame BEFORE staging; a divergence raises AnchorMismatchError and stages nothing — re-read with lines() and re-derive, never retype from memory.
+- `trellis_textedit.replace_lines(relpath, start, end, expected_lines, new_lines)` replaces exactly [start, end): expected_lines must byte-match the removed lines. A window sharing an unchanged leading or trailing line with new_lines is refused as over-wide and the refusal names the minimal window — keep unchanged neighbors OUTSIDE the window.
+- `trellis_textedit.insert_lines(relpath, at, new_lines, anchor_before=None, anchor_after=None)` inserts at index `at` and removes nothing. At least one anchor — the expected full text of the neighboring line — is required and verified.
+- `trellis_textedit.delete_lines(relpath, start, end, expected_lines)` removes exactly the verified lines: deletion is an explicit declaration, never a retype side effect.
 - `trellis_textedit.diff(relpath)` shows a bounded unified diff of staged edits; `trellis_textedit.revert(relpath)` discards them; `trellis_textedit.drop(relpath)` frees a frame slot.
 - `trellis_textedit.write_back(relpath)` verifies the disk bytes still match the load-time digest, then writes the staged frame atomically. A digest mismatch RAISES and writes nothing: the file changed since load — re-load and re-derive your edits by query; never reconstruct them from memory.
 Budgets are bounded; over-budget operations raise with current usage. HARD RULE: toolkit operations have NO provenance standing — they never count as database tool calls, and file content is NEVER sourceNodeIds; database provenance stays mandatory for every answer and every cached insight.

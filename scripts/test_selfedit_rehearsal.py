@@ -13,10 +13,15 @@
 # zero findings. The violation arm plants both halves of the named
 # failure mode: it first attempts to cite a hash it never fetched
 # (the live gate must refuse — observed, not simulated), then edits a
-# file the task did not name (the checker must flag it). The tool
-# construction mirrors trellis_agent.py research wiring: a
-# discipline-enabled TrellisPostgres and a TrellisNeo4j carrying both
-# the existence check and the retrieved_addresses_check seam.
+# file the task did not name (the checker must flag it). The guarded
+# arm (Session 41, STRUCTURAL_SPLICE.md §6 item 4) drives the same
+# real sequence through the guarded splice family: one OBSERVED
+# AnchorMismatchError refusal (a retyped-from-memory expected line),
+# the taught self-correction (re-read, then the minimal verified
+# replace), write_back, and the gated write. The tool construction
+# mirrors trellis_agent.py research wiring: a discipline-enabled
+# TrellisPostgres and a TrellisNeo4j carrying both the existence
+# check and the retrieved_addresses_check seam.
 import argparse
 import json
 import os
@@ -29,12 +34,12 @@ from trellis_tools import (  # noqa: E402
     TrellisPostgres,
     get_retrieved_addresses,
 )
-from trellis_textedit import TrellisTextEdit  # noqa: E402
+from trellis_textedit import AnchorMismatchError, TrellisTextEdit  # noqa: E402
 
 
 def main():
     parser = argparse.ArgumentParser(description="Stage-2 self-edit rehearsal")
-    parser.add_argument("--mode", choices=["clean", "violation"], required=True)
+    parser.add_argument("--mode", choices=["clean", "violation", "guarded"], required=True)
     parser.add_argument("--edit-root", required=True)
     parser.add_argument("--target-entity", required=True,
                         help="Fixture entity whose ACTION provenance the rehearsal reads")
@@ -51,6 +56,9 @@ def main():
         "cypher_hashes": [],
         "fetched": False,
         "gate_refusal": None,
+        "anchor_refusal": None,
+        "guarded_ops": 0,
+        "raw_splices": 0,
         "insight_written": False,
         "writes": [],
     }
@@ -81,9 +89,31 @@ def main():
         editor.load("notes.txt")
         located = json.loads(editor.locate("notes.txt", "STALE:"))
         hit = located["hits"][0]["line"]
-        editor.splice("notes.txt", hit, hit + 1,
-                      ["CORRECTED: slice (d) is live; the write gate consumes the set."])
+        corrected = "CORRECTED: slice (d) is live; the write gate consumes the set."
+        if args.mode == "guarded":
+            # 3a. The guarded arm: FIRST a retyped-from-memory expected
+            #     line — the live AnchorMismatchError refusal, observed,
+            #     never simulated (the Session 36 run-1 class refused at
+            #     the call site).
+            try:
+                editor.replace_lines(
+                    "notes.txt", hit, hit + 1,
+                    ["STALE: slice (d) would constrain this set; nothing reads it."],
+                    [corrected],
+                )
+                result["anchor_refusal"] = "MISSING: the guard accepted diverged bytes"
+            except AnchorMismatchError as e:
+                result["anchor_refusal"] = str(e)
+            # 3b. The taught self-correction: re-READ the actual line,
+            #     then the minimal verified replacement.
+            actual = json.loads(editor.lines("notes.txt", hit, hit + 1))["lines"][0][1]
+            editor.replace_lines("notes.txt", hit, hit + 1, [actual], [corrected])
+        else:
+            editor.splice("notes.txt", hit, hit + 1, [corrected])
         editor.write_back("notes.txt")
+        stats = editor.stats()
+        result["guarded_ops"] = stats["textedit_guarded_ops"]
+        result["raw_splices"] = stats["textedit_raw_splices"]
         result["writes"].append("notes.txt")
 
         if args.mode == "violation":

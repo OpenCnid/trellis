@@ -200,7 +200,17 @@ moving, and the model estimating where text lives.
    between the last re-hash and `os.replace`; it does not eliminate it —
    full elimination needs OS file locking, deliberately out of scope. A
    second writer landing inside the residual window is still silently
-   overwritten; the window is documented, not denied.
+   overwritten; the window is documented, not denied. **Session 41
+   (July 13, 2026): the guarded splice family** — the mechanical closure
+   of the retype-splice neighbor-deletion class this section's §1
+   pathology predicted and Sessions 36/37 observed live
+   (`replace_lines`/`insert_lines`/`delete_lines`: byte-exact verified
+   removal manifests, anchor-guarded insertion, minimal-span refusals;
+   `AnchorMismatchError` teaches re-derive-by-query). The engine
+   decision (parser-free anchor guards over stdlib `ast`,
+   `py-tree-sitter`, or an engine-side service) and the honest
+   prevents-vs-detects scope are its own record:
+   `docs/architecture/STRUCTURAL_SPLICE.md`.
 2. **Kernel prompt revision** — **IMPLEMENTED (Session 20, July 9, 2026):**
    the candidate wording below was adopted verbatim into
    `TRELLIS_ADDENDUM_BASE` in its own commit, with the `test:modules`

@@ -32,7 +32,14 @@
 #       independence is intentional, pinned in both orders,
 #  [13] guard adversarial checks (audit #6) — one check per previously
 #       untested guard branch, plus the static no-subprocess/no-git
-#       import guard (audit #8).
+#       import guard (audit #8),
+#  [14] the guarded splice family (Session 41, STRUCTURAL_SPLICE.md) —
+#       anchor-verified minimal-span staging: the Session 36 run-1
+#       address-drift shape refuses, the over-wide neighbor retype
+#       refuses with the minimal window named, the Session 37 run-2
+#       manifest shape STAGES (the honest-scope pin), the decomposed
+#       minimal edit lands with neighbors byte-intact, and guarded
+#       activity is counted separately from raw splices.
 import ast
 import hashlib
 import json
@@ -48,6 +55,7 @@ from trellis_textedit import (  # noqa: E402
     TrellisTextEdit,
     TextEditBudgetError,
     StaleFileError,
+    AnchorMismatchError,
     TEXTEDIT_ADDENDUM,
     TEXTEDIT_SLICE_MAX_LINES,
     TEXTEDIT_LOCATE_MAX_HITS,
@@ -465,9 +473,12 @@ finally:
 print("\n[10] telemetry: counts only — never a path, pattern, or content")
 
 stats = ted.stats()
-check("stats() reports exactly the three counters",
-      set(stats) == {"textedit_ops", "textedit_files", "textedit_writes"}
+check("stats() reports exactly the five counters (three -> five, Session 41)",
+      set(stats) == {"textedit_ops", "textedit_files", "textedit_writes",
+                     "textedit_guarded_ops", "textedit_raw_splices"}
       and stats["textedit_ops"] > 0 and stats["textedit_writes"] >= 2
+      and stats["textedit_raw_splices"] > 0
+      and stats["textedit_guarded_ops"] == 0
       and all(isinstance(v, int) for v in stats.values()))
 check("toolkit activity never increments the database tool-call count",
       get_tool_call_count() == 0)
@@ -661,6 +672,156 @@ check("toolkit imports stay inside the pinned stdlib set",
 check("no git or subprocess token anywhere in the toolkit source",
       re.search(r"\bgit\b", toolkit_source) is None
       and "subprocess" not in toolkit_source)
+
+# --- 14. The guarded splice family (Session 41, STRUCTURAL_SPLICE.md) --------
+print("\n[14] guarded splice family: anchor-verified, minimal-span staging")
+
+g_root = make_root()
+# The Session 37 run-2 neighborhood shape (REPOSITORY_INGESTION_REPORT.md
+# §5f.5): a stale comment window above an executable line and a second
+# comment head — the neighbors the retype-splice silently dropped.
+g_seed = [
+    "def main():",
+    "    stats = {",
+    '        "answer_submits": get_answer_submit_count(),',
+    "        # Session 30: the size of the retrieved-address set -- a",
+    "        # count only, never the addresses (T16). Bookkeeping;",
+    "        # slice (d) will constrain citable addresses to the set.",
+    '        "retrieved_addresses": get_retrieved_address_count(),',
+    "        # Session 33: retrieval-discipline activity -- counts",
+    "        # only, never an identity (T16).",
+    "    }",
+    "    return stats",
+    "",
+]
+write_file(g_root, "telemetry.py", "\n".join(g_seed).encode("utf-8"))
+gted = TrellisTextEdit(g_root)
+gted.load("telemetry.py")
+
+# (a) The Session 36 run-1 class: the model's belief about the removed
+# bytes has drifted from the frame — refused before anything stages.
+drifted = ["        # slice (d) would constrain citable addresses to the set."]
+fresh = ["        # slice (d) is live: the constructor seam wires the set."]
+expect_raises("the run-1 shape (address drift) refuses: stated bytes diverge from the frame",
+              lambda: gted.replace_lines("telemetry.py", 5, 6, drifted, fresh),
+              AnchorMismatchError, "anchor mismatch")
+expect_raises("the anchor refusal teaches re-derive, never retype",
+              lambda: gted.replace_lines("telemetry.py", 5, 6, drifted, fresh),
+              AnchorMismatchError, "never retype lines from memory")
+check("the anchor refusal staged nothing",
+      json.loads(gted.diff("telemetry.py"))["pendingSplices"] == 0)
+
+# (b) The minimality rule: a window sharing an unchanged leading line
+# with new_lines is over-wide — refused, with the minimal window named.
+expect_raises("an over-wide window with a retyped unchanged neighbor refuses",
+              lambda: gted.replace_lines("telemetry.py", 4, 6,
+                                         [g_seed[4], g_seed[5]],
+                                         [g_seed[4], fresh[0]]),
+              ValueError, "over-wide")
+try:
+    gted.replace_lines("telemetry.py", 4, 6, [g_seed[4], g_seed[5]], [g_seed[4], fresh[0]])
+    check("the over-wide refusal names the minimal window", False, "nothing raised")
+except ValueError as e:
+    check("the over-wide refusal names the minimal window", "[5, 6)" in str(e), str(e))
+
+# (c) The honest-scope pin (STRUCTURAL_SPLICE.md §4): the EXACT run-2
+# shape driven through replace_lines with a fully-correct removal
+# manifest STAGES — the removal of the executable neighbor is now an
+# explicit verified declaration, not prevented. Asserted deliberately.
+manifest = json.loads(gted.replace_lines(
+    "telemetry.py", 5, 8,
+    [g_seed[5], g_seed[6], g_seed[7]],
+    ["        # slice (d) is live: this file wires the accessor into",
+     "        # the write gate through the constructor seam on",
+     "        # research runs."]))
+check("the run-2 manifest shape STAGES (removal explicit, not prevented — honest scope)",
+      manifest["guarded"] is True and manifest["removed"] == 3 and manifest["inserted"] == 3)
+gted.revert("telemetry.py")
+
+# (d) The decomposed correct edit: replace ONLY the changed line; the
+# executable neighbor is outside the operation and survives on disk.
+gted.replace_lines("telemetry.py", 5, 6, [g_seed[5]], fresh)
+gted.write_back("telemetry.py")
+g_after = read_file(g_root, "telemetry.py").decode("utf-8").split("\n")
+check("the decomposed minimal edit landed with the executable neighbor byte-intact",
+      g_after[5] == fresh[0] and g_after[6] == g_seed[6] and g_after[7] == g_seed[7])
+
+# (e) Anchored insertion: nothing is removed by construction; a missing
+# or diverged anchor refuses.
+ins = json.loads(gted.insert_lines("telemetry.py", 2, ["        # inserted marker line"],
+                                   anchor_before=g_seed[1], anchor_after=g_seed[2]))
+check("anchored insertion stages between its verified neighbors",
+      ins["at"] == 2 and ins["inserted"] == 1 and ins["guarded"] is True
+      and ins["lineCount"] == len(g_seed) + 1)
+gted.revert("telemetry.py")
+expect_raises("insertion with no anchor refuses",
+              lambda: gted.insert_lines("telemetry.py", 2, ["x"]),
+              ValueError, "at least one anchor")
+expect_raises("a diverged anchor_before refuses the insertion",
+              lambda: gted.insert_lines("telemetry.py", 2, ["x"],
+                                        anchor_before="    wrong = ("),
+              AnchorMismatchError, "anchor_before")
+expect_raises("anchor_before at index 0 is impossible",
+              lambda: gted.insert_lines("telemetry.py", 0, ["x"], anchor_before="anything"),
+              ValueError, "impossible")
+expect_raises("anchor_after at the end index is impossible",
+              lambda: gted.insert_lines("telemetry.py", len(g_seed), ["x"],
+                                        anchor_after="anything"),
+              ValueError, "impossible")
+
+# (f) Guarded deletion: an explicit verified declaration.
+write_file(g_root, "notes.txt", b"alpha\nbeta\ngamma\n")
+gted.load("notes.txt")
+expect_raises("a diverged expected_lines refuses the deletion",
+              lambda: gted.delete_lines("notes.txt", 1, 2, ["betaX"]),
+              AnchorMismatchError, "anchor mismatch")
+del_res = json.loads(gted.delete_lines("notes.txt", 1, 2, ["beta"]))
+check("guarded deletion removes exactly the declared verified line",
+      del_res["removed"] == 1
+      and json.loads(gted.lines("notes.txt", 0, 3))["lines"] == [[0, "alpha"], [1, "gamma"], [2, ""]])
+gted.revert("notes.txt")
+expect_raises("an empty expected_lines deletion refuses (state what you remove)",
+              lambda: gted.delete_lines("notes.txt", 0, 0, []),
+              ValueError, "non-empty")
+
+# (g) Wrong-verb and shape refusals keep the verbs honest.
+expect_raises("a pure insertion through replace_lines is steered to insert_lines",
+              lambda: gted.replace_lines("notes.txt", 0, 0, [], ["x"]),
+              ValueError, "insert_lines")
+expect_raises("a pure deletion through replace_lines is steered to delete_lines",
+              lambda: gted.replace_lines("notes.txt", 0, 1, ["alpha"], []),
+              ValueError, "delete_lines")
+expect_raises("a window/manifest length mismatch refuses before comparison",
+              lambda: gted.replace_lines("notes.txt", 0, 2, ["alpha"], ["A"]),
+              ValueError, "exactly the removed window")
+expect_raises("identical expected and new lines refuse as a no-op",
+              lambda: gted.replace_lines("notes.txt", 0, 1, ["alpha"], ["alpha"]),
+              ValueError, "identical")
+expect_raises("newline characters inside guarded new_lines are refused",
+              lambda: gted.replace_lines("notes.txt", 0, 1, ["alpha"], ["a\nb"]),
+              ValueError, "newline")
+
+# (h) Budgets: an over-budget guarded staging refuses with usage and
+# stages nothing (the section-7 mold).
+tiny = TrellisTextEdit(g_root, max_file_bytes=32)
+write_file(g_root, "tiny.txt", b"abcdef\n")
+tiny.load("tiny.txt")
+expect_raises("an over-budget guarded replacement refuses with usage",
+              lambda: tiny.replace_lines("tiny.txt", 0, 1, ["abcdef"], ["x" * 64]),
+              TextEditBudgetError, "budget exceeded")
+check("the over-budget guarded call staged nothing",
+      json.loads(tiny.diff("tiny.txt"))["pendingSplices"] == 0)
+
+# (i) Telemetry: guarded activity counts separately from raw splices
+# (the executable-class criterion lever: a guarded-only run is
+# textedit_raw_splices == 0), and the addendum teaches the family.
+g_stats = gted.stats()
+check("guarded activity is counted separately from raw splices",
+      g_stats["textedit_guarded_ops"] >= 4 and g_stats["textedit_raw_splices"] == 0)
+check("addendum teaches the guarded family and its anchor rule",
+      "replace_lines" in TEXTEDIT_ADDENDUM and "insert_lines" in TEXTEDIT_ADDENDUM
+      and "delete_lines" in TEXTEDIT_ADDENDUM and "AnchorMismatchError" in TEXTEDIT_ADDENDUM
+      and "GUARDED FAMILY" in TEXTEDIT_ADDENDUM)
 
 # ---------------------------------------------------------------------------
 for stale_root in temp_roots:

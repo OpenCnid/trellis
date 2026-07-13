@@ -34,6 +34,13 @@
 //      named_file_noncomment_change through the real git binary; the
 //      parse gate's structural blindness to the same edit is observed;
 //      a genuine comment-only edit stays silent.
+//   8. The rehearsal guarded arm (Session 41, STRUCTURAL_SPLICE.md §6
+//      item 4): the same real sequence through the guarded splice
+//      family — one OBSERVED AnchorMismatchError refusal (a
+//      retyped-from-memory expected line), the taught self-correction,
+//      a guarded-only telemetry split (raw_splices 0), the Session 31
+//      gated write, and the full checker at ZERO findings with the
+//      edited file's neighbors byte-intact.
 //
 // All database state is token-scoped: inserted by this drill, deleted
 // by this drill. The repo:trellis substrate is only ever READ.
@@ -101,7 +108,9 @@ const R_SUB = `selfedit rehearsal subject ${token}`;
 const R_OBJ = `selfedit rehearsal object ${token}`;
 const R_SUB2 = `selfedit rehearsal subject2 ${token}`;
 const R_OBJ2 = `selfedit rehearsal object2 ${token}`;
-const ALL_ENTITIES = [TARGET_ENTITY, DEP_ENTITY, P_SUB, P_OBJ, R_SUB, R_OBJ, R_SUB2, R_OBJ2];
+const R_SUB3 = `selfedit rehearsal subject3 ${token}`;
+const R_OBJ3 = `selfedit rehearsal object3 ${token}`;
+const ALL_ENTITIES = [TARGET_ENTITY, DEP_ENTITY, P_SUB, P_OBJ, R_SUB, R_OBJ, R_SUB2, R_OBJ2, R_SUB3, R_OBJ3];
 
 const scratchDirs: string[] = [];
 
@@ -151,11 +160,14 @@ interface RehearsalResult {
   cypher_hashes: string[];
   fetched: boolean;
   gate_refusal: string | null;
+  anchor_refusal: string | null;
+  guarded_ops: number;
+  raw_splices: number;
   insight_written: boolean;
   writes: string[];
 }
 
-async function runRehearsal(mode: 'clean' | 'violation', editRoot: string, subject: string, object: string): Promise<RehearsalResult> {
+async function runRehearsal(mode: 'clean' | 'violation' | 'guarded', editRoot: string, subject: string, object: string): Promise<RehearsalResult> {
   const script = path.resolve('scripts/test_selfedit_rehearsal.py');
   const { stdout } = await execFileAsync(
     config.python.executable,
@@ -563,6 +575,47 @@ async function main(): Promise<void> {
     'an unchanged file yields an empty diff and zero changed lines',
     untouchedDiff === '' && parseUnifiedDiffChangedLines(untouchedDiff).length === 0,
     JSON.stringify(untouchedDiff.slice(0, 80))
+  );
+
+  // --- [8] Rehearsal, guarded arm (Session 41, STRUCTURAL_SPLICE.md) ---
+  console.log('\n[8] scripted rehearsal — guarded splice family arm');
+  const repoF = await makeScratchRepo();
+  const guarded = await runRehearsal('guarded', repoF, R_SUB3, R_OBJ3);
+  check(
+    'the LIVE anchor guard refused the retyped-from-memory expected line',
+    typeof guarded.anchor_refusal === 'string' &&
+      guarded.anchor_refusal.includes('Anchor mismatch') &&
+      guarded.anchor_refusal.includes('never retype'),
+    String(guarded.anchor_refusal).slice(0, 200)
+  );
+  check(
+    'the run was guarded-only (the executable-class criterion lever)',
+    guarded.guarded_ops === 1 && guarded.raw_splices === 0,
+    JSON.stringify({ guarded_ops: guarded.guarded_ops, raw_splices: guarded.raw_splices })
+  );
+  check('the retrieval-gated insight write succeeded on the guarded arm', guarded.insight_written);
+  check('the guarded arm wrote only the named file', guarded.writes.length === 1 && guarded.writes[0] === 'notes.txt', JSON.stringify(guarded.writes));
+  const changedF = await gatherGitStatus(repoF);
+  const edgeGuarded = await gatherEvidenceEdge(R_SUB3, 'consumes', R_OBJ3);
+  const hashesGuarded = [];
+  for (const h of edgeGuarded.sourceNodeIds) hashesGuarded.push(await gatherHashEvidence(h));
+  const fullGuarded = evaluateSelfEditRun({
+    changedPaths: changedF,
+    namedFiles: ['notes.txt'],
+    docKeyPrefix: DOC_PREFIX,
+    edge: edgeGuarded,
+    hashes: hashesGuarded,
+  });
+  check('full checker reports ZERO findings on the guarded arm', fullGuarded.length === 0, JSON.stringify(fullGuarded));
+  const notesGuarded = await fs.promises.readFile(path.join(repoF, 'notes.txt'), 'utf-8');
+  const notesGuardedLines = notesGuarded.split('\n');
+  check(
+    'the guarded edit corrected the stale line with both neighbors byte-intact',
+    notesGuardedLines[0] === 'heading line' &&
+      notesGuardedLines[1].startsWith('CORRECTED:') &&
+      notesGuardedLines[2] === 'trailer line' &&
+      !notesGuarded.includes('STALE:'),
+    JSON.stringify(notesGuardedLines.slice(0, 3))
   );
 }
 
