@@ -3220,3 +3220,159 @@ cap raises; asserting on drill timings; the estimation-discipline
 positive control (next session, unchanged); module #2 default-selection
 entry or edits; extraction re-runs; reconstruction byte changes; a
 fifth probe round; frontend work; `ASTRef` migration.
+
+### July 11, 2026 — Session 28: the estimation-discipline positive control (§4 row 6 — machinery + the measured control)
+
+The Session 26 module #2 follow-through: the control machinery landed
+zero-paid, and the paired measurement ran the same day under the
+session's standing owner approval of paid/owner-gated tests. Branch
+`session-28-estimation-control`.
+
+1. **The probe module-arm flag (`TRELLIS_EXP_MODULES`, the
+   `TRELLIS_EXP_OMIT_CMT` mold).** New pure
+   `src/benchmarks/effective_context/module_arm.ts`:
+   `resolveProbeModuleSelection` returns the default selection when
+   the flag is unset (the serialized value is byte-identical to the
+   probe's historical hardcoded `'["spatial-flywheel"]'` — pinned in
+   `module_arm.test.ts`) and otherwise validates the JSON array
+   through the ORDINARY `parseModuleSelection` + `loadModules` path
+   (shape, max 4, duplicates, registry existence, active status,
+   addendum gates) BEFORE any spawn — malformed JSON, unknown names,
+   and contested modules refuse the whole invocation spawn-free
+   (verified live against `'["ghost-module"]'` and `'{bad'`).
+   `armEnv` now takes the runner-resolved canonical `TRELLIS_MODULES`
+   serialization and deletes `TRELLIS_EXP_MODULES` from the child env;
+   `buildAgentEnv` deletes the flag unconditionally (no config field
+   exists — unit-pinned mirroring the `TRELLIS_EXP_OMIT_CMT` pin). NO
+   kernel change: both composed-prompt pins unmoved (the ON arm is an
+   ordinary operator selection through the ordinary loader).
+2. **The `est` suite (sufficiency-bounded, additive).** Five two-part
+   questions whose parts share ONE read, over the four durable
+   corpora; every earlier suite's question bytes untouched (rounds
+   1–4 stay round-comparable; the shared preambles were extracted
+   into `frankPreamble`/`ledgerPreamble`/`relationalPreamble`
+   byte-identically). Truths + the recorded minimal-evidence bounds
+   (1 db call per question, rationale on the constant) live in the
+   new pure `src/benchmarks/effective_context/estimation_suite.ts`,
+   unit-pinned from committed bytes in `estimation_suite.test.ts`
+   (chronicle Kelvorin 163 / Torulf 125; anomaly 8 → Entry 9 with the
+   pinned sentence; frank "dreary night" → Chapter 5, Ingolstadt 16;
+   ledger Zelvane Wendrick × morrowleaf → 1046 crates / 13 ledgers;
+   relational Glasswind → 41,793 crates / 4 captains; distinctness of
+   every scored pair enforced loudly — equal values would make
+   token-match scoring trivially satisfiable). The est anomaly (8) is
+   pinned disjoint from every other suite's anomalies.
+   `scripts/test_modules.py` gained section [8]: module #2 loads and
+   composes with module #0 through the ordinary loader, brace-safe,
+   NOT in the default selection.
+3. **The measured control (50 runs, $2.3981 vs the ~$1–2 estimate —
+   over estimate, disclosed; the per-invocation $5 abort never
+   armed-fired).** 10 chunked invocations (question × module-arm,
+   `--repeats 5`, both arms on the pinned default kernel).
+   **Correctness 25/25 in BOTH arms. Median db tool calls: on 1 vs
+   off 2 pooled (frank question median halved 4 → 2;
+   minimal-evidence attainment 15/25 vs 10/25). Pooled median input
+   tokens: on 13,240 vs off 9,217 — the token half of the pre-stated
+   criterion FAILS pooled**, with the direction REVERSING on the two
+   largest-corpus questions (est-led-captain on 13,268 vs off 19,335;
+   est-rel-guild on 23,033 vs off 29,287). The 66k on-arm tail run is
+   4 iterations re-feeding the 102-hash relational preamble, not an
+   attention blowup (2 db calls, 0 subcalls). All 50 runs submitted
+   through `trellis_answer` (230/230 cumulative, zero transcription
+   errors); zero pandas/polars imports. **Verdict per the recorded
+   rule: the criterion is NOT met; module #2 stays OUT of the default
+   selection.** The candidacy decision on these numbers (retire vs
+   re-scope to large-corpus/aggregate task shapes) is the owner's —
+   §4 row 6 stays open on exactly that item. Full tables in the
+   probe report's control section; per-invocation `summary.json`
+   records `moduleSelection`/`moduleArmFlag`.
+
+**Verification.** Offline: `npm test` = **728 passing across 79
+files** (baseline 712/77; +16: module_arm 6, estimation_suite 9, the
+`buildAgentEnv` strip pin 1). `npm run build`, `npm run python:check`,
+`docker compose --profile test config --quiet` pass. Isolated Compose
+integration as project `trellis_s28_ci` (host ports 0): **11/11
+PASS**, all image layers cached (`package.json` and `requirements.txt`
+untouched), torn down with `--volumes`. Live zero-LLM:
+`test:modules` green with section [8] and BOTH pins unmoved
+(`3f07295a…4b63` / `85362b81…71bb`), `test:answer-channel` 32,
+`test:textedit` 82, `test:module-lifecycle` 60, `test:promotion` 41,
+`test:rlm-workspace` 106, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
+`test:agent-loop` ALL CHECKS PASSED, `test:a2a` ALL CHECKS PASSED,
+`test:repo-ingest` 56, `test:benchmark-hardening` 24,
+`test:entity-resolution` 34, `test:api-hardening` 18,
+`test:belief-recovery` 30, `test:invalidation-sweep` 17. Probe plan
+mode verified in all three flag states (unset/override/refusals).
+`drill:scale`: first reading **2.65x CLOSED** — outside the recorded
+~1.48x–2.26x band, so it was re-run per the Session 22 precedent and
+came back **1.77x CLOSED** (in-band; the outlier did not reproduce —
+most plausibly the day's drill traffic on the shared dev database;
+the committed `scale_drill_results.json` is the 1.77x run).
+`git diff --check` passes.
+
+**Defects found: one, in this session's own new code, caught by the
+zero-paid drill before any spend.** The est branch of
+`buildSelectedQuestions` initially never assigned `relationalData`,
+and the `&&`-chained guard SILENTLY skipped the whole est question
+set ("No questions selected"). Fixed by assigning the data and
+replacing the silent guard with a loud refusal (incomplete corpus
+loading under est gating now throws). Lesson recorded: a guard that
+degrades a wiring error into an empty selection hides the bug —
+refuse loudly.
+
+**Deliberately not included** (the §8 exclusions held): adding module
+#2 to the default selection (owner's decision on the numbers);
+editing module #2's addendum/manifest; any kernel or composed-prompt
+change; a fifth probe round (the control is a module measurement —
+round numbering untouched); representation migrations; polars
+imports in src/; cap raises; extraction re-runs; row-8 coverage
+hardening (queued next); frontend work; `ASTRef` migration.
+### July 11, 2026 — Addendum to Session 28 (same day, in-session owner adjudication): module #2 RETIRED; direction re-pointed at tooling shape
+
+On the control's numbers the owner retired `estimation-discipline`
+outright ("completely useless" as a default-selection candidate) and
+rejected the underlying target class: *"prove the prompt text moves
+behavior" is not a proper engineering target* — prompt engineering is
+not a valid capability increment. The repository's own measurements
+agree (probe rounds 2–4: the prompt arm indistinguishable; every
+decisive win — `trellis_answer`, `get_ast_blocks`, the suppression
+gate, the splice fix — was tooling shape).
+
+**Mechanics of the retirement (this PR):**
+`modules/estimation-discipline/module.json` status `active` →
+`retired` (the lifecycle transition, not a content edit); the ordinary
+loader now REFUSES composition (`test:modules` [8] rewritten to pin
+the refusal — the historical record, the 19 pinned research hashes,
+and the parse-vs-load distinction; both composed-prompt pins never
+felt any of it); `module_arm.test.ts` re-pinned (the historical
+ON-arm selection now refuses through the real registry; the
+active-module path re-proven with `workspace-discipline`);
+`modules:verify` shows `module:estimation-discipline (version 1;
+manifest: status retired), contested: false` — the graph entity stays
+as the historical record (module entities are contested or retired,
+never deleted). RESEARCH.md carries the retirement note.
+
+**Recorded successor directions (owner-endorsed, pending scheduling —
+NOT self-serve):**
+
+1. **Kernel-level retrieval discipline** — mechanical closure of the
+   behavior module #2 nudged: tool-layer dedup (a re-fetch of an
+   already-held root serves from held state or refuses with a typed
+   pointer) and a per-run retrieval budget with a typed over-budget
+   refusal carrying the held-state inventory. The Session 28 `est`
+   suite + minimal-evidence bounds are the acceptance harness
+   (criterion: repeat-fetches 0 by construction, tokens ≤ baseline,
+   correctness non-inferior).
+2. **Mechanical provenance threading** (the collaborator briefing's
+   item 2, already logged as a candidate architecture session) — the
+   LAST transcription channel: `write_derived_insight` still takes
+   model-asserted `sourceNodeIds`; thread addresses from the
+   retrieval set by plumbing, constrain citable addresses to what the
+   deriving run actually retrieved, sampled entailment for the
+   semantic residual.
+
+Prompt-module authoring is DEPRIORITIZED as a capability increment;
+the module registry, gates, and flywheel machinery stay (they are the
+mechanism for any future module class, including tool-bearing ones),
+but no new protocol-module authoring turn is proposed without
+explicit owner request.

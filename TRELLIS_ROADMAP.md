@@ -218,7 +218,7 @@ Ordered roughly by severity.
 | 7 | Conditional provenance storage migration (3.3 #4) | Blocked behind the recorded trigger (an observed 1,000-source fact or superlinear sweep growth); do not migrate arrays on extrapolation alone. NOTE: the Session 22 `drill:scale` OPEN reading (11.61x) did NOT reproduce on re-run (1.48x CLOSED) — a REPRODUCING open reading is the trigger, a noisy one is not |
 | ~~8~~ | ~~Self-editing toolkit coverage hardening (Trellis-edits-Trellis coverage audit, July 11, 2026)~~ | **Done (Session 29, July 12, 2026)** — the recorded priority items closed zero-paid in three commits: the 82-check drill wired into CI's `offline` job (audit #7); `write_back` hardened inside the existing contract (audit #2/#3/#4 — write-time containment re-verification via the load-time `_resolve` re-run, an in-root resolution-change refusal that catches what the digest guard cannot, source-mode preservation onto the replacement inode, and a final digest re-check immediately before `os.replace` that NARROWS the TOCTOU window — residual honestly documented, not claimed closed); multi-file partial-failure semantics pinned in both orders (audit #5), per-guard-branch adversarial checks (audit #6), and the static no-subprocess/no-git import-allowlist pin (audit #8). Drill 82 → 105 checks on Windows, 106 on POSIX. Remaining audit items stay open by design: #1 (cross-process proof run) is owner-gated propose-with-estimate; #9 content-borne injection and the abnormal-kill half of #10 are unpinned hygiene (the refusal-path temp-file cleanup IS now pinned); see §5 |
 | ~~9~~ | ~~Mechanical provenance threading (owner-approved July 12, 2026 — the tooling-shape sequence, step 2 of 4)~~ | The LAST transcription channel: `write_derived_insight` still takes model-asserted `sourceNodeIds`. **Decompose before building (owner direction: decompose so each slice is completable, then engineer to working solutions).** Recorded slices: ~~(a) design record first~~ and ~~(b) retrieval-set tracking in the tool layer~~ — **done (Session 30, July 12, 2026)**: `docs/architecture/PROVENANCE_THREADING.md` ratified (the T1 transcription / T2 semantic channel split, the claim→block factorization as mechanical membership + sampled semantic residual, the retrieval-set definition and per-run semantics, the slice map with per-slice pins), and the always-on retrieved-address set landed at the citation-audit seam (`get_ast_texts` returned keys / `get_ast_blocks` block ids / `vector_search` result ids; `ast_hashes_exist`, `fetch_texts`, `run_cypher`, Tier-3 surfaces, and seeds never contribute), counts-only `retrieved_addresses` telemetry, pinned by `test:rlm-sandbox` [5] (21 → 40); see §5. ~~(c) address-in-header threading~~ and ~~(d) the write-path constraint~~ — **done (Session 31, July 12, 2026)**: (c) ADJUDICATED SATISFIED BY EXISTING SHAPE (every surface re-presenting Tier-1 bytes already threads address-with-content; the workspace holds no Tier-1 retrievals by construction; the rlms scaffold renders nothing itself; verdict + evidence in the record's §9 ledger — no carriage gap, no implementation, no prompt byte); (d) the retrieval-membership gate landed (`retrieved_addresses_check` constructor seam in the `ast_existence_check` injection mold, checked in `_run_insight_writes` after existence and the cited-attempt audit, before the experimental gates — typed bounded refusal teaching re-retrieval; wired for research runs in `trellis_agent.py`; bare construction byte-identical; closes T1, not T2), pinned by `test:rlm-sandbox` [6] (40 → 53); see §5. ~~(e) the sampled-entailment tier~~ and ~~(f) compat verify-and-strike~~ — **done (Session 32, July 12, 2026)**: (e) the detector machinery landed zero-paid (`src/core/graph/entailment_detection.ts` + `npm run entailment:sweep` + the 'entailment_sweep' job name on the shared verification worker — sampled (edge, cited-hash) pairs judged at most once ever; supported pairs stamp `entailmentCheckedHashes`, unsupported pairs contest the edge with the typed reason 'unsupported_citation' and the durable `unsupportedHashes` audit; provenance fields never mutated; judge-all-then-write atomicity — an infrastructure failure contests NOTHING; config twins ENTAILMENT_SAMPLE_RATE 0.1 / ENTAILMENT_JUDGE_BUDGET_PER_SWEEP 25 max 500), pinned by 10 unit tests + `test:verification-sweep` sections [7]–[9] (35 → 66 checks; the drill itself was repaired first — see §5); the FIRST REAL judged sweep stands PROPOSED owner-gated (dev-graph dry-run: 283 edges / 566 unchecked pairs; default policy = 25 judge calls ≈ $0.02–$0.05 — run only on approval, actuals to be recorded); (f) every §5.3/§5.5 compat claim VERIFIED against the code, no gap (see §5). Kernel prompt: no byte moved across the whole row — slices a–f, both pins unmoved |
-| 10 | Kernel-level retrieval discipline: dedup + budgets (owner-approved July 12, 2026 — step 3 of 4; may fold into row 9's tool-layer work if the seams coincide) | Mechanical closure of the behavior retired module #2 nudged. Slices: (a) held-root tracking (which roots/blocks this run already fetched — engine-side, zero model judgment); (b) dedup: a re-fetch of a held root serves from held state or refuses with a typed pointer to the holding frame; (c) per-run retrieval budget (kernel constant + operator env twin, bounded like every other budget) with a typed over-budget refusal carrying the held-state inventory; (d) acceptance = the Session 28 `est` suite + minimal-evidence bounds re-run as a paired measurement (criterion: repeat-fetches 0 by construction, tokens ≤ baseline, correctness non-inferior — calls and correctness reported TOGETHER, never calls alone) |
+| ~~10~~ | ~~Kernel-level retrieval discipline: dedup + budgets (owner-approved July 12, 2026 — step 3 of 4)~~ | **Machinery done (Session 33, July 13, 2026), all zero-paid; the (d) acceptance measurement stands PROPOSED owner-gated.** `docs/architecture/RETRIEVAL_DISCIPLINE.md` ratified document-first, then (a)+(b)+(c) landed in `trellis_tools.py`: module-level held state under its own lock (addresses/roots/exact query strings — identities only, never content), typed bounded `Retrieval Discipline:` refusals for repeat fetches (full-repeat-only for `get_ast_texts` with partial-overlap serve-everything; per-root for `get_ast_blocks`; exact-query-match for `vector_search` — semantic dedup excluded by decision), and the per-run budget (kernel default 64 byte-returning fetches, cap 1024, `TRELLIS_RETRIEVAL_BUDGET_PER_RUN` env twin, refusal at budget+1 with counts + a bounded held-root echo; dedup refusals consume nothing). Activation is explicit construction in the injection mold — research runs wire it on in `trellis_agent.py`, bare construction is byte-identical, `TRELLIS_EXP_OMIT_RETRIEVAL` is the probe-only OFF arm (`buildAgentEnv` strips it, unit-pinned). Held state never feeds the Session 30 retrieval set or the Session 31 write gate. No prompt byte moved. Pinned by `test:rlm-sandbox` [7] (53 → 95, first-run green) + 3 `buildAgentEnv` unit pins (740 → 743). The (d) paired `est` re-run (criterion pre-stated in the §5 entry: repeat-serves 0 by construction, tokens ≤ baseline, correctness non-inferior, calls and correctness together; est. ~$2.40) runs only on owner approval; see §5 |
 | 11 | Trellis-on-Trellis: full-repo extraction + graph-informed self-edits (owner-approved July 12, 2026 — step 4 of 4, the scaling flywheel) | Two stages, each owner-gated at its paid step. Stage 1: the broader-root extraction run over the full repository (Session 25 prerequisites are DONE — exclusion, code-tuned prompt routing, generic suppression; propose with the CLI's printed post-exclusion block bound and estimate) — Trellis's own codebase becomes a queryable semantic substrate. Stage 2: self-edit depth increments that QUERY the graph about the code they edit (the Session 26/expansion harness, escalating from string constants toward reviewed kernel diffs; each increment a single named failure mode, human `git diff` review before acceptance, toolkit never touches git). This is the large-corpus regime where the Session 28 control showed discipline pays — the corpus is Trellis itself |
 | — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
 | — | Prompt-module authoring (the protocol-module flywheel payload) | **DEPRIORITIZED (owner direction, July 11, 2026).** The registry, gates, and lifecycle machinery stay — they are the mechanism for any future module class (including designed-but-ungated tool-bearing modules) — but no new protocol-module authoring turn is proposed without explicit owner request. Behavioral failure classes close by tooling shape (rows 9/10 are the pattern) |
@@ -229,14 +229,15 @@ Ordered roughly by severity.
 ## 5. Progress Log
 
 
-*(Entries from July 4, 2026 through Session 27 — the Phase-1/T-item work,
-Sessions 1–27, and their follow-ups — are archived verbatim in
+*(Entries from July 4, 2026 through Session 28 — the Phase-1/T-item work,
+Sessions 1–28, and their follow-ups — are archived verbatim in
 [`docs/archive/ROADMAP_HISTORY.md`](docs/archive/ROADMAP_HISTORY.md);
 Sessions 1–23 moved July 12, 2026 by owner direction, then one session
 per PR under the five-session window rule: Session 24 with the Session
 29 PR, Session 25 with the Session 30 PR, Session 26 with the Session 31
-PR, Session 27 with the Session 32 PR. The live ledger below keeps the
-most recent five sessions: 28–32.)*
+PR, Session 27 with the Session 32 PR, Session 28 (entry + retirement
+addendum) with the Session 33 PR. The live ledger below keeps the most
+recent five sessions: 29–33.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -501,161 +502,6 @@ No safeguard weakened or disabled; every finding above either adds
 new test coverage or documents an existing structural/operator-
 discipline guarantee that has no runtime enforcement yet.
 
-### July 11, 2026 — Session 28: the estimation-discipline positive control (§4 row 6 — machinery + the measured control)
-
-The Session 26 module #2 follow-through: the control machinery landed
-zero-paid, and the paired measurement ran the same day under the
-session's standing owner approval of paid/owner-gated tests. Branch
-`session-28-estimation-control`.
-
-1. **The probe module-arm flag (`TRELLIS_EXP_MODULES`, the
-   `TRELLIS_EXP_OMIT_CMT` mold).** New pure
-   `src/benchmarks/effective_context/module_arm.ts`:
-   `resolveProbeModuleSelection` returns the default selection when
-   the flag is unset (the serialized value is byte-identical to the
-   probe's historical hardcoded `'["spatial-flywheel"]'` — pinned in
-   `module_arm.test.ts`) and otherwise validates the JSON array
-   through the ORDINARY `parseModuleSelection` + `loadModules` path
-   (shape, max 4, duplicates, registry existence, active status,
-   addendum gates) BEFORE any spawn — malformed JSON, unknown names,
-   and contested modules refuse the whole invocation spawn-free
-   (verified live against `'["ghost-module"]'` and `'{bad'`).
-   `armEnv` now takes the runner-resolved canonical `TRELLIS_MODULES`
-   serialization and deletes `TRELLIS_EXP_MODULES` from the child env;
-   `buildAgentEnv` deletes the flag unconditionally (no config field
-   exists — unit-pinned mirroring the `TRELLIS_EXP_OMIT_CMT` pin). NO
-   kernel change: both composed-prompt pins unmoved (the ON arm is an
-   ordinary operator selection through the ordinary loader).
-2. **The `est` suite (sufficiency-bounded, additive).** Five two-part
-   questions whose parts share ONE read, over the four durable
-   corpora; every earlier suite's question bytes untouched (rounds
-   1–4 stay round-comparable; the shared preambles were extracted
-   into `frankPreamble`/`ledgerPreamble`/`relationalPreamble`
-   byte-identically). Truths + the recorded minimal-evidence bounds
-   (1 db call per question, rationale on the constant) live in the
-   new pure `src/benchmarks/effective_context/estimation_suite.ts`,
-   unit-pinned from committed bytes in `estimation_suite.test.ts`
-   (chronicle Kelvorin 163 / Torulf 125; anomaly 8 → Entry 9 with the
-   pinned sentence; frank "dreary night" → Chapter 5, Ingolstadt 16;
-   ledger Zelvane Wendrick × morrowleaf → 1046 crates / 13 ledgers;
-   relational Glasswind → 41,793 crates / 4 captains; distinctness of
-   every scored pair enforced loudly — equal values would make
-   token-match scoring trivially satisfiable). The est anomaly (8) is
-   pinned disjoint from every other suite's anomalies.
-   `scripts/test_modules.py` gained section [8]: module #2 loads and
-   composes with module #0 through the ordinary loader, brace-safe,
-   NOT in the default selection.
-3. **The measured control (50 runs, $2.3981 vs the ~$1–2 estimate —
-   over estimate, disclosed; the per-invocation $5 abort never
-   armed-fired).** 10 chunked invocations (question × module-arm,
-   `--repeats 5`, both arms on the pinned default kernel).
-   **Correctness 25/25 in BOTH arms. Median db tool calls: on 1 vs
-   off 2 pooled (frank question median halved 4 → 2;
-   minimal-evidence attainment 15/25 vs 10/25). Pooled median input
-   tokens: on 13,240 vs off 9,217 — the token half of the pre-stated
-   criterion FAILS pooled**, with the direction REVERSING on the two
-   largest-corpus questions (est-led-captain on 13,268 vs off 19,335;
-   est-rel-guild on 23,033 vs off 29,287). The 66k on-arm tail run is
-   4 iterations re-feeding the 102-hash relational preamble, not an
-   attention blowup (2 db calls, 0 subcalls). All 50 runs submitted
-   through `trellis_answer` (230/230 cumulative, zero transcription
-   errors); zero pandas/polars imports. **Verdict per the recorded
-   rule: the criterion is NOT met; module #2 stays OUT of the default
-   selection.** The candidacy decision on these numbers (retire vs
-   re-scope to large-corpus/aggregate task shapes) is the owner's —
-   §4 row 6 stays open on exactly that item. Full tables in the
-   probe report's control section; per-invocation `summary.json`
-   records `moduleSelection`/`moduleArmFlag`.
-
-**Verification.** Offline: `npm test` = **728 passing across 79
-files** (baseline 712/77; +16: module_arm 6, estimation_suite 9, the
-`buildAgentEnv` strip pin 1). `npm run build`, `npm run python:check`,
-`docker compose --profile test config --quiet` pass. Isolated Compose
-integration as project `trellis_s28_ci` (host ports 0): **11/11
-PASS**, all image layers cached (`package.json` and `requirements.txt`
-untouched), torn down with `--volumes`. Live zero-LLM:
-`test:modules` green with section [8] and BOTH pins unmoved
-(`3f07295a…4b63` / `85362b81…71bb`), `test:answer-channel` 32,
-`test:textedit` 82, `test:module-lifecycle` 60, `test:promotion` 41,
-`test:rlm-workspace` 106, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
-`test:agent-loop` ALL CHECKS PASSED, `test:a2a` ALL CHECKS PASSED,
-`test:repo-ingest` 56, `test:benchmark-hardening` 24,
-`test:entity-resolution` 34, `test:api-hardening` 18,
-`test:belief-recovery` 30, `test:invalidation-sweep` 17. Probe plan
-mode verified in all three flag states (unset/override/refusals).
-`drill:scale`: first reading **2.65x CLOSED** — outside the recorded
-~1.48x–2.26x band, so it was re-run per the Session 22 precedent and
-came back **1.77x CLOSED** (in-band; the outlier did not reproduce —
-most plausibly the day's drill traffic on the shared dev database;
-the committed `scale_drill_results.json` is the 1.77x run).
-`git diff --check` passes.
-
-**Defects found: one, in this session's own new code, caught by the
-zero-paid drill before any spend.** The est branch of
-`buildSelectedQuestions` initially never assigned `relationalData`,
-and the `&&`-chained guard SILENTLY skipped the whole est question
-set ("No questions selected"). Fixed by assigning the data and
-replacing the silent guard with a loud refusal (incomplete corpus
-loading under est gating now throws). Lesson recorded: a guard that
-degrades a wiring error into an empty selection hides the bug —
-refuse loudly.
-
-**Deliberately not included** (the §8 exclusions held): adding module
-#2 to the default selection (owner's decision on the numbers);
-editing module #2's addendum/manifest; any kernel or composed-prompt
-change; a fifth probe round (the control is a module measurement —
-round numbering untouched); representation migrations; polars
-imports in src/; cap raises; extraction re-runs; row-8 coverage
-hardening (queued next); frontend work; `ASTRef` migration.
-### July 11, 2026 — Addendum to Session 28 (same day, in-session owner adjudication): module #2 RETIRED; direction re-pointed at tooling shape
-
-On the control's numbers the owner retired `estimation-discipline`
-outright ("completely useless" as a default-selection candidate) and
-rejected the underlying target class: *"prove the prompt text moves
-behavior" is not a proper engineering target* — prompt engineering is
-not a valid capability increment. The repository's own measurements
-agree (probe rounds 2–4: the prompt arm indistinguishable; every
-decisive win — `trellis_answer`, `get_ast_blocks`, the suppression
-gate, the splice fix — was tooling shape).
-
-**Mechanics of the retirement (this PR):**
-`modules/estimation-discipline/module.json` status `active` →
-`retired` (the lifecycle transition, not a content edit); the ordinary
-loader now REFUSES composition (`test:modules` [8] rewritten to pin
-the refusal — the historical record, the 19 pinned research hashes,
-and the parse-vs-load distinction; both composed-prompt pins never
-felt any of it); `module_arm.test.ts` re-pinned (the historical
-ON-arm selection now refuses through the real registry; the
-active-module path re-proven with `workspace-discipline`);
-`modules:verify` shows `module:estimation-discipline (version 1;
-manifest: status retired), contested: false` — the graph entity stays
-as the historical record (module entities are contested or retired,
-never deleted). RESEARCH.md carries the retirement note.
-
-**Recorded successor directions (owner-endorsed, pending scheduling —
-NOT self-serve):**
-
-1. **Kernel-level retrieval discipline** — mechanical closure of the
-   behavior module #2 nudged: tool-layer dedup (a re-fetch of an
-   already-held root serves from held state or refuses with a typed
-   pointer) and a per-run retrieval budget with a typed over-budget
-   refusal carrying the held-state inventory. The Session 28 `est`
-   suite + minimal-evidence bounds are the acceptance harness
-   (criterion: repeat-fetches 0 by construction, tokens ≤ baseline,
-   correctness non-inferior).
-2. **Mechanical provenance threading** (the collaborator briefing's
-   item 2, already logged as a candidate architecture session) — the
-   LAST transcription channel: `write_derived_insight` still takes
-   model-asserted `sourceNodeIds`; thread addresses from the
-   retrieval set by plumbing, constrain citable addresses to what the
-   deriving run actually retrieved, sampled entailment for the
-   semantic residual.
-
-Prompt-module authoring is DEPRIORITIZED as a capability increment;
-the module registry, gates, and flywheel machinery stay (they are the
-mechanism for any future module class, including tool-bearing ones),
-but no new protocol-module authoring turn is proposed without
-explicit owner request.
 ### July 12, 2026 — Owner-approved forward sequence (rows 9–11) + documentation restructure
 
 In the same review that retired module #2, the owner approved the
@@ -1305,3 +1151,142 @@ real judged sweep stands PROPOSED owner-gated (item 3).
    regenerated for row 10 (kernel-level retrieval dedup + budgets —
    the owner-approved step 3 of 4) with Session 27 compressed into the
    digest.
+
+### July 13, 2026 — Session 33: kernel-level retrieval discipline — held-state dedup + the per-run budget (§4 row 10; machinery + pins zero-paid, the acceptance measurement proposed owner-gated)
+
+The mechanical closure of the behavior the retired module #2 nudged
+(the Session 28 control: median db calls 2 vs the recorded
+minimal-evidence bound of 1 with no discipline; frank median 4 — all
+whole-call repeats), per the owner's permanent tooling-shape
+direction. Three implementation commits + docs, no prompt byte, zero
+paid spend.
+
+1. **Slice (a) — the design record, document-first.**
+   `docs/architecture/RETRIEVAL_DISCIPLINE.md` ratified (indexed in
+   docs/README.md; PROVENANCE_THREADING.md §4 now cross-references it,
+   closing that record's forward note). Load-bearing decisions, each
+   with its recorded reason: held state answers "were these bytes
+   already served this run" and holds IDENTITIES only (hashes, roots,
+   query strings — never content: serving from held state would need a
+   store mirror the pillar forbids, so repeats REFUSE, never re-serve);
+   request identities are per-hash **full-repeat-only** for
+   `get_ast_texts` (partial overlap serves EVERYTHING byte-identically
+   — serving the remainder would silently change the returned shape
+   mid-run, refusing the whole call would burn a scarce REPL iteration;
+   the measured failure class is whole-call repeats), per-root for
+   `get_ast_blocks` (THE measured case; served block ids also join held
+   addresses, the root argument never does — the Session 30 shape), and
+   **exact-query-match only** for `vector_search` (semantic
+   near-duplicate detection is a semantic judgment, not plumbing —
+   excluded by decision; result ids never join held addresses because
+   read-after-search is the confirm-before-cite pattern the Session 31
+   write-gate refusal explicitly teaches). The recorded evasion is
+   pinned honestly: padding a repeat with a never-held hash passes —
+   teaching machinery in the write-gate mold, not a security boundary.
+   Scope: per run = per process, module-level under its own lock (a
+   sibling of the audit lock at the same call sites — `_audit_add`'s
+   contract untouched), dies with the process, never parked; seeded
+   runs inherit nothing.
+2. **Slices (b)+(c) — the machinery** (`trellis_tools.py`; config
+   twins in `src/config/index.ts` + `src/workers/rlm_job.ts`).
+   Activation is one explicit constructor decision in the
+   `retrieved_addresses_check` injection mold:
+   `TrellisPostgres(retrieval_discipline=True, retrieval_budget=N)`
+   enables dedup AND budget together; bare construction is
+   byte-identical to before the machinery existed (recording and
+   checking both happen only on disciplined instances). Refusals are
+   typed `ValueError`s with the uniform `Retrieval Discipline:` prefix,
+   bounded echo (first 5 + `+N more`), and the binding-reuse teaching
+   sentence. The budget counts byte-returning fetches only (dedup
+   refusals and empty returns consume nothing), kernel default
+   `RETRIEVAL_BUDGET_DEFAULT = 64` / cap 1024, refuses at budget+1
+   BEFORE any I/O with counts + a bounded held-root echo; check order
+   pinned validation → dedup → budget → fetch (a repeat on an exhausted
+   instance gets the DEDUP refusal — the actionable teaching). Env twin
+   `TRELLIS_RETRIEVAL_BUDGET_PER_RUN` (Zod optional int ≤1024 +
+   the Python `parse_retrieval_budget()` twin with identical bounds;
+   `buildAgentEnv` forwards it ONLY when the operator set it and strips
+   any inherited value otherwise). Research runs wire the discipline ON
+   in `trellis_agent.py` (author mode constructs no DB tools);
+   `TRELLIS_EXP_OMIT_RETRIEVAL=1` is the probe-runner-only OFF arm in
+   the `TRELLIS_EXP_OMIT_CMT` mold — no config field, `buildAgentEnv`
+   deletes it unconditionally (unit-pinned). Telemetry gains six
+   counts-only fields (`retrieval_fetches`, `retrieval_dedup_refusals`,
+   `retrieval_budget_refusals`, `held_addresses`, `held_roots`,
+   `held_queries`) in both payloads; the Node scanner's unknown-field
+   tolerance is already pinned. Guardrail 4 holds structurally: held
+   state never feeds, filters, or gates the Session 30 retrieval set or
+   the Session 31 write gate — a refused re-fetch changes nothing about
+   citability. The vector_search constructor validates the budget
+   BEFORE the connection opens so a refused bound never leaks one.
+3. **Pins.** `test:rlm-sandbox` new section [7], 53 → 95 live checks,
+   all green on FIRST run: the env-twin bounds (default when unset;
+   refusals for malformed/zero/negative/over-cap; the constructor
+   bound), first-fetch byte-identity against a bare instance on all
+   three surfaces, the typed dedup refusals (bounded echo at 7 held
+   hashes, teaching sentence), partial-overlap serve-everything, the
+   padding evasion pinned honestly, cross-surface held addresses
+   (`get_ast_texts` on exactly the served block ids repeats;
+   `get_ast_texts([root])` after `get_ast_blocks(root)` serves),
+   exact-query search dedup (rephrased query serves; the search-hit
+   read-back serves — the taught pattern), the budget+1 refusal with
+   counts + held-root echo, dedup-wins-on-exhausted order, refusals
+   consuming no budget, the section [5]/[6] invariants re-proven under
+   the new machinery (a dedup refusal leaves the retrieval set
+   unchanged; disciplined serves still feed it; a dedup-refused hash
+   still writes through the gated client), the injection-mold
+   bare-construction pins, refused calls still counting as tool
+   invocations, accessor copy semantics, and the static agent-wiring /
+   telemetry / OFF-arm / Tier-3-seam pins. Unit level: 3 new
+   `buildAgentEnv` pins (`npm test` 740 → 743 across 80 files).
+4. **Slice (d) — the acceptance measurement stands PROPOSED,
+   owner-gated (criterion recorded here BEFORE any spend).** The
+   Session 28 `est` suite re-run as a paired measurement: 5 questions ×
+   2 arms × `--repeats 5` = 50 runs. ON arm = the default kernel
+   (discipline wired, budget at the kernel default 64); OFF arm = the
+   identical invocation with `TRELLIS_EXP_OMIT_RETRIEVAL=1` in the
+   probe runner's own environment (the runner's `armEnv` spreads its
+   process env and strips only the flags it manages, so the flag
+   reaches the spawned agent with zero runner change; each run's
+   TRELLIS_TELEMETRY discipline counts verify the arm it actually ran
+   under — the arm assignment is observable per run, not assumed).
+   Pre-stated criterion: (i) repeat-serves 0 by construction on the ON
+   arm (dedup refusal counts reported as observed); (ii) pooled median
+   input tokens ON ≤ OFF; (iii) correctness non-inferior (ON ≥ OFF) —
+   db calls and correctness reported TOGETHER, never calls alone, and
+   never rewarding LOW counts (the Session 28 symmetric rule).
+   Estimate: ~$2.40 (the Session 28 control's measured band — same
+   suite, same shape, same repeats), under the standing ≤$5/run cap;
+   actuals to be disclosed against the estimate. Run only on owner
+   approval; row 10 is struck with the machinery landed and this
+   proposal recorded, per the §6 close-out rule.
+5. **Defects found: none in existing code; one design-stage defect
+   caught by review before commit** — the first constructor draft
+   validated the budget AFTER opening the psycopg2 connection, so a
+   refused bound leaked a connection; validation now runs first
+   (pinned: the drill constructs the refused instance and the refusal
+   raises before any connection exists).
+6. **Acceptance (all green, July 13, 2026).** `npm test` 743 passing /
+   80 files (was 740/80), `npm run build`, `npm run python:check`,
+   `docker compose --profile test config --quiet`. Live zero-paid:
+   `test:answer-channel` 32, `test:textedit` 105 (Windows host),
+   `test:module-lifecycle` 60, `test:modules` green (both
+   composed-prompt pins unmoved — no prompt byte this session),
+   `test:promotion` 41, `test:rlm-workspace` 106, `test:rlm-mcp` 86,
+   `test:rlm-sandbox` 95 (was 53), `test:verification-sweep` 66,
+   `test:agent-loop` 35 (ALL CHECKS PASSED), `test:a2a` 46 (ALL CHECKS
+   PASSED), `test:repo-ingest` 56, `test:benchmark-hardening` 24,
+   `test:entity-resolution` 34, `test:api-hardening` 18,
+   `test:belief-recovery` 30, `test:invalidation-sweep` 17.
+   `drill:scale` run ALONE: 1.94x CLOSED (in-band ~1.48x–2.26x, first
+   try; max provenance 286; results file committed per house
+   practice). Isolated Compose integration as project `trellis_s33_ci`:
+   11/11 PASS (no manifest changed — all image layers cached).
+   `git diff --check` clean.
+7. **Documentation window (owner rule).** The Session 28 §5 entry and
+   its same-day retirement addendum moved VERBATIM to
+   `docs/archive/ROADMAP_HISTORY.md` (the live ledger keeps the most
+   recent five sessions: 29–33); HANDOFF regenerated for row 11
+   (Trellis-on-Trellis: full-repo extraction + graph-informed
+   self-edits — the owner-approved step 4 of 4) with Session 28
+   compressed into the digest.
