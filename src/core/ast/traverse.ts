@@ -34,11 +34,30 @@ const MARKDOWN_BLOCK_TYPES = new Set(['paragraph', 'heading', 'listItem', 'code'
 // extraction units; code_class is deliberately absent — it is a
 // container whose methods and header/attribute chunks are the units, so
 // class bytes are never extracted twice.
+//
+// Session 38 note: the structural-chunking kinds (code_import,
+// code_const, code_type, code_statement) are ALWAYS leaves with
+// content, so the childless-with-content branch below collects them
+// without membership here — the walk (and its trellis_blocks.py twin)
+// stays byte-identical for every existing document.
 const CODE_BLOCK_TYPES = new Set([
   'code_function',
   'code_method',
   'code_chunk',
   'opaque_text',
+]);
+
+// Session 38 (STRUCTURAL_CHUNKING.md §2 axis 4): the recorded per-kind
+// extraction-eligibility decision for the structural kinds. code_import
+// is typed-and-skipped — imports are reference plumbing whose extracted
+// names are exactly the cross-file generic-identifier class Session 25
+// suppresses, so they stay readable blocks (get_ast_blocks returns
+// them) but never become paid extraction or embedding jobs. code_const,
+// code_type, and code_statement are eligible: they are the semantic
+// backbone the upgrade exists to surface. Widening or shrinking this
+// set is a recorded owner-visible decision, never a convenience edit.
+export const EXTRACTION_INELIGIBLE_BLOCK_TYPES: ReadonlySet<string> = new Set([
+  'code_import',
 ]);
 
 /**

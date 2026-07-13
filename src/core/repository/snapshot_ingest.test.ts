@@ -300,6 +300,18 @@ describe('executeRepositorySnapshot', () => {
       ['src/b.ts', 'ingested'],
     ]);
     expect(h.published[0].summary).toMatchObject({ policy: 'none', blocksQueued: 0 });
+    // Session 38: the chunking-policy stamp defaults to 1 and records
+    // the operator's explicit selection — old-policy and new-policy
+    // snapshots stay distinguishable forever.
+    expect(h.published[0].summary).toMatchObject({ chunkingPolicy: 1 });
+  });
+
+  it('stamps an explicit chunking policy in the published summary', async () => {
+    const h = harness({ 'src/b.ts': TS_FILE });
+    const options = { ...OPTS, chunkingPolicy: 2 as const };
+    const plan = await planRepositorySnapshot(h.deps, options);
+    await executeRepositorySnapshot(h.deps, options, plan);
+    expect(h.published[0].summary).toMatchObject({ chunkingPolicy: 2 });
   });
 
   it('publishes an auditable no-op snapshot for an unchanged rerun', async () => {

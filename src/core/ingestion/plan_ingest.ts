@@ -1,5 +1,9 @@
 import type { ASTNode } from '../ast/parser.js';
-import { collectExtractionBlocks, nodeText } from '../ast/traverse.js';
+import {
+  collectExtractionBlocks,
+  EXTRACTION_INELIGIBLE_BLOCK_TYPES,
+  nodeText,
+} from '../ast/traverse.js';
 import type { MerkleDiff } from '../ast/diff.js';
 
 // Session 8: the extraction-planning half of the verified ingest service.
@@ -62,10 +66,16 @@ export function planExtraction(
   policy: ExtractionPolicy
 ): ExtractionPlan {
   const addedSet = diff ? new Set(diff.added) : null;
+  // Session 38: typed-and-skipped kinds (code_import) stay readable
+  // blocks in the walk but never become paid extraction or embedding
+  // jobs. Pre-Session-38 documents contain none of these kinds, so
+  // legacy plans are byte-identical.
   const eligible = collectExtractionBlocks(rootNode)
     .map(block => ({ block, text: nodeText(block) }))
     .filter(({ block, text }) =>
-      text.trim().length > 0 && (!addedSet || addedSet.has(block.id))
+      text.trim().length > 0
+      && !EXTRACTION_INELIGIBLE_BLOCK_TYPES.has(block.type)
+      && (!addedSet || addedSet.has(block.id))
     );
 
   if (policy.mode === 'none') {

@@ -54,6 +54,12 @@ export interface SnapshotOptions {
   // Doc keys stay root-relative, so a scoped run and a full run agree on
   // identity for every path.
   includePrefixes?: readonly string[];
+  // Session 38: which chunking policy deps.parse runs under, stamped in
+  // the published snapshot summary so old-policy and new-policy
+  // documents are distinguishable forever. Absent = 1 (the Session 8
+  // policy). The parse function itself is injected — this field is the
+  // RECORD, wired by the CLI to the same value it gave the parser.
+  chunkingPolicy?: 1 | 2;
 }
 
 export const DEFAULT_FILE_CONCURRENCY = 4;
@@ -383,6 +389,7 @@ export async function executeRepositorySnapshot(
     extractionExclusionCounts: plan.extractionExclusionCounts,
     blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,
     policy: options.policy.mode,
+    chunkingPolicy: options.chunkingPolicy ?? 1,
   });
   for (const [reason, count] of Object.entries(plan.skipCounts)) {
     for (let i = 0; i < count; i++) deps.metrics?.repoSkippedFilesTotal.inc({ reason });
@@ -511,6 +518,7 @@ export async function executeRepositorySnapshot(
       extractionExclusionCounts: plan.extractionExclusionCounts,
       blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,
       policy: options.policy.mode,
+      chunkingPolicy: options.chunkingPolicy ?? 1,
       blocksEligible,
       blocksQueued,
     });

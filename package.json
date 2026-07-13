@@ -36,6 +36,8 @@
     "test:entity-resolution": "tsx scripts/test_entity_resolution.ts",
     "migrate:entity-kinds": "tsx scripts/migrate_entity_kinds.ts",
     "repo:ingest": "tsx scripts/ingest_repository.ts",
+    "chunking:shadow": "tsx scripts/chunking_shadow.ts",
+    "chunking:seam-queries": "tsx scripts/chunking_seam_queries.ts",
     "promote": "tsx scripts/promote_segment.ts",
     "test:promotion": "tsx scripts/test_promotion.ts",
     "modules:register": "tsx scripts/register_modules.ts",
@@ -72,6 +74,7 @@
   "type": "commonjs",
   "dependencies": {
     "@babel/parser": "^8.0.0",
+    "@vscode/tree-sitter-wasm": "0.3.1",
     "bullmq": "^5.79.2",
     "dotenv": "16.6.1",
     "express": "^5.2.1",
@@ -85,6 +88,7 @@
     "prom-client": "^15.1.3",
     "remark-parse": "^11.0.0",
     "unified": "^11.0.5",
+    "web-tree-sitter": "0.26.11",
     "zod": "^4.4.3"
   },
   "devDependencies": {

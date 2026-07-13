@@ -116,4 +116,22 @@ describe('trellis_blocks.py parity with collectExtractionBlocks/nodeText', () =>
     ]);
     expect(pythonBlocks(root)).toEqual(expected);
   });
+
+  it('agrees over Session 38 structural kinds (leaves via the childless-content branch)', () => {
+    // code_import/code_const/code_type/code_statement are ALWAYS leaves
+    // with content, collected by the childless-with-content branch in
+    // BOTH walks — no membership change in either block-type set.
+    const imports = createASTNode('code_import', "import os\nimport sys");
+    const constant = createASTNode('code_const', 'export const LIMIT = 3;');
+    const typeDecl = createASTNode('code_type', 'interface Q { a: string }');
+    const method = createASTNode('code_method', 'def m(self):\n    return 2');
+    const stmt = createASTNode('code_statement', 'self.x = 1');
+    const klass = createASTNode('code_class', undefined, [method, stmt]);
+    const root = createASTNode('root', undefined, [imports, constant, typeDecl, klass]);
+    const expected = tsBlocks(root);
+    expect(expected.map(block => block.type)).toEqual([
+      'code_import', 'code_const', 'code_type', 'code_method', 'code_statement',
+    ]);
+    expect(pythonBlocks(root)).toEqual(expected);
+  });
 });

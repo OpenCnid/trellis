@@ -51,6 +51,13 @@ import { getMetrics } from '../src/core/observability/metrics';
 //                             its previous root hash (never tombstoned
 //                             by an out-of-scope run). Doc keys stay
 //                             root-relative either way.
+//   --chunking-policy <1|2>   code chunking policy (Session 38; default
+//                             1 = the Session 8 top-level blocking,
+//                             byte-identical; 2 = structural cAST
+//                             chunking via tree-sitter — operator-
+//                             explicit per run, stamped in the snapshot
+//                             summary; re-chunking re-hashes blocks and
+//                             re-buys extraction, so scope it)
 //   --concurrency <n>         parallel file ingests (default 4)
 //   --max-file-bytes <n>      per-file size cap (default 2 MiB)
 //   --max-bytes-in-flight <n> total read-buffer bound (default 32 MiB)
@@ -64,6 +71,7 @@ interface CliArgs {
   confirmExtraction: boolean;
   includeUntracked: boolean;
   includePrefixes: string[];
+  chunkingPolicy: 1 | 2;
   concurrency?: number;
   maxFileBytes?: number;
   maxBytesInFlight?: number;
@@ -77,6 +85,7 @@ function parseArgs(argv: string[]): CliArgs {
     confirmExtraction: false,
     includeUntracked: false,
     includePrefixes: [],
+    chunkingPolicy: 1,
     dryRun: false,
   };
   for (let i = 0; i < argv.length; i++) {
@@ -101,6 +110,14 @@ function parseArgs(argv: string[]): CliArgs {
       case '--confirm-extraction': args.confirmExtraction = true; break;
       case '--include-untracked': args.includeUntracked = true; break;
       case '--include': args.includePrefixes.push(value()); break;
+      case '--chunking-policy': {
+        const raw = value();
+        if (raw !== '1' && raw !== '2') {
+          throw new Error(`--chunking-policy must be 1 or 2, got ${raw}`);
+        }
+        args.chunkingPolicy = Number(raw) as 1 | 2;
+        break;
+      }
       case '--concurrency': args.concurrency = Number(value()); break;
       case '--max-file-bytes': args.maxFileBytes = Number(value()); break;
       case '--max-bytes-in-flight': args.maxBytesInFlight = Number(value()); break;
@@ -128,10 +145,12 @@ function buildPolicy(args: CliArgs): RepositoryExtractionPolicy {
 function printPlan(
   plan: SnapshotPlan,
   policy: RepositoryExtractionPolicy,
-  includePrefixes: readonly string[]
+  includePrefixes: readonly string[],
+  chunkingPolicy: 1 | 2
 ): void {
   console.log(`Repository snapshot plan for repo-key "${plan.repoKey}":`);
   console.log(`  scope:            ${includePrefixes.length ? includePrefixes.join(', ') : 'full repository'}`);
+  console.log(`  chunking policy:  ${chunkingPolicy}${chunkingPolicy === 2 ? ' (structural)' : ''}`);
   console.log(`  files accepted:   ${plan.files.length} (${plan.filesToIngest} to ingest, ${plan.filesUnchanged} unchanged)`);
   console.log(`  bytes accepted:   ${plan.totalBytes}`);
   console.log(`  tombstones:       ${plan.tombstones.length}`);
@@ -173,7 +192,10 @@ async function main(): Promise<number> {
     scan: scanRepository,
     readFile: (scanRoot, relativePath) => fs.readFile(path.join(scanRoot, relativePath)),
     parse: (relativePath, bytes) =>
-      parseSourceFile(relativePath, bytes, { pythonExecutable: config.python.executable }),
+      parseSourceFile(relativePath, bytes, {
+        pythonExecutable: config.python.executable,
+        chunkingPolicy: args.chunkingPolicy,
+      }),
     ingestDocument: request => ingestDocument(ingestDeps, request),
     ingestTombstone: (docKey, requestId) => ingestTombstone(ingestDeps, docKey, requestId),
     log,
@@ -185,6 +207,7 @@ async function main(): Promise<number> {
     policy,
     includeUntracked: args.includeUntracked,
     includePrefixes: args.includePrefixes,
+    chunkingPolicy: args.chunkingPolicy,
     concurrency: args.concurrency,
     maxFileBytes: args.maxFileBytes,
     maxBytesInFlight: args.maxBytesInFlight,
@@ -192,7 +215,7 @@ async function main(): Promise<number> {
   };
 
   const plan = await planRepositorySnapshot(deps, options);
-  printPlan(plan, policy, args.includePrefixes);
+  printPlan(plan, policy, args.includePrefixes, args.chunkingPolicy);
   if (args.dryRun) {
     console.log('\nDry run: no writes performed.');
     return 0;
