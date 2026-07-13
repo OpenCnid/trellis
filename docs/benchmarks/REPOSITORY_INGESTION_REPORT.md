@@ -1462,6 +1462,347 @@ instead.
   against the proposal's ≤$0.90 run budget + separately-gated
   refresh.
 
+## 5h. Stage 2, the first FEATURE-CLASS increment: T1, the backend config surface (design record, Session 48, July 13, 2026)
+
+Written BEFORE any run (the §5e/§5f/§5g mold). This is the first
+increment of the ratified T-series (`TEST_TIME_TRAINING.md` §12.6): a
+task-assigned functionality increment — the W-series / increments-1/2
+lineage, distinct from the defect-class increment 3, whose
+never-manufacture rule is untouched. The spec is
+`docs/architecture/MODEL_BACKEND_SEAM.md` §3 + §4 layer 1, scoped by
+its §8 T1 skeleton; because the design record lives in `docs/`
+(outside extraction scope), the task text below carries the spec
+verbatim — the task text IS the spec channel.
+
+### 5h.1 Scope and named files
+
+- `src/config/index.ts` — the four optional `TRELLIS_RLM_*` keys in
+  `EnvSchema`; the three cross-field refusals; the ambient
+  `OPENAI_BASE_URL` guard with the §4.1 message; the
+  `config.rlmBackend` export with fail-fast key resolution.
+- `src/config/rlm_backend.test.ts` — NEW; the per-topic config test
+  mold (`textedit_bounds.test.ts` / `workspace_bounds.test.ts`); the
+  increment's own unit pins.
+- NO call-site change: no consumer reads `config.rlmBackend` in T1
+  (T2/T3 scope). The kernel default model literal does not move
+  (`trellis_agent.py`, T3 scope). A diff touching any other file
+  fails the criterion.
+
+Recorded shape decision (the spec names the export's four optional
+fields and "the fail-fast resolved key value" without naming the
+fifth field): the resolved value is exported as
+`config.rlmBackend.apiKeyValue` (undefined when
+`TRELLIS_RLM_API_KEY_ENV` is unset) — the `config.mcp.credentialEnv`
+precedent: resolved fail-fast at load, never logged or serialized.
+
+### 5h.2 The new-file constraint and the pre-staged stub (recorded decision)
+
+`trellis_textedit.load()` refuses a path that is not an existing
+regular file under the edit root — the toolkit edits existing files
+only, and nothing in its contract creates one. T1 is the first
+increment to name a NEW file. The recorded resolution, in the
+harness-holds-the-pen lineage (the Session 19 grounded-authoring
+precedent): the session pre-stages `src/config/rlm_backend.test.ts`
+as a four-line header-comment stub, committed to the feature branch
+BEFORE the run (so `git status --porcelain` is clean at run start and
+the post-run porcelain shows exactly the run's own work). The run
+authors the entire test body through guarded `insert_lines` anchored
+on the header. The stub carries no test, no import, no executable
+line; every byte of pin content is the run's. Consequences pinned by
+the criterion: the header must survive byte-intact (human review),
+and the toolkit contract is unchanged (no creation surface was
+added).
+
+The stub bytes, exactly (four comment lines, LF-committed like every
+repo text file):
+
+```
+// Session 48 (TTT-track increment T1, MODEL_BACKEND_SEAM.md sections
+// 3 and 4 layer 1): unit pins for the TRELLIS_RLM_* config surface.
+// Pre-staged header (the editing toolkit loads existing files only);
+// the test body below is authored by the stage-2 self-edit run.
+```
+
+Two consequences, recorded: (1) a `.test.ts` file with no tests FAILS
+vitest, so the offline suite reads red between the stub commit and
+the run's landing — the stub is therefore created and committed only
+AFTER owner approval, immediately before the run, and an unapproved
+or failed increment removes it before close-out (the suite is green
+at every shipped state). (2) The stub has no substrate document until
+the post-landing refresh — a file that did not exist at `trellis#11`
+cannot have one. The `--pre` gate therefore names only
+`src/config/index.ts` (its doc is present); the post-run check names
+BOTH files (scope + parse gate); the evidence bridge runs through
+`index.ts` blocks. Recorded as the honest shape for any future
+new-file increment.
+
+### 5h.3 Live evidence verification (the §5g.2 mold; probes read-only, July 13, 2026)
+
+- `repo:trellis:src/config/index.ts` present, version 1, root
+  `74b494fbfd9ee6f2bde906e14a6c033f1f9d7ba2a9c449d9106d16fb1ba3c825`
+  (the `trellis#11` state).
+- Four seam blocks, ALL bytes verbatim on disk — the file is
+  unchanged since `trellis#11`, so refresh-before-use is satisfied
+  with NO pre-run refresh (the split-scope policy-1 `--dry-run` echo
+  read 0 to ingest / 301 unchanged / 0 tombstones):
+  - `fc17205c4b1e129508c7fb5c675944300b124939b4c609bfe77352b39ab76311`
+    (`code_chunk`, 3,959 ch) — the credential mold: the "Fail fast at
+    startup on a malformed registry" comment + the
+    `resolveMcpCredentialEnv(mcpServers, process.env)` call. The
+    expected citation.
+  - `a5930c920330a434d8d32b259d6d5a7f5f02624958af81f474cb78ef37abdcac`
+    (`code_chunk`, 3,968 ch) — the budget mold:
+    `TRELLIS_RETRIEVAL_BUDGET_PER_RUN`'s schema line + its design
+    comment.
+  - `ee175a534c2d734f45685a0065e98fe4fe7b941b7ddbfdf115844f2dadcbf796`
+    (`code_chunk`, 1,625 ch) — the `credentialEnv: mcpCredentialEnv`
+    export + its never-logged comment.
+  - `0b3f685cf2df829b55715a43d3e280a3c09a00fb69f0089942c15bfd7f45d869`
+    (`code_chunk`, 3,941 ch) — the file head / imports.
+- Entity states: `resolvemcpcredentialenv` (1 ACTION edge, 0
+  contested) and `mcpcredentialenv` (0 edges) are the `--pre`
+  entities — `stage2:check --pre` PASS, zero findings, observed this
+  session. `config` (59 edges, 1 contested: `-uses-`
+  `scripts/stage2_selfedit_check.ts`, refresh-churn residue) and
+  `trellis_retrieval_budget_per_run` (4 edges, 1 contested:
+  `-reads_config-` `parse_retrieval_budget`, same class) are NOT
+  named at `--pre`: each carries one contested attached edge that is
+  lazy-recovery residue on an unrelated belief, and the pre-gate's
+  contract is "an edit premised on quarantined beliefs is refused" —
+  this task's premise (the two molds' bytes) relies on neither. Both
+  contested edges are recorded here precisely so the owner reviews
+  that reasoning instead of discovering it.
+- The graph-first chain: the clean entities' edges cite
+  `1a6b13761f1245280596de9a3aa4d30b30e5878e09d07940505b41df9a062d3f`
+  (a `src/config/mcp_servers.ts` block) — informative, NOT citable
+  (the increment-1 trap, re-tested live); the `index.ts` mold blocks
+  are reached by `vector_search` (live-only since Session 40),
+  fetched, and verified byte-verbatim against the loaded frame before
+  citation.
+- Expected insight: `config` `-resolves_fail_fast->`
+  `mcpcredentialenv` (DERIVED_INSIGHT), citing the `index.ts`
+  block(s) showing the fail-fast credential resolution — the exact
+  mold T1's new key resolution mirrors. Post-run, both entities'
+  own contested flags read false (the checker's evidence layer reads
+  `e.contested`, not attached edges).
+- Honest churn note, recorded in advance: the post-landing refresh
+  re-chunks `index.ts` (policy-1 positional chunking), the cited
+  blocks die, and the sweep will contest this fresh insight edge —
+  ordinary lazy recovery (the §5e.5 precedent), never a criterion
+  item.
+
+### 5h.4 Named failure modes and the catching layer
+
+- The run touches an unnamed file → checker scope
+  (`out_of_scope_edit`); a named file left untouched →
+  `named_file_unchanged`.
+- The insight is missing, or cites dead or unbridged hashes → the
+  evidence layer; the citable set is constrained in-run by the
+  Session 31 write gate (only in-run retrieved addresses).
+- A syntax-broken named file → the parse gate (both named files are
+  `.ts`; single-file diagnostics are wired).
+- Neighbor drop / address drift in `index.ts` → the guarded family
+  refuses at staging (`AnchorMismatchError`); any raw splice fails
+  the guarded-only criterion (`textedit_raw_splices` must read 0).
+- Wrong bounds, wrong refusal messages, weak or wrong pins → the
+  increment's own pins (`npm test` with the diff applied) + human
+  `git diff` review against the spec — the layer that judges diff
+  semantics by design (§5e.2).
+- Stub header replaced or removed → human review (the header is the
+  recorded anchor).
+
+### 5h.5 Task text v1 (the run INPUT, verbatim — no kernel prompt byte; both composed-prompt pins unmoved)
+
+```
+Stage-2 self-edit task (feature-class increment T1: the backend
+config surface).
+
+Implement a new validated configuration surface in
+src/config/index.ts and author its unit pins in
+src/config/rlm_backend.test.ts. The specification below is quoted
+from docs/architecture/MODEL_BACKEND_SEAM.md (its section 3 and
+section 4 layer 1); this task text is the spec channel - follow it
+exactly.
+
+THE SPEC, part 1 - four new OPTIONAL environment keys in EnvSchema:
+- TRELLIS_RLM_BACKEND: z.enum(['openai', 'vllm']).optional()
+- TRELLIS_RLM_MODEL: z.string().min(1).max(256).optional()
+- TRELLIS_RLM_BASE_URL: z.url().optional(), plus a refinement
+  requiring the URL scheme to be http: or https:
+- TRELLIS_RLM_API_KEY_ENV: z.string().min(1).max(128).optional()
+Each key gets a comment block in the file's house style naming
+MODEL_BACKEND_SEAM.md as the design record and stating that no
+consumer reads these values yet (T2/T3 wire them).
+
+THE SPEC, part 2 - imperative fail-fast checks after the schema
+parse (the existing editRoot / mcpCredentialEnv precedent in the
+same file), each throwing a plain Error whose message names every
+key involved:
+1. If OPENAI_BASE_URL is present in process.env (any value,
+   including empty), throw with EXACTLY this message:
+   Backend config: OPENAI_BASE_URL is not honored; set
+   TRELLIS_RLM_BASE_URL (root agent) - worker transport is not yet
+   configurable.
+   (single line, an em dash between "(root agent)" and "worker",
+   exactly as the design record states it)
+2. TRELLIS_RLM_BACKEND set to 'vllm' with TRELLIS_RLM_BASE_URL
+   unset: refuse.
+3. TRELLIS_RLM_API_KEY_ENV set with TRELLIS_RLM_BASE_URL unset:
+   refuse.
+4. TRELLIS_RLM_API_KEY_ENV set: the variable it names must be
+   present and non-empty in process.env; otherwise refuse. Resolve
+   the value once here into a local.
+A base URL WITHOUT a backend is allowed - add no check for it.
+
+THE SPEC, part 3 - a new export block on the config object:
+  rlmBackend: { backend, model, baseUrl, apiKeyEnv, apiKeyValue }
+where the first four are the validated values (each undefined when
+its key is unset) and apiKeyValue is the fail-fast resolved value
+of the named key variable (undefined when TRELLIS_RLM_API_KEY_ENV
+is unset). With every key unset every field is undefined and every
+existing config consumer reads exactly what it read before. The
+comment on the block follows the config.mcp.credentialEnv
+precedent: the resolved value never appears in logs or
+serializations. No other code reads rlmBackend yet - change NO call
+site anywhere.
+
+Steps:
+1. Consult the graph first: with trellis_neo4j.run_cypher, list the
+   ACTION edges around the entities named 'resolvemcpcredentialenv'
+   and 'mcpcredentialenv' (entity names are lowercase-normalized;
+   use an UNDIRECTED pattern, e.g.
+   MATCH (e:Entity)-[r:ACTION]-(o:Entity) WHERE e.name IN
+   ['resolvemcpcredentialenv','mcpcredentialenv'] RETURN r.verb,
+   o.name, r.sourceNodeIds). Collect the distinct sourceNodeIds.
+2. Fetch those blocks with trellis_postgres.get_ast_texts and read
+   them. Some fetched blocks belong to OTHER files (for example
+   src/config/mcp_servers.ts) - they inform but must NOT be cited
+   in step 8.
+3. Find the two molds inside src/config/index.ts with
+   trellis_postgres.vector_search (for example 'per-run retrieval
+   budget validated fail-fast env twin' and 'fail fast at startup
+   malformed registry credential env var missing secret'). Fetch
+   the hits you need. Load src/config/index.ts with
+   trellis_textedit.load and verify which fetched blocks' bytes
+   appear VERBATIM in the file you are editing: you need the block
+   holding the TRELLIS_RETRIEVAL_BUDGET_PER_RUN validation (the
+   optional-env-twin mold your new keys follow) and the block
+   holding the "Fail fast at startup" comment with the
+   resolveMcpCredentialEnv(mcpServers, process.env) call (the
+   credential mold your key resolution follows).
+4. Edit src/config/index.ts ONLY through the guarded family -
+   replace_lines / insert_lines / delete_lines, NEVER raw splice
+   (the increment fails its criterion if textedit_raw_splices is
+   nonzero). Insertions dominate: (a) ONE guarded insert inside
+   EnvSchema adding the four keys with their comments, anchored
+   after the TRELLIS_RETRIEVAL_BUDGET_PER_RUN line's block; (b) ONE
+   guarded insert after the existing editRoot fail-fast block
+   adding the ambient guard and the three cross-field refusals;
+   (c) ONE guarded insert inside the config object literal adding
+   the rlmBackend block, anchored between existing blocks (for
+   example after textedit or scratch). Read the neighbors with
+   trellis_textedit.lines() first and supply byte-exact anchors.
+   Do not modify, re-type, or re-wrap ANY existing line.
+5. Author the test body in src/config/rlm_backend.test.ts. The file
+   exists as a four-line header-comment stub - load it, keep the
+   header byte-intact, and add everything below it with guarded
+   insert_lines anchored on the header's last line. First read
+   src/config/textedit_bounds.test.ts (trellis_textedit.load +
+   lines) to learn the house per-topic config-test mold: a
+   managed-keys env save/restore helper, vi.resetModules() plus a
+   dynamic import('./index') per load, afterEach restore. Author
+   fresh code in those conventions - never re-type another file's
+   bytes as your own. The helper must manage: the four TRELLIS_RLM_*
+   keys, OPENAI_BASE_URL, and one scratch variable name of your
+   choice (for example TRELLIS_TEST_RLM_KEY) for the key-env pins.
+   The pins, one describe block:
+   (a) unset default: config.rlmBackend deep-equals the
+       all-undefined five-field shape;
+   (b) backend accepts 'openai' alone and 'vllm' with a base URL;
+       refuses an unknown enum value;
+   (c) model accepts an ordinary id; refuses '' and a 257-char
+       string;
+   (d) base URL accepts http://127.0.0.1:8000/v1 and an https URL
+       with no backend set; refuses a non-URL and ftp://host/;
+   (e) 'vllm' without base URL refuses and the message names both
+       keys;
+   (f) key-env without base URL refuses and the message names both
+       keys;
+   (g) key-env with base URL and the named variable set populates
+       apiKeyEnv and apiKeyValue;
+   (h) key-env naming an absent variable refuses; naming a present
+       but empty variable refuses;
+   (i) ambient OPENAI_BASE_URL set makes config load throw with the
+       exact part-2 guard message.
+6. Verify in its OWN REPL iteration (never the same cell as any
+   later write or the submit): re-read the three edited regions of
+   src/config/index.ts and the whole test file with
+   trellis_textedit.lines(), PRINT them, and assert in code with
+   each result printed: (a) the four TRELLIS_RLM_* schema lines
+   appear exactly once each; (b) the ambient-guard message string
+   appears exactly once in index.ts; (c) the
+   TRELLIS_RETRIEVAL_BUDGET_PER_RUN line and the editRoot fail-fast
+   block are byte-unchanged; (d) the rlmBackend block sits inside
+   the config object literal with the neighboring export blocks
+   intact; (e) the four-line stub header is byte-intact and the
+   first non-header line of the test file is your own import line.
+7. Only after every assertion in step 6 has printed true, in a
+   LATER iteration: record exactly one derived insight
+   trellis_neo4j.write_derived_insight(
+     subject='config', verb='resolves_fail_fast',
+     obj='mcpcredentialenv',
+     sourceNodeIds=[the hash(es) of the fetched block(s) whose
+     bytes appear verbatim in src/config/index.ts and show the
+     fail-fast mcpCredentialEnv resolution]).
+8. Submit a short report via trellis_answer.submit describing what
+   the graph said, what the bytes confirmed, what you added, and
+   the anchors you used.
+
+Edit no other file. If the graph, the fetched bytes, or the file
+contents contradict the task premise (for example the molds are not
+where this task says they are, or the stub header is absent), stop,
+make no edit, and report the contradiction instead.
+```
+
+### 5h.6 The run proposal (owner-gated; presented at session start)
+
+- **Mechanics (the §5e.4/§5g.3 mold):** `trellis_agent.py` spawned
+  directly, research mode, the session worktree as
+  `TRELLIS_EDIT_ROOT`, `TRELLIS_CITATION_AUDIT=1` in the run's own
+  environment, `--max-iterations 16` (recorded deviation from the
+  increments-1/2 value of 12: this increment authors ~200 new lines
+  across two files; the headroom is iteration count only, never
+  spend authorization).
+- **Estimate:** **$0.40–$0.90 for one run** (the landed-run basis
+  $0.347–$0.352, scaled for a two-file authoring task with ~15k
+  output tokens), one diagnosed-contingency re-run at most —
+  **≤$1.80 total**, under the ≤$5/run cap. The post-landing
+  split-scope policy-1 refresh adds ≈$0.05–$0.15 (`index.ts`
+  re-extraction; the new test file is ingested but
+  test/fixture-excluded from extraction). Actuals recorded
+  regardless.
+- **The criterion (pre-stated; the §12.6 feature-class mold):**
+  1. named-file-only diff — exactly `src/config/index.ts` +
+     `src/config/rlm_backend.test.ts`;
+  2. exactly one recorded insight (`config` `-resolves_fail_fast->`
+     `mcpcredentialenv`) through the Session 31 gate, citing only
+     live `index.ts` blocks;
+  3. `stage2:check` zero findings (scope + evidence + parse gate;
+     comment-class not declared — this is an executable-class
+     increment);
+  4. guarded-only: `textedit_raw_splices == 0` in the run telemetry;
+  5. the increment's own pins green: `npm test` grows from 837/85
+     with every new test passing and zero existing tests changed
+     (run by the human with the diff applied);
+  6. human `git diff` review acceptance against the spec text
+     (bounds, messages, export shape, stub header intact,
+     insert-dominant diff over `index.ts`);
+  7. spend within estimate; counts + diff + dollars reported
+     TOGETHER.
+  A harness flag or a failing pin FAILS the increment — record,
+  stop, diagnose; a retry is its own proposal (the increments-1/2
+  treatment).
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).
