@@ -328,6 +328,44 @@ only by a short toolkit-hardening session; the claim→block
 factorization question is live and your input is wanted before the
 design record is written. Item 3 (the incentive audit) remains open.
 
+## Postscript 3 — Test-Time Training, taken literally this time (added July 13, 2026)
+
+A correction to our answer at item (4) above, prompted by the owner
+relaying your current line of work. When you first raised "modular
+harness / Test-Time Training," we answered at the PROMPT level: the
+module registry as versioned, composable, per-run instruction selection.
+That answer stands for what it is — but it was not an answer to TTT in
+the literal sense you meant: **fast-weight layers trained during
+inference, per turn, on the contents of the RLM's context and on the
+harness's own meta-prompts, on open sparse models.** We have now opened
+that track properly:
+[`docs/architecture/TEST_TIME_TRAINING.md`](architecture/TEST_TIME_TRAINING.md)
+— the claim decomposed into three independently testable hypotheses, the
+July-2026 literature mapped into three mechanism families, the harness
+seams named against the code (including one trap we want on your radar:
+the embedding backend is schema-coupled and separable from the
+completion backend), the trust-model analysis (fast weights get the
+Tier-3 treatment — zero provenance standing, per-run ephemeral, and none
+of the write-path gates move because they were never in the model), and
+an owner-gated measurement ladder whose gating question comes BEFORE
+TTT: can an open sparse checkpoint drive our REPL protocol at an
+acceptable violation rate at all? Section 9 of that record holds four
+questions addressed to you — mechanism selection, whether sparsity does
+work in your formulation or is the economics, the mechanism behind the
+meta-prompt claim, and your adaptation-data policy. The five-line
+proposal frame below applies.
+
+*Same-day update:* your answer to the first question arrived — LaCT —
+and is recorded with our reading of it in the record's §12: the
+retrofit is a training job (your side); the reliance claim decomposes
+into a supported efficiency half, an extrapolated improvement half
+(the gap our R3/R4 measurements exist to close), and the untested
+meta-prompt-adherence half our protocol counters will meter. One
+sharpened question back to you (§12.4): should the adaptation-data
+eligibility boundary BE the run's retrieval set — provenance-gated
+fast-weight training, so what the model absorbed is auditable the way
+what it cited is today?
+
 ## Where you can help next
 
 When you propose — on any item below — please use this frame, one per

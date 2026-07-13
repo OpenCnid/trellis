@@ -4702,3 +4702,100 @@ then landed the same owner-scoped edit in one run. Session paid total
    increment ladder now stands at the owner's judgment (increment 1
    landed on contingency; increment 2 failed twice, both classes
    closed mechanically, retry landed first shot).
+
+### July 13, 2026 — Session 40: the `search_ast_nodes` liveness filter — dead-block embedding pollution closed at the T15 seam (§4 row 12 continuation)
+
+The Session 38 pilot's item-3 root cause closed by the recorded
+recommendation (standing item 9, promoted): the query-time liveness
+filter inside `search_ast_nodes`. One schema function changed; zero
+bytes in either caller; the whole session zero-paid except the
+pre-stated seam re-measure (**8 embedding calls, 75 tokens,
+≈$0.000002 actual**). Design record: `STRUCTURAL_CHUNKING.md` §11
+(written BEFORE implementation); measured record §11.4.
+
+1. **The design record first (§11).** Liveness = membership in the
+   CURRENT (max-version) root of at least one document — exactly the
+   stage-2 checker's `gatherHashEvidence` bridge semantics, mirrored
+   into SQL. The filter lives INSIDE the function (one
+   `CREATE OR REPLACE` in `POSTGRES_SCHEMA_SQL`; signature unchanged;
+   both callers — `trellis_tools.py vector_search` and
+   `POST /retrieve` — change zero bytes; the idempotent bootstrap
+   upgrades every stack on boot; reversal is one `CREATE OR REPLACE`
+   back). The filter applies BEFORE `LIMIT`. The honest residual is
+   recorded, not denied: a filtered HNSW scan can under-fill below
+   pgvector's candidate truncation — observed behavior printed at
+   measure time (no under-fill occurred: every query returned a full
+   top-5; a count-5 probe timed 65.9 ms at dev scale, printed never
+   asserted). The superseded-embedding SWEEP stays unchosen on the
+   owner menu.
+2. **Implementation (zero-paid, one commit for schema + pins).**
+   `src/config/schema.ts`: the EXISTS clause (document_nodes →
+   documents → max-version-per-doc_key join, probing the existing
+   `idx_document_nodes_node_id`). `src/config/schema.test.ts`: a new
+   shape pin moved in the SAME commit (EXISTS present, the
+   max-version join present, filter-before-ORDER-BY-before-LIMIT
+   ordering, signature unchanged); `npm test` 836 → **837** across
+   85 files. Dev DB upgraded via `npm run db:init:dev`; measured
+   state at that moment: 1,731 embedded rows / 286 dead / 1,445
+   live.
+3. **The planted-dead-twin drill (`test:repo-ingest` Part 8, ten new
+   checks, first-run green).** Synthetic deterministic vectors, zero
+   LLM: a twin document's v1 block gets an embedding EQUAL to the
+   drill query vector (raw cosine distance 0); v2 re-hashes the block
+   and gets a perturbed embedding. Observed: the v1 block surfaces at
+   rank 1 while current; after supersession the RAW distance order
+   still ranks the dead twin first (the planted proof that the
+   filter, not distance, excludes it) while `search_ast_nodes`
+   returns ONLY the live successor at rank 1; after tombstoning,
+   neither generation surfaces; zero extraction jobs; cleanup clean.
+   The twin vectors sit on a dimension orthogonal to the rlm-sandbox
+   probe so a stale fixture can never tie at distance 0.
+4. **One witting fixture consequence (recorded, not hidden).**
+   `test:rlm-sandbox` [5]'s embedded probe row was a bare `ast_nodes`
+   insert with no document membership — DEAD by the new definition,
+   so the tool would rightly hide it. The fixture now registers the
+   probe as its own single-node document (`sandbox:probe:embed`) with
+   FK-ordered cleanup; every sandbox check is unchanged and the drill
+   is green — which simultaneously proves criterion 3 (all other
+   retrieval surfaces byte-identical; zero bytes changed in
+   `trellis_tools.py`).
+5. **The re-measure (one run, after; before-numbers = §10.3's).**
+   `npm run chunking:seam-queries` (the eight PINNED queries, never
+   tuned): **5/8 top-3 vs the 4/8 post-pilot before — criterion 2
+   PASSES (≥5/8)**. The raw tool now reads exactly what the
+   Session 38 live-only diagnostic read. The pilot's headline miss
+   (the `trellis_agent.py` research-mode telemetry query — the §5f.5
+   increment-2 run-1 miss class) is FIXED through the agent-visible
+   tool: live rank 2 where ~256 dead near-twins previously buried
+   it. No query moved down versus the before-column. Persisting
+   misses NAMED, not chased: `trellis_blocks.py` (the §10.3
+   merge-dilution case — merge-density, owner's rollout judgment)
+   and the two both-column misses (`trellis_tools.py` provenance
+   rank 4, `trellis_workspace.py` >5 — cross-file semantic
+   competition, unchanged by chunking or the filter). Full table in
+   §11.4; raw log `benchmark_logs/session40_seam_after.log`.
+6. **Standing consequence.** Dead-block embedding pollution is
+   CLOSED at the seam — the §1 "name the pollution" reporting duty
+   is retired for tool-shaped vector-search results; retrieval
+   quality no longer decays with the per-PR refresh cadence. Row 12
+   rollout continuation (widening policy 2, the merge-density knob,
+   or reverting the pilot) stays the owner's call, now with §10.3 +
+   §11.4 together.
+7. **Acceptance (all green; commands per HANDOFF §6).** Offline:
+   `npm test` 837/85, `npm run build`, `npm run python:check`,
+   `docker compose --profile test config --quiet`. Live zero-LLM
+   drill block green (`test:repo-ingest` "All checks passed." with
+   Part 8; `test:rlm-sandbox` "All sandbox checks passed."; the full
+   standing block per HANDOFF §6). `drill:scale` run ALONE: 2.05x
+   CLOSED (in-band ~1.48x–2.26x, first try; max provenance 286;
+   results file committed per house practice). Isolated Compose
+   integration as project `trellis_s40_ci` (host ports 0, torn down
+   with `--volumes`). `git diff --check` clean. Defects found in
+   existing kernel code: NONE.
+8. **Documentation window (owner rule).** The Session 35 §5 entry
+   moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the live
+   ledger keeps Sessions 36–40); HANDOFF regenerated per §0 — the
+   largest standing decisions (the row-11 increment-ladder judgment,
+   the row-10 (d) acceptance measurement, the stage-1b prose chunk,
+   structural splice addressing) present unchanged on the owner
+   menu.
