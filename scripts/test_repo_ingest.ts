@@ -669,6 +669,99 @@ async function main(): Promise<void> {
       cliBad.stdout.includes('invalid scope prefix'), true);
     check('scope drill wrote zero extraction jobs to Redis',
       await extractionQueueDepth(), extractionBaseline);
+
+    console.log('\nPart 8: vector-search liveness — a planted dead twin never surfaces (Session 40)');
+    // A superseded block keeps its embedding forever; the liveness filter
+    // in search_ast_nodes (STRUCTURAL_CHUNKING.md §11) must keep it out of
+    // results while the live successor surfaces. Synthetic deterministic
+    // vectors, zero LLM: the drill query IS the dead twin's embedding (raw
+    // cosine distance 0 — without the filter it would rank first); the
+    // live successor sits a tiny perturbation away. Dimension 1 keeps the
+    // direction orthogonal to the rlm-sandbox drill's [1, 0, …] probe, so
+    // a stale row from a crashed sandbox run can never tie at distance 0.
+    const queryVec = new Array(1536).fill(0);
+    queryVec[1] = 1;
+    const liveVec = [...queryVec];
+    liveVec[2] = 0.02;
+    const queryParam = JSON.stringify(queryVec);
+
+    const twinPath = 'docs/twin.md';
+    await fs.writeFile(
+      path.join(repoRoot, twinPath),
+      `# Twin\n\nThe planted twin paragraph (${TOKEN}), version one.\n`
+    );
+    await git(repoRoot, 'add', '-A');
+    await git(repoRoot, 'commit', '-m', 'plant the twin document v1');
+    seenDocKeys.add(docKeyFor(twinPath));
+    const { result: result8a } = await runSnapshot(makeLibraryDeps([]), repoRoot);
+    check('twin v1 snapshot counts', result8a.counts, { ingested: 1, unchanged: 5, tombstoned: 0 });
+
+    const twinRootV1 = await parseFixtureFile(repoRoot, twinPath);
+    const twinBlockV1 = collectExtractionBlocks(twinRootV1)
+      .find(b => nodeText(b).includes('version one'))!;
+    await pgPool.query(
+      'UPDATE ast_nodes SET embedding = $1::vector WHERE id = $2',
+      [queryParam, twinBlockV1.id]
+    );
+    const live8a = await pgPool.query(
+      'SELECT id FROM search_ast_nodes($1::vector, 5)', [queryParam]);
+    check('the v1 block surfaces at rank 1 while it is current',
+      live8a.rows[0]?.id, twinBlockV1.id);
+
+    // Supersede: v2 re-hashes the paragraph. The v1 block goes dead but
+    // keeps its planted embedding — the dead twin.
+    await fs.writeFile(
+      path.join(repoRoot, twinPath),
+      `# Twin\n\nThe planted twin paragraph (${TOKEN}), version two.\n`
+    );
+    await git(repoRoot, 'add', '-A');
+    await git(repoRoot, 'commit', '-m', 'supersede the twin document');
+    const sweeps8: CapturedSweep[] = [];
+    const { result: result8b } = await runSnapshot(makeLibraryDeps(sweeps8), repoRoot);
+    check('twin v2 snapshot counts', result8b.counts, { ingested: 1, unchanged: 5, tombstoned: 0 });
+    await mirrorInvalidationWorker(sweeps8);
+    const twinRootV2 = await parseFixtureFile(repoRoot, twinPath);
+    const twinBlockV2 = collectExtractionBlocks(twinRootV2)
+      .find(b => nodeText(b).includes('version two'))!;
+    check('the superseded twin re-hashed to a distinct block',
+      twinBlockV1.id === twinBlockV2.id, false);
+    await pgPool.query(
+      'UPDATE ast_nodes SET embedding = $1::vector WHERE id = $2',
+      [JSON.stringify(liveVec), twinBlockV2.id]
+    );
+
+    // Raw distance order prefers the dead twin (distance 0): without the
+    // filter it would occupy the top slot. This is the planted proof that
+    // the filter — not distance — excludes it.
+    const raw8 = await pgPool.query(
+      'SELECT id FROM ast_nodes WHERE embedding IS NOT NULL ORDER BY embedding <=> $1::vector LIMIT 1',
+      [queryParam]
+    );
+    check('raw distance order ranks the dead twin first', raw8.rows[0]?.id, twinBlockV1.id);
+
+    const search8b = await pgPool.query(
+      'SELECT id FROM search_ast_nodes($1::vector, 5)', [queryParam]);
+    const ids8b = search8b.rows.map((row: { id: string }) => row.id);
+    check('the dead twin never surfaces through the tool',
+      ids8b.includes(twinBlockV1.id), false);
+    check('the live successor surfaces at rank 1', ids8b[0], twinBlockV2.id);
+
+    // Tombstone: the document's current version becomes the empty root,
+    // so BOTH twin generations drop out of vector search.
+    await fs.rm(path.join(repoRoot, twinPath));
+    await git(repoRoot, 'add', '-A');
+    await git(repoRoot, 'commit', '-m', 'tombstone the twin document');
+    const sweeps8c: CapturedSweep[] = [];
+    const { result: result8c } = await runSnapshot(makeLibraryDeps(sweeps8c), repoRoot);
+    check('twin tombstone snapshot counts', result8c.counts, { ingested: 0, unchanged: 5, tombstoned: 1 });
+    await mirrorInvalidationWorker(sweeps8c);
+    const search8c = await pgPool.query(
+      'SELECT id FROM search_ast_nodes($1::vector, 5)', [queryParam]);
+    const ids8c = search8c.rows.map((row: { id: string }) => row.id);
+    check('tombstoned blocks drop out of vector search',
+      [ids8c.includes(twinBlockV1.id), ids8c.includes(twinBlockV2.id)], [false, false]);
+    check('liveness drill wrote zero extraction jobs to Redis',
+      await extractionQueueDepth(), extractionBaseline);
   } finally {
     console.log('\nCleanup');
     try {

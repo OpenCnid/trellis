@@ -284,8 +284,12 @@ try:
     # stubbed in sys.modules so the in-function `import openai` binds
     # the stub (no network, no spend). Cosine distance 0 against itself
     # guarantees the probe row is the top hit regardless of what else
-    # in the dev store carries embeddings.
+    # in the dev store carries embeddings. Session 40: search_ast_nodes
+    # filters to LIVE blocks (members of some document's current
+    # version), so the probe registers as its own single-node document —
+    # a bare embedded row would be invisible to the tool by design.
     EMBED_HASH = hashlib.sha256(b"trellis-sandbox-retrieval-embed").hexdigest()
+    EMBED_DOC_KEY = "sandbox:probe:embed"
     probe_vector = [1.0] + [0.0] * 1535
     with pg.conn.cursor() as cur:
         cur.execute(
@@ -294,6 +298,16 @@ try:
             (EMBED_HASH, "sandbox_probe_doc",
              json.dumps({"type": "text", "content": "retrieval embed probe"}),
              json.dumps(probe_vector)),
+        )
+        cur.execute(
+            "INSERT INTO documents (doc_key, version, root_hash) VALUES (%s, 1, %s) "
+            "ON CONFLICT (doc_key, version) DO NOTHING",
+            (EMBED_DOC_KEY, EMBED_HASH),
+        )
+        cur.execute(
+            "INSERT INTO document_nodes (root_hash, node_id) VALUES (%s, %s) "
+            "ON CONFLICT (root_hash, node_id) DO NOTHING",
+            (EMBED_HASH, EMBED_HASH),
         )
     pg.conn.commit()
 
@@ -799,7 +813,18 @@ finally:
     try:
         with pg.conn.cursor() as cur:
             # All rows this drill owns (the section [5] retrieval probes
-            # are token-scoped like the original probe row).
+            # are token-scoped like the original probe row). The embed
+            # probe's membership rows (Session 40 liveness) go first so
+            # their foreign keys never block the ast_nodes delete.
+            cur.execute(
+                "DELETE FROM document_nodes WHERE root_hash IN "
+                "(SELECT root_hash FROM documents WHERE doc_key = %s)",
+                ("sandbox:probe:embed",),
+            )
+            cur.execute(
+                "DELETE FROM documents WHERE doc_key = %s",
+                ("sandbox:probe:embed",),
+            )
             cur.execute(
                 "DELETE FROM ast_nodes WHERE document_id = %s",
                 ("sandbox_probe_doc",),
