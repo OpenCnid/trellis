@@ -1855,6 +1855,85 @@ make no edit, and report the contradiction instead.
   contingency run must land inside the remaining $0.9240 or the
   increment records a FAILED verdict with no third run.
 
+### 5h.8 Run 2 and the increment verdict (July 13, 2026 — FAILED; recorded; no third run)
+
+- **The run ($1.2303 computed from tokens — 402,781 in / 22,332 out
+  at the gpt-5.4 rates; 14 calls, 123.5s; 4 db tool calls; 140
+  textedit ops / 8 guarded ops / 0 raw splices / 2 write_backs; 1
+  retrieval fetch / 1 dedup refusal / 0 budget refusals;
+  `answer_submits` 1) WROTE both named files** — an insert-only diff
+  (220 insertions, 0 deletions: the four keys, the ambient guard, the
+  three cross-field refusals, the resolved local, the `rlmBackend`
+  export, and the full test body under the byte-intact stub header) —
+  and recorded its insight through the Session 31 gate.
+- **The mechanical verdict: `stage2:check` flagged
+  `unbridged_evidence`** — the recorded insight cites
+  `1a6b13761f1245280596de9a3aa4d30b30e5878e09d07940505b41df9a062d3f`,
+  which bridges only to `repo:trellis:src/config/mcp_servers.ts`, not
+  to a named file. The transcript shows the mechanism precisely: the
+  run's second evidence cell re-fetched the already-fetched graph
+  hash, the dedup refusal raised and KILLED the cell BEFORE its two
+  `vector_search` calls executed, the run never re-ran the searches,
+  so no `index.ts` block ever entered the retrieval set — and at
+  insight time the run cited the one address it had (the
+  `mcp_servers.ts` implementation block) instead of stopping, despite
+  the task rule and despite having verified the call-site bytes only
+  in its loaded FRAME (frames confer no citability; retrieval does).
+  The Session 31 gate correctly permitted the write (the hash WAS
+  retrieved); the Session 35 bridge check correctly flagged it — the
+  second live `unbridged_evidence` firing ever (Session 37 run 1 was
+  the first).
+- **Criterion verdict, item by item:** (1) named-file-only diff PASS
+  (exactly the two files); (2) the evidence contract FAIL
+  (unbridged citation); (3) `stage2:check` zero findings FAIL (one
+  finding; scope and the parse gate themselves were clean); (4)
+  guarded-only PASS (`textedit_raw_splices` 0); (5) the increment's
+  own pins green PASS as a DIAGNOSTIC (with the diff applied,
+  `npm test` read 846/86 — 9 new pins, all green, zero existing
+  tests changed); (6) human diff review: content read
+  spec-conformant (recorded as a diagnostic; review is moot under a
+  harness flag); (7) spend within estimate FAIL — run 2 $1.2303
+  exceeded the $0.40–$0.90 band, and the session's run total
+  $2.1063 exceeded the ≤$1.80 approved envelope (still under the
+  standing ≤$5/run cap). **Verdict: increment T1 FAILED — a harness
+  flag plus a budget breach; recorded, no third run (the §5f.5
+  precedent).**
+- **The spend mechanism, reported honestly:** run 2 was spawned with
+  $0.9240 of envelope remaining against a run-1 basis of $0.8760;
+  its input tokens came in 39% over run 1 (larger frames — the file
+  re-reads after every guarded insert — plus the full test-body
+  authoring), and the overrun was only measurable after the fact.
+  The feature-class estimate basis is re-based for any retry:
+  two-file authoring runs cost $0.9–$1.3, not $0.4–$0.9.
+- **Cleanup (both bounded, both recorded):** the residual insight
+  edge was deleted under the Session 37 operator-cleanup precedent —
+  `MATCH (s:Entity {name:'config'})-[r:DERIVED_INSIGHT
+  {verb:'resolves_fail_fast'}]->(o:Entity {name:'mcpcredentialenv'})
+  DELETE r` — count 1 before, 0 after, no entity touched; the
+  working tree was reverted (`git checkout` of both named files) and
+  the stub removed in a recorded commit (§5h.2's rule: the stub
+  leaves with a failed increment; `npm test` back to 837/85 green).
+  The graph write is otherwise audit-preserved in the run log
+  (`benchmark_logs/s48_t1_run1.log`, `s48_t1_run2.log`,
+  `s48_t1_run2.diff` — local, gitignored).
+- **Retry lessons (task v3 material; the retry enters as its own
+  owner-approved proposal):** (1) route the citable chain
+  graph-first through the `config` `-uses_config_key-`
+  `trellis_retrieval_budget_per_run` edge, whose provenance IS an
+  `index.ts` block (`fc17205c…6311`) — noting the recorded `--pre`
+  tension: entity `config` carries one contested attached edge
+  (churn residue), so the retry proposal must either name different
+  pre-gate entities or resolve that residue first, an open design
+  point recorded for the proposal; (2) an explicit stop rule: if at
+  insight time NO address in the retrieval set has bytes verbatim in
+  the named file, write NOTHING and report — never substitute a
+  related block; (3) one retrieval-surface call per REPL cell during
+  evidence gathering — a typed refusal kills the entire cell and
+  everything after it (run 2's `vector_search` calls died this way);
+  (4) the re-based estimate above. The diff itself is preserved and
+  content-correct; a retry re-authors it under the fixed evidence
+  discipline rather than resurrecting bytes from a failed run.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

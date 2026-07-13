@@ -5043,3 +5043,80 @@ runs"), so approval was never the blocker; the environment was. Spend:
    container's stack was ephemeral and never touched the durable
    substrate). No kernel byte, no prompt byte, no contract change
    anywhere in the session.
+
+### July 13, 2026 — Session 43: the row-10 slice (d) acceptance measurement RAN and PASSED all three pre-stated criterion items (§4 row 10 CLOSED)
+
+The paired `est`-suite measurement Session 33 proposed and Session 42
+was environmentally blocked from running executed on the owner's dev
+machine with both prerequisites verified first (a 401 from
+`https://api.openai.com/v1/models` proving egress without spend;
+`OPENAI_API_KEY` present). Owner approval was given at session start.
+Total spend **$1.9619** ($1.0497 ON + $0.9122 OFF) against the ~$2.40
+estimate, under the ≤$5/run cap. Verdict record:
+`docs/architecture/RETRIEVAL_DISCIPLINE.md` §9 (the STRUCTURAL_CHUNKING
+§11.4 mold). NO machinery change: zero code bytes moved for the
+measurement itself; no prompt byte; both composed-prompt pins unmoved.
+
+1. **The run shape (exactly as pre-stated, no retuning):** 5 questions
+   × 2 arms × `--repeats 5` = 50 runs through
+   `scripts/exp_effective_context.ts --suites est --arms on
+   --repeats 5 --confirm-paid`; OFF arm identical with
+   `TRELLIS_EXP_OMIT_RETRIEVAL=1` in the runner's own environment.
+   Arm assignment verified PER RUN from TRELLIS_TELEMETRY: all 25 ON
+   runs `retrieval_fetches` ≥ 1; all 25 OFF runs every discipline
+   counter 0. Plan-only echo printed first (≈$0.12/run expected,
+   $5.00 cumulative hard stop); the four durable est corpora verified
+   live before any spend (4 + 40 + 100 distinct doc keys).
+2. **Criterion verdict (pre-stated in the archived Session 33 §5
+   entry item 4; judged item-by-item):** **(i) PASS** — repeat-serves
+   0 by construction on the ON arm; 5 dedup refusals OBSERVED LIVE
+   (est-chr-counts r2, est-chr-quote-entry r1/r2/r4,
+   est-frank-locate-count r1), each refusing a repeat before any I/O,
+   every refused run still correct; 0 budget refusals (the default 64
+   never approached). **(ii) PASS, thin** — pooled median input
+   tokens ON 8,756 ≤ OFF 8,807 (51 tokens ≈ 0.6%; per-question
+   medians MIXED and recorded: OFF lower on both chronicle questions,
+   ON lower on est-frank-locate-count, aggregates flat — the est
+   questions need only 1–2 fetches, so little repeat-spend exists to
+   reclaim). **(iii) PASS** — correctness ON 25/25 ≥ OFF 24/25 (the
+   OFF miss answered "DEBUG_NEEDED, None" after 8 db calls — one
+   run, reported with its counts, never claimed as a discipline
+   correctness win). Pooled db calls: ON median 2 (total 39), OFF
+   median 2 (total 49); answer_submits 50/50; zero
+   TRELLIS_PROTOCOL_VIOLATION.
+3. **What the verdict claims (record §9.3):** the mechanical claim
+   only — repeats never re-serve bytes, the budget bounds spend, the
+   discipline costs nothing measurable (correctness held, tokens did
+   not regress). No token headline (0.6% is noise-adjacent on 25
+   pairs), no correctness claim, padding-evasion and
+   budget-sufficiency residuals stand as recorded. Row 10 is CLOSED:
+   machinery (Session 33) + measurement (this session).
+4. **The DEFERRED Session 42 refresh executed (split-scope recipe,
+   third execution; $0.0161 actual — 2,997 in / 856 out / 1,895
+   embedding tokens, metrics-port actuals read before the workers
+   were killed).** Dry-run plan echo FIRST (7 to ingest / 0
+   tombstones / 12 carried forward out-of-scope — the src/rlm pilot
+   preserved). Snapshot `trellis#11` (policy 1, everything except
+   src/rlm): the four Session 42 repair files
+   (`scripts/test_verification_sweep.ts` v2 — 5 added / 5 orphaned /
+   16 retained, `scripts/test_confidence_writes.ts` v2,
+   `scripts/test_entity_kinds.ts` v2,
+   `src/benchmarks/poison_drill_runner.ts` v2 — 4/4/13) plus three
+   checkout-EOL re-hashes (`scripts/test_answer_channel.ts` v3,
+   `scripts/test_selfedit_rehearsal.py` v3,
+   `src/benchmarks/effective_context/synthetic_corpus.test.ts` v3 —
+   the FIFTH observation of the recorded churn class). 3/3
+   extraction jobs zero failures (only `poison_drill_runner.ts`
+   carried extraction-eligible changed blocks; the three
+   `scripts/test_*` files are kernel test/fixture-excluded —
+   blocksQueued 0 by construction; 3 dropped actions / 3 unresolved
+   endpoints counted, never silent). 7 sweeps contested 9 nodes / 6
+   relationships (all `poison_drill_runner.ts` orphans; audit
+   preserved, standard lazy recovery). ALL THREE standing beliefs
+   (`wires` / `consumes` / `returns_copy_of`) read
+   `contested: FALSE` after the refresh — the THIRD consecutive
+   refresh needing no recovery. NO policy-2 leg: `src/rlm` is
+   unchanged since `trellis#10`. Workers killed by child-tree PID
+   after the metrics read; zero node/tsx consumers verified. This
+   session's own PR is docs + committed-drill-artifact only — it
+   owes no further refresh.
