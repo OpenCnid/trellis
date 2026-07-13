@@ -772,6 +772,60 @@ instead.
   estimate; (5) a harness flag means the increment FAILED — record
   it and stop, no silent retry.
 
+### 5e.5 The measured run (Session 36, July 13, 2026 — owner-approved; run 1 failed review, run 2 landed)
+
+- **Pre-flight:** `stage2:check --pre` PASS on the merged Session 35
+  baseline; edit root = the session worktree, `git status
+  --porcelain` empty; the stale bytes confirmed in place.
+- **Run 1 — FAILED at human `git diff` review ($0.2134; 72,279 in /
+  3,268 out; 9 db tool calls; 20 textedit ops / 2 write_backs).**
+  Hunk A correct. Hunk B: the splice range [93,95) covered the `def`
+  line instead of the docstring tail; the run saw the wrong diff
+  preview and wrote back anyway; a repair splice still left the
+  stale docstring tail as dead bytes below the function body; the
+  final verification read and `trellis_answer.submit` sat in the
+  SAME REPL cell, so the printout showing the leftover stale line
+  could not inform the already-submitted success claim. File left
+  syntax-broken (`unmatched ')'`). `stage2:check` reported zero
+  findings — correctly: scope and the evidence chain WERE clean; the
+  checker proves consultation and scope, not diff semantics (§5e.2),
+  and the criterion places diff semantics with the human reviewer,
+  where run 1 was caught. Toolkit behavior per contract throughout.
+  Failure class: the run's localization/verify discipline
+  (verify-then-submit collapsed into one cell). Tree reverted;
+  contingency re-run per the recorded proposal.
+- **Run 2 — LANDED ($0.3520; 120,135 in / 5,165 out).** All five
+  criterion items pass: named-file-only diff; the pre-scoped
+  comment/docstring-only edit (both stale claims excised, the
+  consumer and seam named, surrounding true sentences preserved;
+  two long unwrapped lines accepted at review as style-only);
+  `stage2:check` zero findings; counts together — 8 db tool calls,
+  5 retrieval fetches / 1 dedup refusal / 0 budget refusals, 33
+  textedit ops / 1 write_back, `answer_submits` 1, `py_compile` +
+  `npm test` 771/81 + `python:check` + `test:textedit` green with
+  the diff applied; no harness flag. The recorded insight
+  (`_verify_hashes_retrieved` `consumes` `get_retrieved_addresses`)
+  cites the two fetched consumer blocks (`66750136…`, `3e478e14…`) —
+  a Session 31 gated write, so consultation is proven mechanically.
+- **The refresh (the freshness policy's first execution; $0.102 —
+  14,751 in / 6,531 out / 5,991 embedding tokens):** plan echo
+  first (8 files, 59-block bound, 0 tombstones), then snapshot
+  `trellis#2` — 24/24 jobs, zero failures; `trellis_tools.py` v2
+  (3 orphaned / 3 added / 38 retained). Churn verified: the old
+  docstring block `1f594ea9…` dead in v2, the stage-1
+  `returns_copy_of` ACTION edge contested with provenance preserved
+  in `orphanedSourceIds`; run 2's insight edge SURVIVED (it cites
+  the unedited consumer blocks — evidence outliving the edit);
+  recovery = an operator re-derivation citing the new v2 block
+  `09281f45…` (the contested ACTION edge stands as the audit record
+  per the lazy-recovery precedent; re-extraction did not reproduce
+  the exact triple — extraction variance, counted: 1 suppression,
+  2 unresolved endpoints across 24 jobs).
+- **Increment verdict: PASSED on run 2 under the pre-stated
+  criterion; run 1 recorded as the diagnosed contingency.** Session
+  paid total $0.667 ($0.565 runs vs ≤$0.90; $0.102 refresh vs
+  ≈$0.05–$0.25).
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).
