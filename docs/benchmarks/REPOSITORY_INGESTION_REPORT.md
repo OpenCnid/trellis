@@ -328,6 +328,242 @@ pilot-provenance entities (contested 394 → 554; entity total unchanged
 at 796 — quarantine, never delete); both queues drained; the standard
 lazy recovery path applies.
 
+## 5d. Stage 1: the durable self-extraction substrate (Session 34, July 13, 2026)
+
+*Roadmap §4 row 11 stage 1 — the owner-approved scaling flywheel, step 4
+of 4 in the July 12, 2026 tooling-shape sequence. Decisions recorded
+BEFORE the run; measured results appended after it.*
+
+### 5d.1 The scope machinery (zero-paid, this session)
+
+The budget gate rejects a whole snapshot whose post-exclusion bound
+exceeds `--max-blocks` — there is no partial queueing — so a
+full-repository `changed` run either fits one budget or does not run at
+all. The July 13 full-scope dry run priced 4,575 post-exclusion blocks
+(~$12.35 at the §5b measured rate): over the standing ≤$5/run cap, so
+scope selection became a required capability, not a convenience.
+
+`repo:ingest` gained a repeatable `--include <prefix>` flag
+(`SnapshotOptions.includePrefixes`, Session 34):
+
+- Only paths under an included prefix (segment-boundary match; `src`
+  covers `src/a.ts`, never `src2/a.ts`) are read, parsed, planned, and
+  ingested. Doc keys stay root-relative, so scoped and full runs agree
+  on identity for every path.
+- A previously effective path OUTSIDE every prefix is **carried
+  forward**: re-published in the new snapshot at its previous root
+  hash, never read, never re-ingested, and — decisively — **never
+  tombstoned by a run whose scope does not cover it**. Deletion
+  decisions belong to runs whose scope covers the path.
+- An out-of-scope path with no prior version is a typed `out_of_scope`
+  skip. (Because out-of-scope files are never read, parse-level skip
+  reasons such as `binary` cannot apply to them — drilled.)
+- An invalid prefix (`..`, absolute, backslash, empty) refuses before
+  any I/O. Unset or empty scope is byte-identical to pre-Session-34
+  behavior (unit-pinned by plan equality).
+- The plan echo prints `scope:` and `carried forward:` lines before any
+  confirmation, and the summary/result carry a `carriedForward` count.
+
+Pins: `snapshot_ingest.test.ts` 17 → 24 unit tests;
+`npm run test:repo-ingest` 56 → 82 live checks (Part 7: scoped
+plan/execute, carry-forward of an *edited* out-of-scope file at its
+pre-edit hash, deferred pickup by a covering full-scope run, in-scope
+deletion still tombstoning under scope, CLI flag round trip, invalid
+prefix refusal).
+
+Operational consequence, recorded: a later scoped run whose scope
+covers path P adjudicates P's liveness (tombstones it if absent); a
+scoped run whose scope does not cover P leaves P exactly as the last
+covering run did. Chunked scope staging under ONE repo key is therefore
+safe: chunk N+1 picks up deferred paths as ordinary changed-mode
+ingests (drilled in Part 7).
+
+### 5d.2 Stage-1 decisions
+
+- **Repo key `trellis`, root = repository root.** Doc keys are
+  `repo:trellis:<repo-relative-path>` — stable across scoped and full
+  runs, and a file rename remains tombstone + new document.
+- **Scope: `src`, `scripts`, `modules`.** The code substrate stage 2
+  queries when editing code — 298 accepted files, printed
+  post-exclusion bound **1,423 blocks** (112 files / 498 blocks
+  `test_fixture_excluded`; 77 `out_of_scope` skips at plan time).
+- **Deferred, not rejected — `docs/` + root-level prose** (~2,900
+  blocks ≈ $7.8 at the §5b rate): its own chunked proposal if the owner
+  wants the architecture records queryable; the Session 25 routing
+  sends Markdown to the LEGACY prose prompt by design, and that
+  prompt's per-block value on engineering narrative is unmeasured.
+- **Excluded by decision — `data/`** (231 blocks): the four durable
+  measurement corpora are *object* text (a Gutenberg novel, synthetic
+  ledgers), not knowledge about Trellis. Extracting them would pour
+  novel characters and synthetic households into the same graph the
+  self-substrate lives in. They stay ingestible (Tier-1 bytes,
+  liveness) but out of every extraction scope this stage defines.
+- **Durability: the residue PERSISTS.** No tombstone-and-sweep cleanup
+  (the pilots' cleanup protocol explicitly does NOT apply). The dev
+  graph becomes live self-substrate: `repo:trellis:*` documents join
+  the durable list beside the probe corpora — drills keep cleaning
+  token-scoped state only. Future sessions refresh the substrate by
+  re-running the scoped snapshot: changed files re-extract their new
+  blocks, and the Merkle diff → invalidation sweep contests beliefs
+  whose source blocks died — the ordinary churn loop, now applied to
+  Trellis's own code.
+- **Estimate:** 1,423 blocks × ≈$0.0027/block (§5b measured, chat +
+  embedding) ≈ **$3.84 ceiling**; the §5c revised-prompt basis
+  (≈$0.0017/block) predicts ≈ **$2.4**. Under the standing ≤$5/run
+  cap. Owner approval for this session's paid runs was given up front;
+  the run proceeds at the printed bound.
+
+### 5d.3 The quality-acceptance criterion (pre-stated)
+
+Counts and spot checks together, never counts alone:
+
+1. **Pipeline:** jobs completed = blocks queued, zero failed jobs, zero
+   merge-dropped actions unaccounted.
+2. **Exclusion:** the executed run's exclusion counts match the plan
+   echo (112 files / 498 blocks withheld); zero extraction jobs carry a
+   test/fixture path's doc key.
+3. **Suppression:** `generic_suppressed` events counted; ZERO denylist
+   names carry `repo:trellis` provenance, verified by live graph query.
+4. **Hub shape:** max hub cardinality (by distinct stage-1 source
+   blocks) ≤ 8% of queued blocks — twice the §5b good-shape ratio
+   (4/103 ≈ 3.9%) — and the top 15 entities are all genuine API-level
+   identifiers, published with the distribution.
+5. **Spot checks:** named kernel surfaces (e.g. `write_derived_insight`,
+   `parseLlmResponse`) resolve to entities whose `sourceNodeIds` fetch
+   back real `ast_nodes` bytes containing the identifier.
+
+### 5d.4 Measured results (the run, July 13, 2026)
+
+`repo:ingest --repo-key trellis --root . --include src --include
+scripts --include modules --extract changed --max-blocks 1450
+--confirm-extraction` from the session worktree (workers: a fresh
+`dev:workers` instance started after the stale-consumer check found
+none; killed by child-PID tree after the drain, per the July 12
+lesson).
+
+**Snapshot:** `trellis#1` published — 298 ingested / 0 unchanged / 0
+tombstoned; 1,921 blocks eligible, **1,423 queued** (the printed bound
+exactly), 498 excluded (`test_fixture_excluded`, 112 files) — the
+executed counts match the plan echo line for line.
+
+**Pipeline:** 1,423/1,423 extraction jobs completed, zero failures,
+queue drained in 53m42s (serial worker — BullMQ default concurrency 1;
+~26 jobs/min end to end). 22 unresolved endpoints flowed through the
+name pass-through; the merge dropped 9 actions whose endpoints matched
+no entity (counted and logged, never silent — the pilots' §5b run had
+zero at 103 blocks; ~0.6% of 1,423 jobs is recorded as the observed
+base rate for the code prompt at scale).
+
+**Spend (worker metrics, fresh instance = exact):** 1,423
+`gpt-5.4-2026-03-05` completions — 892,363 input / 325,335 output
+tokens (627 in / 229 out per block vs §5c's 588/185) — plus 1,423
+`text-embedding-3-small` calls, 388,944 tokens. At the same price
+basis that reproduces §5b's $0.28: **≈ $2.75** (estimate band was
+$2.4–$3.84; the $3.84 ceiling held).
+
+**The pre-stated criterion, all five parts:**
+
+1. **Pipeline** — PASS (above).
+2. **Exclusion** — PASS: queued = 1,921 − 498 = 1,423 exactly; the
+   exclusion behavior itself is drill-pinned (Part 6/7).
+3. **Suppression** — PASS: 19 `extraction.generic_suppressed` events
+   (22 entities + 28 actions dropped); ZERO denylist names carry
+   stage-1 provenance, verified by live graph query.
+4. **Hub shape** — PASS: max hub `ast_nodes` at 29 distinct stage-1
+   source blocks = **2.04%** of queued (criterion ≤ 8%; §5b good
+   shape 3.9%). Top 15 (all genuine API-level identifiers):
+   `ast_nodes` 29, `main` 28, `neo4jdriver` 27, `pgpool` 26,
+   `node.js` 23, `derived_insight` 16, `trellis_mcp_servers` 15,
+   `trellis_modules` 12, `config.python.executable` 12,
+   `config.llm.extractionmodel` 11, `documents` 11, `eslint` 11,
+   `question` 10, `config.python.pythonpath` 9, `document_nodes` 9.
+   Residual observation, recorded not acted on: `main` at 28 is the
+   cross-file function-name class (every CLI's `main` merges by
+   name) — the first observed count for a future denylist candidate;
+   per the kernel-gate rule an addition needs review, and `main` is a
+   genuine identifier, so it stands as data.
+5. **Spot checks** — PASS: `write_derived_insight` (4 entities, e.g.
+   `trellis_neo4j.write_derived_insight`), `parsellmresponse`,
+   `trellis_postgres.get_ast_blocks`, `trellis_answer.submit` all
+   resolve with stage-1 provenance; a cited hash fetched from
+   `ast_nodes` returned real block bytes containing the identifier
+   (thread-back verified against stored bytes, not just counts).
+
+**Graph produced:** 1,995 entities and 1,788 ACTION relationships now
+carry stage-1 provenance (dev-graph totals 2,613 / 2,366 — the count
+includes pre-existing entities, e.g. pilot-era `ast_nodes`, that
+absorbed live stage-1 provenance; mixed-provenance recovery semantics
+unchanged). The residue PERSISTS — no cleanup, by design (§5d.2).
+
+### 5d.5 Stage-2 seam observations (recorded, nothing implemented)
+
+What a graph-informed self-edit increment would actually ask, observed
+against the live substrate:
+
+- **"What depends on the surface I am editing?"** —
+  `MATCH (e:Entity {name: 'trellis_neo4j.write_derived_insight'})<-[r:ACTION]-(caller)`
+  style queries now return real callers/consumers with block-hash
+  provenance; the edit run can fetch the cited blocks
+  (`get_ast_texts`) to read the actual call sites before splicing.
+- **"Which file owns this entity?"** — provenance hashes join
+  `document_nodes`→`documents` rows, so `repo:trellis:<path>` doc keys
+  give the toolkit the exact file to `load` — the graph-to-textedit
+  bridge needs NO new machinery, just Cypher + the existing
+  `trellis_postgres`/`trellis_textedit` surfaces.
+- **Freshness is the loop's own churn:** an edit that lands and
+  re-ingests (scoped snapshot rerun) re-extracts changed blocks and
+  contests beliefs whose blocks died — the substrate self-corrects at
+  exactly the granularity the edit touched.
+- **Gap worth noting for the stage-2 design record:** entity names are
+  lowercase-normalized (`parsellmresponse`), so name lookups from
+  source identifiers need the same normalization
+  (`globalEntityId`'s) — a resolved lookup helper, not raw
+  string-match, is the right seam.
+- **Worker throughput observation (not stage-2 blocking):** the
+  extraction worker is serial by construction; a substrate refresh
+  after a large merge re-extracts at ~26 jobs/min. If refresh latency
+  ever matters, worker concurrency needs its own merge-safety pins
+  (concurrent same-name entity merges are undrilled) — a reviewed
+  kernel change, not a config flip.
+
+### 5d.6 Substrate freshness policy (recommended, July 13, 2026 — owner adoption pending)
+
+The residue ages as code changes. The Merkle diff makes refresh
+INCREMENTAL by construction — unchanged files are auditable no-ops and
+only changed blocks re-extract — so a typical session's refresh is
+tens of blocks (≈ $0.05–$0.25 at the measured stage-1 rate), not a
+re-run of the $2.75 baseline.
+
+- **Not real-time.** Extraction spend is operator-gated per run
+  (Guardrail 4, permanent), and nothing consults the substrate between
+  merges — per-commit refresh would buy churn, not freshness.
+- **Recommended cadence:** one scoped-snapshot refresh per MERGED
+  session PR (the zero-paid plan echo prints the changed-block bound;
+  the operator approves the increment), and ALWAYS a refresh before
+  any stage-2 edit run whose target area changed since the last
+  snapshot (refresh-before-use).
+- **Why stale is tolerable between refreshes — the failure shape is
+  right:** staleness can degrade ADVICE (a query may cite a
+  previous-effective version's blocks), but it cannot corrupt an
+  ACTION. The stage-2 edit path re-reads current bytes through
+  `trellis_textedit.load` and the hash-guarded `write_back` refuses on
+  any divergence (`StaleFileError`, write-time containment
+  re-verification) — an edit premised on stale knowledge is REFUSED at
+  the disk boundary, never silently applied. Advisory reads mitigate
+  the same way the write gate teaches: fetch the cited bytes and
+  confirm before relying.
+- **Quality follow-up, propose-with-estimate:** a one-time targeted
+  entailment sweep over stage-1 provenance pairs (~100 pairs ≈ $0.04
+  at the measured July 13 sweep rate) would convert the semantic
+  layer's sampled-audit coverage from opportunistic to deliberate for
+  this corpus — standing owner item.
+- **Model portability note:** the extraction pipeline is
+  model-agnostic at its boundaries — `EXTRACTION_MODEL` is env
+  configuration and every completion crosses `parseLlmResponse` — so a
+  future local-model deployment is a configuration change plus a
+  re-embedding pass, not a rearchitecture. Third-party pricing is an
+  economics input, not a structural dependency.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

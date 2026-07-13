@@ -22,6 +22,9 @@ export type ScanSkipReason =
   | 'not_a_file'
   | 'oversize'
   | 'unsupported_extension'
+  // Session 34: an accepted path outside a scoped run's --include
+  // prefixes with no prior effective version (plan-time, not scan-time).
+  | 'out_of_scope'
   // Parse-time reasons (binary/decode_error/parse_error/coverage_error)
   // share the same vocabulary so one counter covers the whole funnel.
   | ParseSkipReason;

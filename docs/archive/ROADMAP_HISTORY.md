@@ -1,4 +1,4 @@
-# Trellis Roadmap Progress Log — Archive (July 4–11, 2026; T-items through Session 27)
+# Trellis Roadmap Progress Log — Archive (July 4–12, 2026; T-items through Session 29)
 
 Moved verbatim from `TRELLIS_ROADMAP.md` §5 on July 12, 2026 (owner
 direction: the live roadmap keeps only the most recent five sessions).
@@ -6,7 +6,8 @@ Entries below are the dated ledger from the first Phase-1 commit through
 Session 27 (Sessions 1–23 moved July 12, 2026; then one session entry
 per PR under the same window rule — Session 24 with the Session 29 PR,
 Session 25 with the Session 30 PR, Session 26 with the Session 31 PR,
-Session 27 with the Session 32 PR); nothing was edited in the moves.
+Session 27 with the Session 32 PR, Session 28 with the Session 33 PR,
+Session 29 with the Session 34 PR); nothing was edited in the moves.
 The live ledger continues in `TRELLIS_ROADMAP.md` §5.
 
 ### July 4, 2026 — Phase 1: Foundations & Portability (items 3.1 #1–3, #7)
@@ -3376,3 +3377,96 @@ the module registry, gates, and flywheel machinery stay (they are the
 mechanism for any future module class, including tool-bearing ones),
 but no new protocol-module authoring turn is proposed without
 explicit owner request.
+
+### July 12, 2026 — Session 29: self-editing toolkit coverage hardening (§4 row 8)
+
+The July 11 coverage audit's recorded priority items closed, all
+zero-paid, three commits (CI wiring / kernel hardening / drill pins) —
+the toolkit hardened before the source-editing flywheel (row 11)
+deepens on it.
+
+1. **CI wiring (audit #7, first commit).**
+   `.github/workflows/ci.yml`'s `offline` job now runs
+   `npm run test:textedit` directly after the existing Python-runtime
+   install step (the drill needs no database or network). Zero new
+   tests in this commit; the whole drill became regression-detected.
+2. **`write_back` hardening (audit #2/#3/#4, kernel change — witting,
+   its own commit).** All three closed INSIDE the existing contract:
+   `StaleFileError` semantics, temp + rename atomicity, and the
+   Session 26 splice semantics (refuse only `"
+"`) did not move, and
+   `TEXTEDIT_ADDENDUM` is byte-unchanged (both composed-prompt pins
+   untouched: default `5d27e474…fe2a`, omit-arm `45987904…0b56`).
+   (a) **Write-time containment (audit #3):** `write_back` re-runs the
+   load-time `_resolve` against the CURRENT filesystem — a parent
+   directory swapped for a symlink after load is refused at write
+   time; additionally a path that resolves DIFFERENTLY than at load is
+   refused as stale even when the target's bytes are identical (the
+   in-root swap the digest guard alone cannot see). (b) **Mode
+   preservation (audit #4):** the source's `stat.S_IMODE` is carried
+   onto the mkstemp temp file (created 0600) before `os.replace` — the
+   executable bit on a script or hook no longer vanishes on every
+   edit; Windows mode bits are a harmless no-op. (c) **The narrowed
+   TOCTOU window (audit #2):** the digest is re-checked immediately
+   before `os.replace`, so a second writer landing while the temp file
+   was being built is DETECTED (StaleFileError, temp unlinked, disk
+   untouched) instead of overwritten. Honesty per the audit's own
+   framing: the residual race between the final re-hash and
+   `os.replace` remains — full elimination needs OS file locking,
+   deliberately out of scope — and is documented in the `write_back`
+   docstring and CODE_MEDIATED_TEXT.md §6 item 1, not claimed closed.
+3. **Drill extension (`scripts/test_textedit.py` 82 → 105 checks on
+   this Windows host; 106 on POSIX, where the executable-bit check
+   also runs).** Section [11] pins each hardening behavior — mode
+   preservation, the outside-root symlink-swap refusal (outside file
+   untouched, no temp residue), the in-root resolution-change refusal,
+   deterministic second-writer detection (a wrapped `mkstemp` lands
+   the mutation inside the narrowed window), and no orphaned temp file
+   after a refusal (the refusal-path half of audit #10, pinned in
+   passing). Section [12] pins multi-file partial-failure semantics
+   (audit #5) as INTENTIONAL per-file independence, in both orders:
+   file A lands although B refuses (B keeps the second writer's bytes
+   and its staged splice for re-derivation), and a refusal first never
+   blocks a later independent write. Section [13] adds one adversarial
+   check per previously untested guard branch (audit #6: boolean
+   line/splice indexes, a boolean constructor bound, a non-string
+   locate pattern, a non-string path, a non-string `new_lines`
+   element, reload-discards-staging) — each fails if its branch is
+   deleted, the cheap deterministic core of mutation coverage with
+   zero new dependencies — plus the audit-#8 hygiene item: the
+   toolkit's import set is pinned to an exact stdlib allowlist and its
+   source must carry no git or subprocess token (the no-git guarantee
+   now held by a check, not inspection).
+4. **Audit disposition after this session:** #2 narrowed + documented,
+   #3/#4/#5/#6/#7/#8 closed, #10 half-closed (refusal-path cleanup
+   pinned; the abnormal-kill orphan stays unpinned hygiene), #9
+   (content-borne injection) untouched — the Session 26 W4 live
+   refusal stands as the evidence of record; #1 (cross-process
+   isolation) is a proof run, owner-gated propose-with-estimate, never
+   self-served.
+5. **Acceptance (all green, commands per HANDOFF §6).** Offline:
+   `npm test` 729 passing across 79 files observed BEFORE any Session
+   29 change (the HANDOFF-recorded 728 was one short of the post-PR-69
+   suite; no Session 29 change touches the unit suite), `npm run
+   build`, `npm run python:check`,
+   `docker compose --profile test config --quiet`. Live zero-paid:
+   `test:answer-channel` 32, `test:textedit` 105 (was 82),
+   `test:module-lifecycle` 60, `test:modules` green (section [8]
+   refusal pinned, both prompt pins unmoved), `test:promotion` 41,
+   `test:rlm-workspace` 106, `test:rlm-mcp` 86, `test:rlm-sandbox` 21,
+   `test:agent-loop` 35 (ALL CHECKS PASSED), `test:a2a` 46 (ALL CHECKS
+   PASSED), `test:repo-ingest` 56, `test:benchmark-hardening` 24,
+   `test:entity-resolution` 34, `test:api-hardening` 18,
+   `test:belief-recovery` 30, `test:invalidation-sweep` 17.
+   `drill:scale` 1.97x CLOSED (in-band ~1.48x–2.26x; max provenance
+   286; results file committed per house practice). Isolated Compose
+   integration run as project `trellis_s29_ci` (host ports 0, torn
+   down with `--volumes`): 11/11 PASS, every image layer cached (no
+   manifest changed). `git diff --check` clean. No defect found in
+   existing code — the audit's gaps were coverage gaps, and every
+   pre-existing guard held under the new adversarial checks; the
+   three hardening behaviors added enforcement where none existed.
+6. **Documentation window (owner rule, July 12).** The Session 24 §5
+   entry moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the
+   live ledger keeps the most recent five sessions: 25–29); HANDOFF
+   regenerated for row 9 with Session 24 compressed into its digest.
