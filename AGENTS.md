@@ -106,6 +106,7 @@ start. Worked instances of the frame:
 | Extraction prompts (`src/workers/extraction_job.ts`) | Byte pins in `extraction_job.test.ts` (legacy prompt = queue-compat contract: NEVER move) |
 | Write-path provenance (`trellis_tools.py`) | 64-hex format + existence + retrieval-membership enforcement, in that order; `test:rlm-sandbox` [2]/[3]/[6], `test:rlm-workspace`, unit pins |
 | Retrieval discipline (`trellis_tools.py`, discipline-enabled construction only) | Held-state dedup + per-run budget; identities only, never content; first fetch byte-identical; `test:rlm-sandbox` [7], `buildAgentEnv` unit pins |
+| Retrieval liveness (`search_ast_nodes` in `src/config/schema.ts`, the T15 seam) | Current-version-membership EXISTS before LIMIT — discovery reads live blocks only; `schema.test.ts` filter pin, `test:repo-ingest` Part 8 (planted dead twin) |
 | Editing toolkit (`trellis_textedit.py`) | `npm run test:textedit` (containment, digest guard, splice semantics) |
 | Answer channel (`trellis_answer.py`) | `npm run test:answer-channel` (incl. kernel-prompt substring checks) |
 | Module registry (`trellis_modules.py` + `src/config/modules.ts`) | Twin validators, `npm run test:modules` |
@@ -153,6 +154,13 @@ start. Worked instances of the frame:
     session: update `TRELLIS_ROADMAP.md` §5 (dated entry, exact
     commands, counts, defects) and regenerate `HANDOFF.md` per its §0
     in the same PR.
+13. **Superseded versions are archive, not search space** (owner
+    direction, July 13, 2026): any default-discovery retrieval
+    surface — present or future — reads LIVE blocks only (members of
+    some document's current version). Superseded content is reachable
+    solely by explicit address (hash/id) when a caller deliberately
+    asks for history. Reference semantics: the `search_ast_nodes`
+    EXISTS join / the stage-2 checker's `gatherHashEvidence` bridge.
 
 ## 5. Working protocol (commands)
 

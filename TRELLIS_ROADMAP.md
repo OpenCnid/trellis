@@ -1302,3 +1302,30 @@ pre-stated seam re-measure (**8 embedding calls, 75 tokens,
    the row-10 (d) acceptance measurement, the stage-1b prose chunk,
    structural splice addressing) present unchanged on the owner
    menu.
+
+### July 13, 2026 — Owner direction (post-Session-40, same day): live-by-default retrieval RATIFIED as the general rule
+
+Recorded from the owner's review of PR #82, in their words: "Stay out
+of the trash, they're old versions for a reason… you can look at them
+if the user needs to, but that shouldn't be the default."
+
+- **The rule, generalized beyond the landed filter:** superseded
+  versions are ARCHIVE, not search space. Any default-discovery
+  retrieval surface — present or future — reads LIVE blocks only
+  (members of some document's current version). Superseded content is
+  reachable solely by explicit address (hash/id) when a caller
+  deliberately asks for history. Reference semantics: the
+  `search_ast_nodes` EXISTS join / `gatherHashEvidence`.
+- **Audit performed with the ratification:** vector search was the
+  ONLY default-discovery surface — every other `ast_nodes` reader
+  (`fetch_texts`, `get_ast_texts`, `get_ast_blocks`,
+  `ast_hashes_exist`, `/retrieve` by ids, the provenance/verification/
+  entailment readers) takes explicit ids or hashes, which IS the
+  opt-in. By-address readers stay unfiltered by design: verification
+  must be able to read exactly the bytes a claim cited, live or dead.
+- **Where it landed (same PR, commit `568a854` + this entry):**
+  `STRUCTURAL_CHUNKING.md` §11.2 (the ratification line), HANDOFF
+  guardrail 5 (the Session 40 invariant block), and `AGENTS.md`
+  (hard rule 13 + a worked-instance row in the
+  behavior→enforcement→pin table). Zero code bytes — the machinery
+  already enforces the rule; this records its generality.
