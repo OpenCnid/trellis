@@ -123,6 +123,15 @@ const EnvSchema = z.object({
   ENTAILMENT_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
   ENTAILMENT_JUDGE_BUDGET_PER_SWEEP: z.coerce.number().int().positive().max(500).default(25),
 
+  // Per-run retrieval budget for the RLM agent (Session 33,
+  // RETRIEVAL_DISCIPLINE.md §4): the operator env twin of the Python
+  // kernel default (64 fetches/run, RETRIEVAL_BUDGET_DEFAULT in
+  // trellis_tools.py). Optional: unset is NOT forwarded (buildAgentEnv
+  // strips any inherited value) and the child applies its kernel
+  // default; a set value is validated here fail-fast and re-validated
+  // by the Python twin parse_retrieval_budget() with identical bounds.
+  TRELLIS_RETRIEVAL_BUDGET_PER_RUN: z.coerce.number().int().positive().max(1024).optional(),
+
   // A2A server surface (Session 11). Off by default: with the switch
   // unset the API registers no A2A routes and is byte-identical to a
   // pre-Session-11 process (pinned by the test:a2a drill). The card
@@ -325,6 +334,10 @@ export const config = {
   entailment: {
     sampleRate: env.ENTAILMENT_SAMPLE_RATE,
     judgeBudgetPerSweep: env.ENTAILMENT_JUDGE_BUDGET_PER_SWEEP,
+  },
+  retrieval: {
+    /** Per-run fetch budget for the spawned agent; undefined = kernel default. */
+    budgetPerRun: env.TRELLIS_RETRIEVAL_BUDGET_PER_RUN,
   },
   a2a: {
     enabled: env.TRELLIS_A2A_ENABLED === 'true',

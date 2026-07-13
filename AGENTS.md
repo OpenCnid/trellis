@@ -105,6 +105,7 @@ start. Worked instances of the frame:
 | Kernel prompt (`trellis_agent.py` composition) | Composed-prompt sha pins + history in `scripts/test_modules.py` — recompute BOTH pins in the SAME commit, wittingly |
 | Extraction prompts (`src/workers/extraction_job.ts`) | Byte pins in `extraction_job.test.ts` (legacy prompt = queue-compat contract: NEVER move) |
 | Write-path provenance (`trellis_tools.py`) | 64-hex format + existence + retrieval-membership enforcement, in that order; `test:rlm-sandbox` [2]/[3]/[6], `test:rlm-workspace`, unit pins |
+| Retrieval discipline (`trellis_tools.py`, discipline-enabled construction only) | Held-state dedup + per-run budget; identities only, never content; first fetch byte-identical; `test:rlm-sandbox` [7], `buildAgentEnv` unit pins |
 | Editing toolkit (`trellis_textedit.py`) | `npm run test:textedit` (containment, digest guard, splice semantics) |
 | Answer channel (`trellis_answer.py`) | `npm run test:answer-channel` (incl. kernel-prompt substring checks) |
 | Module registry (`trellis_modules.py` + `src/config/modules.ts`) | Twin validators, `npm run test:modules` |

@@ -56,6 +56,12 @@ system-level framing is the root `README.md`.
   membership vs the sampled semantic residual), and the slice map that
   constrains citable addresses to what the deriving run actually
   retrieved.
+- **[`RETRIEVAL_DISCIPLINE.md`](architecture/RETRIEVAL_DISCIPLINE.md)**
+  — the retrieval-spend closure design record (roadmap §4 row 10):
+  held-state dedup (typed refusals for repeat fetches) and the per-run
+  retrieval budget at the three Tier-1 retrieval surfaces — the
+  code-mediated-text pillar applied to retrieval spend, closing the
+  failure class the retired module #2 nudged.
 - **[`MATHEMATICAL_FOUNDATIONS.md`](architecture/MATHEMATICAL_FOUNDATIONS.md)**
   — the timeless substrate math: Merkle trees, content addressing, and
   why cryptographic identity solves the Shift Problem that positional

@@ -13,8 +13,11 @@
 # deduped union of a batch's hashes must exist in ast_nodes before the
 # WRITE session opens. Section [5] pins the Session 30 retrieval-set
 # tracking; section [6] pins the Session 31 retrieval-membership write
-# gate (PROVENANCE_THREADING.md slice d) on top of it. Probe AST rows
-# are token-scoped: inserted by this test, deleted by this test.
+# gate (PROVENANCE_THREADING.md slice d) on top of it; section [7] pins
+# the Session 33 retrieval discipline (RETRIEVAL_DISCIPLINE.md —
+# held-state dedup + the per-run budget, active only on
+# discipline-enabled construction). Probe AST rows are token-scoped:
+# inserted by this test, deleted by this test.
 import hashlib
 import json
 import os
@@ -29,7 +32,11 @@ from trellis_tools import (  # noqa: E402
     get_tool_call_count,
     get_retrieved_addresses,
     get_retrieved_address_count,
+    get_retrieval_discipline_stats,
+    parse_retrieval_budget,
     get_citation_audit,
+    RETRIEVAL_BUDGET_DEFAULT,
+    RETRIEVAL_BUDGET_MAX,
 )
 
 failures = 0
@@ -494,6 +501,289 @@ try:
     finally:
         gated.close()
 
+    # --- Session 33: retrieval discipline (RETRIEVAL_DISCIPLINE.md) -----
+    print("\n[7] retrieval discipline (held-state dedup + per-run budget)")
+
+    # Sections [1]-[6] used bare construction throughout: an
+    # undisciplined instance records nothing, so held state must be
+    # empty here — the injection-mold baseline.
+    stats0 = get_retrieval_discipline_stats()
+    check("bare construction in sections [1]-[6] recorded no held state",
+          all(v == 0 for v in stats0.values()), f"{stats0}")
+
+    # The env twin (record §4): kernel default when unset; a set value
+    # validated with the same bounds as the TypeScript config.
+    check("parse_retrieval_budget defaults to the kernel constant when unset",
+          "TRELLIS_RETRIEVAL_BUDGET_PER_RUN" not in os.environ
+          and parse_retrieval_budget() == RETRIEVAL_BUDGET_DEFAULT)
+    os.environ["TRELLIS_RETRIEVAL_BUDGET_PER_RUN"] = "5"
+    check("parse_retrieval_budget honors a valid operator value",
+          parse_retrieval_budget() == 5)
+    for bad in ("abc", "0", "-3", str(RETRIEVAL_BUDGET_MAX + 1)):
+        os.environ["TRELLIS_RETRIEVAL_BUDGET_PER_RUN"] = bad
+        try:
+            parse_retrieval_budget()
+            check(f"parse_retrieval_budget refuses {bad!r}", False, "nothing raised")
+        except ValueError:
+            check(f"parse_retrieval_budget refuses {bad!r}", True)
+    del os.environ["TRELLIS_RETRIEVAL_BUDGET_PER_RUN"]
+    try:
+        TrellisPostgres(retrieval_discipline=True, retrieval_budget=0)
+        check("the constructor refuses an out-of-bounds budget", False, "nothing raised")
+    except ValueError:
+        check("the constructor refuses an out-of-bounds budget", True)
+
+    # Probe rows this section owns (token-scoped via the shared
+    # document_id, like every other probe row in this drill).
+    DISC_TEXT_HASHES = [
+        hashlib.sha256(f"trellis-sandbox-disc-text-{i}".encode()).hexdigest()
+        for i in range(7)
+    ]
+    DISC_FRESH_HASH = hashlib.sha256(b"trellis-sandbox-disc-fresh").hexdigest()
+    DISC_BARE_HASH = hashlib.sha256(b"trellis-sandbox-disc-bare").hexdigest()
+    DISC_OVER_HASH = hashlib.sha256(b"trellis-sandbox-disc-over").hexdigest()
+    DISC_ROOT_HASH = hashlib.sha256(b"trellis-sandbox-disc-root").hexdigest()
+    DISC_CHILD_HASH = hashlib.sha256(b"trellis-sandbox-disc-child").hexdigest()
+    with pg.conn.cursor() as cur:
+        for h in DISC_TEXT_HASHES + [DISC_FRESH_HASH, DISC_BARE_HASH, DISC_OVER_HASH]:
+            cur.execute(
+                "INSERT INTO ast_nodes (id, document_id, data) VALUES (%s, %s, %s) "
+                "ON CONFLICT (id) DO NOTHING",
+                (h, "sandbox_probe_doc", json.dumps({"type": "text", "content": f"disc probe {h[:8]}"})),
+            )
+        cur.execute(
+            "INSERT INTO ast_nodes (id, document_id, data) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING",
+            (DISC_ROOT_HASH, "sandbox_probe_doc", json.dumps({
+                "type": "root",
+                "children": [{
+                    "id": DISC_CHILD_HASH,
+                    "type": "paragraph",
+                    "children": [{"type": "text", "content": "disc probe paragraph"}],
+                }],
+            })),
+        )
+    pg.conn.commit()
+
+    disc = TrellisPostgres(retrieval_discipline=True, retrieval_budget=64)
+    try:
+        # First fetch of every surface: byte-identical to a bare fetch
+        # of the same request (record §5 — the discipline never changes
+        # what a fresh fetch returns).
+        bare_one = pg.get_ast_texts([DISC_TEXT_HASHES[0]])
+        disc_one = disc.get_ast_texts([DISC_TEXT_HASHES[0]])
+        check("first disciplined get_ast_texts is byte-identical to a bare fetch",
+              disc_one == bare_one)
+
+        # A full repeat refuses: typed, names the held hashes, teaches
+        # binding reuse.
+        try:
+            disc.get_ast_texts([DISC_TEXT_HASHES[0]])
+            check("a full-repeat get_ast_texts refuses", False, "nothing raised")
+            check("the dedup refusal teaches binding reuse", False, "nothing raised")
+        except ValueError as e:
+            msg = str(e)
+            check("a full-repeat get_ast_texts refuses",
+                  "Retrieval Discipline" in msg and DISC_TEXT_HASHES[0] in msg, msg[:200])
+            check("the dedup refusal teaches binding reuse",
+                  "Reuse the variable" in msg and "re-derive" in msg, msg[:200])
+
+        # Partial overlap serves EVERYTHING (record §2.2): held keys are
+        # never silently dropped, and the bytes match a bare fetch.
+        pair = [DISC_TEXT_HASHES[0], DISC_TEXT_HASHES[1]]
+        bare_pair = pg.get_ast_texts(pair)
+        disc_pair = disc.get_ast_texts(pair)
+        check("partial overlap serves everything, byte-identical to a bare fetch",
+              disc_pair == bare_pair)
+        served = json.loads(disc_pair)
+        check("the held hash is served again in the overlap call (never dropped)",
+              DISC_TEXT_HASHES[0] in served and DISC_TEXT_HASHES[1] in served)
+
+        # Bounded echo: with all 7 hashes held, the repeat names the
+        # first 5 + a count.
+        disc.get_ast_texts(DISC_TEXT_HASHES[2:])
+        try:
+            disc.get_ast_texts(DISC_TEXT_HASHES)
+            check("the dedup echo is bounded (first 5 + count)", False, "nothing raised")
+        except ValueError as e:
+            check("the dedup echo is bounded (first 5 + count)", "+2 more" in str(e),
+                  str(e)[:200])
+
+        # The recorded evasion, pinned honestly (record §2.2): padding a
+        # repeat with a never-held hash passes — full-repeat only.
+        evade = json.loads(disc.get_ast_texts([DISC_TEXT_HASHES[0], DISC_FRESH_HASH]))
+        check("a repeat padded with a fresh hash serves (dedup is full-repeat only)",
+              DISC_FRESH_HASH in evade)
+
+        # get_ast_blocks: per-root identity (record §2.3).
+        bare_blocks = pg.get_ast_blocks(DISC_ROOT_HASH)
+        disc_blocks = disc.get_ast_blocks(DISC_ROOT_HASH)
+        check("first disciplined get_ast_blocks is byte-identical to a bare fetch",
+              disc_blocks == bare_blocks)
+        try:
+            disc.get_ast_blocks(DISC_ROOT_HASH)
+            check("a repeat get_ast_blocks on a held root refuses", False, "nothing raised")
+        except ValueError as e:
+            check("a repeat get_ast_blocks on a held root refuses",
+                  "Retrieval Discipline" in str(e) and DISC_ROOT_HASH in str(e), str(e)[:200])
+        # The served block ids joined held addresses: reading exactly
+        # them via get_ast_texts is a repeat by the §2.2 rule…
+        try:
+            disc.get_ast_texts([DISC_CHILD_HASH])
+            check("get_ast_texts on exactly the served block ids is a repeat", False,
+                  "nothing raised")
+        except ValueError as e:
+            check("get_ast_texts on exactly the served block ids is a repeat",
+                  "Retrieval Discipline" in str(e), str(e)[:200])
+        # …but the root argument itself never joined: its own
+        # reconstruction bytes were not returned (the Session 30 shape).
+        root_text = json.loads(disc.get_ast_texts([DISC_ROOT_HASH]))
+        check("get_ast_texts([root]) after get_ast_blocks(root) serves",
+              root_text.get(DISC_ROOT_HASH, "") != "")
+
+        # vector_search: exact-query-match only (record §2.4), drilled
+        # zero-paid with the section [5] stub and embedded probe row.
+        sys.modules["openai"] = stub_openai
+        try:
+            bare_search = pg.vector_search("disc dedup probe")
+            disc_search = disc.vector_search("disc dedup probe")
+            check("first disciplined vector_search is byte-identical to a bare search",
+                  disc_search == bare_search)
+            try:
+                disc.vector_search("disc dedup probe")
+                check("an exact-repeat query refuses", False, "nothing raised")
+            except ValueError as e:
+                check("an exact-repeat query refuses",
+                      "Retrieval Discipline" in str(e) and "exact query" in str(e),
+                      str(e)[:200])
+            rephrased = json.loads(disc.vector_search("disc dedup probe, rephrased"))
+            check("a different query string serves (semantic dedup excluded by decision)",
+                  bool(rephrased))
+            # Search result ids never join held addresses: reading a hit
+            # afterward is the confirm-before-cite pattern the Session 31
+            # write gate teaches — it must keep working.
+            hit_id = json.loads(disc_search)[0]["id"]
+            hit_text = json.loads(disc.get_ast_texts([hit_id]))
+            check("reading a search hit via get_ast_texts serves (the taught pattern)",
+                  hit_id in hit_text)
+        finally:
+            if real_openai is not None:
+                sys.modules["openai"] = real_openai
+            else:
+                del sys.modules["openai"]
+
+        # The budget (record §4): budget N serves N byte-returning
+        # fetches; call N+1 refuses with counts + a bounded held-root
+        # echo, before any I/O.
+        stats_now = get_retrieval_discipline_stats()
+        tight = TrellisPostgres(retrieval_discipline=True,
+                                retrieval_budget=stats_now["retrieval_fetches"] + 1)
+        try:
+            in_budget = json.loads(tight.get_ast_texts([DISC_BARE_HASH]))
+            check("the budgeted instance serves its final in-budget fetch",
+                  DISC_BARE_HASH in in_budget)
+            try:
+                tight.get_ast_texts([DISC_OVER_HASH])
+                check("the budget refusal fires at budget+1", False, "nothing raised")
+                check("the budget refusal carries counts and a bounded held-root echo",
+                      False, "nothing raised")
+            except ValueError as e:
+                msg = str(e)
+                check("the budget refusal fires at budget+1",
+                      "Retrieval Discipline" in msg and "budget" in msg, msg[:200])
+                check("the budget refusal carries counts and a bounded held-root echo",
+                      "addresses" in msg and "block roots" in msg and DISC_ROOT_HASH in msg,
+                      msg[:200])
+            # Check order pinned: a REPEAT on the exhausted instance gets
+            # the dedup refusal (the actionable teaching), and refusals
+            # of either kind consume no budget.
+            before = get_retrieval_discipline_stats()
+            try:
+                tight.get_ast_texts([DISC_TEXT_HASHES[0]])
+                check("a repeat on an exhausted instance still gets the DEDUP refusal",
+                      False, "nothing raised")
+            except ValueError as e:
+                check("a repeat on an exhausted instance still gets the DEDUP refusal",
+                      "already retrieved" in str(e) and "budget" not in str(e),
+                      str(e)[:200])
+            after = get_retrieval_discipline_stats()
+            check("dedup refusals consume no budget",
+                  after["retrieval_fetches"] == before["retrieval_fetches"])
+            check("both refusal counters counted their attempts",
+                  after["retrieval_dedup_refusals"] == before["retrieval_dedup_refusals"] + 1
+                  and after["retrieval_budget_refusals"] >= 1)
+        finally:
+            tight.close()
+
+        # Guardrail 4 re-proven under the new machinery: held state is
+        # bookkeeping over retrieval, never over citability.
+        rset_before = get_retrieved_address_count()
+        try:
+            disc.get_ast_texts([DISC_TEXT_HASHES[0]])
+        except ValueError:
+            pass
+        check("a dedup refusal leaves the retrieval set unchanged",
+              get_retrieved_address_count() == rset_before)
+        check("disciplined serves still feed the always-on retrieval set",
+              DISC_FRESH_HASH in get_retrieved_addresses())
+        gated_disc = TrellisNeo4j(
+            ast_existence_check=pg.ast_hashes_exist,
+            retrieved_addresses_check=get_retrieved_addresses,
+        )
+        try:
+            out = json.loads(gated_disc.write_derived_insight(
+                "sandbox disc subject", "mentions", "sandbox disc object",
+                [DISC_TEXT_HASHES[0]]))
+            check("held state never gates citability: a dedup-refused hash still writes",
+                  bool(out) and out[0].get("verb") == "mentions")
+        finally:
+            gated_disc.close()
+
+        # The injection-mold pin: bare construction keeps serving repeat
+        # fetches byte-for-byte and records nothing.
+        held_before = get_retrieval_discipline_stats()
+        bare_repeat = json.loads(pg.get_ast_texts([DISC_TEXT_HASHES[0]]))
+        check("bare construction still serves repeat fetches (injection mold)",
+              DISC_TEXT_HASHES[0] in bare_repeat)
+        check("bare fetches record no held state",
+              get_retrieval_discipline_stats() == held_before)
+
+        # A refused call still counts as a database tool invocation (the
+        # write-path refusal precedent — the count is a floor, never a
+        # reward).
+        tc_before = get_tool_call_count()
+        try:
+            disc.get_ast_texts([DISC_TEXT_HASHES[0]])
+        except ValueError:
+            pass
+        check("a refused call still counts as a database tool invocation",
+              get_tool_call_count() == tc_before + 1)
+
+        # The stats accessor returns a fresh snapshot, never live state.
+        snap = get_retrieval_discipline_stats()
+        snap["retrieval_fetches"] = -999
+        check("get_retrieval_discipline_stats returns a copy (caller mutation is inert)",
+              get_retrieval_discipline_stats()["retrieval_fetches"] != -999)
+
+        # Static pins (the section [5]/[6] mold): the agent wires the
+        # discipline for research runs with the OFF-arm escape, the
+        # telemetry carries counts only, and Tier-3 surfaces never touch
+        # the held-state seam (so no parked/seeded state can carry it —
+        # a seeded run inherits NO held state).
+        check("trellis_agent.py wires the discipline for research runs",
+              "retrieval_discipline=not EXP_OMIT_RETRIEVAL_ENABLED" in agent_source
+              and "retrieval_budget=parse_retrieval_budget()" in agent_source)
+        check("agent telemetry carries the counts-only discipline stats",
+              "get_retrieval_discipline_stats()" in agent_source)
+        check("the OFF-arm flag is read only at the agent",
+              'os.getenv("TRELLIS_EXP_OMIT_RETRIEVAL") == "1"' in agent_source)
+        for tier3_module in ("trellis_mcp.py", "trellis_workspace.py", "trellis_textedit.py"):
+            with open(os.path.join(RLM_DIR, tier3_module), "r", encoding="utf-8") as fh:
+                source = fh.read()
+            check(f"{tier3_module} never references the held-state seam",
+                  "_held" not in source and "retrieval_discipline" not in source)
+    finally:
+        disc.close()
+
     # Cleanup of the probe facts — the test owns a direct write session;
     # this is not the sandbox path.
     with client.driver.session() as s:
@@ -501,7 +791,8 @@ try:
             "MATCH (n:Entity) WHERE n.name IN "
             "['sandbox probe subject', 'sandbox probe object', 'sandbox bulk object', "
             "'sandbox gate subject', 'sandbox gate object', 'sandbox gate batch subject', "
-            "'sandbox gate batch object', 'sandbox gate bare subject'] "
+            "'sandbox gate batch object', 'sandbox gate bare subject', "
+            "'sandbox disc subject', 'sandbox disc object'] "
             "DETACH DELETE n"
         )
 finally:

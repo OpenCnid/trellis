@@ -146,6 +146,13 @@ export interface AgentEnvConfig {
    * or stale env can never enable editing (Guardrail 4).
    */
   textedit?: { editRoot: string; maxFileBytes: number; maxFiles: number };
+  /**
+   * Per-run retrieval budget (Session 33, config.retrieval.budgetPerRun).
+   * Present ONLY when the operator set TRELLIS_RETRIEVAL_BUDGET_PER_RUN;
+   * when omitted, any raw inherited value is stripped and the child
+   * applies its kernel default (the workspace-bounds discipline).
+   */
+  retrievalBudget?: number;
 }
 
 /**
@@ -195,6 +202,11 @@ export function buildAgentEnv(
     delete env.TRELLIS_TEXTEDIT_MAX_FILE_BYTES;
     delete env.TRELLIS_TEXTEDIT_MAX_FILES;
   }
+  if (cfg.retrievalBudget !== undefined) {
+    env.TRELLIS_RETRIEVAL_BUDGET_PER_RUN = String(cfg.retrievalBudget);
+  } else {
+    delete env.TRELLIS_RETRIEVAL_BUDGET_PER_RUN;
+  }
   // Session 21: the effective-context probe's prompt-omission flag is
   // experiment instrumentation ONLY (pillar §6.3). Unlike the managed
   // variables above it has no config field at all — the worker NEVER
@@ -207,6 +219,11 @@ export function buildAgentEnv(
   // an inherited value can never move a production run's module
   // selection off the validated config path above.
   delete env.TRELLIS_EXP_MODULES;
+  // Session 33: the retrieval-discipline OFF-arm flag
+  // (RETRIEVAL_DISCIPLINE.md §5), same mold. The worker never forwards
+  // it, so an inherited value can never run a production task with the
+  // dedup/budget discipline disabled.
+  delete env.TRELLIS_EXP_OMIT_RETRIEVAL;
   // Explicitly set the credential variables the registry names, so the
   // forwarding contract holds regardless of what the base env carries.
   for (const [name, value] of Object.entries(cfg.mcpCredentialEnv ?? {})) {

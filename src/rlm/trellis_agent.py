@@ -12,6 +12,8 @@ from trellis_tools import (
     get_tool_call_count,
     get_retrieved_addresses,
     get_retrieved_address_count,
+    get_retrieval_discipline_stats,
+    parse_retrieval_budget,
     RUBRIC_TEXT,
     CITATION_AUDIT_ENABLED,
     CITATION_ENTAIL_ENABLED,
@@ -147,6 +149,14 @@ CODE_MEDIATED_TEXT_BLOCK = """CODE-MEDIATED TEXT (HARD RULE): load text into str
 # answer-channel revision lands in both arms, so the omit arm is now
 # purely structural: the default kernel minus exactly the block).
 EXP_OMIT_CMT_ENABLED = os.getenv("TRELLIS_EXP_OMIT_CMT") == "1"
+
+# Session 33 (RETRIEVAL_DISCIPLINE.md §5): the OFF arm of the row-10
+# acceptance measurement. Same mold exactly: off by default and
+# byte-identical unset (the research TrellisPostgres is constructed
+# WITH the discipline); never set by any default, worker, or Compose
+# configuration; buildAgentEnv strips any inherited value, so only an
+# experiment runner's own spawn env can disable the discipline.
+EXP_OMIT_RETRIEVAL_ENABLED = os.getenv("TRELLIS_EXP_OMIT_RETRIEVAL") == "1"
 
 _ADDENDUM_BASE_PREFIX = """
 
@@ -340,6 +350,9 @@ def run_author_mode(args):
             "tool_calls": get_tool_call_count(),
             "mcp_calls": get_mcp_call_count(),
             "retrieved_addresses": get_retrieved_address_count(),
+            # Session 33: all zeros in author mode — no disciplined
+            # (or any) database tool is ever constructed here.
+            **get_retrieval_discipline_stats(),
             **workspace.stats(),
             "execution_time_s": getattr(result, "execution_time", None),
             "model_usage": usage_dict.get("model_usage_summaries", {}),
@@ -407,8 +420,17 @@ def main():
     # unconditional, no toggle — and constrains citable addresses to the
     # run's retrieved-address set (Session 31, PROVENANCE_THREADING.md
     # slice d: the T1 closure, wired here and only here; bare
-    # construction elsewhere keeps writing exactly as before).
-    postgres_tool = TrellisPostgres()
+    # construction elsewhere keeps writing exactly as before). Session
+    # 33 (RETRIEVAL_DISCIPLINE.md §5): research runs also wire the
+    # retrieval discipline on — held-state dedup + the per-run budget at
+    # the three retrieval surfaces, disabled only by the probe-runner
+    # OFF-arm flag. A malformed budget env raises here, before any paid
+    # work; bare TrellisPostgres() construction elsewhere stays
+    # undisciplined by design.
+    postgres_tool = TrellisPostgres(
+        retrieval_discipline=not EXP_OMIT_RETRIEVAL_ENABLED,
+        retrieval_budget=parse_retrieval_budget(),
+    )
     entailment_check = make_entailment_check(postgres_tool) if CITATION_ENTAIL_ENABLED else None
     neo4j_tool = TrellisNeo4j(
         ast_existence_check=postgres_tool.ast_hashes_exist,
@@ -555,6 +577,10 @@ def main():
             # addresses (T16). Bookkeeping; slice (d) will constrain
             # citable addresses to the set itself.
             "retrieved_addresses": get_retrieved_address_count(),
+            # Session 33 (RETRIEVAL_DISCIPLINE.md §6): retrieval-
+            # discipline activity — counts only, never an identity
+            # (T16). The Node scanner tolerates unknown fields (pinned).
+            **get_retrieval_discipline_stats(),
             "execution_time_s": getattr(result, "execution_time", None),
             "model_usage": usage_dict.get("model_usage_summaries", {}),
         }

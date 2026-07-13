@@ -214,7 +214,11 @@ mistake this record exists to avoid.
   serving/refusing re-fetches) that will naturally share call sites
   with this one. The shared seam is the call sites, not the set —
   record that in row-10 terms when that design is written; nothing
-  here pre-implements it.
+  here pre-implements it. (Recorded: the row-10 design is
+  [`RETRIEVAL_DISCIPLINE.md`](RETRIEVAL_DISCIPLINE.md) — held state is
+  its own module-level structure under its own lock, activation is
+  explicit construction at the agent, and the two structures never
+  feed each other.)
 - **Reset: none needed.** The process exits at run end; the set dies
   with it. Nothing is persisted, parked, or serialized — a retrieval
   set in a snapshot would be a provenance claim Tier 3 is not allowed
