@@ -44,6 +44,13 @@ import { getMetrics } from '../src/core/observability/metrics';
 //   --max-blocks <n>          required positive budget for changed
 //   --confirm-extraction      required acknowledgement for changed
 //   --include-untracked       add untracked, non-ignored files to the set
+//   --include <prefix>        repeatable path-prefix scope (Session 34).
+//                             Only paths under a prefix are planned and
+//                             ingested; a previously effective path
+//                             outside every prefix carries forward at
+//                             its previous root hash (never tombstoned
+//                             by an out-of-scope run). Doc keys stay
+//                             root-relative either way.
 //   --concurrency <n>         parallel file ingests (default 4)
 //   --max-file-bytes <n>      per-file size cap (default 2 MiB)
 //   --max-bytes-in-flight <n> total read-buffer bound (default 32 MiB)
@@ -56,6 +63,7 @@ interface CliArgs {
   maxBlocks?: number;
   confirmExtraction: boolean;
   includeUntracked: boolean;
+  includePrefixes: string[];
   concurrency?: number;
   maxFileBytes?: number;
   maxBytesInFlight?: number;
@@ -68,6 +76,7 @@ function parseArgs(argv: string[]): CliArgs {
     extract: 'none',
     confirmExtraction: false,
     includeUntracked: false,
+    includePrefixes: [],
     dryRun: false,
   };
   for (let i = 0; i < argv.length; i++) {
@@ -91,6 +100,7 @@ function parseArgs(argv: string[]): CliArgs {
       case '--max-blocks': args.maxBlocks = Number(value()); break;
       case '--confirm-extraction': args.confirmExtraction = true; break;
       case '--include-untracked': args.includeUntracked = true; break;
+      case '--include': args.includePrefixes.push(value()); break;
       case '--concurrency': args.concurrency = Number(value()); break;
       case '--max-file-bytes': args.maxFileBytes = Number(value()); break;
       case '--max-bytes-in-flight': args.maxBytesInFlight = Number(value()); break;
@@ -115,11 +125,17 @@ function buildPolicy(args: CliArgs): RepositoryExtractionPolicy {
   return { mode: 'changed', maxBlocks: args.maxBlocks as number };
 }
 
-function printPlan(plan: SnapshotPlan, policy: RepositoryExtractionPolicy): void {
+function printPlan(
+  plan: SnapshotPlan,
+  policy: RepositoryExtractionPolicy,
+  includePrefixes: readonly string[]
+): void {
   console.log(`Repository snapshot plan for repo-key "${plan.repoKey}":`);
+  console.log(`  scope:            ${includePrefixes.length ? includePrefixes.join(', ') : 'full repository'}`);
   console.log(`  files accepted:   ${plan.files.length} (${plan.filesToIngest} to ingest, ${plan.filesUnchanged} unchanged)`);
   console.log(`  bytes accepted:   ${plan.totalBytes}`);
   console.log(`  tombstones:       ${plan.tombstones.length}`);
+  console.log(`  carried forward:  ${plan.carriedForward.length} (out-of-scope, previously effective)`);
   const skipEntries = Object.entries(plan.skipCounts).sort();
   console.log(`  skipped files:    ${plan.skipped.length}${skipEntries.length ? ` (${skipEntries.map(([reason, count]) => `${reason}=${count}`).join(', ')})` : ''}`);
   const languages = plan.files.reduce<Record<string, number>>((acc, file) => {
@@ -168,6 +184,7 @@ async function main(): Promise<number> {
     repoKey: args.repoKey,
     policy,
     includeUntracked: args.includeUntracked,
+    includePrefixes: args.includePrefixes,
     concurrency: args.concurrency,
     maxFileBytes: args.maxFileBytes,
     maxBytesInFlight: args.maxBytesInFlight,
@@ -175,7 +192,7 @@ async function main(): Promise<number> {
   };
 
   const plan = await planRepositorySnapshot(deps, options);
-  printPlan(plan, policy);
+  printPlan(plan, policy, args.includePrefixes);
   if (args.dryRun) {
     console.log('\nDry run: no writes performed.');
     return 0;
@@ -184,7 +201,7 @@ async function main(): Promise<number> {
   const result = await executeRepositorySnapshot(deps, options, plan);
   console.log(`\nSnapshot ${result.repoKey}#${result.snapshotSeq} published:`);
   console.log(`  ingested:   ${result.counts.ingested}`);
-  console.log(`  unchanged:  ${result.counts.unchanged}`);
+  console.log(`  unchanged:  ${result.counts.unchanged} (${result.carriedForward} carried forward out-of-scope)`);
   console.log(`  tombstoned: ${result.counts.tombstoned}`);
   console.log(`  blocks eligible/queued: ${result.blocksEligible}/${result.blocksQueued}`);
   console.log(`  blocks excluded (test/fixture): ${result.blocksExcludedFromExtraction}`);

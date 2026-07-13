@@ -5,7 +5,9 @@ import { ExtractionBudgetExceededError, planExtraction } from '../ingestion/plan
 import {
   ByteGate,
   executeRepositorySnapshot,
+  isPathInScope,
   mapBounded,
+  normalizeScopePrefixes,
   planRepositorySnapshot,
   type SnapshotDeps,
   type SnapshotOptions,
@@ -178,6 +180,108 @@ describe('planRepositorySnapshot', () => {
     // are excluded from the bound but counted as excluded blocks.
     expect(plan.paidJobUpperBound).toBe(1);
     expect(plan.blocksExcludedFromExtraction).toBe(3);
+  });
+});
+
+describe('scoped snapshots (Session 34)', () => {
+  it('normalizes prefixes and rejects invalid ones before any I/O', () => {
+    expect(normalizeScopePrefixes(undefined)).toBeNull();
+    expect(normalizeScopePrefixes([])).toBeNull();
+    expect(normalizeScopePrefixes(['src/', 'scripts', 'src'])).toEqual(['scripts', 'src']);
+    expect(() => normalizeScopePrefixes(['../escape'])).toThrow(/invalid scope prefix/);
+    expect(() => normalizeScopePrefixes(['/abs'])).toThrow(/invalid scope prefix/);
+    expect(() => normalizeScopePrefixes(['a\\b'])).toThrow(/invalid scope prefix/);
+    expect(() => normalizeScopePrefixes([''])).toThrow(/invalid scope prefix/);
+  });
+
+  it('matches prefixes at segment boundaries only', () => {
+    expect(isPathInScope('src/a.ts', ['src'])).toBe(true);
+    expect(isPathInScope('src', ['src'])).toBe(true);
+    expect(isPathInScope('src2/a.ts', ['src'])).toBe(false);
+    expect(isPathInScope('docs/a.md', ['src'])).toBe(false);
+    expect(isPathInScope('anything', null)).toBe(true);
+  });
+
+  it('an unset or empty scope plans identically to the pre-scope behavior', async () => {
+    const files = { 'src/b.ts': TS_FILE, 'README.md': MD_FILE };
+    const base = await planRepositorySnapshot(harness(files).deps, OPTS);
+    const unset = await planRepositorySnapshot(harness(files).deps, {
+      ...OPTS,
+      includePrefixes: [],
+    });
+    expect(unset).toEqual(base);
+    expect(base.carriedForward).toEqual([]);
+  });
+
+  it('skips out-of-scope new files as out_of_scope and bounds paid work to the scope', async () => {
+    const { deps } = harness({ 'src/b.ts': TS_FILE, 'docs/guide.md': MD_FILE });
+    const plan = await planRepositorySnapshot(deps, {
+      ...OPTS,
+      policy: { mode: 'changed', maxBlocks: 100 },
+      includePrefixes: ['src'],
+    });
+    expect(plan.files.map(file => file.path)).toEqual(['src/b.ts']);
+    expect(plan.skipCounts).toEqual({ out_of_scope: 1 });
+    expect(plan.paidJobUpperBound).toBe(1);
+    expect(plan.carriedForward).toEqual([]);
+    expect(plan.tombstones).toEqual([]);
+  });
+
+  it('carries forward out-of-scope previously effective paths instead of tombstoning', async () => {
+    // docs/guide.md changed on disk and docs/gone.md was deleted — both
+    // out of scope, so both carry forward at their previous root hash.
+    const { deps } = harness({ 'src/b.ts': TS_FILE, 'docs/guide.md': MD_FILE }, {
+      effective: new Map([
+        ['docs/guide.md', { docKey: 'repo:fixture:docs/guide.md', rootHash: 'prior-hash' }],
+        ['docs/gone.md', { docKey: 'repo:fixture:docs/gone.md', rootHash: 'gone-hash' }],
+      ]),
+    });
+    const plan = await planRepositorySnapshot(deps, { ...OPTS, includePrefixes: ['src'] });
+    expect(plan.carriedForward).toEqual([
+      { path: 'docs/gone.md', docKey: 'repo:fixture:docs/gone.md', rootHash: 'gone-hash' },
+      { path: 'docs/guide.md', docKey: 'repo:fixture:docs/guide.md', rootHash: 'prior-hash' },
+    ]);
+    expect(plan.tombstones).toEqual([]);
+    // Previously effective out-of-scope paths are carried, not skipped.
+    expect(plan.skipCounts).toEqual({});
+  });
+
+  it('still tombstones in-scope deletions under a scoped run', async () => {
+    const { deps } = harness({ 'src/b.ts': TS_FILE }, {
+      effective: new Map([
+        ['src/dead.ts', { docKey: 'repo:fixture:src/dead.ts', rootHash: 'x' }],
+        ['docs/guide.md', { docKey: 'repo:fixture:docs/guide.md', rootHash: 'y' }],
+      ]),
+    });
+    const plan = await planRepositorySnapshot(deps, { ...OPTS, includePrefixes: ['src'] });
+    expect(plan.tombstones).toEqual([
+      { path: 'src/dead.ts', docKey: 'repo:fixture:src/dead.ts' },
+    ]);
+    expect(plan.carriedForward.map(carry => carry.path)).toEqual(['docs/guide.md']);
+  });
+
+  it('publishes carried rows verbatim with outcome unchanged and never ingests them', async () => {
+    const h = harness({ 'src/b.ts': TS_FILE, 'docs/guide.md': MD_FILE }, {
+      effective: new Map([
+        ['docs/guide.md', { docKey: 'repo:fixture:docs/guide.md', rootHash: 'prior-hash' }],
+      ]),
+    });
+    const options: SnapshotOptions = { ...OPTS, includePrefixes: ['src'] };
+    const plan = await planRepositorySnapshot(h.deps, options);
+    const result = await executeRepositorySnapshot(h.deps, options, plan);
+
+    expect(h.ingested.map(request => request.docKey)).toEqual(['repo:fixture:src/b.ts']);
+    expect(h.tombstoned).toEqual([]);
+    expect(result.counts).toEqual({ ingested: 1, unchanged: 1, tombstoned: 0 });
+    expect(result.carriedForward).toBe(1);
+    const carriedRow = h.published[0].rows.find(row => row.path === 'docs/guide.md');
+    expect(carriedRow).toEqual({
+      path: 'docs/guide.md',
+      docKey: 'repo:fixture:docs/guide.md',
+      rootHash: 'prior-hash',
+      outcome: 'unchanged',
+    });
+    expect(h.published[0].summary).toMatchObject({ carriedForward: 1 });
   });
 });
 

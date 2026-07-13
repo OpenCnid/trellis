@@ -3,7 +3,7 @@ import type { ExtractionSourceKind } from '../ast/persist.js';
 import { planExtraction, ExtractionBudgetExceededError } from '../ingestion/plan_ingest.js';
 import type { IngestRequest, IngestResult } from '../ingestion/ingest_document.js';
 import type { Logger } from '../observability/logger.js';
-import { isTestOrFixturePath, repoDocKey } from './paths.js';
+import { isTestOrFixturePath, repoDocKey, validateRepoRelativePath } from './paths.js';
 import { diffManifests } from './manifest.js';
 import {
   countSkipReasons,
@@ -44,6 +44,16 @@ export interface SnapshotOptions {
   maxBytesInFlight?: number;
   maxFileBytes?: number;
   requestId?: string;
+  // Session 34: optional path-prefix scope. Absent or empty = the full
+  // repository, byte-identical to pre-scope behavior. When present, only
+  // paths under one of the prefixes are planned and ingested; everything
+  // else is untouched — a previously effective out-of-scope path is
+  // CARRIED FORWARD into the new snapshot at its previous root hash
+  // (never tombstoned by a run whose scope does not cover it), and an
+  // out-of-scope path with no prior version is skipped as out_of_scope.
+  // Doc keys stay root-relative, so a scoped run and a full run agree on
+  // identity for every path.
+  includePrefixes?: readonly string[];
 }
 
 export const DEFAULT_FILE_CONCURRENCY = 4;
@@ -99,10 +109,51 @@ export interface PlannedTombstone {
   docKey: string;
 }
 
+// Session 34: a previously effective path outside the run's scope. It
+// re-publishes in the new snapshot at its previous root hash so document
+// liveness and the deletion baseline survive a scoped run untouched.
+export interface PlannedCarry {
+  path: string;
+  docKey: string;
+  rootHash: string;
+}
+
+/**
+ * Validates and normalizes scope prefixes (Session 34). Each prefix must
+ * be a valid repo-relative path after trailing-slash trimming; an
+ * invalid prefix throws before any planning I/O. Returns null when the
+ * caller passed no scope — the full-repository fast path.
+ */
+export function normalizeScopePrefixes(
+  includePrefixes: readonly string[] | undefined
+): string[] | null {
+  if (!includePrefixes || includePrefixes.length === 0) return null;
+  const normalized = includePrefixes.map(raw => {
+    const trimmed = raw.replace(/\/+$/, '');
+    const validation = validateRepoRelativePath(trimmed);
+    if (!validation.ok) {
+      throw new Error(`invalid scope prefix: ${JSON.stringify(raw)}`);
+    }
+    return trimmed;
+  });
+  return [...new Set(normalized)].sort();
+}
+
+/** Segment-boundary prefix match: 'src' covers 'src/a.ts', never 'src2/a.ts'. */
+export function isPathInScope(relativePath: string, prefixes: readonly string[] | null): boolean {
+  if (!prefixes) return true;
+  return prefixes.some(
+    prefix => relativePath === prefix || relativePath.startsWith(`${prefix}/`)
+  );
+}
+
 export interface SnapshotPlan {
   repoKey: string;
   files: PlannedFile[];
   tombstones: PlannedTombstone[];
+  // Session 34: out-of-scope previously effective paths, re-published
+  // verbatim (empty for a full-scope run).
+  carriedForward: PlannedCarry[];
   skipped: SkippedFile[];
   skipCounts: Record<string, number>;
   totalBytes: number;
@@ -121,7 +172,10 @@ export interface SnapshotPlan {
 export interface SnapshotResult {
   repoKey: string;
   snapshotSeq: number;
+  // counts.unchanged includes carried-forward rows (both publish with
+  // outcome 'unchanged'); carriedForward reports that subset.
   counts: { ingested: number; unchanged: number; tombstoned: number };
+  carriedForward: number;
   skipCounts: Record<string, number>;
   extractionExclusionCounts: Record<string, number>;
   blocksExcludedFromExtraction: number;
@@ -194,6 +248,7 @@ export async function planRepositorySnapshot(
   deps: SnapshotDeps,
   options: SnapshotOptions
 ): Promise<SnapshotPlan> {
+  const scopePrefixes = normalizeScopePrefixes(options.includePrefixes);
   const scan = await deps.scan(options.root, {
     includeUntracked: options.includeUntracked,
     maxFileBytes: options.maxFileBytes,
@@ -204,8 +259,17 @@ export async function planRepositorySnapshot(
   const files: PlannedFile[] = [];
   const gate = new ByteGate(options.maxBytesInFlight ?? DEFAULT_MAX_BYTES_IN_FLIGHT);
 
+  // Session 34: an out-of-scope accepted file is never read or parsed.
+  // With a prior effective version it carries forward below; without one
+  // it is a typed skip so the funnel still accounts for every path.
+  const inScopeAccepted = scan.accepted.filter(entry => {
+    if (isPathInScope(entry.path, scopePrefixes)) return true;
+    if (!previous.has(entry.path)) skipped.push({ path: entry.path, reason: 'out_of_scope' });
+    return false;
+  });
+
   await mapBounded(
-    scan.accepted,
+    inScopeAccepted,
     options.concurrency ?? DEFAULT_FILE_CONCURRENCY,
     async entry => {
       const release = await gate.acquire(entry.size);
@@ -240,8 +304,25 @@ export async function planRepositorySnapshot(
   // A previously effective path that is now absent OR no longer accepted
   // (newly oversize, reclassified, unparseable) must tombstone: its
   // bytes are no longer eligible source, so its facts quarantine.
+  // Session 34: deletion decisions belong to runs whose scope covers the
+  // path — an out-of-scope previous path carries forward verbatim
+  // (whether or not it is still on disk) and never tombstones here.
+  const previousInScope: string[] = [];
+  const carriedForward: PlannedCarry[] = [];
+  for (const [previousPath, effective] of previous) {
+    if (isPathInScope(previousPath, scopePrefixes)) {
+      previousInScope.push(previousPath);
+    } else {
+      carriedForward.push({
+        path: previousPath,
+        docKey: effective.docKey,
+        rootHash: effective.rootHash,
+      });
+    }
+  }
+  carriedForward.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
   const currentAccepted = new Set(files.map(file => file.path));
-  const manifest = diffManifests(previous.keys(), currentAccepted);
+  const manifest = diffManifests(previousInScope, currentAccepted);
   const tombstones = manifest.removed.map(path => ({
     path,
     docKey: previous.get(path)!.docKey,
@@ -258,6 +339,7 @@ export async function planRepositorySnapshot(
     repoKey: options.repoKey,
     files,
     tombstones,
+    carriedForward,
     skipped,
     skipCounts: countSkipReasons(skipped),
     totalBytes: files.reduce((sum, file) => sum + file.size, 0),
@@ -296,6 +378,7 @@ export async function executeRepositorySnapshot(
     filesToIngest: plan.filesToIngest,
     filesUnchanged: plan.filesUnchanged,
     tombstones: plan.tombstones.length,
+    carriedForward: plan.carriedForward.length,
     skipCounts: plan.skipCounts,
     extractionExclusionCounts: plan.extractionExclusionCounts,
     blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,
@@ -382,6 +465,19 @@ export async function executeRepositorySnapshot(
       deps.metrics?.repoFilesTotal.inc({ outcome: 'unchanged', language: file.language });
     }
 
+    // Session 34: out-of-scope previously effective paths re-publish at
+    // their previous root hash. No read, no parse, no ingest, no queue —
+    // the scoped run leaves them exactly as the last covering run did.
+    for (const carry of plan.carriedForward) {
+      rows.push({
+        path: carry.path,
+        docKey: carry.docKey,
+        rootHash: carry.rootHash,
+        outcome: 'unchanged',
+      });
+      deps.metrics?.repoFilesTotal.inc({ outcome: 'unchanged', language: 'none' });
+    }
+
     // Tombstones run only after every file ingest succeeded: a partial
     // failure must never mark unprocessed paths deleted.
     for (const tombstone of plan.tombstones) {
@@ -410,6 +506,7 @@ export async function executeRepositorySnapshot(
     };
     await deps.store.publishSnapshot(options.repoKey, snapshotSeq, rows, {
       counts,
+      carriedForward: plan.carriedForward.length,
       skipCounts: plan.skipCounts,
       extractionExclusionCounts: plan.extractionExclusionCounts,
       blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,
@@ -437,6 +534,7 @@ export async function executeRepositorySnapshot(
       repoKey: options.repoKey,
       snapshotSeq,
       counts,
+      carriedForward: plan.carriedForward.length,
       skipCounts: plan.skipCounts,
       extractionExclusionCounts: plan.extractionExclusionCounts,
       blocksExcludedFromExtraction: plan.blocksExcludedFromExtraction,

@@ -159,7 +159,10 @@ async function runSnapshot(deps: SnapshotDeps, root: string, extra?: Partial<Sna
   return { plan, result };
 }
 
-async function runCli(repoRoot: string): Promise<{ code: number; stdout: string }> {
+async function runCli(
+  repoRoot: string,
+  extraArgs: string[] = []
+): Promise<{ code: number; stdout: string }> {
   const tsxCli = require.resolve('tsx/cli');
   try {
     const { stdout } = await execFileAsync(process.execPath, [
@@ -169,6 +172,7 @@ async function runCli(repoRoot: string): Promise<{ code: number; stdout: string 
       '--repo-key', REPO_KEY,
       '--extract', 'none',
       '--max-file-bytes', String(MAX_FILE_BYTES),
+      ...extraArgs,
     ], { cwd: path.resolve('.'), maxBuffer: 16 * 1024 * 1024 });
     return { code: 0, stdout };
   } catch (error: any) {
@@ -545,6 +549,125 @@ async function main(): Promise<void> {
       [1, 2]);
     await mirrorInvalidationWorker(sweeps6);
     check('changed-mode drill wrote zero extraction jobs to Redis',
+      await extractionQueueDepth(), extractionBaseline);
+
+    console.log('\nPart 7: scoped snapshots (Session 34) — --include carries the rest forward');
+    // Edit an in-scope file AND an out-of-scope file, add a brand-new
+    // out-of-scope file, then run scoped to src/: only the in-scope edit
+    // ingests and enqueues; the edited out-of-scope path carries forward
+    // at its PREVIOUS root hash (never re-read, never tombstoned); the
+    // new out-of-scope path is a typed out_of_scope skip with no
+    // document row.
+    const readmeBefore = await latestVersion(docKeyFor('README.md'));
+    await fs.writeFile(
+      path.join(repoRoot, 'src/app.ts'),
+      `${await fs.readFile(path.join(repoRoot, 'src/app.ts'), 'utf8')}\nexport function sessionThirtyFour() {\n  return 'scoped';\n}\n`
+    );
+    await fs.writeFile(
+      path.join(repoRoot, 'README.md'),
+      `${await fs.readFile(path.join(repoRoot, 'README.md'), 'utf8')}\nEdited out of scope.\n`
+    );
+    await fs.mkdir(path.join(repoRoot, 'docs'), { recursive: true });
+    await fs.writeFile(
+      path.join(repoRoot, 'docs', 'newdoc.md'),
+      '# New Doc\n\nA paragraph written outside the scope.\n'
+    );
+    await git(repoRoot, 'add', '-A');
+    await git(repoRoot, 'commit', '-m', 'in-scope and out-of-scope edits for the scope drill');
+
+    // A full-scope plan (planning only, no writes) prices README + the
+    // new doc; the scoped plan must price only the in-scope edit.
+    const fullPlan7 = await planRepositorySnapshot(makeLibraryDeps([], undefined, []), {
+      root: repoRoot,
+      repoKey: REPO_KEY,
+      policy: { mode: 'changed', maxBlocks: 50 },
+      maxFileBytes: MAX_FILE_BYTES,
+    });
+    const sweeps7: CapturedSweep[] = [];
+    const jobs7: Array<{ name: string; data: Record<string, unknown> }> = [];
+    const { plan: plan7, result: result7 } = await runSnapshot(
+      makeLibraryDeps(sweeps7, undefined, jobs7),
+      repoRoot,
+      { policy: { mode: 'changed', maxBlocks: 50 }, includePrefixes: ['src'] }
+    );
+    // Two out_of_scope skips: docs/newdoc.md AND the hostile binary
+    // data/blob.md — an out-of-scope file is never read, so parse-level
+    // reasons (binary) cannot apply to it.
+    check('scoped plan skips the new out-of-scope files as out_of_scope',
+      plan7.skipCounts.out_of_scope, 2);
+    check('out-of-scope files are never parsed (no binary skip under scope)',
+      plan7.skipCounts.binary, undefined);
+    check('scoped plan carries the three out-of-scope effective paths',
+      plan7.carriedForward.map(carry => carry.path),
+      ['README.md', '__fixtures__/sample.md', 'config/settings.json']);
+    check('carried README keeps its pre-edit root hash',
+      plan7.carriedForward[0].rootHash, readmeBefore?.root_hash);
+    check('scoped paid bound excludes out-of-scope blocks',
+      plan7.paidJobUpperBound < fullPlan7.paidJobUpperBound, true);
+    check('scoped snapshot counts (carried publish as unchanged)',
+      [result7.counts, result7.carriedForward],
+      [{ ingested: 1, unchanged: 4, tombstoned: 0 }, 3]);
+    check('only the in-scope edit enqueued',
+      jobs7.map(job => [job.data.docKey, job.data.sourceKind]),
+      [[docKeyFor('src/app.ts'), 'code']]);
+    check('edited out-of-scope README was NOT re-ingested',
+      (await latestVersion(docKeyFor('README.md')))?.version, readmeBefore?.version);
+    check('new out-of-scope file has no document row',
+      await latestVersion(docKeyFor('docs/newdoc.md')), null);
+    await mirrorInvalidationWorker(sweeps7);
+
+    // The chunk-two pattern: a later full-scope run picks up exactly the
+    // deferred out-of-scope work as ordinary changed-mode ingests.
+    const sweeps7b: CapturedSweep[] = [];
+    const jobs7b: Array<{ name: string; data: Record<string, unknown> }> = [];
+    const { result: result7b } = await runSnapshot(
+      makeLibraryDeps(sweeps7b, undefined, jobs7b),
+      repoRoot,
+      { policy: { mode: 'changed', maxBlocks: 50 } }
+    );
+    check('full-scope follow-up ingests exactly the deferred paths',
+      result7b.counts, { ingested: 2, unchanged: 4, tombstoned: 0 });
+    check('follow-up carried nothing (full scope)', result7b.carriedForward, 0);
+    check('README re-ingested by the covering run',
+      (await latestVersion(docKeyFor('README.md')))?.version, (readmeBefore?.version ?? 0) + 1);
+    check('deferred new doc registered at version 1',
+      (await latestVersion(docKeyFor('docs/newdoc.md')))?.version, 1);
+    check('deferred prose blocks enqueue only under the covering run',
+      jobs7b.every(job => job.data.sourceKind === 'prose')
+        && jobs7b.some(job => job.data.docKey === docKeyFor('docs/newdoc.md'))
+        && jobs7b.some(job => job.data.docKey === docKeyFor('README.md')),
+      true);
+    await mirrorInvalidationWorker(sweeps7b);
+
+    // In-scope deletions still tombstone under a scoped run.
+    await fs.rm(path.join(repoRoot, 'src/app.test.ts'));
+    await git(repoRoot, 'add', '-A');
+    await git(repoRoot, 'commit', '-m', 'delete in-scope test file');
+    const sweeps7c: CapturedSweep[] = [];
+    const { result: result7c } = await runSnapshot(
+      makeLibraryDeps(sweeps7c),
+      repoRoot,
+      { includePrefixes: ['src'] }
+    );
+    check('scoped run tombstones the in-scope deletion',
+      result7c.counts, { ingested: 0, unchanged: 5, tombstoned: 1 });
+    check('scoped deletion carried the four out-of-scope paths', result7c.carriedForward, 4);
+    check('in-scope deletion registered a tombstone version',
+      (await latestVersion(docKeyFor('src/app.test.ts')))?.root_hash, emptyDocumentRoot().id);
+    await mirrorInvalidationWorker(sweeps7c);
+
+    // The CLI surface: --include parses, the plan echo prints scope and
+    // carried counts, and an invalid prefix refuses before any write.
+    const cli7 = await runCli(repoRoot, ['--include', 'src']);
+    check('CLI scoped run exits 0', cli7.code, 0);
+    check('CLI plan echo prints the scope', /scope:\s+src\b/.test(cli7.stdout), true);
+    check('CLI plan echo prints the carried-forward count',
+      /carried forward:\s+4 /.test(cli7.stdout), true);
+    const cliBad = await runCli(repoRoot, ['--include', '../escape']);
+    check('CLI refuses an invalid scope prefix', cliBad.code === 0, false);
+    check('invalid-prefix refusal names the prefix',
+      cliBad.stdout.includes('invalid scope prefix'), true);
+    check('scope drill wrote zero extraction jobs to Redis',
       await extractionQueueDepth(), extractionBaseline);
   } finally {
     console.log('\nCleanup');
