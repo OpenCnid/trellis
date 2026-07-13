@@ -228,3 +228,164 @@ retuning of the budget until a recorded owner decision).
 - July 13, 2026 (later the same day) — owner SELECTED this row as the
   Session 38 objective; the increment-2 retry moves to Session 39.
   Sequencing recorded in the roadmap §5 entry and HANDOFF §3.
+- July 13, 2026 (Session 38) — IMPLEMENTED as designed (§10 below):
+  the seam (`src/core/ast/generic_tree.ts`), the walk
+  (`structural_chunker.ts`), the engine (`treesitter_engine.ts`:
+  web-tree-sitter 0.26.11 + @vscode/tree-sitter-wasm 0.3.1, both
+  exact-pinned), `chunkingPolicy` on `parseSourceFile` and
+  `repo:ingest --chunking-policy` with the snapshot-summary stamp;
+  policy 1 byte-identity pinned. Shadow measured, pilot executed —
+  the numbers are §10.
+
+## 10. Measured record (Session 38, July 13, 2026)
+
+### 10.1 Implementation decisions inside the fixed algorithm
+
+Recorded refinements the cAST shape left open, decided before the
+shadow run:
+
+- **Same-kind merge only.** Adjacent small siblings merge only when
+  they map to the SAME block kind (imports with imports, statements
+  with statements). Merging across kinds would blur typed identity
+  and extraction eligibility. Consequence: small adjacent functions
+  DO merge into one `code_function` block (the cAST density rule).
+- **Trivia glues forward.** Comments and gap bytes ride the FOLLOWING
+  construct's block (a doc comment travels with its function); the
+  trailing gap of a span appends to the preceding segment, descending
+  into a trailing container. Gaps larger than the split threshold
+  become bounded `code_chunk` segments instead of distorting a
+  construct's block — so a glued prefix can push a block slightly
+  past the hard cap (counted honestly below).
+- **Budget constants:** `STRUCTURAL_SPLIT_THRESHOLD_CHARS = 4000`
+  (equals policy 1's `MAX_CHUNK_CHARS` — no new over-cap class),
+  `STRUCTURAL_MERGE_TARGET_CHARS = 3000` (top of the record's target
+  band). Tuned once here; changes are recorded decisions.
+- **Classes are ALWAYS containers** (never merged, never a leaf),
+  preserving the Session 8 rule that class bytes are never an
+  extraction unit; methods stay individually typed.
+- **Eligibility (§2 axis 4):** `code_import` typed-and-skipped
+  (readable in the walk, never extracted or embedded — import names
+  are the cross-file generic-identifier class); `code_const` /
+  `code_type` / `code_statement` ELIGIBLE. Recorded in
+  `EXTRACTION_INELIGIBLE_BLOCK_TYPES` (traverse.ts), consumed by
+  `planExtraction`.
+- **ERROR trees refuse** (typed `parse_error`) — the §8 broken-file
+  policy decision stays unmade.
+- The walk consumes NAMED tree-sitter children; both block walks
+  (`collectExtractionBlocks` / `trellis_blocks.py`) collect the new
+  kinds through the existing childless-with-content branch — neither
+  walk changed a byte (parity re-pinned).
+
+### 10.2 Shadow measurement (zero-paid, full scope src+scripts+modules)
+
+`npx tsx scripts/chunking_shadow.ts` over 285 measured code files
+(305 accepted, 20 non-code), July 13, 2026. GREEN: zero coverage
+errors under either policy, zero policy-2 parse refusals.
+
+| Measure | Policy 1 | Policy 2 |
+|---|---|---|
+| Blocks | 2,332 | 2,682 |
+| Monoliths >8,000 chars | 15 (max 25,818) | **0 (max 4,641)** |
+| Blocks >4,000 chars | 41 | 3 (glued-prefix exceptions: 4,003 / 4,085 / 4,641) |
+| TS structureless share | 51.6% | **0.4%** |
+| PY structureless share | 55.0% | 0.0% |
+| JS structureless share | 100.0% | 0.0% |
+| Extraction-eligible blocks | 1,839 | 2,389 (293 `code_import` skipped) |
+
+Policy-2 kind distribution: 997 `code_statement` / 690 `code_const` /
+464 `code_function` / 293 `code_import` / 195 `code_type` /
+41 `code_method` / 2 `code_chunk`. Boundary oracle: **911/911**
+policy-1 functions/methods (≤4,000 chars) found intact inside one
+policy-2 block — zero Babel/python-ast vs tree-sitter boundary
+disagreements on this corpus. `code_function` count falls 860 → 464
+because small adjacent functions merge (the density rule above);
+none is split or lost (the oracle proves containment).
+
+### 10.3 Pilot (owner-approved; scope src/rlm, policy 2)
+
+Snapshot `trellis#6`, July 13, 2026: `repo:ingest --repo-key trellis
+--root . --include src/rlm --chunking-policy 2 --extract changed
+--max-blocks 150 --confirm-extraction` after the printed plan echo
+(8 files to ingest, 110-block paid bound — exactly the shadow's
+number; 304 out-of-scope paths carried forward; 1 unchanged text
+file). **110/110 extraction jobs, zero failures**; spend **$0.540
+actual** vs the ~$0.46 estimate (78,791 input + 34,231 output tokens
+gpt-5.4 + 38,554 embedding tokens — finer blocks emit relatively
+more graph JSON per input token; the per-block rate moved $0.0042 →
+$0.0049). Seam-query baseline measured BEFORE the pilot on the same
+day (`benchmark_logs/session38_seam_before.log`).
+
+The five-part §7 criterion, judged as pre-stated:
+
+1. **Size distribution: PASS.** Database-verified on the current
+   versions: 118 typed blocks (60 statement / 30 method / 20
+   function / 8 import), zero over the 4,000 hard cap, zero
+   monoliths; the 13,656-char `main()` block is gone (max in scope
+   3,999). Policy 1 in the same scope: 256 blocks, 1 monolith,
+   4 over-cap.
+2. **Typed coverage: PASS.** Structureless share in scope 27.3% →
+   **0.0%** (bar ≤15%; the scope is all-Python — the full-corpus TS
+   figure is §10.2's 51.6% → 0.4% shadow number).
+3. **Seam-query retrieval: FAIL as worded.** Through the exact tool
+   instrument (`search_ast_nodes` top 3): before 5/8, after **4/8**.
+   Root cause diagnosed, not argued away: the re-chunk killed every
+   old block but their EMBEDDINGS remain searchable — ~256 dead
+   near-twins of the same bytes outrank the live re-chunks (the
+   before-run's rank-1 hit for the `trellis_blocks.py` query is the
+   after-run's rank-1 hit too, now dead). A live-only diagnostic
+   (top 20 fetched, dead hits skipped — NOT the criterion
+   instrument) reads before 5/8 → after 5/8 with **the headline case
+   FIXED**: "retrieved addresses telemetry count in research mode"
+   ranks a live `trellis_agent.py` block at 2 (before: not in top
+   5 — the §5f.5 increment-2 run-1 miss class), and one genuine
+   regression NAMED: `trellis_blocks.py`'s small functions merge
+   with the module docstring under the density rule and the diluted
+   block falls out of the top 5. Two findings for the owner: (a)
+   dead-block embedding pollution is a substrate property every
+   refresh worsens — a liveness filter in `search_ast_nodes` (or an
+   embedding sweep over superseded blocks) is a recorded candidate,
+   owner-gated because it changes agent-visible tool behavior; (b)
+   same-kind merging trades small-file retrieval sharpness for
+   density — retuning is a recorded decision, not a silent knob.
+4. **Hub cardinality: PASS.** Max hub over pilot-scope current
+   blocks: `trellis_mcp_servers` at 6/110 = **5.45%** (bar ≤8%).
+   `main` gained ≤3 pilot-scope sources (its 30 historical sources /
+   120 edges stand as audit) — the monolith-block hub-feeding
+   pattern is gone; provenance lands on per-construct entities.
+5. **Churn integrity: PASS.** 110/110 with byte coverage green on
+   every file; the pilot window contested 89 nodes / 202
+   relationships with audit preserved (`orphanedSourceIds`); the
+   three standing TRUE beliefs whose evidence blocks died
+   (Session 36's `returns_copy_of` recovery, Session 36 run-2's
+   `wires` insight, Session 37 run-2's `consumes` insight) were
+   quarantined by the sweep and RECOVERED the same day as operator
+   re-derivations through the ordinary write path citing the live
+   policy-2 blocks (`9b4c3159…`, `040b7f13…`+`e3df7336…`,
+   `e3df7336…`) — all three read uncontested with `rederivedAt`
+   stamped. Dollars reported with the counts above.
+
+**Pilot verdict under §7's own rule: FAILED (item 3 missed as
+worded); items 1, 2, 4, 5 pass.** Recorded and stopped — no budget
+retuning, no query retuning, no instrument swap. The policy-2
+`src/rlm` substrate STANDS as ingested (reverting would be a second
+churn event teaching nothing); rollout continuation, the item-3
+follow-ups, and any wider scope are the owner's call with this
+record.
+
+### 10.4 Rollout state after the pilot
+
+- `src/rlm` is at chunking policy 2 (snapshot `trellis#6`); the rest
+  of the scope is policy 1 (snapshot `trellis#5`, the Session 38
+  per-PR refresh). Snapshot summaries stamp `chunkingPolicy`.
+- **Refresh recipe until the owner widens the rollout:** the ordinary
+  per-PR refresh must NOT re-parse `src/rlm` under policy 1 (it
+  would revert the pilot and re-buy extraction). Run TWO scoped
+  snapshots: (1) policy 1 with `--include src/core --include
+  src/api --include src/workers --include src/benchmarks --include
+  src/config --include src/frontend --include scripts --include
+  modules` (everything except `src/rlm`; carried forward preserves
+  the pilot), then (2) `--include src/rlm --chunking-policy 2` when
+  `src/rlm` actually changed. Session 34's carry-forward semantics
+  make this safe by construction.
+- Nothing defaults to policy 2 anywhere; `--chunking-policy` is
+  operator-explicit per run.
