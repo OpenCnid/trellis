@@ -1227,15 +1227,39 @@ real judged sweep stands PROPOSED owner-gated (item 3).
    entailment job name round-trips through the real worker over
    Redis/BullMQ (the worker/queue now close at the END of the drill so
    section [9] shares section [6]'s worker).
-3. **The measured sweep — PROPOSED, owner-gated (not run).** Dev-graph
-   dry-run (`npm run entailment:sweep -- --dry-run`): 283 non-contested
-   DERIVED_INSIGHT edges, 566 unchecked pairs (the OOLONG-era
-   classification edges dominate). The default policy samples ~60
-   pairs and admits 25 within budget = 25 judge completions of ~200
-   input + ~15 output tokens each — estimate ≈ $0.02–$0.05 total,
-   comfortably under the ≤$5 cap. Run only on explicit owner approval
-   (`npm run entailment:sweep -- --sync --seed <n>`); actuals to be
-   recorded here.
+3. **The measured sweep — RAN July 13, 2026, owner-approved (the
+   standing proposal executed the next day; proposal record: dev-graph
+   dry-run read 283 non-contested DERIVED_INSIGHT edges / 566 unchecked
+   pairs, default policy = 25 judge calls, estimate ≈ $0.02–$0.05).**
+   Selection reproduced the recorded dry-run
+   (`npm run entailment:sweep -- --sync --seed 32`): 60 sampled, 25
+   within budget (35 deferred). Judged 25/25 — 8 supported, 17
+   flagged, 15 edges contested; zero skips, zero judge failures,
+   whole-batch atomicity held. ACTUALS: 2,176 input + 375 output
+   tokens = $0.0093 (vs the $0.02–$0.05 estimate; the sync CLI now
+   prints usage tokens — patched in this PR). Every flagged block was
+   then verified against its stored bytes; the 17 flags decompose
+   into two classes: **(i) 9 CONFIRMED weak citations** — the cited
+   block is a HEADING whose entire text is the question id (e.g.
+   bytes "q_0034" cited as provenance for `q_0034 mentions cairo`):
+   real ingested bytes that do not support the claim, invisible to
+   the format/existence/retrieval layers BY CONSTRUCTION — exactly
+   the wrong-block class the detector was built to surface (the
+   OOLONG-era extraction attributed facts to heading blocks alongside
+   body blocks); **(ii) 8 strict-judge verdicts on
+   derived-classification claims** — question-body paragraphs flagged
+   for `has_category` (e.g. "What does HTTP stand for?" vs
+   `has_category abbr`): the text supports the classification
+   semantically but does not STATE it, and the judge (the recorded
+   `make_entailment_check` prompt shape) reads "state or directly
+   support" strictly. Recorded as a calibration observation for a
+   future owner-picked decision (a classification-aware judge
+   variant vs accepting conservative contests — recovery is one
+   re-derivation either way); the judge prompt shape is NOT changed
+   now. The 15 contested edges are OOLONG-era cache rows on the dev
+   graph — standard lazy-recovery residue (a re-derivation citing the
+   body block recovers each). No machinery defect: every behavior
+   matched the section [7]–[9] pins.
 4. **Slice (f) — compat VERIFIED against the code, no gap, row 9
    struck.** Every §5.3/§5.5 claim checked (the Session 27
    verify-first standard): **(i)** the (d) gate is write-time only —

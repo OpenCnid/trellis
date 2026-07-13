@@ -72,6 +72,7 @@ async function main(): Promise<void> {
     const judge: EntailmentJudge = oracle ? makeOracleEntailmentJudge(oracle) : makeOpenAIEntailmentJudge();
     const report = await detectUnsupportedCitations(neo4jDriver, pgPool, selection.pairs, judge);
     console.log(`  judged ${report.judged}: ${report.supported} supported, ${report.flagged} flagged (${report.edgesFlagged} edge(s) contested), ${report.skippedNoText} skipped (no live text), ${report.skippedNoAnswer} skipped (no answer), ${report.usage.subcalls} sub-call(s)`);
+    console.log(`  usage: ${report.usage.inputTokens} input tokens, ${report.usage.outputTokens} output tokens`);
     for (const f of report.flags) {
       console.log(`    FLAGGED ${f.subject} ${f.verb} ${f.object}: cited ${f.hash} does not support the claim — contested.`);
     }

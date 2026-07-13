@@ -360,10 +360,20 @@ composing with the slice (d) gate (unretrieved re-derivation refused;
 retrieval-gated one recovers; audit survives), judge failure contests
 NOTHING, budget defers loudly, dead-byte pairs skipped and counted,
 queue round trip through the real worker. **(3) The first REAL judged
-sweep stands PROPOSED, owner-gated, NOT run:** dev-graph dry-run reads
-283 edges / 566 unchecked pairs; the default policy admits 25 judge
-calls ≈ $0.02–$0.05 (`npm run entailment:sweep -- --sync --seed <n>`
-on approval; actuals to the roadmap). **(4) Slice (f) — compat
+sweep RAN owner-approved (July 13, 2026, the day after the proposal —
+dev graph 283 edges / 566 unchecked pairs):** seed 32, 25/25 judged —
+8 supported, 17 flagged, 15 edges contested; ACTUAL $0.0093 (2,176
+input + 375 output tokens, vs the $0.02–$0.05 estimate). Verified
+against stored bytes, the flags decompose: 9 CONFIRMED weak citations
+(HEADING blocks — bytes like "q_0034" — cited as provenance for
+question facts: the exact wrong-block class the detector exists for,
+invisible to the three structural layers by construction) + 8
+strict-judge verdicts on derived-classification `has_category` claims
+(text supports but does not STATE the classification — a recorded
+calibration observation, owner-picked follow-up; the judge prompt
+shape unchanged). The 15 contested edges are OOLONG-era dev-graph
+cache rows — standard lazy-recovery residue. No machinery defect:
+every behavior matched the pins. **(4) Slice (f) — compat
 VERIFIED, no gap:** the (d) gate is write-time only
 (`_verify_hashes_retrieved` has exactly one caller); envelopes
 additive only (`TRELLIS_RESULT` exactly `{status, answer, toolCalls}`;
@@ -593,8 +603,12 @@ immutable, content-addressed physical location in source material.
      zero-LLM drills; both contest through the Phase 4 path, never
      delete; both fetch block text engine-side and validate every
      completion through `parseLlmResponse`. Real sweeps are owner-gated
-     (the first entailment sweep stands PROPOSED: 566 unchecked pairs
-     on the dev graph, 25 judge calls ≈ $0.02–$0.05).
+     per run. The first ran owner-approved July 13, 2026 (seed 32, 25
+     pairs, $0.0093): 17 flagged — 9 VERIFIED weak heading-block
+     citations (the wrong-block class the detector exists for) + 8
+     strict-judge verdicts on derived-classification `has_category`
+     claims (calibration observation, owner-picked follow-up); the
+     roadmap §5 Session 32 entry item 3 records the decomposition.
    - **Module entities (Session 18; `src/core/graph/module_registration.ts`
      + `scripts/register_modules.ts`):** each research-bearing ACTIVE
      module manifest is registrable as
@@ -1047,15 +1061,21 @@ Repository state at handoff creation:
   several GB of headroom. Changing `package.json` invalidates the
   Docker `npm ci` layer; changing `requirements.txt` invalidates the
   pip layer.
-- The standing owner-gated proposals: **(1) the first REAL entailment
-  sweep** (Session 32: dev graph 283 edges / 566 unchecked pairs;
-  default policy = 25 judge calls ≈ $0.02–$0.05;
-  `npm run entailment:sweep -- --sync --seed <n>`; actuals to the
-  roadmap); (2) the next proof-run depth increment (the Session 29
-  mode-preservation fix unblocks the executable-file case as a
-  candidate); (3) the pandas head-to-head probe round; (4) the
-  cross-process concurrency proof run (coverage-audit gap #1). All
-  propose-with-estimate, never self-served.
+- The standing owner-conditional items: **(1) the judge-calibration
+  decision for derived-classification claims** (the July 13, 2026
+  measured sweep — 25 pairs, $0.0093 — found the strict judge flagging
+  8/25 question-body `has_category` pairs whose text supports but does
+  not STATE the classification; options: a classification-aware judge
+  prompt variant vs accepting conservative contests; owner-picked —
+  the 9 heading-block flags in the same sweep were VERIFIED real weak
+  citations, so the detector's core class works as built); (2) the
+  next proof-run depth increment (the Session 29 mode-preservation fix
+  unblocks the executable-file case as a candidate); (3) the pandas
+  head-to-head probe round; (4) the cross-process concurrency proof
+  run (coverage-audit gap #1). All propose-with-estimate, never
+  self-served. Note the sweep left 15 contested OOLONG-era edges on
+  the dev graph — standard lazy-recovery residue, recovered by
+  re-derivation citing the body block.
 - CI target is Node 22 (the `offline` job also runs `test:textedit`
   after its Python-runtime install — Session 29). Session 32's local
   environment was Node 20.19.2, Python 3.13.1, Docker Compose v2,
@@ -1315,10 +1335,11 @@ Update:
   only (29–33 after this session) — compress the oldest into the
   digest and move its roadmap §5 entry verbatim to
   `docs/archive/ROADMAP_HISTORY.md`. The standing owner-conditional
-  items: the first REAL entailment sweep (proposed, ≈$0.02–$0.05), the
-  proof-run depth increment, the pandas head-to-head probe round, and
-  the cross-process concurrency proof run — all propose-with-estimate,
-  never self-served.
+  items: the judge-calibration decision for classification claims
+  (from the July 13 measured sweep), the proof-run depth increment,
+  the pandas head-to-head probe round, and the cross-process
+  concurrency proof run — all propose-with-estimate, never
+  self-served.
 
 ## 7. Guardrails
 
@@ -1458,10 +1479,11 @@ Update:
 
 ## 8. Explicit exclusions
 
-Do not include: running the `est` paired acceptance measurement, the
-first real entailment sweep, or ANY paid run without explicit owner
-approval (all stand propose-with-estimate; the entailment sweep
-proposal is already recorded — the Session 32 roadmap entry item 3);
+Do not include: running the `est` paired acceptance measurement or
+ANY paid run without explicit owner approval (all stand
+propose-with-estimate; the first entailment sweep RAN owner-approved
+July 13, 2026 — actuals in the Session 32 roadmap entry item 3; a
+SECOND sweep or a judge-calibration change is a new owner decision);
 reworking row 9 in any form (the detector ships as recorded —
 detector-not-gate is permanent; do not wire it into the write path, do
 not change its stamps, reasons, or judged-at-most-once semantics, do
