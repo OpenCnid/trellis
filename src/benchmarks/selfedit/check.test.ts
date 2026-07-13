@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   checkEditScope,
   checkEvidence,
+  checkParseResults,
   evaluatePreCheck,
   evaluateSelfEditRun,
+  FileParseResult,
   parseGitStatusPorcelain,
   SelfEditRunEvidence,
 } from './check';
@@ -153,6 +155,34 @@ describe('evaluateSelfEditRun', () => {
 
   it('is clean end to end on clean input', () => {
     expect(evaluateSelfEditRun(cleanEvidence())).toEqual([]);
+  });
+});
+
+describe('checkParseResults', () => {
+  const parses = (file: string, language: FileParseResult['language']): FileParseResult => ({
+    file,
+    language,
+    parseable: true,
+  });
+
+  it('is silent when every wired file parses', () => {
+    expect(
+      checkParseResults([parses('a.py', 'python'), parses('b.ts', 'typescript'), parses('c.md', null)])
+    ).toEqual([]);
+  });
+
+  it('flags an unparseable named file with the bounded error detail', () => {
+    const findings = checkParseResults([
+      { file: 'a.py', language: 'python', parseable: false, error: "SyntaxError: unmatched ')' (line 95)" },
+    ]);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].code).toBe('named_file_unparseable');
+    expect(findings[0].detail).toContain('a.py');
+    expect(findings[0].detail).toContain("unmatched ')'");
+  });
+
+  it('never flags an extension with no parser wired, even marked unparseable', () => {
+    expect(checkParseResults([{ file: 'c.md', language: null, parseable: false }])).toEqual([]);
   });
 });
 

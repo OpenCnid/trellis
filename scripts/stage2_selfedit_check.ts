@@ -10,7 +10,13 @@
 //               changed under the edit root, and the run's recorded
 //               evidence edge is present, uncontested, and cites only
 //               hashes live in the CURRENT version of a document that
-//               bridges to a named file.
+//               bridges to a named file. Since Session 37 the post-run
+//               mode also runs the parse gate (§5f): every named file
+//               with a wired parser (.py via the configured
+//               interpreter, .ts/.js via a TypeScript single-file
+//               parse) must still parse — the Session 36 run-1 escape
+//               (a syntax-broken named file) is a typed finding now,
+//               not a human catch.
 //
 // Read-only everywhere: the only git invocation is `git status
 // --porcelain` (the toolkit itself never touches git — the harness
@@ -28,8 +34,10 @@
 import { execFile } from 'child_process';
 import util from 'util';
 import { neo4jDriver, pgPool } from '../src/config/db';
+import { config } from '../src/config/index';
 import {
   checkEvidence,
+  checkParseResults,
   evaluatePreCheck,
   EvidenceEdge,
   HashEvidence,
@@ -38,6 +46,7 @@ import {
   SelfEditFinding,
   SelfEditPreState,
 } from '../src/benchmarks/selfedit/check';
+import { gatherParseResults } from '../src/benchmarks/selfedit/parse_gate';
 
 const execFileAsync = util.promisify(execFile);
 
@@ -210,6 +219,7 @@ async function main(): Promise<number> {
   for (const h of edge.sourceNodeIds) {
     hashes.push(await gatherHashEvidence(h));
   }
+  const parseResults = await gatherParseResults(args.editRoot, args.namedFiles, config.python.executable);
   const findings = [
     ...checkEditScope(changedPaths, args.namedFiles),
     ...checkEvidence({
@@ -219,6 +229,7 @@ async function main(): Promise<number> {
       edge,
       hashes,
     }),
+    ...checkParseResults(parseResults),
   ];
   return report(findings);
 }

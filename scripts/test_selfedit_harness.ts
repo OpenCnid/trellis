@@ -22,6 +22,11 @@
 //   5. The rehearsal violation arm: the live Session 31 gate REFUSES a
 //      citation the run never fetched (observed, not simulated), and
 //      the checker flags the planted out-of-scope edit.
+//   6. The parse gate (Session 37, §5f): the EXACT Session 36 run-1
+//      escape shape — a valid function body with the stale docstring
+//      tail left below it as dead bytes — fires named_file_unparseable
+//      through the real interpreter; clean files and unwired
+//      extensions stay silent.
 //
 // All database state is token-scoped: inserted by this drill, deleted
 // by this drill. The repo:trellis substrate is only ever READ.
@@ -36,10 +41,12 @@ import { config, pgDsn } from '../src/config/index';
 import {
   checkEditScope,
   checkEvidence,
+  checkParseResults,
   evaluatePreCheck,
   evaluateSelfEditRun,
   SelfEditFinding,
 } from '../src/benchmarks/selfedit/check';
+import { gatherParseResults } from '../src/benchmarks/selfedit/parse_gate';
 import {
   gatherEvidenceEdge,
   gatherGitStatus,
@@ -402,6 +409,63 @@ async function main(): Promise<void> {
     'exactly the scope finding (evidence itself is clean)',
     fullViolation.length === 1 && fullViolation[0].code === 'out_of_scope_edit',
     JSON.stringify(fullViolation)
+  );
+
+  // --- [6] The parse gate (Session 37, §5f) ---------------------------
+  console.log('\n[6] parse gate — the run-1 escape shape');
+  const repoD = await makeScratchRepo();
+  // The EXACT Session 36 run-1 failure shape (the preserved failed
+  // diff): the splice repair left the stale docstring tail below the
+  // function body as dead bytes — python reports unmatched ')'.
+  const run1Shape = [
+    'def get_addresses():',
+    '    """A COPY of the run\'s retrieved-address set (callers can never',
+    '    mutate run state). Live on research runs."""',
+    '    with _lock:',
+    '        return set(_addresses)',
+    "    mutate run state). Slice (d)'s future input.\"\"\"",
+    '    with _lock:',
+    '        return set(_addresses)',
+    '',
+  ].join('\n');
+  await fs.promises.writeFile(path.join(repoD, 'edited.py'), run1Shape, 'utf-8');
+  await fs.promises.writeFile(path.join(repoD, 'clean.py'), 'def f():\n    return 1\n', 'utf-8');
+  await fs.promises.writeFile(path.join(repoD, 'broken.ts'), 'const x = (1;\n', 'utf-8');
+
+  const brokenResults = await gatherParseResults(repoD, ['edited.py'], config.python.executable);
+  const brokenFindings = checkParseResults(brokenResults);
+  check(
+    'run-1 shape fires named_file_unparseable through the real interpreter',
+    brokenFindings.length === 1 && brokenFindings[0].code === 'named_file_unparseable',
+    JSON.stringify(brokenFindings)
+  );
+  check(
+    "the finding carries the SyntaxError detail",
+    brokenFindings.length === 1 && brokenFindings[0].detail.includes('SyntaxError'),
+    JSON.stringify(brokenFindings)
+  );
+  const cleanResults = await gatherParseResults(repoD, ['clean.py', 'notes.txt'], config.python.executable);
+  check(
+    'clean python and the unwired .txt extension stay silent',
+    checkParseResults(cleanResults).length === 0 &&
+      cleanResults.find(r => r.file === 'notes.txt')?.language === null,
+    JSON.stringify(cleanResults)
+  );
+  const tsResults = await gatherParseResults(repoD, ['broken.ts'], config.python.executable);
+  const tsFindings = checkParseResults(tsResults);
+  check(
+    'broken TypeScript fires named_file_unparseable via the single-file parse',
+    tsFindings.length === 1 && tsFindings[0].code === 'named_file_unparseable',
+    JSON.stringify(tsFindings)
+  );
+  // The gate composes ADDITIVELY: the Session 35 clean-arm evidence
+  // checker still reports zero findings on repoB (section [4]) — the
+  // parse gate on its named file agrees.
+  const repoBParse = await gatherParseResults(repoB, ['notes.txt'], config.python.executable);
+  check(
+    'the clean-arm named file (unwired extension) adds no parse finding',
+    checkParseResults(repoBParse).length === 0,
+    JSON.stringify(repoBParse)
   );
 }
 
