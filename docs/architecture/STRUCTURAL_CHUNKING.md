@@ -488,6 +488,71 @@ refresh cadence.
    property, not pollution — it may persist; the chunker is not
    retuned for it (guardrail 8).
 
-### 11.4 Measured record
+### 11.4 Measured record (Session 40, July 13, 2026)
 
-(To be filled after implementation and the re-measure.)
+**Implementation, all zero-paid:** the `CREATE OR REPLACE FUNCTION`
+in `POSTGRES_SCHEMA_SQL` (`src/config/schema.ts`) with the §11.2
+EXISTS clause, signature unchanged; the `schema.test.ts` shape pins
+moved in the same commit (a new filter pin asserting the EXISTS
+clause, the max-version join, and filter-before-ORDER-BY-before-LIMIT
+ordering; 836 → 837 unit tests). The planted-dead-twin drill landed
+as `test:repo-ingest` Part 8 (ten checks: v1 surfaces at rank 1 while
+current; after supersession the RAW distance order still ranks the
+dead twin first while the tool returns ONLY the live successor at
+rank 1; after tombstoning neither generation surfaces; zero
+extraction jobs). One witting fixture consequence: `test:rlm-sandbox`
+section [5]'s embedded probe row was a bare `ast_nodes` insert with
+no document membership — dead by the new definition — so the fixture
+now registers it as its own single-node document
+(`sandbox:probe:embed`), with FK-ordered cleanup; the drill's checks
+are unchanged. Zero bytes changed in `trellis_tools.py` or
+`src/api/server.ts` (criterion 3: `test:rlm-sandbox` [5]/[6]/[7]
+green).
+
+**The re-measure (one run, after; the before-numbers are §10.3's):**
+spend stated before the run as ≈8 query embeddings; actual **8 calls,
+75 tokens** text-embedding-3-small (≈$0.000002). Dev-substrate state
+at measure time: 1,731 embedded rows, 286 dead, 1,445 live. Raw log:
+`benchmark_logs/session40_seam_after.log`.
+
+| # | Query (defining file) | §10.3 pre-pilot | §10.3 post-pilot (= before) | After filter |
+|---|---|---|---|---|
+| 1 | retrieved addresses telemetry (`trellis_agent.py`) | >5 | >5 | **2 — IN** |
+| 2 | write derived insight provenance (`trellis_tools.py`) | 4 | 4 | 4 — not |
+| 3 | submit final answer (`trellis_answer.py`) | 1 | 1 | 1 — IN |
+| 4 | retrieval discipline budget (`trellis_tools.py`) | 1 | 2 | 1 — IN |
+| 5 | MCP allowlist (`trellis_mcp.py`) | 2 | 1 | 1 — IN |
+| 6 | workspace park/seed (`trellis_workspace.py`) | >5 | >5 | >5 — not |
+| 7 | hash-guarded splice (`trellis_textedit.py`) | 1 | 2 | 1 — IN |
+| 8 | ordered blocks (`trellis_blocks.py`) | 1 | >5 | >5 — not |
+| | **top-3 totals** | **5/8** | **4/8** | **5/8** |
+
+**Criterion verdict, judged as pre-stated (§11.3):**
+
+1. **PASS** — the planted-dead-twin drill green (raw order preferred
+   the dead twin; the tool excluded it; tombstone removed both).
+2. **PASS** — 5/8 ≥ the 5/8 bar. The raw tool now reads exactly what
+   the Session 38 live-only diagnostic read: the pilot's headline
+   miss (query 1, the §5f.5 increment-2 run-1 miss class) is FIXED
+   through the agent-visible tool — a live `trellis_agent.py` block
+   at rank 2 where ~256 dead near-twins previously buried it. No
+   query moved DOWN versus the post-pilot before-column.
+3. **PASS** — every other retrieval surface byte-identical
+   (`test:rlm-sandbox` [5]/[6]/[7] green, zero caller bytes changed).
+4. **PASS** — 75 embedding tokens, ≈$0.000002 actual.
+5. Persisting misses NAMED, not chased: query 8 is the §10.3
+   merge-dilution case (merge-density, not pollution — stands for
+   the owner's rollout judgment); queries 2 and 6 were misses in
+   BOTH §10.3 columns (rank 4 and >5 respectively, unchanged by
+   chunking or by the filter) — cross-file semantic competition,
+   not a filter regression. No under-fill observed: every query
+   returned a full top-5 through the filtered HNSW path; a count-5
+   probe timed 65.9 ms at dev scale (printed, never asserted).
+
+**Standing consequence:** dead-block embedding pollution is CLOSED at
+the T15 seam — vector search reads only live blocks; superseded
+history stays queryable by hash through every other surface. The §1
+"name the pollution" reporting duty is retired for tool-shaped
+vector-search results; the superseded-embedding SWEEP stays on the
+owner menu, unchosen (storage, not correctness, is its only remaining
+argument).
