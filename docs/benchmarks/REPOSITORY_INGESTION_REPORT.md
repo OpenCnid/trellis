@@ -1803,6 +1803,58 @@ make no edit, and report the contradiction instead.
   stop, diagnose; a retry is its own proposal (the increments-1/2
   treatment).
 
+### 5h.7 Run 1 (July 13, 2026 — clean self-refusal; diagnosed; the recorded contingency follows)
+
+- **The run ($0.8760 computed from tokens — 290,167 in / 15,060 out
+  at the gpt-5.4 rates; inside the $0.40–$0.90 band; 15 iterations,
+  96.0s; 5 db tool calls; 74 textedit ops / 8 guarded ops / 0 raw
+  splices / 0 write_backs; 3 retrieval fetches / 1 dedup refusal /
+  0 budget refusals; `answer_submits` 1) ended in a clean
+  SELF-REFUSAL:** its step-6 verification printed three assertions
+  false, so it reverted its staged frames, wrote NO derived insight,
+  and submitted a contradiction report per the task's final
+  paragraph. `git status --porcelain` after the run: EMPTY — no byte
+  reached disk (`textedit_writes` 0).
+- **Diagnosis (from the transcript, `benchmark_logs/s48_t1_run1.log`):
+  all three failures are artifacts of the run's own verification
+  code, not of the edit.** The run assembled multi-line expectation
+  strings and concatenated `lines()` text WITHOUT line terminators,
+  so every multi-line substring assertion (`editroot_block_unchanged`,
+  `rlmBackend_between_textedit_and_scratch`, `stub_header_intact`)
+  read False while every single-line assertion (the four schema
+  lines, the ambient-guard message, the budget line) read True. The
+  SAME verification cell printed the actual regions, and they match
+  the spec: the four keys with house comments after the budget
+  block, the ambient guard + three cross-field refusals + the
+  resolved local after the editRoot block, the `rlmBackend` block
+  between `textedit` and `scratch`, the stub header intact with the
+  vitest import as the first authored line. The run's own report
+  even names the mechanism ("without line terminators preserved").
+- **What worked as designed:** two live `AnchorMismatchError`
+  refusals caught address-shift after earlier staged inserts (the
+  run re-located and retried — the Session 41 teaching-refusal loop,
+  observed twice); verify-then-write held (failed verification means
+  nothing was written); the contradiction rule was followed to the
+  letter. The failure class is run-internal verification string
+  assembly — closed by task discipline, not by any machinery change.
+- **Task text v2 (the recorded contingency's input) = v1 with two
+  deltas, verbatim:** (1) appended to step 4: frame lines on this
+  CRLF file carry a trailing `"\r"` — include it in every anchor;
+  line addresses SHIFT after every staged insert — re-locate before
+  EACH insert; an `AnchorMismatchError` stages nothing — re-locate
+  and retry. (2) step 6 gains the ASSERTION DISCIPLINE paragraph:
+  multi-line regions are compared as LISTS of consecutive line texts
+  (or joined with `"\n"`), never as terminator-less concatenations;
+  and a new step 7: an assertion printing false with the printed
+  region showing the intended content means fix the ASSERTION and
+  re-verify in a new iteration — only a genuine content mismatch in
+  the printed region itself means stop, revert, and report (the
+  run-1 false-abort class). Old steps 7/8 renumber to 8/9 (which
+  also fixes v1's step-2 forward reference to "step 8").
+- **Budget state:** $0.8760 of the ≤$1.80 approved total spent; the
+  contingency run must land inside the remaining $0.9240 or the
+  increment records a FAILED verdict with no third run.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).
