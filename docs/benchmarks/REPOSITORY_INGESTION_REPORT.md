@@ -1221,7 +1221,7 @@ or a line comment for the file's language.
   edit touching them flags conservatively (a false FLAG a human can
   overrule, never a false pass). The gate is a post-run mechanical
   check in the parse-gate mold (guardrail 5), never a write gate.
-- **Pins:** 14 unit tests in `check.test.ts` — the reference
+- **Pins:** 13 unit tests in `check.test.ts` — the reference
   violation is the EXACT preserved run-2 failed diff reproduced
   inline (its removed executable line fires the finding exactly once;
   its added side, all comments, stays silent) — plus drill section
@@ -1391,6 +1391,76 @@ instead.
   flag means the increment FAILED — record and stop, no silent
   retry. A third consecutive increment failure STOPS the ladder and
   puts the three-failure record to the owner.
+
+### 5g.4 The measured run (Session 39, July 13, 2026 — LANDED, all five criterion items, first shot)
+
+- **The run ($0.347 computed from tokens — 110,447 in / 7,089 out at
+  the gpt-5.4 rates; inside the $0.15–$0.45 band; 9 db tool calls;
+  32 textedit ops / 1 write_back; 1 retrieval fetch — the two-hash
+  `get_ast_texts` batch — 1 dedup refusal observed live / 0 budget
+  refusals; `answer_submits` 1; 79.6s execution).** The evidence
+  chain ran exactly as §5g.2 predicted: the two undirected ACTION
+  edges → both hashes fetched in one batch → the citation audit
+  shows `read` = both, `cited` = the wiring block ONLY (the tools.py
+  hash fetched and correctly NOT cited — the run-1 trap re-tested
+  and passed); the gated write MERGEd onto the standing edge with an
+  unchanged provenance union. The run followed the v3 discipline
+  observably: locate on both telemetry sites (author 351 / research
+  578) plus the constructor seam (437), a minimal-span splice
+  replacing exactly the two stale comment lines with three comment
+  lines, and the neighbor-preservation iteration printing all four
+  assertions (executable line present, `# Session 33` head present,
+  stale sentence gone, author-mode region untouched) BEFORE the
+  separate submit iteration. One transient run-authored REPL
+  `ValueError` (a tuple-unpack in its own inspection code) was
+  recovered in the next iteration — no tool or gate involvement.
+- **Mechanical verdict:** `stage2:check --edit-root . --named-file
+  src/rlm/trellis_agent.py --comment-class src/rlm/trellis_agent.py
+  --subject trellis_agent --verb wires --object
+  get_retrieved_addresses` → **PASS: zero findings** across all four
+  layers (scope, evidence, parse gate, comment-class gate).
+- **Human `git diff` review: ACCEPTED.** One hunk at the research
+  telemetry site; removed 2 comment lines / added 3 comment lines;
+  the executable `retrieved_addresses` line and the `# Session 33`
+  head are untouched CONTEXT lines this time (run 2 deleted them);
+  the author-mode twin region is byte-identical. Offline gates green
+  with the diff applied (`npm test` 836/85, build, python:check).
+  One recorded observation: `write_back` wrote the three new lines
+  with LF endings into the otherwise-CRLF file (641 CRLF / 3 LF on
+  disk) — git normalizes on commit; the Session 36 mixed-EOL commit
+  class, recorded, not a defect.
+- **Criterion verdict: items 1–5 ALL PASS. Increment 2 CLOSED by the
+  retry; no contingency needed.** The ladder record now reads:
+  increment 1 landed on contingency; increment 2 failed twice
+  (Session 37), each failure class was closed by tooling shape (the
+  parse gate; the comment-class gate) or task discipline
+  (minimal-span + neighbor assertions), and the retry landed first
+  shot.
+- **The split-scope refresh (§5d.6 cadence under the §10.4 recipe;
+  $0.157 actual — 34,756 in / 6,936 out / 13,148 embedding tokens
+  from the fresh worker instance's metrics):** plan echoes FIRST for
+  both scopes (policy-1 bound 76 blocks / 12 files; policy-2 bound
+  24 blocks / 1 file; ZERO tombstones in both — carry-forward
+  correct in both directions). Snapshot `trellis#7` (policy 1,
+  everything except `src/rlm`): 12 files ingested — this session's
+  four harness files plus the Session 38 machinery files re-hashed
+  whole (the checkout-EOL churn class, third observation). Snapshot
+  `trellis#8` (policy 2, `src/rlm`): exactly `trellis_agent.py` v3,
+  Merkle-precise churn — 23 blocks RETAINED / 3 orphaned / 3 added,
+  2 extraction jobs. Pipeline: **59/59 jobs, zero failures**; 13
+  invalidation sweeps contested 63 nodes / 30 relationships (audit
+  preserved; standard lazy recovery — the agent.py v3 sweep alone:
+  5 nodes / 3 relationships from the superseded telemetry block's
+  derivations). **Churn verification:** the old stale-comment block
+  `ab87725e…f883` is DEAD in v3; the wiring block `9b4c3159…6a730`
+  was RETAINED (the edit never touched its statement run), so ALL
+  THREE standing beliefs (`wires` / `consumes` / `returns_copy_of`)
+  read uncontested with live provenance and NO recovery was needed
+  this time — the first refresh where the standing insights rode
+  through on retained blocks alone.
+- **Session paid total: $0.504** (run $0.347 + refresh $0.157),
+  against the proposal's ≤$0.90 run budget + separately-gated
+  refresh.
 
 ## 6. Verification summary
 

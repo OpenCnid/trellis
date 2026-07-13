@@ -3994,3 +3994,109 @@ paid spend.
    (Trellis-on-Trellis: full-repo extraction + graph-informed
    self-edits — the owner-approved step 4 of 4) with Session 28
    compressed into the digest.
+
+### July 13, 2026 — Session 34: Trellis-on-Trellis stage 1 — the scoped-snapshot machinery + the full code-substrate extraction run (§4 row 11 stage 1)
+
+The scaling flywheel's substrate step: Trellis's own code is now a
+queryable semantic graph with content-addressed provenance, durable in
+the dev stack. Two zero-paid implementation commits, the design
+record, then the owner-approved run (approval given up front this
+session), then the measured close-out.
+
+1. **The cost problem that forced machinery.** The zero-paid full-repo
+   dry run priced 4,575 post-exclusion blocks ≈ $12.35 at the §5b
+   measured rate — over the standing ≤$5/run cap — and the budget gate
+   is all-or-nothing (`ExtractionBudgetExceededError` rejects the
+   whole snapshot before any row). Scope selection under ONE durable
+   repo key became required machinery, not convenience.
+2. **Scoped snapshots (`--include <prefix>`, repeatable;
+   `SnapshotOptions.includePrefixes`).** Segment-boundary prefix
+   match; doc keys stay root-relative so scoped and full runs agree on
+   identity. Out-of-scope previously effective paths CARRY FORWARD at
+   their previous root hash (published outcome `unchanged`, never
+   read, never parsed, never tombstoned — deletion decisions belong to
+   runs whose scope covers the path; a later covering run picks up
+   deferred paths as ordinary changed-mode ingests). Out-of-scope
+   paths with no prior version are typed `out_of_scope` skips (never
+   parsed, so parse-level reasons cannot apply — drilled). Invalid
+   prefixes refuse before any I/O; unset scope is byte-identical,
+   pinned by plan equality. Plan echo prints `scope:` and
+   `carried forward:` before any confirmation. Pins:
+   `snapshot_ingest.test.ts` 17 → 24; `test:repo-ingest` 56 → 82
+   (Part 7: carry-forward of an EDITED out-of-scope file at its
+   pre-edit hash, deferred pickup by a covering run, in-scope deletion
+   still tombstoning under scope, CLI round trip, invalid-prefix
+   refusal).
+3. **The stage-1 decisions, recorded BEFORE the run**
+   (`REPOSITORY_INGESTION_REPORT.md` §5d): repo key `trellis` at the
+   repository root; scope `src`+`scripts`+`modules` (printed bound
+   1,423 blocks; 112 files / 498 blocks `test_fixture_excluded`);
+   `docs/` + root prose DEFERRED to their own chunked proposal (~2,900
+   blocks ≈ $7.8, prose-prompt value unmeasured); `data/` EXCLUDED by
+   decision (measurement corpora are object text — extracting a novel
+   would pour its characters into the self-substrate); durability = the
+   residue persists, no tombstone cleanup, `repo:trellis:*` joins the
+   durable list beside the probe corpora; estimate $2.4–$3.84; the
+   five-part quality criterion pre-stated (§5d.3).
+4. **The run (owner-approved, July 13, 2026).** Stale-consumer check
+   first (none found; the July 12 precedent), fresh `dev:workers`
+   instance, then
+   `repo:ingest --repo-key trellis --root . --include src --include
+   scripts --include modules --extract changed --max-blocks 1450
+   --confirm-extraction`. Snapshot `trellis#1`: 298 ingested, 1,921
+   eligible, 1,423 queued (the printed bound exactly), 498 excluded.
+   Pipeline: **1,423/1,423 jobs, zero failures, 53m42s** (serial
+   worker, ~26 jobs/min); 22 unresolved endpoints via the name
+   pass-through; 9 merge-dropped actions (counted, logged — the
+   observed base rate at scale, ~0.6%). Spend (fresh-instance worker
+   metrics, exact): 892,363 input / 325,335 output completion tokens +
+   388,944 embedding tokens — **≈ $2.75** at the basis that reproduces
+   §5b's $0.28 (estimate band $2.4–$3.84; ceiling held). Criterion:
+   ALL FIVE PASS — exclusion math exact (1,921 − 498 = 1,423);
+   suppression 22 entities + 28 actions with ZERO denylist names
+   carrying stage-1 provenance (query-verified); max hub `ast_nodes`
+   at 29 distinct stage-1 sources = 2.04% of queued (bar ≤ 8%; top 15
+   all genuine API-level identifiers, distribution published);
+   `write_derived_insight`/`parsellmresponse`/`get_ast_blocks`/
+   `trellis_answer` all resolve with provenance threading back to real
+   `ast_nodes` bytes (fetched and checked, not just counted). Graph:
+   1,995 entities / 1,788 ACTION relationships carry stage-1
+   provenance (dev totals 2,613 / 2,366). Residual observations
+   recorded, not acted on: `main` at 28 sources is the cross-file
+   function-name class (first observed count for a future denylist
+   review; a genuine identifier, so it stands as data); worker
+   concurrency is a future reviewed kernel change if refresh latency
+   ever matters (concurrent same-name merges are undrilled).
+5. **Stage-2 seam observations recorded, nothing implemented**
+   (§5d.5): dependency queries against real callers work today; the
+   graph-to-textedit bridge is Cypher + existing surfaces (provenance
+   hash → `document_nodes` → `repo:trellis:<path>` → `load`); entity
+   names are lowercase-normalized so identifier lookups need
+   `globalEntityId`'s normalization; substrate freshness is the
+   ordinary churn loop.
+6. **Acceptance (all green; commands per HANDOFF §6).** Offline:
+   `npm test` 750 passing across 80 files (743 baseline + 7 scope
+   pins), `npm run build`, `npm run python:check`,
+   `docker compose config --quiet` + `--profile test config --quiet`.
+   Live zero-paid: `test:answer-channel` 32, `test:textedit` 105,
+   `test:module-lifecycle` 60, `test:modules` green (both prompt pins
+   unmoved — no prompt byte this session), `test:promotion` 41,
+   `test:rlm-workspace` 106, `test:rlm-mcp` 86, `test:rlm-sandbox` 95,
+   `test:verification-sweep` 66, `test:agent-loop` 35,
+   `test:a2a` 46, `test:repo-ingest` 82 (was 56),
+   `test:benchmark-hardening` 24, `test:entity-resolution` 34,
+   `test:api-hardening` 18, `test:belief-recovery` 30,
+   `test:invalidation-sweep` 17. `drill:scale` run ALONE after the
+   drain: 1.53x CLOSED (in-band ~1.48x–2.26x; max provenance 286 —
+   the stage-1 substrate does not move the gate; results file
+   committed per house practice). Isolated Compose integration as
+   project `trellis_s34_ci` (host ports 0): 11/11.
+   `git diff --check` clean. Defects found this session: NONE in
+   existing code (two drill-expectation arithmetic errors during
+   Part 7 authoring were fixed before commit and are recorded here
+   for honesty).
+7. **Documentation window (owner rule).** The Session 29 §5 entry
+   moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the live
+   ledger keeps the most recent five sessions: 30–34); HANDOFF
+   regenerated for row 11 stage 2 with Session 29 compressed into the
+   digest.
