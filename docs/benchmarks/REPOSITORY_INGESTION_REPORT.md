@@ -564,6 +564,202 @@ re-run of the $2.75 baseline.
   re-embedding pass, not a rearchitecture. Third-party pricing is an
   economics input, not a structural dependency.
 
+## 5e. Stage 2, increment 1: the graph-informed self-edit (design record, Session 35, July 13, 2026)
+
+Recorded BEFORE any harness code or run, per the house document-first
+pattern. This section operationalizes the §5d.5 seam observations as
+the first stage-2 increment: one bounded task in which an edit run
+must consult the stage-1 substrate about the code it is editing. The
+increment demonstrates the NEW loop (query → read cited bytes → edit)
+at LOW edit risk; it does not deepen edit risk. Cross-referenced from
+the roadmap §5 Session 35 entry.
+
+### 5e.1 The target (found by inspection, verified against the live substrate)
+
+`src/rlm/trellis_tools.py` carries two stale statements, both written
+in Session 30 (slice (b)) and both falsified by Session 31 (slice (d)):
+
+1. The module-level comment above `_retrieved_addresses` claims
+   "slice (d) will constrain citable addresses to this set on every
+   run. Bookkeeping only today — no write-path behavior reads it
+   yet."
+2. The `get_retrieved_addresses` docstring ends "Slice (d)'s future
+   input."
+
+Both are false today: `_verify_hashes_retrieved` consumes the set on
+every gated write, wired through the `retrieved_addresses_check`
+constructor seam (`trellis_agent.py` research runs). This is exactly
+the HANDOFF §3 example shape — a stale cross-reference comment that
+misstates a dependency — and the correction is comment/docstring-only:
+zero executable lines change, so edit risk is minimal while the edit
+content still DEPENDS on graph-verified facts.
+
+Live-substrate evidence observed while selecting the target (recorded
+here; the drill re-proves the same bridge on a hermetic fixture):
+
+- Entity `get_retrieved_addresses` exists in the dev graph with one
+  ACTION edge (`verb: returns_copy_of` → `_retrieved_addresses`)
+  whose provenance hash `1f594ea9…ca61` bridges through
+  `document_nodes` → `documents` to
+  `repo:trellis:src/rlm/trellis_tools.py` (version 1, current), and
+  the stored block bytes are the `get_retrieved_addresses` function
+  INCLUDING the stale docstring.
+- The consumer blocks are in the substrate too:
+  `667501…dc3e` (`_verify_hashes_retrieved`) and `faefe76e…6ace`
+  (`_run_insight_writes`, the caller). No graph entity for
+  `_verify_hashes_retrieved` exists yet — the run's recorded insight
+  fills a real gap.
+
+### 5e.2 The named failure mode and how the harness detects it
+
+**Graph-misdirected editing:** the run touches a file the graph
+evidence did not name, or edits on the basis of contested
+(quarantined) beliefs. Detection is post-run and mechanical:
+
+1. **Scope:** `git status --porcelain` under the edit root must show
+   exactly the named file (`src/rlm/trellis_tools.py`) modified —
+   any extra path is `out_of_scope_edit`, a missing named file is
+   `named_file_unchanged`. (The harness runs read-only `git status`;
+   the toolkit itself never touches git — Session 26 precedent.)
+2. **Evidence:** the run must record exactly one derived insight
+   (subject `_verify_hashes_retrieved`, verb `consumes`, object
+   `get_retrieved_addresses`) citing the blocks it fetched. The
+   Session 31 write gate makes this trail mechanical: a hash that was
+   never retrieved in-run cannot be cited, so a successful write IS
+   proof the graph/store was consulted. The checker then verifies:
+   the edge exists and is uncontested, both endpoints are
+   uncontested, every cited hash exists in `ast_nodes` AND is a
+   member of the CURRENT version of a document whose key bridges
+   (doc-key prefix `repo:trellis:`) to a named file. Violations:
+   `evidence_edge_missing`, `empty_evidence`, `contested_evidence`,
+   `dead_evidence_hash`, `unbridged_evidence`.
+3. **Pre-check (refresh-before-use spirit):** before the run, the
+   harness verifies the target entity exists and is uncontested, its
+   ACTION edges are uncontested, and the named file's substrate
+   document is present — an edit premised on quarantined beliefs is
+   refused before any spend.
+
+HONEST SCOPE: the checker proves the RECORDED evidence chain (which
+the write gate enforces mechanically) and the diff scope. It does not
+prove every byte the run read, and it does not prove the graph query
+temporally preceded the edit — the run transcript (plus the opt-in
+`TRELLIS_CITATION_AUDIT=1` line, set in the run's own environment per
+the A/B-eval precedent) carries that, and the human review reads it.
+
+### 5e.3 The harness machinery (zero-paid, this session)
+
+- `src/benchmarks/selfedit/check.ts` — pure: porcelain parsing, scope
+  evaluation, evidence evaluation, pre-check evaluation; typed
+  findings; unit-pinned in `check.test.ts`.
+- `scripts/stage2_selfedit_check.ts` — the operator CLI
+  (`--pre` / post-run modes): gathers git status (read-only), the
+  Neo4j edge/contested state, and the PG hash-liveness/doc-key
+  bridge, then evaluates. Non-empty findings exit 1.
+- `scripts/test_selfedit_harness.ts` + `test_selfedit_rehearsal.py`
+  (`npm run test:selfedit-harness`) — the live zero-LLM drill:
+  a token-scoped hermetic fixture (documents/document_nodes/ast_nodes
+  rows + planted DERIVED_INSIGHT edges) proves the bridge query and
+  every detection code fires (planted out-of-scope edit FLAGGED,
+  planted contested/dead/unbridged evidence FLAGGED); the Python
+  rehearsal drives the run's REAL tool sequence — `run_cypher` →
+  `get_ast_texts` → `trellis_textedit` load/locate/splice/write_back
+  → the retrieval-gated `write_derived_insight` — against the fixture
+  in a scratch git repo, in a clean arm (checker passes) and a
+  violation arm (unretrieved citation refused by the live gate;
+  out-of-scope edit flagged by the checker). A live-substrate smoke
+  (read-only) confirms the bridge against `repo:trellis:*` when the
+  substrate is present and prints SKIP when it is not.
+
+### 5e.4 The run proposal (owner-gated; NOT run this session unless approved)
+
+- **Edit root:** the session branch checkout (the worktree that ships
+  this PR) — the human `git diff` review is then the ordinary PR
+  review. `TRELLIS_EDIT_ROOT` set in the spawn environment only.
+- **Spawn (Session 26 mechanics):** `trellis_agent.py` spawned
+  directly, research mode, `--max-iterations 12`, env: `NEO4J_*`,
+  `PG_DSN`, `PYTHONPATH`, `TRELLIS_EDIT_ROOT=<checkout>`,
+  `TRELLIS_CITATION_AUDIT=1` (observation), `OPENAI_API_KEY`.
+- **The task text (the run INPUT, verbatim — never a kernel prompt
+  byte; both composed-prompt pins stay unmoved):**
+
+```
+Stage-2 self-edit task (increment 1).
+
+The file src/rlm/trellis_tools.py contains two stale statements
+written before Session 31:
+(1) the module-level comment above the _retrieved_addresses set
+    claims "slice (d) will constrain citable addresses to this set
+    on every run. Bookkeeping only today - no write-path behavior
+    reads it yet."
+(2) the get_retrieved_addresses docstring ends "Slice (d)'s future
+    input."
+
+Verify against the knowledge graph and the stored source bytes what
+actually consumes the retrieved-address set today, then correct BOTH
+stale statements so they accurately name the consumer.
+
+1. Resolve the graph entity named 'get_retrieved_addresses' (entity
+   names are lowercase-normalized) with trellis_neo4j.run_cypher;
+   list its ACTION edges and their sourceNodeIds provenance hashes.
+2. Fetch those provenance blocks with trellis_postgres.get_ast_texts
+   and read them.
+3. Find the write-path consumer with trellis_postgres.vector_search
+   (for example 'retrieval membership write gate cited hashes') and
+   fetch the blocks defining _verify_hashes_retrieved and its
+   wiring; confirm from the fetched bytes that the write path
+   consumes the set through the retrieved_addresses_check
+   constructor seam.
+4. Edit ONLY src/rlm/trellis_tools.py through trellis_textedit
+   (load, locate, splice, diff, write_back): correct the two stale
+   statements to say slice (d) is live - the write gate
+   _verify_hashes_retrieved consumes this set through the
+   retrieved_addresses_check seam on research runs; bare
+   construction is unaffected. Keep both hunks
+   comment/docstring-only; change no executable line; preserve the
+   surrounding sentences that are still true (the
+   NOT-experiment-gated statement and the telemetry sentence).
+5. Record exactly one derived insight:
+   trellis_neo4j.write_derived_insight(
+     subject='_verify_hashes_retrieved', verb='consumes',
+     obj='get_retrieved_addresses',
+     sourceNodeIds=[the hashes of the blocks you fetched that show
+     this]).
+6. Submit a short report via trellis_answer.submit describing what
+   the graph said, what the bytes confirmed, and what you changed.
+
+Edit no other file. If the graph or the fetched bytes contradict the
+task premise, stop, make no edit, and report the contradiction
+instead.
+```
+
+- **The pre-scoped edit (semantic acceptance for the diff):** exactly
+  two hunks in `src/rlm/trellis_tools.py`, both comment/docstring
+  bytes only. Hunk A (the module comment): keeps the
+  NOT-experiment-gated statement and the telemetry sentence, and
+  replaces the "will constrain … no write-path behavior reads it
+  yet" claim with the live fact — slice (d) landed (Session 31);
+  `_verify_hashes_retrieved` refuses citations outside this set,
+  wired via the `retrieved_addresses_check` constructor seam on
+  research runs; bare construction unaffected. Hunk B (the
+  docstring): "Slice (d)'s future input." becomes the live-input
+  statement naming the consuming gate. Exact wording is the run's;
+  the human review judges it against the fetched bytes.
+- **Estimate:** W-series basis (W1 ≈$0.06, W2 ≈$0.18, W3 ≈$0.06 per
+  run; this task is W2-complexity plus a vector_search and a gated
+  write): **$0.15–$0.45 for one run; propose one run plus at most
+  one contingency re-run after a diagnosed clean failure — ≤$0.90
+  total**, well under the ≤$5/run cap. Actuals recorded in the
+  roadmap regardless of outcome.
+- **Acceptance criterion (pre-stated; also in the roadmap entry):**
+  (1) scope: exactly the named file changed; (2) the diff implements
+  the pre-scoped edit and lands only after human `git diff` review;
+  (3) the checker reports ZERO findings (evidence edge present,
+  uncontested, live, bridged to the named file); (4) counts and the
+  diff reported TOGETHER — db tool calls, retrieval-discipline
+  counts, textedit ops, `answer_submits`, actual dollars vs the
+  estimate; (5) a harness flag means the increment FAILED — record
+  it and stop, no silent retry.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).
