@@ -8,17 +8,17 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–28 and their same-day follow-ons (July 4–11, 2026; PRs
-#21–#68) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–29 and their same-day follow-ons (July 4–12, 2026; PRs
+#21–#71) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — Session 24
 with the Session 29 PR, Session 25 with the Session 30 PR, Session 26
 with the Session 31 PR, Session 27 with the Session 32 PR, Session 28
-with the Session 33 PR — this file keeps full narrative only for the
-most recent five sessions). The one-paragraph digest, oldest first; §1
-below carries everything from this span that a new session must
-actually know:
+with the Session 33 PR, Session 29 with the Session 34 PR — this file
+keeps full narrative only for the most recent five sessions). The
+one-paragraph digest, oldest first; §1 below carries everything from
+this span that a new session must actually know:
 
 - **Sessions 1–8 + T-items** built the substrate: verified ingest
   (persist → read-back re-hash → membership → Merkle diff), the
@@ -117,51 +117,19 @@ actually know:
   50 runs answered through `trellis_answer` (230/230 cumulative, zero
   transcription errors).
 
-**Session 29 (July 12, 2026, PR #71) is also complete: self-editing
-toolkit coverage hardening** (roadmap §4 row 8 — the July 11 coverage
-audit's recorded priority items, all zero-paid, three commits).
-**(1) CI wiring (audit #7):** `.github/workflows/ci.yml`'s `offline`
-job now runs `npm run test:textedit` directly after the
-Python-runtime install step — the toolkit drill is
-regression-detected. **(2) `write_back` hardening (audit #2/#3/#4;
-kernel change, witting, its own commit; the contract UNMOVED:
-`StaleFileError` semantics, temp + rename atomicity, the Session 26
-splice semantics, `TEXTEDIT_ADDENDUM` bytes, and BOTH composed-prompt
-pins untouched):** (a) write-time containment re-verification — the
-load-time `_resolve` re-run against the CURRENT filesystem (never a
-second implementation): a parent symlink swapped in after load
-refuses at write time, and a path that resolves DIFFERENTLY than at
-load refuses as stale even on identical bytes (the in-root swap the
-digest guard alone cannot see); (b) source-mode preservation onto the
-replacement inode (`stat.S_IMODE` + `os.chmod` on the 0600 mkstemp
-temp — the executable bit on a script or hook survives edits; Windows
-mode bits are a harmless no-op); (c) the NARROWED TOCTOU window — a
-final digest re-check immediately before `os.replace`, so a second
-writer landing while the temp file was being built is DETECTED
-(StaleFileError, temp unlinked, disk untouched) instead of silently
-overwritten. Honest residual, documented in the docstring and pillar
-§6 item 1, never claimed closed: the race between the final re-hash
-and the replace remains — full elimination needs OS file locking,
-deliberately out of scope. **(3) The drill grew 82 → 105 checks
-(Windows host; 106 on POSIX, where the executable-bit check also
-runs):** section [11] pins each hardening behavior, including
-deterministic second-writer detection (a wrapped `mkstemp` lands the
-mutation inside the narrowed window) and no-orphaned-temp-on-refusal
-(the refusal-path half of audit #10); section [12] pins multi-file
-partial failure as INTENTIONAL per-file independence in both orders
-(audit #5); section [13] adds one adversarial check per previously
-untested guard branch (audit #6: boolean line/splice indexes, a
-boolean constructor bound, non-string pattern/path/new_lines-element,
-reload-discards-staging — each fails if its branch is deleted) plus
-the audit-#8 static pin: the toolkit's imports must stay inside an
-exact stdlib allowlist and its source must carry no git or subprocess
-token. Audit disposition: #2 narrowed + documented, #3–#8 closed,
-#10 half-closed, #9 stands on the Session 26 W4 live refusal, #1
-(the cross-process proof run) stays owner-gated propose-with-estimate.
-No defect found in existing code — every pre-existing guard held
-under the new adversarial checks. `drill:scale` read 1.97x CLOSED
-(in-band, no re-run needed). Compose isolated as `trellis_s29_ci`:
-11/11, all layers cached. Zero paid spend.
+- **Session 29 (PR #71)** hardened the editing toolkit inside its
+  unchanged contract, all zero-paid: CI's `offline` job now runs the
+  textedit drill; `write_back` gained write-time containment
+  re-verification (the load-time `_resolve` re-run), the in-root
+  resolution-change refusal, source-mode preservation onto the
+  replacement inode, and the final pre-replace digest re-check that
+  NARROWS the TOCTOU window (residual documented in the docstring and
+  pillar §6 item 1, never claimed closed); the drill grew 82 → 105/106
+  checks (per-guard adversarial pins, multi-file per-file-independence
+  in both orders, the stdlib import-allowlist / no-git-token static
+  pin). Audit disposition: #2 narrowed + documented, #3–#8 closed,
+  #10 half-closed, #9 stands on the Session 26 W4 live refusal, #1
+  (cross-process proof run) stays owner-gated.
 
 **Session 30 (July 12, 2026, PR #72) is also complete: mechanical
 provenance threading — the design record + retrieval-set tracking**
@@ -442,20 +410,71 @@ a first attempt guessed `TRELLIS_PG_HOST_PORT`, collided with the dev
 stack on 5433, and failed at network setup; torn down and re-run
 clean. Zero paid spend.
 
+**Session 34 (July 13, 2026, this PR) is also complete:
+Trellis-on-Trellis stage 1 — the scoped-snapshot machinery + the full
+code-substrate extraction run; roadmap §4 row 11 stage 1 is STRUCK
+(stage 2 stays open).** Two zero-paid implementation commits, the
+design record, the owner-approved run (approval given up front), the
+measured close-out. **(1) The forcing problem:** the full-repo dry run
+priced 4,575 post-exclusion blocks ≈ $12.35 — over the ≤$5/run cap —
+and the budget gate is all-or-nothing, so scope selection under one
+durable repo key became required machinery. **(2) Scoped snapshots:**
+`repo:ingest --include <prefix>` (repeatable;
+`SnapshotOptions.includePrefixes`) — segment-boundary match, doc keys
+root-relative; out-of-scope previously effective paths CARRY FORWARD
+at their previous root hash (outcome `unchanged`, never read, never
+tombstoned — deletion decisions belong to covering runs; a later
+covering run picks up deferred paths as ordinary changed-mode
+ingests); out-of-scope paths with no prior version are typed
+`out_of_scope` skips (never parsed — parse-level reasons cannot
+apply); invalid prefixes refuse before I/O; unset scope byte-identical
+(plan-equality pinned). `snapshot_ingest.test.ts` 17 → 24;
+`test:repo-ingest` 56 → 82 (Part 7). **(3) The decisions, recorded
+before the run** (`REPOSITORY_INGESTION_REPORT.md` §5d): repo key
+`trellis` at the repo root; scope `src`+`scripts`+`modules` (bound
+1,423 blocks; 112 files / 498 blocks excluded); `docs/` + root prose
+DEFERRED to their own chunked proposal (~2,900 blocks ≈ $7.8); `data/`
+EXCLUDED by decision (measurement corpora are object text); the
+residue DURABLE (no tombstone cleanup — `repo:trellis:*` joins the
+durable list); five-part criterion pre-stated. **(4) The run:**
+stale-consumer check (none), fresh workers, snapshot `trellis#1` —
+298 ingested, 1,921 eligible, 1,423 queued (the printed bound
+exactly), 498 excluded; **1,423/1,423 jobs, zero failures, 53m42s**
+(serial worker ~26 jobs/min); 22 unresolved endpoints via
+pass-through; 9 merge-dropped actions (~0.6%, the observed base rate
+at scale); spend 892,363 in / 325,335 out / 388,944 embedding tokens
+≈ **$2.75 actual** (band $2.4–$3.84). ALL FIVE criteria PASS: max hub
+`ast_nodes` 29 = 2.04% of queued (bar ≤8%), zero denylist names
+(query-verified), named kernel surfaces
+(`trellis_neo4j.write_derived_insight`, `parsellmresponse`,
+`trellis_postgres.get_ast_blocks`, `trellis_answer.submit`) resolve
+with provenance threading back to real fetched bytes. Graph: 1,995
+entities / 1,788 ACTION relationships carry stage-1 provenance (dev
+totals 2,613 / 2,366). Residuals recorded, not acted on: `main` at 28
+sources (the cross-file function-name class — first observed count
+for a future denylist review; a genuine identifier, stands as data);
+serial-worker throughput (concurrency would need merge-safety pins —
+concurrent same-name merges are undrilled). **(5) Stage-2 seams
+recorded, nothing implemented** (§5d.5): dependency Cypher against
+real callers works today; graph→textedit bridge = provenance hash →
+`document_nodes` → `repo:trellis:<path>` → `load` (no new machinery);
+entity names are lowercase-normalized — identifier lookups need
+`globalEntityId`'s normalization; freshness = the ordinary churn
+loop. No prompt byte; both composed-prompt pins unmoved. Zero
+defects found in existing code.
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 34: Trellis-on-Trellis stage 1 — the
-full-repository extraction proposal, and on owner approval the run**
-(roadmap §4 row 11 stage 1 — the owner-approved July 12, 2026
-tooling-shape sequence, step 4 of 4; row 7 stays trigger-blocked),
-per §3–§6 below. The snapshot/plan machinery and any gap-closing pins
-are zero-paid; the extraction run itself is owner-gated
-propose-with-estimate at the CLI's printed post-exclusion block bound.
-Stage 2 (graph-informed self-edits) is a SEPARATE later increment —
-record seam observations in row-11 terms, implement nothing, unless
-the owner directs otherwise after stage 1 lands. Do not re-plan or
-re-implement completed work. RLM expands exclusively to Recursive
-Language Model (the MIT CSAIL formulation).
+Your objective is **Session 35: Trellis-on-Trellis stage 2, first
+increment — the graph-informed self-edit** (roadmap §4 row 11 stage 2
+— the owner-approved July 12, 2026 tooling-shape sequence's final
+standing row; row 7 stays trigger-blocked), per §3–§6 below. The
+harness and pins are zero-paid; the edit run itself is owner-gated
+propose-with-estimate (the W-series precedent: ≈$0.10–$0.50/run).
+Each increment is a single named failure mode with human `git diff`
+review before acceptance; the toolkit never touches git. Do not
+re-plan or re-implement completed work. RLM expands exclusively to
+Recursive Language Model (the MIT CSAIL formulation).
 
 ---
 
@@ -1001,11 +1020,27 @@ immutable, content-addressed physical location in source material.
      `node_modules/next/dist/docs/` before writing Next-specific code.
      NOT this session's work unless the owner directs it.
    - Whole-codebase ingestion: `src/core/repository/`, `npm run
-     repo:ingest`, live drill `npm run test:repo-ingest` (56 checks —
+     repo:ingest`, live drill `npm run test:repo-ingest` (82 checks —
      Part 6 exercises the Session 25 exclusion + routing under
-     `--extract changed` with the queue captured in memory). A
-     repository-scale `changed` run is DESIGNED-safe but still
-     owner-gated per run (row 11 stage 1).
+     `--extract changed` with the queue captured in memory; Part 7 the
+     Session 34 scope machinery). **Session 34 added scoped
+     snapshots:** the repeatable `--include <prefix>` CLI flag
+     (`SnapshotOptions.includePrefixes`) plans and ingests only paths
+     under an included prefix (segment-boundary match, doc keys stay
+     root-relative); a previously effective path OUTSIDE every prefix
+     CARRIES FORWARD at its previous root hash (published outcome
+     `unchanged`, never read, never tombstoned — deletion decisions
+     belong to runs whose scope covers the path; a later covering run
+     picks up deferred paths as ordinary changed-mode ingests); an
+     out-of-scope path with no prior version is a typed `out_of_scope`
+     skip (never parsed, so parse-level reasons cannot apply); invalid
+     prefixes refuse before I/O; unset scope is byte-identical
+     (plan-equality pinned). Extraction spend stays double-gated per
+     run. **The stage-1 self-substrate is LIVE (July 13, 2026):**
+     repo-key `trellis`, scope `src`+`scripts`+`modules`, doc keys
+     `repo:trellis:<path>` — durable, never drill-cleaned; refresh by
+     re-running the scoped snapshot (changed blocks re-extract, the
+     Merkle diff → sweep contests stale beliefs).
    - Benchmarks: OOLONG v1 saturated baseline; anti-shortcut v2 at
      `data/oolong_pairs_dataset_hard.json`; scale evidence in
      `docs/benchmarks/SCALE_PROVENANCE_REPORT.md` and
@@ -1030,14 +1065,14 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 13, 2026 Session 33 PR (row 10
-  machinery + pins — the PR that carries this file). Sessions 25–32
-  (PRs #63/#64/#67/#68/#71/#72/#73/#74), the wall-clock benchmark +
-  expansion series (PR #65), the coverage-audit record (PR #66), the
-  prompt-engineering pass (PR #69), and the root AGENTS.md (PR #70)
-  are all merged. Use `git log -- HANDOFF.md` to confirm this PR
-  landed; if it is still unmerged when this session starts, STOP and
-  merge it first.
+- `master`: the head after the July 13, 2026 Session 34 PR (stage-1
+  machinery + the measured run — the PR that carries this file).
+  Sessions 25–33 (PRs #63/#64/#67/#68/#71/#72/#73/#74/#75), the
+  wall-clock benchmark + expansion series (PR #65), the
+  coverage-audit record (PR #66), the prompt-engineering pass
+  (PR #69), and the root AGENTS.md (PR #70) are all merged. Use
+  `git log -- HANDOFF.md` to confirm this PR landed; if it is still
+  unmerged when this session starts, STOP and merge it first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); the dev
   graph carries its registered entity `module:workspace-discipline`
   (`moduleVersion` 2; manifest pins 31 research hashes; the entity's
@@ -1050,7 +1085,13 @@ Repository state at handoff creation:
   `f0ffaf20…7c23`, 827 blocks), `ledger:synthetic:house-01…40`, and
   the Session 23 relational set `ledger:synthetic:s2-house-001…100` +
   `registry:synthetic:captains` + `tariff:synthetic:port-schedule`
-  (roots and diffs stable — re-ingest is the auditable no-op) — ~320
+  (roots and diffs stable — re-ingest is the auditable no-op) — and,
+  since July 13, 2026, **the stage-1 self-substrate**: 298
+  `repo:trellis:<path>` documents (snapshot `trellis#1`, scope
+  `src`+`scripts`+`modules`) whose extraction produced 1,995 entities
+  / 1,788 ACTION relationships with stage-1 provenance (dev graph
+  totals 2,613 / 2,366). DURABLE — never drill-cleaned, never
+  tombstoned as cleanup; refresh = re-run the scoped snapshot. ~620
   documents total in `documents` (pilot residue tombstoned;
   pilot-provenance entities read contested — the standard
   lazy-recovery residue; the two promoted
@@ -1061,62 +1102,59 @@ Repository state at handoff creation:
   is RETIRED (manifest status `retired`, loader refuses composition;
   the graph entity `module:estimation-discipline` persists as the
   historical record, uncontested, 19 research hashes). Roadmap §4 rows
-  5/6/6a/8/9/10 are STRUCK; row 11 is next; row 7 stays
-  trigger-blocked.
-- Session 33 changed the Python kernel wittingly (`trellis_tools.py`:
-  the held-state module block, the disciplined `TrellisPostgres`
-  constructor + the three surface checks; `trellis_agent.py`: the
-  research-run wiring, the `TRELLIS_EXP_OMIT_RETRIEVAL` flag, the
-  telemetry fields) and NO prompt byte — both composed-prompt pins
-  unmoved (default `5d27e474…fe2a`, omit-arm `45987904…0b56` —
-  recompute BOTH in the same commit only if the kernel prompt or
-  rubric legitimately changes). New TS surface: the optional
-  `TRELLIS_RETRIEVAL_BUDGET_PER_RUN` config bound
-  (`src/config/index.ts`), `config.retrieval.budgetPerRun` forwarding
-  in `buildAgentEnv`/`rlm_worker.ts` (forward-when-set, strip
-  otherwise, unit-pinned), and the unconditional
-  `TRELLIS_EXP_OMIT_RETRIEVAL` deletion. `package.json` and
-  `requirements.txt` did NOT change — Docker layers all cached.
+  5/6/6a/8/9/10 and row 11 STAGE 1 are STRUCK; row 11 stage 2 is
+  next; row 7 stays trigger-blocked.
+- Session 34 changed NO Python kernel byte and NO prompt byte — both
+  composed-prompt pins unmoved (default `5d27e474…fe2a`, omit-arm
+  `45987904…0b56` — recompute BOTH in the same commit only if the
+  kernel prompt or rubric legitimately changes). Its TS surface:
+  `src/core/repository/snapshot_ingest.ts` (`includePrefixes`,
+  `normalizeScopePrefixes`, `isPathInScope`, `PlannedCarry`,
+  carry-forward publish + `carriedForward` counts), `scanner.ts`
+  (`out_of_scope` skip reason), and `scripts/ingest_repository.ts`
+  (`--include`, the scope/carried plan-echo lines). `package.json`
+  and `requirements.txt` did NOT change — Docker layers all cached.
   Reminder from Session 24: `block_parity.test.ts` SPAWNS the real
   Python walk inside plain `npm test` (interpreter from
   `PYTHON_EXECUTABLE` or the platform default) — a machine without
   Python on PATH will fail the unit suite; CI sets up Python 3.13
   before `npm test`.
-- Offline baseline: `npm test` = 743 passing across 80 files
-  (Session 33 added three `buildAgentEnv` pins in `rlm_job.test.ts`
-  over the 740/80 base).
+- Offline baseline: `npm test` = 750 passing across 80 files
+  (Session 34 added seven scope pins in `snapshot_ingest.test.ts`
+  over the 743/80 base).
 - `npm run build` and `npm run python:check` pass (the check imports
   polars — an environment without it fails the check by design).
 - `npm run drill:scale`: gate CLOSED at max provenance 286.
-  Session 33 read 1.94x CLOSED (in-band ~1.48x–2.26x, first try);
-  Session 32 2.04x; Session 31 2.09x; Session 30 1.89x; Session 29
-  1.97x; Session 28 first read 2.65x — OUTSIDE the band — and the
-  precedent re-run read 1.77x CLOSED (non-reproducing, most plausibly
-  same-day drill traffic on the shared dev database). If a future run
-  reads OPEN, re-run before believing it — and if it REPRODUCES, that
-  is the recorded migration trigger (roadmap §4 row 7) and the owner
-  adjudicates. The drill rewrites the tracked
-  `scale_drill_results.json` — commit it with the session PR (house
-  practice; the committed copy is Session 33's 1.94x CLOSED run). Run
-  the scale drill ALONE — never concurrently with other live drills
-  on the shared dev database (the Session 28 outlier's most plausible
-  cause).
-- Live zero-LLM checks (Session 33 observed, all green):
+  Session 34 read 1.53x CLOSED (in-band ~1.48x–2.26x, first try, run
+  ALONE after the extraction drain — the stage-1 substrate does not
+  move the gate); Session 33 1.94x; Session 32 2.04x; Session 31
+  2.09x; Session 30 1.89x; Session 29 1.97x; Session 28 first read
+  2.65x — OUTSIDE the band — and the precedent re-run read 1.77x
+  CLOSED (non-reproducing, most plausibly same-day drill traffic on
+  the shared dev database). If a future run reads OPEN, re-run before
+  believing it — and if it REPRODUCES, that is the recorded migration
+  trigger (roadmap §4 row 7) and the owner adjudicates. The drill
+  rewrites the tracked `scale_drill_results.json` — commit it with
+  the session PR (house practice; the committed copy is Session 34's
+  1.53x CLOSED run). Run the scale drill ALONE — never concurrently
+  with other live drills on the shared dev database (the Session 28
+  outlier's most plausible cause).
+- Live zero-LLM checks (Session 34 observed, all green):
   `test:answer-channel` (32), `test:modules` (green — pins unmoved),
   `test:textedit` (105 on this Windows host; 106 on POSIX — the
   executable-bit check is POSIX-only; also in CI),
   `test:module-lifecycle` (60), `test:promotion` (41),
   `test:rlm-workspace` (106), `test:rlm-mcp` (86),
-  `test:rlm-sandbox` (95 — was 53; section [7] is the retrieval
-  discipline), `test:verification-sweep` (66),
+  `test:rlm-sandbox` (95), `test:verification-sweep` (66),
   `test:agent-loop` (35 / ALL CHECKS PASSED), `test:a2a` (46),
-  `test:repo-ingest` (56), `test:benchmark-hardening` (24),
+  `test:repo-ingest` (82 — was 56; Part 7 is the Session 34 scope
+  machinery), `test:benchmark-hardening` (24),
   `test:entity-resolution` (34), `test:api-hardening` (18),
   `test:belief-recovery` (30), `test:invalidation-sweep` (17).
 - Isolated Compose integration: 11 assertions (`--profile test`,
   unique project name; includes the containerized credentialed MCP
   fixture probe and the in-container `polars 1.34.0` import probe).
-  Session 33 ran it as project `trellis_s33_ci` (all 11 PASS) and
+  Session 34 ran it as project `trellis_s34_ci` (all 11 PASS) and
   tore it down with `--volumes`. The isolation host-port variables
   are EXACTLY `TRELLIS_POSTGRES_HOST_PORT`,
   `TRELLIS_NEO4J_HTTP_HOST_PORT`, `TRELLIS_NEO4J_BOLT_HOST_PORT`,
@@ -1124,7 +1162,7 @@ Repository state at handoff creation:
   (Session 33's first attempt guessed `TRELLIS_PG_HOST_PORT`,
   collided with the dev stack on 5433, and failed at network setup —
   torn down and re-run clean). NOTE: the machine's C: drive runs
-  close to full (~19 GB free at Session 33's close) and a FULL image
+  close to full (~19 GB free at Session 34's close) and a FULL image
   rebuild needs several GB of headroom. Changing `package.json`
   invalidates the Docker `npm ci` layer; changing `requirements.txt`
   invalidates the pip layer.
@@ -1143,11 +1181,14 @@ Repository state at handoff creation:
   STATE the classification; options: a classification-aware judge
   prompt variant vs accepting conservative contests; owner-picked —
   the 9 heading-block flags in the same sweep were VERIFIED real weak
-  citations, so the detector's core class works as built); (3) the
-  next proof-run depth increment (the Session 29 mode-preservation
-  fix unblocks the executable-file case as a candidate); (4) the
-  pandas head-to-head probe round; (5) the cross-process concurrency
-  proof run (coverage-audit gap #1).
+  citations, so the detector's core class works as built); **(3) the
+  stage-1b prose chunk** (docs/ + root prose, ~2,900 blocks ≈ $7.8 at
+  the §5b rate — needs its own chunked proposal, two runs under the
+  cap, and a prose-prompt value question answered; recorded in
+  `REPOSITORY_INGESTION_REPORT.md` §5d.2); (4) the pandas
+  head-to-head probe round; (5) the cross-process concurrency proof
+  run (coverage-audit gap #1). The Session 35 stage-2 edit run is the
+  OBJECTIVE's own owner-gated step, not a conditional item.
 - CI target is Node 22 (the `offline` job also runs `test:textedit`
   after its Python-runtime install — Session 29). Session 33's local
   environment was Node 20.19.2, Python 3.13.1, Docker Compose v2,
@@ -1186,144 +1227,128 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 34 problem statement
+## 3. Session 35 problem statement
 
-**Trellis-on-Trellis stage 1: the full-repository extraction (roadmap
-§4 row 11 stage 1)** — the owner-approved scaling flywheel, step 4 of
-4 in the July 12, 2026 tooling-shape sequence. Trellis's own codebase
-becomes a queryable semantic substrate: entities and relationships
-extracted from the repository's source, threaded to content-addressed
-AST provenance, contestable by the ordinary sweep when the code
-changes. Stage 2 (self-edit depth increments that QUERY the graph
-about the code being edited) builds on that substrate LATER — it is
-not this session unless the owner directs it after stage 1 lands.
+**Trellis-on-Trellis stage 2, first increment: the graph-informed
+self-edit (roadmap §4 row 11 stage 2).** Stage 1 made the code a
+queryable substrate: 1,995 entities / 1,788 ACTION relationships with
+provenance threading to `repo:trellis:<path>` blocks. Stage 2 makes an
+edit run CONSULT that substrate about the code it is editing — the
+capability the whole sequence was built toward. The first increment
+must demonstrate the NEW loop (query -> read cited bytes -> edit) at
+LOW edit risk, not deepen edit risk itself.
 
-Everything stage 1 needs already exists and is drilled:
+What exists and is drilled:
 
-- **The ingestion machinery (Session 8):** `npm run repo:ingest`
-  (`scripts/ingest_repository.ts` over `src/core/repository/` —
-  scanner, manifest, `snapshot_ingest.ts`, snapshot store,
-  tombstones). Re-ingest of an unchanged file is the auditable no-op;
-  a changed file versions its document and the Merkle diff → the
-  invalidation sweep contests stale beliefs for free.
-- **The extraction double gate:** policy `none` is the default
-  everywhere; a `changed` run needs the explicit block budget
-  (`plan_ingest.ts`) AND `--confirm-extraction` at the CLI. The plan
-  echo prints the post-exclusion block bound BEFORE any spend.
-- **The Session 25 prerequisites, all live:** the kernel-fixed
-  test/fixture exclusion (`isTestOrFixturePath` forces policy `none`
-  with typed `test_fixture_excluded` file/block counts), additive
-  `sourceKind`/`language` payload routing to the code-tuned extraction
-  prompt (legacy prose bytes unit-pinned), and deterministic
-  generic-identifier suppression before resolution (counted, never
-  silent).
-- **The measured evidence:** the July 11 pilot re-run
-  (`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`) — 103/103 jobs,
-  $0.28 (≈$0.0027/block), max hub cardinality 3.5× lower than the
-  July 6 pilot. The pilot's scope was a subset root and its residue
-  was tombstoned + swept.
+- **The edit surface (Sessions 20/26/29):** `trellis_textedit`,
+  operator-gated by `TRELLIS_EDIT_ROOT`, hash-guarded write-back,
+  containment re-verification, 105/106-check drill in CI. The W-series
+  (PR #65) proved live source edits land through it (W1 the first RLM
+  source-code edit; W4 the adversarial containment probe held).
+- **The query surface (Sessions 1-33):** `trellis_neo4j.run_cypher`
+  (read-only), `trellis_postgres.get_ast_texts`/`get_ast_blocks`/
+  `vector_search` under retrieval discipline, the Session 31 write
+  gate for any DERIVED_INSIGHT the run records.
+- **The substrate bridge (measured in §5d.5 of the ingestion
+  report):** provenance hash -> `document_nodes` -> `documents.doc_key`
+  = `repo:trellis:<path>` -> `trellis_textedit.load(path)`. No new
+  machinery — Cypher plus existing surfaces.
+- **The run protocol (Session 26 precedents, all standing):** every
+  edit-run diff human-reviewed via `git diff`; the toolkit never
+  touches git; single named failure mode per increment; owner-gated
+  paid step (W-series ran ~$0.10/run).
 
-What stage 1 changes: SCOPE (the full repository, post-exclusion) and
-DURABILITY (the extraction results PERSIST as the substrate stage 2
-queries — the pilot's tombstone-and-sweep cleanup does NOT apply).
-The open decisions §4 requires the session to record before proposing:
-scope roots, durability consequences, and the quality-acceptance
-criterion. The paid run itself is owner-gated propose-with-estimate at
-the CLI's printed bound.
+The increment this session: ONE bounded task where the run must (a)
+resolve a named kernel surface in the graph (`globalEntityId`
+lowercase normalization — `parsellmresponse`, not `parseLlmResponse`),
+(b) walk its ACTION edges to find real dependents, (c) fetch the cited
+blocks and verify what the code actually does, and (d) apply one
+small, pre-scoped textual edit that depends on facts (a)-(c) (e.g.
+correcting a stale cross-reference comment that misstates a dependency
+— final task selection is this session's design work). The NAMED
+FAILURE MODE: **graph-misdirected editing** — the run touches a file
+the graph evidence did not name, or edits on the basis of contested
+(quarantined) beliefs. The harness must be able to detect both.
 
 ## 4. Required design
 
-- **Record the stage-1 decisions BEFORE proposing the run** (the
-  house document-first pattern — recommend a dated stage-1 section in
-  `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`, or a short
-  companion record if the decisions outgrow a report section). It
-  must decide and record, minimum: **scope** (which roots ingest with
-  `--extract changed` — src/, scripts/, docs/, modules/? the plan echo
-  prints the post-exclusion bound per scope; note `docs/` is prose —
-  the routing sends it to the LEGACY prose prompt by design);
-  **durability** (the extraction residue persists — record the
-  document-key scheme consequences, what re-ingest churn does to
-  beliefs via the Merkle-diff→sweep loop, and that the dev graph
-  becomes live self-substrate the drills must not casually mutate;
-  reconcile with the drill-hygiene rule that drills clean only
-  token-scoped state); **the quality-acceptance criterion, pre-stated**
-  (jobs completed/failed, `test_fixture_excluded` counts, suppression
-  counts, entity/edge totals, hub-cardinality distribution vs the
-  pilot's 3.5×-lower baseline — counts reported TOGETHER with
-  spot-check query results, never counts alone); and **the estimate**
-  (printed post-exclusion bound × the measured ≈$0.0027/block pilot
-  rate; if the full-repo estimate approaches the standing ≤$5/run cap,
-  propose chunked scope stages with the owner choosing).
-- **Zero-paid first, always:** run the snapshot + plan echo with the
-  zero-paid default to get the real printed bound for the chosen
-  scope; verify the exclusion and routing counts look sane against
-  `test:repo-ingest` expectations; only then write the proposal.
-- **On approval:** before any paid enqueue, check for stale queue
-  consumers from other worktrees (the July 12 precedent — a stale
-  pilot worker consumed the queue mid-run; on Windows kill worker
-  TREES by child PID, parent-only kill orphans the child). Run with
-  the double gate, watch the counts, and record actuals against the
-  estimate.
-- **After the run:** the report's stage-1 section gets the measured
-  numbers + spot-check queries (e.g. entities for a named kernel
-  function; provenance threading back to real block hashes;
-  `drill:scale` afterward READ-ONLY as usual — run it ALONE). Leave
-  the residue in place — that is the point.
-- **Stage-2 seams:** record observations in row-11 terms (what graph
-  queries a self-edit increment would ask; where the toolkit and the
-  graph meet) — implement NOTHING of stage 2.
-- **What does NOT change:** the Session 25 extraction invariants
-  (patterns, denylist, both prompts kernel-fixed); the verified-ingest
-  transaction; the sweep semantics; rows 9/10 machinery (the write
-  gate, the detector, the retrieval discipline — all ship as
-  recorded); every probe suite's question bytes; the four durable
-  corpora; both composed-prompt pins.
+- **Record the increment design BEFORE the run** (house
+  document-first pattern — a dated stage-2 section in
+  `docs/benchmarks/WALL_CLOCK_TEXT_OPS_REPORT.md` beside the W-series
+  it extends, or §5e of `REPOSITORY_INGESTION_REPORT.md`; pick one and
+  cross-reference). It must decide, minimum: the exact task text (a
+  run INPUT, never a kernel prompt byte — both composed-prompt pins
+  stay unmoved); the target surface and the pre-scoped edit; the edit
+  root (recommend a session-worktree checkout so the human `git diff`
+  review is natural); how the harness verifies the failure mode
+  (post-run: exactly the named file changed — `git status --short`;
+  the run's cited hashes all live and uncontested — a Cypher check);
+  and the estimate (W-series basis ~$0.10-0.50/run; propose 1-2 runs).
+- **Zero-paid first:** a stub/oracle rehearsal of the harness path
+  (spawn the agent in stub replay or drive the tool sequence directly
+  in a LocalREPL drill) proving the bridge queries work and the
+  detection checks fire on a planted violation (edit a file the graph
+  did not name -> the harness FLAGS it). The `test:rlm-sandbox` /
+  `test:textedit` molds apply; pins for any new helper.
+- **The paid run (owner-gated):** research-mode agent with BOTH
+  `TRELLIS_EDIT_ROOT` and DB tools live (retrieval discipline ON as
+  wired), the task text pointing at the substrate, `--max-iterations`
+  bounded. Record: tool-call counts, retrieval-discipline counts, the
+  diff, the graph evidence the run actually cited, dollars.
+- **Human review before acceptance:** the diff lands only by human
+  `git diff` review in the PR — the run itself NEVER commits.
+- **What does NOT change:** the stage-1 substrate (no tombstoning, no
+  re-extraction this session unless the edit lands and the owner wants
+  the refresh demonstrated); rows 9/10 machinery; the textedit
+  contract; the Session 25 extraction invariants; every probe suite's
+  question bytes; both composed-prompt pins.
 
 ## 5. File-level starting points
 
 Inspect before designing:
 
-- `scripts/ingest_repository.ts` + `src/core/repository/`
-  (`scanner.ts`, `manifest.ts`, `snapshot_ingest.ts`,
-  `snapshot_store.ts`, `paths.ts` — `isTestOrFixturePath` lives here)
-  — the CLI, the plan echo with the printed post-exclusion bound, the
-  typed exclusion counts, and the snapshot/tombstone machinery.
-- `src/core/ingestion/plan_ingest.ts` — the extraction policy double
-  gate and the hard block budget.
-- `src/workers/extraction_worker.ts` + `src/workers/extraction_job.ts`
-  — payload parsing (`parseExtractionJobData`), the code-tuned prompt
-  routing (`buildExtractionPrompt`), and the merge fence.
-- `src/core/graph/generic_suppression.ts` + `extraction_merge.ts` —
-  the suppression counts and the ON MATCH quarantine/recovery mirror
-  the stage-1 quality criterion reads from.
-- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` — the pilot
-  evidence base and the natural home of the stage-1 record.
-- `scripts/test_repo_ingest.ts` (`npm run test:repo-ingest`, 56
-  checks — Part 6 exercises exclusion + routing under `--extract
-  changed` with the queue captured in memory) — the drill mold for
-  any machinery gap stage 1 exposes.
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5d.5 — the seam
+  observations this increment operationalizes (dependency Cypher, the
+  hash->doc-key->load bridge, the lowercase-normalization gap).
+- `docs/benchmarks/WALL_CLOCK_TEXT_OPS_REPORT.md` — the W-series
+  protocol (task framing, containment probes, spend basis) stage 2
+  extends.
+- `src/rlm/trellis_agent.py` — research-run construction: where DB
+  tools, the workspace, and (when `TRELLIS_EDIT_ROOT` is set) the
+  textedit toolkit are injected together.
+- `src/rlm/trellis_textedit.py` + `scripts/test_textedit.ts` — the
+  edit surface and its drill mold.
+- `src/rlm/trellis_tools.py` — `run_cypher` (read-only), the three
+  retrieval surfaces, `get_retrieved_addresses` (the run's evidence
+  trail — the harness can read the citation audit to see what the run
+  actually consulted).
+- `src/core/graph/resolve_actions.ts` (`globalEntityId`) — the
+  normalization an identifier->entity lookup must reproduce.
+- `src/workers/rlm_job.ts` (`buildAgentEnv`) — how
+  `TRELLIS_EDIT_ROOT` + bounds reach a spawned run (operator env, not
+  payload).
+- `scripts/exp_effective_context.ts` — the paid-run driver mold
+  (arm env, telemetry scraping, repeats) if a driver script is wanted
+  rather than a hand-driven run.
 
 ## 6. Test strategy and acceptance
 
-Everything this session is zero-paid except the OWNER-GATED extraction
-run (propose with the printed bound and estimate; run only on
-approval).
+Everything zero-paid except the owner-gated edit run(s).
 
-- **Zero-paid:** the snapshot + plan echo over the chosen scope
-  (real printed bound, exclusion/routing counts); any machinery gap
-  found gets a `test:repo-ingest` extension in the existing mold
-  (counts reported before → after). If NO gap is found, no new
-  machinery — this session's deliverables are the recorded decisions,
-  the proposal, and (on approval) the measured run.
+- **Zero-paid:** the bridge drill (hash -> doc key -> load round trip
+  against the live substrate, read-only); the violation-detection
+  rehearsal (planted out-of-scope edit FLAGGED; planted
+  contested-belief citation FLAGGED); any new helper unit-pinned; the
+  full standing drill block stays green (the substrate coexists with
+  every drill — proven this session).
 - **The owner-gated run:** criterion pre-stated in the roadmap entry
-  before spending; actuals (jobs, counts, dollars) recorded against
-  the estimate; quality spot-checks reported WITH the counts.
-- The full standing drill block stays green; run `drill:scale` ALONE
-  (never concurrent with other live drills — the Session 28 outlier
-  precedent).
+  BEFORE spending: the named file and only the named file changed;
+  the diff implements the pre-scoped edit; the run's citation audit
+  shows the graph consulted BEFORE the edit; counts and the diff
+  reported together; actual dollars vs estimate.
+- Run `drill:scale` ALONE (never concurrent with other live drills).
 
-Required close-out (the standing block — `test:verification-sweep` is
-a permanent member since Session 32):
+Required close-out (the standing block — unchanged membership):
 
 ```
  npm test
@@ -1357,23 +1382,18 @@ a permanent member since Session 32):
 Update:
 
 - `TRELLIS_ROADMAP.md`: full-dated §5 entry with exact commands,
-  counts, and defects found; strike row 11 stage 1 only when the run
-  has RUN with actuals recorded (machinery-plus-proposal alone leaves
-  the row open with the proposal noted — stage 1 is a measured
-  deliverable, not a paper one); stage 2 stays unstruck either way.
+  counts, defects; row 11 stage 2's first increment recorded (the row
+  strikes only when the owner judges the increment ladder complete —
+  record progress, do not strike unilaterally).
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5 re-check.
-  NOTE for objective selection: if stage 1 RAN, the natural next
-  objective is the stage-2 first increment (owner-gated at its paid
-  step; single named failure mode; human `git diff` review; toolkit
-  never touches git) — but re-select against what the run revealed.
-  If stage 1 stands proposed-unapproved, the next session's objective
-  is whatever the owner directs (the standing owner-conditional items
-  in §2 are the menu; the row-10 (d) acceptance measurement is the
-  most shovel-ready). Row 7 stays trigger-blocked; prompt-module
-  authoring stays deprioritized permanently. Keep the narrative
-  window: full paragraphs for the most recent FIVE sessions only
-  (30–34 after this session) — compress the oldest into the digest
-  and move its roadmap §5 entry verbatim to
+  NOTE for objective selection: if the increment RAN and landed, the
+  natural next objective is the next depth increment OR the substrate
+  refresh demonstration (re-run the scoped snapshot after the landed
+  edit and show the churn loop contest/re-derive) — re-select against
+  what the run revealed. If it stands proposed-unapproved, the menu is
+  §2's standing owner-conditional items. Keep the five-session
+  narrative window (31-35 after this session): compress Session 30
+  into the digest and move its roadmap §5 entry verbatim to
   `docs/archive/ROADMAP_HISTORY.md`.
 
 ## 7. Guardrails
@@ -1440,7 +1460,14 @@ Update:
    retrieval set and held state never feeds, filters, or gates the
    Session 30/31 structures; the budget counts byte-returning fetches
    only; refusals are typed and bounded in the `Retrieval Discipline:`
-   shape). None of these is ever weakened or made configurable.
+   shape), and the Session 34 scope invariants (a scoped run NEVER
+   tombstones an out-of-scope path — carry-forward publishes the
+   previous root hash verbatim; deletion decisions belong to runs
+   whose scope covers the path; unset/empty scope is byte-identical
+   to full scope, plan-equality pinned; `out_of_scope` is a typed
+   counted skip; invalid prefixes refuse before I/O; doc keys stay
+   root-relative under every scope). None of these is ever weakened
+   or made configurable.
    `TRELLIS_EXP_OMIT_CMT`, `TRELLIS_EXP_MODULES`, and
    `TRELLIS_EXP_OMIT_RETRIEVAL` stay experiment-only: off by default,
    byte-identical unset (pinned), never set by any
@@ -1501,8 +1528,10 @@ Update:
     `ledger:synthetic:house-*`, and the relational
     `ledger:synthetic:s2-house-*`/`registry:synthetic:captains`/
     `tariff:synthetic:port-schedule`), the promoted research docs,
-    and — once stage 1 lands — the repository extraction substrate
-    stay durable.
+    and the stage-1 repository extraction substrate (`repo:trellis:*`
+    documents + their graph entities — LIVE since July 13, 2026) stay
+    durable. Never tombstone or sweep the stage-1 residue as if it
+    were drill state.
 13. Ship one feature branch and one PR to `master`, plain engineering
     prose, no AI attribution or generated-by trailers. Regenerate this
     file in the same PR — and re-run the §0 step 5 check before
@@ -1524,14 +1553,24 @@ Update:
 
 ## 8. Explicit exclusions
 
-Do not include: running the full-repository extraction, the row-10 (d)
-`est` acceptance measurement, or ANY paid run without explicit owner
-approval (all stand propose-with-estimate; the first entailment sweep
-RAN owner-approved July 13, 2026 — actuals in the Session 32 roadmap
-entry item 3; a SECOND sweep or a judge-calibration change is a new
-owner decision); starting row 11 stage 2 in any form (graph-informed
-self-edits — record seam observations in row-11 terms, implement
-nothing, unless the owner directs otherwise after stage 1 lands);
+Do not include: running the stage-2 edit run, the row-10 (d) `est`
+acceptance measurement, the stage-1b prose chunk (docs/ + root
+prose), or ANY paid run without explicit owner approval (all stand
+propose-with-estimate; the first entailment sweep RAN owner-approved
+July 13, 2026 — actuals in the Session 32 roadmap entry item 3; a
+SECOND sweep or a judge-calibration change is a new owner decision);
+letting the edit run or the toolkit touch git in any form (landing is
+a human-reviewed PR, always); committing an edit-run diff without
+human `git diff` review; widening the stage-2 increment beyond its
+single named failure mode mid-session; re-running the stage-1
+extraction or re-ingesting the substrate this session (the refresh
+demonstration is its own future increment; a scoped snapshot re-run
+without extraction budget is zero-paid but still churns beliefs —
+owner-visible, not a convenience); tombstoning or sweeping the
+stage-1 extraction residue as if it were drill state (durability is
+the point — permanent now that the run has run; guardrail 12);
+reworking the Session 34 scope machinery (carry-forward semantics,
+the `out_of_scope` skip, the plan echo lines ship as recorded);
 reworking rows 9 or 10 (the write gate, the detector, and the
 retrieval discipline ship as recorded — do not change their stamps,
 reasons, refusal bytes, identities, or wiring; do not wire the
@@ -1547,10 +1586,9 @@ recorded in `PROVENANCE_THREADING.md` §3 and pinned by
 owner visibility, not a convenience edit); weakening, reordering, or
 merging the three write-path layers (format → existence → retrieval
 membership — fixed order, fail-fast); widening the generic-identifier
-denylist or the test-fixture patterns without observed counts;
-tombstoning or sweeping the stage-1 extraction residue as if it were
-drill state (durability is the point — but ONLY once the owner-gated
-run has actually run); un-retiring module #2 or authoring ANY new
+denylist or the test-fixture patterns without observed counts (the
+`main`-at-28 observation is DATA for a future review, not a license
+to act); un-retiring module #2 or authoring ANY new
 protocol module (deprioritized permanently; explicit owner request
 only); re-running or extending the Session 28 control or ANY measured
 probe round outside the recorded owner-gated proposals; running the
@@ -1581,9 +1619,9 @@ but a probe invocation's own environment; moving the composed-prompt
 pins without a witting kernel prompt change (both recomputed in the
 same commit, history recorded); new MCP servers or transports; A2A
 changes; frontend work (deferred unscheduled); `ASTRef`/`EVIDENCED_BY`
-migration (gate CLOSED; Sessions 23–33 read 1.84x, 2.11x, 1.99x–2.01x,
-1.78x, 1.99x, 1.77x-after-outlier, 1.97x, 1.89x, 2.09x, 2.04x, and
-1.94x, inside the band — do not migrate on a noisy reading); T13
+migration (gate CLOSED; Sessions 23–34 read 1.84x, 2.11x, 1.99x–2.01x,
+1.78x, 1.99x, 1.77x-after-outlier, 1.97x, 1.89x, 2.09x, 2.04x, 1.94x,
+and 1.53x, inside the band — do not migrate on a noisy reading); T13
 re-hashing; rlms library modifications; weakening the Session 14
 write-path enforcement, the Session 15/20/22/24 composition pins, the
 Session 16 lineage pins, the Session 17 promotion refusals, the
@@ -1595,7 +1633,10 @@ Session 22 answer-channel refusals, the Session 24 block-walk parity
 pin, the Session 25 extraction gates, the Session 27 M1/M7 standing
 fixtures, the Session 28 module-arm validation and est-suite truth
 pins, the Session 30 retrieval-set tracking pins, the Session 31
-write-gate pins, the Session 32 detector pins, or the Session 33
+write-gate pins, the Session 32 detector pins, the Session 33
 retrieval-discipline pins (`test:rlm-sandbox` [7] + the
 `buildAgentEnv` unit pins, including the constructor-validates-
-before-connect behavior and first-fetch byte-identity).
+before-connect behavior and first-fetch byte-identity), or the
+Session 34 scope pins (`snapshot_ingest.test.ts` scope section +
+`test:repo-ingest` Part 7, including plan-equality for unset scope
+and carry-forward-never-tombstones).

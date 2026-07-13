@@ -432,9 +432,99 @@ Counts and spot checks together, never counts alone:
    `parseLlmResponse`) resolve to entities whose `sourceNodeIds` fetch
    back real `ast_nodes` bytes containing the identifier.
 
-### 5d.4 Measured results
+### 5d.4 Measured results (the run, July 13, 2026)
 
-*(appended after the owner-approved run)*
+`repo:ingest --repo-key trellis --root . --include src --include
+scripts --include modules --extract changed --max-blocks 1450
+--confirm-extraction` from the session worktree (workers: a fresh
+`dev:workers` instance started after the stale-consumer check found
+none; killed by child-PID tree after the drain, per the July 12
+lesson).
+
+**Snapshot:** `trellis#1` published — 298 ingested / 0 unchanged / 0
+tombstoned; 1,921 blocks eligible, **1,423 queued** (the printed bound
+exactly), 498 excluded (`test_fixture_excluded`, 112 files) — the
+executed counts match the plan echo line for line.
+
+**Pipeline:** 1,423/1,423 extraction jobs completed, zero failures,
+queue drained in 53m42s (serial worker — BullMQ default concurrency 1;
+~26 jobs/min end to end). 22 unresolved endpoints flowed through the
+name pass-through; the merge dropped 9 actions whose endpoints matched
+no entity (counted and logged, never silent — the pilots' §5b run had
+zero at 103 blocks; ~0.6% of 1,423 jobs is recorded as the observed
+base rate for the code prompt at scale).
+
+**Spend (worker metrics, fresh instance = exact):** 1,423
+`gpt-5.4-2026-03-05` completions — 892,363 input / 325,335 output
+tokens (627 in / 229 out per block vs §5c's 588/185) — plus 1,423
+`text-embedding-3-small` calls, 388,944 tokens. At the same price
+basis that reproduces §5b's $0.28: **≈ $2.75** (estimate band was
+$2.4–$3.84; the $3.84 ceiling held).
+
+**The pre-stated criterion, all five parts:**
+
+1. **Pipeline** — PASS (above).
+2. **Exclusion** — PASS: queued = 1,921 − 498 = 1,423 exactly; the
+   exclusion behavior itself is drill-pinned (Part 6/7).
+3. **Suppression** — PASS: 19 `extraction.generic_suppressed` events
+   (22 entities + 28 actions dropped); ZERO denylist names carry
+   stage-1 provenance, verified by live graph query.
+4. **Hub shape** — PASS: max hub `ast_nodes` at 29 distinct stage-1
+   source blocks = **2.04%** of queued (criterion ≤ 8%; §5b good
+   shape 3.9%). Top 15 (all genuine API-level identifiers):
+   `ast_nodes` 29, `main` 28, `neo4jdriver` 27, `pgpool` 26,
+   `node.js` 23, `derived_insight` 16, `trellis_mcp_servers` 15,
+   `trellis_modules` 12, `config.python.executable` 12,
+   `config.llm.extractionmodel` 11, `documents` 11, `eslint` 11,
+   `question` 10, `config.python.pythonpath` 9, `document_nodes` 9.
+   Residual observation, recorded not acted on: `main` at 28 is the
+   cross-file function-name class (every CLI's `main` merges by
+   name) — the first observed count for a future denylist candidate;
+   per the kernel-gate rule an addition needs review, and `main` is a
+   genuine identifier, so it stands as data.
+5. **Spot checks** — PASS: `write_derived_insight` (4 entities, e.g.
+   `trellis_neo4j.write_derived_insight`), `parsellmresponse`,
+   `trellis_postgres.get_ast_blocks`, `trellis_answer.submit` all
+   resolve with stage-1 provenance; a cited hash fetched from
+   `ast_nodes` returned real block bytes containing the identifier
+   (thread-back verified against stored bytes, not just counts).
+
+**Graph produced:** 1,995 entities and 1,788 ACTION relationships now
+carry stage-1 provenance (dev-graph totals 2,613 / 2,366 — the count
+includes pre-existing entities, e.g. pilot-era `ast_nodes`, that
+absorbed live stage-1 provenance; mixed-provenance recovery semantics
+unchanged). The residue PERSISTS — no cleanup, by design (§5d.2).
+
+### 5d.5 Stage-2 seam observations (recorded, nothing implemented)
+
+What a graph-informed self-edit increment would actually ask, observed
+against the live substrate:
+
+- **"What depends on the surface I am editing?"** —
+  `MATCH (e:Entity {name: 'trellis_neo4j.write_derived_insight'})<-[r:ACTION]-(caller)`
+  style queries now return real callers/consumers with block-hash
+  provenance; the edit run can fetch the cited blocks
+  (`get_ast_texts`) to read the actual call sites before splicing.
+- **"Which file owns this entity?"** — provenance hashes join
+  `document_nodes`→`documents` rows, so `repo:trellis:<path>` doc keys
+  give the toolkit the exact file to `load` — the graph-to-textedit
+  bridge needs NO new machinery, just Cypher + the existing
+  `trellis_postgres`/`trellis_textedit` surfaces.
+- **Freshness is the loop's own churn:** an edit that lands and
+  re-ingests (scoped snapshot rerun) re-extracts changed blocks and
+  contests beliefs whose blocks died — the substrate self-corrects at
+  exactly the granularity the edit touched.
+- **Gap worth noting for the stage-2 design record:** entity names are
+  lowercase-normalized (`parsellmresponse`), so name lookups from
+  source identifiers need the same normalization
+  (`globalEntityId`'s) — a resolved lookup helper, not raw
+  string-match, is the right seam.
+- **Worker throughput observation (not stage-2 blocking):** the
+  extraction worker is serial by construction; a substrate refresh
+  after a large merge re-extracts at ~26 jobs/min. If refresh latency
+  ever matters, worker concurrency needs its own merge-safety pins
+  (concurrent same-name entity merges are undrilled) — a reviewed
+  kernel change, not a config flip.
 
 ## 6. Verification summary
 
