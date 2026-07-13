@@ -1408,7 +1408,15 @@ Repository state at handoff creation:
   run); **(7) the targeted stage-1 entailment sweep**
   (~100 pairs ≈ $0.04 — deliberate sampled-audit coverage over the
   substrate's semantic layer; the Session 36 refresh added 24 newly
-  extracted blocks to that pool). Item (6) has now run
+  extracted blocks to that pool); **(8) the structural-chunking
+  pilot** (`docs/architecture/STRUCTURAL_CHUNKING.md`, roadmap §4
+  row 12 — recorded July 13, 2026 owner-directed: the cAST
+  split-merge algorithm over a generic tree seam, `web-tree-sitter`
+  as the scaling engine, policy-versioned scoped rollout; pilot =
+  one prefix ≈ low single-digit dollars re-extraction under the
+  record's §7 five-part criterion; a substrate-identity change, so
+  migration-grade owner sign-off — it sits BESIDE the Session 38
+  objective and never preempts it). Item (6) has now run
   twice (Session 36 `trellis#2` $0.102; Session 37 `trellis#3`
   $0.0656) — the cadence stands (one scoped refresh per merged PR +
   refresh-before-use ahead of stage-2 edit runs), each refresh still
