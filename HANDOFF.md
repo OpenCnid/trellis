@@ -8,12 +8,12 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–36 and their same-day follow-ons (July 4–13, 2026; PRs
-#21–#78) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–37 and their same-day follow-ons (July 4–13, 2026; PRs
+#21–#79) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 36 with the Session 41 PR — this file keeps full
+recently Session 37 with the Session 42 PR — this file keeps full
 narrative only for the most recent five sessions). The one-paragraph
 digest, oldest first; §1 below carries everything from this span that
 a new session must actually know:
@@ -242,64 +242,27 @@ a new session must actually know:
   with audit preserved → operator re-derivation citing the new v2
   block through the ordinary write path. No machinery defect: run 1's
   failure was the run's, not the harness's.
+- **Session 37 (PR #79)** ran stage-2 increment 2 to a RECORDED
+  FAILURE ($0.7012 total): the parse gate landed zero-paid first
+  (`named_file_unparseable` — `.py` via the configured interpreter's
+  builtin `compile()` with no bytecode write, `.ts`/`.js` via
+  single-file parse diagnostics; 11 unit pins + drill section [6]);
+  the target (the `trellis_agent.py` stale telemetry comment) was
+  selected by substrate query; run 1 FAILED on the first live
+  `unbridged_evidence` firing (vector-search widening cited
+  wrong-document blocks; deterministic; residual edge deleted as
+  bounded operator cleanup), run 2 FAILED at human `git diff` review
+  — **retype-splice neighbor deletion** (6 hand-retyped comment lines
+  dropped an executable neighbor while still PARSING; every
+  mechanical layer structurally blind; human review caught it exactly
+  where the criterion places diff semantics). Verdict FAILED, no
+  third run; run 2's insight edge (`trellis_agent` `wires`
+  `get_retrieved_addresses`) stands. Also recorded: the checkout
+  EOL-normalization churn class (refresh `trellis#3`) and the
+  Windows orphaned-worker tell (kill the child process tree; verify
+  zero node/tsx workers before any queue drill).
 
-**Session 37 (July 13, 2026, PR #79) is complete: stage-2
-increment 2 — the parse gate LANDED zero-paid; the owner-approved
-deeper edit runs BOTH FAILED under the pre-stated criterion and are
-recorded (roadmap §4 row 11 stage 2).** The increment's product is
-measurement, not a landed diff; session paid total **$0.7012** (runs
-$0.3994 + $0.2362; refresh $0.0656). Design record:
-`REPOSITORY_INGESTION_REPORT.md` §5f + §5f.5. **(1) The parse gate
-(landed, stays regardless):** `named_file_unparseable` joins the
-checker's typed findings — `stage2:check` post-run mode parses every
-named file (`.py` via the `config.python.executable` interpreter
-running builtin `compile()` over the file bytes — py_compile's exact
-syntax check WITHOUT its bytecode write, because the checker is
-read-only; `.ts`/`.js` via `ts.createSourceFile` single-file parse
-diagnostics; unwired extensions honestly unchecked). Pure evaluation
-in `check.ts`; gatherers in `src/benchmarks/selfedit/parse_gate.ts`;
-composes ADDITIVELY. Pins: 11 unit tests + drill section [6] planting
-the EXACT preserved Session 36 run-1 failed-diff shape. **(2)
-Selection by substrate query (§5f.2):** the `slice (d) will`
-staleness family had exactly three surviving occurrences — the
-`trellis_agent.py` research-mode telemetry comment (SELECTED: doubly
-false), the landed increment-1 residue (REJECTED — measured
-evidence), the drill fixture's planted line (REJECTED — fixture
-bytes). New named failure mode: near-duplicate mis-targeting.
-**(3) Run 1 FAILED on a harness flag ($0.3994) — the FIRST live
-firing of the Session 35 bridge check:** the diff was CORRECT but the
-recorded insight cited two `trellis_tools.py` blocks → 2 ×
-`unbridged_evidence`. Diagnosed DETERMINISTIC: directional Cypher saw
-0 out-edges → the task's vector_search widening branch →
-semantically-similar wrong-document blocks. Tree reverted; operator
-cleanup recorded (the failed run's residual edge DELETED before the
-contingency — bounded acceptance-run hygiene, never belief-machinery
-precedent). **(4) Run 2 (contingency, task text v2) FAILED at human
-`git diff` review ($0.2362):** the evidence chain was PERFECT (118
-undirected edges → 26 provenance hashes → the in-file block
-identified and cited; `stage2:check` ZERO findings INCLUDING the
-parse gate) — but the splice replaced a 6-line window with 6
-HAND-RETYPED comment lines whose retype dropped two neighbors: the
-executable `"retrieved_addresses": get_retrieved_address_count(),`
-line and the Session 33 comment's first line. The file still PARSES —
-every mechanical layer is structurally blind to a parseable semantic
-deletion — and human review caught it, exactly where the criterion
-places diff semantics. Failure named: **retype-splice neighbor
-deletion** (the CODE_MEDIATED_TEXT §1 pathology). Both failed diffs
-reverted and preserved locally
-(`benchmark_logs/session37_run{1,2}_failed_diff.patch`). **Increment
-verdict: FAILED; no third run.** Run 2's insight edge
-(`trellis_agent` `wires` `get_retrieved_addresses`) STANDS. **(5)**
-The close-out refresh (snapshot `trellis#3`; $0.0656) recorded the
-checkout EOL-normalization churn class (cross-worktree snapshots
-re-hash mixed-EOL blocks — environmental, not a defect). **(6)
-Close-out defect found and fixed live:** harness-stopping `npm run
-dev:workers` on Windows orphans the child tsx worker — the stale
-consumer STEALS queue-drill jobs ("timeout" while effects apply).
-KILL THE CHILD PROCESS TREE and verify zero node/tsx worker processes
-before any queue drill.
-
-**Session 38 (July 13, 2026, PR #80) is also complete: structural
+**Session 38 (July 13, 2026, PR #80) is complete: structural
 chunking increment 1 — the generic tree seam + the cAST split-merge
 walk + the tree-sitter engine + shadow measurement landed zero-paid;
 the owner-approved `src/rlm` pilot RAN and FAILED criterion item 3
@@ -434,7 +397,7 @@ the general rule: superseded versions are ARCHIVE, not search space
 — any default-discovery surface reads LIVE blocks only, history
 solely by explicit address (roadmap §5 entry; HANDOFF guardrail 5).
 
-**Session 41 (July 13, 2026, this PR) is also complete: structural
+**Session 41 (July 13, 2026, PR #83) is also complete: structural
 splice addressing — the design record + the guarded splice family
 (standing item 10; the row-11 executable-class prerequisite,
 SATISFIED).** The owner delegated the session's gated decisions and
@@ -504,21 +467,86 @@ CLOSED (below the recorded band) and was RE-RUN per guardrail 8:
 1.45x CLOSED, consistent. NO kernel prompt byte; zero defects found
 in existing kernel code.
 
+**Session 42 (July 13, 2026, this PR) is complete as a RECORDED
+ENVIRONMENTAL BLOCK: the row-10 slice (d) acceptance measurement
+did NOT run — the session executed in a Claude Code remote Linux
+container whose egress policy denies `api.openai.com` (CONNECT 403
+at the session proxy) and which carries no `OPENAI_API_KEY`; owner
+approval was given up front and was never the blocker. $0.0000
+spent; the proposal STANDS as the §3 objective below.** What the
+session DID establish, all zero-paid: **(1) The measurement is
+proven NOT dev-DB-bound.** On a fresh stack (pgvector/pg16 +
+Neo4j 5.11 + Redis 7 via compose, `npm run db:init:dev`), `npx tsx
+scripts/exp_effective_context.ts --ingest` staged all four durable
+est corpora (144 documents, representation invariants green:
+"source truths = stored truths"). The ON/OFF mechanics re-verified
+in code: `armEnv` does NOT strip `TRELLIS_EXP_OMIT_RETRIEVAL`
+(passes through to the spawned agent), and `trellis_agent.py`
+resolves it to `retrieval_discipline=not EXP_OMIT_RETRIEVAL_ENABLED`
+at the research construction. The runner's spend gate observed
+live: plan-only without `--confirm-paid`; the ≤$5.00 cumulative
+hard stop printed with it. A zero-paid probe run with a placeholder
+key traversed the ENTIRE path and failed exactly at the OpenAI call
+(`APIConnectionError`, $0.0000) — the recorded evidence that ONLY
+key+egress block the run. **(2) Defect class 1 found and fixed (the
+event-loop rule): hardcoded `'python'` + a hardcoded Windows
+`PYTHONPATH`** in four drill/benchmark scripts
+(`test_verification_sweep.ts` ×2 sites, `test_confidence_writes.ts`
+×2, `test_entity_kinds.ts` ×1, `poison_drill_runner.ts` ×1) — all
+six sites now use `config.python.executable` + the house
+`config.python.pythonPath` pattern. This had `test:verification-sweep`
+(a STANDING-BLOCK drill) failing on any non-owner host; post-fix
+66/66. **(3) Defect class 2 found and fixed (Session 32's precedent
+finished):** `test:confidence-writes` and `test:entity-kinds` seeded
+non-sha256 fixture provenance — broken since Session 14 on EVERY
+machine, unnoticed because neither is in the standing block
+(Session 32 repaired only the sweep drill). Both now seed real
+sha256 `ast_nodes` fixture rows with cleanup; both read "All checks
+passed." The write path itself untouched (guardrail 3). **(4)
+Close-out on this environment:** `npm test` 837/85 first try
+(Linux, Python 3.11 venv); build; python:check (recipe:
+requirements.txt + requirements-pdf-fast-nodeps.txt + pandas —
+uv/clean-resolver installs do NOT get pandas transitively);
+18/18 standing drills green (textedit 130 = the POSIX pin;
+selfedit-harness 52, environment-shaped); `drill:scale` ALONE:
+1.10x CLOSED (below-band → guardrail-8 re-run) then 1.52x CLOSED
+in-band, max provenance 286 both, committed file carries 1.52x.
+The isolated Compose INTEGRATION could not run — the image build's
+apt stage is denied by the same egress class (`deb.debian.org`
+403); recorded, not routed around. **(5) Bookkeeping:** Session 37
+compressed to the digest; its §5 entry moved verbatim to the
+archive (window now 38–42). **The adopted per-PR refresh cadence:
+this PR changes four in-scope script files, so a scoped policy-1
+refresh is OWED and DEFERRED to the next session with the owner's
+durable dev PG** (this container's stack was ephemeral; the durable
+substrate was never touched). No kernel byte, no prompt byte, no
+contract change.
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 42: the row-10 slice (d) acceptance
+Your objective is **Session 43: the row-10 slice (d) acceptance
 measurement — the retrieval-discipline paired `est`-suite re-run**
-(the longest-standing shovel-ready owner-conditional item, §2
-item 1; criterion pre-stated in the archived Session 33 §5 entry
-item 4 BEFORE any spend), per §3–§6 below. The run is owner-gated
-propose-with-estimate (~$2.40 under the ≤$5/run cap): present the
-proposal at session start and run ONLY on approval; if the owner
-does not approve, take the §2 menu instead (the next candidates are
-the row-11 executable-class increment 3 — which needs a REAL target
-found by substrate query, never manufactured — and the targeted
-stage-1 entailment sweep). The measurement needs NO new machinery:
-if the existing telemetry or runner proves insufficient, that is a
-FINDING to record, not a reason to build silently. The toolkit never
+(unchanged from Session 42, which was blocked ENVIRONMENTALLY, not
+by approval or design; criterion pre-stated in the archived
+Session 33 §5 entry item 4 BEFORE any spend), per §3–§6 below.
+**HARD ENVIRONMENTAL PREREQUISITES, verified missing in the
+Session 42 container: (a) a real `OPENAI_API_KEY` reachable by the
+probe runner's spawned agents, and (b) network egress to
+`api.openai.com`. Check BOTH at session start (a `curl -sS -o
+/dev/null -w '%{http_code}' https://api.openai.com/v1/models` that
+returns 401 proves egress without spending); if either is missing,
+record it and take the §2 menu — do not route around a policy
+denial.** The run is owner-gated propose-with-estimate (~$2.40
+under the ≤$5/run cap): present the proposal at session start and
+run ONLY on approval; if the owner does not approve, take the §2
+menu instead (the next candidates are the row-11 executable-class
+increment 3 — which needs a REAL target found by substrate query,
+never manufactured — and the targeted stage-1 entailment sweep;
+both ALSO need the owner's durable dev PG and OpenAI access). Also
+owed when the durable dev PG is reachable: the DEFERRED Session 42
+refresh (see §2). The measurement needs NO new machinery: if the
+existing telemetry or runner proves insufficient, that is a FINDING
+to record, not a reason to build silently. The toolkit never
 touches git. Do not re-plan or re-implement completed work. RLM
 expands exclusively to Recursive Language Model (the MIT CSAIL
 formulation).
@@ -739,9 +767,10 @@ immutable, content-addressed physical location in source material.
      wire it on; bare construction byte-identical;
      `TRELLIS_EXP_OMIT_RETRIEVAL` probe-only OFF arm). Held state
      holds identities only, never content, never feeds the retrieval
-     set or the write gate (`test:rlm-sandbox` [7]). **Session 42's
+     set or the write gate (`test:rlm-sandbox` [7]). **Session 43's
      objective (§3) is this row's outstanding acceptance
-     measurement.**
+     measurement (Session 42's attempt was blocked environmentally —
+     $0 spent, staging verified).**
    - **The verification layer (Phase 5 + Session 32):** two sampled
      re-check tiers over the shared `verification_queue` — the
      classifier sweep and the entailment sweep (job name
@@ -933,8 +962,9 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 13, 2026 Session 41 PR
-  (structural splice addressing — the PR that carries this file).
+- `master`: the head after the July 13, 2026 Session 42 PR
+  (the recorded environmental block + the drill portability/fixture
+  repairs — the PR that carries this file).
   Use `git log -- HANDOFF.md` to confirm this PR landed; if it is
   still unmerged when this session starts, STOP and merge it first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); module
@@ -970,73 +1000,84 @@ Repository state at handoff creation:
   executable-class prerequisite (structural splice addressing) is
   SATISFIED — increment 3 enters as a NEW proposal when a real
   target surfaces; row 12 increments 1–2 are done; row 7 stays
-  trigger-blocked.
-- Session 41 changed NO kernel prompt byte — both composed-prompt
-  pins unmoved (default `5d27e474…fe2a`, omit-arm `45987904…0b56` —
-  recompute BOTH in the same commit only if the kernel prompt or
-  rubric legitimately changes; the TEXTEDIT_ADDENDUM grew guarded
-  bullets, but it is gated behind `TRELLIS_EDIT_ROOT` and outside
-  the composed pins — verified by `test:modules` green). Its code
-  surface: `src/rlm/trellis_textedit.py` (the guarded family +
-  `AnchorMismatchError` + the counter split), `src/rlm/trellis_agent.py`
-  (two zeroed fallback-dict keys), `scripts/test_textedit.py`
-  (section [14] + the five-counter pin move),
-  `scripts/test_selfedit_rehearsal.py` (mode `guarded`),
-  `scripts/test_selfedit_harness.ts` (section [8]);
-  docs: `docs/architecture/STRUCTURAL_SPLICE.md` (NEW) +
-  cross-references in `STRUCTURAL_CHUNKING.md` §8 and
-  `CODE_MEDIATED_TEXT.md` §6.1. This session's worker log:
-  `benchmark_logs/session41_workers.log` (gitignored, local to the
-  `trellis-engine-dev-53b592` worktree; the Session 40 seam log
-  lives in `trellis-engine-dev-160fda`, the Session 38 logs in
-  `friendly-wright-cb2e97`, the Session 37/39 artifacts in
-  `trellis-engine-dev-d29bbc` — gitignored artifacts do NOT travel
-  to fresh worktrees). Reminder from Session 24:
-  `block_parity.test.ts` SPAWNS the real Python walk inside plain
-  `npm test` — a machine without Python on PATH fails the unit
-  suite; CI sets up Python 3.13 before `npm test`. Reminder from
-  Session 41 pre-flight: a worktree with a PRE-POPULATED but stale
-  `node_modules` fails the four tree-sitter-importing test files
-  with module-not-found — run `npm ci` before believing a fresh
-  worktree's `npm test`.
+  trigger-blocked. IMPORTANT (Session 42): everything in this bullet
+  describes the OWNER'S durable dev PG. Session 42 ran in an
+  ephemeral remote container and NEVER touched that substrate — its
+  fresh-stack corpora staging died with the container, by design.
+- Session 42 changed NO kernel byte and NO prompt byte — both
+  composed-prompt pins unmoved (default `5d27e474…fe2a`, omit-arm
+  `45987904…0b56` — recompute BOTH in the same commit only if the
+  kernel prompt or rubric legitimately changes; `test:modules` 56
+  green). Its entire code surface is drill/benchmark-side (the two
+  found-defect repairs): `scripts/test_verification_sweep.ts`,
+  `scripts/test_confidence_writes.ts`, `scripts/test_entity_kinds.ts`,
+  `src/benchmarks/poison_drill_runner.ts` — all six hardcoded
+  `'python'` spawn sites now use `config.python.executable` + the
+  house `config.python.pythonPath` pattern, and the two
+  non-standing-block drills seed REAL sha256 `ast_nodes` fixture
+  rows (the Session 32 seeding pattern) instead of the
+  Session-14-refused `test-…-hash-a` strings. Session 41's code
+  surface (the guarded family etc.) is recorded in the archive and
+  roadmap. Reminder from Session 24: `block_parity.test.ts` SPAWNS
+  the real Python walk inside plain `npm test` — a machine without
+  Python on PATH fails the unit suite; CI sets up Python 3.13
+  before `npm test`. Reminder from Session 41 pre-flight: a
+  worktree with a PRE-POPULATED but stale `node_modules` fails the
+  four tree-sitter-importing test files with module-not-found — run
+  `npm ci` before believing a fresh worktree's `npm test`.
+  Session 42 bring-up notes for policy-restricted containers:
+  `REDISMS_DISABLE_POSTINSTALL=1 npm ci` (the PoC-only
+  `redis-memory-server` postinstall downloads a binary and aborts
+  behind restricted egress); Python in a dedicated venv with BOTH
+  requirements files PLUS `pandas` (a clean uv resolver does not
+  pull pandas transitively from `unstructured==0.23.1`); Docker Hub
+  blob-CDN denials are recoverable with
+  `registry-mirrors: ["https://mirror.gcr.io"]`.
 - Offline baseline: `npm test` = 837 passing across 85 files
-  (UNCHANGED by Session 41 — the increment is Python-toolkit-side;
-  its pins live in `test:textedit` [14] and `test:selfedit-harness`
-  [8], recorded honestly).
+  (UNCHANGED by Session 42 — the repairs are drill-script-side; the
+  drills themselves are the pins, recorded honestly).
 - `npm run build` and `npm run python:check` pass (the check imports
   polars — an environment without it fails the check by design).
 - `npm run drill:scale`: gate CLOSED at max provenance 286.
-  Session 41 read 1.39x CLOSED then 1.45x CLOSED on the guardrail-8
-  re-run (below the previously recorded 1.48x–2.26x band — two
-  consecutive closed readings, the observed band's floor moves down
-  to ~1.39x); Session 40 read 2.05x; Session 39 2.18x; Session 38
-  1.69x. If a future run reads OPEN, re-run before believing it — a
+  Session 42 (fresh Linux container DB) read 1.10x CLOSED then
+  1.52x CLOSED on the guardrail-8 re-run; Session 41 read 1.39x
+  then 1.45x; Session 40 2.05x; Session 39 2.18x; Session 38 1.69x.
+  If a future run reads OPEN, re-run before believing it — a
   REPRODUCING open reading is the migration trigger (roadmap §4
   row 7) and the owner adjudicates. The drill rewrites the tracked
   `scale_drill_results.json` — commit it with the session PR (the
-  committed copy is Session 41's 1.45x CLOSED re-run). Run the scale
+  committed copy is Session 42's 1.52x CLOSED re-run). Run the scale
   drill ALONE — never concurrently with other live drills on the
   shared dev database.
-- Live zero-LLM checks (Session 41 observed, all green):
-  `test:selfedit-harness` (ALL CHECKS PASSED, 55 checks this
-  environment — the count is environment-shaped; runs the rehearsal
-  python, so it needs the Python runtime deps), `test:answer-channel`
-  (32), `test:textedit` (129 on Windows; 130 on POSIX),
-  `test:module-lifecycle` (60), `test:modules` (56 — pins unmoved),
-  `test:promotion` (41), `test:rlm-workspace` (106), `test:rlm-mcp`
-  (86), `test:rlm-sandbox` (95), `test:verification-sweep` (66),
+- Live zero-LLM checks (Session 42 observed on a fresh Linux
+  container, all green): `test:selfedit-harness` (ALL CHECKS
+  PASSED, 52 checks this environment — the count is
+  environment-shaped; runs the rehearsal python, so it needs the
+  Python runtime deps), `test:answer-channel` (32), `test:textedit`
+  (129 on Windows; 130 on POSIX — observed 130), `test:module-lifecycle`
+  (60), `test:modules` (56 — pins unmoved), `test:promotion` (41),
+  `test:rlm-workspace` (106), `test:rlm-mcp` (86), `test:rlm-sandbox`
+  (95), `test:verification-sweep` (66 — after the Session 42
+  portability repair; it CANNOT pass on a host where bare `python`
+  lacks the runtime deps at any commit before this one),
   `test:agent-loop` (35), `test:a2a` (46), `test:repo-ingest` ("All
   checks passed" is the signal — the [PASS] count is
-  environment-dependent by construction), `test:benchmark-hardening`
-  (24), `test:entity-resolution` (34), `test:api-hardening` (18),
-  `test:belief-recovery` (30), `test:invalidation-sweep` (17).
+  environment-dependent by construction; 89 this environment),
+  `test:benchmark-hardening` (24), `test:entity-resolution` (34),
+  `test:api-hardening` (18), `test:belief-recovery` (30),
+  `test:invalidation-sweep` (17). The repaired non-standing drills
+  `test:confidence-writes` and `test:entity-kinds` also read "All
+  checks passed" (first green since Session 14).
 - Isolated Compose integration: 11 assertions (`--profile test`,
   unique project name; includes the containerized credentialed MCP
   fixture probe and the in-container `polars 1.34.0` import probe).
   Session 41 ran it as project `trellis_s41_ci` (11/11 PASS) and
-  tore it down with `--volumes`. The CI-mold invocation: env
-  `COMPOSE_PROJECT_NAME` + the five host-port variables at 0 + an
-  `API_KEY`, then `docker compose --profile test up --build
+  tore it down with `--volumes`. **Session 42 could NOT run it: the
+  image build's apt stage is egress-policy-denied in the remote
+  container (`deb.debian.org` 403) — recorded, not routed around;
+  re-run it in a provisioned environment.** The CI-mold invocation:
+  env `COMPOSE_PROJECT_NAME` + the five host-port variables at 0 +
+  an `API_KEY`, then `docker compose --profile test up --build
   --abort-on-container-exit --exit-code-from integration
   integration`, then `down --volumes --remove-orphans`. The isolation
   host-port variables are EXACTLY `TRELLIS_POSTGRES_HOST_PORT`,
@@ -1044,12 +1085,13 @@ Repository state at handoff creation:
   `TRELLIS_REDIS_HOST_PORT`, `TRELLIS_API_HOST_PORT` — set each to 0.
   NOTE: C: runs tight on free space; a FULL image rebuild needs
   several GB of headroom. `requirements.txt` and `package.json`
-  unchanged in Sessions 39–41 — both layers stay cached.
+  unchanged in Sessions 39–42 — both layers stay cached.
 - The standing owner-conditional items — all propose-with-estimate,
   never self-served: **(1) the row-10 slice (d) acceptance
-  measurement — PROMOTED to the Session 42 objective (§3)** (the
-  `est` suite paired re-run, 50 runs, ~$2.40; criterion pre-stated
-  in the archived Session 33 §5 entry item 4); **(2) the
+  measurement — STILL the objective (§3), carried from Session 42's
+  environmental block** (the `est` suite paired re-run, 50 runs,
+  ~$2.40; criterion pre-stated in the archived Session 33 §5 entry
+  item 4; needs OpenAI key + egress, see §3); **(2) the
   judge-calibration decision** for derived-classification claims
   (the July 13 sweep's 8/25 strict-judge verdicts); **(3) the
   stage-1b prose chunk** (~2,900 blocks ≈ $7.8, needs its own
@@ -1059,9 +1101,15 @@ Repository state at handoff creation:
   scoped refresh per merged PR + refresh-before-use ahead of stage-2
   edit runs; each refresh's extraction spend still gated per run —
   UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; Session 41's refresh
-  covered the Session 40+41 files — Session 42 owes one only for the
-  files ITS PR changes); **(7) the targeted stage-1 entailment
-  sweep** (~100 pairs ≈ $0.04); **(8) the row-12 rollout
+  covered the Session 40+41 files — **Session 42's refresh is OWED
+  and DEFERRED: its PR changed four in-scope script files
+  (`scripts/test_verification_sweep.ts`,
+  `scripts/test_confidence_writes.ts`, `scripts/test_entity_kinds.ts`,
+  `src/benchmarks/poison_drill_runner.ts`), and the owner's durable
+  dev PG was unreachable from the remote container — the next
+  session with dev-PG access runs the policy-1 refresh covering
+  Session 42's files plus its own**); **(7) the targeted stage-1
+  entailment sweep** (~100 pairs ≈ $0.04); **(8) the row-12 rollout
   continuation** (widening policy-2 scope, retuning merge density,
   or reverting the pilot — owner's call with the record §10.3 +
   §11.4 together); **(9) the superseded-embedding SWEEP** (storage
@@ -1110,14 +1158,28 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 42 problem statement
+## 3. Session 43 problem statement
 
 **The row-10 slice (d) acceptance measurement: the paired `est`-suite
 re-run that measures what the Session 33 retrieval-discipline
-machinery actually buys** (standing item 1 promoted; the criterion
-was pre-stated in the archived Session 33 §5 entry item 4 BEFORE any
-spend — measure against it, never against a retrofitted bar). The
-facts a new session must act on:
+machinery actually buys** (unchanged from Session 42, which was
+blocked ENVIRONMENTALLY — no OpenAI key, `api.openai.com`
+egress-denied — with $0 spent and the staging verified end to end;
+the criterion was pre-stated in the archived Session 33 §5 entry
+item 4 BEFORE any spend — measure against it, never against a
+retrofitted bar). The facts a new session must act on:
+
+- **The Session 42 environmental prerequisites, checked FIRST:**
+  (a) `OPENAI_API_KEY` present for the runner's spawned agents;
+  (b) egress to `api.openai.com` (a `curl` returning HTTP 401
+  proves egress without spending; a CONNECT 403 is a policy denial
+  — record it and take the §2 menu, never route around). The
+  measurement runs anywhere those two hold: it is NOT dev-DB-bound.
+  On a fresh stack, `npx tsx scripts/exp_effective_context.ts
+  --ingest` stages all four est corpora zero-paid with
+  representation invariants verified (Session 42 proved this recipe
+  live: 144 documents, all invariants green). On the owner's dev
+  machine the corpora are already durable.
 
 - **What landed without its acceptance measurement:** Session 33's
   held-state dedup + per-run budget are drilled zero-LLM
@@ -1154,29 +1216,43 @@ facts a new session must act on:
 - **Why now:** the splice prerequisite (Session 41) closed the row-11
   sequencing question; row 12's substrate side is quiet; this is the
   only standing item that is fully specified, fully instrumented,
-  and blocked on nothing but approval. It is also NOT a probe round —
-  round numbering stays untouched; the verdict lands in
-  `RETRIEVAL_DISCIPLINE.md` (the record that owns the criterion) and
-  the roadmap §5 entry.
+  and blocked on nothing but environment + approval. It is also NOT
+  a probe round — round numbering stays untouched; the verdict lands
+  in `RETRIEVAL_DISCIPLINE.md` (the record that owns the criterion)
+  and the roadmap §5 entry.
 - **The gate:** owner approval at session start (unless the owner
-  opens the session with a blanket delegation, as Session 41's did).
+  opens the session with a blanket delegation, as Sessions 41 and
+  42 did — a delegation does NOT carry across sessions).
   Unapproved = take the §2 menu.
 
 ## 4. Required design
 
-- **Pre-flight (zero-paid):** confirm the Session 41 PR merged
-  (`git log -- HANDOFF.md`); `npm ci` (see the §2 stale-node_modules
-  reminder); `npm run db:init:dev`; full offline gates; stale worker
-  check per the §2 operational notes; verify the four durable corpora
-  and the `est` suite's pinned truths are live (`npm test` covers the
-  pins; a quick `documents` count sanity-checks the corpora).
+- **Pre-flight (zero-paid):** confirm the Session 42 PR merged
+  (`git log -- HANDOFF.md`); check the §3 environmental
+  prerequisites FIRST (key + egress — Session 42 burned a session
+  discovering them missing after full staging); `npm ci` (see the
+  §2 stale-node_modules reminder; restricted-egress containers need
+  `REDISMS_DISABLE_POSTINSTALL=1`); `npm run db:init:dev`; full
+  offline gates; stale worker check per the §2 operational notes;
+  verify the four durable corpora and the `est` suite's pinned
+  truths are live (`npm test` covers the pins; a quick `documents`
+  count sanity-checks the corpora — on a fresh stack run the
+  `--ingest` staging recipe, §3 bullet 1).
 - **The proposal, before any spend:** present the run shape, the
   verbatim criterion, and the ~$2.40 estimate. On approval, run.
 - **The measurement (one paired run, no retuning):** 5 questions ×
   2 arms × 5 repeats through `scripts/exp_effective_context.ts`'s
   est suite; ON = default discipline-enabled research construction;
   OFF = `TRELLIS_EXP_OMIT_RETRIEVAL=1` in the runner's environment.
-  Verify per-run arm assignment from the TRELLIS_TELEMETRY
+  The Session 42-verified invocations (the runner's own
+  `--arms on/off` toggle is the CMT experiment — BOTH retrieval
+  arms use `--arms on`): ON =
+  `npx tsx scripts/exp_effective_context.ts --suites est --arms on
+  --repeats 5 --confirm-paid`; OFF = the identical command with
+  `TRELLIS_EXP_OMIT_RETRIEVAL=1` set in the runner's environment.
+  Without `--confirm-paid` the runner prints the plan and spends
+  nothing; with it, the cumulative >$5.00 hard stop aborts remaining
+  runs. Verify per-run arm assignment from the TRELLIS_TELEMETRY
   discipline counts. Report per-question AND pooled: correctness,
   input/output tokens (medians with spread), db calls, dedup refusal
   counts, budget refusals (expect 0 — a nonzero count is a finding),
@@ -1224,8 +1300,9 @@ acceptance is the measurement itself plus the standing gates.
   measured and recorded verbatim — pass or fail, no retuning.
 - **Zero-paid:** the full standing drill block green; `npm test`
   837/85 (or grown, if a found defect forces an in-scope fix — then
-  its pin moves in the same commit, recorded); the split-scope
-  refresh for Session 42's own changed files ONLY (docs-only changes
+  its pin moves in the same commit, recorded). The refresh duty
+  (extraction spend gated per run): the DEFERRED Session 42 files
+  plus this session's own changed in-scope files (docs-only changes
   owe nothing — docs are out of the ingest scope).
 - Run `drill:scale` ALONE (never concurrent with other live drills).
 
@@ -1261,6 +1338,12 @@ Required close-out (the standing block):
  git diff --check
 ```
 
+(Session 42 note: in a policy-restricted container the Compose
+INTEGRATION may be unbuildable — `deb.debian.org` egress-denied at
+the image build's apt stage. Record it and move on; `docker compose
+--profile test config --quiet` still validates the manifest. Do not
+route around a policy denial.)
+
 Update:
 
 - `TRELLIS_ROADMAP.md`: full-dated §5 entry with the exact run
@@ -1268,13 +1351,17 @@ Update:
   actual dollars; row 10's cell gains the measured verdict.
 - `docs/architecture/RETRIEVAL_DISCIPLINE.md`: the measured-verdict
   section (the STRUCTURAL_CHUNKING §11.4 mold).
+- The DEFERRED Session 42 refresh (§2 item 6) if the durable dev PG
+  is reachable this session: the split-scope policy-1 refresh
+  covering Session 42's four changed script files plus whatever
+  this session's own PR changes.
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5
   re-check. NOTE for objective selection: the largest standing
   decisions after this session are the row-11 executable-class
   increment 3 (needs a real target by substrate query), the
   judge-calibration decision, and the stage-1b prose chunk. Keep the
-  five-session narrative window (38–42 after this session):
-  compress Session 37 into the digest and move its roadmap §5 entry
+  five-session narrative window (39–43 after this session):
+  compress Session 38 into the digest and move its roadmap §5 entry
   verbatim to `docs/archive/ROADMAP_HISTORY.md`.
 
 ## 7. Guardrails
@@ -1541,9 +1628,10 @@ embedding any probe corpus; changing the `est` suite's pinned truths,
 bounds, or question set; changing the discipline machinery's refusal
 bytes, identities, telemetry shape, or wiring to move the numbers;
 the superseded-embedding SWEEP (storage reclamation, owner decision);
-any refresh extraction beyond the adopted per-PR cadence (Session 42
-owes a refresh only for files its own PR changes — docs-only changes
-owe nothing); the stage-1b prose chunk; the row-12 rollout
+any refresh extraction beyond the adopted per-PR cadence (Session 43
+owes the DEFERRED Session 42 refresh plus one for files its own PR
+changes — docs-only changes owe nothing); the stage-1b prose chunk;
+the row-12 rollout
 continuation (widening policy 2 beyond `src/rlm`, retuning the merge
 target or split threshold, or reverting the pilot); ANY paid run
 without explicit owner approval (the §3 run INCLUDED — propose first,

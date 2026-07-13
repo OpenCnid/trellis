@@ -1,8 +1,10 @@
 import { execFile } from 'child_process';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import util from 'util';
-import { neo4jDriver } from '../src/config/db';
+import { neo4jDriver, pgPool } from '../src/config/db';
+import { config } from '../src/config/index';
 
 // Phase 5 Milestone 1 verification: confidence-carrying writes + bulk
 // write throughput, exercised through the REAL Python tools
@@ -37,7 +39,7 @@ const EXPECTED_RUBRIC_VERSION = JSON.parse(
 
 const PY_ENV = {
   ...process.env,
-  PYTHONPATH: 'C:\\Users\\Darian\\AppData\\Roaming\\Python\\Python313\\site-packages',
+  ...(config.python.pythonPath && { PYTHONPATH: config.python.pythonPath }),
   PYTHONIOENCODING: 'utf-8'
 };
 
@@ -65,7 +67,7 @@ async function runOpsViaPython(ops: unknown[]): Promise<{ ops: Array<{ ok: boole
     't.close()',
     "print(json.dumps({'ops': out, 'tool_calls': get_tool_call_count()}))"
   ].join('\n');
-  const { stdout } = await execFileAsync('python', ['-c', py, JSON.stringify(ops)], {
+  const { stdout } = await execFileAsync(config.python.executable, ['-c', py, JSON.stringify(ops)], {
     cwd: path.resolve('src/rlm'),
     env: PY_ENV
   });
@@ -88,7 +90,7 @@ async function inspectAgentPrompt(): Promise<{ braces_ok: boolean; rubric_in_pro
     '    rubric_version=RUBRIC_VERSION,',
     ')))'
   ].join('\n');
-  const { stdout } = await execFileAsync('python', ['-c', py], {
+  const { stdout } = await execFileAsync(config.python.executable, ['-c', py], {
     cwd: path.resolve('src/rlm'),
     env: PY_ENV
   });
@@ -143,12 +145,28 @@ async function cleanup(): Promise<void> {
   } finally {
     await session.close();
   }
+  await pgPool.query('DELETE FROM ast_nodes WHERE document_id = $1', [`${TOKEN}-root`]);
+}
+
+// Session 14 enforces format AND existence on provenance at the write
+// path, so the fixture hashes must be real sha256 hex strings that
+// exist in ast_nodes (the test_verification_sweep seeding pattern).
+const H = (n: string) => crypto.createHash('sha256').update(`${TOKEN}:${n}`).digest('hex');
+
+async function seedAstNode(hash: string): Promise<void> {
+  const data = { id: hash, type: 'paragraph', children: [{ id: `${hash}-child`, type: 'text', content: `fixture text ${hash.slice(0, 8)}` }] };
+  await pgPool.query(
+    `INSERT INTO ast_nodes (id, document_id, data) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING`,
+    [hash, `${TOKEN}-root`, JSON.stringify(data)]
+  );
 }
 
 async function main(): Promise<void> {
   console.log('Milestone 1: confidence-carrying writes + bulk throughput');
-  const hashA = `${TOKEN}-hash-a`;
-  const hashB = `${TOKEN}-hash-b`;
+  const hashA = H('a');
+  const hashB = H('b');
+  await seedAstNode(hashA);
+  await seedAstNode(hashB);
 
   try {
     // --- 1. Single writes -------------------------------------------------

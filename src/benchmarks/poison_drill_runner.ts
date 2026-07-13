@@ -27,6 +27,7 @@ import {
 } from '../core/graph/verification';
 import { PRICE_PER_M_INPUT, PRICE_PER_M_OUTPUT } from './oolong/scoring';
 import { pgPool, neo4jDriver } from '../config/db';
+import { config } from '../config/index';
 
 // Phase 5 Milestone 4: the Poisoning Drill (PHASE_5_PRD.md §Milestone 4).
 //
@@ -195,11 +196,11 @@ async function rederiveDisputedViaPython(dataset: OolongDataset): Promise<{ rede
     'print(t.write_derived_insights(json.loads(sys.argv[1])))',
     't.close()'
   ].join('\n');
-  await execFileAsync('python', ['-c', py, JSON.stringify(facts)], {
+  await execFileAsync(config.python.executable, ['-c', py, JSON.stringify(facts)], {
     cwd: path.resolve('src/rlm'),
     env: {
       ...process.env,
-      PYTHONPATH: 'C:\\Users\\Darian\\AppData\\Roaming\\Python\\Python313\\site-packages',
+      ...(config.python.pythonPath && { PYTHONPATH: config.python.pythonPath }),
       PYTHONIOENCODING: 'utf-8'
     }
   });
