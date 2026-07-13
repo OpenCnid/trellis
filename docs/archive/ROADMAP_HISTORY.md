@@ -4799,3 +4799,136 @@ pre-stated seam re-measure (**8 embedding calls, 75 tokens,
    the row-10 (d) acceptance measurement, the stage-1b prose chunk,
    structural splice addressing) present unchanged on the owner
    menu.
+
+### July 13, 2026 — Session 41: structural splice addressing — the design record + the guarded splice family (§4 row 11 prerequisite; standing item 10)
+
+The owner delegated the session's gated decisions and approved paid
+runs up front. The deliverable order was document-first (the
+row-9/10/12 mold): the design record ratified BEFORE implementation,
+then only the increment it scopes, all zero-paid; the session's only
+paid work was the adopted per-PR substrate refresh ($0.0955 actual).
+
+1. **The design record (`docs/architecture/STRUCTURAL_SPLICE.md`,
+   written first).** The failure class is defined from its two live
+   instances (Session 36 run 1: address drift, syntax-broken file;
+   Session 37 run 2: parseable neighbor deletion — both preserved as
+   reverted patches and narrated in
+   `REPOSITORY_INGESTION_REPORT.md` §5e/§5f.5). The central decision
+   — the engine — enumerated four candidates against the Session 29
+   import-allowlist pin, the Session 20 containment contract, and the
+   pillar: Python stdlib `ast` REJECTED (comments are not AST nodes —
+   the engine would be blind to the exact class it exists to close;
+   `.py`-only; parse-guarding is measurably blind, the run-2 file
+   parsed), `py-tree-sitter` REJECTED (a native wheel = an allowlist
+   widening that buys nothing the class needs — both instances were
+   byte-identity failures, not construct-identification failures;
+   revisit trigger recorded: construct-granular addressing that
+   content queries cannot express), an engine-side structural service
+   REJECTED (the toolkit deliberately has no IPC surface; engine-side
+   spans go stale under staged splices — a positional mirror, the
+   T13 anti-pattern), and **parser-free anchor guards CHOSEN**: the
+   guard is the frame's own bytes, total over every text file, exact,
+   zero new imports. "Structural" resolves to the structure the
+   toolkit already owns.
+2. **The guarded splice family (zero-paid, additive — `splice`
+   byte-untouched).** `replace_lines(relpath, start, end,
+   expected_lines, new_lines)` verifies the stated removal manifest
+   byte-exactly against the frame BEFORE staging
+   (`AnchorMismatchError` on divergence, naming the first divergent
+   line with bounded previews and teaching re-derive-by-query) and
+   refuses over-wide windows sharing an unchanged leading/trailing
+   line with new_lines, naming the computed minimal window;
+   `insert_lines(relpath, at, new_lines, anchor_before/anchor_after)`
+   requires at least one verified neighbor anchor and removes nothing
+   by construction; `delete_lines(relpath, start, end,
+   expected_lines)` makes deletion an explicit verified declaration.
+   All three stage through the splice machinery (same budgets,
+   pendingSplices, diff/revert/write_back — hash guard and Session 29
+   hardening untouched). Telemetry: `stats()` grew three → five
+   counters (`textedit_guarded_ops` / `textedit_raw_splices` — the
+   executable-class criterion lever: a guarded-only run is
+   raw_splices == 0; the drill pin moved wittingly in the same
+   commit; the `trellis_agent.py` fallback dict grew the same keys
+   zeroed; the Node scanner tolerates additive fields, pinned).
+   `TEXTEDIT_ADDENDUM` teaches the family (brace-free; gated behind
+   `TRELLIS_EDIT_ROOT` — both composed-prompt pins UNMOVED, verified
+   by `test:modules` in the close-out block).
+3. **Honest scope, pinned deliberately (record §4):** the run-1 class
+   is PREVENTED at the call (anchor mismatch refuses; nothing
+   stages); edge-neighbor retypes are PREVENTED (minimality); a
+   kept line dropped INSIDE a correctly-declared removal window — the
+   exact run-2 shape — STAGES: converted from silent side effect to
+   explicit reviewable declaration, NOT prevented. The drill asserts
+   the staging (the honest-scope pin) so the residual is measured,
+   not denied. Raw `splice` stays callable (compatibility); the lever
+   for future increments is the criterion, not the contract.
+4. **Pins and drills (§6 criterion items 1–5 ALL PASS, first-run
+   green):** `test:textedit` 105 → 129 on Windows (106 → 130 POSIX) —
+   new section [14]: the run-1 shape refused with nothing staged, the
+   over-wide refusal naming "[5, 6)", the run-2 manifest shape
+   staging, the decomposed minimal edit landing with the executable
+   neighbor byte-intact on disk, anchored insertion/deletion refusal
+   branches, budget refusal staging nothing, the five-counter
+   telemetry split, the addendum teaching check; the section-10
+   telemetry pin moved three → five in the same commit.
+   `test:selfedit-harness` 49 → 55 checks — the rehearsal gained mode
+   `guarded` (`scripts/test_selfedit_rehearsal.py`) and section [8]
+   drives the run's REAL sequence: cypher → fetch → one OBSERVED
+   live `AnchorMismatchError` (a retyped-from-memory expected line) →
+   the taught self-correction (re-read, minimal verified replace) →
+   write_back → the Session 31 gated write; guarded-only telemetry
+   (guarded_ops 1 / raw_splices 0); full checker ZERO findings;
+   neighbors byte-intact. `npm test` stays 837/85 — the increment is
+   Python-toolkit-side; its pins live in the two drills (recorded
+   honestly; no artificial TS test was added).
+5. **The close-out block, all green:** `npm test` 837/85; build;
+   python:check; compose config; the full drill list
+   (selfedit-harness 55, answer-channel, textedit 129,
+   module-lifecycle, modules — pins unmoved, promotion,
+   rlm-workspace, rlm-mcp, rlm-sandbox, verification-sweep,
+   agent-loop, a2a, repo-ingest, benchmark-hardening,
+   entity-resolution, api-hardening, belief-recovery,
+   invalidation-sweep); `git diff --check`. The isolated Compose
+   integration ran as project `trellis_s41_ci` (11/11 PASS, torn
+   down `--volumes`). `drill:scale` ALONE read 1.39x CLOSED — below
+   the recorded 1.48x–2.26x band, so it was RE-RUN per guardrail 8:
+   1.45x CLOSED, consistent; two consecutive closed readings, the
+   band's floor moves down; the committed
+   `scale_drill_results.json` carries the 1.45x re-run (max
+   cardinality 286 unchanged).
+6. **The per-PR refresh (split-scope recipe §10.4, second execution;
+   $0.0955 actual — 16,327 in / 5,452 out / 9,017 embedding tokens
+   from the worker metrics port, read before the workers were
+   killed).** Plan echoes FIRST, zero tombstones both scopes.
+   `trellis#9` (policy 1, everything except src/rlm): 9 files —
+   `src/config/schema.ts` (the Session 40 filter, 2 paid blocks) +
+   test/EOL-churn re-hashes (excluded from extraction). `trellis#10`
+   (policy 2, src/rlm): 3 files — `trellis_textedit.py`
+   Merkle-precise 16 retained / 15 added / 8 orphaned (the guarded
+   family), `trellis_agent.py` 24 retained / 2 added / 2 orphaned
+   (the fallback dict), `trellis_answer.py` 8/8 re-hash (the
+   checkout-EOL churn class, fourth observation). 20/20 extraction
+   jobs, zero failures; 12 sweeps contested 38 nodes / 31
+   relationships (audit preserved, lazy recovery). **All three
+   standing beliefs (`wires` / `consumes` / `returns_copy_of`) rode
+   through UNCONTESTED** — the `wires` evidence block
+   `9b4c3159…6a730` was retained by the v-next agent ingest; the
+   second consecutive refresh needing no recovery. Worker child tree
+   killed and zero Trellis consumers verified afterward (the
+   Session 37/38 stale-consumer discipline).
+7. **The delegated ladder decision (row 11), recorded:** the row
+   stays OPEN; the executable-class prerequisite is SATISFIED by this
+   session; increment 3 = the first executable-class edit run under a
+   guarded-only criterion (`textedit_raw_splices == 0` added to the
+   standing five items), entering as a NEW proposal with its own
+   estimate when a REAL in-scope target surfaces by substrate query —
+   never manufactured. Cross-references landed in
+   `STRUCTURAL_CHUNKING.md` §8 (DECIDED) and `CODE_MEDIATED_TEXT.md`
+   §6.1 (the closure paragraph).
+8. **Bookkeeping:** Session 36's §5 entry moved verbatim to
+   `docs/archive/ROADMAP_HISTORY.md` (the five-session window is now
+   37–41); HANDOFF regenerated per §0 with the §0 step 5 re-check
+   (next objective: the row-10 slice (d) acceptance measurement —
+   the longest-standing shovel-ready item now that the splice
+   prerequisite is closed). No kernel prompt byte anywhere in the
+   session; zero defects found in existing kernel code.
