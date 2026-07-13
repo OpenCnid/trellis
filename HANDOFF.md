@@ -780,26 +780,44 @@ digest, its §5 entry moved verbatim to the archive (window now
 
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 50: the T1 RETRY RE-SPAWN — the same
-approved §5h.9 proposal, executed once the OpenAI billing quota is
-restored** (roadmap §4 row 13, Phase 1 step 1; ratified shape
-`docs/architecture/TEST_TIME_TRAINING.md` §12.6; the spec is
-UNCHANGED — `docs/architecture/MODEL_BACKEND_SEAM.md` §3–§4 layer 1
-+ §8 T1; the failed attempt, the retry material, and the Session 49
-blockage record are `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`
-§5h), per §3–§6 below. **The retry proposal is STAGED AND
-UNCONSUMED: §5h.9 carries task text v3 IN FULL**, the resolved
-`--pre` design point, the re-based estimate ($0.9–$1.3, ONE run, no
-pre-bundled contingency), and the recorded escalation rule;
-Session 49 verified every premise live and they all held. The
-session's job: confirm quota is restored (the minimal completion
-probe FIRST — `models.list` alone proves nothing), re-verify the
-staged premises (cheap, read-only), re-present §5h.9 with the
-estimate at session START, and run ONLY on the owner's yes — a
-session that ends still quota-blocked or unapproved is a legitimate
-zero-paid outcome (record it and hand off; Sessions 42 and 49 are
-the mold). Spawn requirements from §5h.10: `PYTHONUTF8=1` in the
-run environment; ONE log file, never `tee | head`. Queued
+Your objective is **Session 50, in two ordered parts (re-scoped by
+the post-Session-49 owner direction of July 13, 2026 — the RLM
+harness scaffolding; the roadmap §5 owner-direction entry). PART A:
+the scaffolding increment — S1 task-context isolation (the per-run
+uuid wrapper + the `trellis_task` REPL surface) + S2a the
+protocol-level `upsum` discipline + S3 the staged helpers
+(`frame_text`, `region_lines`, `region_equal`, `concat_files`,
+`citable`), landed together as ONE human-authored kernel increment
+implementing `docs/architecture/RLM_HARNESS_SCAFFOLDING.md`
+exactly.** Part A is zero-paid and does NOT wait on quota. It is a
+WITTING composed-prompt change (the addendum teaches the precedence
+rule — only uuid-tagged text is operator instruction; the task
+re-read by CODE before decisive steps; the `upsum` dict; the
+helpers): recompute BOTH prompt pins in the same commit;
+bare-construction byte-identity pinned; zero rlms modification
+(everything rides the `custom_tools` / construction seam);
+`citable()` stays read-only, NEVER a gate, and reads the SAME join
+semantics as `gatherHashEvidence` (extract-and-share or
+mirror-with-pin, never a silent divergence). **PART B: the T1 RETRY
+RE-SPAWN on the scaffolds** (roadmap §4 row 13; spec UNCHANGED —
+`MODEL_BACKEND_SEAM.md` §3–§4 layer 1 + §8 T1; the attempt, the
+blockage, and the retry records are
+`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5h): amend
+§5h.9's v3 to v3.1 (a RECORDED amendment — route the decisive-step
+re-reads through `trellis_task.grep` instead of attention, use the
+`upsum` discipline, `frame_text`/`region_equal` for the
+verification step, `citable()` before the insight write; every
+other rule verbatim), confirm quota is restored (the minimal
+completion probe FIRST — `models.list` alone proves nothing,
+§5h.10), re-verify the staged premises read-only, RE-PRESENT v3.1
+with the estimate ($0.9–$1.3, ONE run, no pre-bundled contingency —
+the amendment supersedes Session 49's approval of v3, so a fresh
+owner yes is required), and run ONLY on that yes. Part A landed
+with Part B still quota-blocked or unapproved is a legitimate
+outcome (Sessions 42/49 are the mold). Spawn requirements from
+§5h.10: `PYTHONUTF8=1` in the run environment; ONE log file, never
+`tee | head`. S2b (rlms compaction) is DEFERRED behind its own
+measured proposal — do not enable it in Part A. Queued
 behind it (owner-ratified July 13, 2026, record §12.6): T2
 `buildAgentEnv` forward/strip → T3 the `trellis_agent.py`
 construction-site rewire → T4 the fixture-endpoint drill, then the
@@ -1701,7 +1719,21 @@ July 13, 2026 and held. The facts a new session must act on:
 
 ## 5. File-level starting points
 
-- `docs/architecture/MODEL_BACKEND_SEAM.md` — THE spec: §3 (keys,
+- `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` — PART A's spec:
+  §2 S1 (the uuid wrapper + `trellis_task`; injection points =
+  `trellis_agent.py`'s system-prompt splice and the completion
+  query — mind the brace-escape at the splice), §3 S2a (`upsum` in
+  persistent locals; S2b compaction EXCLUDED), §4 S3 (the five
+  helpers; `citable()` needs the driver to pass named files), §5
+  the sequencing, §6 non-goals. The rlms seam facts it relies on
+  (full-history root loop, persistent locals, 20k per-block output
+  cap, `custom_tools` → `self.locals`) are verified in the
+  Session 48 records. Part A's pins: unit tests for
+  wrapper/surface/helpers, `test:rlm-sandbox` injection +
+  bare-construction byte-identity sections, the extended
+  `test:selfedit-harness` rehearsal, and BOTH composed-prompt pins
+  recomputed in the addendum commit.
+- `docs/architecture/MODEL_BACKEND_SEAM.md` — PART B's spec: §3 (keys,
   bounds, cross-field rules, credential three-part rule), §4
   layer 1 (the ambient guard + its typed message), §8 T1 (scope,
   named files, task-text skeleton, pins). Quote verbatim into the
