@@ -4473,3 +4473,142 @@ close-out refresh (recorded below). Design record:
    RETRY: the comment-class diff gate zero-paid first, then the
    re-proposed run (owner-gated).
 
+
+### July 13, 2026 — Session 38: structural chunking increment 1 — the seam + cAST walk + shadow measurement landed zero-paid; the pilot ran and FAILED criterion item 3 as worded (§4 row 12)
+
+The code-substrate granularity upgrade, implemented exactly as the
+design record fixed it (algorithm and engine not re-litigated). One
+machinery commit + docs; paid spend this session: the per-PR refresh
+(~$0.29 est., actuals split across a worker incident — see item 6),
+the pilot **$0.540 actual** vs ~$0.46 estimate, and 16 seam-query
+embedding calls (150 tokens, <$0.001). The full measured record is
+`docs/architecture/STRUCTURAL_CHUNKING.md` §10.
+
+1. **The machinery (zero-paid).** The generic tree seam
+   (`src/core/ast/generic_tree.ts`: `GenericTreeNode` byte spans with
+   strict ordered/nested/in-parent validation — violations are typed
+   errors, never guessed trees; spans are UTF-16 code units with
+   `String.slice` semantics, verified against multi-byte content
+   before adoption); the cAST split-merge walk
+   (`structural_chunker.ts`, pure: fit = one chunk, oversized
+   recurses, adjacent SAME-KIND siblings greedily merge to 3,000
+   chars, oversized childless leaves stay whole, comments and gaps
+   glue to the following construct, giant gaps become bounded
+   `code_chunk` segments; split threshold 4,000 = policy 1's
+   `MAX_CHUNK_CHARS`; byte-exact coverage enforced in the walk AND
+   re-checked by `coversSource`); the engine
+   (`treesitter_engine.ts`: `web-tree-sitter` 0.26.11 +
+   `@vscode/tree-sitter-wasm` 0.3.1 grammar blobs, BOTH exact-pinned
+   in package.json — a grammar bump is a substrate-identity event;
+   ERROR/missing trees refuse as typed `parse_error`; per-language
+   chunk profiles for TS/TSX/JS and Python). `parseSourceFile` gains
+   `chunkingPolicy` (absent/1 byte-identical — pinned; 2 =
+   structural; markdown/text ignore it); `repo:ingest` gains
+   `--chunking-policy` with the snapshot-summary `chunkingPolicy`
+   stamp (default 1, pinned). New kinds `code_import` / `code_const`
+   / `code_type` / `code_statement` flow through BOTH block walks via
+   the existing childless-with-content branch — neither walk changed
+   a byte (parity re-pinned with a structural-kinds case in
+   `block_parity.test.ts`). The recorded per-kind eligibility
+   decision: `code_import` typed-and-skipped
+   (`EXTRACTION_INELIGIBLE_BLOCK_TYPES` in traverse.ts, consumed by
+   `planExtraction` — readable blocks, never paid extraction or
+   embedding); the other three ELIGIBLE. `npm test` 782 → 823 across
+   85 files (seam validation, walk pins incl. the 13.7 KB
+   main()-shape recursion, engine pins incl. UTF-16 spans and the
+   ERROR refusal, policy-1 byte-identity in the plan-equality mold,
+   policy-2 determinism, eligibility pins, the snapshot stamp).
+2. **Shadow measurement (zero-paid, `npm run chunking:shadow`).**
+   285 code files, full scope, GREEN (zero coverage errors, zero
+   policy-2 refusals on policy-1-accepted files): monoliths >8,000
+   chars **15 → 0** (max 25,818 → 4,641); TS structureless share
+   **51.6% → 0.4%** (PY 55% → 0%, JS 100% → 0%); blocks 2,332 →
+   2,682; extraction-eligible 1,839 → 2,389 with 293 imports
+   typed-and-skipped; 3 over-cap glued-prefix exceptions counted;
+   boundary oracle **911/911** policy-1 functions/methods intact
+   inside one policy-2 block (zero Babel/python-ast vs tree-sitter
+   boundary disagreements). `code_function` 860 → 464 by design
+   (small adjacent functions merge — the density rule; the oracle
+   proves containment, not loss).
+3. **The pilot (owner-approved up front; snapshot `trellis#6`).**
+   Seam-query baseline FIRST (8 pre-stated kernel-surface queries,
+   `npm run chunking:seam-queries`, pinned in the script): 5/8
+   defining files in top 3. Then `--include src/rlm
+   --chunking-policy 2 --extract changed --max-blocks 150
+   --confirm-extraction`: plan echo 110-block bound (the shadow's
+   exact number), 8 files, 304 carried forward; **110/110 jobs, zero
+   failures; $0.540**. Criterion verdict (§10.3, judged as
+   pre-stated): items 1/2/4/5 PASS (zero monoliths and zero over-cap
+   persisted — DB-verified; structureless 27.3% → 0.0% in scope; max
+   pilot-scope hub 5.45% ≤ 8% with `main`'s monolith hub-feeding
+   gone; churn integrity green with 89 nodes / 202 rels contested,
+   audit preserved). **Item 3 FAILED as worded: raw tool-shape
+   seam queries read 4/8 after vs 5/8 before.** Root cause diagnosed
+   and recorded, not argued away: dead-block embedding pollution —
+   the re-chunk killed every old block but their embeddings stay
+   searchable, and ~256 dead near-twins outrank the live re-chunks.
+   The live-only diagnostic (explicitly NOT the criterion
+   instrument) reads 5/8 → 5/8 with the HEADLINE case fixed (the
+   §5f.5 `trellis_agent.py` telemetry query: not-in-top-5 →
+   live-rank 2) and one genuine regression named (small-function
+   merge dilution on `trellis_blocks.py`). **Pilot verdict: FAILED
+   under §7's own rule; recorded and stopped — no retuning.** The
+   policy-2 `src/rlm` substrate STANDS (reverting is a second churn
+   event teaching nothing); two owner follow-up candidates recorded
+   in §10.3: a liveness filter for `search_ast_nodes` (or an
+   embedding sweep over superseded blocks) and the merge-density
+   knob. Rollout continuation is the owner's call; row 12 stays
+   open.
+4. **Churn + recovery observed live (the third time).** The pilot
+   quarantined the three standing TRUE beliefs whose evidence blocks
+   died (Session 36's `returns_copy_of` recovery belief, the
+   Session 36 run-2 `wires` insight, the Session 37 run-2 `consumes`
+   insight — all audit-preserved with `orphanedSourceIds`); all
+   three RECOVERED same-day as operator re-derivations through the
+   ordinary write path citing live policy-2 blocks, verified
+   uncontested with `rederivedAt` stamped. NOTE for Session 39:
+   `src/rlm` block hashes CHANGED — the retry's evidence must be
+   re-verified against the live substrate before any run
+   (refresh-before-use; the wiring statement is now block
+   `9b4c3159…`, a 2,961-char `code_statement`).
+5. **The per-PR refresh ran BEFORE the pilot by design** (snapshot
+   `trellis#5`, policy 1, scope src+scripts+modules: 17 files, 69
+   jobs queued, zero failures) so it could not clobber the pilot's
+   policy-2 roots. FUTURE refreshes must use the split-scope recipe
+   in §10.4 of the record: policy-1 refresh over everything EXCEPT
+   `src/rlm` (carry-forward preserves the pilot), plus a policy-2
+   `src/rlm` refresh when that directory changed.
+6. **Defect/incident record.** (a) The first worker start failed on
+   a missing `benchmark_logs/` directory (fresh worktree) and
+   ORPHANED an npm tree that kept consuming — the Session 37
+   stale-consumer class reproduced from a new cause; caught by
+   process-list inspection, both trees killed, queue verified
+   drained (69/69, zero failures) before proceeding. Refresh token
+   actuals were split across the two workers' registries and are
+   reported as the ~$0.29 estimate, honestly unrecoverable. (b)
+   `npm run chunking:shadow -- --include src/rlm` did not forward
+   the flag on this npm; direct `npx tsx scripts/chunking_shadow.ts
+   --include src/rlm` works (recorded, not chased). (c) Zero defects
+   found in existing kernel code; no kernel prompt byte, both
+   composed-prompt pins unmoved.
+7. **Acceptance (all green, July 13, 2026).** `npm test` 823 passing
+   / 85 files (was 782/82), `npm run build`, `npm run python:check`,
+   `docker compose --profile test config --quiet`. The full standing
+   drill block green (18 suites: selfedit-harness, answer-channel,
+   textedit, module-lifecycle, modules — pins unmoved — promotion,
+   rlm-workspace, rlm-mcp, rlm-sandbox, verification-sweep,
+   agent-loop, a2a, repo-ingest, benchmark-hardening,
+   entity-resolution, api-hardening, belief-recovery,
+   invalidation-sweep). `drill:scale` run ALONE: 1.69x CLOSED
+   (in-band ~1.48x–2.26x, first try; max provenance 286; results
+   file committed). Isolated Compose integration as project
+   `trellis_s38_ci`: 11/11 PASS (package.json changed — the npm ci
+   layer rebuilt; the pip layer stayed cached); torn down with
+   `--volumes`. `git diff --check` clean.
+8. **Documentation window (owner rule).** The Session 33 §5 entry
+   moved VERBATIM to `docs/archive/ROADMAP_HISTORY.md` (the live
+   ledger keeps Sessions 34–38); HANDOFF regenerated for Session 39
+   (the increment-2 retry: comment-class diff gate zero-paid first,
+   then the re-proposed run with task text v3) with Session 33
+   compressed into the digest.
+

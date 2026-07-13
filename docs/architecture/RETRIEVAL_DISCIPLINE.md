@@ -262,3 +262,84 @@ spend: repeat-fetches 0 by construction on the disciplined arm, tokens
 ≤ baseline, correctness non-inferior — calls and correctness reported
 TOGETHER, never calls alone (the Session 28 symmetric rule: never
 reward LOW counts either).
+
+## 9. Measured verdict (Session 43, July 13, 2026)
+
+The §8 acceptance measurement ran owner-approved on July 13, 2026
+(Session 43; Session 42's attempt was blocked environmentally with $0
+spent). One paired run, no retuning: 5 questions × 2 arms ×
+`--repeats 5` = 50 runs through `scripts/exp_effective_context.ts`
+(`--suites est --arms on --repeats 5 --confirm-paid`; the OFF arm is
+the identical invocation with `TRELLIS_EXP_OMIT_RETRIEVAL=1` in the
+runner's own environment). Arm assignment was verified PER RUN from
+the TRELLIS_TELEMETRY discipline counters, both directions: all 25 ON
+runs report `retrieval_fetches` ≥ 1; all 25 OFF runs report every
+discipline counter 0. Spend: **$1.0497 (ON) + $0.9122 (OFF) =
+$1.9619 actual** against the ~$2.40 estimate, under the ≤$5/run cap.
+
+### 9.1 The numbers
+
+Per question (correct, median input tokens [min..max], median db
+calls, dollars — counts and correctness together, per the symmetric
+rule):
+
+| question | arm | correct | in-tokens med [min..max] | out med | db med | $ |
+|---|---|---|---|---|---|---|
+| est-chr-counts | ON | 5/5 | 8,214 [8,017..12,809] | 488 | 1 | 0.1418 |
+| est-chr-counts | OFF | 5/5 | 3,742 [3,742..12,914] | 451 | 1 | 0.1021 |
+| est-chr-quote-entry | ON | 5/5 | 14,405 [8,668..21,080] | 876 | 2 | 0.2237 |
+| est-chr-quote-entry | OFF | 5/5 | 3,805 [3,805..13,380] | 540 | 2 | 0.1250 |
+| est-frank-locate-count | ON | 5/5 | 8,680 [3,847..9,367] | 736 | 2 | 0.1272 |
+| est-frank-locate-count | OFF | 4/5 | 8,910 [3,847..14,994] | 805 | 2 | 0.1679 |
+| est-led-captain | ON | 5/5 | 12,441 [5,615..30,007] | 854 | 1 | 0.2241 |
+| est-led-captain | OFF | 5/5 | 12,304 [5,615..20,172] | 1,006 | 1 | 0.2048 |
+| est-rel-guild | ON | 5/5 | 18,729 [8,756..43,554] | 1,193 | 1 | 0.3330 |
+| est-rel-guild | OFF | 5/5 | 18,689 [8,756..42,445] | 1,042 | 1 | 0.3124 |
+
+Pooled: ON **25/25 correct**, median input 8,756 [3,847..43,554],
+median output 829, median db calls 2 (total 39), answer_submits
+25/25, $1.0497. OFF **24/25 correct**, median input 8,807
+[3,742..42,445], median output 796, median db calls 2 (total 49),
+answer_submits 25/25, $0.9122. Discipline counters on the ON arm:
+**5 dedup refusals observed live** (est-chr-counts r2; the three
+est-chr-quote-entry repeats r1/r2/r4; est-frank-locate-count r1 —
+each a repeat request refused before any I/O, with the run
+completing correctly), **0 budget refusals** (the kernel default 64
+was never approached; a nonzero count would have been a finding).
+
+### 9.2 Criterion verdict, judged as pre-stated (the archived Session 33 §5 entry, item 4)
+
+1. **(i) PASS** — repeat-serves 0 by construction on the ON arm:
+   the dedup machinery is pinned (`test:rlm-sandbox` [7]), and the
+   run observed it live — 5 repeat requests drew typed
+   `Retrieval Discipline:` refusals and NO re-served bytes; every
+   run that drew a refusal still answered correctly.
+2. **(ii) PASS, thin** — pooled median input tokens ON 8,756 ≤ OFF
+   8,807. The margin is 51 tokens (~0.6%) — recorded as observed:
+   the pooled direction is correct, not a headline saving. The
+   per-question medians are MIXED and recorded honestly: OFF read
+   lower on both chronicle questions (one-shot runs at the 3.7–3.8k
+   floor were more frequent there), ON read lower on
+   est-frank-locate-count, the two aggregate questions were flat.
+   The est suite's questions need only 1–2 fetches, so there is
+   little repeat-spend for dedup to reclaim; the 5 refused repeats
+   are exactly where the mechanical saving lives.
+3. **(iii) PASS** — correctness non-inferior: ON 25/25 ≥ OFF 24/25.
+   The one OFF miss (est-frank-locate-count r2) answered
+   "DEBUG_NEEDED, None" after 8 db calls — a single-run
+   observation, reported with its counts, NOT evidence that
+   discipline improves correctness.
+
+### 9.3 What this verdict does and does not claim
+
+The machinery's claim was always mechanical, and that is what the
+measurement confirms: repeats never re-serve bytes (observed at 5/25
+run opportunities), the budget bounds spend without firing at this
+suite's scale, and the discipline costs nothing measurable —
+correctness held and pooled tokens did not regress. It does NOT
+claim a token headline (the 0.6% pooled margin is noise-adjacent on
+25 pairs), does NOT claim a correctness improvement (one run), and
+the §3 padding-evasion and budget-sufficiency residuals stand
+exactly as recorded. Raw logs:
+`benchmark_logs/effective-context-2026-07-13T17-55-42-912Z` (ON) and
+`…T18-01-27-193Z` (OFF), gitignored, local to the Session 43 host.
