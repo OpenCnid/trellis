@@ -43,6 +43,7 @@ export interface TrellisMetrics {
 
   // Verification sweep outcomes.
   verificationBeliefsTotal: Counter<'result'>;
+  entailmentPairsTotal: Counter<'result'>;
 
   // Entity-resolution sweep outcomes.
   resolutionCandidatesTotal: Counter<string>;
@@ -184,6 +185,14 @@ export function createMetrics(registry: Registry): TrellisMetrics {
       help:
         'Verification sweep results: classified, agreed, disputed, '
         + 'skipped_no_text, skipped_no_answer.',
+      labelNames: ['result'],
+      registers: [registry],
+    }),
+    entailmentPairsTotal: new Counter({
+      name: 'trellis_entailment_pairs_total',
+      help:
+        'Entailment detector results per (edge, cited-hash) pair: judged, '
+        + 'supported, flagged, skipped_no_text, skipped_no_answer, deferred.',
       labelNames: ['result'],
       registers: [registry],
     }),

@@ -458,3 +458,42 @@ the section they amend.)*
   needed: no prompt byte moved, both composed-prompt pins unmoved. The
   fixed constraint survives for any FUTURE surface: headers are
   engine-stamped, never model-written.
+
+- **July 12, 2026 (Session 32) — slice (e) finalized and landed
+  (`src/core/graph/entailment_detection.ts`). Amends §5.4 with the
+  decisions the sketch left open:**
+  1. **Check-stamp shape: additive per-edge audit properties, decided
+     against the graph shape.** A supported verdict appends the hash to
+     `entailmentCheckedHashes` (+ `entailmentCheckedAt`); an unsupported
+     verdict contests the edge through the ordinary Phase 4/5 transition
+     with the typed reason `unsupported_citation` and appends the hash
+     to `unsupportedHashes` (+ `entailmentFlaggedAt`). Provenance fields
+     (`sourceNodeIds` / `orphanedSourceIds`) are never mutated by either
+     verdict; no per-pair node class was added (§4.5 data-not-objects:
+     two list properties on the edge, not a new graph shape).
+  2. **Judged at most once.** Selection excludes BOTH stamp kinds, so
+     every judge completion buys new information and a recovered edge
+     never flaps back into contest over an already-judged pair — the
+     durable `unsupportedHashes` record already carries the finding for
+     the human gate and any future sweep policy. A NEW hash on a
+     re-derived edge is a new pair and re-enters the pool. Consequence
+     recorded honestly: the write path's union semantics keep an
+     unsupported hash in `sourceNodeIds` after recovery; the edge
+     recovers (re-derivation clears the contest, exactly as everywhere
+     else), the audit survives, and the pair is not re-judged.
+  3. **Uniform candidate class.** Every non-contested `DERIVED_INSIGHT`
+     edge with provenance is in the pool — `has_category` edges
+     included (the verification sweep re-classifies them; the detector
+     asks a different question of the same edges).
+  4. **Judge-all-then-write atomicity.** Every verdict is collected
+     before any write; a judge infrastructure failure aborts the sweep
+     with zero partial stamps and zero partial contests — strengthening
+     "never a provenance verdict" to "never partial state" (drilled:
+     `test:verification-sweep` [9]).
+  5. **Transport.** The detector rides `verification_queue` under its
+     own job name (`entailment_sweep`); the existing verification job
+     shape processes byte-identically. A pair whose bytes died since
+     the write is skipped and counted (`skipped_no_text`) — dead bytes
+     are the quarantine sweep's territory, never a semantic verdict.
+  The oracle-mode machinery is zero-paid end to end; the first real
+  judged sweep stays owner-gated propose-with-estimate per §5.4.

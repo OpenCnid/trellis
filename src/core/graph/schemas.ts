@@ -64,3 +64,13 @@ export const AliasAdjudicationSchema = z.object({
 });
 
 export type AliasAdjudication = z.infer<typeof AliasAdjudicationSchema>;
+
+// Strict structured-output shape for one entailment-judge verdict
+// (Session 32, PROVENANCE_THREADING.md §5.4): one bounded completion per
+// sampled (edge, cited-hash) pair; the verdict validates before any
+// check stamp or flag is written.
+export const EntailmentResponseSchema = z.object({
+  supported: z.boolean(),
+});
+
+export type EntailmentResponse = z.infer<typeof EntailmentResponseSchema>;

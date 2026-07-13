@@ -115,6 +115,14 @@ const EnvSchema = z.object({
   RESOLUTION_MAX_PAIRS_PER_SWEEP: z.coerce.number().int().positive().default(200),
   RESOLUTION_BATCH_SIZE: z.coerce.number().int().positive().default(25),
 
+  // Sampled citation-entailment detection (Session 32,
+  // PROVENANCE_THREADING.md §5.4): the T2 detector over persisted
+  // DERIVED_INSIGHT (edge, cited-hash) pairs. The rate samples unchecked
+  // pairs per sweep; the budget hard-bounds judge completions per sweep
+  // (overflow is counted as deferred, never silently dropped).
+  ENTAILMENT_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
+  ENTAILMENT_JUDGE_BUDGET_PER_SWEEP: z.coerce.number().int().positive().max(500).default(25),
+
   // A2A server surface (Session 11). Off by default: with the switch
   // unset the API registers no A2A routes and is byte-identical to a
   // pre-Session-11 process (pinned by the test:a2a drill). The card
@@ -313,6 +321,10 @@ export const config = {
     minConfidence: env.RESOLUTION_MIN_CONFIDENCE,
     maxPairsPerSweep: env.RESOLUTION_MAX_PAIRS_PER_SWEEP,
     batchSize: env.RESOLUTION_BATCH_SIZE,
+  },
+  entailment: {
+    sampleRate: env.ENTAILMENT_SAMPLE_RATE,
+    judgeBudgetPerSweep: env.ENTAILMENT_JUDGE_BUDGET_PER_SWEEP,
   },
   a2a: {
     enabled: env.TRELLIS_A2A_ENABLED === 'true',
