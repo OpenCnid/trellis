@@ -1,11 +1,12 @@
-# Structural Chunking: the code-substrate granularity upgrade (design-record CANDIDATE)
+# Structural Chunking: the code-substrate granularity upgrade (design record — roadmap §4 row 12)
 
-Status: **CANDIDATE, owner-gated — recorded July 13, 2026 (Session 37
-follow-on, owner-directed investigation).** Nothing here is
-implemented. This record sits BESIDE the Session 38 objective (the
-comment-class diff gate + the increment-2 retry) and does not preempt
-it; it enters the roadmap as its own row and runs only on owner
-selection. Document-first, per house pattern.
+Status: **SELECTED — the owner chose this row as the NEXT session
+objective (July 13, 2026, same day as recording; Session 38).**
+Nothing is implemented yet; the machinery lands zero-paid first and
+the pilot stays owner-gated per §7. The previously queued objective
+(the comment-class diff gate + the increment-2 retry) is DEFERRED one
+session, not dropped — it follows as Session 39 by the same owner
+decision. Document-first, per house pattern.
 
 ## 1. The measured problem
 
@@ -224,3 +225,6 @@ retuning of the budget until a recorded owner decision).
   code, no dependency, no prompt byte. External basis: cAST
   (arXiv:2506.15655), the astchunk reference implementation, and the
   tree-sitter project's wasm bindings — consulted July 13, 2026.
+- July 13, 2026 (later the same day) — owner SELECTED this row as the
+  Session 38 objective; the increment-2 retry moves to Session 39.
+  Sequencing recorded in the roadmap §5 entry and HANDOFF §3.
