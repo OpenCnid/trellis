@@ -328,6 +328,114 @@ pilot-provenance entities (contested 394 → 554; entity total unchanged
 at 796 — quarantine, never delete); both queues drained; the standard
 lazy recovery path applies.
 
+## 5d. Stage 1: the durable self-extraction substrate (Session 34, July 13, 2026)
+
+*Roadmap §4 row 11 stage 1 — the owner-approved scaling flywheel, step 4
+of 4 in the July 12, 2026 tooling-shape sequence. Decisions recorded
+BEFORE the run; measured results appended after it.*
+
+### 5d.1 The scope machinery (zero-paid, this session)
+
+The budget gate rejects a whole snapshot whose post-exclusion bound
+exceeds `--max-blocks` — there is no partial queueing — so a
+full-repository `changed` run either fits one budget or does not run at
+all. The July 13 full-scope dry run priced 4,575 post-exclusion blocks
+(~$12.35 at the §5b measured rate): over the standing ≤$5/run cap, so
+scope selection became a required capability, not a convenience.
+
+`repo:ingest` gained a repeatable `--include <prefix>` flag
+(`SnapshotOptions.includePrefixes`, Session 34):
+
+- Only paths under an included prefix (segment-boundary match; `src`
+  covers `src/a.ts`, never `src2/a.ts`) are read, parsed, planned, and
+  ingested. Doc keys stay root-relative, so scoped and full runs agree
+  on identity for every path.
+- A previously effective path OUTSIDE every prefix is **carried
+  forward**: re-published in the new snapshot at its previous root
+  hash, never read, never re-ingested, and — decisively — **never
+  tombstoned by a run whose scope does not cover it**. Deletion
+  decisions belong to runs whose scope covers the path.
+- An out-of-scope path with no prior version is a typed `out_of_scope`
+  skip. (Because out-of-scope files are never read, parse-level skip
+  reasons such as `binary` cannot apply to them — drilled.)
+- An invalid prefix (`..`, absolute, backslash, empty) refuses before
+  any I/O. Unset or empty scope is byte-identical to pre-Session-34
+  behavior (unit-pinned by plan equality).
+- The plan echo prints `scope:` and `carried forward:` lines before any
+  confirmation, and the summary/result carry a `carriedForward` count.
+
+Pins: `snapshot_ingest.test.ts` 17 → 24 unit tests;
+`npm run test:repo-ingest` 56 → 82 live checks (Part 7: scoped
+plan/execute, carry-forward of an *edited* out-of-scope file at its
+pre-edit hash, deferred pickup by a covering full-scope run, in-scope
+deletion still tombstoning under scope, CLI flag round trip, invalid
+prefix refusal).
+
+Operational consequence, recorded: a later scoped run whose scope
+covers path P adjudicates P's liveness (tombstones it if absent); a
+scoped run whose scope does not cover P leaves P exactly as the last
+covering run did. Chunked scope staging under ONE repo key is therefore
+safe: chunk N+1 picks up deferred paths as ordinary changed-mode
+ingests (drilled in Part 7).
+
+### 5d.2 Stage-1 decisions
+
+- **Repo key `trellis`, root = repository root.** Doc keys are
+  `repo:trellis:<repo-relative-path>` — stable across scoped and full
+  runs, and a file rename remains tombstone + new document.
+- **Scope: `src`, `scripts`, `modules`.** The code substrate stage 2
+  queries when editing code — 298 accepted files, printed
+  post-exclusion bound **1,423 blocks** (112 files / 498 blocks
+  `test_fixture_excluded`; 77 `out_of_scope` skips at plan time).
+- **Deferred, not rejected — `docs/` + root-level prose** (~2,900
+  blocks ≈ $7.8 at the §5b rate): its own chunked proposal if the owner
+  wants the architecture records queryable; the Session 25 routing
+  sends Markdown to the LEGACY prose prompt by design, and that
+  prompt's per-block value on engineering narrative is unmeasured.
+- **Excluded by decision — `data/`** (231 blocks): the four durable
+  measurement corpora are *object* text (a Gutenberg novel, synthetic
+  ledgers), not knowledge about Trellis. Extracting them would pour
+  novel characters and synthetic households into the same graph the
+  self-substrate lives in. They stay ingestible (Tier-1 bytes,
+  liveness) but out of every extraction scope this stage defines.
+- **Durability: the residue PERSISTS.** No tombstone-and-sweep cleanup
+  (the pilots' cleanup protocol explicitly does NOT apply). The dev
+  graph becomes live self-substrate: `repo:trellis:*` documents join
+  the durable list beside the probe corpora — drills keep cleaning
+  token-scoped state only. Future sessions refresh the substrate by
+  re-running the scoped snapshot: changed files re-extract their new
+  blocks, and the Merkle diff → invalidation sweep contests beliefs
+  whose source blocks died — the ordinary churn loop, now applied to
+  Trellis's own code.
+- **Estimate:** 1,423 blocks × ≈$0.0027/block (§5b measured, chat +
+  embedding) ≈ **$3.84 ceiling**; the §5c revised-prompt basis
+  (≈$0.0017/block) predicts ≈ **$2.4**. Under the standing ≤$5/run
+  cap. Owner approval for this session's paid runs was given up front;
+  the run proceeds at the printed bound.
+
+### 5d.3 The quality-acceptance criterion (pre-stated)
+
+Counts and spot checks together, never counts alone:
+
+1. **Pipeline:** jobs completed = blocks queued, zero failed jobs, zero
+   merge-dropped actions unaccounted.
+2. **Exclusion:** the executed run's exclusion counts match the plan
+   echo (112 files / 498 blocks withheld); zero extraction jobs carry a
+   test/fixture path's doc key.
+3. **Suppression:** `generic_suppressed` events counted; ZERO denylist
+   names carry `repo:trellis` provenance, verified by live graph query.
+4. **Hub shape:** max hub cardinality (by distinct stage-1 source
+   blocks) ≤ 8% of queued blocks — twice the §5b good-shape ratio
+   (4/103 ≈ 3.9%) — and the top 15 entities are all genuine API-level
+   identifiers, published with the distribution.
+5. **Spot checks:** named kernel surfaces (e.g. `write_derived_insight`,
+   `parseLlmResponse`) resolve to entities whose `sourceNodeIds` fetch
+   back real `ast_nodes` bytes containing the identifier.
+
+### 5d.4 Measured results
+
+*(appended after the owner-approved run)*
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).
