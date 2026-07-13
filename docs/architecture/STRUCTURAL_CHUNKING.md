@@ -211,7 +211,13 @@ retuning of the budget until a recorded owner decision).
   (`py-tree-sitter` is a native wheel — an allowlist and runtime
   decision), and it needs its own design record. The Session 38
   comment-class diff gate DETECTS that class post-run either way and
-  ships first regardless.
+  ships first regardless. **DECIDED (Session 41):** the record is
+  `STRUCTURAL_SPLICE.md` — the engine decision went to parser-free
+  anchor guards (the guarded splice family: `replace_lines` /
+  `insert_lines` / `delete_lines`, byte-exact removal manifests,
+  minimal-span refusals); the py-tree-sitter widening was REJECTED
+  with a recorded revisit trigger (construct-granular addressing that
+  content queries cannot express).
 - **Error-tolerant ingestion of broken files** (§2 axis 3): enabled
   by the tree-sitter engine but a separate policy decision (what a
   substrate should assert about bytes that do not parse).
