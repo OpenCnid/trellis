@@ -8,12 +8,12 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–34 and their same-day follow-ons (July 4–13, 2026; PRs
-#21–#76) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–35 and their same-day follow-ons (July 4–13, 2026; PRs
+#21–#77) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 34 with the Session 39 PR — this file keeps full
+recently Session 35 with the Session 40 PR — this file keeps full
 narrative only for the most recent five sessions). The one-paragraph
 digest, oldest first; §1 below carries everything from this span that
 a new session must actually know:
@@ -216,39 +216,22 @@ a new session must actually know:
   `repo:trellis:<path>` → `load`; entity names lowercase-normalized;
   freshness = the ordinary churn loop.
 
-**Session 35 (July 13, 2026, PR #77) is also complete:
-Trellis-on-Trellis stage 2, increment 1 — the graph-informed
-self-edit HARNESS (the edit run executed in Session 36).** Three
-commits (the design record, the harness, the docs), no kernel byte,
-no prompt byte, zero paid spend. **(1) The increment design record**
-is `REPOSITORY_INGESTION_REPORT.md` §5e (document-first). The
-selected target: `src/rlm/trellis_tools.py` carried two stale
-Session 30 statements FALSIFIED by Session 31; the pre-scoped edit is
-comment/docstring-only; the run must derive the correction from graph
-+ fetched bytes. **(2) The named failure mode:** graph-misdirected
-editing. Mechanical detection: `src/benchmarks/selfedit/check.ts`
-(pure; typed findings `out_of_scope_edit` / `named_file_unchanged` /
-`evidence_edge_missing` / `empty_evidence` / `contested_evidence` /
-`dead_evidence_hash` / `unbridged_evidence` / `target_entity_missing`
-/ `contested_target` / `doc_missing`; 21 unit pins) + `npm run
-stage2:check` (`--pre` gates on an uncontested target + present
-substrate doc; the post-run mode gathers `git status --porcelain`
-(read-only), the Neo4j evidence-edge state, and the PG
-current-version doc-key bridge, then evaluates — findings exit 1).
-The evidence check leans on Session 31 mechanically: the run records
-ONE derived insight citing the blocks it fetched — the write gate
-already refuses unretrieved citations, so a successful write IS proof
-of consultation. HONEST SCOPE (§5e.2): the checker proves the
-recorded evidence chain and diff scope, not diff semantics — human
-review reads the transcript. **(3) The drill** `npm run
-test:selfedit-harness`: 39 checks, token-scoped fixture, every
-detection code fired on its planted violation, the scripted rehearsal
-driving the run's REAL tool sequence zero-LLM with the clean arm at
-ZERO findings and the violation arm observing the LIVE gate refusal,
-plus a read-only live-substrate smoke. **(4) The run proposal**
-(§5e.4): Session 26 spawn mechanics, research mode,
-`--max-iterations 12`, estimate $0.15–$0.45/run ≤$0.90 total,
-five-part criterion pre-stated.
+- **Session 35 (PR #77)** built the stage-2 self-edit HARNESS
+  zero-paid (the run executed in Session 36): the increment design
+  record mold (`REPOSITORY_INGESTION_REPORT.md` §5e, document-first),
+  the named failure mode "graph-misdirected editing" with mechanical
+  detection (`src/benchmarks/selfedit/check.ts` — pure, typed
+  findings; `npm run stage2:check` — `--pre` gate + the post-run
+  gatherers: read-only `git status --porcelain`, the Neo4j
+  evidence-edge state, the PG current-version doc-key bridge), the
+  evidence contract "ONE recorded insight citing fetched blocks —
+  the Session 31 write gate makes a successful write proof of
+  consultation," the HONEST SCOPE (§5e.2: the checker proves scope
+  and the evidence chain, never diff semantics — human review reads
+  the transcript), and the `test:selfedit-harness` drill (scripted
+  rehearsal driving the run's real tool sequence zero-LLM; every
+  detection code fired on its planted violation; the live gate
+  refusal observed).
 
 **Session 36 (July 13, 2026, PR #78) is also complete: stage-2
 increment 1 EXECUTED and LANDED — the graph-informed self-edit run +
@@ -433,7 +416,7 @@ forward the flag on this npm — invoke `npx tsx
 scripts/chunking_shadow.ts` directly. Zero defects in existing kernel
 code; NO kernel prompt byte; both composed-prompt pins unmoved.
 
-**Session 39 (July 13, 2026, this PR) is also complete: the
+**Session 39 (July 13, 2026, PR #81) is also complete: the
 increment-2 RETRY — the comment-class diff gate landed zero-paid,
 then the approved run LANDED all five criterion items first shot
 (roadmap §4 row 11 stage 2; the row stays open on the owner's
@@ -494,28 +477,79 @@ comment-class gate) or by task discipline (minimal span + neighbor
 assertions), retry landed first shot. NO kernel prompt byte; both
 composed-prompt pins unmoved.
 
+**Session 40 (July 13, 2026, this PR) is also complete: the
+`search_ast_nodes` liveness filter — dead-block embedding pollution
+CLOSED at the T15 seam, then the pinned seam queries re-measured
+(roadmap §4 row 12 continuation; the Session 38 pilot's item-3 root
+cause; the whole session zero-paid except 8 embedding calls / 75
+tokens ≈$0.000002).** Design record `STRUCTURAL_CHUNKING.md` §11
+(written BEFORE implementation); measured record §11.4. **(1) The
+filter:** one `CREATE OR REPLACE FUNCTION` in `POSTGRES_SCHEMA_SQL`
+(`src/config/schema.ts`) — LIVENESS = membership in the CURRENT
+(max-version) root of at least one document, exactly the stage-2
+checker's `gatherHashEvidence` bridge mirrored into SQL (an EXISTS
+clause probing `idx_document_nodes_node_id`, applied BEFORE `LIMIT`);
+signature unchanged, so BOTH callers (`vector_search` in
+`trellis_tools.py`, `POST /retrieve`) changed ZERO bytes and the
+idempotent bootstrap upgrades every stack on boot. Tombstones compose
+(current version = empty root); superseded history stays queryable by
+hash through every other surface — only vector search filters. The
+honest residual recorded, not denied: a filtered HNSW scan can
+under-fill below pgvector's candidate truncation (0.8.3 on dev,
+iterative scan off) — NO under-fill observed (every query returned a
+full top-5; count-5 probe 65.9 ms, printed never asserted); no
+planner GUC set in the function. **(2) Pins + drill (zero-paid):**
+the `schema.test.ts` filter pin moved in the SAME commit (`npm test`
+836 → 837/85); `test:repo-ingest` Part 8 = the planted-dead-twin
+drill (synthetic vectors: the query IS the dead twin's embedding —
+raw distance order ranks it FIRST, the tool returns ONLY the live
+successor; tombstone drops both generations; ten checks first-run
+green). One witting fixture consequence: `test:rlm-sandbox` [5]'s
+embedded probe row was a bare insert with no membership — DEAD by
+the new definition — so it now registers as its own single-node
+document (`sandbox:probe:embed`, FK-ordered cleanup); every sandbox
+check unchanged and green. **(3) The re-measure (one run, after;
+§10.3's after-numbers are the before):** seam queries through the
+raw tool **4/8 → 5/8 — criterion ≥5/8 PASS**; the raw tool now
+reads exactly the Session 38 live-only diagnostic; the pilot's
+headline miss (the `trellis_agent.py` telemetry query, the §5f.5
+run-1 miss class) FIXED at live rank 2 where ~256 dead near-twins
+had buried it; NO query moved down. Persisting misses NAMED, not
+chased: `trellis_blocks.py` (merge-density, §10.3's named
+regression) and the two both-column misses (tools.py provenance
+rank 4, workspace >5 — cross-file semantic competition, unchanged by
+chunking or filter). Dev substrate at measure time: 1,731 embedded /
+286 dead / 1,445 live. **(4)** The §1 "name the pollution" reporting
+duty is RETIRED for tool-shaped vector-search results; the
+superseded-embedding SWEEP stays on the owner menu unchosen (storage,
+not correctness, is its only remaining argument). Zero defects found
+in existing kernel code; NO kernel prompt byte; both composed-prompt
+pins unmoved.
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 40: the `search_ast_nodes` liveness
-filter — closing the dead-block embedding pollution class at the
-schema seam, then re-measuring the pinned seam queries** (roadmap §4
-row 12 continuation; the Session 38 pilot's item-3 root cause;
-standing-menu item 9 promoted by the Session 39 recorded
-recommendation — the owner may override the selection), per §3–§6
-below. This CHANGES agent-visible retrieval results, so it follows
-the migration-grade entry: design record FIRST (a §11 section in
-`docs/architecture/STRUCTURAL_CHUNKING.md` or its own short record),
-pre-stated criterion, the zero-paid drill, then the near-zero-paid
-seam re-measure (8 query embeddings, well under a cent). The row-11
-increment ladder stands at the owner's judgment with the full record
-(increment 1 landed on contingency; increment 2 failed twice, retry
-landed first shot after mechanical closure) — present it, do not
-design increment 3 unilaterally; the recorded sequencing is that
-executable-class edit increments re-enter only AFTER structural
-splice addressing (standing item 10) has its own design record. The
-toolkit never touches git. Do not re-plan or re-implement completed
-work. RLM expands exclusively to Recursive Language Model (the MIT
-CSAIL formulation).
+Your objective is **Session 41: the structural splice addressing
+design record — the mechanical closure of the retype-splice
+neighbor-deletion class in `trellis_textedit`** (standing item 10;
+the recorded PREREQUISITE for any executable-class stage-2 edit
+increment; named as the highest-leverage adjacent candidate in
+`STRUCTURAL_CHUNKING.md` §8 and as the §1 pathology's closure
+candidate in `CODE_MEDIATED_TEXT.md` — the owner may override the
+selection to the §2 menu), per §3–§6 below. The deliverable is the
+design record FIRST (document-first, the row-9/10/12 mold: the
+decision space includes the Session 29 stdlib-only import-allowlist
+pin, so the engine choice — Python stdlib `ast`, a py-tree-sitter
+allowlist widening, or an engine-side service — is the record's
+central decision), a pre-stated acceptance criterion, and then ONLY
+the increment the record scopes as zero-paid-drillable this session.
+The row-11 increment ladder stands at the owner's judgment with the
+full record (increment 1 landed on contingency; increment 2 failed
+twice, retry landed first shot after mechanical closure) — present
+it, do not design increment 3 unilaterally; executable-class edit
+increments re-enter only AFTER this session's design record exists
+and its machinery lands. The toolkit never touches git. Do not
+re-plan or re-implement completed work. RLM expands exclusively to
+Recursive Language Model (the MIT CSAIL formulation).
 
 ---
 
@@ -591,15 +625,22 @@ immutable, content-addressed physical location in source material.
    - `repository_snapshots`/`repository_snapshot_paths` (Session 8)
      record which paths each published repository snapshot contained.
      Since Session 38 the published summary stamps `chunkingPolicy`.
-   - KNOWN SUBSTRATE PROPERTY (measured Session 38): `search_ast_nodes`
-     (the single schema-level SQL function BOTH the API and the Python
-     RLM client call — `src/config/schema.ts`, the T15 seam) has NO
-     liveness filter — superseded blocks keep their embeddings and
-     appear in vector-search results forever; every re-ingest adds
-     dead near-twins that can outrank live blocks (13 snapshots deep
-     and growing with every refresh). Closing it IS the Session 40
-     objective (§3) under the migration-grade entry — until it lands,
-     name the pollution whenever describing vector-search results.
+   - **The liveness filter (Session 40): `search_ast_nodes`** (the
+     single schema-level SQL function BOTH the API and the Python RLM
+     client call — `src/config/schema.ts`, the T15 seam) returns ONLY
+     LIVE blocks: members of the CURRENT (max-version) root of at
+     least one document (the `gatherHashEvidence` bridge mirrored
+     into SQL, an EXISTS clause applied BEFORE `LIMIT`). Superseded
+     blocks keep their embeddings — dead history stays queryable BY
+     HASH through every other surface — but never occupy vector-search
+     result slots (the Session 38 dead-block embedding pollution
+     class, closed; design + measured record `STRUCTURAL_CHUNKING.md`
+     §11). Signature unchanged; both callers byte-identical; the
+     idempotent bootstrap carries the upgrade. Honest residual: a
+     filtered HNSW scan can under-fill below pgvector's candidate
+     truncation — none observed at dev scale; report row counts if it
+     ever appears. Pinned by the `schema.test.ts` filter pin +
+     `test:repo-ingest` Part 8 (the planted dead twin).
    - Durable measurement substrate (Sessions 21–23):
      `data/frankenstein.txt` and `data/synthetic_chronicle.txt`
      (committed, byte-stability unit-pinned, `.gitattributes -text`)
@@ -654,7 +695,10 @@ immutable, content-addressed physical location in source material.
      for scoped runs invoke `npx tsx scripts/chunking_shadow.ts
      --include <prefix>` directly — npm `--` forwarding is broken on
      this npm) and `scripts/chunking_seam_queries.ts` (the eight
-     PINNED seam queries — never tune them between measurements).
+     PINNED seam queries — never tune them between measurements;
+     since the Session 40 filter the raw tool reads live blocks only,
+     so the instrument and the Session 38 live-only diagnostic now
+     coincide by construction).
    - **The promotion path (Session 17; `src/core/promotion/`):** the
      ONLY route from Tier 3 to Tier 1: `plan_promotion.ts` (typed
      refusals; content byte-verbatim) + `promote_segment.ts` (one
@@ -800,12 +844,13 @@ immutable, content-addressed physical location in source material.
      applied the pillar to the write path; Session 33 to retrieval
      spend; **Session 38 to the substrate's own granularity**
      (structure the engine can compute — typed construct blocks —
-     instead of blob chunks attention must re-read). Session 37
-     run 2's retype-splice neighbor deletion is the §1 pathology
-     observed live — the mechanical closure candidate (structural
-     splice addressing in `trellis_textedit`) is named in
-     `STRUCTURAL_CHUNKING.md` §8, deliberately out of scope, own
-     design record needed.
+     instead of blob chunks attention must re-read); **Session 40 to
+     retrieval liveness** (the engine, not the model, decides which
+     blocks are current). Session 37 run 2's retype-splice neighbor
+     deletion is the §1 pathology observed live — its mechanical
+     closure (structural splice addressing in `trellis_textedit`) IS
+     the Session 41 objective (§3): the design record first, the
+     import-allowlist decision inside it.
    - **The editing toolkit (Session 20; `src/rlm/trellis_textedit.py`):**
      injected ONLY when the operator sets `TRELLIS_EDIT_ROOT`. Every
      path strictly resolves inside the real root. `load` holds a
@@ -909,10 +954,11 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 13, 2026 Session 39 PR
-  (the increment-2 retry — the PR that carries this file).
-  Use `git log -- HANDOFF.md` to confirm this PR landed; if it is
-  still unmerged when this session starts, STOP and merge it first.
+- `master`: the head after the July 13, 2026 Session 40 PR
+  (the `search_ast_nodes` liveness filter — the PR that carries this
+  file). Use `git log -- HANDOFF.md` to confirm this PR landed; if it
+  is still unmerged when this session starts, STOP and merge it
+  first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); module
   #2 (`estimation-discipline`) is RETIRED (loader refuses
   composition; the graph entity persists as history). The dev PG
@@ -942,58 +988,58 @@ Repository state at handoff creation:
   leave it). The `trellis_agent.py` stale telemetry comment is FIXED
   AND LANDED (the Session 39 run's edit, commit `dd86921`) — the
   increment-ladder task list is EMPTY. Dead-block embedding
-  pollution stands as the recorded substrate property (§1) — THIS
-  session's target; name it whenever describing vector-search
-  results until the filter lands. ~640 documents in `documents`; the
-  two promoted `research:trellis/estimation-discipline/*` docs
-  remain; 15 contested OOLONG-era edges from the July 13 entailment
-  sweep remain (lazy-recovery residue). Roadmap §4 rows 5/6/6a/8/9/10
+  pollution is CLOSED at the T15 seam (Session 40): vector search
+  reads live blocks only; the dev store carried 1,731 embedded /
+  286 dead / 1,445 live rows at the measure — the dead embeddings
+  REMAIN (queryable by hash; the sweep alternative stays an owner
+  menu item). ~640 documents in `documents`; the two promoted
+  `research:trellis/estimation-discipline/*` docs remain; 15
+  contested OOLONG-era edges from the July 13 entailment sweep
+  remain (lazy-recovery residue). Roadmap §4 rows 5/6/6a/8/9/10
   and row 11 STAGE 1 are STRUCK; row 11 stage 2 increment ladder is
   COMPLETE THROUGH THE RETRY and stands at the owner's judgment
   (increments 1–2 both landed; deeper executable-class increments
-  are sequenced behind structural splice addressing); row 12 is IN
-  PROGRESS (the liveness filter is THIS session — the merge-density
-  knob and any scope widening stay owner calls); row 7 stays
-  trigger-blocked.
-- Session 39 changed NO kernel prompt byte — both composed-prompt
+  are sequenced behind structural splice addressing — THIS session's
+  §3 objective is its design record); row 12 increments 1–2 are done
+  (chunking machinery + pilot, then the liveness filter; the
+  merge-density knob and any scope widening stay owner calls);
+  row 7 stays trigger-blocked.
+- Session 40 changed NO kernel prompt byte — both composed-prompt
   pins unmoved (default `5d27e474…fe2a`, omit-arm `45987904…0b56` —
   recompute BOTH in the same commit only if the kernel prompt or
   rubric legitimately changes). Its code surface:
-  `src/benchmarks/selfedit/check.ts` (+ `check.test.ts`) — the
-  comment-class gate's pure pieces beside the parse gate;
-  `scripts/stage2_selfedit_check.ts` (`--comment-class` +
-  `gatherGitDiff`); `scripts/test_selfedit_harness.ts` (drill
-  section [7]); `src/rlm/trellis_agent.py` (the RUN-authored
-  3-comment-line correction — landed measured evidence of the
-  increment-2 retry; do not style-clean it, the Session 36
-  precedent). Run logs in `benchmark_logs/` (gitignored, local):
-  `session39_selfedit_run1.log` / `session39_workers.log` /
-  `session39_refresh_p{1,2}.log` / `session39_compose.log` /
-  `session39_task_v3.txt` (also verbatim in §5g.3). The Session 37
-  artifacts (`session37_run{1,2}_failed_diff.patch`,
-  `session37_task_v2.txt`) remain in this worktree's
-  `benchmark_logs/` — NOTE for fresh worktrees: gitignored artifacts
-  do NOT travel; Session 39 recovered them from the
-  `trellis-engine-dev-d29bbc` worktree's `benchmark_logs/`.
-  Reminder from Session 24: `block_parity.test.ts` SPAWNS the real
-  Python walk inside plain `npm test` — a machine without Python on
-  PATH fails the unit suite; CI sets up Python 3.13 before
-  `npm test`.
-- Offline baseline: `npm test` = 836 passing across 85 files
-  (Session 39 added the 13 comment-class gate pins, 823 → 836).
+  `src/config/schema.ts` (the `search_ast_nodes` EXISTS clause) +
+  `src/config/schema.test.ts` (the filter pin, moved in the same
+  commit); `scripts/test_repo_ingest.ts` (Part 8, the
+  planted-dead-twin drill); `scripts/test_rlm_sandbox.py` (the [5]
+  embed probe registered as `sandbox:probe:embed` with FK-ordered
+  cleanup — a fixture consequence of the filter, checks unchanged);
+  ZERO bytes in `trellis_tools.py` and `src/api/server.ts` (the two
+  callers). After pulling this PR run `npm run db:init:dev` once so
+  the dev stack's function body upgrades (Compose stacks upgrade on
+  boot). This session's log: `benchmark_logs/session40_seam_after.log`
+  (gitignored, local to the `trellis-engine-dev-160fda` worktree; the
+  Session 38 seam logs live in `friendly-wright-cb2e97`, the
+  Session 37/39 artifacts in `trellis-engine-dev-d29bbc` — gitignored
+  artifacts do NOT travel to fresh worktrees). Reminder from
+  Session 24: `block_parity.test.ts` SPAWNS the real Python walk
+  inside plain `npm test` — a machine without Python on PATH fails
+  the unit suite; CI sets up Python 3.13 before `npm test`.
+- Offline baseline: `npm test` = 837 passing across 85 files
+  (Session 40 added the schema filter pin, 836 → 837).
 - `npm run build` and `npm run python:check` pass (the check imports
   polars — an environment without it fails the check by design).
 - `npm run drill:scale`: gate CLOSED at max provenance 286.
-  Session 39 read 2.18x CLOSED (in-band ~1.48x–2.26x, first try, at
-  the band's top edge — watch it); Session 38 1.69x; Session 37
-  1.76x; Session 36 1.63x. If a future run reads OPEN, re-run before
+  Session 40 read 2.05x CLOSED (in-band ~1.48x–2.26x, first try);
+  Session 39 2.18x (the band's top edge); Session 38 1.69x;
+  Session 37 1.76x. If a future run reads OPEN, re-run before
   believing it — a REPRODUCING open reading is the migration trigger
   (roadmap §4 row 7) and the owner adjudicates. The drill rewrites
   the tracked `scale_drill_results.json` — commit it with the
-  session PR (the committed copy is Session 39's 2.18x CLOSED run).
+  session PR (the committed copy is Session 40's 2.05x CLOSED run).
   Run the scale drill ALONE — never concurrently with other live
   drills on the shared dev database.
-- Live zero-LLM checks (Session 39 observed, all green):
+- Live zero-LLM checks (Session 40 observed, all green):
   `test:selfedit-harness` (ALL CHECKS PASSED, 49 checks this
   environment — the count is environment-shaped; runs the rehearsal
   python, so it needs the Python runtime deps), `test:answer-channel`
@@ -1003,15 +1049,17 @@ Repository state at handoff creation:
   (86), `test:rlm-sandbox` (95), `test:verification-sweep` (66),
   `test:agent-loop` (35), `test:a2a` (46), `test:repo-ingest` ("All
   checks passed" is the signal — the [PASS] count is
-  environment-dependent by construction; 79 this environment),
-  `test:benchmark-hardening` (24), `test:entity-resolution` (34),
-  `test:api-hardening` (18), `test:belief-recovery` (30),
-  `test:invalidation-sweep` (17).
+  environment-dependent by construction; Session 40 added Part 8's
+  ten liveness checks), `test:benchmark-hardening` (24),
+  `test:entity-resolution` (34), `test:api-hardening` (18),
+  `test:belief-recovery` (30), `test:invalidation-sweep` (17).
 - Isolated Compose integration: 11 assertions (`--profile test`,
   unique project name; includes the containerized credentialed MCP
   fixture probe and the in-container `polars 1.34.0` import probe).
-  Session 39 ran it as project `trellis_s39_ci` (11/11 PASS) and
-  tore it down with `--volumes`. The CI-mold invocation: env
+  Session 40 ran it as project `trellis_s40_ci` (11/11 PASS,
+  including `/retrieve` end-to-end through the new function body in a
+  fresh bootstrapped stack) and tore it down with `--volumes`. The
+  CI-mold invocation: env
   `COMPOSE_PROJECT_NAME` + the five host-port variables at 0 + an
   `API_KEY`, then `docker compose --profile test up --build
   --abort-on-container-exit --exit-code-from integration
@@ -1019,9 +1067,9 @@ Repository state at handoff creation:
   host-port variables are EXACTLY `TRELLIS_POSTGRES_HOST_PORT`,
   `TRELLIS_NEO4J_HTTP_HOST_PORT`, `TRELLIS_NEO4J_BOLT_HOST_PORT`,
   `TRELLIS_REDIS_HOST_PORT`, `TRELLIS_API_HOST_PORT` — set each to 0.
-  NOTE: C: ran ~18 GB free at Session 39's close; a FULL image
-  rebuild needs several GB of headroom. `requirements.txt` and
-  `package.json` unchanged this session — both layers stay cached.
+  NOTE: C: runs tight on free space; a FULL image rebuild needs
+  several GB of headroom. `requirements.txt` and `package.json`
+  unchanged in Sessions 39–40 — both layers stay cached.
 - The standing owner-conditional items — all propose-with-estimate,
   never self-served: **(1) the row-10 slice (d) acceptance
   measurement** (the `est` suite paired re-run, 50 runs, ~$2.40;
@@ -1034,22 +1082,23 @@ Repository state at handoff creation:
   **(6) the substrate freshness cadence** (ADOPTED July 13: one
   scoped refresh per merged PR + refresh-before-use ahead of stage-2
   edit runs; each refresh's extraction spend still gated per run —
-  UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; Session 39 executed it
-  cleanly at $0.157); **(7) the targeted stage-1 entailment sweep**
-  (~100 pairs ≈ $0.04); **(8) the row-12 rollout continuation
-  BEYOND this session's liveness filter** (widening policy-2 scope,
-  retuning merge density, or reverting the pilot — owner's call with
-  the record §10.3 plus this session's re-measure); **(9) — PROMOTED
-  to the Session 40 objective (§3): the `search_ast_nodes` liveness
-  filter** (the superseded-embedding SWEEP alternative stays on this
-  menu, unchosen — destructive, re-buys embeddings on recovery);
-  **(10) structural splice addressing in `trellis_textedit`** (the
-  retype-splice mechanical closure — own record, import-allowlist
-  implications; the recorded PREREQUISITE for any executable-class
-  stage-2 increment); **(11) the row-11 increment-ladder judgment**
-  (both increments landed; present the ladder record — deeper
-  increments, pivot, or strike the row). If the owner overrides the
-  §3 selection, this list is the menu.
+  UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; NOTE: Session 40 changed
+  only harness/schema files, no refresh was owed — Session 41's
+  refresh covers both PRs' files); **(7) the targeted stage-1
+  entailment sweep** (~100 pairs ≈ $0.04); **(8) the row-12 rollout
+  continuation BEYOND the landed liveness filter** (widening
+  policy-2 scope, retuning merge density, or reverting the pilot —
+  owner's call with the record §10.3 + §11.4 together); **(9) the
+  superseded-embedding SWEEP** (storage reclamation only now that
+  the filter closed the correctness class — destructive, re-buys
+  embeddings on recovery; stays unchosen); **(10) — PROMOTED to the
+  Session 41 objective (§3): structural splice addressing in
+  `trellis_textedit`** (the retype-splice mechanical closure — own
+  record, import-allowlist implications; the recorded PREREQUISITE
+  for any executable-class stage-2 increment); **(11) the row-11
+  increment-ladder judgment** (both increments landed; present the
+  ladder record — deeper increments, pivot, or strike the row). If
+  the owner overrides the §3 selection, this list is the menu.
   OPERATIONAL NOTES (Windows): stopping `npm run dev:workers`
   through the session harness — OR a failed pipeline start (a
   missing `benchmark_logs/` directory broke a Tee and orphaned the
@@ -1088,143 +1137,135 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 40 problem statement
+## 3. Session 41 problem statement
 
-**The `search_ast_nodes` liveness filter (roadmap §4 row 12
-continuation; the Session 38 pilot's item-3 root cause; standing
-item 9 promoted by the Session 39 recommendation).** The measured
-facts a new session must act on:
+**Structural splice addressing in `trellis_textedit` (standing
+item 10 promoted; the recorded PREREQUISITE for executable-class
+stage-2 edit increments; the mechanical closure of the Session 37
+run-2 failure class).** The measured facts a new session must act
+on:
 
-- **The measured defect class:** the Session 38 pilot FAILED its
-  criterion item 3 as worded — the eight PINNED seam queries read
-  5/8 top-3 before the re-chunk and 4/8 after, through the raw tool.
-  Root cause, diagnosed not argued: `search_ast_nodes`
-  (`src/config/schema.ts` — the single schema-level SQL function
-  BOTH callers use: `trellis_postgres.vector_search` in
-  `src/rlm/trellis_tools.py` and `POST /retrieve` in
-  `src/api/server.ts`, the T15 seam) orders ALL embedded `ast_nodes`
-  rows by cosine distance with NO liveness filter. Superseded blocks
-  keep their embeddings forever; the pilot's re-chunk killed every
-  old `src/rlm` block and ~256 dead near-twins now outrank the live
-  re-chunks. The live-only diagnostic (`chunking_seam_queries.ts`'s
-  Session 38 mode — NOT the criterion instrument) read 5/8 → 5/8
-  with the headline `trellis_agent.py` telemetry query FIXED
-  (not-in-top-5 → live-rank 2): the live blocks are GOOD; the dead
-  ones bury them.
-- **The pollution compounds:** 13+ published snapshots (`trellis#1`
-  through `trellis#8` plus drill-era roots); EVERY refresh adds dead
-  near-twins — Session 39's own refresh orphaned whole re-hashed
-  files (the EOL churn class re-hashes entire files, each leaving an
-  embedded corpse per block). Left unfixed, retrieval quality decays
-  monotonically with the adopted per-PR refresh cadence.
-- **The chosen shape (of the two §10.3 candidates):** the QUERY-TIME
-  liveness filter — non-destructive (embeddings stay; superseded
-  history remains queryable by hash), reversible (one `CREATE OR
-  REPLACE FUNCTION` either way), and drillable zero-LLM (synthetic
-  embeddings). The superseded-embedding SWEEP stays on the §2 menu
-  unchosen: destructive, and recovery re-buys embeddings.
-- **Why this is migration-grade:** the filter CHANGES agent-visible
-  first-fetch results — guardrail 9's byte-identity rule moves only
-  with a witting, recorded change. This is that change: design
-  record first, pre-stated criterion, the before/after measurement
-  recorded. The Session 39 recommendation selected it; the owner may
-  override to the §2 menu.
+- **The observed failure class (Session 37 run 2, $0.2362, human
+  review caught it):** retype-splice neighbor deletion. The run's
+  evidence chain was PERFECT and `stage2:check` reported zero
+  findings, but the model hand-retyped a 6-line window as `splice`
+  `new_lines` and the retype DROPPED two neighbors — an executable
+  line and a comment head — while the file still PARSED. This is
+  `CODE_MEDIATED_TEXT.md` §1's pathology verbatim: existing bytes
+  moved through attention. The Session 39 comment-class gate DETECTS
+  the class post-run for declared comment-only increments;
+  executable-class increments have NO mechanical detection and NO
+  prevention — which is why they are sequenced behind this session.
+- **The toolkit today is line-oriented** (`src/rlm/trellis_textedit.py`:
+  `load` holds a frame + load-time sha256; `lines` returns a bounded
+  slice; `locate` returns engine-computed 0-based half-open LINE
+  addresses; `splice(relpath, start, end, new_lines)` stages a
+  line-window replacement; `write_back` is the hash guard). Nothing
+  constrains `new_lines` to touch only what the model means to
+  change: replacing a window re-authors every line in it. The
+  Session 39 retry succeeded by TASK DISCIPLINE (splice minimal
+  span + coded neighbor assertions) — behavior, not tooling shape.
+  The permanent owner direction (Session 28) says close it by shape.
+- **The constraint that makes this a design problem:** the
+  Session 29 static import-allowlist pin — `trellis_textedit.py` is
+  stdlib-only, no subprocess, no git tokens. The candidate engines
+  for syntax-aware addressing each violate or strain a recorded
+  invariant: `py-tree-sitter` is a native wheel (an allowlist
+  WIDENING — a recorded owner-visible decision); the TS-side
+  tree-sitter engine lives in another process (an IPC surface the
+  toolkit deliberately lacks); Python stdlib `ast` covers `.py`
+  files only (honest partial coverage — but `.py` is where both
+  landed self-edits and both failures happened). There are also
+  shapes that need NO parser: e.g., anchor-guarded splices, where
+  the engine verifies model-supplied EXPECTED bytes for the removed
+  span (or spans addressed by `locate` hits directly) and refuses on
+  mismatch — neighbor preservation by construction, no grammar at
+  all. Which shape wins is the design record's central decision, NOT
+  this handoff's: do not pre-commit; enumerate, weigh against the
+  invariant fence, decide, and record.
+- **Why this is the objective now:** the row-11 ladder is complete
+  through comment-class increments and the owner's judgment on
+  deeper increments is BLOCKED on exactly this record (the recorded
+  sequencing since Session 37). Row 12's liveness filter landed in
+  Session 40, so the substrate side is quiet. The owner may override
+  to the §2 menu.
 
 ## 4. Required design
 
-- **Pre-flight (zero-paid):** confirm the Session 39 PR merged
-  (`git log -- HANDOFF.md`); `npm ci`; full offline gates; stale
-  worker check per the §2 operational notes.
+- **Pre-flight (zero-paid):** confirm the Session 40 PR merged
+  (`git log -- HANDOFF.md`); `npm ci`; `npm run db:init:dev` (the
+  Session 40 function body must be live before any drill that
+  touches vector search); full offline gates; stale worker check per
+  the §2 operational notes.
 - **The design record FIRST (document-first, the row-9/10/12 mold):**
-  a new §11 in `docs/architecture/STRUCTURAL_CHUNKING.md` (the
-  pollution finding lives in its §10 — keep the record with its
-  evidence). Decide and record: (1) LIVENESS = membership in the
-  CURRENT version of at least one document — exactly the bridge
-  semantics the stage-2 checker already uses
-  (`gatherHashEvidence`'s max-version join in
-  `scripts/stage2_selfedit_check.ts`); tombstones compose correctly
-  (a tombstoned doc's current version is the empty root, so its
-  blocks drop out); the durable corpora are unaffected (their blocks
-  ARE current-version members). (2) The filter lives INSIDE
-  `search_ast_nodes` — one `CREATE OR REPLACE FUNCTION` in
-  `POSTGRES_SCHEMA_SQL`, signature UNCHANGED (`query_embedding`,
-  `match_count` default 3 → `(id, content)`), so BOTH callers change
-  zero bytes and the idempotent bootstrap upgrades every stack on
-  boot (no migration script). (3) The filter applies BEFORE `LIMIT`
-  (`WHERE a.embedding IS NOT NULL AND EXISTS (current-version
-  membership)`) — filtering after the limit would under-fill
-  `match_count`. Print timing observations; never assert them
-  (pgvector's index scan degrades to a filtered scan — acceptable at
-  dev scale, recorded honestly if visible).
-- **The pre-stated criterion (write it in §11 BEFORE implementing):**
-  (1) every `search_ast_nodes` result is a member of some document's
-  current version — drill-pinned with a PLANTED dead twin (superseded
-  block with a near-identical synthetic embedding must NOT appear;
-  its live successor MUST); (2) the eight PINNED seam queries re-run
-  through the raw tool read ≥ the Session 38 live-only diagnostic
-  (5/8 top-3), before/after table recorded — the queries are NEVER
-  tuned between measurements; (3) the first fetch of every OTHER
-  retrieval surface stays byte-identical (`get_ast_texts`,
-  `get_ast_blocks`, dedup/budget refusal bytes untouched — pinned by
-  the existing `test:rlm-sandbox` sections staying green);
-  (4) paid spend ≈ 8 query embeddings (well under a cent), stated
-  before the re-measure runs; (5) a genuine regression, if observed,
-  is NAMED (the Session 38 merge-dilution case on
-  `trellis_blocks.py` is merge-density, not pollution — it may
-  persist; do not retune the chunker to chase it).
-- **Implementation (zero-paid):** the schema SQL change +
-  `schema.test.ts` pin updates in the SAME commit (the pins assert
-  function shape — they must move wittingly with it); a new drill
-  section in the repo-ingest drill (it owns snapshot lifecycle:
-  ingest v1 with a synthetic embedding, supersede with v2, search
-  returns ONLY the live block; tombstone, search returns neither) —
-  synthetic deterministic vectors, zero LLM.
-- **The re-measure (propose, then run — ~$0.01):** `npx tsx
-  scripts/chunking_seam_queries.ts` before the schema change is NOT
-  needed (Session 38's after-numbers are the before-numbers); run it
-  once after, record the table in §11 beside §10.3's, and give the
-  criterion-2 verdict. If the filter does NOT clear 5/8, record the
-  miss honestly and stop — no query tuning, no threshold moving
-  (guardrail 8).
-- **What does NOT change:** `vector_search`'s Python bytes and its
-  dedup/budget/retrieval-set semantics; both callers' query text;
-  the extraction pipeline; chunking policies; every other retrieval
-  surface's first-fetch bytes; the seam-query file's query strings.
+  a NEW standalone record `docs/architecture/STRUCTURAL_SPLICE.md`
+  (this is a toolkit-contract decision, not a chunking one — it gets
+  its own document, cross-referenced from `STRUCTURAL_CHUNKING.md`
+  §8 and `CODE_MEDIATED_TEXT.md`). Decide and record, at minimum:
+  (1) the failure-class definition and its two observed instances
+  (Session 36 run 1, Session 37 run 2 — cite the preserved diffs);
+  (2) the engine decision (stdlib `ast` / py-tree-sitter allowlist
+  widening / engine-side service / parser-free anchor guards),
+  weighed explicitly against the Session 29 allowlist pin, the
+  Session 20 containment contract, and the pillar; (3) the new tool
+  surface and its refusal semantics (typed, bounded, teaching — the
+  house mold), designed so EXISTING `splice` behavior is
+  byte-identical for current callers (additive, the injection mold);
+  (4) what the shape PREVENTS vs what it only DETECTS — honest scope
+  in the §5e.2 tradition; (5) the pre-stated acceptance criterion
+  for the increment that lands this session.
+- **Implementation (zero-paid, ONLY what the record scopes):** the
+  chosen increment must be drillable zero-LLM inside
+  `test:textedit`'s existing gating/containment molds (new sections,
+  planted violations fire, clean arm zero findings). If the record
+  chooses an allowlist widening, the widening itself is a RECORDED
+  OWNER-VISIBLE decision — present it with the record before
+  implementing on top of it; the static no-git/no-subprocess pins
+  never weaken regardless of engine.
+- **The rehearsal tie-in:** if a new tool surface lands, the
+  Session 35 harness rehearsal (`test_selfedit_rehearsal.py`) gains
+  a section exercising it in the run's real sequence — the drill
+  proves the shape composes with the write gate and the checker
+  without changing either.
+- **What does NOT change:** `write_back`'s hash-guard and Session 29
+  hardening semantics; `splice`'s existing signature and its
+  "\n"-only refusal; the checker's read-only git surface; the
+  toolkit's counts-only telemetry; no prompt byte unless the record
+  explicitly scopes a tool-teaching line (and then both
+  composed-prompt pins move in the same commit, recorded).
 
 ## 5. File-level starting points
 
-- `src/config/schema.ts` — `search_ast_nodes` (the T15 seam; the
-  only functional change of the session) + `src/config/schema.test.ts`
-  (the shape pins that move with it).
-- `scripts/chunking_seam_queries.ts` — the eight PINNED queries and
-  the Session 38 live-only diagnostic mode (the acceptance
-  instrument; never tune the queries).
-- `docs/architecture/STRUCTURAL_CHUNKING.md` §10.3 (the failed
-  item-3 verdict, the pollution diagnosis, the diagnostic numbers —
-  §11 goes beside them).
-- `scripts/stage2_selfedit_check.ts` — `gatherHashEvidence` (the
-  current-version membership join to mirror in SQL).
-- `src/rlm/trellis_tools.py` `vector_search` (~line 775) and
-  `src/api/server.ts` `/retrieve` (~line 271) — the two callers
-  (read-only this session; zero bytes change).
-- The repo-ingest drill script (`npm run test:repo-ingest`) — the
-  snapshot-lifecycle drill that gains the planted-dead-twin section.
-- `TRELLIS_ROADMAP.md` §4 row 12 + §5 Session 38/39 entries — the
-  rollout state and the recorded recommendation.
+- `src/rlm/trellis_textedit.py` — `load` / `lines` / `locate` /
+  `splice` / `write_back` (the contract the record must leave
+  byte-identical for existing callers).
+- `scripts/test_textedit.ts` — the 105/106-check drill (gating,
+  containment, hash-guard, multi-file, import-allowlist static pin —
+  the molds new sections follow).
+- `benchmark_logs/session37_run2_failed_diff.patch` (in the
+  `trellis-engine-dev-d29bbc` worktree — gitignored artifacts do not
+  travel) + `REPOSITORY_INGESTION_REPORT.md` §5f.5 — the observed
+  failure instance the record must cite.
+- `docs/architecture/CODE_MEDIATED_TEXT.md` §1/§6 and
+  `docs/architecture/STRUCTURAL_CHUNKING.md` §8 — where the
+  candidate is already named; the new record cross-references both.
+- `scripts/test_selfedit_harness.ts` + `test_selfedit_rehearsal.py`
+  — the rehearsal that gains the composition section.
+- `TRELLIS_ROADMAP.md` §4 rows 11/12 — the sequencing this record
+  unblocks.
 
 ## 6. Test strategy and acceptance
 
-Zero-paid except the ~8 seam-query embeddings (<$0.01, stated
-before running).
+Zero-paid throughout (no seam re-measure, no extraction, no edit
+run this session — the record and its increment are offline +
+zero-LLM-drillable; any follow-on edit run is a NEW owner-gated
+proposal).
 
-- **Zero-paid:** the updated `schema.test.ts` pins land in
-  `npm test` (836/85 grows); the repo-ingest drill grows the
-  planted-dead-twin + tombstone section and stays green; the full
-  standing drill block green (in particular `test:rlm-sandbox` [5]/
-  [6]/[7] — the retrieval-set, write-gate, and discipline pins prove
-  the OTHER surfaces byte-identical).
-- **The re-measure:** criterion 2's before/after table recorded in
-  §11; verdict against ≥5/8 stated plainly.
+- **Zero-paid:** the design record ratified in-repo; the scoped
+  increment's unit pins land in `npm test` (837/85 grows); the
+  textedit drill grows its new sections and stays green on both
+  Windows (105+) and POSIX (106+) counts; the rehearsal composition
+  section green; the full standing drill block green.
 - Run `drill:scale` ALONE (never concurrent with other live drills).
 
 Required close-out (the standing block):
@@ -1262,21 +1303,21 @@ Required close-out (the standing block):
 Update:
 
 - `TRELLIS_ROADMAP.md`: full-dated §5 entry with exact commands,
-  counts, the before/after seam table, and actual dollars; row 12
-  progress recorded (rollout continuation beyond the filter stays
-  the owner's).
-- `docs/architecture/STRUCTURAL_CHUNKING.md`: §11 (the design
-  record, written BEFORE implementing) + its measured verdict.
+  counts, and the record's decisions; rows 11/12 sequencing updated
+  (the record unblocks the owner's increment-ladder judgment).
+- `docs/architecture/STRUCTURAL_SPLICE.md`: the design record
+  (written BEFORE implementing) + the increment's measured/drilled
+  verdict; cross-references added in `STRUCTURAL_CHUNKING.md` §8 and
+  `CODE_MEDIATED_TEXT.md` where the candidate is named.
 - `HANDOFF.md`: regenerate per §0 — including the §0 step 5
   re-check. NOTE for objective selection: the largest standing
   decisions after this session are the row-11 increment-ladder
-  judgment (present the ladder record), the row-10 (d) acceptance
-  measurement (~$2.40), the stage-1b prose chunk (~$7.8, chunked),
-  and structural splice addressing (item 10 — the prerequisite for
-  executable-class edit increments). Keep the five-session narrative
-  window (36–40 after this session): compress Session 35 into the
-  digest and move its roadmap §5 entry verbatim to
-  `docs/archive/ROADMAP_HISTORY.md`.
+  judgment (now unblocked — present the ladder record WITH the new
+  splice machinery), the row-10 (d) acceptance measurement (~$2.40),
+  and the stage-1b prose chunk (~$7.8, chunked). Keep the
+  five-session narrative window (37–41 after this session):
+  compress Session 36 into the digest and move its roadmap §5 entry
+  verbatim to `docs/archive/ROADMAP_HISTORY.md`.
 
 ## 7. Guardrails
 
@@ -1372,7 +1413,21 @@ Update:
    `status --porcelain` + `diff -- <file>`, nothing wider; both diff
    sides are checked; block-comment interiors stay honestly out of
    scope — the gate flags conservatively rather than pass silently;
-   post-run mechanical check only, never a write gate), and the
+   post-run mechanical check only, never a write gate), the
+   Session 40 liveness-filter invariants (liveness = current-version
+   membership, the `gatherHashEvidence` semantics — the SQL join and
+   the checker's bridge move TOGETHER or not at all; the filter
+   lives ONLY inside `search_ast_nodes` at the T15 seam — never
+   re-implemented in a caller, never widened to `fetch_texts` /
+   `get_ast_texts` / `get_ast_blocks` / `ast_hashes_exist`, which
+   serve history BY HASH by design; the function signature moves
+   only with a witting recorded change; the filter applies before
+   `LIMIT`; no planner GUC inside the function; under-fill, if ever
+   observed, is reported with row counts, never patched by loosening
+   the filter; and the owner-ratified GENERAL rule — superseded
+   versions are archive, not search space: any default-discovery
+   retrieval surface, present or FUTURE, reads live blocks only,
+   with superseded content reachable solely by explicit address), and the
    Session 38 structural-chunking invariants (chunking
    policy 1 is the DEFAULT everywhere — policy 2 is operator-explicit
    per run, stamped in the snapshot summary, never a default until a
@@ -1428,9 +1483,13 @@ Update:
    version (Session 38): a criterion miss is a FAILED pilot even when
    four of five items pass and the miss is artifact-explained —
    record the raw number, the diagnosis, AND the diagnostic number,
-   then stop; the owner adjudicates. Dead-block embedding pollution
-   is a recorded substrate property — never describe vector-search
-   results without naming it.
+   then stop; the owner adjudicates. Session 40's version: the
+   liveness filter closed the pollution CLASS at the tool — the dead
+   embeddings still exist in storage (the sweep is a separate owner
+   decision), the two both-column seam misses persist (semantic
+   competition, not pollution), and the filtered-HNSW under-fill
+   residual is documented, not denied — never describe the filter as
+   having "fixed retrieval."
 9. Do not break existing consumers: the composed-prompt pins
    (`5d27e474…fe2a` default / `45987904…0b56` omit-arm since the
    July 12, 2026 prompt-engineering pass, `test:modules` [4]/[7])
@@ -1441,7 +1500,10 @@ Update:
    semantics are additive only; the API, A2A, and SSE contracts are
    untouched; the `get_ast_texts`/`nodeText` reconstruction bytes do
    not change; the FIRST fetch of every retrieval surface returns
-   byte-identical results; bare `TrellisNeo4j(...)` AND bare
+   byte-identical results (vector search's Session 40 filtered shape
+   IS the pinned baseline now — the filter was the recorded witting
+   change; the next change there needs the same ceremony); bare
+   `TrellisNeo4j(...)` AND bare
    `TrellisPostgres(...)` construction keep behaving exactly as
    today; the verification worker keeps processing the existing job
    shape byte-for-byte; `parseSourceFile` WITHOUT `chunkingPolicy`
@@ -1487,22 +1549,32 @@ Update:
 
 ## 8. Explicit exclusions
 
-Do not include: the superseded-embedding SWEEP (the unchosen §10.3
-candidate — the filter is this objective; the sweep is destructive
+Do not include: the superseded-embedding SWEEP (the filter closed
+the correctness class; the sweep is destructive storage reclamation
 and stays a separate owner decision), any refresh extraction beyond
 the adopted per-PR cadence, the row-10 (d) `est` acceptance
 measurement, the stage-1b prose chunk (docs/ + root prose), the
-row-12 rollout continuation BEYOND the filter (widening policy 2
-beyond `src/rlm`, retuning the merge target or split threshold —
-including to chase the recorded `trellis_blocks.py` merge-dilution
-case — or reverting the pilot), or ANY paid run without explicit
-owner approval (the ~$0.01 seam re-measure is THIS objective's
-stated spend; everything else stands propose-with-estimate; the
-first entailment sweep RAN owner-approved July 13, 2026 — a SECOND
-sweep or a judge-calibration change is a new owner decision); tuning
+row-12 rollout continuation (widening policy 2 beyond `src/rlm`,
+retuning the merge target or split threshold — including to chase
+the recorded `trellis_blocks.py` merge-dilution case — or reverting
+the pilot), or ANY paid run without explicit owner approval (THIS
+session is zero-paid throughout — a follow-on edit run exercising
+the new splice machinery is a NEW owner-gated proposal with its own
+estimate; the first entailment sweep RAN owner-approved July 13,
+2026 — a SECOND sweep or a judge-calibration change is a new owner
+decision); weakening, re-implementing, or widening the Session 40
+liveness filter (it lives ONLY in `search_ast_nodes`; the
+history-by-hash surfaces never filter; under-fill is reported, never
+patched by loosening — guardrail 5); tuning
 the eight pinned seam queries, their embedding text, or the top-3
-threshold to make criterion 2 pass (guardrail 8 — record the miss
-and stop); hand-editing the increment-1 LANDED diff in
+threshold (guardrail 8 — they are the standing instrument);
+installing `py-tree-sitter` or ANY native wheel — or widening the
+Session 29 import-allowlist — before the design record's engine
+decision is written and recorded (the widening is itself a recorded
+owner-visible decision, and the no-git/no-subprocess pins never
+weaken regardless); changing `splice`'s existing signature or
+semantics for current callers (the new addressing surface is
+ADDITIVE, the injection mold); hand-editing the increment-1 LANDED diff in
 `trellis_tools.py` OR the increment-2 retry's LANDED diff in
 `trellis_agent.py` (both are measured evidence of landed self-edits
 — style cleanups included); deleting, contesting, or "cleaning up"
@@ -1587,16 +1659,13 @@ but a probe invocation's own environment; moving the composed-prompt
 pins without a witting kernel prompt change (both recomputed in the
 same commit, history recorded); new MCP servers or transports; A2A
 changes; frontend work (deferred unscheduled); `ASTRef`/`EVIDENCED_BY`
-migration (gate CLOSED; Sessions 23–39 read 1.84x, 2.11x,
+migration (gate CLOSED; Sessions 23–40 read 1.84x, 2.11x,
 1.99x–2.01x, 1.78x, 1.99x, 1.77x-after-outlier, 1.97x, 1.89x, 2.09x,
-2.04x, 1.94x, 1.53x, 1.68x, 1.63x, 1.76x, 1.69x, and 2.18x, inside
-the band — do not migrate on a noisy reading); T13 re-hashing; rlms
-library modifications; treating the checkout EOL-normalization churn
-class as a defect to "fix" in the ingestion layer (recorded
-environmental behavior), or fixing the embedding pollution anywhere
-EXCEPT the `search_ast_nodes` schema seam (the ingestion layer and
-the Python wrapper are not the place — one CREATE OR REPLACE at the
-T15 seam covers both callers); weakening the Session 14 write-path
+2.04x, 1.94x, 1.53x, 1.68x, 1.63x, 1.76x, 1.69x, 2.18x, and 2.05x,
+inside the band — do not migrate on a noisy reading); T13 re-hashing;
+rlms library modifications; treating the checkout EOL-normalization
+churn class as a defect to "fix" in the ingestion layer (recorded
+environmental behavior); weakening the Session 14 write-path
 enforcement,
 the Session 15/20/22/24 composition pins, the Session 16 lineage
 pins, the Session 17 promotion refusals, the Session 18 registration
@@ -1615,9 +1684,12 @@ Session 34 scope pins (`snapshot_ingest.test.ts` scope section +
 (`check.test.ts` + the `test:selfedit-harness` drill), the
 Session 37 parse-gate pins (`parse_gate.test.ts` + drill section
 [6]), the Session 39 comment-class-gate pins (the run-2-shape unit
-pins in `check.test.ts` + drill section [7]), or the Session 38
+pins in `check.test.ts` + drill section [7]), the Session 38
 structural-chunking pins
 (`generic_tree.test.ts` + `structural_chunker.test.ts` +
 `treesitter_engine.test.ts` + the parity structural-kinds case + the
 snapshot-stamp pins, including policy-1 byte-identity and the
-policy-1-never-emits-structural-kinds pin).
+policy-1-never-emits-structural-kinds pin), or the Session 40
+liveness-filter pins (the `schema.test.ts` filter pin +
+`test:repo-ingest` Part 8's planted dead twin + the
+`sandbox:probe:embed` membership fixture).

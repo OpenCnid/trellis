@@ -74,6 +74,12 @@ export const POSTGRES_SCHEMA_SQL = `
   -- T15: both the TypeScript API and Python RLM client call this function,
   -- keeping cosine ordering, null filtering and result shape in one schema
   -- definition instead of maintaining parallel queries across languages.
+  -- Session 40 (STRUCTURAL_CHUNKING.md §11): results are filtered to LIVE
+  -- blocks — members of some document's CURRENT (max-version) root — before
+  -- the LIMIT, so superseded near-twin embeddings cannot occupy result
+  -- slots. The membership join mirrors the stage-2 checker's
+  -- gatherHashEvidence. Superseded history stays queryable by hash through
+  -- every other surface; only vector search filters.
   CREATE OR REPLACE FUNCTION search_ast_nodes(
     query_embedding vector(1536),
     match_count INTEGER DEFAULT 3
@@ -86,6 +92,17 @@ export const POSTGRES_SCHEMA_SQL = `
     SELECT a.id, a.data->>'content' AS content
     FROM ast_nodes a
     WHERE a.embedding IS NOT NULL
+      AND EXISTS (
+        SELECT 1
+        FROM document_nodes dn
+        JOIN documents d ON d.root_hash = dn.root_hash
+        JOIN (
+          SELECT doc_key, MAX(version) AS version
+          FROM documents
+          GROUP BY doc_key
+        ) latest ON latest.doc_key = d.doc_key AND latest.version = d.version
+        WHERE dn.node_id = a.id
+      )
     ORDER BY a.embedding <=> query_embedding
     LIMIT match_count
   $function$;
