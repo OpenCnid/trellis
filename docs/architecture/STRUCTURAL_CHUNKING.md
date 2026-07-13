@@ -434,6 +434,13 @@ refresh cadence.
    carries it; superseded history stays queryable by hash — the
    filter touches ONLY vector search, never `fetch_texts`,
    `get_ast_texts`, `get_ast_blocks`, or `ast_hashes_exist`.
+   Owner-ratified as the GENERAL rule (July 13, 2026, on this
+   record): superseded versions are archive, not search space —
+   any DEFAULT-DISCOVERY retrieval surface, present or future,
+   reads live blocks only; superseded content is reachable solely
+   by explicit address when a caller deliberately asks for history.
+   Vector search was audited as the only default-discovery surface
+   (every other `ast_nodes` reader takes explicit ids/hashes).
 2. **The filter lives INSIDE `search_ast_nodes`.** One
    `CREATE OR REPLACE FUNCTION` in `POSTGRES_SCHEMA_SQL`, signature
    unchanged (`query_embedding vector(1536)`, `match_count INTEGER

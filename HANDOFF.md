@@ -1424,7 +1424,10 @@ Update:
    only with a witting recorded change; the filter applies before
    `LIMIT`; no planner GUC inside the function; under-fill, if ever
    observed, is reported with row counts, never patched by loosening
-   the filter), and the
+   the filter; and the owner-ratified GENERAL rule — superseded
+   versions are archive, not search space: any default-discovery
+   retrieval surface, present or FUTURE, reads live blocks only,
+   with superseded content reachable solely by explicit address), and the
    Session 38 structural-chunking invariants (chunking
    policy 1 is the DEFAULT everywhere — policy 2 is operator-explicit
    per run, stamped in the snapshot summary, never a default until a
