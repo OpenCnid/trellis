@@ -1061,6 +1061,124 @@ instead.
   actual dollars vs the estimate; (5) a harness flag means the
   increment FAILED — record it and stop, no silent retry.
 
+### 5f.5 The measured runs (Session 37, July 13, 2026 — owner-approved up front; BOTH runs failed; increment 2 FAILED and recorded)
+
+- **Pre-flight:** `stage2:check --pre` PASS (`trellis_agent`,
+  `get_retrieved_address_count`; doc present); tree clean; substrate
+  block `2f703511…2514` verified byte-verbatim in the on-disk file.
+- **Run 1 — FAILED on a harness flag ($0.3994; 134,387 in / 6,343
+  out; 7 db tool calls; 24 textedit ops / 1 write_back; 2 retrieval
+  fetches / 1 dedup refusal observed live / 0 budget refusals;
+  `answer_submits` 1).** The DIFF was correct — one hunk, the right
+  site, comment-lines-only, author-mode untouched, and it would have
+  passed the parse gate — but `stage2:check` FLAGGED the evidence:
+  2 × `unbridged_evidence` (the recorded insight cited
+  `09281f45…c58d` and `66750136…dc3e`, both blocks of
+  `repo:trellis:src/rlm/trellis_tools.py`, not the named file). The
+  FIRST live firing of the Session 35 bridge check. Diagnosis
+  (deterministic, from the transcript): the run's directional Cypher
+  saw `trellis_agent` with 0 out-edges and pivoted to the task's
+  "widen with vector_search" branch; vector_search surfaced the
+  semantically-similar tools.py consumer blocks; the run confirmed
+  the in-file wiring through `trellis_textedit.lines()` reads —
+  which correctly never feed the retrieval set — so the only
+  CITABLE evidence it held was the wrong document's. Tree reverted
+  (`session37_run1_failed_diff.patch` preserved, local). **Operator
+  cleanup, recorded:** the failed run's residual edge was DELETED
+  before the contingency (`MATCH (trellis_agent)-[r:DERIVED_INSIGHT
+  {verb:'wires'}]->(get_retrieved_addresses) DELETE r`, 1 edge;
+  entities untouched) — the write path's MERGE unions edge
+  provenance, so leaving the rejected hashes would have made the
+  pre-stated contract mechanically unpassable for any later run;
+  contest-instead-of-delete would equally have blocked it
+  (`contested_evidence`). Acceptance-run hygiene in the drill-cleanup
+  mold, not belief-machinery precedent.
+- **The contingency (task text v2, amendments recorded per the
+  diagnosis):** step 1 queries `main`'s ACTION edges UNDIRECTED and
+  collects their provenance; step 2 fetches those blocks and
+  identifies the in-file one; a new step 3 states the bridge rule
+  explicitly (cite ONLY hashes whose fetched bytes are part of the
+  named file); the vector_search widening branch removed. The
+  Session 36 contingency was byte-identical because its diagnosis
+  was stochastic run discipline; this diagnosis was deterministic
+  task guidance, so the guidance was fixed and the amendment
+  recorded verbatim (`benchmark_logs/session37_task_v2.txt`).
+- **Run 2 — FAILED at human `git diff` review ($0.2362; 76,860 in /
+  4,402 out; 3 db tool calls; 26 textedit ops / 2 write_backs;
+  1 retrieval fetch — the 26-hash `get_ast_texts` batch — 0 dedup /
+  0 budget refusals; `answer_submits` 1).** The evidence chain was
+  PERFECT this time: 118 undirected edges → 26 distinct provenance
+  hashes → the in-file block `2f703511…2514` identified and cited;
+  `stage2:check` zero findings INCLUDING the parse gate. The diff
+  was one hunk at the right site — but the splice replaced a 6-LINE
+  window `[574, 580)` with 6 HAND-RETYPED comment lines, and the
+  retype dropped two neighbors: the executable line
+  `"retrieved_addresses": get_retrieved_address_count(),` (the
+  telemetry field silently vanishes from the research payload) and
+  the first line of the Session 33 comment below it (left
+  decapitated). The file still PARSES — the parse gate and every
+  checker layer are structurally blind to a parseable semantic
+  deletion — and the human review caught it, exactly where the
+  criterion places diff semantics. The verify-in-its-own-iteration
+  discipline WAS followed (write cell → verification cell printing
+  the region → submit cell), but the verification predicate checked
+  only stale-text absence and author-region presence — it never
+  asserted the executable neighbors survived. Failure named:
+  **retype-splice neighbor deletion** — the run re-typed existing
+  true bytes through attention instead of splicing only the changed
+  span, the exact pathology CODE_MEDIATED_TEXT §1 names (the model
+  never copies). Tree reverted
+  (`session37_run2_failed_diff.patch` preserved, local).
+- **Increment verdict: FAILED under the pre-stated criterion (run 1
+  item 3; run 2 items 1–2). Both proposed runs consumed; recorded
+  and stopped — no third run.** Paid total $0.6356 vs the ≤$0.90
+  proposal. Run 2's insight edge (`trellis_agent` `wires`
+  `get_retrieved_addresses`, citing `2f703511…2514`) STANDS: it is
+  a true belief with live in-file provenance, gate- and
+  checker-verified — the run's recorded evidence passed; its diff
+  did not. The stale comment in `trellis_agent.py` remains in place
+  (still a valid future target).
+- **What the failures buy (the increments' point is measurement):**
+  (1) the Session 35 bridge check fired live for the first time and
+  caught real evidence substitution; (2) the parse gate landed and
+  run 1's diff showed the gate-visible class no longer reaches
+  review unflagged (its diff parsed AND was comment-only — the gate
+  passing was informative); (3) run 2 named the NEXT mechanically
+  closable class: a comment-class edit that deletes parseable
+  executable neighbors. The closure is decidable from the diff alone
+  (every changed line in the named file must be a comment/blank
+  line) — the recorded candidate for increment 2's retry
+  (Session 38's parse-gate-mold zero-paid step), per the
+  tooling-over-prompt-modules direction.
+- **The close-out refresh (the §5d.6 cadence; $0.0656 — 10,326 in /
+  3,969 out / 4,101 embedding tokens, actuals from the worker
+  metrics port):** plan echo FIRST (7 files, 66-block printed bound
+  against a 200 budget, 0 tombstones, 116 test/fixture files
+  excluded from extraction), then snapshot `trellis#3` — 17/17
+  extraction jobs, zero failures (1 dropped action + 1 unresolved
+  endpoint counted, the base-rate behavior). Ingested: the four
+  parse-gate harness files + their two test files (policy `none` by
+  the kernel exclusion) + `src/rlm/trellis_tools.py` v3 — the
+  tools.py re-ingest is NOT an edit: Session 36's run-authored
+  splice lines were committed with mixed line endings from its own
+  worktree, and this session's fresh checkout normalized the file
+  to uniform CRLF, so the module-comment block re-hashed
+  (`fe108c10…` dead in v3, replaced by `2c243fa3…` with
+  byte-identical text modulo EOL). Recorded as the
+  checkout-normalization churn class: a one-time re-hash when
+  snapshots are taken from different worktrees, handled by the
+  ordinary churn loop. Invalidation sweeps contested 25 nodes / 17
+  relationships across the 5 re-versioned docs (audit preserved);
+  re-extraction re-derived from the new bytes. Both standing
+  beliefs verified UNCONTESTED with live provenance after the
+  refresh: the Session 36 operator re-derivation
+  (`get_retrieved_addresses` `returns_copy_of`
+  `_retrieved_addresses`, citing `09281f45…` — retained in v3) and
+  this session's run-2 insight (`trellis_agent` `wires`
+  `get_retrieved_addresses`, citing `2f703511…2514` —
+  `trellis_agent.py` was not re-ingested; both failed diffs were
+  reverted before the refresh).
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

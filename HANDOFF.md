@@ -8,15 +8,16 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–31 and their same-day follow-ons (July 4–12, 2026; PRs
-#21–#73) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–32 and their same-day follow-ons (July 4–13, 2026; PRs
+#21–#74) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — Session 24
 with the Session 29 PR, Session 25 with the Session 30 PR, Session 26
 with the Session 31 PR, Session 27 with the Session 32 PR, Session 28
 with the Session 33 PR, Session 29 with the Session 34 PR, Session 30
-with the Session 35 PR, Session 31 with the Session 36 PR — this file
+with the Session 35 PR, Session 31 with the Session 36 PR, Session 32
+with the Session 37 PR — this file
 keeps full narrative only for the most recent five sessions). The one-paragraph digest, oldest first; §1
 below carries everything from this span that a new session must
 actually know:
@@ -160,81 +161,30 @@ actually know:
   CLOSED, T2 explicitly NOT (slice (e)'s detector). Pinned by
   `test:rlm-sandbox` [6] (40 → 53, first-run green).
 
-**Session 32 (July 12, 2026, PR #74) is also complete: mechanical
-provenance threading FINISHED — the slice (e) sampled-entailment
-detector + the slice (f) compat verify-and-strike; roadmap §4 row 9 is
-STRUCK** (all machinery zero-paid, four commits: the drill repair, the
-detector, the pins, the docs). **(0) Pre-existing defect found and
-fixed FIRST, its own commit:** `test:verification-sweep` had been
-BROKEN since the Session 14 format enforcement landed (July 7) — the
-drill seeded beliefs whose `sourceNodeIds` were token-scoped strings,
-which `_normalize_fact` refuses (`^[0-9a-f]{64}$`); it was absent from
-every close-out block since, so the breakage went unobserved. Fix:
-provenance hashes are sha256 digests of the token-scoped names (real
-64-hex, unique per run, teardown unchanged); all 35 pre-existing
-checks pass again, and the drill is now IN the standing close-out
-block so it cannot silently rot. **(1) Slice (e) — the sampled
-entailment detector** (`src/core/graph/entailment_detection.ts`, the
-verification-sweep mold; finalized decisions recorded in
-`PROVENANCE_THREADING.md` §9 amending §5.4 BEFORE the code landed):
-the T2 residual tier, a post-hoc DETECTOR over persisted
-DERIVED_INSIGHT (edge, cited-hash) pairs — never a write gate, never a
-delete. Uniform candidate class (every non-contested DERIVED_INSIGHT
-edge with provenance, `has_category` included); the pure sampler
-expands unchecked pairs (cited minus judged, deduped), samples at the
-operator-visible rate, hard-caps at the judge budget with overflow
-counted as `deferred` (seeded `mulberry32`). Each pair is judged AT
-MOST ONCE ever: supported ⇒ the hash joins the edge's additive
-`entailmentCheckedHashes` (+ `entailmentCheckedAt`); unsupported ⇒ the
-edge contests through the ordinary Phase 4/5 transition with typed
-reason `unsupported_citation` and the hash joins the durable
-`unsupportedHashes` audit (+ `entailmentFlaggedAt`). Provenance fields
-never mutated; recovery is re-derivation; no contest flap over an
-already-judged pair. The judge: one bounded completion per pair
-through `parseLlmResponse` (`EntailmentResponseSchema`; the
-`make_entailment_check` prompt SHAPE — the `TRELLIS_CITATION_*` flags
-untouched), with judge-all-then-write atomicity (every verdict
-collected before any write; an infrastructure failure aborts with ZERO
-partial state). Oracle mode drills the whole path zero-LLM. Config
-twins `ENTAILMENT_SAMPLE_RATE` 0.1 / `ENTAILMENT_JUDGE_BUDGET_PER_SWEEP`
-25 (max 500). Transport: the `entailment_sweep` job name on the
-existing verification queue/worker (every other job name
-byte-identical); counts-only `trellis_entailment_pairs_total{result}`;
-scheduler `npm run entailment:sweep` (`--rate`, `--budget`, `--seed`,
-`--prefix`, `--oracle`, `--sync`, `--dry-run`). **(2) Pins:** 10 unit
-tests (`entailment_detection.test.ts`, `npm test` 730 → 740) — pool
-definition, determinism, budget/deferred, oracle semantics; drill
-sections [7]–[9] (`test:verification-sweep` 35 → 66, all green on
-FIRST run) — the planted unsupported citation flagged with provenance
-intact, the supported pair on the SAME edge still stamped, recovery
-composing with the slice (d) gate (unretrieved re-derivation refused;
-retrieval-gated one recovers; audit survives), judge failure contests
-NOTHING, budget defers loudly, dead-byte pairs skipped and counted,
-queue round trip through the real worker. **(3) The first REAL judged
-sweep RAN owner-approved (July 13, 2026, the day after the proposal —
-dev graph 283 edges / 566 unchecked pairs):** seed 32, 25/25 judged —
-8 supported, 17 flagged, 15 edges contested; ACTUAL $0.0093 (2,176
-input + 375 output tokens, vs the $0.02–$0.05 estimate). Verified
-against stored bytes, the flags decompose: 9 CONFIRMED weak citations
-(HEADING blocks — bytes like "q_0034" — cited as provenance for
-question facts: the exact wrong-block class the detector exists for,
-invisible to the three structural layers by construction) + 8
-strict-judge verdicts on derived-classification `has_category` claims
-(text supports but does not STATE the classification — a recorded
-calibration observation, owner-picked follow-up; the judge prompt
-shape unchanged). The 15 contested edges are OOLONG-era dev-graph
-cache rows — standard lazy-recovery residue. No machinery defect:
-every behavior matched the pins. **(4) Slice (f) — compat
-VERIFIED, no gap:** the (d) gate is write-time only
-(`_verify_hashes_retrieved` has exactly one caller); envelopes
-additive only (`TRELLIS_RESULT` exactly `{status, answer, toolCalls}`;
-telemetry gained only slice (b)'s count); no pre-threading writer
-class (the only gated construction is the agent's research-run wiring;
-every other construction site is bare BY DESIGN under the injection
-mold). Evidence cited in the roadmap §5 entry. `drill:scale` 2.04x
-CLOSED (in-band, first try). Compose isolated as `trellis_s32_ci`:
-11/11 (`package.json` changed — npm ci layer rebuilt; pip layer
-cached). Zero paid spend.
+- **Session 32 (PR #74)** finished row 9 zero-paid: a pre-existing
+  drill breakage fixed first (`test:verification-sweep` seeded
+  non-sha256 provenance since Session 14 — repaired, and the drill
+  joined the standing close-out block); the slice (e) sampled
+  entailment detector (`entailment_detection.ts`, sweep-side, never a
+  write gate: uniform candidate pool, seeded sampler, judge budget
+  with counted `deferred` overflow, each (edge, cited-hash) pair
+  judged AT MOST ONCE ever — supported stamps additive
+  `entailmentCheckedHashes`, unsupported contests with typed reason
+  `unsupported_citation` + durable `unsupportedHashes`;
+  judge-all-then-write atomicity; oracle mode;
+  `entailment_sweep` job name on the shared verification queue;
+  config twins rate 0.1 / budget 25 max 500; `npm run
+  entailment:sweep`); 10 unit pins + drill sections [7]-[9]
+  (`test:verification-sweep` 35 → 66); the first REAL judged sweep
+  ran owner-approved July 13 (seed 32, 25/25 pairs, $0.0093 actual:
+  9 CONFIRMED weak heading-block citations — the exact wrong-block
+  class the detector exists for — + 8 strict-judge verdicts on
+  derived-classification `has_category` claims, the recorded
+  calibration observation; 15 contested OOLONG-era edges = standard
+  lazy-recovery residue); slice (f) compat VERIFIED no-gap (the (d)
+  gate write-time only, envelopes additive, no pre-threading writer
+  class). T2 is MEASURED at a sampled rate, never eliminated —
+  report the rate with every claim.
 
 **Session 33 (July 13, 2026, PR #75) is also complete: kernel-level
 retrieval discipline — held-state dedup + the per-run budget; roadmap
@@ -460,7 +410,7 @@ the count is environment-dependent by construction (a
 `symlinkCreated` conditional + failure-only loop checks); "All
 checks passed" is the acceptance signal.
 
-**Session 36 (July 13, 2026, this PR) is also complete: stage-2
+**Session 36 (July 13, 2026, PR #78) is also complete: stage-2
 increment 1 EXECUTED and LANDED — the graph-informed self-edit run +
 the freshness policy's first refresh** (roadmap §4 row 11 stage 2;
 the row stays open pending the owner's increment-ladder judgment).
@@ -526,21 +476,134 @@ harness's. NO kernel prompt byte; both composed-prompt pins unmoved
 (the landed diff is Python comment/docstring bytes — not prompt
 composition input; `test:modules` green with the diff applied).
 
+**Session 37 (July 13, 2026, this PR) is also complete: stage-2
+increment 2 — the parse gate LANDED zero-paid; the owner-approved
+deeper edit runs BOTH FAILED under the pre-stated criterion and are
+recorded (roadmap §4 row 11 stage 2; the row stays open).** The
+increment's product is measurement, not a landed diff; session paid
+total **$0.7012** (runs $0.3994 + $0.2362 vs the ≤$0.90 proposal;
+refresh $0.0656 vs ≈$0.05–$0.25). Design record:
+`REPOSITORY_INGESTION_REPORT.md` §5f (before the run) + §5f.5 (the
+measured record). **(1) The parse gate (landed, stays regardless):**
+`named_file_unparseable` joins the checker's typed findings —
+`stage2:check` post-run mode parses every named file (`.py` via the
+`config.python.executable` interpreter running builtin `compile()`
+over the file bytes: py_compile's exact syntax check WITHOUT its
+bytecode write, because the checker is read-only and `__pycache__`
+residue in the reviewed tree is unacceptable; `.ts`/`.js` via
+`ts.createSourceFile` single-file parse diagnostics — no project
+resolution, no type check, no emit; unwired extensions honestly
+unchecked, never a finding). Pure evaluation (`checkParseResults`,
+`parseGateLanguage`) in `check.ts`; gatherers in
+`src/benchmarks/selfedit/parse_gate.ts`; composes ADDITIVELY in the
+CLI (`evaluateSelfEditRun` and every Session 35 pin byte-unchanged).
+Pins: 11 unit tests (`npm test` 771 → 782 across 82 files; the
+planted run-1 shape per language) + drill section [6]
+(`test:selfedit-harness`, 41 [PASS] observed on this stack — 36
+pre-existing + 5; "ALL CHECKS PASSED" is the signal) planting the
+EXACT preserved Session 36 run-1 failed-diff shape and watching the
+finding fire through the real interpreter. **(2) Selection by
+substrate query (§5f.2):** the `slice (d) will` staleness family has
+exactly three surviving occurrences — the `trellis_agent.py`
+research-mode telemetry comment (SELECTED: doubly false, the same
+13.7 KB `main()` block wires
+`retrieved_addresses_check=get_retrieved_addresses` eleven lines up),
+the landed increment-1 residue at `trellis_tools.py:78` (REJECTED —
+measured evidence, hands off), the drill fixture's planted stale line
+(REJECTED — fixture bytes). Broader staleness families queried EMPTY;
+the honest ladder consequence recorded: surviving falsifiable
+staleness is comment-class, so the step up was depth (inside
+`main()`), near-duplicate disambiguation (twin
+`"retrieved_addresses"` telemetry sites at lines ~352 author / ~579
+research), and the verify-in-its-own-iteration task discipline. New
+named failure mode: near-duplicate mis-targeting. **(3) Run 1 FAILED
+on a harness flag ($0.3994; 134,387 in / 6,343 out) — the FIRST live
+firing of the Session 35 bridge check:** the diff was CORRECT (one
+hunk, right site, comment-only, would have passed the parse gate) but
+the recorded insight cited two `trellis_tools.py` blocks →
+2 × `unbridged_evidence`. Diagnosed DETERMINISTIC: directional Cypher
+saw `trellis_agent` with 0 out-edges → the task's vector_search
+widening branch → semantically-similar wrong-document blocks; the
+in-file wiring was confirmed through textedit reads, which correctly
+never feed the retrieval set, so the only citable evidence the run
+held was the wrong document's. Tree reverted; **operator cleanup
+recorded:** the failed run's residual edge DELETED before the
+contingency (the write path's MERGE unions edge provenance — the
+rejected hashes would have made the pre-stated contract mechanically
+unpassable; contest-instead-of-delete would equally block it as
+`contested_evidence`; acceptance-run hygiene in the drill-cleanup
+mold, never belief-machinery precedent). **(4) Run 2 (contingency,
+task text v2 — amendments recorded per the diagnosis: undirected
+`main`-edge provenance walk, explicit cite-only-named-file-bytes
+rule, vector_search branch removed) FAILED at human `git diff` review
+($0.2362; 76,860 in / 4,402 out):** the evidence chain was PERFECT
+(118 undirected edges → 26 provenance hashes → the in-file block
+`2f703511…2514` identified and cited; `stage2:check` ZERO findings
+INCLUDING the parse gate) — but the splice replaced the 6-line window
+`[574, 580)` with 6 HAND-RETYPED comment lines whose retype dropped
+two neighbors: the executable `"retrieved_addresses":
+get_retrieved_address_count(),` line and the Session 33 comment's
+first line. The file still PARSES — every mechanical layer is
+structurally blind to a parseable semantic deletion — and human
+review caught it, exactly where the criterion places diff semantics.
+The verify-in-its-own-iteration discipline WAS followed; its
+predicate checked only stale-text absence, never neighbor
+preservation. Failure named: **retype-splice neighbor deletion** (the
+CODE_MEDIATED_TEXT §1 pathology — the model re-typed existing bytes
+through attention instead of splicing the changed span). Both failed
+diffs reverted and preserved locally
+(`benchmark_logs/session37_run{1,2}_failed_diff.patch`). **Increment
+verdict: FAILED; both proposed runs consumed; no third run.** Run 2's
+insight edge (`trellis_agent` `wires` `get_retrieved_addresses`,
+citing the in-file block) STANDS — true, live-bridged, gate- and
+checker-verified; the `trellis_agent.py` stale comment REMAINS IN
+PLACE (still a valid target — do not hand-fix it; it is the retry's
+task). **(5) The close-out refresh (snapshot `trellis#3`; $0.0656 —
+10,326 in / 3,969 out / 4,101 embedding, metrics-port actuals):**
+plan echo first (7 files / 66-block bound / 0 tombstones), 17/17 jobs
+zero failures (1 dropped action + 1 unresolved endpoint counted).
+The `trellis_tools.py` v3 re-ingest is NOT an edit — checkout
+EOL-normalization churn (Session 36's run-authored splice lines
+committed with mixed line endings from its worktree; this session's
+fresh checkout normalized to uniform CRLF, so the module-comment
+block re-hashed: `fe108c10…` dead, `2c243fa3…` live with
+byte-identical text modulo EOL) — a recorded one-time class when
+snapshots come from different worktrees. Sweeps contested 25 nodes /
+17 relationships (audit preserved); both standing beliefs verified
+UNCONTESTED with live provenance after the refresh. **(6) Close-out
+defect found and fixed live:** stopping the refresh's `npm run
+dev:workers` via the session harness orphaned the child tsx worker
+process on Windows — the stale consumer STOLE jobs from
+`test:verification-sweep` and `test:agent-loop` (both reported
+"timeout" while the job effects applied — the exact
+stale-consumer signature the Session 34 pre-flight names); child PIDs
+killed, zero consumers verified, both drills green on re-run. KILL
+THE CHILD PROCESS TREE and verify zero node/tsx worker processes
+before any queue drill. `drill:scale` ALONE 1.76x CLOSED; Compose
+`trellis_s37_ci` 11/11; NO kernel prompt byte, both composed-prompt
+pins unmoved; no kernel code byte landed (the session's code diff is
+harness tooling only).
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 37: stage-2 increment 2 — close the
-run-1 escape mechanically (the parse gate), then design and execute a
-deeper owner-scoped self-edit increment** (roadmap §4 row 11
-stage 2), per §3–§6 below. Increment 1's measured lesson: the checker
-verified scope and evidence but nothing mechanical verified the edited
-file still PARSES — run 1 shipped a syntax-broken file that only
-human review caught. Increment 2 (a) lands the parse gate in
-`stage2:check` zero-paid FIRST (a post-run mechanical check, never a
-write gate), then (b) proposes the deeper edit run to the owner:
-graph-derived candidate targets, a NEW named failure mode, the same
-harness + human `git diff` review, task text adding the
-verify-in-its-own-iteration discipline. ASK THE OWNER before any
-paid run (propose-with-estimate; the fallback menu is §2's standing
+Your objective is **Session 38: the increment-2 RETRY — close the
+run-2 escape mechanically (the comment-class diff gate), then
+re-propose and execute the same owner-scoped edit** (roadmap §4
+row 11 stage 2), per §3–§6 below. Increment 2's measured lessons
+(Session 37, both runs failed): the bridge check caught
+wrong-document evidence live (run 1), and a comment-only edit that
+DELETES parseable executable neighbors passes every mechanical layer
+by construction (run 2 — the retype-splice class). Session 38 (a)
+lands the comment-class diff gate in `stage2:check` zero-paid FIRST
+(a post-run mechanical check over the named file's diff: every
+changed line must be a comment or blank line when the increment is
+declared comment-class — run 2's exact escape becomes a typed
+finding), then (b) re-proposes the SAME target (the
+`trellis_agent.py` research-mode stale telemetry comment — still in
+place, still substrate-verified) with task text v3 adding the
+neighbor-preservation verification predicate and the
+splice-minimal-span discipline. ASK THE OWNER before any paid run
+(propose-with-estimate; the fallback menu is §2's standing
 owner-conditional items). Each increment stays a single named failure
 mode; the toolkit never touches git. Do not re-plan or re-implement
 completed work. RLM expands exclusively to Recursive Language Model
@@ -1124,11 +1187,25 @@ immutable, content-addressed physical location in source material.
      live-substrate smoke). Harness tooling, not a kernel gate: bare
      construction and every existing kernel surface are untouched.
      **Session 36 executed increment 1 through it** (run 1 failed
-     human review — the verify-then-submit-in-one-cell class the §3
-     parse gate targets; run 2 landed all five criterion items) and
-     ran the freshness policy's first refresh (snapshot `trellis#2`,
-     churn loop observed live: dead hash → contest with audit → live
-     re-derivation on v2 bytes).
+     human review — the verify-then-submit-in-one-cell class; run 2
+     landed all five criterion items) and ran the freshness policy's
+     first refresh (snapshot `trellis#2`, churn loop observed live:
+     dead hash → contest with audit → live re-derivation on v2
+     bytes). **Session 37 added the parse gate to the harness**
+     (`named_file_unparseable` in `check.ts` + the gatherers in
+     `src/benchmarks/selfedit/parse_gate.ts`: `.py` via the
+     configured interpreter's builtin `compile()` — py_compile's
+     check without its bytecode write, the checker stays read-only;
+     `.ts`/`.js` via TypeScript single-file parse diagnostics;
+     unwired extensions honestly unchecked; post-run only, never a
+     write gate; composes additively — `evaluateSelfEditRun`
+     untouched), executed increment 2 through it (BOTH runs failed
+     and are recorded — the first live `unbridged_evidence` catch,
+     then the retype-splice neighbor deletion that only human review
+     can currently see), and ran the third refresh (snapshot
+     `trellis#3`; the `trellis_tools.py` re-hash there is checkout
+     EOL-normalization churn, a recorded one-time class when
+     snapshots come from different worktrees).
    - Benchmarks: OOLONG v1 saturated baseline; anti-shortcut v2 at
      `data/oolong_pairs_dataset_hard.json`; scale evidence in
      `docs/benchmarks/SCALE_PROVENANCE_REPORT.md` and
@@ -1153,10 +1230,10 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 13, 2026 Session 36 PR (the
-  landed increment-1 self-edit + the first refresh — the PR that
-  carries this file).
-  Sessions 25–35 (PRs #63/#64/#67/#68/#71/#72/#73/#74/#75/#76/#77), the
+- `master`: the head after the July 13, 2026 Session 37 PR (the
+  parse gate + the recorded increment-2 failures + the third refresh
+  — the PR that carries this file).
+  Sessions 25–36 (PRs #63/#64/#67/#68/#71/#72/#73/#74/#75/#76/#77/#78), the
   wall-clock benchmark + expansion series (PR #65), the
   coverage-audit record (PR #66), the prompt-engineering pass
   (PR #69), and the root AGENTS.md (PR #70) are all merged. Use
@@ -1176,11 +1253,14 @@ Repository state at handoff creation:
   `registry:synthetic:captains` + `tariff:synthetic:port-schedule`
   (roots and diffs stable — re-ingest is the auditable no-op) — and,
   since July 13, 2026, **the self-substrate at snapshot
-  `trellis#2`** (Session 36's refresh over Session 34's `trellis#1`):
-  303 effective `repo:trellis:<path>` documents, scope
+  `trellis#3`** (Session 37's refresh over `trellis#2` over
+  `trellis#1`): 305 effective `repo:trellis:<path>` documents, scope
   `src`+`scripts`+`modules` — stage-1 extraction produced 1,995
-  entities / 1,788 ACTION relationships; the refresh re-extracted 24
-  changed blocks (Session 35's harness files + the landed edit).
+  entities / 1,788 ACTION relationships; `trellis#2` re-extracted 24
+  changed blocks (Session 35's harness files + the landed edit);
+  `trellis#3` re-extracted 17 (the parse-gate files +
+  `trellis_tools.py` v3, the checkout EOL-normalization re-hash —
+  NOT an edit).
   DURABLE — never drill-cleaned, never tombstoned as cleanup; refresh
   = re-run the scoped snapshot (`repo:ingest --repo-key trellis
   --root . --include src --include scripts --include modules`, plan
@@ -1188,7 +1268,14 @@ Repository state at handoff creation:
   stage-1 `returns_copy_of` ACTION edge on `get_retrieved_addresses`
   reads contested with its dead v1 hash in `orphanedSourceIds` (the
   Session 36 churn demonstration; the live fact is the uncontested
-  DERIVED_INSIGHT `returns_copy_of` belief citing the v2 block);
+  DERIVED_INSIGHT `returns_copy_of` belief citing `09281f45…`,
+  retained live in v3); the Session 37 run-2 insight edge
+  (`trellis_agent` `wires` `get_retrieved_addresses`, citing the
+  live `main()` block `2f703511…2514`) STANDS uncontested — a true
+  gate- and checker-verified belief from a run whose DIFF failed
+  review (§5f.5); the Session 37 refresh's 25 contested nodes / 17
+  contested relationships across 5 re-versioned docs are standard
+  lazy-recovery residue;
   ~630 documents total in `documents` (pilot residue tombstoned;
   pilot-provenance entities read contested — the standard
   lazy-recovery residue; the two promoted
@@ -1203,35 +1290,42 @@ Repository state at handoff creation:
   PROGRESS (increment 1 EXECUTED and LANDED Session 36; the row
   strikes only on the owner's increment-ladder judgment); row 7 stays
   trigger-blocked.
-- Session 36 changed NO prompt byte — both composed-prompt pins
-  unmoved (default `5d27e474…fe2a`, omit-arm `45987904…0b56` —
-  recompute BOTH in the same commit only if the kernel prompt or
-  rubric legitimately changes). Its code surface is exactly the
-  RUN-AUTHORED diff: two comment/docstring hunks in
-  `src/rlm/trellis_tools.py` (zero executable lines — the Session 30
-  stale slice-(d) statements corrected by the increment-1 run itself;
-  do not "improve" this diff by hand, it is measured evidence).
-  Everything else is docs (`TRELLIS_ROADMAP.md`,
-  `REPOSITORY_INGESTION_REPORT.md` §5e.5, the archive move, this
-  file) plus the committed `scale_drill_results.json`. `package.json`
-  and `requirements.txt` unchanged — all Docker layers cached. Run
-  transcripts live in `benchmark_logs/` (gitignored, local only):
-  `session36_selfedit_run1.log` / `session36_run1_failed_diff.patch`
-  / `session36_selfedit_run2.log` / `session36_workers.log` /
-  `session36_compose.log`.
+- Session 37 changed NO prompt byte and NO kernel code byte — both
+  composed-prompt pins unmoved (default `5d27e474…fe2a`, omit-arm
+  `45987904…0b56` — recompute BOTH in the same commit only if the
+  kernel prompt or rubric legitimately changes). Its code surface is
+  harness tooling only: `src/benchmarks/selfedit/parse_gate.ts`
+  (new) + `parse_gate.test.ts` (new) + `check.ts`/`check.test.ts`
+  (the finding + pure evaluation + pins) +
+  `scripts/stage2_selfedit_check.ts` (post-run parse step) +
+  `scripts/test_selfedit_harness.ts` (drill section [6]). Both
+  increment-2 run diffs were REVERTED (recorded failures — the
+  `trellis_agent.py` stale comment is still in place and is the
+  Session 38 retry's target; do not hand-fix it). Everything else is
+  docs (`TRELLIS_ROADMAP.md`, `REPOSITORY_INGESTION_REPORT.md`
+  §5f/§5f.5, the archive move, this file) plus the committed
+  `scale_drill_results.json`. `package.json` and `requirements.txt`
+  unchanged — all Docker layers cached. Run transcripts live in
+  `benchmark_logs/` (gitignored, local only):
+  `session37_selfedit_run1.log` / `session37_selfedit_run2.log` /
+  `session37_run1_failed_diff.patch` /
+  `session37_run2_failed_diff.patch` / `session37_task.txt` /
+  `session37_task_v2.txt` / `session37_workers.log` /
+  `session37_compose.log`.
   Reminder from Session 24: `block_parity.test.ts` SPAWNS the real
   Python walk inside plain `npm test` (interpreter from
   `PYTHON_EXECUTABLE` or the platform default) — a machine without
   Python on PATH will fail the unit suite; CI sets up Python 3.13
   before `npm test`.
-- Offline baseline: `npm test` = 771 passing across 81 files
-  (unchanged by Session 36 — no new test surface; the session's code
-  diff is comment/docstring-only).
+- Offline baseline: `npm test` = 782 passing across 82 files
+  (Session 37 added the 11 parse-gate pins in
+  `parse_gate.test.ts` + `check.test.ts`).
 - `npm run build` and `npm run python:check` pass (the check imports
   polars — an environment without it fails the check by design).
 - `npm run drill:scale`: gate CLOSED at max provenance 286.
-  Session 36 read 1.63x CLOSED (in-band ~1.48x–2.26x, first try);
-  Session 35 1.68x; Session 34 1.53x; Session 33 1.94x; Session 32 2.04x; Session 31
+  Session 37 read 1.76x CLOSED (in-band ~1.48x–2.26x, first try);
+  Session 36 1.63x; Session 35 1.68x; Session 34 1.53x; Session 33
+  1.94x; Session 32 2.04x; Session 31
   2.09x; Session 30 1.89x; Session 29 1.97x; Session 28 first read
   2.65x — OUTSIDE the band — and the precedent re-run read 1.77x
   CLOSED (non-reproducing, most plausibly same-day drill traffic on
@@ -1239,13 +1333,16 @@ Repository state at handoff creation:
   believing it — and if it REPRODUCES, that is the recorded migration
   trigger (roadmap §4 row 7) and the owner adjudicates. The drill
   rewrites the tracked `scale_drill_results.json` — commit it with
-  the session PR (house practice; the committed copy is Session 36's
-  1.63x CLOSED run). Run the scale drill ALONE — never concurrently
+  the session PR (house practice; the committed copy is Session 37's
+  1.76x CLOSED run). Run the scale drill ALONE — never concurrently
   with other live drills on the shared dev database (the Session 28
   outlier's most plausible cause).
-- Live zero-LLM checks (Session 36 observed, all green):
-  `test:selfedit-harness` (39 — runs the rehearsal python, so
-  it needs the Python runtime deps), `test:answer-channel` (32),
+- Live zero-LLM checks (Session 37 observed, all green):
+  `test:selfedit-harness` (41 [PASS] on this stack — 36 pre-existing
+  + the 5 parse-gate checks; the count is environment-shaped like
+  repo-ingest, "ALL CHECKS PASSED" is the signal; runs the rehearsal
+  python, so it needs the Python runtime deps),
+  `test:answer-channel` (32),
   `test:modules` (green — pins unmoved),
   `test:textedit` (105 on this Windows host; 106 on POSIX — the
   executable-bit check is POSIX-only; also in CI),
@@ -1263,7 +1360,7 @@ Repository state at handoff creation:
 - Isolated Compose integration: 11 assertions (`--profile test`,
   unique project name; includes the containerized credentialed MCP
   fixture probe and the in-container `polars 1.34.0` import probe).
-  Session 36 ran it as project `trellis_s36_ci` (all 11 PASS; no
+  Session 37 ran it as project `trellis_s37_ci` (all 11 PASS; no
   manifest changed — all layers cached) and tore it down with
   `--volumes`. The CI-mold invocation: env `COMPOSE_PROJECT_NAME` +
   the five host-port variables at 0 + an `API_KEY`, then
@@ -1276,7 +1373,7 @@ Repository state at handoff creation:
   (Session 33's first attempt guessed `TRELLIS_PG_HOST_PORT`,
   collided with the dev stack on 5433, and failed at network setup —
   torn down and re-run clean). NOTE: the machine's C: drive runs
-  close to full (~19 GB free at Session 36's close) and a FULL image
+  close to full (~19 GB free at Session 37's close) and a FULL image
   rebuild needs several GB of headroom. Changing `package.json`
   invalidates the Docker `npm ci` layer; changing `requirements.txt`
   invalidates the pip layer.
@@ -1311,13 +1408,19 @@ Repository state at handoff creation:
   run); **(7) the targeted stage-1 entailment sweep**
   (~100 pairs ≈ $0.04 — deliberate sampled-audit coverage over the
   substrate's semantic layer; the Session 36 refresh added 24 newly
-  extracted blocks to that pool). Item (6)'s FIRST EXECUTION ran in
-  Session 36 (snapshot `trellis#2`, $0.102) — the cadence stands (one
-  scoped refresh per merged PR + refresh-before-use ahead of stage-2
-  edit runs), each refresh still gated per run. The increment-2 parse
-  gate and edit run are the Session 37 OBJECTIVE's own steps, not
-  conditional items — but if the owner declines the run, this list is
-  the fallback menu.
+  extracted blocks to that pool). Item (6) has now run
+  twice (Session 36 `trellis#2` $0.102; Session 37 `trellis#3`
+  $0.0656) — the cadence stands (one scoped refresh per merged PR +
+  refresh-before-use ahead of stage-2 edit runs), each refresh still
+  gated per run. The comment-class diff gate and the retry run are
+  the Session 38 OBJECTIVE's own steps, not conditional items — but
+  if the owner declines the run, this list is the fallback menu.
+  OPERATIONAL NOTE (Session 37, Windows): stopping `npm run
+  dev:workers` through the session harness orphans the child tsx
+  worker — a stale consumer that steals queue-drill jobs
+  (verification-sweep/agent-loop report "timeout" while effects
+  apply). Kill the child process tree and verify zero node/tsx
+  worker processes before running queue drills.
 - CI target is Node 22 (the `offline` job also runs `test:textedit`
   after its Python-runtime install — Session 29). Session 33's local
   environment was Node 20.19.2, Python 3.13.1, Docker Compose v2,
@@ -1356,131 +1459,143 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 37 problem statement
+## 3. Session 38 problem statement
 
-**Stage-2 increment 2 (roadmap §4 row 11 stage 2): close increment
-1's measured escape mechanically, then take one step deeper on the
-edit ladder.** Increment 1 landed (Session 36) and left two facts a
-new session must act on:
+**The increment-2 RETRY (roadmap §4 row 11 stage 2): close run 2's
+measured escape mechanically, then re-run the same owner-scoped
+edit.** Session 37 left two facts a new session must act on:
 
-- **The measured escape:** run 1 shipped a syntax-broken
-  `trellis_tools.py` (`SyntaxError: unmatched ')'`) that
-  `stage2:check` PASSED — correctly, per its recorded scope (§5e.2:
-  consultation + diff scope, not diff semantics) — and only human
-  `git diff` review caught. The failure class is named in the
-  Session 36 roadmap entry: verify-then-submit collapsed into one
-  REPL cell (the run's final verification read printed the leftover
-  stale bytes AFTER `trellis_answer.submit` was already staged in the
-  same cell). A parse-level check is mechanically decidable and
-  belongs in the checker: a self-edit that leaves the named file
-  unparseable should be a typed finding, not a human catch.
-- **The ladder position:** increment 1 was comment/docstring-only in
-  one named file. The recorded escalation (roadmap §4 row 11) is
-  "string constants toward reviewed kernel diffs" — increment 2's
-  edit class is a genuine step up (an executable-line single-file
-  edit, or a multi-file comment-class edit), owner-scoped, with a
-  NEW named failure mode and the same harness + human review.
+- **The measured escape (run 2):** a comment-class edit that DELETED
+  parseable executable neighbors — the splice replaced a 6-line
+  window with 6 hand-retyped comment lines, dropping the executable
+  `"retrieved_addresses": get_retrieved_address_count(),` line and
+  the Session 33 comment's first line — passed the scope check, the
+  evidence check, AND the parse gate (the file parses), and only
+  human `git diff` review caught it. For a declared comment-class
+  increment this is mechanically decidable from the diff alone:
+  every changed line (both removed and added sides) in the named
+  file must be a comment line or blank. That check belongs in the
+  checker as a typed finding.
+- **The target still stands:** the `trellis_agent.py` research-mode
+  telemetry comment ("Bookkeeping; slice (d) will constrain citable
+  addresses to the set itself.", lines ~575–578) remains stale and
+  substrate-verified (`trellis#3` mirrors disk for that file; the
+  in-file evidence block `2f703511…2514` is live). Run 2's insight
+  edge (`trellis_agent` `wires` `get_retrieved_addresses`) already
+  EXISTS with that live citation — a retry's gated write MERGEs onto
+  it (provenance union; the existing hash bridges to the named file,
+  so the checker is unaffected). The failed-run diagnosis chain is
+  recorded in §5f.5; task text v2 (the working evidence path) is the
+  base for v3.
 
 The session splits zero-paid machinery from the owner-gated run
-exactly as Session 35/36 did: build and drill the parse gate FIRST
-(no approval needed — harness tooling, not kernel), then propose the
-increment-2 run with target, failure mode, criterion, and estimate,
-and WAIT for owner approval before any paid spend.
+exactly as Sessions 35–37 did: build and drill the comment-class
+diff gate FIRST (harness tooling, no approval needed), then propose
+the retry run with the amended task text and WAIT for owner approval
+before any paid spend.
 
 ## 4. Required design
 
-- **Pre-flight (zero-paid):** confirm the Session 36 PR merged
+- **Pre-flight (zero-paid):** confirm the Session 37 PR merged
   (`git log -- HANDOFF.md`); `npm ci`; full offline gates; the
-  standing drill block green.
-- **The parse gate (zero-paid, lands regardless of the run):** extend
-  `src/benchmarks/selfedit/check.ts` with a typed finding
-  `named_file_unparseable` and `scripts/stage2_selfedit_check.ts`
-  with the post-run parse check on the named file — language-aware by
-  extension: `.py` via a spawned `python -m py_compile` (the
-  interpreter from the same config seam the harness already uses),
-  `.ts`/`.js` via the TypeScript compiler API's parse-diagnostics (a
-  single-file syntax parse, NOT a type-check — no project resolution,
-  no emit). POST-RUN mechanical check only, never a write gate
-  (guardrail 5's mold); a parse failure is a finding (exit 1), same
-  as every other code. Unit pins in `check.test.ts` (a planted
-  syntax-broken fixture per language, plus the clean-arm no-finding
-  pin); a drill section in `test_selfedit_harness.ts` planting the
-  EXACT run-1 shape (stale docstring tail left as dead bytes below a
-  function body) and observing the finding fire. Run-1's preserved
-  failed diff (`benchmark_logs/session36_run1_failed_diff.patch`,
-  local) is the reference shape. The checker stays READ-ONLY.
-- **The increment-2 proposal (owner-gated; present, then WAIT):**
-  select 2–3 candidate targets BY GRAPH QUERY over the `trellis#2`
-  substrate (the increment-1 mold: a recorded falsifiable staleness
-  or mismatch the run can verify against fetched bytes — e.g. a
-  docstring/comment contradicted by a later session's landed
-  behavior, found by reading `run_cypher` results against stored
-  blocks; do NOT hand-pick by reading the working tree alone — the
-  graph-informed selection IS the increment's point). For each
-  candidate record: the named file(s), the pre-scoped edit, the NEW
-  named failure mode the increment measures, mechanical detection,
-  estimate (the W-series/increment-1 basis: $0.15–$0.45/run for
-  single-file; scale for multi-file), and the five-part criterion in
-  the §5e.4 mold. Write the design record as
-  `REPOSITORY_INGESTION_REPORT.md` §5f BEFORE any run. Task-text
-  discipline (the run-1 lesson, run INPUT not kernel prompt): require
-  the final verification read in its OWN iteration, with
-  `trellis_answer.submit` only in a LATER cell after printing the
-  verified bytes.
+  standing drill block green (kill stale worker processes first —
+  the §2 operational note).
+- **The comment-class diff gate (zero-paid, lands regardless of the
+  run):** extend `src/benchmarks/selfedit/check.ts` with a typed
+  finding (suggested `named_file_noncomment_change`) and a pure
+  evaluation over a parsed unified diff: for a named file DECLARED
+  comment-class (a new CLI flag, e.g. `--comment-class <file>` —
+  the increment declares its class; the gate must not fire on future
+  executable-class increments), every changed content line (`-` and
+  `+` sides both) must be blank or a comment line for the file's
+  language (`#` for `.py`; `//` for `.ts`/`.js` this edition —
+  block-comment interiors are OUT of scope, recorded honestly; the
+  retry targets a `.py` file). The gatherer runs read-only
+  `git diff -- <named file>` under the edit root — a WIDENING of the
+  harness's git surface from `status --porcelain` to `diff`, still
+  read-only, recorded in the §5g design record. Pure parsing
+  unit-pinned (the preserved run-2 diff is the reference shape: its
+  removed executable line must fire the finding; a clean
+  comment-only edit stays silent); a drill section in
+  `test_selfedit_harness.ts` planting the EXACT run-2 shape (replace
+  a comment+executable window with comment-only lines) and observing
+  the finding fire through the real git binary. POST-RUN mechanical
+  check only, never a write gate (guardrail 5's mold).
+- **The retry proposal (owner-gated; present, then WAIT):** same
+  target, same evidence contract (subject `trellis_agent`, verb
+  `wires`, object `get_retrieved_addresses` — the existing live edge
+  MERGEs additively), same spawn mechanics. Task text v3 = v2 (the
+  §5f.5-recorded amendments that produced run 2's PERFECT evidence
+  chain) plus the run-2 lessons, run INPUT not kernel prompt:
+  (1) SPLICE MINIMAL SPAN — splice exactly the lines whose content
+  changes and NEVER retype unchanged lines (the run-2 failure was a
+  6-line retype window for a 2-line change); (2) the verification
+  predicate must assert NEIGHBOR PRESERVATION — after write_back,
+  print the edited region AND assert the executable
+  `"retrieved_addresses": get_retrieved_address_count(),` line and
+  the `# Session 33` comment head are still present, in their own
+  iteration, before any submit. Write §5g in
+  `REPOSITORY_INGESTION_REPORT.md` BEFORE the run (the §5f mold:
+  target evidence re-verified live, failure mode, detection,
+  estimate — the increment-1/2 basis $0.15–$0.45/run, ≤$0.90 total —
+  five-part criterion with the comment-class gate added to item 3).
 - **The run (only after owner approval):** Session 26 spawn
-  mechanics, research mode, `TRELLIS_EDIT_ROOT` = the clean session
-  worktree, `TRELLIS_CITATION_AUDIT=1`, `--max-iterations 12` (raise
-  only with the owner if the deeper class needs it). Refresh-before-
-  use: if the target file changed since `trellis#2`, run the scoped
-  refresh (plan echo first, separately gated) BEFORE the run so the
-  substrate mirrors current bytes. Post-run in order: `stage2:check`
-  (now with the parse gate) → human `git diff` review → offline gates
-  with the diff applied → land in the session PR. One contingency
-  re-run only after a diagnosed clean failure, within the proposed
-  budget; a harness flag = FAILED, record and stop.
+  mechanics, research mode, `--max-iterations 12`,
+  `TRELLIS_EDIT_ROOT` = the clean session worktree,
+  `TRELLIS_CITATION_AUDIT=1` in the run's own env. Refresh-before-use
+  only if `trellis_agent.py` changed since `trellis#3` (it should
+  not have). Post-run in order: `stage2:check` (scope + evidence +
+  parse gate + the NEW comment-class gate) → human `git diff` review
+  → offline gates with the diff applied → land in the session PR.
+  One contingency re-run only after a diagnosed clean failure,
+  within the proposed budget; a harness flag = FAILED, record and
+  stop. If the retry fails again, STOP the ladder and put the
+  increment-ladder judgment to the owner with the three failure
+  records — do not design increment 3 unilaterally.
 - **Post-landing refresh (the adopted §5d.6 cadence, separately
-  gated):** plan echo, approval, drain, churn verification with
-  counts — the Session 36 mold.
+  gated):** plan echo, approval, drain (fresh workers, then KILL THE
+  CHILD TREE and verify zero consumers), churn verification with
+  counts — the Session 36/37 mold.
 - **What does NOT change:** rows 9/10 machinery; the textedit
-  contract; the increment-1 landed diff (measured evidence — never
-  "improved" by hand); every probe suite's question bytes; both
-  composed-prompt pins.
+  contract; the increment-1 landed diff AND the still-stale
+  `trellis_agent.py` comment (the run's task — never hand-fixed);
+  every probe suite's question bytes; both composed-prompt pins.
 
 ## 5. File-level starting points
 
-- `TRELLIS_ROADMAP.md` §5 Session 36 entry — the run-1 diagnosis
-  (the failure class the parse gate closes) and the landed-run
-  counts; §4 row 11 for the ladder.
-- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5e (the
-  increment-1 design record — the mold for §5f) and §5e.5 (the
-  measured-run record).
+- `TRELLIS_ROADMAP.md` §5 Session 37 entry — both run diagnoses and
+  the recorded next step; §4 row 11 for the ladder state.
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5f + §5f.5 (the
+  increment-2 design record and measured-runs record — the mold and
+  the evidence base for §5g).
 - `src/benchmarks/selfedit/check.ts` + `check.test.ts` — the checker
-  and its pins (typed findings list; add `named_file_unparseable`).
+  (typed findings list; add the comment-class finding beside
+  `named_file_unparseable`).
+- `src/benchmarks/selfedit/parse_gate.ts` + `parse_gate.test.ts` —
+  the Session 37 parse gate (the structural mold for the new gate's
+  gatherer/evaluation split).
 - `scripts/stage2_selfedit_check.ts` — the CLI (post-run mode gains
-  the parse step; `--pre` unchanged).
-- `scripts/test_selfedit_harness.ts` + `scripts/test_selfedit_rehearsal.py`
-  — the drill (add the run-1-shape planted violation) and the
-  spawn-env mold for the paid run (`runRehearsal`).
-- `src/rlm/trellis_agent.py` — the spawn surface (unchanged; research
-  mode wires gate + discipline).
-- `scripts/ingest_repository.ts` — the refresh command.
-- `src/config/index.ts` — the python-executable seam
-  (`config.python.executable`) the parse gate should reuse.
+  the declared-class flag + the diff gatherer; `--pre` unchanged).
+- `scripts/test_selfedit_harness.ts` — the drill (section [6] is the
+  parse gate; add the run-2-shape section).
+- `benchmark_logs/session37_run2_failed_diff.patch` +
+  `session37_task_v2.txt` (local, gitignored) — the reference escape
+  shape and the task-text base.
+- `src/rlm/trellis_agent.py` lines ~570–585 — the target region
+  (read-only until the run).
 
 ## 6. Test strategy and acceptance
 
-Zero-paid except the owner-gated increment-2 run and (separately
-gated) any refresh extraction.
+Zero-paid except the owner-gated retry run and (separately gated)
+any refresh extraction.
 
-- **Zero-paid:** the parse gate's unit pins land in `npm test`
-  (771/81 grows); `test:selfedit-harness` grows by the planted
-  parse-failure section and stays green; the full standing drill
-  block green; `stage2:check --pre` passes before any run.
-- **The run (owner-gated):** judged by §5f's pre-stated five-part
-  criterion (the §5e.4 mold: named-file-only scope, pre-scoped edit
-  under human review, checker zero findings INCLUDING the parse gate,
-  counts + diff + dollars together, harness flag = FAILED with no
-  silent retry).
+- **Zero-paid:** the comment-class gate's unit pins land in
+  `npm test` (782/82 grows); `test:selfedit-harness` grows by the
+  planted run-2-shape section and stays green; the full standing
+  drill block green; `stage2:check --pre` passes before any run.
+- **The run (owner-gated):** judged by §5g's pre-stated five-part
+  criterion (the §5f.4 mold, comment-class gate included in the
+  checker item).
 - **The refresh (owner-gated):** plan echo bound before approval;
   churn verified with counts post-drain.
 - Run `drill:scale` ALONE (never concurrent with other live drills).
@@ -1524,19 +1639,19 @@ Update:
   (run + refresh separately); row 11 stage-2 progress recorded (the
   row strikes only when the owner judges the increment ladder
   complete — record progress, do not strike unilaterally).
-- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`: §5f (the
-  increment-2 design record, written BEFORE the run) + its measured
-  subsection after.
-- `HANDOFF.md`: regenerate per §0 — including the §0 step 5 re-check.
-  NOTE for objective selection: if increment 2 lands, the natural
-  next objective is increment 3 (further up the ladder, owner-scoped)
-  or an owner-directed pivot to the §2 standing menu (the row-10 (d)
-  acceptance and the stage-1b prose chunk are the largest standing
-  measurements); if the owner declines increment 2's run, the parse
-  gate still lands and the fallback is the §2 menu. Keep the
-  five-session narrative window (33–37 after this session): compress
-  Session 32 into the digest and move its roadmap §5 entry verbatim
-  to `docs/archive/ROADMAP_HISTORY.md`.
+- `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`: §5g (the retry
+  design record, written BEFORE the run) + its measured subsection
+  after.
+- `HANDOFF.md`: regenerate per §0 — including the §0 step 5
+  re-check. NOTE for objective selection: if the retry lands, the
+  natural next objective is the owner's increment-ladder judgment
+  (present the ladder record and ask: deeper increment, pivot to the
+  §2 standing menu — the row-10 (d) acceptance and the stage-1b
+  prose chunk are the largest standing measurements — or strike the
+  row); if the retry fails, STOP and put the three-failure record to
+  the owner. Keep the five-session narrative window (34–38 after
+  this session): compress Session 33 into the digest and move its
+  roadmap §5 entry verbatim to `docs/archive/ROADMAP_HISTORY.md`.
 
 ## 7. Guardrails
 
@@ -1610,12 +1725,27 @@ Update:
    counted skip; invalid prefixes refuse before I/O; doc keys stay
    root-relative under every scope), and the Session 35 stage-2
    harness invariants (the checker and its CLI are READ-ONLY
-   everywhere — the only git invocation is `git status --porcelain`,
-   and the run/toolkit never touches git; `--pre` runs before any
-   edit run; a harness flag FAILS the increment — never argued away,
-   never re-run silently; the evidence contract stays "one recorded
-   insight citing fetched blocks, verified through the Session 31
-   gate" — the checker never becomes a write gate itself). None of
+   everywhere — the git surface is read-only (`git status
+   --porcelain` since Session 35; Session 38's comment-class gate
+   may add read-only `git diff`), and the run/toolkit never touches
+   git; `--pre` runs before any edit run; a harness flag FAILS the
+   increment — never argued away, never re-run silently; the
+   evidence contract stays "one recorded insight citing fetched
+   blocks, verified through the Session 31 gate" — the checker never
+   becomes a write gate itself), and the Session 37 parse-gate
+   invariants (post-run mechanical check ONLY, never a write gate;
+   the Python parse spawns the configured interpreter and NEVER
+   writes bytecode into the edit root; the TS parse is single-file
+   diagnostics — no project resolution, no type check, no emit;
+   extensions with no parser wired never produce a finding; the gate
+   composes ADDITIVELY beside `evaluateSelfEditRun`, whose contract
+   is unchanged — and every future mechanical gate in this harness
+   follows the same mold). The Session 37 operator-cleanup precedent
+   is BOUNDED, permanently: deleting a graph edge is legitimate only
+   for a failed acceptance-run's own residual write, before its
+   contingency, with the exact Cypher and rationale recorded in the
+   session's documents — never for extraction-produced beliefs,
+   never for contested audit records, never silent. None of
    these is ever weakened or made configurable.
    `TRELLIS_EXP_OMIT_CMT`, `TRELLIS_EXP_MODULES`, and
    `TRELLIS_EXP_OMIT_RETRIEVAL` stay experiment-only: off by default,
@@ -1702,28 +1832,42 @@ Update:
 
 ## 8. Explicit exclusions
 
-Do not include: running the increment-2 edit run, any refresh
+Do not include: running the retry edit run, any refresh
 extraction, the row-10 (d) `est` acceptance measurement, the
 stage-1b prose chunk (docs/ + root prose), or ANY paid run without
 explicit owner approval (the run and any refresh are THIS objective's
 gated steps — ask first, wait; everything else stands
 propose-with-estimate; the first entailment sweep RAN owner-approved
-July 13, 2026 — actuals in the Session 32 roadmap entry item 3; a
+July 13, 2026 — actuals in the archived Session 32 roadmap entry; a
 SECOND sweep or a judge-calibration change is a new owner decision);
 hand-editing the increment-1 LANDED diff in `trellis_tools.py`
 (measured evidence of the first landed self-edit — style cleanups
 included; any change there is a NEW owner-visible edit, not a
-touch-up); making the parse gate a write gate or wiring it anywhere
-except the post-run checker path (guardrail 5's mold); letting the edit run or the toolkit
-touch git in any form (landing is a human-reviewed PR, always);
+touch-up); hand-fixing the `trellis_agent.py` research-mode stale
+telemetry comment (it is the retry run's TASK — fixing it by hand
+destroys the increment); deleting, contesting, or "cleaning up" the
+Session 37 run-2 insight edge (`trellis_agent` `wires`
+`get_retrieved_addresses` — a true, live-bridged, gate-verified
+belief that stands) or any graph edge outside the bounded
+operator-cleanup precedent (guardrail 5); making the parse gate or
+the new comment-class gate a write gate or wiring either anywhere
+except the post-run checker path (guardrail 5's mold); firing the
+comment-class gate on an increment that did not declare
+comment-class; letting the edit run or the toolkit
+touch git in any form (the harness's own git use stays read-only:
+status + diff; landing is a human-reviewed PR, always);
 committing an edit-run diff without human `git diff` review or with
 a non-empty `stage2:check` finding list; widening the stage-2
 increment beyond its single named failure mode mid-session;
 re-running the scoped snapshot OUTSIDE the post-landing refresh step
 (a scoped re-run without extraction budget is zero-paid but still
 churns beliefs — owner-visible, not a convenience); weakening any
-Session 35 harness pin or making the checker a write gate
-(guardrail 5); tombstoning or sweeping the
+Session 35 harness pin or Session 37 parse-gate pin, or making the
+checker a write gate
+(guardrail 5); designing or running increment 3 (or any new ladder
+step) unilaterally after a second retry failure — the
+increment-ladder judgment belongs to the owner with the full failure
+record; tombstoning or sweeping the
 stage-1 extraction residue as if it were drill state (durability is
 the point — permanent now that the run has run; guardrail 12);
 reworking the Session 34 scope machinery (carry-forward semantics,
@@ -1780,7 +1924,10 @@ migration (gate CLOSED; Sessions 23–36 read 1.84x, 2.11x, 1.99x–2.01x,
 1.78x, 1.99x, 1.77x-after-outlier, 1.97x, 1.89x, 2.09x, 2.04x, 1.94x,
 1.53x, 1.68x, and 1.63x, inside the band — do not migrate on a noisy
 reading); T13
-re-hashing; rlms library modifications; weakening the Session 14
+re-hashing; rlms library modifications; treating the checkout
+EOL-normalization churn class (§5f.5) as a defect to "fix" in the
+ingestion layer — it is recorded environmental behavior handled by
+the ordinary churn loop; weakening the Session 14
 write-path enforcement, the Session 15/20/22/24 composition pins, the
 Session 16 lineage pins, the Session 17 promotion refusals, the
 Session 18 registration gates, the Session 19 authoring-mode /
@@ -1798,6 +1945,9 @@ before-connect behavior and first-fetch byte-identity), or the
 Session 34 scope pins (`snapshot_ingest.test.ts` scope section +
 `test:repo-ingest` Part 7, including plan-equality for unset scope
 and carry-forward-never-tombstones), or the Session 35 stage-2
-harness pins (`check.test.ts` + the 39-check `test:selfedit-harness`
+harness pins (`check.test.ts` + the `test:selfedit-harness`
 drill, including the live-gate refusal observation and the
-clean-arm zero-findings pass).
+clean-arm zero-findings pass), or the Session 37 parse-gate pins
+(`parse_gate.test.ts` + drill section [6], including the planted
+run-1 shape firing through the real interpreter and the
+unwired-extension silence).
