@@ -1179,6 +1179,289 @@ instead.
   `trellis_agent.py` was not re-ingested; both failed diffs were
   reverted before the refresh).
 
+## 5g. Stage 2, increment 2 RETRY: the comment-class diff gate + the re-proposed edit (design record, Session 39, July 13, 2026)
+
+Written BEFORE the run (the §5f mold). The retry closes Session 37
+run 2's measured escape mechanically, then re-runs the same
+owner-scoped edit with the run-2 lessons folded into the task text.
+
+### 5g.1 The comment-class diff gate (zero-paid, landed before the run)
+
+Session 37 run 2's escape — a comment splice whose hand-retyped
+window dropped the executable
+`"retrieved_addresses": get_retrieved_address_count(),` line and the
+Session 33 comment head, leaving a file that still PARSES — is
+mechanically decidable from the diff alone when the increment
+DECLARES its edit comment-class: every changed content line in the
+named file's diff, the removed side AND the added side, must be blank
+or a line comment for the file's language.
+
+- **The typed finding** `named_file_noncomment_change` joins the
+  checker (`src/benchmarks/selfedit/check.ts`). Pure pieces:
+  `parseUnifiedDiffChangedLines` (in-hunk `-`/`+` lines only; file
+  headers, context lines, and the no-newline marker skipped; CR
+  stripped; bounded to what `git diff` emits, not a general patch
+  parser), `commentMarkerForFile` (`#` for `.py`, `//` for
+  `.ts`/`.js`; unwired extensions null), and `checkCommentClassDiff`
+  (blank or marker-prefixed after trim passes; anything else on
+  either side is a finding with the bounded offending line quoted).
+- **The declaration** is a new CLI flag `--comment-class <file>`
+  (repeatable) on `scripts/stage2_selfedit_check.ts`'s post-run mode.
+  The gate NEVER fires on an increment that did not declare
+  comment-class — an executable-class increment never sees it.
+  Declarations validate BEFORE any I/O: a comment-class file must be
+  a `--named-file`, must have a wired line-comment marker, and the
+  flag is refused under `--pre` (all three refusals observed).
+- **The gatherer** is read-only `git diff -- <file>` under the edit
+  root (`gatherGitDiff`) — the recorded Session 39 WIDENING of the
+  harness's git surface from `status --porcelain` to status + diff,
+  still read-only; the run and the toolkit never touch git.
+- **HONEST SCOPE:** line comments only this edition. Block-comment
+  interiors and docstrings are NOT recognized, so a comment-class
+  edit touching them flags conservatively (a false FLAG a human can
+  overrule, never a false pass). The gate is a post-run mechanical
+  check in the parse-gate mold (guardrail 5), never a write gate.
+- **Pins:** 13 unit tests in `check.test.ts` — the reference
+  violation is the EXACT preserved run-2 failed diff reproduced
+  inline (its removed executable line fires the finding exactly once;
+  its added side, all comments, stays silent) — plus drill section
+  [7] in `test:selfedit-harness`, which plants the run-2 shape in a
+  scratch git repo, observes the parse gate's structural BLINDNESS to
+  it (the file parses), and watches the new gate fire through the
+  real git binary; the genuine comment-only edit arm stays silent.
+
+### 5g.2 Live evidence re-verification (the policy-2 substrate)
+
+The Session 38 pilot re-chunked `src/rlm` under chunking policy 2
+(snapshot `trellis#6`) — every §5f-era `src/rlm` hash is dead. The
+retry's evidence was re-verified against the LIVE substrate this
+session (read-only probes, recorded here per §3 of the handoff):
+
+- `repo:trellis:src/rlm/trellis_agent.py` current version 2, root
+  `6a1c2309b9d305795e51d5d75453551bec9495e98eccd832f7044a66fe840623`,
+  25 content-bearing blocks.
+- **The wiring block:**
+  `9b4c315986e342ebb741658d70ff04b21fef478cc2cdef103b261a294a6fa730`
+  (`code_statement`, 2,961 chars) contains the research path's
+  `TrellisNeo4j(... retrieved_addresses_check=get_retrieved_addresses)`
+  construction; bytes verbatim on disk.
+- **The stale-comment block:**
+  `ab87725e1583b8bf84a209c31f441d771099f9a53fa7475e67edc998c13cf883`
+  (`code_statement`, 2,949 chars) contains the stale
+  "slice (d) will constrain" comment; bytes verbatim on disk. Policy
+  2 SPLIT the wiring and the telemetry dict into separate blocks —
+  §5f's premise that one block held both is no longer true, and task
+  text v3 says so explicitly.
+- Both blocks' bytes appearing verbatim on disk means
+  `trellis_agent.py` is unchanged since `trellis#6`:
+  refresh-before-use is satisfied with NO pre-run refresh.
+- **The graph path (v3's step 1):** `get_retrieved_addresses` has
+  exactly two undirected ACTION edges — `constrains_with`
+  (`trellisneo4j`, citing the wiring block) and `returns_copy_of`
+  (`_retrieved_addresses`, citing
+  `e3df7336f60e53e183c9789551895542856e8959e8aff85a0060ba20cc619a81`,
+  a `trellis_tools.py` block). §5f's route through entity `main` is
+  DEAD (contested since the pilot churn — data, not a defect), so v3
+  re-routes. The two-hash fan-out is well inside the retrieval
+  budget, and the tools.py hash is a live re-test of the run-1 trap:
+  the run will fetch it and must NOT cite it (task rule 3 + the
+  Session 35 bridge check).
+- **The standing edge the retry MERGEs onto:** `trellis_agent`
+  `wires` `get_retrieved_addresses` exists, uncontested,
+  `rederivedAt` stamped, citing the wiring block — the run's gated
+  write unions provenance onto it.
+- `stage2:check --pre` PASS (zero findings) over `trellis_agent`,
+  `get_retrieved_addresses`, `_verify_hashes_retrieved`,
+  `_retrieved_addresses`, doc present.
+
+### 5g.3 The run proposal (approved this session; estimate honored regardless)
+
+- **Task text v3** (run INPUT only — no kernel prompt byte; both
+  composed-prompt pins unmoved) = v2's working evidence path re-based
+  per §5g.2, plus the two run-2 lessons: **(1) SPLICE MINIMAL SPAN**
+  — the splice window covers exactly the comment lines whose content
+  changes; a replacement line identical to an existing line means the
+  window is too wide; **(2) NEIGHBOR-PRESERVATION verification** —
+  the post-write_back iteration asserts in code, and prints, that the
+  executable `retrieved_addresses` line and the `# Session 33` head
+  survived, the stale sentence is gone, and the author-mode region is
+  untouched, before any submit. Verbatim:
+
+```
+Stage-2 self-edit task (increment 2, retry).
+
+The file src/rlm/trellis_agent.py contains one stale comment written
+before Session 31. The file has TWO telemetry dict constructions that
+each contain a "retrieved_addresses" entry: an author-mode one
+(earlier in the file) and a research-mode one (later in the file, in
+the research path). The stale comment sits ONLY above the
+research-mode entry and ends: "Bookkeeping; slice (d) will constrain
+citable addresses to the set itself." The author-mode telemetry
+comment is NOT stale and must not change.
+
+Verify against the knowledge graph and the stored source bytes what
+actually consumes the retrieved-address set today, then correct ONLY
+the stale research-mode comment.
+
+1. Query the graph with trellis_neo4j.run_cypher for the ACTION
+   edges around the entity named 'get_retrieved_addresses' (entity
+   names are lowercase-normalized). Use an UNDIRECTED relationship
+   pattern, for example MATCH (e:Entity)-[r:ACTION]-(o:Entity) WHERE
+   e.name = 'get_retrieved_addresses' RETURN r.verb, o.name,
+   r.sourceNodeIds - edges carry provenance in either direction.
+   Collect the distinct sourceNodeIds hashes from those edges.
+2. Fetch those provenance blocks with trellis_postgres.get_ast_texts
+   and read them. Among the fetched blocks, identify the block(s)
+   whose bytes belong to src/rlm/trellis_agent.py itself. The source
+   substrate stores this file as several fine-grained blocks: the
+   block showing the research path's TrellisNeo4j construction with
+   retrieved_addresses_check=get_retrieved_addresses is a code
+   statement block and it is NOT the same block that holds the stale
+   telemetry comment. Confirm the wiring from fetched bytes that
+   appear verbatim in the file you are editing.
+3. IMPORTANT provenance rule for this task: the derived insight you
+   record in step 6 may cite ONLY hashes whose fetched bytes are
+   part of src/rlm/trellis_agent.py (bytes that appear verbatim in
+   the file you are editing). Blocks from other files (for example
+   src/rlm/trellis_tools.py) describe the consumer but must NOT be
+   cited here.
+4. Edit ONLY src/rlm/trellis_agent.py through trellis_textedit
+   (load, locate, splice, diff, write_back): correct the stale
+   research-mode comment so it says slice (d) is live - this file
+   wires get_retrieved_addresses into the write gate through the
+   retrieved_addresses_check constructor seam on research runs.
+   Keep the edit comment-lines-only; change no executable line;
+   preserve the sentences that are still true (the count-only /
+   never-the-addresses T16 sentence). The string
+   "retrieved_addresses" appears at TWO telemetry sites; use the
+   engine-computed locate addresses and the surrounding bytes to
+   target the research-mode site only. Do NOT touch the author-mode
+   telemetry comment or any other part of the file.
+   SPLICE THE MINIMAL SPAN: your splice window must cover EXACTLY
+   the comment lines whose content changes and nothing else. Never
+   re-type a line whose content is not changing - not the executable
+   "retrieved_addresses": get_retrieved_address_count(), line, not
+   the "# Session 33" comment lines below it, not any unchanged
+   comment line above. If a line in your replacement list is
+   identical to a line already in the file at the same position,
+   your window is too wide: shrink the window instead of re-typing
+   that line.
+5. Verify in its OWN iteration: after write_back, in a NEW REPL
+   iteration, re-read the edited region and PRINT it, then assert
+   NEIGHBOR PRESERVATION in code (substring checks over the region,
+   each result printed): (a) the executable line
+   "retrieved_addresses": get_retrieved_address_count(), is still
+   present in the research-mode region, (b) the "# Session 33"
+   comment line below it is still present, (c) the stale sentence
+   ("slice (d) will constrain") is gone, (d) the author-mode
+   telemetry region is untouched. Do not submit in the same
+   iteration as this verification read.
+6. Only after you have seen the printed confirmation of ALL FOUR
+   assertions, in a LATER iteration: record exactly one derived
+   insight
+   trellis_neo4j.write_derived_insight(
+     subject='trellis_agent', verb='wires',
+     obj='get_retrieved_addresses',
+     sourceNodeIds=[the hash(es) of the fetched block(s) from
+     src/rlm/trellis_agent.py that show the wiring]),
+   then submit a short report via trellis_answer.submit describing
+   what the graph said, what the bytes confirmed, and what you
+   changed.
+
+Edit no other file. If the graph or the fetched bytes contradict the
+task premise, stop, make no edit, and report the contradiction
+instead.
+```
+- **Mechanics:** identical to §5e.4/§5f.4 — the session worktree as
+  `TRELLIS_EDIT_ROOT`, `TRELLIS_CITATION_AUDIT=1` in the run's own
+  environment, research mode, `--max-iterations 12`,
+  `trellis_agent.py` spawned directly.
+- **Estimate:** the increment-1/2 basis — **$0.15–$0.45 for one run;
+  one contingency re-run after a diagnosed clean failure at most —
+  ≤$0.90 total**, under the ≤$5/run cap. Actuals recorded regardless.
+- **Acceptance criterion (pre-stated; the §5f.4 mold with the new
+  gate folded into item 3):** (1) scope AND site: exactly the named
+  file changed; exactly ONE hunk in the research-mode telemetry
+  region; every changed content line a comment line; the author-mode
+  region byte-identical; (2) the pre-scoped edit lands only after
+  human `git diff` review; (3) `stage2:check` (with `--comment-class
+  src/rlm/trellis_agent.py` declared) reports ZERO findings —
+  including the parse gate AND the comment-class diff gate; (4)
+  counts and the diff and dollars reported TOGETHER; (5) a harness
+  flag means the increment FAILED — record and stop, no silent
+  retry. A third consecutive increment failure STOPS the ladder and
+  puts the three-failure record to the owner.
+
+### 5g.4 The measured run (Session 39, July 13, 2026 — LANDED, all five criterion items, first shot)
+
+- **The run ($0.347 computed from tokens — 110,447 in / 7,089 out at
+  the gpt-5.4 rates; inside the $0.15–$0.45 band; 9 db tool calls;
+  32 textedit ops / 1 write_back; 1 retrieval fetch — the two-hash
+  `get_ast_texts` batch — 1 dedup refusal observed live / 0 budget
+  refusals; `answer_submits` 1; 79.6s execution).** The evidence
+  chain ran exactly as §5g.2 predicted: the two undirected ACTION
+  edges → both hashes fetched in one batch → the citation audit
+  shows `read` = both, `cited` = the wiring block ONLY (the tools.py
+  hash fetched and correctly NOT cited — the run-1 trap re-tested
+  and passed); the gated write MERGEd onto the standing edge with an
+  unchanged provenance union. The run followed the v3 discipline
+  observably: locate on both telemetry sites (author 351 / research
+  578) plus the constructor seam (437), a minimal-span splice
+  replacing exactly the two stale comment lines with three comment
+  lines, and the neighbor-preservation iteration printing all four
+  assertions (executable line present, `# Session 33` head present,
+  stale sentence gone, author-mode region untouched) BEFORE the
+  separate submit iteration. One transient run-authored REPL
+  `ValueError` (a tuple-unpack in its own inspection code) was
+  recovered in the next iteration — no tool or gate involvement.
+- **Mechanical verdict:** `stage2:check --edit-root . --named-file
+  src/rlm/trellis_agent.py --comment-class src/rlm/trellis_agent.py
+  --subject trellis_agent --verb wires --object
+  get_retrieved_addresses` → **PASS: zero findings** across all four
+  layers (scope, evidence, parse gate, comment-class gate).
+- **Human `git diff` review: ACCEPTED.** One hunk at the research
+  telemetry site; removed 2 comment lines / added 3 comment lines;
+  the executable `retrieved_addresses` line and the `# Session 33`
+  head are untouched CONTEXT lines this time (run 2 deleted them);
+  the author-mode twin region is byte-identical. Offline gates green
+  with the diff applied (`npm test` 836/85, build, python:check).
+  One recorded observation: `write_back` wrote the three new lines
+  with LF endings into the otherwise-CRLF file (641 CRLF / 3 LF on
+  disk) — git normalizes on commit; the Session 36 mixed-EOL commit
+  class, recorded, not a defect.
+- **Criterion verdict: items 1–5 ALL PASS. Increment 2 CLOSED by the
+  retry; no contingency needed.** The ladder record now reads:
+  increment 1 landed on contingency; increment 2 failed twice
+  (Session 37), each failure class was closed by tooling shape (the
+  parse gate; the comment-class gate) or task discipline
+  (minimal-span + neighbor assertions), and the retry landed first
+  shot.
+- **The split-scope refresh (§5d.6 cadence under the §10.4 recipe;
+  $0.157 actual — 34,756 in / 6,936 out / 13,148 embedding tokens
+  from the fresh worker instance's metrics):** plan echoes FIRST for
+  both scopes (policy-1 bound 76 blocks / 12 files; policy-2 bound
+  24 blocks / 1 file; ZERO tombstones in both — carry-forward
+  correct in both directions). Snapshot `trellis#7` (policy 1,
+  everything except `src/rlm`): 12 files ingested — this session's
+  four harness files plus the Session 38 machinery files re-hashed
+  whole (the checkout-EOL churn class, third observation). Snapshot
+  `trellis#8` (policy 2, `src/rlm`): exactly `trellis_agent.py` v3,
+  Merkle-precise churn — 23 blocks RETAINED / 3 orphaned / 3 added,
+  2 extraction jobs. Pipeline: **59/59 jobs, zero failures**; 13
+  invalidation sweeps contested 63 nodes / 30 relationships (audit
+  preserved; standard lazy recovery — the agent.py v3 sweep alone:
+  5 nodes / 3 relationships from the superseded telemetry block's
+  derivations). **Churn verification:** the old stale-comment block
+  `ab87725e…f883` is DEAD in v3; the wiring block `9b4c3159…6a730`
+  was RETAINED (the edit never touched its statement run), so ALL
+  THREE standing beliefs (`wires` / `consumes` / `returns_copy_of`)
+  read uncontested with live provenance and NO recovery was needed
+  this time — the first refresh where the standing insights rode
+  through on retained blocks alone.
+- **Session paid total: $0.504** (run $0.347 + refresh $0.157),
+  against the proposal's ≤$0.90 run budget + separately-gated
+  refresh.
+
 ## 6. Verification summary
 
 - `npm test`: 345 passing across 44 files (baseline 294/40).

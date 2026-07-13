@@ -574,8 +574,9 @@ def main():
             "answer_submits": get_answer_submit_count(),
             # Session 30 (PROVENANCE_THREADING.md slice b): the size of
             # the run's retrieved-address set — a count only, never the
-            # addresses (T16). Bookkeeping; slice (d) will constrain
-            # citable addresses to the set itself.
+            # addresses (T16). Bookkeeping; slice (d) is live - this
+            # file wires get_retrieved_addresses into the write gate through the
+            # retrieved_addresses_check constructor seam on research runs.
             "retrieved_addresses": get_retrieved_address_count(),
             # Session 33 (RETRIEVAL_DISCIPLINE.md §6): retrieval-
             # discipline activity — counts only, never an identity
