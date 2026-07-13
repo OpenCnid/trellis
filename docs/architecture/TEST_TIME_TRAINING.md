@@ -595,12 +595,20 @@ that matter for the plan as stated:
   instruments (protocol-violation counts, answer-channel compliance,
   criterion items) are exactly the right meter; R5 — or an explicit R4
   criterion item — carries it.
-- **One overlap named honestly:** LaCT's measured wins are
-  LONG-CONTEXT modeling — the job the RLM harness already removes from
-  attention by construction (context lives in the REPL, fetched by
-  code). For THIS application the expected win therefore narrows to
-  serving efficiency plus C3's adherence effect; §3.4's
-  stability-shaped expectation remains the calibration.
+- **One overlap named — then CORRECTED by the owner (same day):** the
+  first version of this bullet argued LaCT's long-context wins do not
+  apply because the RLM removes the corpus from attention. The owner's
+  correction, recorded: **large REPL dumps ARE long-context modeling
+  in practice** — the code-mediated-text discipline stops the model
+  *retyping* retrieved bytes, not *reading* them; printed fetch
+  results, block texts, code, and extraction working sets flow through
+  attention every turn, and the planned workload uses a substantial
+  share of the worker agents' context to code and extract accurately.
+  The architecture point survives only in narrow form (the corpus
+  RESIDES outside attention and is fetched selectively); the per-run
+  token flow is genuine long-context load, so C1's long-context
+  quality-and-efficiency results apply to this application directly.
+  §3.4's stability-shaped expectation remains the calibration for C2.
 - **The authors' own limitation transfers:** state-based models are
   weaker at REASONING — the capability the RLM leans on hardest (LaCT
   pairs fast weights with window attention partly for this reason).
@@ -649,3 +657,40 @@ unchanged in order.
   exactly its size (guardrail 8, Session 45's version).
 - No rung's gate moved: everything remains owner-approved
   propose-with-estimate.
+
+### 12.5 The empirical decision and the reproduction landscape (added later on July 13, 2026)
+
+The owner's follow-up framed the undertaking as **"our own private
+repro study with expansion"** and asked whether the empiricals are
+worth running versus checking existing reproduction studies first.
+Both were done in order; the landscape check (same day, zero-paid):
+
+- **LaCT is peer-reviewed:** published at ICLR 2026 (no longer just a
+  preprint) — confidence in C1 rises.
+- **Official code exists:** github.com/a1600012888/LaCT, including
+  fused Triton kernels for the TTT layer — a private reproduction
+  starts from released code, not a reimplementation.
+- **Independent groups already retrain the LM setup:** the KV-binding
+  analysis (arXiv:2602.21204) trains its own 760M LaCT-LLM baseline on
+  100B FineWeb-Edu tokens; the mechanism has also been adopted
+  downstream in other domains (ZipMap, arXiv:2603.04385; elastic
+  spatial memory, arXiv:2604.07350). The reproduction half of the
+  undertaking carries good priors.
+- **A reproducibility-report culture exists in the TTT space**
+  (e.g., arXiv:2511.16691 for TTT-on-nearest-neighbors) — but **no
+  external study covers C2 or C3**: nobody has published "retrofit
+  fast-weight layers onto an open LLM and measure whether the LLM
+  improves," and nobody has measured meta-prompt adherence under fast
+  weights at all. The expansion half is novel measurement.
+
+**The verdict recorded:** the empiricals are worth running, and they
+are the ONLY route to C2/C3 — no amount of literature checking closes
+a gap the literature has not measured. The ladder is already shaped as
+exactly this study: R3 = the reproduction half on our workload (the
+same-checkpoint baseline; does quality hold under the protocol), R4 =
+the expansion half (C2 improvement, C3 adherence, the
+provenance-gated adaptation-data policy). The house measurement
+machinery — pre-stated criteria, paired arms, verdicts recorded
+pass-or-fail with actuals — is a reproduction-study harness by
+construction. Gates unchanged: each rung still enters as its own
+owner-approved proposal.

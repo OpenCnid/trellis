@@ -634,7 +634,16 @@ large-chunk fast-weight layers. The "provenance-gated adaptation
 data" design seed is recorded (eligibility boundary = the run's
 retrieval set — §9 question 4, sharpened, back to the collaborator).
 LaCT's own stated limitation (state-based models weaker at REASONING)
-transfers to any R3/R4 criterion.
+transfers to any R3/R4 criterion. **(7) The follow-up exchange
+(record §12.5):** the owner CORRECTED the overlap point — large REPL
+dumps ARE long-context modeling in practice (the discipline stops
+retyping, not reading), so C1's long-context results apply directly —
+and framed the undertaking as a PRIVATE REPRO STUDY WITH EXPANSION.
+Landscape check: LaCT is ICLR 2026; official code exists
+(github.com/a1600012888/LaCT); independent groups retrain the LM
+setup; NO external study covers C2 or C3 — the empiricals are the
+only route, and the ladder is already shaped as the study (R3 = the
+reproduction half, R4 = the expansion half). Gates unchanged.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
@@ -1275,7 +1284,11 @@ Repository state at handoff creation:
   layers, the retrofit training job is COLLABORATOR-SIDE, and the
   reliance claim is decomposed C1 supported / C2 extrapolated — the
   load-bearing gap / C3 untested; questions 2–4 stand, question 4
-  sharpened to "eligibility boundary = the run's retrieval set?"). Row 10's measurement
+  sharpened to "eligibility boundary = the run's retrieval set?".
+  The owner framed the undertaking as a PRIVATE REPRO STUDY WITH
+  EXPANSION — record §12.5: R3 = the reproduction half on our
+  workload, R4 = the expansion half (C2/C3, which NO external study
+  covers); official LaCT code exists, ICLR 2026). Row 10's measurement
   (Session 43) and the judge-calibration MEASUREMENT (Session 44)
   are DONE and off this list — only the calibration DECISION
   remains. If the owner approves nothing this session, the zero-paid

@@ -1414,3 +1414,19 @@ step-5 event-loop rule.
    large-chunk fast-weight layers); its criterion inherits C2 and C3
    explicitly — a stability-only result is a finding, not a failure,
    but it is not C2. No rung's gate moved.
+5. **The follow-up exchange (later the same day; record §12.5):** the
+   owner CORRECTED the entry-3 overlap point — large REPL dumps ARE
+   long-context modeling in practice (the discipline stops retyping,
+   not reading; printed fetch results and extraction working sets
+   flow through attention every turn), so C1's long-context results
+   apply to this application directly — and framed the undertaking as
+   "our own private repro study with expansion." The landscape check
+   (zero-paid): LaCT is published at ICLR 2026; official code exists
+   (github.com/a1600012888/LaCT, fused Triton kernels); independent
+   groups already retrain the LM setup (arXiv:2602.21204's own 760M
+   LaCT-LLM on 100B tokens) and adopt the mechanism downstream; a
+   TTT reproducibility-report culture exists (arXiv:2511.16691) but
+   NO external study covers C2 or C3. Verdict recorded: the
+   empiricals are worth running and are the ONLY route to C2/C3; the
+   ladder is already shaped as the study (R3 = the reproduction half
+   on our workload, R4 = the expansion half); gates unchanged.
