@@ -1324,3 +1324,43 @@ ladder complete.
    session's state (the run stands proposed-unapproved, so the §2
    standing owner-conditional menu plus the increment-1 run itself
    carry forward).
+
+### July 13, 2026 — Owner direction (post-Session-35, same day): the substrate freshness policy is ADOPTED; the concept-proof framing recorded
+
+Recorded from the owner's questions and direction after PR #77 went
+up ("how often should we update it? real time? … is it okay for it to
+stale sometimes? Find solutions … Note that the whole pipeline depends
+on third party LLM pricing for now, but can also be run with a local
+model in the future. We are proving the concept now").
+
+1. **The freshness policy (`REPOSITORY_INGESTION_REPORT.md` §5d.6)
+   moves from recommended to ADOPTED.** NOT real-time — extraction
+   spend is operator-gated per run (Guardrail 4, unchanged) and
+   nothing consults the substrate between merges, so per-commit
+   refresh would buy churn, not freshness. Staleness between
+   refreshes is TOLERABLE because the failure shape is right: stale
+   graph knowledge can degrade ADVICE, but it cannot corrupt an
+   ACTION — the edit path re-reads current disk bytes and the
+   hash-guarded `write_back` refuses on any divergence, and the
+   Session 31 write gate forces a run to fetch current stored bytes
+   before citing them. Cadence: one scoped-snapshot refresh per
+   MERGED session PR plus refresh-before-use ahead of any stage-2
+   edit run whose target area changed. Adoption sets the default
+   cadence only; each refresh still gets its plan-echo bound printed
+   and its spend approved per run. The Session 36 refresh
+   demonstration doubles as the policy's first execution.
+2. **The concept-proof framing (§5d.6 model-portability note
+   extended):** third-party LLM pricing is an economics input, not a
+   structural dependency — the pipeline is model-agnostic at its
+   boundaries (`EXTRACTION_MODEL` is env config; every completion
+   crosses `parseLlmResponse`), so a local-model deployment is a
+   configuration change plus a re-embedding pass. The project is
+   proving the concept now and building on it; scalability is kept
+   in mind (incremental Merkle-diff refresh, bounded budgets,
+   recorded follow-ups such as extraction-worker concurrency with
+   merge-safety pins) and improves further later — recorded
+   residuals are follow-ups, not blockers.
+3. **HANDOFF touched per the §0 step-5 event-loop rule:** the §2
+   standing item (6) now reads ADOPTED (execution stays owner-gated
+   per run); the Session 36 objective is unchanged — it already
+   carries the refresh demonstration.

@@ -526,7 +526,14 @@ against the live substrate:
   (concurrent same-name entity merges are undrilled) — a reviewed
   kernel change, not a config flip.
 
-### 5d.6 Substrate freshness policy (recommended, July 13, 2026 — owner adoption pending)
+### 5d.6 Substrate freshness policy (ADOPTED July 13, 2026 — owner direction)
+
+Recommended at stage-1 close; the owner confirmed the direction the
+same day (post-Session-35 exchange): NOT real-time, staleness
+tolerable between refreshes, cadence = one scoped refresh per merged
+PR plus refresh-before-use ahead of edit runs. Adoption sets the
+default cadence only — every refresh's extraction spend stays
+operator-gated per run (Guardrail 4, unchanged).
 
 The residue ages as code changes. The Merkle diff makes refresh
 INCREMENTAL by construction — unchanged files are auditable no-ops and
@@ -557,12 +564,17 @@ re-run of the $2.75 baseline.
   at the measured July 13 sweep rate) would convert the semantic
   layer's sampled-audit coverage from opportunistic to deliberate for
   this corpus — standing owner item.
-- **Model portability note:** the extraction pipeline is
-  model-agnostic at its boundaries — `EXTRACTION_MODEL` is env
-  configuration and every completion crosses `parseLlmResponse` — so a
-  future local-model deployment is a configuration change plus a
-  re-embedding pass, not a rearchitecture. Third-party pricing is an
-  economics input, not a structural dependency.
+- **Model portability note (owner framing confirmed July 13, 2026):**
+  the extraction pipeline is model-agnostic at its boundaries —
+  `EXTRACTION_MODEL` is env configuration and every completion crosses
+  `parseLlmResponse` — so a future local-model deployment is a
+  configuration change plus a re-embedding pass, not a rearchitecture.
+  Third-party pricing is an economics input, not a structural
+  dependency. The project is proving the concept now and building on
+  it: scalability is kept in mind (incremental refresh, bounded spend,
+  recorded follow-ups like worker concurrency with merge-safety pins)
+  and improves further later — recorded residuals are follow-ups, not
+  blockers.
 
 ## 5e. Stage 2, increment 1: the graph-informed self-edit (design record, Session 35, July 13, 2026)
 
