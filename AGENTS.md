@@ -104,7 +104,7 @@ start. Worked instances of the frame:
 |---|---|
 | Kernel prompt (`trellis_agent.py` composition) | Composed-prompt sha pins + history in `scripts/test_modules.py` — recompute BOTH pins in the SAME commit, wittingly |
 | Extraction prompts (`src/workers/extraction_job.ts`) | Byte pins in `extraction_job.test.ts` (legacy prompt = queue-compat contract: NEVER move) |
-| Write-path provenance (`trellis_tools.py`) | 64-hex + existence enforcement; `test:rlm-workspace`, unit pins |
+| Write-path provenance (`trellis_tools.py`) | 64-hex format + existence + retrieval-membership enforcement, in that order; `test:rlm-sandbox` [2]/[3]/[6], `test:rlm-workspace`, unit pins |
 | Editing toolkit (`trellis_textedit.py`) | `npm run test:textedit` (containment, digest guard, splice semantics) |
 | Answer channel (`trellis_answer.py`) | `npm run test:answer-channel` (incl. kernel-prompt substring checks) |
 | Module registry (`trellis_modules.py` + `src/config/modules.ts`) | Twin validators, `npm run test:modules` |
@@ -121,8 +121,8 @@ start. Worked instances of the frame:
 3. **Never merge, rename, or delete Entity nodes.** Equivalence is an
    overlay belief; wrong entities are contested or retired.
 4. **Provenance is enforced, not asked for**: every `sourceNodeIds`
-   element must be a real, existing AST hash. Never weaken the write
-   path.
+   element must be a real, existing AST hash — and, on agent research
+   runs, one the run actually retrieved. Never weaken the write path.
 5. **Code-mediated text is doctrine**
    (`docs/architecture/CODE_MEDIATED_TEXT.md`): locations
    engine-computed, existing bytes moved by code, hash-guarded writes,

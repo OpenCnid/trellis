@@ -414,5 +414,47 @@ park/seed lineage mechanics.
 
 ## 9. Corrections ledger (anti-drift)
 
-*(Empty at ratification. Refinements the implementation forces are
-recorded here, dated, with the section they amend.)*
+*(Refinements the implementation forces are recorded here, dated, with
+the section they amend.)*
+
+- **July 12, 2026 (Session 31) — slice (c) adjudicated: SATISFIED BY
+  EXISTING SHAPE. No carriage gap; no implementation; the slice is
+  struck.** Amends §5.2, which deferred the carriage decision to this
+  inspection. Every surface that re-presents retrieved Tier-1 bytes to
+  a writing run was inspected against the code:
+  1. **The tool returns** (`src/rlm/trellis_tools.py`) already thread
+     address-with-content: `get_ast_texts` returns the hash-keyed map
+     (each text delivered under its own address), `get_ast_blocks`
+     returns `{id, type, text}` per block (the block's own citable
+     hash rides beside its bytes), and `vector_search` returns
+     `{id, content}` rows. No retrieval surface returns bytes without
+     their address.
+  2. **The workspace** (`src/rlm/trellis_workspace.py`) never holds
+     Tier-1 retrievals: `capture()` is invoked from exactly one place
+     — inside `trellis_mcp.call_tool` — so its origin-stamped segments
+     hold MCP results only; database reads return directly to the REPL
+     and are never workspace-captured; `add_note` stores model-authored
+     Tier-3 notes with no provenance standing by design; `read` and
+     `segment` re-present only that Tier-3 content. No existing surface
+     strips adjacency, because no engine path deposits Tier-1 bytes
+     into Tier-3 state — and building one (a workspace DB-capture
+     path) would be a NEW carriage surface, which this adjudication was
+     explicitly not permitted to invent.
+  3. **The rlms scaffold** (`rlm/environments/local_repl.py`,
+     rlms==0.1.3) performs no separate rendering of tool results:
+     injected tools return values into the model's own REPL code, and
+     the transcript sees only that code's stdout/stderr
+     (`execute_code` → `REPLResult`). The engine never interleaves
+     block text with prose; what the model chooses to print is model
+     behavior governed by the pillar, not a harness carriage surface.
+  4. **The author path** (`src/core/authoring/corpus.ts`/`seed.ts`)
+     seeds one segment per corpus block with the block hash's first 16
+     hex as the origin `argsHash` — a deterministic, engine-stamped
+     pointer that is structurally never full provenance — and author
+     mode constructs no database tools and has no write path; its
+     citations are harness-pinned (`assemble.ts`). Nothing slice (d)
+     needs.
+  The §5.2 prompt contingency (a TOOLS-line teaching sentence) was not
+  needed: no prompt byte moved, both composed-prompt pins unmoved. The
+  fixed constraint survives for any FUTURE surface: headers are
+  engine-stamped, never model-written.

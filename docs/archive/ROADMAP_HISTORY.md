@@ -2992,3 +2992,119 @@ everything, extract selectively; prompts request, gates enforce.
    prompt-movable, positive-control-testable). Execute what the owner
    approves, record the outcome here. No new implementation scope is
    self-served while the queue is in this state.
+
+### July 11, 2026 — Session 26: the Trellis-edits-Trellis proof runs + module #2 (the adjudication session, both proposals approved)
+
+The owner approved both standing proposals in-session, delegating the
+open parameters: the proof run's edit targets ("a small supervised test
+edit, if that goes well go deeper and expand the breadth") and module
+#2's topic ("you can choose the recommended topic"). Total session paid
+spend: ≈$0.70 (proof-run series ≈$0.58 under its $1 cap; module #2
+authoring $0.122 under its $0.53 printed estimate).
+
+1. **The proof-run series (six spawns, three edits landed, one real
+   defect found and fixed).** Mechanics: `trellis_agent.py` spawned
+   directly (the probe's `armEnv` mold, temp driver deleted after use)
+   with `TRELLIS_EDIT_ROOT` at this branch checkout; every run's diff
+   reviewed by the human via `git diff` before acceptance; the toolkit
+   never touched git.
+   - **Run 1 ($0.052, REJECTED at review):** the GLOSSARY Capability
+     Flywheel status edit landed byte-precise but carried an
+     instruction ambiguity verbatim ("version 2.0 --" — the task
+     text's own dash) — the supervision gate exists for exactly this;
+     reverted, task rewritten unambiguously.
+   - **Run 1b ($0.098, honest no-write):** the revert had converted the
+     working file to CRLF (autocrlf), and the run correctly REFUSED to
+     force a write it could not stage cleanly, reporting why. File
+     re-normalized to LF.
+   - **Run 1c ($0.066, ACCEPTED):** one line changed, every other byte
+     identical: "(designed;" → "(machinery shipped; module #1 live at
+     version 2;" with the version READ FROM THE GRAPH
+     (`module:workspace-discipline`.moduleVersion) and int-rendered in
+     code — a DB-grounded edit, 2 tool calls, hash-guarded write_back,
+     answer submitted by reference.
+   - **Run 2 ($0.182, honest no-write — FOUND A REAL KERNEL DEFECT):**
+     the two-file breadth task thrashed against
+     `trellis_textedit.splice` refusing every replacement: the
+     validation rejected "\r" alongside "\n", which made CRLF files
+     (API_REFERENCE.md, docs/README.md) IMPOSSIBLE to line-replace —
+     the replacement must carry the trailing "\r" to keep bytes
+     verbatim, contradicting the toolkit's own documented
+     CRLF-verbatim behavior. Reproduced zero-paid with a local
+     harness, fixed (`src/rlm/trellis_textedit.py` now refuses only
+     "\n", the frame delimiter), regression-pinned
+     (`test:textedit` 81 → 82: replacing a CRLF line keeps the
+     carriage return byte verbatim). No pinned check asserted the old
+     behavior. THE FLYWHEEL RESULT: Trellis editing Trellis surfaced a
+     bug in Trellis's own editing toolkit on its second real edit.
+   - **Run 2b ($0.121, ACCEPTED):** on the fixed toolkit, both files
+     edited in one run — API_REFERENCE.md "all five queues" → "all
+     seven queues" (stale since Session 9; CRLF preserved) and a
+     correctly formatted 4-line benchmarks-index entry for
+     `EFFECTIVE_CONTEXT_PROBE_REPORT.md` authored and inserted into
+     docs/README.md; 15 textedit ops, 2 files, 2 writes, answer by
+     reference.
+   - **Run 3 ($0.061, ACCEPTED — the "deeper" arc):** a
+     graph-aggregation-informed edit: queried EVERY `module_manifest`
+     entity, built the replacement phrase entirely in code from the
+     query results (names prefix-stripped, versions int-rendered,
+     sorted, joined), and updated the line run 1c wrote to "(machinery
+     shipped; 2 modules live (estimation-discipline v1,
+     workspace-discipline v2);" — the flywheel turning on its own
+     prior output. Depth note: source-file edits are mechanically
+     identical to docs edits (the toolkit is file-agnostic); the next
+     depth increment is an owner-picked real code change.
+2. **Module #2: `estimation-discipline` (topic chosen per the recorded
+   constraints).** "Mechanical provenance threading" was NOT chosen —
+   `docs/COLLABORATOR_BRIEFING.md` records it as a candidate
+   ARCHITECTURE session (plumbing, not prompt) and records module
+   topics must be behavioral with a decisive positive control; the
+   briefing's own candidate list names estimation discipline ("when is
+   an answer good enough to stop searching"), which has live measured
+   evidence of the failure class. Corpus: two documents authored by
+   the operator this session (no normative estimation prose existed in
+   the repo), every evidence number verified against its committed
+   report (8-vs-4 external calls; 0-external-call seeded task;
+   110,550-token single sub-call; 13k–27k recovery-loop band vs ~8.2k
+   median; the searching-past-held-evidence laundering incident);
+   parked via the Session 21 one-shot harness shape (temp script
+   deleted) and promoted through the REAL CLI as
+   `research:trellis/estimation-discipline/contract` (root
+   `9f5c46bc…8b62`, 11 blocks) and `…/evidence` (root `f6fa47e4…b4fa`,
+   8 blocks), extraction `none`. The paid authoring run (estimate
+   $0.53 printed; **$0.122 actual**, 36,442 in / 3,047 out, 23
+   workspace ops over the 19 seeded blocks) produced a faithful
+   six-section addendum with one honest gap note; the anchor gate
+   PASSED first try at 21/58 = 0.36 ≥ 0.30; the harness pinned all 19
+   corpus hashes; assembled, human-reviewed (corpus-authorship and
+   positive-control sections added to RESEARCH.md), registered live
+   (`module:estimation-discipline`, uncontested, `modules:verify`
+   green). NOT in the default selection — both composed-prompt pins
+   unmoved; per the briefing's rule it stays out until the positive
+   control (designed this session, measurement owner-gated — new §4
+   row 6) measures a real effect.
+3. **Also answered in-session (owner question):** pandas was never
+   forced head-to-head — rounds 2–4 measured whether the model REACHES
+   for it (0/191 runs) and whether plain loops stayed correct (yes,
+   digit-exact through 6,859 records and 3-table joins at ~8.7k median
+   tokens). A forced pandas-arm vs loops-arm comparison on the
+   recorded movers (schema heterogeneity, fuzzy joins) remains an
+   owner-pickable future probe round.
+4. **Acceptance.** `npm test` 712/77 (unchanged — the toolkit fix is
+   Python, pinned by the live drill); `npm run build`,
+   `npm run python:check`, `docker compose --profile test config
+   --quiet`, `git diff --check` green; `test:textedit` **82** (the
+   CRLF regression check); `test:modules` green with BOTH pins unmoved
+   and module #2 present; full standing drill block green;
+   `drill:scale` 1.78x CLOSED (in-band); Compose integration re-run as
+   `trellis_s26_ci` (the Dockerfile COPY layer moved with
+   `trellis_textedit.py`; `package.json` untouched, `npm ci` cached).
+5. **Objective selection for Session 27 (the §0 rule).** New §4 row 6
+   is the first unstruck actionable row: the estimation-discipline
+   positive-control MACHINERY (zero-paid probe module-arm flag, the
+   `TRELLIS_EXP_OMIT_CMT` mold) with the paired measurement proposed
+   owner-gated (~$1–2). Behind it: row 7 (conditional migration) stays
+   trigger-blocked. Also owner-conditional: the next proof-run depth
+   increment (a real source-code change through the toolkit, target
+   owner-picked), and the pandas head-to-head probe round if the owner
+   wants it measured.

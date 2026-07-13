@@ -135,7 +135,8 @@ CITATION_ENTAIL_ENABLED = os.getenv("TRELLIS_CITATION_ENTAIL") == "1"
 
 
 class TrellisNeo4j:
-    def __init__(self, ast_existence_check=None, entailment_check=None):
+    def __init__(self, ast_existence_check=None, entailment_check=None,
+                 retrieved_addresses_check=None):
         # Retrieve config from environment variables
         uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
         user = os.getenv("NEO4J_USER", "neo4j")
@@ -154,6 +155,16 @@ class TrellisNeo4j:
         # does NOT support the claim. When wired, unsupported citations
         # are refused before the write.
         self._entailment_check = entailment_check
+        # Session 31 (PROVENANCE_THREADING.md slice d): a callable
+        # returning the run's current retrieved-address set (the
+        # slice (b) tracking's get_retrieved_addresses). When wired,
+        # every insight write additionally requires that each cited
+        # hash is IN the run's retrieval set — the T1 closure. None
+        # (the default) keeps bare construction byte-identical:
+        # operator scripts and drills write exactly as before. Wired
+        # only by explicit construction at the agent, the
+        # ast_existence_check injection mold.
+        self._retrieved_addresses_check = retrieved_addresses_check
 
     def run_cypher(self, query: str) -> str:
         """
@@ -340,6 +351,32 @@ class TrellisNeo4j:
                 f"are provenance; nothing was written."
             )
 
+    def _verify_hashes_retrieved(self, cited_hashes) -> None:
+        """Session 31 (PROVENANCE_THREADING.md §5.3): citable addresses
+        are constrained to the run's retrieved-address set — every cited
+        hash must be one whose bytes a retrieval tool returned to this
+        run. The THIRD layer, additive and order-pinned after format
+        (_normalize_fact) and existence (_verify_hashes_exist). Closes
+        T1 (transcription/choice: corrupted digits, scrollback hashes,
+        second-hand citation of graph-surfaced provenance lists); does
+        NOT close T2 (read-then-cite laundering) — that is slice (e)'s
+        sampled entailment tier. Fail fast, no partial write. The check
+        is in-process set membership: there is no I/O to fail, and an
+        empty set refuses everything unretrieved — the safe direction."""
+        if self._retrieved_addresses_check is None:
+            return
+        unretrieved = sorted(set(cited_hashes) - self._retrieved_addresses_check())
+        if unretrieved:
+            shown = ", ".join(unretrieved[:5])
+            more = f" (+{len(unretrieved) - 5} more)" if len(unretrieved) > 5 else ""
+            raise ValueError(
+                f"Provenance Violation: {len(unretrieved)} cited sourceNodeIds hash(es) were "
+                f"never retrieved by this run: {shown}{more}. A run may cite only addresses "
+                f"whose bytes a retrieval tool returned to it. Call get_ast_texts on them, "
+                f"confirm the bytes actually support your claim, then re-derive and cite; "
+                f"nothing was written."
+            )
+
     def _run_insight_writes(self, facts: list) -> str:
         # The single whitelisted write path opens its session with explicit
         # WRITE access; every other session in this sandbox is READ (T7).
@@ -351,6 +388,12 @@ class TrellisNeo4j:
         # existence gate and reach here.
         cited_hashes = {h for fact in facts for h in fact["sourceNodeIds"]}
         _audit_add("cited", cited_hashes)
+        # Session 31 (PROVENANCE_THREADING.md slice d): the retrieval-
+        # membership gate — after existence, after the cited-attempt
+        # audit (the A/B eval's measure-the-attempt discipline), before
+        # the experimental gates. One unretrieved hash refuses the whole
+        # batch before any session opens.
+        self._verify_hashes_retrieved(cited_hashes)
         # Hybrid soft-gate (experimental, opt-in): refuse to cite a hash
         # the run never read via get_ast_texts, so the model must read
         # before it cites. (Measured NOT to prevent laundering — the model
