@@ -124,6 +124,89 @@ def get_citation_audit() -> dict:
     }
 
 
+# --- Retrieval discipline (Session 33, RETRIEVAL_DISCIPLINE.md) --------
+# Held-state dedup + the per-run retrieval budget at the three Tier-1
+# retrieval surfaces. Held state answers "were these bytes already
+# served to this run" — bookkeeping over retrieval, NEVER over
+# citability: it is a different structure from the Session 30 retrieval
+# set (which answers "which addresses may this run cite"), under its
+# own lock, and the two never feed each other. Held state holds
+# IDENTITIES only (hashes, roots, query strings), never content —
+# serving from held state would require a store mirror the pillar
+# forbids, so a repeat fetch REFUSES with a typed teaching message.
+# Recording and checking both happen only on discipline-enabled
+# TrellisPostgres instances (explicit construction at the agent, the
+# retrieved_addresses_check injection mold); bare construction is
+# byte-identical to before this machinery existed. Per run = per
+# process: the state dies with the process and is never parked or
+# seeded. Telemetry reports counts only (T16).
+RETRIEVAL_BUDGET_DEFAULT = 64
+RETRIEVAL_BUDGET_MAX = 1024
+
+_held_lock = threading.Lock()
+_held = {
+    # Hashes whose bytes a disciplined get_ast_texts/get_ast_blocks
+    # call served. vector_search result ids deliberately do NOT join:
+    # reading a search hit via get_ast_texts is the confirm-before-cite
+    # pattern the Session 31 write-gate refusal explicitly teaches.
+    "addresses": set(),
+    # get_ast_blocks roots already served (the measured repeat class).
+    "roots": set(),
+    # Exact vector_search query strings already served. Semantic
+    # near-duplicate detection is excluded by decision (record §2.4):
+    # "same question, different words" is a semantic judgment, not
+    # plumbing.
+    "queries": set(),
+    "fetches": 0,
+    "dedup_refusals": 0,
+    "budget_refusals": 0,
+}
+
+
+def parse_retrieval_budget() -> int:
+    """Python twin of the TRELLIS_RETRIEVAL_BUDGET_PER_RUN config bound
+    (record §4): unset means the kernel default; a set value must be a
+    positive integer no greater than RETRIEVAL_BUDGET_MAX. Invalid
+    values raise here, before any paid work."""
+    raw = os.getenv("TRELLIS_RETRIEVAL_BUDGET_PER_RUN")
+    if raw is None or not raw.strip():
+        return RETRIEVAL_BUDGET_DEFAULT
+    try:
+        value = int(raw)
+    except ValueError:
+        raise ValueError(
+            f"Invalid TRELLIS_RETRIEVAL_BUDGET_PER_RUN: {raw!r} is not an integer."
+        )
+    if value < 1 or value > RETRIEVAL_BUDGET_MAX:
+        raise ValueError(
+            f"Invalid TRELLIS_RETRIEVAL_BUDGET_PER_RUN: {value} is outside "
+            f"[1, {RETRIEVAL_BUDGET_MAX}]."
+        )
+    return value
+
+
+def get_retrieval_discipline_stats() -> dict:
+    """Counts-only snapshot of the run's retrieval-discipline state for
+    TRELLIS_TELEMETRY (identities never leave the module — T16)."""
+    with _held_lock:
+        return {
+            "retrieval_fetches": _held["fetches"],
+            "retrieval_dedup_refusals": _held["dedup_refusals"],
+            "retrieval_budget_refusals": _held["budget_refusals"],
+            "held_addresses": len(_held["addresses"]),
+            "held_roots": len(_held["roots"]),
+            "held_queries": len(_held["queries"]),
+        }
+
+
+def _bounded_echo(items, limit=5):
+    """First `limit` items + a count of the rest — the write-gate echo
+    discipline, shared by the dedup and budget refusals."""
+    shown = ", ".join(items[:limit])
+    more = f" (+{len(items) - limit} more)" if len(items) > limit else ""
+    return shown + more
+
+
 # The semantic (entailment) citation gate — the experimental §7 v3 tier
 # (GROUNDED_AUTHORING). Off by default; when TRELLIS_CITATION_ENTAIL=1 the
 # write path calls an injected checker that asks, per cited block, whether
@@ -494,10 +577,51 @@ class TrellisNeo4j:
 
 
 class TrellisPostgres:
-    def __init__(self):
+    def __init__(self, retrieval_discipline=False, retrieval_budget=None):
+        # Session 33 (RETRIEVAL_DISCIPLINE.md §5): held-state dedup and
+        # the per-run budget activate together through this one explicit
+        # constructor decision — the retrieved_addresses_check injection
+        # mold. The default (False) is byte-identical to before the
+        # machinery existed: bare construction in drills, operator
+        # scripts, and harness paths records nothing and refuses
+        # nothing. trellis_agent.py wires it on for research runs.
+        # Validated BEFORE the connection opens so a refused budget
+        # never leaks one.
+        self._retrieval_discipline = bool(retrieval_discipline)
+        if retrieval_budget is None:
+            self._retrieval_budget = RETRIEVAL_BUDGET_DEFAULT
+        else:
+            budget = int(retrieval_budget)
+            if budget < 1 or budget > RETRIEVAL_BUDGET_MAX:
+                raise ValueError(
+                    f"retrieval_budget must be in [1, {RETRIEVAL_BUDGET_MAX}], got {budget}."
+                )
+            self._retrieval_budget = budget
         # Basic connection string assuming local defaults or env var
         dsn = os.getenv("PG_DSN", "dbname=trellis_db user=trellis_user password=trellis_password host=localhost port=5433")
         self.conn = psycopg2.connect(dsn)
+
+    def _discipline_check_budget(self):
+        """The per-run budget gate (record §4): budget N serves N
+        byte-returning fetches; the next fetch refuses BEFORE any I/O,
+        with counts and a bounded held-root echo. Runs after the dedup
+        check — a repeat gets the dedup refusal, whose teaching is the
+        actionable one."""
+        with _held_lock:
+            if _held["fetches"] < self._retrieval_budget:
+                return
+            _held["budget_refusals"] += 1
+            fetches = _held["fetches"]
+            counts = (len(_held["addresses"]), len(_held["roots"]), len(_held["queries"]))
+            roots_echo = _bounded_echo(sorted(_held["roots"]))
+        raise ValueError(
+            f"Retrieval Discipline: the per-run retrieval budget of "
+            f"{self._retrieval_budget} fetches is exhausted ({fetches} served: "
+            f"{counts[0]} addresses, {counts[1]} block roots, {counts[2]} searches"
+            f"{'; roots held: ' + roots_echo if roots_echo else ''}). "
+            f"Work from the variables holding what you already retrieved — "
+            f"re-derive in code instead of re-fetching."
+        )
 
     def fetch_texts(self, hashes: list) -> dict:
         """Reconstructed block text for each hash — {id: text}. NOT counted
@@ -521,6 +645,28 @@ class TrellisPostgres:
         if not hashes:
             return "{}"
 
+        # Session 33 (record §2.2): full-repeat dedup — refuse ONLY when
+        # every requested hash is already held; a call that could serve
+        # any new bytes passes in full, held hashes included, so the
+        # returned bytes of a served call are byte-identical to a bare
+        # fetch. Identity is the requested set (the model's assertion);
+        # padding a repeat with a never-held hash evades the dedup by
+        # design — teaching machinery, not a security boundary.
+        if self._retrieval_discipline:
+            requested = {h for h in hashes if isinstance(h, str)}
+            with _held_lock:
+                full_repeat = bool(requested) and requested <= _held["addresses"]
+                if full_repeat:
+                    _held["dedup_refusals"] += 1
+            if full_repeat:
+                raise ValueError(
+                    f"Retrieval Discipline: all {len(requested)} requested hash(es) "
+                    f"were already retrieved this run: {_bounded_echo(sorted(requested))}. "
+                    f"Reuse the variable holding the earlier get_ast_texts/get_ast_blocks "
+                    f"return — re-derive from it in code instead of re-fetching."
+                )
+            self._discipline_check_budget()
+
         try:
             # Reconstruct text from the full node (not data->>'content',
             # which is NULL for markdown/container blocks whose text lives
@@ -529,6 +675,11 @@ class TrellisPostgres:
             texts = self.fetch_texts(hashes)
             # Read-set: the hashes the run actually retrieved text for.
             _audit_add("read", list(texts.keys()))
+            if self._retrieval_discipline:
+                with _held_lock:
+                    _held["addresses"].update(texts.keys())
+                    if texts:
+                        _held["fetches"] += 1
             return json.dumps(texts)
         except Exception as e:
             # Roll back so the aborted transaction does not poison the
@@ -557,6 +708,21 @@ class TrellisPostgres:
                 "get_ast_blocks takes ONE root hash string; pass a document's root "
                 "hash (use get_ast_texts for a list of block hashes)."
             )
+        # Session 33 (record §2.3): per-root dedup — the measured repeat
+        # class (the Session 28 frank-corpus re-reads were get_ast_blocks
+        # calls on the same root). A failed call marks nothing.
+        if self._retrieval_discipline:
+            with _held_lock:
+                repeat = root_hash in _held["roots"]
+                if repeat:
+                    _held["dedup_refusals"] += 1
+            if repeat:
+                raise ValueError(
+                    f"Retrieval Discipline: get_ast_blocks already served root "
+                    f"{root_hash} this run. Reuse the variable holding the earlier "
+                    f"blocks list — re-derive from it in code instead of re-fetching."
+                )
+            self._discipline_check_budget()
         try:
             with self.conn.cursor() as cur:
                 cur.execute("SELECT data FROM ast_nodes WHERE id = %s", (root_hash,))
@@ -572,6 +738,18 @@ class TrellisPostgres:
         # Read-set semantics match get_ast_texts: the run retrieved these
         # blocks' bytes, so they join the citation audit's read bucket.
         _audit_add("read", [b["id"] for b in blocks if isinstance(b["id"], str)])
+        if self._retrieval_discipline:
+            with _held_lock:
+                _held["roots"].add(root_hash)
+                # The blocks' bytes were served, so their ids join held
+                # addresses: a later get_ast_texts on exactly these ids
+                # is a repeat by the §2.2 rule. The root argument itself
+                # never joins — its reconstruction was not returned (the
+                # Session 30 retrieval-set rule has the same shape).
+                _held["addresses"].update(
+                    b["id"] for b in blocks if isinstance(b["id"], str))
+                if blocks:
+                    _held["fetches"] += 1
         return json.dumps(blocks)
 
     def ast_hashes_exist(self, hashes: list) -> str:
@@ -600,7 +778,25 @@ class TrellisPostgres:
         This provides semantic fallback if the Graph traversal fails or needs grounding.
         """
         _count_tool_call()
-        # Assuming we need to get embedding from OpenAI for the query first, 
+        # Session 33 (record §2.4): exact-query-match dedup ONLY — the
+        # search is deterministic over an unchanged store, so re-asking
+        # the identical string re-spends an embedding call to learn
+        # nothing. Semantic near-duplicate detection is excluded by
+        # decision: not plumbing. The refusal fires BEFORE the paid
+        # embedding call.
+        if self._retrieval_discipline:
+            with _held_lock:
+                repeat = query in _held["queries"]
+                if repeat:
+                    _held["dedup_refusals"] += 1
+            if repeat:
+                raise ValueError(
+                    "Retrieval Discipline: this exact query was already searched "
+                    "this run. Reuse the variable holding the earlier results; "
+                    "rephrase only if you genuinely need different evidence."
+                )
+            self._discipline_check_budget()
+        # Assuming we need to get embedding from OpenAI for the query first,
         # or assuming the query string itself is handled if there is an embedding model in postgres (pgvector doesn't do it automatically)
         # To avoid adding heavy ML deps here, we will call OpenAI embeddings API to get the vector.
         import openai
@@ -623,6 +819,18 @@ class TrellisPostgres:
                 # Search-set: hashes surfaced by semantic search (module
                 # #1 laundered by citing these without reading them).
                 _audit_add("search", [row[0] for row in results])
+                if self._retrieval_discipline:
+                    with _held_lock:
+                        # The query joins held state even on an empty
+                        # result (re-asking is the same repeat class);
+                        # only byte-returning fetches consume budget.
+                        # Result ids deliberately do NOT join held
+                        # addresses — reading a hit via get_ast_texts is
+                        # the confirm-before-cite pattern the write gate
+                        # teaches (record §2.4).
+                        _held["queries"].add(query)
+                        if results:
+                            _held["fetches"] += 1
                 # search_ast_nodes returns data->>'content', which is NULL
                 # for markdown/container blocks; reconstruct those so the
                 # preview is real text, not null (the get_ast_texts fix).

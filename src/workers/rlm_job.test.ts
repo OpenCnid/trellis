@@ -263,6 +263,27 @@ describe('buildAgentEnv', () => {
     const env = buildAgentEnv({ TRELLIS_EXP_MODULES: '["evil-module"]' }, CFG);
     expect('TRELLIS_EXP_MODULES' in env).toBe(false);
   });
+
+  it('forwards the retrieval budget only when the operator set it (Session 33)', () => {
+    const env = buildAgentEnv({}, { ...CFG, retrievalBudget: 12 });
+    expect(env.TRELLIS_RETRIEVAL_BUDGET_PER_RUN).toBe('12');
+  });
+
+  it('strips a raw inherited retrieval budget when none is configured', () => {
+    // The workspace-bounds discipline: the child only ever sees a value
+    // that crossed the Zod validator; unset means the kernel default.
+    const env = buildAgentEnv({ TRELLIS_RETRIEVAL_BUDGET_PER_RUN: '99999' }, CFG);
+    expect('TRELLIS_RETRIEVAL_BUDGET_PER_RUN' in env).toBe(false);
+  });
+
+  it('always strips the retrieval-discipline OFF-arm flag (Session 33)', () => {
+    // TRELLIS_EXP_OMIT_RETRIEVAL follows the TRELLIS_EXP_OMIT_CMT mold:
+    // no config field, never forwarded — an inherited value can never
+    // run a production task with the dedup/budget discipline disabled
+    // (RETRIEVAL_DISCIPLINE.md §5).
+    const env = buildAgentEnv({ TRELLIS_EXP_OMIT_RETRIEVAL: '1' }, CFG);
+    expect('TRELLIS_EXP_OMIT_RETRIEVAL' in env).toBe(false);
+  });
 });
 
 describe('buildAgentArgs', () => {

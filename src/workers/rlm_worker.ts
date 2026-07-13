@@ -305,6 +305,9 @@ function runAgentProcess(
               maxFiles: config.textedit.maxFiles,
             }
           : undefined,
+        // Session 33: forwarded only when the operator set the budget;
+        // unset lets the child apply its kernel default.
+        retrievalBudget: config.retrieval.budgetPerRun,
       })
     });
 
