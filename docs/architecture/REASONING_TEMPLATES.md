@@ -39,7 +39,7 @@ Module mold (verified against `modules/workspace-discipline/module.json` and `sr
 
 - `modules/<name>/module.json`: fields name, version, purpose, research.sourceNodeIds, addendum, tools, bounds.addendumMaxBytes, acceptance.zeroPaid, status, kernelCompat.
 - Valid status enum (from `src/config/modules.ts` Zod schema): `active`, `contested`, `retired`. Only `active` modules compose. This module ships `contested`: the research basis is not yet promoted to `ast_nodes` hashes, so it does not compose.
-- `bounds.addendumMaxBytes`: 8192, carried from the workspace-discipline precedent; cap enforced by `loadModule` in `src/config/modules.ts`.
+- `bounds.addendumMaxBytes`: 12288 (under the `MODULE_ADDENDUM_MAX_BYTES_CAP` of 16384). The workspace-discipline precedent value was 8192, but this addendum is 8184 bytes LF-normalized, an 8-byte margin; the bound is raised so a one-word edit does not trip the `loadModule` byte check at active-promotion. Cap enforced by `loadModule` in `src/config/modules.ts`.
 - Composition path: `trellis_agent.py` line: `TRELLIS_ADDENDUM = TRELLIS_ADDENDUM_BASE + build_modules_addendum(_SELECTED_MODULES, ...) + TRELLIS_WORKFLOW_RULES`. The addendum composes via `build_modules_addendum` once at startup.
 - Prompt contract: brace-free (`rlms` runs `.format()` over the system prompt); `<<TRELLIS_RUBRIC>>` is the only substitution token; ASCII only.
 - Registration and provenance: `scripts/register_modules.ts` (`npm run modules:register`) represents a research-bearing manifest as a `module:<name>` graph entity citing its research.sourceNodeIds after verifying each hash exists in `ast_nodes`. Empty-research manifests register nothing. The module registers non-active until research hashes are promoted.
@@ -71,7 +71,7 @@ Module mold (verified against `modules/workspace-discipline/module.json` and `sr
 ## 6. What this record does NOT touch
 
 - No kernel change; no change to `trellis_agent.py` beyond composing one more registered module through the existing path.
-- No change to existing modules, prompts, or prompt pins, except the necessary composed-prompt pin recompute when the module is actually registered (implementation-time, not this proposal).
+- No change to existing modules, prompts, or prompt pins. A `contested` module that is not in `DEFAULT_MODULE_SELECTION` does not compose, so `SYSTEM_PROMPT` stays byte-identical and both composed-prompt sha pins are verified unchanged. Pin recompute attaches only at active-promotion, and only if the module is added to `DEFAULT_MODULE_SELECTION` or an operator `TRELLIS_MODULES` selection (implementation-time, not this proposal).
 - No injected vector-magnitude form of the L axis.
 - No RLM orchestrator work; no FEV/CHARM harness scope; no Session 56 / EL-* work.
 - No paid run.
@@ -80,7 +80,7 @@ Module mold (verified against `modules/workspace-discipline/module.json` and `sr
 
 ## 7. Acceptance
 
-Zero-paid: `npm run test:modules` green with the new module registered; both composed-prompt pins recomputed in the same commit; `npm run modules:verify` clean once research hashes are promoted. `npm ci`, `npm test`, `npm run build`, `npm run python:check` per `AGENTS.md` section 5.
+Zero-paid: `npm run test:modules` green with the new module registered; both composed-prompt pins verified unchanged (byte-identical, since a non-default contested module does not compose); `npm run modules:verify` clean once research hashes are promoted. Pin recompute attaches only at active-promotion, and only if the module is added to `DEFAULT_MODULE_SELECTION` or an operator `TRELLIS_MODULES` selection. `npm ci`, `npm test`, `npm run build`, `npm run python:check` per `AGENTS.md` section 5.
 
 Owner-gated paid: none in this proposal (additive). Behavioral measurement of the templates is a later, owner-gated, zero-paid-first exercise.
 
@@ -125,13 +125,13 @@ TRELLIS_ADDENDUM_BASE = (
 )
 ```
 
-`_ADDENDUM_BASE_PREFIX` contains: turn discipline, the tool contract, task precedence, re-read discipline, the UPSUM running-state block. `CODE_MEDIATED_TEXT_BLOCK` is the code-mediated-text hard rule. The only per-task variation is the injected task text. The reasoning shape is identical for every task kind. This is the gap this module addresses.
+`_ADDENDUM_BASE_PREFIX` contains: turn discipline, the tool contract, task precedence, re-read discipline. `CODE_MEDIATED_TEXT_BLOCK` (the code-mediated-text hard rule) composes next, gated by `EXP_OMIT_CMT_ENABLED`. `_ADDENDUM_BASE_SUFFIX` carries the UPSUM running-state block. (Verified at `trellis_agent.py:171,205,218`.) The only per-task variation is the injected task text. The reasoning shape is identical for every task kind. This is the gap this module addresses.
 
 ---
 
 ## 12. Convergent grounding
 
-- PCF (Polymorphic Combinatorial Frameworks, arXiv 2508.01581): the combinatorial construction of the mode space; CLASS gives the distribution over unfixed parameters; the SPARK categories (Skills, Personas, Approaches, Resources, Knowledge) frame each primitive as a composed unit.
+- PCF (Polymorphic Combinatorial Frameworks, arXiv 2508.01581): the combinatorial construction of the mode space; CLASS gives the distribution over unfixed parameters; the SPARK categories (Skills, Personalities, Approaches, Resources, Knowledge) frame each primitive as a composed unit.
 - Constructor theory: compossibility and closure; the generating-set obligation (the primitive set must generate the mode space with no gaps).
 - MASH (github.com/gusthemole/MASH): traceable proof of the composition method and the classifier-placement principle (section 16).
 
@@ -139,9 +139,11 @@ TRELLIS_ADDENDUM_BASE = (
 
 ## 13. Rule: new modules register new primitives
 
-A module's registration IS the registration of the primitives it contributes. `scripts/register_modules.ts` represents each research-bearing manifest as a `module:<name>` graph entity; under this design the manifest also declares its reasoning primitives (modes plus their port interfaces), and registering the module adds those primitives to the harness's composable set. Adding a primitive is a module registration and nothing else; there is no side channel. This keeps every primitive provenance-tracked and contestable by the same invalidation sweep, and makes the library's growth auditable.
+A module's registration IS the registration of the primitives it contributes. `scripts/register_modules.ts` represents each research-bearing manifest as a `module:<name>` graph entity; the design target is that the manifest also declares its reasoning primitives (modes plus their port interfaces) and that registering the module adds those primitives to the harness's composable set (the L2 rung; see the scope note below). Adding a primitive is a module registration and nothing else; there is no side channel. This keeps every primitive provenance-tracked and contestable by the same invalidation sweep, and makes the library's growth auditable.
 
 Registration is self-documenting: a module's manifest declares each primitive's mode, purpose, and port interface at registration time, so registering a module publishes its primitives into the composable catalog and documents them in one act (see section 15). A new module must be registerable this way to enter the library.
+
+**Scope note (this slice).** Machine-readable primitive declarations in the manifest, modes and their port interfaces as validated fields, are a later kernel edition (the L2 rung): they require extending `ModuleManifestSchema` (currently `.strict()` and protocol-only, `tools: z.array(z.never()).max(0)`, `src/config/modules.ts`) and its Python twin (`src/rlm/trellis_modules.py`), which is a kernel change. This slice ships no such change: the primitives live only as addendum catalog text (section 14), and registration publishes the `module:<name>` graph entity and its research provenance only. The section 13 and section 15 framing (a manifest that declares primitives; a primitive as a SPARK-composed unit) states that L2 target, not what this proposal lands, so the section 6 "additive / no kernel change" claim holds.
 
 ---
 
@@ -163,7 +165,7 @@ Execution sits inside the SPARK framework. A primitive is a SPARK-composed unit,
 
 - **Approaches:** the mode and its one-line purpose (the concept the worker classifies against).
 - **Resources:** the guarded-verb REPL syntax the mode reaches for, materialized as a verbatim usage snippet. The snippet is how syntax is handed to the worker.
-- **Skills, Personas, Knowledge:** present as axes, drawn on when a mode needs them; not every mode uses all five.
+- **Skills, Personalities, Knowledge:** present as axes, drawn on when a mode needs them; not every mode uses all five.
 
 The one object the worker consults to classify (section 14) is the same object that hands it the correctly-invoked Resource. Self-documentation is the Resources axis materialized beside its Approach.
 
@@ -414,9 +416,9 @@ In-ports: `task`. Out-port: `answer`. Key R snippets: `trellis_mcp.list_tools`, 
 
 Per-REPL workspaces (Tier 3) are where learning grows. Successful runs are abstracted via UPSUM and prioritized; proven composites promote to modules by registration (the Capability Flywheel, sections 9, 13). `trellis_workspace.add_note`, `trellis_workspace.set_plan`, and `trellis_workspace.segment` are the S-axis operations.
 
-### P (Personas): deliberately omitted
+### P (Personalities): the expert-persona overlay deliberately omitted
 
-A persona is a loadable overlay, one axis of SPARK (PCF, arXiv 2508.01581); omitting it is a configuration choice within the framework, not a gap. For an accuracy-critical code worker a persona is a constraint without benefit: adding a persona to a system prompt does not improve objective-task performance (Zheng et al., Findings of the ACL: EMNLP 2024, arXiv 2311.10054), and expert personas specifically degrade accuracy on pretraining-dependent tasks including coding and math while helping only alignment-style tasks (Hu, Rostami, and Thomason, 2026, arXiv 2603.18507). No P is composed for the worker; the pretrained model's base behavior runs on its own.
+Personalities (P) is one axis of SPARK (PCF, arXiv 2508.01581); the role/expert-persona overlay is the instance of that axis. Omitting that overlay is a configuration choice within the framework, not a gap. For an accuracy-critical code worker it is a constraint without measured benefit: adding a persona to a system prompt does not improve objective-task performance (Zheng et al., Findings of the ACL: EMNLP 2024, arXiv 2311.10054), and expert personas specifically degrade accuracy on pretraining-dependent tasks including coding and math while helping only alignment-style tasks (Hu, Rostami, and Thomason, 2026, arXiv 2603.18507). That work argues conditional persona routing (PRISM: a persona is applied only where it is self-verified to help), not blanket omission. For this worker, accuracy-critical and with no alignment-style objective, omission is the conservative default; the pretrained model's base behavior runs on its own. A routing refinement (apply an overlay only on the task classes where it is verified to help) is left open as a later option.
 
 ---
 
@@ -721,3 +723,22 @@ From `TRELLIS_ADDENDUM_BASE` in `src/rlm/trellis_agent.py`:
 | `address` | Integer line index, engine-computed by `locate`; never estimated |
 | `answer` | Final answer value submitted via `trellis_answer.submit` |
 | `task` | Operator task text, engine-held in `trellis_task` |
+
+---
+
+## 18. Prior art and grounding provenance
+
+### 18.1 Nearest published prior art
+
+**SELF-DISCOVER** (Zhou et al., DeepMind, NeurIPS 2024; arXiv 2402.03620) is the closest published system: SELECT -> ADAPT -> COMPOSE over a fixed library of atomic reasoning modules, instantiated per task; the same move this record makes, and it reports the empirical result the L axis has not yet produced (up to +32% over CoT on BIG-Bench-Hard and MATH at 10-40x less compute than CoT-SC). The L axis is that mechanism **specialized** to a typed, guarded, provenance-tracked substrate, not a new discovery of it. **Voyager** (Wang et al., 2023; arXiv 2305.16291) is the prior art for the S-axis flywheel (section 17.S): a skill library accreting from successful runs.
+
+### 18.2 What is genuinely distinctive
+
+Against SELF-DISCOVER's generic atoms, L-axis primitives are bound to the Trellis REPL: ports are real operation types (section 17.Y), modes name verbatim guarded verbs (section 15), the engine owns addresses, counts, and terminators, and every primitive enters through provenance-gated registration (section 13). Composition is typed (section 9); SELF-DISCOVER's is untyped prose.
+
+### 18.3 Grounding provenance (independent vs. our own)
+
+- **Independent:** SELF-DISCOVER (2402.03620); Zheng et al. (2311.10054); Hu, Rostami, Thomason (2603.18507). Two peer-reviewed.
+- **Our own:** PCF (2508.01581) is co-authored by a member of this project; MASH (github.com/gusthemole/MASH) is our repository. These are consistent self-precedents showing the method is realizable, not independent evidence that it works. Section 16's "traceable proof" reads as "inspectable self-precedent".
+
+Novelty and coverage claims should lean on the independent axis; PCF and MASH frame the method, they do not validate it. Validation is the owner-gated, positive-control measurement deferred in section 7.

@@ -5,7 +5,7 @@
   "research": { "sourceNodeIds": [] },
   "addendum": "addendum.txt",
   "tools": [],
-  "bounds": { "addendumMaxBytes": 8192 },
+  "bounds": { "addendumMaxBytes": 12288 },
   "acceptance": { "zeroPaid": "npm run test:modules" },
   "status": "contested",
   "kernelCompat": 1
