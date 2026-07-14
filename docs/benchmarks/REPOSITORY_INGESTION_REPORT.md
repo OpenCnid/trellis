@@ -2623,6 +2623,11 @@ edits, record no insight, and report the contradiction.
 - One retrieval call per REPL cell.
 ```
 
+(v3.1 is the historical input the LANDED T1 ran on, preserved
+verbatim; §5h.12 records the skills-strengthened successor v3.2,
+which SUPERSEDES v3.1 as the T-series template. The run below ran on
+v3.1.)
+
 **The run (July 13, 2026 — ONE spawn, first shot): $0.5781 computed
 from tokens (192,978 in / 9,561 out at the gpt-5.4 rates; UNDER the
 $0.9–$1.3 estimate), 11 root iterations of the 16 allowed, 66.4s;
@@ -2710,6 +2715,378 @@ sweep CONTESTED the fresh insight edge exactly as pre-recorded —
 ordinary lazy recovery, never a criterion item; the three standing
 Session 36/39 beliefs rode through UNCONTESTED (their fourth
 consecutive clean refresh).
+
+### 5h.12 Task text v3.2 — the skills-strengthened successor (owner-directed, July 13, 2026; authored under `prompt-engineering` + `hypershot-protocol`)
+
+The owner directed a genuine prompt-engineering pass over v3.1 with
+both skills INVOKED (Guardrail 15), rejecting the earlier "PASS, no
+change" audit as too lenient — that audit checked structural
+COMPLIANCE (are semantic tags present? yes) but not STRENGTH (are the
+highest-stakes rules maximally salient? are dense steps decomposed?
+is the output schema'd? are hypershot frames used where braces are
+allowed?). v3.1 stays recorded verbatim in §5h.11 as the historical
+input the LANDED T1 ran on (never falsified); **v3.2 below is the
+strengthened successor and is now the template the T-series inherits**
+(the §5h.9→v3.1→v3.2 lineage). It was authored with `prompt-engineering`
+and `hypershot-protocol` loaded and applied clause by clause.
+
+**What the skills changed, mapped to their principles (the
+iterative-refinement loop — `prompt-engineering` best practice 5,
+tightening at each point of divergence):**
+
+1. **Decoherence prevention (`prompt-engineering` BP3):** the
+   `<mission>` now names the ONE failure the task exists to prevent
+   (an insight citing an unretrieved block) instead of reading as a
+   generic implement-task — the "why" is up front where it primes
+   everything.
+2. **Explicit prioritization + attention zone (`prompt-engineering`
+   toolkit E):** the four rules are renamed R1–R4 with STABLE trigger
+   tokens; THE STOP CONDITION (the load-bearing rule run 2 violated)
+   is promoted to R2 with an explicit "the rule here wins" conflict
+   ordering, and the grep pattern becomes the stable `R1|R2|R3|R4`.
+3. **Positive instruction framing (`prompt-engineering` BP4):** every
+   rule now LEADS with what to do ("Cite only what you retrieved",
+   "When nothing is citable, write nothing", "Give every retrieval
+   call its own cell", "Edit only through the guarded family") — the
+   negations reinforce rather than lead.
+4. **Hypershot frames where the addendum could not carry them
+   (`hypershot-protocol` Rules B/C + §6):** the task text is NOT
+   `.format()`-brace-constrained the way the composed-prompt addendum
+   is (the completion query passes raw; the system-prompt splice
+   doubles braces then `.format()` restores them), so `upsum` is now
+   an instantiable FRAME with instruction-bearing variables — not a
+   prose key list — and the final report is a `<output_contract>`
+   frame (replacing v3.1's free-form "describe what the graph said").
+   Invariance test preserved: tool names, entity names, the exact
+   guard message, and spec bounds stay CONCRETE (the task's invariant
+   vocabulary); only the run-specific fills are variables.
+5. **Marker hierarchy matched to content (`prompt-engineering`
+   toolkit B):** v3.1's dense multi-action steps (3, 6, 9, 11) are
+   decomposed into labeled sub-sequences (E1–E4, M1–M4, V1–V2, C1–C3)
+   with one action per bullet, so the model checks each off.
+6. **Topological end-state (`prompt-engineering` BP1):** a new
+   `<definition_of_done>` gives the model a crisp success frame to
+   test itself against before submitting.
+7. **Fixing the EXACT divergence the landed T1 diff showed
+   (`prompt-engineering` BP5):** §5h.11's two cosmetic review notes
+   (the Part-2 guard block landed between the editRoot comment tail
+   and its `const`; a stray blank line) are addressed at the point of
+   divergence — M2(b) now says place the guard block AFTER the
+   editRoot block's closing line so the comment stays attached to its
+   statement, and M2(c) states the one-blank-line block spacing. A
+   stronger prompt would have prevented both.
+
+**Task text v3.2 (the strengthened template — verbatim):**
+
+```
+Stage-2 self-edit task (feature-class increment T1: the backend
+config surface).
+
+<mission>
+Add a validated configuration surface to src/config/index.ts and its
+unit pins to src/config/rlm_backend.test.ts, exactly per
+<specification>. This task text is the entire spec channel — the
+design record it quotes lives outside your reach, so follow the bytes
+here literally.
+ONE failure has killed a prior attempt at this task: recording a
+derived insight that cites a hash the run never retrieved from the
+target file. <governing_rules> exists to make that failure
+impossible. Read it first and obey it over every other instinct.
+</mission>
+
+<governing_rules>
+*** CRITICAL — these four rules govern the whole run. Re-read them BY
+CODE with trellis_task.grep('R1|R2|R3|R4') before each decisive step
+(the first write_back, the insight write, the submit). If any
+instruction below ever seems to conflict with a rule here, THE RULE
+HERE WINS. ***
+
+R1  CITE ONLY WHAT YOU RETRIEVED FROM THE TARGET. A hash is citable
+    only when BOTH hold: you fetched it THIS RUN via
+    trellis_postgres.get_ast_texts or
+    trellis_postgres.vector_search, AND its retrieved text appears
+    verbatim inside src/config/index.ts. Retrieval is what confers
+    citability; a hash you have seen only inside a trellis_textedit
+    frame is NOT citable. Call citable(hashes), read its `citable`
+    field, and trust it.
+
+R2  WHEN NOTHING IS CITABLE, WRITE NOTHING — THE STOP CONDITION. If
+    you reach the completion protocol and no hash satisfies R1,
+    revert every staged edit with trellis_textedit.revert, submit the
+    <output_contract> report with cited_hashes empty and a reason,
+    and end. Citing a related block from any other file is the exact
+    failure this task guards against — it is forbidden, never a
+    fallback.
+
+R3  ONE RETRIEVAL CALL PER CELL. Give every get_ast_texts and every
+    vector_search its OWN repl cell with nothing after it in that
+    cell. A "Retrieval Discipline" refusal is a raised exception that
+    kills the rest of its cell, so keep each retrieval behind its own
+    cell boundary. When a refusal says a hash was already retrieved,
+    reuse the variable you already hold and fetch nothing.
+
+R4  EDIT ONLY THROUGH THE GUARDED FAMILY. Move bytes only with
+    trellis_textedit.replace_lines / insert_lines / delete_lines.
+    Success requires textedit_raw_splices == 0.
+</governing_rules>
+
+<state_protocol>
+Keep a running upsum dict in the repl (the system prompt requires
+it). Create it in your FIRST cell in exactly this shape, update it at
+the END of every cell, and PRINT it before each decisive step:
+
+  upsum = {
+      "done": [{One_Line_Per_Completed_Step}],
+      "pending": [{One_Line_Per_Step_Not_Yet_Done}],
+      "blocked": [{One_Line_Per_Blocker_With_Its_Cause}],
+      "decisive_facts": [{Citable_Hash_Ids}, {Anchor_Lines_Verified}],
+  }
+
+A step still in "pending" is work you have NOT done, however far back
+the transcript claims otherwise — believe upsum over the scrollback.
+</state_protocol>
+
+<specification>
+Part 1 - four new OPTIONAL environment keys in EnvSchema:
+- TRELLIS_RLM_BACKEND: z.enum(['openai', 'vllm']).optional()
+- TRELLIS_RLM_MODEL: z.string().min(1).max(256).optional()
+- TRELLIS_RLM_BASE_URL: z.url().optional(), plus a refinement
+  requiring the URL scheme to be http: or https:
+- TRELLIS_RLM_API_KEY_ENV: z.string().min(1).max(128).optional()
+Each key gets a comment block in the file's house style naming
+MODEL_BACKEND_SEAM.md as the design record and stating that no
+consumer reads these values yet (T2/T3 wire them).
+
+Part 2 - imperative fail-fast checks after the schema parse (the
+existing editRoot / mcpCredentialEnv precedent in the same file),
+each throwing a plain Error whose message names every key involved:
+1. If OPENAI_BASE_URL is present in process.env (any value,
+   including empty), throw with EXACTLY this single-line message:
+   Backend config: OPENAI_BASE_URL is not honored; set
+   TRELLIS_RLM_BASE_URL (root agent) — worker transport is not yet
+   configurable.
+   (the dash between "(root agent)" and "worker" is an em dash,
+   exactly as written above)
+2. TRELLIS_RLM_BACKEND set to 'vllm' with TRELLIS_RLM_BASE_URL
+   unset: refuse.
+3. TRELLIS_RLM_API_KEY_ENV set with TRELLIS_RLM_BASE_URL unset:
+   refuse.
+4. TRELLIS_RLM_API_KEY_ENV set: the variable it names must be
+   present and non-empty in process.env; otherwise refuse. Resolve
+   the value once here into a local.
+A base URL WITHOUT a backend is allowed - add no check for it.
+
+Part 3 - a new export block on the config object:
+  rlmBackend: { backend, model, baseUrl, apiKeyEnv, apiKeyValue }
+where the first four are the validated values (each undefined when
+its key is unset) and apiKeyValue is the fail-fast resolved value of
+the named key variable (undefined when TRELLIS_RLM_API_KEY_ENV is
+unset). With every key unset every field is undefined and every
+existing config consumer reads exactly what it read before. The
+comment on the block follows the config.mcp.credentialEnv precedent:
+the resolved value never appears in logs or serializations. No other
+code reads rlmBackend yet - change NO call site anywhere.
+</specification>
+
+<evidence_protocol goal="get one citable src/config/index.ts hash into your retrieval set, then confirm the task premise from its bytes">
+E1 (one cell). Query the graph for the ACTION neighborhood of the
+   entity 'trellis_retrieval_budget_per_run' (names are
+   lowercase-normalized; provenance rides edges in either direction,
+   so match undirected):
+     MATCH (e:Entity)-[r:ACTION]-(o:Entity)
+     WHERE e.name = '{The_Budget_Entity_Named_Above}'
+     RETURN r.verb, o.name, r.sourceNodeIds,
+            coalesce(r.contested, false) AS contested
+   Keep only rows where contested is false. Your primary citation
+   candidate is the sourceNodeIds hash on the uncontested edge with
+   verb 'uses_config_key' toward entity 'config' — that hash's block
+   belongs to src/config/index.ts. Collect the distinct hashes from
+   all uncontested edges into a variable.
+
+E2 (one cell — R3). Fetch every collected hash in ONE get_ast_texts
+   call. Print the first line of each returned text.
+
+E3 (one cell). Load src/config/index.ts, then classify:
+   a. text = frame_text('src/config/index.ts')   # canonical join,
+      "\r" terminators intact on this CRLF file.
+   b. For each fetched hash: CITABLE when its full retrieved text is a
+      verbatim substring of text; otherwise NOT-CITABLE (blocks from
+      other files — e.g. src/workers/rlm_job.ts — inform you but stay
+      uncitable, R1).
+   c. Cross-check with citable(all_fetched_hashes) and PRINT the
+      report. Keep a hash ONLY when your verbatim check AND the
+      probe's `citable` field agree. Hold the survivors in a variable
+      for the completion protocol.
+   d. Confirm from the citable bytes that BOTH molds you mirror live
+      in this file: the TRELLIS_RETRIEVAL_BUDGET_PER_RUN validation
+      (the optional-env-twin your new keys follow) and the "Fail fast
+      at startup" comment plus the
+      resolveMcpCredentialEnv(mcpServers, process.env) call (the
+      credential mold your key resolution follows).
+
+E4 (fallback — ONLY if E3 left zero citable hashes). Make at most TWO
+   vector_search calls, each in its own cell (R3), querying about the
+   budget validation or the credential fail-fast resolution in
+   src/config/index.ts; fetch nothing you already hold; re-run E3's
+   classification. Still nothing citable ⇒ R2 (THE STOP CONDITION)
+   governs.
+</evidence_protocol>
+
+<editing_protocol>
+Author only genuinely NEW lines; move existing bytes by slicing them
+in code — never retype an existing line as your own.
+
+M1 (one cell). Load src/config/rlm_backend.test.ts and
+   src/config/textedit_bounds.test.ts. Confirm the test stub is
+   exactly a four-line header comment. Read the bounds test to learn
+   the house per-topic config-test mold: a managed-keys env
+   save/restore helper, vi.resetModules() + a dynamic
+   import('./index') per load, an afterEach restore. You will write
+   fresh code in these conventions.
+
+M2. Apply exactly THREE guarded inserts to src/config/index.ts (R4).
+   For EACH insert, in the same cell as the insert: read the
+   neighborhood with trellis_textedit.lines(); build byte-exact
+   anchors that INCLUDE the trailing "\r"; insert; then stop — line
+   addresses shift after every staged insert, so re-locate before the
+   next one and never reuse an address computed before an earlier
+   insert. An AnchorMismatchError staged nothing → re-read and retry.
+   Leave every existing line byte-unchanged.
+   a. The four TRELLIS_RLM_* keys with their comments, INSIDE
+      EnvSchema, immediately after the TRELLIS_RETRIEVAL_BUDGET_PER_RUN
+      entry's own comment-and-line, so the schema entries stay
+      grouped.
+   b. The ambient guard + the three cross-field refusals + the
+      resolved local, placed AFTER the closing line of the complete
+      existing editRoot fail-fast block — so the editRoot comment
+      stays attached to the editRoot code above it and your insert
+      never splits an existing comment from its statement.
+   c. The rlmBackend export block, INSIDE the config object literal,
+      between two existing export blocks (e.g. immediately after the
+      textedit block's closing line), with exactly one blank line on
+      each side, matching the file's existing block spacing.
+
+M3. Author the test body in src/config/rlm_backend.test.ts with
+   guarded insert_lines anchored on the header's last (fourth) line,
+   leaving all four header lines byte-intact. Manage these env keys
+   in the save/restore helper: the four TRELLIS_RLM_* keys,
+   OPENAI_BASE_URL, and one scratch key-env variable name of your
+   choice. Write ONE describe block with these pins:
+   (a) unset default: config.rlmBackend deep-equals the all-undefined
+       five-field shape;
+   (b) backend accepts 'openai' alone and 'vllm' with a base URL;
+       refuses an unknown enum value;
+   (c) model accepts an ordinary id; refuses '' and a 257-char
+       string;
+   (d) base URL accepts http://127.0.0.1:8000/v1 and an https URL
+       with no backend set; refuses a non-URL and ftp://host/;
+   (e) 'vllm' without base URL refuses and the message names both
+       keys;
+   (f) key-env without base URL refuses and the message names both
+       keys;
+   (g) key-env with base URL and the named variable set populates
+       apiKeyEnv and apiKeyValue;
+   (h) key-env naming an absent variable refuses; naming a present
+       but empty variable refuses;
+   (i) ambient OPENAI_BASE_URL set makes config load throw with the
+       exact Part-2 guard message.
+
+M4. Review each file with trellis_textedit.diff, then write_back each
+   file.
+</editing_protocol>
+
+<verification_protocol>
+V1 (its OWN iteration — never a write cell or the submit cell).
+   Re-read the three edited regions of src/config/index.ts and the
+   whole test file, PRINT each, and assert in code with each result
+   printed. ASSERTION DISCIPLINE — compare STRUCTURE, never
+   terminator-stripped text:
+   - multi-line region: region_equal(relpath, start,
+     [{Expected_Line_With_Trailing_CR}, ...]) OR
+     region_lines(relpath, start, end) == your expected LIST.
+   - whole-file substring: use frame_text(relpath) (terminators
+     kept).
+   A concatenation of lines() texts without terminators reads false
+   even when the region is correct — never assert against one.
+   Assert: (a) each of the four TRELLIS_RLM_* schema entries appears
+   exactly once; (b) the ambient-guard message appears exactly once
+   in index.ts; (c) the TRELLIS_RETRIEVAL_BUDGET_PER_RUN line is
+   byte-unchanged and the editRoot fail-fast block's line list is
+   byte-unchanged; (d) the rlmBackend block sits inside the config
+   object literal with its neighboring blocks intact; (e) the four
+   stub header lines compare equal AS A LIST to the four expected
+   header lines, and the first non-header line of the test file is
+   your own import line.
+
+V2. When an assertion prints false but the PRINTED region shows the
+   intended content, the assertion is the bug: fix the assertion and
+   re-verify in a new iteration. A genuine content mismatch VISIBLE
+   in the printed region itself is the ONE case that triggers R2
+   (revert, no insight, report).
+</verification_protocol>
+
+<completion_protocol>
+C1. In a LATER iteration, after every V1 assertion has printed true:
+   re-read the rules with trellis_task.grep('R1|R2|R3|R4'), PRINT
+   upsum, and call citable() on your held candidates once more. Keep
+   only hashes whose `citable` field is True. If that leaves the list
+   empty, R2 governs — take the empty-cited path in
+   <output_contract>.
+
+C2. Record EXACTLY ONE derived insight, citing only the survivors:
+   trellis_neo4j.write_derived_insight(
+       subject='config', verb='resolves_fail_fast',
+       obj='mcpcredentialenv',
+       sourceNodeIds=[{Citable_Index_Ts_Hash_Ids_From_E3}])
+
+C3. Submit the report through trellis_answer.submit by REFERENCE
+   (trellis_answer.submit("report")), instantiating the
+   <output_contract> frame.
+</completion_protocol>
+
+<output_contract>
+Build this dict and submit it by reference. Fill every field; leave
+cited_hashes empty ONLY on the R2 path.
+
+  report = {
+      "graph_finding": "{What_The_Uncontested_ACTION_Edges_Named}",
+      "bytes_confirmed": "{Which_Two_Molds_The_Citable_Block_Showed}",
+      "edits_made": "{Each_index_ts_Insert_And_The_Test_Body_One_Line_Each}",
+      "anchors_used": [{Byte_Exact_Anchor_Line_Per_Insert}],
+      "cited_hashes": [{Hash_Ids_That_Passed_R1}],
+      "why_citable": "{Retrieved_This_Run_AND_Verbatim_In_index_ts}",
+  }
+</output_contract>
+
+<definition_of_done>
+The run is correct when ALL hold: exactly src/config/index.ts and
+src/config/rlm_backend.test.ts changed; textedit_raw_splices == 0;
+every V1 assertion printed true; exactly one insight recorded, its
+sourceNodeIds a subset of your R1-passing survivors; the report
+submitted by reference. If any cannot be met, R2 governs: revert,
+record no insight, submit the empty-cited report.
+</definition_of_done>
+
+Edit no other file. If the graph, the retrieved bytes, or the file
+contents contradict this task (a mold is absent, the stub header is
+absent, or nothing is citable), R2 governs.
+
+*** THE TWO RULES THAT DECIDE THE RUN, ONCE MORE ***
+- R1 + R2: cite only a hash RETRIEVED THIS RUN whose bytes are
+  verbatim in src/config/index.ts, confirmed by citable(); if none
+  qualifies, record NO insight at all.
+- R3: exactly one retrieval call per repl cell.
+```
+
+**Scope of this pass, recorded honestly:** v3.2 is a STRUCTURAL
+strengthening of v3.1 under the two skills — the specification, the
+evidence chain, the criterion, and the invariant vocabulary are
+byte-for-byte the same intent; nothing behavioral was added. T1 is
+already LANDED on v3.1 (§5h.11) and is NOT re-run by this pass — v3.2
+is recorded as the template the remaining T-series (T2 onward)
+inherits and adapts. A live A/B of v3.1 vs v3.2 adherence would be
+its own owner-approved paid proposal, not run here.
+
 
 ## 6. Verification summary
 

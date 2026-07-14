@@ -1778,8 +1778,10 @@ act on:
   churn note — a landed T2 re-chunks `rlm_job.ts` and the fresh
   edge contests on the next refresh), the named failure modes +
   catching layers (§5i.3), the task text VERBATIM (§5i.4, authored
-  under the protocols on the v3.1 template with T2's spec spliced),
-  and the run proposal with the estimate (§5i.5).
+  under the protocols — both Skills INVOKED, Guardrail 15 — on the
+  **v3.2 template (§5h.12), the skills-strengthened successor to
+  v3.1**, with T2's spec spliced), and the run proposal with the
+  estimate (§5i.5).
 - **Verify the evidence chain live BEFORE proposing** (read-only;
   the §5g.2 mold): the chosen edge(s) uncontested with live
   `rlm_job.ts` provenance; block bytes verbatim on disk;
@@ -1835,9 +1837,12 @@ act on:
   the forwarding/strip test mold (Sessions 33/50 pins are the exact
   shape T2's new pins follow).
 - `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5h — the FULL
-  T1 record: §5h.5/§5h.9/§5h.11 task texts v1/v3/v3.1 (v3.1 is
-  T2's template), §5h.11 the landed-run record and driver; §5e.4 /
-  §5g.3 — the proposal mold.
+  T1 record: §5h.5/§5h.9/§5h.11 task texts v1/v3/v3.1, **§5h.12 the
+  skills-strengthened v3.2 (T2's TEMPLATE — study its structure:
+  governing_rules with stable R1–R4 tokens, positive-led framing,
+  the upsum and output_contract hypershot frames, decomposed
+  sub-sequences, definition_of_done)**, §5h.11 the landed-run record
+  and driver; §5e.4 / §5g.3 — the proposal mold.
 - `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` +
   `src/rlm/trellis_scaffold.py` — the scaffolds the task text
   leans on (what `citable()`/`frame_text`/`region_equal`/
