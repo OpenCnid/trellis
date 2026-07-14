@@ -1,0 +1,12 @@
+{
+  "name": "reasoning-templates",
+  "version": 1,
+  "purpose": "Supply the RLM a fixed set of reasoning-mode scaffolds (the L axis) it instantiates per task by rough-fuzzy match; structure fixed, per-task variables model-authored.",
+  "research": { "sourceNodeIds": [] },
+  "addendum": "addendum.txt",
+  "tools": [],
+  "bounds": { "addendumMaxBytes": 12288 },
+  "acceptance": { "zeroPaid": "npm run test:modules" },
+  "status": "contested",
+  "kernelCompat": 1
+}
