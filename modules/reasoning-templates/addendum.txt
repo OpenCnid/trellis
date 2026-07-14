@@ -1,0 +1,151 @@
+REASONING TEMPLATE PROTOCOL
+
+=== MODE SELECTION ===
+
+Identify the operating-mode invariant for the task before composing an approach.
+The invariant is the fixed parameter: the kind of reasoning the task requires.
+Match the task to the nearest reasoning-mode template by structure, not by keyword.
+When the match is uncertain, hold the two nearest templates and choose by the task fixed parameter.
+Do not blend cross-mode vocabulary; each template stays within its own mode.
+
+Available modes and their purpose:
+
+  proof         -- Establish a claim from the corpus with cited evidence.
+                   In-ports: query, task. Out-port: answer.
+  search        -- Locate relevant nodes without a prior claim.
+                   In-ports: query, task. Out-port: answer.
+  construction  -- Build or modify a file artifact in the edit root.
+                   In-ports: task, address. Out-port: answer.
+  troubleshooting -- Diagnose a failure by iterating query, evidence, and hypothesis.
+                   In-ports: task, query. Out-port: answer.
+  exploration   -- Map an unknown domain by traversal without a prior hypothesis.
+                   In-ports: query, task. Out-port: answer.
+  negotiation   -- Resolve conflicting evidence or constraint sets to a consistent position.
+                   In-ports: task, hashes. Out-port: answer, insight.
+  triage        -- Classify and prioritize a set of corpus items for downstream action.
+                   In-ports: query, task. Out-port: answer, insight.
+  ingestion     -- Retrieve and reason over external content via MCP (when configured).
+                   In-ports: task. Out-port: answer.
+
+Port type vocabulary:
+  query         -- string sent to run_cypher, vector_search, trellis_task.grep, or locate
+  rows          -- json.loads-parsed list of row dicts from run_cypher
+  hashes        -- list of 64-hex AST node ids; cite only addresses retrieved this run
+  blocks        -- json.loads-parsed list of dicts from get_ast_blocks
+  insight       -- derived fact dict: subject, verb, obj, sourceNodeIds, confidence
+  address       -- integer line index, engine-computed by locate; never estimated
+  answer        -- final answer value submitted via trellis_answer.submit
+  task          -- operator task text, engine-held in trellis_task
+
+=== TEMPLATE INSTANTIATION ===
+
+Take the matched template as fixed structure; treat its named variables as free.
+Instantiate each free variable with the domain terms for this task.
+Compose only the genuinely new, task-specific reasoning; do not restate the fixed structure.
+
+Mode-entry resource sequence (what each mode reaches for first):
+
+  proof:         run_cypher -> get_ast_texts/get_ast_blocks -> write_derived_insight -> trellis_answer.submit
+  search:        run_cypher or vector_search -> get_ast_texts -> trellis_answer.submit
+  construction:  trellis_textedit.load -> locate -> guarded-edit -> diff -> write_back -> trellis_answer.submit
+  troubleshooting: trellis_task.grep -> run_cypher -> get_ast_texts -> write_derived_insight -> trellis_answer.submit
+  exploration:   run_cypher (node scan) -> run_cypher (edge walk) -> get_ast_blocks -> trellis_workspace.add_note -> trellis_answer.submit
+  negotiation:   run_cypher (CONTRADICTS) -> get_ast_texts -> write_derived_insight or trellis_workspace.add_note -> trellis_answer.submit
+  triage:        run_cypher or vector_search -> get_ast_texts -> write_derived_insights (bulk) -> trellis_answer.submit
+  ingestion:     trellis_mcp.list_tools -> trellis_mcp.call_tool -> trellis_workspace.segment -> trellis_answer.submit
+
+=== RESOURCE HANDOFF ===
+
+Each mode names the guarded verbs it uses. Read the call syntax here; do not improvise.
+Invoke only guarded verbs; the engine owns the mechanics (addresses, counts, terminators).
+
+Core retrieval verbs (all return JSON string; wrap every return in json.loads):
+
+  trellis_neo4j.run_cypher(query)
+    -- returns list of row dicts keyed by RETURN aliases
+    -- example: results = json.loads(trellis_neo4j.run_cypher("MATCH (q:Question) RETURN q.id AS id LIMIT 5"))
+
+  trellis_postgres.get_ast_texts(hashes)
+    -- returns dict mapping hash to text
+    -- example: texts = json.loads(trellis_postgres.get_ast_texts(["<hash1>", "<hash2>"]))
+
+  trellis_postgres.get_ast_blocks(root_hash)
+    -- returns ordered list of block dicts with keys id, type, text
+    -- example: blocks = json.loads(trellis_postgres.get_ast_blocks("<root-hash>"))
+
+  trellis_postgres.vector_search(query)
+    -- returns list of dicts with keys id, content; top 3; semantic fallback only
+    -- example: hits = json.loads(trellis_postgres.vector_search("semantic entailment"))
+    -- call get_ast_texts on hit ids before citing; search-set membership is not retrieval
+
+Core write verb (insight write is the ONLY mutation path):
+
+  trellis_neo4j.write_derived_insight(subject, verb, obj, sourceNodeIds, confidence, subject_kind, object_kind)
+    -- cited hashes must exist in ast_nodes and must have been retrieved this run
+    -- example: json.loads(trellis_neo4j.write_derived_insight("s", "v", "o", ["<hash>"], 0.9))
+
+  trellis_neo4j.write_derived_insights(facts)
+    -- bulk variant; each fact is a dict with keys subject, verb, obj, sourceNodeIds
+    -- use for batch classification writes in triage and negotiation modes
+
+Answer verb (ends the task):
+
+  trellis_answer.submit(expression_text)
+    -- takes expression TEXT; evaluates in the calling REPL frame; prefixes FINAL_ANSWER: itself
+    -- example: trellis_answer.submit("answer_text")  -- where answer_text is a computed variable
+    -- literal-only expressions are refused; always compute into a variable first
+
+Construction verbs (only in construction mode; operator-gated by TRELLIS_EDIT_ROOT):
+
+  trellis_textedit.load(relpath)
+    -- reads file into held frame; returns lineCount, bytes, digest
+  trellis_textedit.locate(relpath, pattern, regex=False)
+    -- engine-computed addresses; never estimate line numbers; always locate
+  trellis_textedit.replace_lines(relpath, start, end, expected_lines, new_lines)
+    -- guarded replace; verifies expected_lines byte-exactly before staging
+  trellis_textedit.insert_lines(relpath, at, new_lines, anchor_before=None, anchor_after=None)
+    -- guarded insert; at least one anchor required
+  trellis_textedit.delete_lines(relpath, start, end, expected_lines)
+    -- guarded delete; verifies exact bytes before removing
+  trellis_textedit.write_back(relpath)
+    -- hash-guarded atomic disk write; raises StaleFileError on digest mismatch
+
+Workspace verbs (only when workspace is active; gated by MCP or goal-id):
+
+  trellis_workspace.read()
+    -- bounded index; plan, notes, segment metadata; never content
+  trellis_workspace.segment(segment_id)
+    -- full record for one segment, content included
+  trellis_workspace.set_plan(plan)
+    -- replace plan atomically with plain JSON-serializable data
+  trellis_workspace.add_note(text)
+    -- append a self-note; use in exploration and negotiation modes
+
+MCP verbs (only when MCP is configured; no provenance standing):
+
+  trellis_mcp.list_tools()
+    -- configured surface; registry truth; no I/O
+  trellis_mcp.call_tool(server, tool, arguments)
+    -- invoke allowlisted tool; with workspace active returns stub; read full content via segment()
+    -- MCP calls never count as database tool calls; external content has no provenance standing
+
+Task verbs (always available; no provenance standing):
+
+  trellis_task.text()
+    -- operator task verbatim as plain string
+  trellis_task.grep(pattern)
+    -- engine-side regex over task text; returns JSON string with bounded hits
+  trellis_task.uuid
+    -- this run task id; plain string attribute
+
+=== UPSUM ===
+
+upsum is your single source of truth. Create it in your first repl block. Rewrite it
+completely at the end of every block. Keys: done, pending, blocked, decisive_facts.
+Bound by code: size = len(str(upsum)); compare to UPSUM_BUDGET (constant in namespace).
+
+=== MODE EXIT ===
+
+Each mode's natural exit is trellis_answer.submit. Switches between modes are explicit:
+name the new mode and its entry resource before switching. The upsum pending list
+tracks the current mode sequence.
