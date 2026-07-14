@@ -5282,3 +5282,206 @@ unmoved, no refresh owed (nothing in extraction scope changed).
    artifact only (two architecture-record sections, this entry, the
    row-11 cell, the regenerated HANDOFF): no refresh owed, no code
    byte, no prompt byte.
+
+### July 13, 2026 — Session 45: the test-time-training research track OPENED (owner-directed) — research record, rung ladder, collaborator questions; zero runtime bytes
+
+Owner-directed objective, jumping the §4 queue per HANDOFF §0 step 3
+(the queued stage-1b prose chunk stays standing item 1, undiminished;
+the reason recorded here): initiate research on Test-Time Training
+(TTT) — the external collaborator's active line ("increasingly
+optimized sparse models in this harness," fast weights trained during
+test time each turn on the RLM's REPL-resident context and on the
+harness's own meta-prompts) — and roadmap it with architectural
+documentation for future sessions and collaborators. $0.0000 spent;
+docs-only PR.
+
+1. **Research method (disclosed).** The direction said "use Deep
+   Research"; no such tool exists in this session's harness, so the
+   session substituted multi-query web research over primary sources
+   (arXiv abstracts fetched directly; ids verified July 13, 2026).
+   The record's §10 reading list is the citable output — eleven works
+   spanning the fast-weights lineage (Schmidhuber 1992 → Ba 2016 →
+   Schlag 2021), the architectural family (TTT-Linear arXiv:2407.04620,
+   Titans arXiv:2501.00663, ATLAS arXiv:2505.23735), the
+   pretrained-adaptation family (ARC-TTT arXiv:2411.07279, TTT-NTP
+   arXiv:2606.21803, agentic TTT arXiv:2607.03441), the compiled-state
+   cousins (Cartridges, SEAL, Transformer²), and the behavioral-eval
+   critique (Beyond Perplexity arXiv:2607.00368). Two calibrating
+   findings adopted verbatim into the record: TTT gains in multi-turn
+   agents are STABILITY-shaped, not capability-shaped (~1.9× serving
+   cost); TTT perplexity wins frequently fail to appear behaviorally.
+   NOT found (recorded): any unified TTT×sparse-MoE literature, and
+   any direct study of fast-weight adaptation to a fixed harness
+   meta-prompt — both are open questions put to the collaborator.
+2. **The record (`docs/architecture/TEST_TIME_TRAINING.md`, the
+   document-first mold one stage earlier — the record that decides
+   whether a design record is ever warranted).** Contents: the claim
+   decomposed (H1/H2/H3, each independently testable); the three
+   mechanism families; the seams named against the code (the two
+   hardcoded `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}`
+   sites and the direct `openai.OpenAI()` checker client in
+   `trellis_agent.py`; the `vector(1536)` + HNSW embedder-schema
+   coupling in `POSTGRES_SCHEMA_SQL` — the embedding backend is
+   schema-coupled and SEPARABLE from the completion backend, and an
+   embedder move is a substrate-identity event; the composed-prompt
+   byte pins as the natural prefix fast-state cache key — the house
+   pin discipline is coincidentally the cache-key discipline H2's
+   mechanism would need); the trust-model analysis (fast weights =
+   Tier-3 analog with zero provenance standing; per-run-ephemeral
+   ABSOLUTE — cross-run persistence is a promotion-shaped event
+   needing its own record; every gate engine-side and model-agnostic,
+   so a backend swap changes none of them — the tooling-shape doctrine
+   paying out); the three named threats (injection amplification via
+   adaptation data — any R4 proposal must pre-state its
+   adaptation-data policy as precisely as the retrieval set defines
+   citability; cross-run contamination; reproducibility — model
+   checkpoints join grammar wasm blobs as exact-pinned
+   substrate-identity objects); the measurement plan (the est suite
+   and protocol/answer-channel counters are backend-independent
+   instruments; positive-control duty restated for TTT; behavioral
+   criteria only, perplexity recorded never criterial); and the
+   owner-gated ladder R1→R5 with the cost-doctrine re-expression
+   (GPU-hours under the same propose/actuals ceremony).
+3. **Honest scope, pinned in the record §8:** TTT is IMPOSSIBLE on
+   the current gpt-5.4 API backend — nothing changes today's runtime;
+   "increasing quality of response overall" is an unmeasured
+   hypothesis whose best current external calibration predicts
+   stability-shaped wins; H2 has NO direct literature support; the
+   track proceeding at all is the owner's call at every rung.
+4. **Collaborator handoff (R1).** `docs/COLLABORATOR_BRIEFING.md`
+   gained Postscript 3: it corrects the July 9 item-(4) answer (the
+   module registry is PROMPT-level test-time adaptation; the
+   collaborator's line is WEIGHT-level — the registry answer stands
+   for what it is, but it was not an answer to TTT) and points to the
+   record's §9 questions (mechanism selection; whether sparsity does
+   WORK in their formulation or is the economics; the H2 mechanism
+   question — what a gradient step over fully-attended prefix bytes
+   adds; the adaptation-data policy). Delivery is owner-mediated.
+5. **Bookkeeping.** Session 40's §5 entry moved VERBATIM to
+   `docs/archive/ROADMAP_HISTORY.md` (live ledger now 41–45); found
+   in passing and repaired: the §5 archive-pointer paragraph was
+   three moves stale (still read "37–41" although Sessions 42–44
+   each moved an entry) — the four missing moves are now recorded in
+   it, this one included. §4 gained row 13 (this track). HANDOFF
+   regenerated per §0: the next-session §3 objective is rung R2 (the
+   zero-paid backend-seam audit), with the judge-calibration decision
+   presentation duty carried at session start and the owner's
+   standing alternates (stage-1b, row-12 continuation, a surfaced
+   row-11 target) intact.
+6. **Acceptance (docs-only).** The diff touches five markdown files
+   and nothing else (`git diff --stat` in the PR); zero code, prompt,
+   config, or schema bytes — both composed-prompt pins untouched by
+   construction. `npm ci` + `npm test` run in the session worktree
+   (result recorded in the PR); the live drill block, Compose
+   integration, and `drill:scale` were NOT re-run — no non-markdown
+   byte moved and the Session 44 baseline stands; a docs-only PR owes
+   no substrate refresh under the adopted cadence (`docs/` is outside
+   extraction scope until stage-1b lands).
+
+### July 13, 2026 — Collaborator R1 exchange (post-Session-45, same day): the mechanism SELECTED (LaCT); the reliance claim recorded and decomposed
+
+The owner relayed the collaborator's response to the Session 45 record
+the day it was written (verbatim quote preserved in
+`TEST_TIME_TRAINING.md` §12): the model they aim to use is LaCT
+("Test-Time Training Done Right"); with open weights they intend to
+add a synthetic set of layers that ARE the fast weights; Trellis
+supplies provenance to check the procedure and the meta-prompt
+adherence they expect it to sharpen; "the research shows this improves
+base model performance — that's the claim we're relying on for our
+application." Zero-paid; folded into the Session 45 PR under the §0
+step-5 event-loop rule.
+
+1. **The selection verified against the primary source** (LaCT =
+   Zhang et al., MIT + Adobe, arXiv:2505.23884; re-fetched July 13):
+   the "add fast-weight layers to open weights" plan is the paper's
+   Wan-2.1 retrofit pattern — attention layers replaced by LaCT +
+   sliding-window attention, then FINE-TUNED (a training job, not an
+   inference-time configuration); the retrofit result reads
+   COMPARABLE to full attention, not improved; the paper's
+   superiority results are FROM-SCRATCH architecture comparisons
+   (760M/3B language models at 32k beating GLA/DeltaNet on
+   long-context loss); authors' own stated limitation: state-based
+   models are weaker at reasoning.
+2. **The reliance claim decomposed (record §12.2), the Session 28
+   discipline — a premise relied on is a premise measured:** C1
+   SUPPORTED (hardware efficiency + quality-preserving retrofit
+   feasibility); C2 EXTRAPOLATED ("improves base model performance"
+   for a retrofitted open LLM — LaCT does not show it; nearest
+   support is TTT-NTP's +3–4 RULER and aTTT's stability-shaped
+   gains; **the load-bearing gap R3/R4 exist to measure**); C3
+   UNTESTED (meta-prompt adherence = H2 — no literature; Trellis's
+   protocol counters are the meter). One overlap named honestly:
+   LaCT's measured wins are long-context modeling — the job the RLM
+   already removes from attention by construction; the expected win
+   for THIS application narrows to serving efficiency + the C3
+   adherence effect.
+3. **Division of labor recorded (record §12.3):** the retrofit
+   training job is COLLABORATOR-SIDE (or its own owner-funded
+   proposal) — not a rung of this repo's ladder; Trellis contributes
+   the acceptance instrument, the R2 serving-seam audit, and the
+   design seed "provenance-gated adaptation data" (the fast-weight
+   training signal restricted to engine-verified live blocks with the
+   run's retrieval set as the eligibility boundary — bounding the
+   injection-amplification threat and making what-the-model-absorbed
+   auditable).
+4. **Ladder deltas (record §12.4):** R1 question 1 ANSWERED;
+   questions 2–4 stand, question 4 sharpened into a concrete proposal
+   (adaptation-data eligibility = the retrieval set?); R3 gains the
+   same-checkpoint requirement so R4 isolates the added layers; R4
+   arms fixed (base checkpoint vs same checkpoint with trained-in
+   large-chunk fast-weight layers); its criterion inherits C2 and C3
+   explicitly — a stability-only result is a finding, not a failure,
+   but it is not C2. No rung's gate moved.
+5. **The follow-up exchange (later the same day; record §12.5):** the
+   owner CORRECTED the entry-3 overlap point — large REPL dumps ARE
+   long-context modeling in practice (the discipline stops retyping,
+   not reading; printed fetch results and extraction working sets
+   flow through attention every turn), so C1's long-context results
+   apply to this application directly — and framed the undertaking as
+   "our own private repro study with expansion." The landscape check
+   (zero-paid): LaCT is published at ICLR 2026; official code exists
+   (github.com/a1600012888/LaCT, fused Triton kernels); independent
+   groups already retrain the LM setup (arXiv:2602.21204's own 760M
+   LaCT-LLM on 100B tokens) and adopt the mechanism downstream; a
+   TTT reproducibility-report culture exists (arXiv:2511.16691) but
+   NO external study covers C2 or C3. Verdict recorded: the
+   empiricals are worth running and are the ONLY route to C2/C3; the
+   ladder is already shaped as the study (R3 = the reproduction half
+   on our workload, R4 = the expansion half); gates unchanged.
+
+### July 13, 2026 — Owner ratification (post-Session-45, same day): the TTT-track chunking (phases 0–3) and the feature-class self-edit rung
+
+The owner ratified the track's decomposition and the proposal that
+Trellis authors the Trellis-side seam code through the stage-2
+harness ("build this using Trellis, then we come back and review
+it"). Full record `TEST_TIME_TRAINING.md` §12.6. Ratification covers
+the SHAPE only — every increment and paid run below still enters as
+its own owner-approved proposal with its own estimate.
+
+1. **The feature-class self-edit rung DEFINED (record §12.6):**
+   task-assigned functionality increments authored by Trellis (the
+   W-series / increments-1–2 lineage) — DISTINCT from the
+   defect-class increment 3, whose never-manufacture rule is
+   untouched. Criterion mold: the standing five + guarded-only
+   (`textedit_raw_splices == 0`) + the parse gate + the increment's
+   own new unit pins green. Toolkit never touches git; every diff
+   human-reviewed; landing is a human PR.
+2. **Spec-before-pen:** the seam design record (R2b) is
+   HUMAN-authored before any T-increment runs; task texts derive
+   from it.
+3. **The phases:** Phase 0 = R2a (Session 46: census + rlms verdict)
+   then R2b (the seam design record). Phase 1 = the T-series
+   (feature-class, smallest first): T1 config surface → T2
+   `buildAgentEnv` forwarding/strip → T3 the `trellis_agent.py`
+   construction-site rewire (policy-2 substrate covers it) → T4 the
+   zero-LLM fixture-endpoint drill. Phase 2 = R3a/R3b (the
+   reproduction half) then R4a–R4d when the collaborator's retrofit
+   checkpoint lands (exact-pinned). Phase 3 = R5.
+4. **Dependencies named:** the record lives in `docs/` (outside
+   extraction scope) — T-series task text carries the spec verbatim
+   until stage-1b chunk A lands (synergy, not prerequisite);
+   refresh-before-use applies per T-increment target area under the
+   split-scope recipe.
+5. HANDOFF re-pointed: Session 46 = R2a, with R2b + the T-series
+   queued behind it; folded into the Session 45 PR under the §0
+   step-5 event-loop rule.

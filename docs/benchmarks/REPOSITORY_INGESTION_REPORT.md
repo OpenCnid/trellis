@@ -2623,7 +2623,93 @@ edits, record no insight, and report the contradiction.
 - One retrieval call per REPL cell.
 ```
 
-The run record follows below when the spawn completes.
+**The run (July 13, 2026 — ONE spawn, first shot): $0.5781 computed
+from tokens (192,978 in / 9,561 out at the gpt-5.4 rates; UNDER the
+$0.9–$1.3 estimate), 11 root iterations of the 16 allowed, 66.4s;
+3 db tool calls / 3 retrieved addresses / 1 retrieval fetch /
+0 dedup refusals / 0 budget refusals; 32 textedit ops / 3 files
+held / 2 write_backs / 4 guarded ops / 0 raw splices;
+`answer_submits` 1; porcelain after the run: exactly the two named
+files.** The run followed the amended protocols end to end: the
+graph query surfaced the three uncontested provenance hashes, ONE
+`get_ast_texts` call fetched all three (no dedup refusal ever
+fired — the run-2 class never recurred), `frame_text` classified
+exactly one hash byte-verbatim in `index.ts`, the `citable()` probe
+agreed ("Permissible citable hash count for index.ts: 1" in the
+run's own upsum), the `upsum` dict was created in the first cell
+and visibly maintained through every iteration, ONE live
+`AnchorMismatchError` fired mid-edit (an address computed before an
+earlier staged insert) and the run re-located and retried — the
+Session 41 teaching loop — and the completion protocol re-read the
+hard rules through `trellis_task.grep` before the ONE gated insight
+write. The uuid tags are not echoed anywhere in the transcript (the
+prompt is never logged); the surface's function is observed through
+the run's own grep calls. Log:
+`benchmark_logs/s50_t1_retry_run1.log` (local, gitignored).
+
+**Criterion verdict, item by item — ALL SEVEN PASS; increment T1
+LANDED:**
+
+1. Named-file-only diff PASS — porcelain shows exactly
+   `src/config/index.ts` + `src/config/rlm_backend.test.ts`;
+   insert-only (173 insertions, 0 deletions).
+2. Evidence contract PASS — exactly one DERIVED_INSIGHT `config`
+   `-resolves_fail_fast->` `mcpcredentialenv` through the
+   Session 31 gate, citing exactly [`fc17205c…6311`] (retrieved
+   this run; bridges to `repo:trellis:src/config/index.ts`); the
+   citation audit reads cited ⊆ read, `citedButUnread` empty.
+3. `stage2:check` zero findings PASS (scope + evidence + parse
+   gate; comment-class not declared) — the FIRST zero-findings T1
+   run.
+4. Guarded-only PASS — `textedit_raw_splices` 0.
+5. The increment's own pins green PASS — `npm test` 866/86 →
+   875/87 with the diff applied: the run's nine pin groups all
+   green, zero existing tests changed.
+6. Human `git diff` review ACCEPTED against the spec — the four
+   keys with their bounds, the EXACT ambient-guard message (em dash
+   verified in the file bytes), the three cross-field refusals in
+   spec order, the fail-fast resolved local, the five-field
+   `rlmBackend` export, the byte-intact stub header with the vitest
+   import as the first authored line, CRLF uniform (0 bare-LF
+   lines), `git diff --check` clean. Two COSMETIC notes recorded
+   (not spec violations; the landed diff is measured evidence and
+   stays as written, the increments-1/2 no-hand-edit precedent):
+   (a) the Part-2 guard block was inserted between the editRoot
+   comment tail and its `const editRoot` line — the spec's
+   placement ("after the schema parse") is satisfied, but the task
+   text's step-6(b) anchor guidance ("after the existing editRoot
+   fail-fast block") was not followed literally, and the editRoot
+   comment now sits two blocks above its code; (b) one stray blank
+   line between the `rlmBackend` and `textedit` export blocks.
+7. Spend within estimate PASS — $0.5781 against $0.9–$1.3; session
+   paid total including the quota probe ≈$0.5782, well under the
+   ≤$5/run cap.
+
+**The ladder record:** T1 landed on its second attempt overall
+(Session 48 FAILED, Session 49 environmentally blocked and
+unconsumed, this run LANDED first-shot on the scaffolds) — the
+increment-2 shape repeated: failure classes closed mechanically
+(the scaffolds) plus task discipline (v3.1), then a clean landing.
+The §5h.9 escalation rule was never needed; the evidence class did
+not recur. The honest attribution: this single landing cannot
+separate the scaffolds' contribution from the v3.1 prose — what is
+OBSERVED is that the run used `frame_text`/`citable()`/`upsum`/
+`trellis_task.grep` at exactly the steps that failed in Session 48,
+and none of those failure modes recurred.
+
+**Post-landing (the §5h.3 churn note, EXECUTED and observed):** the
+per-PR split-scope refresh ran the same day — policy-1 published
+`trellis#12` (10 ingested / 305 unchanged / 0 tombstones; 7 blocks
+queued of the 16-block printed bound) and the policy-2 `src/rlm`
+leg published `trellis#13` (4 ingested / 313 unchanged / 0
+tombstones; 26 queued of 32 eligible; the new
+`trellis_scaffold.test.ts` test/fixture-excluded); extraction
+actuals 27,073 in / 20,209 out + 15,029 embedding tokens ≈
+**$0.2701**. The `index.ts` re-chunk killed the cited block and the
+sweep CONTESTED the fresh insight edge exactly as pre-recorded —
+ordinary lazy recovery, never a criterion item; the three standing
+Session 36/39 beliefs rode through UNCONTESTED (their fourth
+consecutive clean refresh).
 
 ## 6. Verification summary
 
