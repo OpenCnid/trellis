@@ -222,7 +222,7 @@ Ordered roughly by severity.
 | ~~10~~ | ~~Kernel-level retrieval discipline: dedup + budgets (owner-approved July 12, 2026 — step 3 of 4)~~ | **Machinery done (Session 33, July 13, 2026), all zero-paid; the (d) acceptance measurement stands PROPOSED owner-gated.** `docs/architecture/RETRIEVAL_DISCIPLINE.md` ratified document-first, then (a)+(b)+(c) landed in `trellis_tools.py`: module-level held state under its own lock (addresses/roots/exact query strings — identities only, never content), typed bounded `Retrieval Discipline:` refusals for repeat fetches (full-repeat-only for `get_ast_texts` with partial-overlap serve-everything; per-root for `get_ast_blocks`; exact-query-match for `vector_search` — semantic dedup excluded by decision), and the per-run budget (kernel default 64 byte-returning fetches, cap 1024, `TRELLIS_RETRIEVAL_BUDGET_PER_RUN` env twin, refusal at budget+1 with counts + a bounded held-root echo; dedup refusals consume nothing). Activation is explicit construction in the injection mold — research runs wire it on in `trellis_agent.py`, bare construction is byte-identical, `TRELLIS_EXP_OMIT_RETRIEVAL` is the probe-only OFF arm (`buildAgentEnv` strips it, unit-pinned). Held state never feeds the Session 30 retrieval set or the Session 31 write gate. No prompt byte moved. Pinned by `test:rlm-sandbox` [7] (53 → 95, first-run green) + 3 `buildAgentEnv` unit pins (740 → 743). The (d) paired `est` re-run (criterion pre-stated in the §5 entry: repeat-serves 0 by construction, tokens ≤ baseline, correctness non-inferior, calls and correctness together; est. ~$2.40) runs only on owner approval; see §5. **Session 42 (July 13, 2026) attempted the measurement with owner approval in a remote container — BLOCKED ENVIRONMENTALLY (no OpenAI key; `api.openai.com` egress policy-denied), $0 spent; staging verified end-to-end on a fresh stack (the measurement is NOT dev-DB-bound: `--ingest` stages the est corpora anywhere) and the proposal STANDS; see §5** **Session 43 (July 13, 2026): the measurement RAN owner-approved and PASSED all three pre-stated criterion items — (i) repeat-serves 0 by construction with 5 dedup refusals observed live and 0 budget refusals; (ii) pooled median input tokens ON 8,756 ≤ OFF 8,807 (thin, 0.6%, per-question medians mixed and recorded); (iii) correctness ON 25/25 ≥ OFF 24/25. $1.9619 actual vs ~$2.40 estimate. Verdict record `RETRIEVAL_DISCIPLINE.md` §9; the mechanical claim only — no token headline, no correctness claim. Row CLOSED; see §5** |
 | 11 | Trellis-on-Trellis: ~~full-repo extraction~~ + graph-informed self-edits (owner-approved July 12, 2026 — step 4 of 4, the scaling flywheel) | **Stage 1 DONE (Session 34, July 13, 2026)** — the scoped-snapshot machinery (`--include` prefix scope with carry-forward, zero-paid; `test:repo-ingest` 56 → 82, unit pins 17 → 24) landed because the full-repo bound priced over the ≤$5/run cap (4,575 blocks ≈ $12.35); the owner-approved run then extracted the code substrate under one durable repo key: `repo:trellis`, scope `src`+`scripts`+`modules`, 1,423/1,423 jobs, zero failures, ≈$2.75 actual vs the $2.4–$3.84 estimate band, all five pre-stated criteria PASS (max hub 2.04% vs the ≤8% bar; zero denylist names; named kernel surfaces thread back to real bytes) — see §5 and `REPOSITORY_INGESTION_REPORT.md` §5d. The residue is DURABLE self-substrate (never drill-cleaned); `docs/` + root prose deferred to their own chunked proposal; `data/` excluded by decision. Stage 2 (IN PROGRESS): self-edit depth increments that QUERY the graph about the code they edit (the Session 26/expansion harness, escalating from string constants toward reviewed kernel diffs; each increment a single named failure mode, human `git diff` review before acceptance, toolkit never touches git; seam observations recorded in §5d.5 — the graph-to-textedit bridge needs no new machinery). **Increment 1 harness DONE (Session 35, July 13, 2026), the edit run PROPOSED owner-gated** — the named failure mode "graph-misdirected editing" gets mechanical detection (`src/benchmarks/selfedit/check.ts` + `npm run stage2:check` + the 39-check `test:selfedit-harness` drill: the hash→current-version doc-key bridge, planted out-of-scope/contested/dead/unbridged violations all FLAGGED, the scripted rehearsal driving the run's real tool sequence zero-LLM with the live Session 31 gate refusal observed); the increment design record is `REPOSITORY_INGESTION_REPORT.md` §5e (target: the stale Session 30 slice-(d) comment + docstring in `trellis_tools.py`, falsified by Session 31 — comment/docstring-only correction; task text verbatim; estimate $0.15–$0.45/run, ≤$0.90 total); see §5. **Increment 1 EXECUTED and LANDED (Session 36, July 13, 2026)** — run 1 failed human `git diff` review (mis-ranged hunk-B splice; verify-and-submit collapsed into one REPL cell; diagnosed, reverted, recorded), the contingency run 2 landed all five criterion items ($0.565 both runs vs ≤$0.90; checker zero findings; the recorded insight is a Session 31 gated write citing the fetched consumer blocks); the freshness policy's first refresh then ran (snapshot `trellis#2`, 24/24 jobs, $0.102): old-block death → ACTION-edge contest with audit preserved → operator re-derivation citing the new v2 block, while run 2's insight edge survived on its unedited consumer-block provenance — the churn loop observed live end to end; see §5 and `REPOSITORY_INGESTION_REPORT.md` §5e.5. The row stays open pending the owner's increment-ladder judgment. **Increment 2 EXECUTED and FAILED (Session 37, July 13, 2026)** — the parse gate (`named_file_unparseable`: `.py` via the configured interpreter's `compile()`, `.ts`/`.js` via TypeScript single-file parse diagnostics; post-run check, never a write gate) landed zero-paid FIRST with 11 unit pins + drill section [6] planting the exact run-1 shape; the owner-approved deeper run (the `trellis_agent.py` research-mode stale telemetry comment, selected by substrate query; new named failure mode: near-duplicate mis-targeting) then failed twice under the pre-stated criterion — run 1 on the FIRST live `unbridged_evidence` firing (cited wrong-document blocks; diagnosed deterministic, residual edge deleted as recorded operator cleanup), run 2 at human review (retype-splice neighbor deletion: a 6-line hand-retyped window dropped the executable telemetry line and a comment head while still PARSING — invisible to every mechanical layer by construction). $0.6356 total vs ≤$0.90; both failed diffs reverted and preserved; run 2's insight edge stands (true, live-bridged, gate-verified). Recorded next step: the increment-2 RETRY — the comment-class diff gate (every changed named-file line comment/blank, decidable from the diff alone) zero-paid first, then the re-proposed run; see §5 and `REPOSITORY_INGESTION_REPORT.md` §5f/§5f.5. **Owner re-sequenced July 13, 2026: the retry runs as Session 39, AFTER the row-12 structural-chunking session — deferred, not dropped.** **Increment 2 RETRY LANDED (Session 39, July 13, 2026)** — the comment-class diff gate (`named_file_noncomment_change`: every changed content line in a DECLARED comment-class named file must be blank or a line comment, both diff sides; read-only `git diff` gatherer; 13 unit pins on the preserved run-2 diff + drill section [7]) landed zero-paid FIRST; the approved run (task text v3 = v2 re-based onto the policy-2 substrate + splice-minimal-span + neighbor-preservation verification) then landed ALL FIVE criterion items in one run ($0.347 vs the $0.15–$0.45 estimate; zero findings across scope/evidence/parse/comment-class; the recorded insight cited exactly the live wiring block; human review accepted a one-hunk minimal-span comment-only diff with both neighbors preserved). The run-2 escape class is closed mechanically — the same diff shape now fires the gate (drilled). Split-scope refresh: `trellis#7` (policy 1) + `trellis#8` (policy 2, `trellis_agent.py` v3 — retained 23 / orphaned 3 / added 3). See §5 and `REPOSITORY_INGESTION_REPORT.md` §5g. The row stays open pending the owner's increment-ladder judgment (the ladder record now reads: increment 1 landed on contingency; increment 2 failed twice, then its retry landed first-shot after each failure class was closed by tooling shape). **Structural splice addressing DONE (Session 41, July 13, 2026)** — the recorded prerequisite for executable-class increments: design record `docs/architecture/STRUCTURAL_SPLICE.md` (document-first; engine decision = parser-free anchor guards — stdlib `ast` rejected comment-blind, `py-tree-sitter` rejected as an unneeded allowlist widening with a recorded revisit trigger, an engine-side service rejected on the process boundary and the stale-span hazard); the guarded splice family (`replace_lines`/`insert_lines`/`delete_lines`: byte-exact verified removal manifests, anchored insertion, minimal-span over-wide refusals naming the narrowed window, `AnchorMismatchError` teaching refusals) landed ADDITIVE zero-paid — `splice` untouched, telemetry split `textedit_guarded_ops`/`textedit_raw_splices` (the executable-class criterion lever: a guarded-only run is raw_splices == 0), `test:textedit` 105 → 129 Windows / 106 → 130 POSIX (new section [14] incl. the honest-scope pin: the run-2 manifest shape STAGES — explicit, not prevented), rehearsal guarded arm = `test:selfedit-harness` [8] (live AnchorMismatchError observed, Session 31 gate passed, full checker ZERO findings, neighbors byte-intact on disk). **LADDER DECISION (owner-delegated, July 13, 2026):** the row stays OPEN; increment 3 = the first executable-class edit run under a guarded-only criterion (`textedit_raw_splices == 0` added to the standing five items), a NEW proposal with its own estimate when a REAL in-scope target surfaces by substrate query — never manufactured; see §5. **Increment 3 target search EXECUTED (Session 44, July 13, 2026): NO real target survived scrutiny** — 22 recorded query families over live blocks and the graph plus one live-run candidate, every candidate rejected with its reason (the full record is the Session 44 §5 entry; the closest candidates — an unreachable twin divergence in `_is_private_mcp_host`, ten superfluous `export` keywords, and a falsified CLI-truncation suspicion — all failed the concrete-falsifiable-mismatch bar). The row stays OPEN; the guarded-only criterion (`textedit_raw_splices == 0` + the standing five) stands ready for the first real target. **FEATURE-CLASS rung defined (owner-ratified July 13, 2026; `TEST_TIME_TRAINING.md` §12.6):** task-assigned functionality increments (the row-13 backend-seam T-series T1–T4) join stage 2 as their own rung class — the W-series / increments-1–2 lineage, NOT defect discovery, so the increment-3 never-manufacture rule is untouched; criterion = the standing five + guarded-only + the parse gate + the increment's new unit pins green; every diff human-reviewed, landing stays a human PR |
 | 12 | Structural chunking: the code-substrate granularity upgrade (SELECTED July 13, 2026 — the owner-chosen Session 38 objective; the pilot stays gated per run) | **Increment 1 DONE (Session 38, July 13, 2026): machinery + shadow landed zero-paid (`npm test` 782 → 823; monoliths 15 → 0, TS structureless 51.6% → 0.4%, boundary oracle 911/911); the owner-approved `src/rlm` pilot ran (snapshot `trellis#6`, 110/110 jobs, $0.540) and FAILED criterion item 3 AS WORDED (seam queries 5/8 → 4/8 through the raw tool — root-caused to dead-block embedding pollution; the live-only diagnostic reads 5/8 → 5/8 with the headline `trellis_agent.py` case FIXED); items 1/2/4/5 PASS; recorded and stopped, substrate stands, rollout continuation + the liveness-filter and merge-density follow-ups are owner calls — see §5 and the record §10.** Design record `docs/architecture/STRUCTURAL_CHUNKING.md` (document-first). Measured problem on the live substrate: >52% of TS bytes are structureless `code_chunk` gap material (964 chunks / 902 KB vs 747 functions / 832 KB — Zod schemas, consts, interfaces invisible as structure); 15 monolith blocks over 8 KB (max 25.8 KB — `main()` is one 13.7 KB block: one embedding, one extraction unit, the 118-edge hub entity); Session 37 run 1 showed the retrieval consequence live (wrong-file vector hits). Decided shape: the cAST recursive split-merge algorithm (size-budgeted, syntax-aligned, byte-exact — arXiv:2506.15655) written ONCE over a generic tree seam; `web-tree-sitter` (wasm, no native toolchain) as the scaling engine (languages become grammar-plus-mapping; error-tolerant parsing for the future broken-file axis), with Babel/python-ast retained as test-time oracles; typed gap kinds (`code_import`/`code_const`/`code_type`/`code_statement`) make extraction eligibility a per-type spend control. Invariant fence: T13 preimage, byte-exact coverage, the generic block walk, and every write-path/retrieval structure untouched; Session 27 verdict respected (not a representation migration — but substrate-identity change, so migration-grade entry: owner sign-off + pre-stated criterion + budgeted scoped rollout via the Session 34 `--include` machinery, policy-versioned; full-scope re-extraction ≈$2.75 at stage-1 rates). Five-part pilot criterion pre-stated in the record §7 (size distribution, typed-coverage bar ≤15%, seam-query retrieval top-3 before/after, hub bar ≤8%, churn integrity + dollars). Sits BESIDE the Session 38 objective (comment-class gate + increment-2 retry) — does not preempt it. Adjacent candidates named out of scope in §8: structural splice addressing in `trellis_textedit` (the mechanical closure of run 2's retype-splice class; own record needed — import-allowlist implications), error-tolerant broken-file ingestion. **Increment 2 DONE (Session 40, July 13, 2026): the `search_ast_nodes` liveness filter** — the pilot's item-3 root cause closed at the T15 seam (one `CREATE OR REPLACE`; liveness = current-version membership, the `gatherHashEvidence` join mirrored into SQL; filter before `LIMIT`; both callers zero bytes; design record + measured verdict `STRUCTURAL_CHUNKING.md` §11). Planted-dead-twin drill green (`test:repo-ingest` Part 8); seam queries through the raw tool **4/8 → 5/8** (criterion ≥5/8 PASS; the headline `trellis_agent.py` telemetry miss FIXED at live rank 2; the `trellis_blocks.py` merge-dilution miss persists, named — merge-density, not pollution); spend 8 embedding calls / 75 tokens ≈$0.000002; see §5 and §11.4. Rollout continuation (widening policy 2, the merge-density knob, or reverting the pilot) stays the owner's call with §10.3 + §11.4 together |
-| 13 | Test-time training / sparse-model backend research track (owner-directed July 13, 2026) | **Track OPENED (Session 45, July 13, 2026), zero-paid; NO machinery, NO decision ratified, NO runtime byte.** Research record `docs/architecture/TEST_TIME_TRAINING.md`: the relayed collaborator claim decomposed into three separable hypotheses (H1 context adaptation / H2 meta-prompt adaptation / H3 the sparse-model vehicle — each testable or rejectable alone); the July-2026 literature mapped into three mechanism families (architectural fast-weight layers — TTT-Linear/Titans/ATLAS; per-instance adaptation of pretrained weights — ARC-TTT/TTT-NTP/agentic TTT; compiled-state cousins — cartridges/SEAL/Transformer²) with the two calibrating 2026 results adopted (aTTT: gains are stability-shaped, not capability-shaped, at ~1.9× serving cost; Beyond Perplexity: TTT perplexity wins often fail behaviorally — criteria are task-behavior counts, never loss curves); the Trellis seams named against the code (rlms `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}` hardcoded at both `trellis_agent.py` construction sites; the `vector(1536)` embedder-schema coupling = a substrate-identity boundary — completion and embedding backends are SEPARABLE decisions; the composed-prompt byte pins are the natural cache key for any prefix fast-state); the trust-model verdict (fast weights = Tier-3 analog, zero provenance standing, per-run ephemeral absolute; every gate engine-side and model-agnostic — a backend swap changes NONE of them; three named new threats: injection amplification via adaptation data, cross-run contamination, reproducibility — checkpoints become exact-pinned substrate-identity objects); and the owner-gated rung ladder **R1** (collaborator exchange — the record's §9 questions travel via the owner) → **R2** (the backend-seam audit, zero-paid, the next actionable rung) → **R3** (open-sparse baseline; the GATING question is protocol competence, before TTT enters at all) → **R4** (paired TTT arms, adaptation-data policy pre-stated) → **R5** (meta-prompt fast-state, H2 isolated). TTT is impossible on the current API backend by construction — the track exists to make the possibility measurable. **R1 partially RETURNED same day (record §12 + the §5 exchange entry):** the collaborator selected **LaCT** (arXiv:2505.23884) — open-weights retrofit with added fast-weight layers, a TRAINING job (the paper's Wan-2.1 pattern), collaborator-side; the reliance claim ("the research shows this improves base model performance") decomposed C1 SUPPORTED (efficiency + retrofit feasibility) / C2 EXTRAPOLATED (the load-bearing gap — LaCT's one retrofit reads comparable, its superiority results are from-scratch comparisons; R3/R4 measure it) / C3 UNTESTED (meta-prompt adherence = H2; Trellis's protocol counters are the meter); R4 arms fixed (same open checkpoint ± trained-in large-chunk fast-weight layers); the "provenance-gated adaptation data" design seed recorded (eligibility boundary = the run's retrieval set — question 4 back to the collaborator). **Chunking RATIFIED same day (owner; record §12.6 + the §5 ratification entry):** the undertaking = the private repro study with expansion, decomposed — Phase 0 human-authored spec (R2a census, Session 46; R2b seam design record); Phase 1 the Trellis-edits-Trellis T-SERIES (feature-class self-edit increments, defined in §12.6 — task-assigned, DISTINCT from defect-class increment 3; criterion = standing five + guarded-only + parse gate + new unit pins; smallest first): T1 config surface → T2 `buildAgentEnv` forwarding/strip → T3 the `trellis_agent.py` construction-site rewire → T4 the zero-LLM fixture-endpoint drill; Phase 2 measurement (R3a/R3b reproduction half; R4a–R4d expansion half when the retrofit checkpoint lands); Phase 3 R5. Ratification covers the SHAPE — each increment/run still its own owner-approved proposal. See §5. **R2a DONE (Session 46, July 13, 2026), zero-paid:** the backend-seam census (`TEST_TIME_TRAINING.md` §13 — six site classes, every completion/embedding call site disposed; the worker-side model id found ALREADY config-shaped via `EXTRACTION_MODEL`; the one real discovery: the unmanaged `OPENAI_BASE_URL` SDK pass-through that couples completion transport and embedder — recorded, not a defect, the exact T1/T2/T3 gap) and the rlms verdict: **YES, rlms==0.1.3 admits a base-URL/backend override without library modification** (`OpenAIClient(base_url=...)` first-class; explicit `vllm` backend; the seam is additive `backend_kwargs` at the two construction sites; one hard caveat — the endpoint MUST return `usage` or `_track_cost` raises). The judge-calibration decision was presented and the owner picked ACCEPT (see §5). **R2b DONE (Session 47, July 13, 2026), zero-paid, docs-only:** the human-authored seam design record `docs/architecture/MODEL_BACKEND_SEAM.md` (own file — the choice recorded in its header). The three-way split decided per lane: root RLM completion moves via the T-series; worker transport DEFERRED behind a named prerequisite (the worker completion client and the embedding client are one `new OpenAI()` construction today — any worker-transport override must split them first or it moves the embedder, the forbidden §4.2 coupling); the embedder does not move. The T1 config strawman: four optional keys (`TRELLIS_RLM_BACKEND` enum openai|vllm, `TRELLIS_RLM_MODEL`, `TRELLIS_RLM_BASE_URL`, `TRELLIS_RLM_API_KEY_ENV` in the `mcpCredentialEnv` name-indirection mold), three cross-field refusals, the kernel default literal staying Python-side so unset is byte-identical trivially. The census §13.3 recommendation ADOPTED as a three-layer disposition: T1 fail-fast refusal of ambient `OPENAI_BASE_URL` at config load (makes the completion/embedder coupling structurally unreachable, not just unmanaged), T2 unconditional `buildAgentEnv` delete (the experiment-flag mold), T3 agent-side delete-unless-configured before construction (closes the rlms `load_dotenv()` re-introduction channel for this variable; the dotenv channel for OTHER variables stays a named residual). The checker client FOLLOWS the seam (it already shares the root's ambient transport; freezing it would take new code and recreate the split in-process). Telemetry: two additive fields (`rlm_backend`, `rlm_base_url_set` — never the URL, T16). All four T-increment task-text skeletons pre-stated with scope, named files, and the full feature-class criterion (T4's stub MUST return `usage` and gains a no-usage misbehaving mode); the R3a/R3b proposal skeleton carries its estimate class (GPU-hours or hosted per-token under the ≤$5 cap; R3a's FIRST assertion = the endpoint returns `usage`). **T1 ATTEMPTED (Session 48, July 13, 2026) — verdict FAILED, recorded ($2.1063 actual against the ≤$1.80 approved envelope; still under the ≤$5 cap):** the increment record is `REPOSITORY_INGESTION_REPORT.md` §5h. Run 1 ($0.8760) ended in a clean self-refusal — its own verification code compared multi-line regions as terminator-less concatenations, read three false negatives, reverted its staging (zero disk writes), and reported; the staged content was spec-correct in the printed regions. Run 2 with the diagnosed task v2 ($1.2303) WROTE the full insert-only diff (content-correct: diagnostic `npm test` 846/86 all green with it applied; 0 raw splices; scope and parse gate clean) but FAILED the evidence contract: a dedup refusal killed the evidence cell before `vector_search` executed, no `index.ts` block ever entered the retrieval set, and the run cited the one retrieved address (a `mcp_servers.ts` block) instead of stopping — `stage2:check` flagged `unbridged_evidence` (the second live firing ever), and a harness flag fails the increment, never argued away. Cleanup recorded: residual insight edge deleted under the bounded operator-cleanup precedent; tree reverted; stub removed; suite back to 837/85. Retry lessons recorded in §5h.8 (graph-first citable chain via the `uses_config_key` edge whose provenance IS an `index.ts` block; the explicit no-citable-address STOP rule; one retrieval call per REPL cell; estimate re-based $0.9–$1.3 for two-file authoring). **T1 RETRY ATTEMPTED (Session 49, July 13, 2026) — ENVIRONMENTALLY BLOCKED, $0.0000 (record §5h.10):** the §5h.9 proposal was presented and approved, every staged premise re-verified live and held (the `uses_config_key` edge uncontested citing `fc17205c…6311`, bytes verbatim on disk with both molds, `--pre` PASS, harness green, dry-run echo 0/301/0), but the run never executed — spawn 1 died pre-API on a Windows cp1252 `UnicodeEncodeError` in the rlms rich logger (driver requirement recorded: `PYTHONUTF8=1` under redirected stdout), spawn 1b was refused `429 insufficient_quota` (the OpenAI account's billing quota is exhausted; `models.list` authenticates, completions refuse — rejected requests do not bill). NOT a failed run: task v3 is unconsumed, T1 still stands at ONE failed attempt, the proposal + estimate + escalation rule stand as staged. Unblock = owner restores quota; the next spawn's pre-flight runs a minimal completion probe FIRST. **T1 LANDED (Session 50, July 13, 2026 — record §5h.11): the RLM harness scaffolds (RLM_HARNESS_SCAFFOLDING.md S1+S2a+S3) landed FIRST as a human-authored kernel increment (zero-paid; both composed-prompt pins recomputed; npm test 837/85 → 866/86), quota confirmed restored by the minimal completion probe, task v3 amended to v3.1 (six recorded deltas routing the disciplines through the scaffolds), and the retry ran ONCE and landed ALL SEVEN criterion items ($0.5781 vs the $0.9–$1.3 estimate; insert-only 173-insertion diff over exactly the two named files; stage2:check ZERO findings; guarded-only; the ONE gated insight citing the index.ts block; npm test 875/87; two cosmetic review notes recorded). The TRELLIS_RLM_* config surface + the ambient OPENAI_BASE_URL guard are LIVE in src/config/index.ts with zero consumers (T2/T3 wire them). Phase 1 step 1 COMPLETE.** **§12.7 external evidence LOGGED + §7 UPSUM proposal PENDING (PR #96, July 13, 2026, post-Session-50 same-day review-merge — see §5):** the R3/R4 criterion sharpened (scored on reasoning- and protocol-shaped items — a knowledge-recall criterion would flatline for reasons unrelated to whether TTT works; Szafer et al., ICLR 2026); the R4 estimate unit fixed (a GENERATION-token estimate, not a training-cost estimate — rollout dominates wall-clock); the LoRA drift-bound citation pinned (Hu et al., arXiv:2505.20633, ICML 2025, its Observation 3 — verified against the paper body); the global-workspace/Jacobian-lens result recorded as an AVENUE ONLY (not a rung, no criterion, viability explicitly gated on the still-partial open-checkpoint reproducibility); reading-list rows 12–14 added (header relabeled "identifiers verified"). `RLM_HARNESS_SCAFFOLDING.md` §7 proposed the S2a UPSUM refinement (lists rewritten never appended; emergent domains one compressed note each; the code-checked `UPSUM_BUDGET` constant; the ITERATION-BUDGET back-fill). **§7 RATIFIED and IMPLEMENTED (Session 51, July 13, 2026, PR #98), zero-paid:** the owner ratified all four; the kernel-prompt increment landed — `_ADDENDUM_BASE_SUFFIX` rewritten (rewrite-in-place/emergent-domain/code-checked-budget), `UPSUM_BUDGET = 2000` added to `trellis_scaffold.py` and injected beside `trellis_task`, both composed-prompt pins recomputed (default `6183de3a…ed50`, omit-arm `34b00be6…d02a`), authored under both prompt-engineering + hypershot skills (Guardrail 15, honored before authoring), `npm test` 876/87, `test:modules`/`test:rlm-sandbox` (119) green; NO behavior claim attends it (spec-conformance only, guardrail 8). Next: T2 (buildAgentEnv forward/strip, MODEL_BACKEND_SEAM.md §8 T2), then T3 → T4 → Phase 2 |
+| 13 | Test-time training / sparse-model backend research track (owner-directed July 13, 2026) | **Track OPENED (Session 45, July 13, 2026), zero-paid; NO machinery, NO decision ratified, NO runtime byte.** Research record `docs/architecture/TEST_TIME_TRAINING.md`: the relayed collaborator claim decomposed into three separable hypotheses (H1 context adaptation / H2 meta-prompt adaptation / H3 the sparse-model vehicle — each testable or rejectable alone); the July-2026 literature mapped into three mechanism families (architectural fast-weight layers — TTT-Linear/Titans/ATLAS; per-instance adaptation of pretrained weights — ARC-TTT/TTT-NTP/agentic TTT; compiled-state cousins — cartridges/SEAL/Transformer²) with the two calibrating 2026 results adopted (aTTT: gains are stability-shaped, not capability-shaped, at ~1.9× serving cost; Beyond Perplexity: TTT perplexity wins often fail behaviorally — criteria are task-behavior counts, never loss curves); the Trellis seams named against the code (rlms `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}` hardcoded at both `trellis_agent.py` construction sites; the `vector(1536)` embedder-schema coupling = a substrate-identity boundary — completion and embedding backends are SEPARABLE decisions; the composed-prompt byte pins are the natural cache key for any prefix fast-state); the trust-model verdict (fast weights = Tier-3 analog, zero provenance standing, per-run ephemeral absolute; every gate engine-side and model-agnostic — a backend swap changes NONE of them; three named new threats: injection amplification via adaptation data, cross-run contamination, reproducibility — checkpoints become exact-pinned substrate-identity objects); and the owner-gated rung ladder **R1** (collaborator exchange — the record's §9 questions travel via the owner) → **R2** (the backend-seam audit, zero-paid, the next actionable rung) → **R3** (open-sparse baseline; the GATING question is protocol competence, before TTT enters at all) → **R4** (paired TTT arms, adaptation-data policy pre-stated) → **R5** (meta-prompt fast-state, H2 isolated). TTT is impossible on the current API backend by construction — the track exists to make the possibility measurable. **R1 partially RETURNED same day (record §12 + the §5 exchange entry):** the collaborator selected **LaCT** (arXiv:2505.23884) — open-weights retrofit with added fast-weight layers, a TRAINING job (the paper's Wan-2.1 pattern), collaborator-side; the reliance claim ("the research shows this improves base model performance") decomposed C1 SUPPORTED (efficiency + retrofit feasibility) / C2 EXTRAPOLATED (the load-bearing gap — LaCT's one retrofit reads comparable, its superiority results are from-scratch comparisons; R3/R4 measure it) / C3 UNTESTED (meta-prompt adherence = H2; Trellis's protocol counters are the meter); R4 arms fixed (same open checkpoint ± trained-in large-chunk fast-weight layers); the "provenance-gated adaptation data" design seed recorded (eligibility boundary = the run's retrieval set — question 4 back to the collaborator). **Chunking RATIFIED same day (owner; record §12.6 + the §5 ratification entry):** the undertaking = the private repro study with expansion, decomposed — Phase 0 human-authored spec (R2a census, Session 46; R2b seam design record); Phase 1 the Trellis-edits-Trellis T-SERIES (feature-class self-edit increments, defined in §12.6 — task-assigned, DISTINCT from defect-class increment 3; criterion = standing five + guarded-only + parse gate + new unit pins; smallest first): T1 config surface → T2 `buildAgentEnv` forwarding/strip → T3 the `trellis_agent.py` construction-site rewire → T4 the zero-LLM fixture-endpoint drill; Phase 2 measurement (R3a/R3b reproduction half; R4a–R4d expansion half when the retrofit checkpoint lands); Phase 3 R5. Ratification covers the SHAPE — each increment/run still its own owner-approved proposal. See §5. **R2a DONE (Session 46, July 13, 2026), zero-paid:** the backend-seam census (`TEST_TIME_TRAINING.md` §13 — six site classes, every completion/embedding call site disposed; the worker-side model id found ALREADY config-shaped via `EXTRACTION_MODEL`; the one real discovery: the unmanaged `OPENAI_BASE_URL` SDK pass-through that couples completion transport and embedder — recorded, not a defect, the exact T1/T2/T3 gap) and the rlms verdict: **YES, rlms==0.1.3 admits a base-URL/backend override without library modification** (`OpenAIClient(base_url=...)` first-class; explicit `vllm` backend; the seam is additive `backend_kwargs` at the two construction sites; one hard caveat — the endpoint MUST return `usage` or `_track_cost` raises). The judge-calibration decision was presented and the owner picked ACCEPT (see §5). **R2b DONE (Session 47, July 13, 2026), zero-paid, docs-only:** the human-authored seam design record `docs/architecture/MODEL_BACKEND_SEAM.md` (own file — the choice recorded in its header). The three-way split decided per lane: root RLM completion moves via the T-series; worker transport DEFERRED behind a named prerequisite (the worker completion client and the embedding client are one `new OpenAI()` construction today — any worker-transport override must split them first or it moves the embedder, the forbidden §4.2 coupling); the embedder does not move. The T1 config strawman: four optional keys (`TRELLIS_RLM_BACKEND` enum openai|vllm, `TRELLIS_RLM_MODEL`, `TRELLIS_RLM_BASE_URL`, `TRELLIS_RLM_API_KEY_ENV` in the `mcpCredentialEnv` name-indirection mold), three cross-field refusals, the kernel default literal staying Python-side so unset is byte-identical trivially. The census §13.3 recommendation ADOPTED as a three-layer disposition: T1 fail-fast refusal of ambient `OPENAI_BASE_URL` at config load (makes the completion/embedder coupling structurally unreachable, not just unmanaged), T2 unconditional `buildAgentEnv` delete (the experiment-flag mold), T3 agent-side delete-unless-configured before construction (closes the rlms `load_dotenv()` re-introduction channel for this variable; the dotenv channel for OTHER variables stays a named residual). The checker client FOLLOWS the seam (it already shares the root's ambient transport; freezing it would take new code and recreate the split in-process). Telemetry: two additive fields (`rlm_backend`, `rlm_base_url_set` — never the URL, T16). All four T-increment task-text skeletons pre-stated with scope, named files, and the full feature-class criterion (T4's stub MUST return `usage` and gains a no-usage misbehaving mode); the R3a/R3b proposal skeleton carries its estimate class (GPU-hours or hosted per-token under the ≤$5 cap; R3a's FIRST assertion = the endpoint returns `usage`). **T1 ATTEMPTED (Session 48, July 13, 2026) — verdict FAILED, recorded ($2.1063 actual against the ≤$1.80 approved envelope; still under the ≤$5 cap):** the increment record is `REPOSITORY_INGESTION_REPORT.md` §5h. Run 1 ($0.8760) ended in a clean self-refusal — its own verification code compared multi-line regions as terminator-less concatenations, read three false negatives, reverted its staging (zero disk writes), and reported; the staged content was spec-correct in the printed regions. Run 2 with the diagnosed task v2 ($1.2303) WROTE the full insert-only diff (content-correct: diagnostic `npm test` 846/86 all green with it applied; 0 raw splices; scope and parse gate clean) but FAILED the evidence contract: a dedup refusal killed the evidence cell before `vector_search` executed, no `index.ts` block ever entered the retrieval set, and the run cited the one retrieved address (a `mcp_servers.ts` block) instead of stopping — `stage2:check` flagged `unbridged_evidence` (the second live firing ever), and a harness flag fails the increment, never argued away. Cleanup recorded: residual insight edge deleted under the bounded operator-cleanup precedent; tree reverted; stub removed; suite back to 837/85. Retry lessons recorded in §5h.8 (graph-first citable chain via the `uses_config_key` edge whose provenance IS an `index.ts` block; the explicit no-citable-address STOP rule; one retrieval call per REPL cell; estimate re-based $0.9–$1.3 for two-file authoring). **T1 RETRY ATTEMPTED (Session 49, July 13, 2026) — ENVIRONMENTALLY BLOCKED, $0.0000 (record §5h.10):** the §5h.9 proposal was presented and approved, every staged premise re-verified live and held (the `uses_config_key` edge uncontested citing `fc17205c…6311`, bytes verbatim on disk with both molds, `--pre` PASS, harness green, dry-run echo 0/301/0), but the run never executed — spawn 1 died pre-API on a Windows cp1252 `UnicodeEncodeError` in the rlms rich logger (driver requirement recorded: `PYTHONUTF8=1` under redirected stdout), spawn 1b was refused `429 insufficient_quota` (the OpenAI account's billing quota is exhausted; `models.list` authenticates, completions refuse — rejected requests do not bill). NOT a failed run: task v3 is unconsumed, T1 still stands at ONE failed attempt, the proposal + estimate + escalation rule stand as staged. Unblock = owner restores quota; the next spawn's pre-flight runs a minimal completion probe FIRST. **T1 LANDED (Session 50, July 13, 2026 — record §5h.11): the RLM harness scaffolds (RLM_HARNESS_SCAFFOLDING.md S1+S2a+S3) landed FIRST as a human-authored kernel increment (zero-paid; both composed-prompt pins recomputed; npm test 837/85 → 866/86), quota confirmed restored by the minimal completion probe, task v3 amended to v3.1 (six recorded deltas routing the disciplines through the scaffolds), and the retry ran ONCE and landed ALL SEVEN criterion items ($0.5781 vs the $0.9–$1.3 estimate; insert-only 173-insertion diff over exactly the two named files; stage2:check ZERO findings; guarded-only; the ONE gated insight citing the index.ts block; npm test 875/87; two cosmetic review notes recorded). The TRELLIS_RLM_* config surface + the ambient OPENAI_BASE_URL guard are LIVE in src/config/index.ts with zero consumers (T2/T3 wire them). Phase 1 step 1 COMPLETE.** **§12.7 external evidence LOGGED + §7 UPSUM proposal PENDING (PR #96, July 13, 2026, post-Session-50 same-day review-merge — see §5):** the R3/R4 criterion sharpened (scored on reasoning- and protocol-shaped items — a knowledge-recall criterion would flatline for reasons unrelated to whether TTT works; Szafer et al., ICLR 2026); the R4 estimate unit fixed (a GENERATION-token estimate, not a training-cost estimate — rollout dominates wall-clock); the LoRA drift-bound citation pinned (Hu et al., arXiv:2505.20633, ICML 2025, its Observation 3 — verified against the paper body); the global-workspace/Jacobian-lens result recorded as an AVENUE ONLY (not a rung, no criterion, viability explicitly gated on the still-partial open-checkpoint reproducibility); reading-list rows 12–14 added (header relabeled "identifiers verified"). `RLM_HARNESS_SCAFFOLDING.md` §7 proposed the S2a UPSUM refinement (lists rewritten never appended; emergent domains one compressed note each; the code-checked `UPSUM_BUDGET` constant; the ITERATION-BUDGET back-fill). **§7 RATIFIED and IMPLEMENTED (Session 51, July 13, 2026, PR #98), zero-paid:** the owner ratified all four; the kernel-prompt increment landed — `_ADDENDUM_BASE_SUFFIX` rewritten (rewrite-in-place/emergent-domain/code-checked-budget), `UPSUM_BUDGET = 2000` added to `trellis_scaffold.py` and injected beside `trellis_task`, both composed-prompt pins recomputed (default `6183de3a…ed50`, omit-arm `34b00be6…d02a`), authored under both prompt-engineering + hypershot skills (Guardrail 15, honored before authoring), `npm test` 876/87, `test:modules`/`test:rlm-sandbox` (119) green; NO behavior claim attends it (spec-conformance only, guardrail 8). **T2 ATTEMPTED (Session 52, July 14, 2026) — verdict FAILED, recorded ($1.0888 actual, over the $0.5–$1.0 estimate but under the ≤$5 cap; record `REPOSITORY_INGESTION_REPORT.md` §5i):** the evidence chain was staged and verified zero-paid (entity `buildagentenv`, 17 uncontested ACTION edges all citing the live `buildAgentEnv` function-body block `c3883a2e…` at `trellis#12`; `--pre` PASS; harness green), the task text authored under both prompt skills (Guardrail 15) on the v3.2 template with the T2 spec spliced and the geometry adaptation (the cited block is INSIDE the edit span, so verbatim is confirmed once at the pre-edit evidence phase and held; completion re-check via `citable()`), the quota probe confirmed restored, and ONE spawn ran (research mode, 16/16 iterations, 108.7s). The production `src/workers/rlm_job.ts` diff was SPEC-PERFECT (all four Parts — the `rlmBackend?` block, the four `TRELLIS_RLM_*` set-or-delete blocks, the unconditional `delete env.OPENAI_BASE_URL`, the key-value forward — insert-only, byte-clean, guarded-only `raw_splices == 0`, `stage2:check` zero findings, the ONE gated insight `buildagentenv -forwards_by_name-> mcpcredentialenv` citing the held live block), but the FIFTH authored test pin FAILED: the absent-block byte-identity pin asserted `buildAgentEnv(cleanBase, CFG)` deep-equals `{ PATH }`, wrong because `buildAgentEnv` unconditionally injects the `NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING` keys — `npx vitest run` = 1 failed / 36 passed. A failing pin FAILS the increment (item 5); the spend overrun is a second recorded miss (item 7). No machinery defect — every layer fired per contract; the class is a mis-written test assertion, closable in the retry task text (v3.3: pin (e) must build its expected from `buildAgentEnv`'s actual clean-base output, mirroring the file's first existing `buildAgentEnv` test). Cleanup recorded: the residual insight edge deleted under the bounded operator-cleanup precedent (`DERIVED_INSIGHT` 299 → 298), the entity node left (guardrail 2), diff reverted, `npm test` back to 876/87. T2 stands at ONE failed attempt; a retry is its own owner-approved proposal (the increments-1/2 treatment). **T2 RETRY (v3.3) ATTEMPTED (Session 53, July 14, 2026) — a clean R2 self-refusal, NO LANDING, recorded ($0.7139 within the $0.7–$1.2 estimate; record `REPOSITORY_INGESTION_REPORT.md` §5i.7):** the v3.3 task text was authored = v3.2 with ONLY the M3 pin-(e) fix (both prompt skills invoked, Guardrail 15; `diff` confirms the single delta), the evidence chain re-verified live and held (17 uncontested edges / single hash `c3883a2e…`, block verbatim on disk, `--pre` PASS, harness green, dry-run 3/300/0), and ONE spawn ran (research mode, 12 model calls, 104.0s). The run reached E3 cleanly (fetched + held the citable hash) but then its OWN staged edits duplicated the `rlmBackend?` field and the four `TRELLIS_RLM_*` blocks and anchored the test pins outside the `buildAgentEnv` describe; V1 saw the visible mismatch and V2 → R2 reverted both files with no insight (0 write_backs, porcelain clean, guarded-only `raw_splices == 0`). The v3.3 pin-(e) fix was CORRECT but UNEXERCISED — the run failed at an EARLIER, DIFFERENT stage (editing execution + an R2 over-trigger on a self-inflicted fixable staging slip), no machinery defect. No cleanup owed (R2 wrote nothing; `DERIVED_INSIGHT` stays 298). **T2 has now had TWO sessions without a landing — the §5g.3 third-strike escalation is now an OWNER-VISIBLE decision**, presented alongside the v3.4 retry (keeps pin-(e); adds anti-duplication + a robust test anchor + the R2 scope clarification; estimate $0.6–$1.1). **T2 RETRY (v3.4) ATTEMPTED (Session 54, July 14, 2026) — a clean R2 self-refusal, NO LANDING, THIRD strike ($0.8163 within estimate; record §5i.8):** v3.4 = v3.3 + three editing-execution safeguards (anti-duplication, robust last-`it()` test anchor, R2 scope clarification), authored under both prompt skills (Guardrail 15); the safeguards CLOSED the Session 53 classes (no dup inserts, correct anchor, correct revert-and-re-stage) but a NEW class surfaced — the run BATCHED guarded `insert_lines` in one cell with stale (pre-staging) line numbers, so every insert after the first hit a shifted line → `AnchorMismatchError` ×11, no verified edit in 14/16 iterations, R2. Every harness layer fired per contract; graph untouched (`DERIVED_INSIGHT` 298), porcelain clean, no cleanup. **T2 now has THREE no-landings, each a distinct editing-execution sub-failure that a prompt patch closed only to surface a new one (§5i.6 pin → §5i.7 dup/anchor/R2 → §5i.8 stale-address batching) — the §5g.3 third-strike is ACTIVE and the owner picked TOOLING SHAPE** (the doctrine response: close the class in the guarded editing toolkit, not prompt text). Next objective = the tooling-shape increment: an engine-resolved-anchor (and/or batch) guarded `insert_lines` per CODE_MEDIATED_TEXT doctrine (model passes a unique anchor substring, the engine computes the address + terminator; non-unique/absent = typed refusal) — ADDITIVE to the Session 41 family (raw `splice` + existing guarded methods byte-identical/pinned), design-record-first, zero-paid + drill-pinned, then a re-attempt T2 measures it. T2 PAUSED pending the tooling increment; T3 → T4 → Phase 2 follow |
 | — | Boundary-preserving reconstruction (`get_ast_texts`/`nodeText` byte change) | **SUPERSEDED July 11, 2026 by the additive `get_ast_blocks` accessor (row 4).** Round 3 recommended repairing localization by changing the reconstruction to preserve block boundaries; the owner instead chose the additive accessor, which fixes the same failure class WITHOUT moving every pinned reconstruction truth. Re-enters only if the accessor proves insufficient in the row-4 re-measure — a witting kernel change with owner sign-off if ever pursued |
 | — | Prompt-module authoring (the protocol-module flywheel payload) | **DEPRIORITIZED (owner direction, July 11, 2026).** The registry, gates, and lifecycle machinery stay — they are the mechanism for any future module class (including designed-but-ungated tool-bearing modules) — but no new protocol-module authoring turn is proposed without explicit owner request. Behavioral failure classes close by tooling shape (rows 9/10 are the pattern) |
 | — | Frontend deployment and community readiness remainder (3.3 #5 residue) | **Deferred, unscheduled** (owner direction, July 7, 2026 — third deferral); scope preserved in §3.3 #5 and re-enters this table when the owner schedules it |
@@ -253,8 +253,10 @@ Session 44 with the Session 49 PR, Session 45 (its session entry plus
 the same-day R1-exchange and ratification entries — all Session 45 PR
 records, the Session 28 entry-plus-addendum precedent) with the
 Session 50 PR, Session 46 with the Session 51 PR, Session 47 with the
-Session 52 PR.
-The live ledger below keeps the most recent five sessions: 48–52.)*
+Session 52 PR, Session 48 with the Session 53 PR, Session 49 with the
+Session 54 PR, Session 50 (its session entry plus the same-day PR #96/#97
+follow-ons) with the Session 55 EL-01 PR.
+The live ledger below keeps the most recent five sessions: 51–55.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -790,537 +792,6 @@ owner invited a document-first design record for Trellis serving MCP;
 the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
 
-### July 13, 2026 — Session 48: TTT-track increment T1 attempted through the stage-2 harness — verdict FAILED, recorded in full (§4 row 13, Phase 1 step 1)
-
-The first feature-class self-edit increment ran owner-approved and
-FAILED on the pre-stated criterion; both runs, the diagnosis, the
-cleanup, and the retry lessons are recorded in
-`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5h (the increment
-record, written document-first before any spend). Session paid total
-**$2.1063** (run 1 $0.8760 + run 2 $1.2303) against the ≤$1.80
-approved envelope — the overrun itself is a recorded criterion
-failure — under the standing ≤$5/run cap. The final tree ships ZERO
-code bytes (the failed diff reverted, the pre-staged stub removed);
-no prompt byte; both composed-prompt pins unmoved; no refresh owed
-(no in-scope file changed at close-out).
-
-1. **Zero-paid staging (all green before the proposal):** the §5h
-   record document-first; `stage2:check --pre` PASS on the two clean
-   evidence entities (`resolvemcpcredentialenv`, `mcpcredentialenv`;
-   the contested attached edges on `config` and
-   `trellis_retrieval_budget_per_run` are named in §5h.3 with the
-   reasoning for not pre-gating on them); the split-scope policy-1
-   dry-run echo read 0 to ingest / 301 unchanged / 0 tombstones
-   (refresh-before-use satisfied with no refresh);
-   `test:selfedit-harness` ALL CHECKS PASSED; `npm test` 837/85.
-   Two staging discoveries recorded: the toolkit cannot create files
-   (`load` refuses non-files) — resolved by the pre-staged four-line
-   stub header committed before the run (§5h.2, with the
-   vitest-red-window consequence recorded); and prerequisites
-   verified first (egress 401 probe, key present) per the
-   Session 43 lesson.
-2. **Run 1 ($0.8760 — 290,167 in / 15,060 out; 15 iterations, 96s;
-   0 write_backs, 0 raw splices): clean SELF-REFUSAL.** Its step-6
-   verification assembled multi-line expectations without line
-   terminators, three assertions read false, and the run reverted
-   its staging and reported per the task's contradiction rule — the
-   printed regions in the same cell show the staged content was
-   spec-correct. Two live `AnchorMismatchError` refusals caught
-   address-shift inserts mid-run (the Session 41 teaching loop,
-   observed). Diagnosis and task v2 (assertion discipline: line
-   LISTS, never terminator-less concatenations; the re-locate rule;
-   the fix-the-assertion-not-the-edit step) recorded in §5h.7
-   BEFORE the contingency spawned.
-3. **Run 2 ($1.2303 — 402,781 in / 22,332 out; 14 calls, 123.5s;
-   2 write_backs, 0 raw splices): wrote a content-correct diff,
-   FAILED the evidence contract.** The diff: insert-only, 220
-   insertions across exactly the two named files (the four
-   `TRELLIS_RLM_*` keys, the ambient `OPENAI_BASE_URL` guard with
-   the exact §4.1 message, the three cross-field refusals, the
-   `config.rlmBackend` export, the full pin file under the
-   byte-intact stub header); diagnostic `npm test` with the diff
-   applied read 846/86 all green. The failure: a retrieval-dedup
-   refusal (correct behavior — the cell re-fetched an
-   already-fetched hash) killed the evidence cell BEFORE its two
-   `vector_search` calls executed; the run never re-ran them; no
-   `index.ts` block entered the retrieval set; at insight time the
-   run cited the one address it had — the `mcp_servers.ts`
-   implementation block — instead of stopping. `stage2:check`
-   flagged `unbridged_evidence` (the second live firing ever). The
-   Session 31 gate correctly permitted the write; the bridge check
-   correctly caught the wrong-document citation.
-4. **Verdict and cleanup:** a harness flag fails the increment
-   (never argued away) and the spend breached the approved envelope
-   — **T1 FAILED, no third run** (the §5f.5 two-failure precedent).
-   The residual insight edge was deleted under the bounded
-   operator-cleanup precedent (exact Cypher and before/after counts
-   in §5h.8); the tree reverted; the stub removed in a recorded
-   commit; `npm test` back to 837/85 green. The run logs and the
-   preserved diff live in `benchmark_logs/` (local, gitignored).
-5. **What the failure taught (the §5h.8 retry material):** the
-   citable-evidence chain must arrive graph-first (the
-   `uses_config_key` edge on `trellis_retrieval_budget_per_run`
-   cites `fc17205c…6311`, an `index.ts` block — with the `--pre`
-   tension on entity `config`'s unrelated contested edge recorded
-   as an open design point); the task needs an explicit STOP rule
-   for the no-citable-address case; evidence cells make one
-   retrieval call each (a typed refusal kills the whole cell);
-   feature-class two-file authoring prices $0.9–$1.3 per run, not
-   the $0.4–$0.9 the landed comment-class runs suggested. The
-   machinery itself needed NO change: every layer — the anchor
-   guard, the dedup refusal, the write gate, the bridge check —
-   fired exactly per contract; run 2's failure is task-discipline
-   class, closed by task text v3 in the retry proposal.
-6. **Close-out (docs-only tree):** `npm test` 837/85, `npm run
-   build`, `npm run python:check`, `docker compose --profile test
-   config --quiet` green; live drills not re-run beyond
-   `test:selfedit-harness` (zero non-markdown bytes in the final
-   tree — the Session 45–47 precedent; the reverted run bytes never
-   shipped); no refresh owed (the dry-run echo at staging read
-   current, and the close-out tree changes docs only). Bookkeeping:
-   Session 43 compressed to the HANDOFF digest, its §5 entry moved
-   verbatim to `docs/archive/ROADMAP_HISTORY.md` (live ledger now
-   44–48, pointer paragraph updated in the same commit); row 13's
-   cell gains the T1 outcome; HANDOFF regenerated per §0 with the
-   step-5 re-check (next objective: the T1 RETRY as its own
-   owner-approved proposal, task v3 built from §5h.8).
-7. **Same-day addendum (owner-directed, the §0 step-5 rule):** task
-   text v3 was DRAFTED and staged in §5h.9 so Session 49 presents a
-   ready proposal — authored under the house prompt-engineering and
-   hypershot protocols (the July 12 kernel-prompt precedent applied
-   to a task text for the first time: semantic tags, the two
-   decisive rules in attention zones at head AND tail, positive
-   framing, hypershot frames with instruction-bearing variables;
-   run 2's violated citation rule had been buried mid-step prose).
-   The §5h.8 open `--pre` design point is RESOLVED in §5h.9 (clean
-   pre-gate entities kept; the task filters uncontested edges
-   in-query; the evidence chain re-verified live read-only — the
-   `uses_config_key` edge uncontested, its provenance `fc17205c…`
-   carrying BOTH molds). The escalation rule is recorded: a
-   recurrence of the evidence class closes by TOOLING SHAPE (a
-   harness-side read-only citability query — retrieval-set
-   membership AND named-file bridge), proposed owner-gated, never a
-   write gate. The mechanical-vs-task-text position is recorded:
-   detection layers are already mechanical and all fired per
-   contract; the retry closes run competence in task text first,
-   tooling on recurrence (the increment-2 ladder shape). Estimate
-   for the retry: $0.9–$1.3, ONE run, no pre-bundled contingency.
-
-### July 13, 2026 — Session 49: the T1 retry — presented, approved, ENVIRONMENTALLY BLOCKED (OpenAI quota exhausted); $0.0000 spent; the proposal stands
-
-The session executed §3 of the handoff exactly up to the spawn, and
-the environment stopped it there. Full record:
-`REPOSITORY_INGESTION_REPORT.md` §5h.10. The shipped tree is
-docs-only (this entry, the §5h.10 record, the regenerated handoff,
-the archive move); the branch history carries the stub add/remove
-pair (net zero code bytes), the Session 48 pattern.
-
-1. **Pre-flight (zero-paid, all green):** the Session 48 PR
-   confirmed merged (`git log -- HANDOFF.md`); `npm ci`; `npm test`
-   837/85 first try; the Windows stale-worker check found only
-   foreign session kernels, zero trellis queue consumers.
-2. **Premise re-verification (zero-paid, read-only, all held):**
-   the `trellis_retrieval_budget_per_run` `-uses_config_key-`
-   `config` edge uncontested with `sourceNodeIds` =
-   [`fc17205c…6311`] (the contested `reads_config` residue present
-   exactly as §5h.3 records); the block's 3,961 bytes verbatim in
-   `src/config/index.ts` by raw byte-substring check (CRLF intact),
-   carrying BOTH molds (the budget schema line + the "Fail fast at
-   startup" comment + the `resolveMcpCredentialEnv` call);
-   `stage2:check --pre` PASS zero findings on
-   `resolvemcpcredentialenv` + `mcpcredentialenv`;
-   `test:selfedit-harness` ALL CHECKS PASSED; the split-scope
-   policy-1 `--dry-run` echo 0 to ingest / 301 unchanged / 0
-   tombstones — no drift, no pre-run refresh owed.
-3. **The proposal (§5h.9) was presented at session start and
-   approved** ($0.9–$1.3, ONE run, task text v3 verbatim). The stub
-   was created and committed only after approval (porcelain clean
-   at spawn), per §5h.2.
-4. **Spawn 1: pre-API crash, $0.** The rlms verbose logger prints a
-   rich header panel (U+25C6 glyphs); with stdout redirected the
-   Python stream encoder was cp1252 and the process died on
-   `UnicodeEncodeError` inside the `RLM(...)` constructor — zero
-   iterations, zero tool calls, zero tokens. Driver requirement
-   recorded: `PYTHONUTF8=1` for any Windows spawn with redirected
-   stdout.
-5. **Spawn 1b (`PYTHONUTF8=1`): `429 insufficient_quota`, $0.** The
-   first root completion was refused — the OpenAI account behind
-   the ambient key has exhausted its billing quota. The decisive
-   probe: `models.list` succeeds (131 models — the key
-   authenticates) while a minimal completion refuses with the same
-   code; authentication proves nothing about quota; rejected
-   requests do not bill.
-6. **Verdict: ENVIRONMENTALLY BLOCKED, not a failed run** (the
-   Session 42 precedent — approval was never the blocker). Task v3
-   is UNCONSUMED; T1 still stands at ONE failed attempt
-   (Session 48); the §5g.3 three-failure ladder is untouched. The
-   proposal, estimate, and escalation rule stand as staged.
-7. **Cleanup:** the stub removed in a recorded commit on
-   confirmation of the blockage; `git status` clean; `npm test`
-   837/85 at every shipped state.
-8. **Close-out (docs-only mold):** `npm test` 837/85, `npm run
-   build`, `npm run python:check`, `docker compose --profile test
-   config --quiet` green; live drills beyond the two run this
-   session (`test:selfedit-harness`, `stage2:check --pre`) not
-   re-run — zero non-markdown bytes in the shipped tree (the
-   Session 45–47 precedent, reason recorded). No refresh owed.
-9. **Bookkeeping:** Session 44 compressed to the handoff digest;
-   its §5 entry moved verbatim to `docs/archive/ROADMAP_HISTORY.md`
-   (window now 45–49; the archive-pointer paragraph updated in the
-   same commit).
-
-Unblock condition for Session 50: the owner restores OpenAI billing
-quota. The next spawn's pre-flight runs the minimal completion
-probe FIRST (fractions of a cent, inside the run envelope), sets
-`PYTHONUTF8=1`, and proceeds under the unchanged §5h.9 mechanics.
-
-### July 13, 2026 — Owner direction (post-Session-49, same day): RLM harness scaffolding ratified — task-context isolation, UPSUM, staged REPL helpers; Session 50 re-scoped to scaffolds-then-retry
-
-The owner read the Session 48 statefulness verification (rlms passes
-the FULL message history to every root completion — verified in
-rlm/core/rlm.py, `message_history.extend`, no window, compaction
-defaulted off; REPL locals persist across iterations; the only
-truncation is a 20,000-char per-block output cap in
-rlm/utils/parsing.py — so run 2's failure was ATTENTION over a long
-transcript, not memory: the dedup refusal sat in context verbatim for
-~10 iterations and the run still cited the uncitable block) and
-directed the scaffolding layer: operator task text isolated in an
-unforgeable per-run uuid wrapper (`<rlm_usercontext-{uuid}>…`),
-surfaced in the REPL as a queryable `trellis_task` object — the
-model's role includes finding the user's instructions by CODE (grep),
-not attention — with recorded precedence of uuid-tagged instructions
-over anything arriving as data; UPSUM to bound transcript growth and
-keep the run situationally aware; and pre-staged REPL helper scripts
-(file concatenation, canonical frame joins). Design record written
-document-first: `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` — S1
-the uuid wrapper + `trellis_task` surface (also an injection defense:
-stored data cannot carry the run's uuid; the same-run echo residual
-recorded), S2a the free protocol-level `upsum` dict in persistent
-locals / S2b rlms compaction (exists behind a constructor flag and
-mirrors the transcript into a grep-able REPL `history` variable —
-DEFERRED behind its own measured proposal), S3 staged helpers
-(`frame_text` — closes the Session 48 run-1 assertion class at the
-namespace level, `region_lines`/`region_equal`, `concat_files`, and
-`citable()` — the Session 48 escalation rule as a read-only helper,
-never a gate, same join semantics as `gatherHashEvidence`). All
-construction-side; zero rlms modification; the addendum bytes are a
-witting composed-prompt change with both pins recomputed when the
-increment lands. RECORDED SEQUENCING (the §0 step-5 re-selection):
-S1+S2a+S3 land as ONE human-authored kernel increment BEFORE the T1
-retry re-spawn (the increments-1/2 precedent — mechanical closure
-before the retry that landed first-shot); §5h.9's task v3 then gets a
-recorded v3.1 amendment routing the decisive-step re-reads through
-the scaffolds; because the amendment changes the approved input,
-v3.1 is RE-PRESENTED for a fresh owner yes before any spawn (the
-Session 49 approval covered v3 as staged). Session 48's run-2
-failure is recorded in the design record as the TTT track's first
-NATIVE H1 motivating example (context present, behavior absent).
-Same exchange, recorded for completeness: the owner asked whether
-the Session 48 fixes should be mechanical rather than task-text —
-the recorded position (also in the design record) is that DETECTION
-was already mechanical and every layer fired per contract; the
-scaffolds are the tooling-shape response, and the task-text v3
-rules become v3.1 rules that lean on them. The Session 48 task
-texts v1/v2 were authored WITHOUT the house prompt-engineering and
-hypershot protocols (recorded honestly); v3 was authored under
-both, and Part A's addendum bytes follow the same discipline.
-
-### July 13, 2026 — Session 50: the RLM harness scaffolds LANDED (Part A, zero-paid) + TTT-track increment T1 LANDED first-shot on the retry (Part B, $0.5781) — §4 row 13, Phase 1 step 1 COMPLETE
-
-Two ordered parts per the post-Session-49 owner direction; the owner
-approved all gated and paid runs at session start. Session paid
-total: **$0.5782** (the minimal-completion quota probe ≈$0.0001 +
-the retry run $0.5781) + the per-PR refresh **$0.2701 actual**
-(27,073 in / 20,209 out extraction tokens + 15,029 embedding
-tokens, read from the worker metrics before the worker tree was
-killed), all far under the ≤$5/run cap.
-
-1. **Part A — the scaffolding increment (S1 + S2a + S3, one
-   human-authored kernel increment implementing
-   `RLM_HARNESS_SCAFFOLDING.md`; zero-paid).** New pure module
-   `src/rlm/trellis_scaffold.py` (stdlib-only — the trellis_blocks
-   precedent, so plain `npm test` spawns it): `wrap_task_text` (the
-   per-run uuid tags), `TrellisTask` (`.text()` verbatim,
-   `.grep(pattern)` bounded engine-side regex returning JSON,
-   `.uuid`), `parse_task_named_files` (the
-   `TRELLIS_TASK_NAMED_FILES` driver input, fail-fast validated,
-   [] ≡ unset), and `build_scaffold_helpers` — the gated factory:
-   the four frame helpers (`frame_text` / `region_lines` /
-   `region_equal` / `concat_files`, reading held frames through the
-   toolkit's own accessor under its lock) inject only beside an
-   injected `trellis_textedit`; `citable()` (retrieved-this-run ∧
-   bridges-to-a-named-file; the `gatherHashEvidence` MAX(version)
-   membership join mirrored in SQL — mirror-with-pin) injects only
-   when the driver passed named files. Return-type convention
-   recorded: helpers return PYTHON VALUES (their outputs feed code);
-   `grep` returns a JSON string. `trellis_agent.py` wires it all in
-   research mode: one uuid per run, the task wrapped at BOTH
-   injection points (the system-prompt splice and the completion
-   query), `trellis_task` injected as kernel surface, the helpers
-   through the factory, two new conditional addenda
-   (`build_helpers_addendum` / `build_citable_addendum` — empty
-   strings when gated off, byte-identical prompt pinned). The
-   always-on addendum gains TOOLS item 4 (`trellis_task` + the TASK
-   PRECEDENCE hard rule), the UPSUM running-state discipline, and
-   the decisive-step re-read workflow rule — a WITTING
-   composed-prompt change, both pins recomputed in the same commit
-   (initially default `6b8d41e8…b626` / omit-arm `5d3057f2…7dd6`,
-   then RE-AUTHORED same-day under the skills — see item 8 — to
-   default `e57e7a55…24bd` / omit-arm `a37d2b4a…764e`; history
-   entries appended in `scripts/test_modules.py`). `buildAgentEnv`
-   gains the unconditional `TRELLIS_TASK_NAMED_FILES` delete (the
-   experiment-flag deletion mold — a direct-spawn driver input,
-   never worker-forwarded) + a unit pin. Author mode untouched
-   (recorded scope decision: the S1 injection points are the
-   research path's). S2b (rlms compaction) NOT enabled — deferred
-   behind its own measured proposal exactly as the design record
-   states. Pins: NEW `src/rlm/trellis_scaffold.test.ts` (28 tests,
-   one spawned stdlib-only python battery
-   `scripts/test_scaffold_unit.py`) + the `rlm_job.test.ts` strip
-   pin — `npm test` 837/85 → 866/86; `test:rlm-sandbox` section [8]
-   (95 → 118: live citable classifications on fixture rows including
-   the retrieve-then-flip remedy, probe-is-bookkeeping-inert pins,
-   NEVER-A-GATE observed live — the probe describes an uncitable
-   hash and the Session 31 gate still refuses it, typed validation
-   refusals, and the static agent/scaffold seam pins);
-   `test:selfedit-harness` section [9] (the guarded arm drives
-   `trellis_task.grep`, `region_equal`, and `citable()` before its
-   gated write; the citable report MIRROR-PINNED against the
-   TypeScript `gatherHashEvidence` on the same fixture — live,
-   dead, off-document, and ghost hashes agree on both sides);
-   `python:check` covers the new module.
-2. **Part B — the T1 retry, quota probe first (the §5h.10 unblock
-   protocol):** `models.list` was NOT trusted; one minimal
-   completion returned normally (12 in / 4 out) — **quota
-   RESTORED**. Staged premises re-verified live read-only, all held
-   (the `uses_config_key` edge uncontested citing `fc17205c…6311`;
-   3,959 chars = 3,961 utf-8 bytes verbatim on disk carrying both
-   molds; `stage2:check --pre` PASS on the two clean entities;
-   harness green). Refresh-before-use: the dry-run echo read 8 to
-   ingest / 294 unchanged / 0 tombstones — the drift EXACTLY this
-   session's own Part-A files, none in the evidence chain or the
-   named files; the refresh deferred to the single post-landing
-   per-PR run (reasoning recorded in §5h.11). Task v3 amended to
-   v3.1 (recorded verbatim in `REPOSITORY_INGESTION_REPORT.md`
-   §5h.11; six deltas — hard-rule re-reads through
-   `trellis_task.grep`, the `<state_protocol>` upsum block,
-   `frame_text` + the `citable()` cross-check in evidence step 3,
-   `region_equal`/`region_lines` assertion discipline in step 9, the
-   final `citable()` re-check in step 11, and the driver's
-   named-files + `PYTHONUTF8=1` env) — every other rule, the spec,
-   the estimate ($0.9–$1.3, ONE run), and the criterion verbatim
-   from §5h.9. The stub was re-created (the §5h.2 bytes) and
-   committed post-approval; porcelain clean at spawn.
-3. **The run: T1 LANDED, ALL SEVEN criterion items PASS
-   ($0.5781 — 192,978 in / 9,561 out; 11 of 16 iterations, 66.4s;
-   0 dedup refusals; 4 guarded ops / 0 raw splices / 2 write_backs;
-   insert-only 173-insertion diff over exactly the two named
-   files).** Item-by-item verdict in §5h.11: scope PASS; the ONE
-   gated insight `config` `-resolves_fail_fast->`
-   `mcpcredentialenv` citing exactly [`fc17205c…6311`] PASS
-   (`citedButUnread` empty); `stage2:check` ZERO findings PASS (the
-   first zero-findings T1 run); guarded-only PASS; the run's nine
-   pin groups green — `npm test` 866/86 → 875/87, zero existing
-   tests changed — PASS; human diff review ACCEPTED against the
-   spec with two COSMETIC notes recorded (the Part-2 guard block
-   sits between the editRoot comment tail and its `const` — spec
-   placement satisfied, task anchor guidance not followed
-   literally; one stray blank line in the config object) — the
-   landed diff stays as written (the no-hand-edit precedent); spend
-   PASS (under estimate). Scaffolds observed live in the
-   transcript: `upsum` maintained every iteration, ONE
-   `AnchorMismatchError` → taught re-locate recovery, the
-   `citable()` probe's "permissible count: 1" driving the citation
-   choice, the completion-protocol re-read through
-   `trellis_task.grep`. The Session 48 failure classes did NOT
-   recur; the honest attribution stands in §5h.11 (one landing
-   cannot separate the scaffolds from the v3.1 prose — but the run
-   used them at exactly the previously-failing steps). **Row 13
-   Phase 1 step 1 (T1) is COMPLETE; the ratified queue's next
-   increment is T2 (`buildAgentEnv` forward/strip,
-   MODEL_BACKEND_SEAM.md §8 T2), its own owner-gated proposal.**
-4. **The per-PR refresh (split-scope, both legs — src/rlm changed
-   this session):** policy-1 leg published `trellis#12` (10
-   ingested / 305 unchanged / 0 tombstones; 7 blocks queued of the
-   16-block printed bound) and the policy-2 `src/rlm` leg published
-   `trellis#13` (4 ingested / 313 unchanged / 0 tombstones; 26
-   blocks queued of 46 eligible; `trellis_scaffold.test.ts`
-   test/fixture-excluded; the published echo read 26 queued of 32
-   eligible). Extraction actuals $0.2701. Post-refresh belief state
-   observed: the THREE standing beliefs UNCONTESTED (their fourth
-   consecutive clean refresh); the fresh T1 insight edge CONTESTED —
-   exactly the §5h.3 pre-recorded churn (the `index.ts` re-chunk
-   killed `fc17205c…6311`); ordinary lazy recovery, never cleaned
-   up.
-5. **Close-out (the full standing block — non-markdown bytes
-   moved):** ALL 18 standing drills green in one sequential chain
-   (`test:selfedit-harness` ALL CHECKS PASSED with the new [9];
-   `test:rlm-sandbox` 118 with the new [8]; `test:textedit` 129;
-   `test:verification-sweep` 66; the rest at their standing
-   counts); `drill:scale` ALONE — 1.90x CLOSED in-band, max
-   provenance 286 (`scale_drill_results.json` committed); the
-   isolated Compose integration as project `trellis_s50_ci` — all
-   assertions PASS, torn down with `--volumes`; `npm test` 875/87;
-   `npm run build`, `python:check` (now covering
-   `trellis_scaffold.py`), `docker compose --profile test config
-   --quiet` green; `git diff --check` clean. Defects found this
-   session: NONE in machinery (every layer fired per contract); the
-   two cosmetic notes on the run-authored diff are recorded in
-   §5h.11 and stay as written.
-6. **Bookkeeping:** Session 45 compressed to the digest; its §5
-   entries (the session entry + the same-day R1-exchange and
-   ratification entries — all Session 45 PR records) moved verbatim
-   to `docs/archive/ROADMAP_HISTORY.md` (window now 46–50);
-   HANDOFF regenerated (next objective: T2).
-7. **Same-day owner exchange (post-PR-#95, the §0 step-5 loop): the
-   prompt-authoring process gate — Guardrail 15 RATIFIED.** The
-   owner asked whether the `prompt-engineering` (meta-prompting) and
-   `hypershot-protocol` skills were invoked to author Session 50's
-   prompts. Honest answer, recorded: NO — neither Skill was invoked
-   this session. Part B's v3.1 was treated as a surgical amendment
-   inheriting v3's protocol authoring (Session 48, under both
-   protocols); Part A's addendum bytes followed the established
-   kernel conventions (themselves from the July-12 prompt-engineering
-   pass). A PROCESS gap, not a product one. The owner directed
-   (a) hard-requiring both skills for T2 authoring, (b) a
-   retroactive audit now, and (c) a PERMANENT rule: every future
-   session that creates or edits prompt text invokes BOTH skills
-   first. **The retroactive audit (both skills loaded, then read
-   against the landed bytes):** v3.1 is FULLY compliant — proper
-   semantic tags (`<mission>`/`<hard_rules>`/`<state_protocol>`/
-   `<specification>`/the four protocol blocks), attention zones at
-   head (`*** CRITICAL ***`) and tail (`*** THE TWO DECISIVE RULES,
-   ONCE MORE ***`), hypershot instruction-bearing variables for the
-   run-specific fills (`{The_Entity_Named_Above}`,
-   `{Citable_Index_Ts_Hashes_Held_From_Step_3}`, the
-   `[{Expected_Line}, ...]` assertion frame), and the §6 invariance
-   test correctly applied (tool names / entity names / the exact
-   guard message / spec bounds stay concrete as the task's
-   invariant vocabulary). Part A's addendum is substantially
-   compliant — hierarchical markers matching the kernel's numbered
-   TOOLS list, the `(HARD RULE)` attention convention, positive
-   framing that leads, the decisive-step rule reinforced at TOOLS-item
-   tail AND workflow-rules tail; the ONE hypershot opportunity (a
-   frame for the `upsum` dict shape) is BLOCKED by the rlms
-   no-literal-braces constraint, so prose is forced there. The audit
-   confirmed structural COMPLIANCE. Guardrail 15 (permanent, HANDOFF
-   §7) closes the process gap; also recorded as a feedback memory.
-   Zero-paid, docs-only.
-8. **Owner override + the two skills passes (same-day, the §0
-   step-5 loop): the "PASS, no re-authoring" verdict was TOO
-   LENIENT — it checked compliance, not STRENGTH.** The owner
-   directed a genuine prompt-engineering pass with both skills
-   INVOKED. Two artifacts re-authored, each recorded and pin/byte
-   verified: **(a) task text v3.2** (`REPOSITORY_INGESTION_REPORT.md`
-   §5h.12 — v3.1 preserved verbatim as the historical T1 input;
-   v3.2 is the new T-series template): mission names the failure it
-   prevents; rules renamed R1–R4 with stable grep tokens and THE
-   STOP CONDITION promoted to R2 with explicit conflict priority;
-   positive-led framing throughout; `upsum` and the final report
-   given as hypershot FRAMES (braces are legal in the task text —
-   verified the escape+`.format()` round-trip is identical, no
-   KeyError); dense steps decomposed E1–E4/M1–M4/V1–V2/C1–C3; a new
-   `<definition_of_done>`; and M2(b)/(c) fix the exact divergence
-   the landed T1 diff showed (the guard-block misplacement + block
-   spacing — iterative refinement at the point of divergence).
-   **(b) the Part A kernel addendum** re-authored under the skills:
-   positive-led framing, a stable "RE-READ BEFORE YOU ACT" label
-   replacing three drifting phrasings, the UPSUM keys promoted to a
-   per-meaning sub-bullet list, the intro re-led on "your
-   instructions are the operator task"; brace-free by necessity
-   (the addendum passes rlms `.format()` — no hypershot braces, the
-   forced-prose case recorded in Guardrail 15). BOTH composed-prompt
-   pins recomputed (default `6b8d41e8`→`e57e7a55…24bd`, omit-arm
-   `5d3057f2`→`a37d2b4a…764e`; `test:modules` green); T1 ran on the
-   prior bytes — the strengthened addendum serves T2 onward. Both
-   passes are STRUCTURAL (spec, evidence chain, criterion, invariant
-   vocabulary unchanged); no comparison run needed (the owner's
-   standing evidence: the protocols significantly raise prompt
-   strength and adherence). Zero-paid, same PR (#95).
-
-### July 13, 2026 — Collaborator PR #96 (post-Session-50, same day): TTT record §12.7 external evidence + reading-list rows 12–14; RLM_HARNESS_SCAFFOLDING.md §7 S2a UPSUM refinement PROPOSED — reviewed in two rounds, merged
-
-Docs-only collaborator PR (Lexideck), reviewed at owner direction
-and squash-merged as `7a37418` after two review rounds. Zero runtime,
-prompt, or config bytes; no gate, default, or pin moved; $0.0000
-spend (review verification used web fetches only); no refresh owed
-(`docs/` is outside extraction scope). Session 51's objective (T2)
-is unchanged by this merge.
-
-1. **What landed in `TEST_TIME_TRAINING.md`:** new §12.7 (three
-   external items logged after the §10 list was compiled) + reading-
-   list rows 12–14 (§10 header relabeled "arXiv ids" → "identifiers
-   verified"). Item 1 (Szafer et al., *Navigating the Cost-
-   Performance Pareto Frontier of Test-Time LLM Agent Adaptation*,
-   ICLR 2026, OpenReview tWAnCRYMcT): adaptation gains concentrate
-   on reasoning over knowledge the model already holds and are near-
-   zero on facts it never learned — external support for the H1
-   framing; hardens the requirement that the R3/R4 criterion be
-   scored on reasoning- and protocol-shaped items; and rollout
-   (forward-pass generation) dominates per-step wall-clock, so R4's
-   propose-with-estimate is a GENERATION-token estimate, not a
-   training-cost estimate. Item 2 (Hu et al., *Test-Time Learning
-   for Large Language Models*, arXiv:2505.20633, ICML 2025): its
-   Observation 3 — LoRA prevents catastrophic forgetting more
-   effectively than full-parameter updates in the TTL setting — is
-   the drift-bound citation behind preferring a low-rank adapter in
-   any future R4 arm (that paper's own observation, not an
-   independent head-to-head; recorded at exactly that strength).
-   Item 3 (Gurnee et al., *Verbalizable Representations Form a
-   Global Workspace in Language Models*, transformer-circuits.pub/
-   2026/workspace): the workspace/Jacobian-lens avenue for H2 —
-   recorded as an AVENUE ONLY, not a rung, no criterion attached,
-   viability explicitly gated on the still-partial open-checkpoint
-   reproducibility (the `anthropics/jacobian-lens` reference
-   implementation is Apache-2.0 and fits open-weight decoders;
-   third-party replications are partial and mixed).
-
-2. **What landed in `RLM_HARNESS_SCAFFOLDING.md`:** new §7 — the
-   S2a UPSUM refinement PROPOSAL, framed document-first: the record
-   governs and the landed addendum bytes are "the record's current
-   implementation," never an authority over it. Four decisions for
-   the amended §3 if ratified: (7.1) key shape pinned — four list-
-   valued keys, REWRITTEN each turn, never appended (append-only
-   lists reproduce the growth the section targets); (7.2) emergent
-   domains carry one compressed note each; (7.3) the size bound is
-   the code-checked constant `UPSUM_BUDGET` — the model computes
-   `len(...)` over the serialized dict in the REPL and reacts to the
-   printed number, never eyeballs it (the counting doctrine);
-   (7.4) the record back-fills the ITERATION BUDGET discipline the
-   live addendum already teaches but §3 never specified. Ratification
-   ceremony pre-stated in §7 itself: final bytes authored under the
-   prompt-engineering + hypershot-protocol skills (Guardrail 15),
-   both composed-prompt pins recomputed in the same commit
-   (Guardrail 9), `test:modules` green. **OWNER DECISION PENDING —
-   nothing implemented; the live addendum is untouched and T2
-   proceeds on the current bytes.**
-
-3. **Review record (both rounds commented on the PR):** round 1
-   found eight amendment classes — the stale §7 premise ("before
-   Part A implements S2a"; the PR opened five minutes before PR #95
-   merged), two record-vs-implementation divergences (key shape;
-   the unrecorded ITERATION BUDGET paragraph), an undefined model-
-   estimated size budget (counting-doctrine violation), an UNCITED
-   small-model-reproduction claim (the cited article covers Claude
-   models only), an overstated LoRA-forgetting claim, the §10
-   header's "arXiv ids" scope, and an intro wording error. Round 2
-   (commit `9b47e0a`) addressed all eight; every load-bearing
-   external citation was then verified live before merge:
-   Observation 3 quoted exactly from the paper body, ICML 2025
-   confirmed via the arXiv Comments field, `anthropics/jacobian-
-   lens` + `tao-hpu/jspace-replication` + `solarkyle/jspace` all
-   real with the PR's "partial and mixed" replication
-   characterization matching the repos' own findings. ONE recorded
-   cosmetic nit rides the next touch of §12.7 item 3: the text says
-   "Gemma-3"; the cited repos cover Gemma-2 and Gemma-4 (noted on
-   the PR, not blocking).
-
-4. **Bookkeeping:** row 13's cell gains the PR #96 outcome; the
-   §7 ratification decision joins the HANDOFF §2 standing owner-
-   conditional items; HANDOFF §2 baseline updated to `7a37418`.
-   No session number consumed; the five-session narrative window
-   (46–50) is unchanged.
-
 ### July 13, 2026 — Session 51: the S2a UPSUM refinement RATIFIED and implemented (owner-directed detour from T2) — a kernel-prompt increment, zero-paid
 
 Session 51's default objective was TTT-track increment T2 (the
@@ -1430,15 +901,286 @@ current addendum bytes either way.**
    standing item 12 is struck; the default next objective returns to
    T2 (Session 52). No paid work, no owner-conditional run.
 
+### July 14, 2026 — Session 52: TTT-track increment T2 (`buildAgentEnv` forward/strip) attempted through the stage-2 harness — verdict FAILED, recorded (§4 row 13, Phase 1 step 2)
+
+TTT-track increment T2, the second FEATURE-CLASS self-edit (§12.6):
+`buildAgentEnv` gains the `TRELLIS_RLM_*` forward/strip surface and
+the unconditional `OPENAI_BASE_URL` delete per `MODEL_BACKEND_SEAM.md`
+§3.3 + §4 layer 2 + the §8 T2 skeleton. The increment FAILED on the
+pre-stated criterion; the final tree ships ZERO code bytes (the failed
+diff reverted). Session paid total $1.0889 (the quota probe ≈$0.0001 +
+the run $1.0888) under the ≤$5/run cap. The increment record is
+`REPOSITORY_INGESTION_REPORT.md` §5i.
+
+1. **Zero-paid staging, all verified read-only before the proposal
+   (§5i.1–§5i.3):** the substrate is FRESH for the target
+   (`repo:trellis:src/workers/rlm_job.ts` v2 at `trellis#12`, root
+   `a0d3b0d2…`, extraction ran July 13). The entity `buildagentenv`
+   has 17 ACTION edges, ALL uncontested, ALL citing the single live
+   block `c3883a2e…d0b6d0b4` — the `buildAgentEnv` function-body block
+   carrying BOTH molds T2 mirrors (the unconditional experiment-flag
+   deletion block + the `mcpCredentialEnv` forwarding loop). The block
+   is a verbatim substring of the on-disk file (uniform CRLF).
+   `stage2:check --pre --entity buildagentenv` PASS zero findings;
+   `test:selfedit-harness` green; the split-scope policy-1 `--dry-run`
+   echo read 3 to ingest / 300 unchanged / 0 tombstones (the 3 drifting
+   files are Session 51's changed `scripts/*.py`, outside the evidence
+   chain and named files — deferred to the post-landing refresh; no
+   pre-run refresh owed). NEITHER named file needed a stub (both exist;
+   the test file already carries a `buildAgentEnv` describe). **The
+   recorded open point decided:** the one-line `rlm_worker.ts` wiring
+   defers to T3 (T2 stays a pure-function increment, zero live
+   consumers — the T1 shape).
+2. **The geometry difference from T1, recorded honestly (§5i.2):** T2's
+   guarded inserts land INSIDE the cited `buildAgentEnv` block, so it
+   is not verbatim-contiguous on disk after the edits. The adaptation:
+   confirm disk-verbatim ONCE at the pre-edit evidence phase (E3), HOLD
+   the surviving hash, and re-check at completion via `citable()` only
+   (DB membership + retrieval set — edit-invariant); `stage2:check`'s
+   evidence layer is likewise DB-membership based and unaffected. The
+   insight stays at completion time, preserving the R2 revert-before-
+   write integrity.
+3. **Guardrail 15 honored:** BOTH the `prompt-engineering` and
+   `hypershot-protocol` skills were INVOKED via the Skill tool BEFORE
+   any T2 task-text byte was written; the task text (§5i.4, verbatim)
+   was authored on the §5h.12 v3.2 template with the T2 spec spliced
+   and the geometry adaptation woven into R1/E3/C1.
+4. **The run — VERDICT FAILED, two criterion misses (§5i.6):** the
+   quota probe FIRST returned quota RESTORED (12 in / 4 out); ONE
+   spawn, research mode, `--max-iterations 16`, `PYTHONUTF8=1`,
+   `TRELLIS_TASK_NAMED_FILES` as staged, one log file (exit 0, 108.7s;
+   16/16 iterations; 371,136 in / 16,097 out; 5 guarded ops / 0 raw
+   splices; the ONE gated insight `buildagentenv -forwards_by_name->`
+   `mcpcredentialenv` citing the held live block `c3883a2e…`). Items
+   1–4 + 6 PASS: named-file-only diff (exactly the two files),
+   evidence contract (the gated insight, citation audit clean),
+   `stage2:check` zero findings, guarded-only, and the `rlm_job.ts`
+   production diff is SPEC-PERFECT (all four Parts placed exactly,
+   insert-only, byte-clean). **Item 5 (pins green) FAILED** — the
+   fifth authored pin, the absent-block byte-identity test, asserted
+   `buildAgentEnv(cleanBase, CFG)` deep-equals `{ PATH }`, wrong
+   because `buildAgentEnv` unconditionally injects the
+   `NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING` keys —
+   `npx vitest run src/workers/rlm_job.test.ts` = 1 failed / 36
+   passed. **Item 7 (spend) MISSED** — $1.0888 vs the $0.5–$1.0
+   estimate (16 full iterations vs T1's 11). A failing pin FAILS the
+   increment; no second run this session (the retry is its own
+   proposal). NO machinery defect — every layer fired per contract;
+   the class is a mis-written test assertion caught mechanically by
+   `npm test` (`stage2:check` is correctly blind to test-green, the
+   parse gate correctly passed a well-formed file).
+5. **Cleanup (guardrail 5, the bounded operator-cleanup precedent):**
+   the failed run's own residual insight write was deleted —
+   `MATCH (s:Entity {name:'buildagentenv'})-[r:DERIVED_INSIGHT
+   {verb:'forwards_by_name'}]->(o:Entity {name:'mcpcredentialenv'})
+   DELETE r` (`DERIVED_INSIGHT` edges 299 → 298; target 1 → 0); the
+   freshly-created `mcpcredentialenv` entity NODE was left in place
+   (guardrail 2 — entities are never deleted). The diff was reverted
+   (`git checkout --`; preserved as
+   `benchmark_logs/s52_t2_run1_failed.diff`, local/gitignored, never a
+   patch source); `npm test` back to 876/87.
+6. **Retry material (v3.3 — a NEW owner-approved proposal; T2 stands
+   at ONE failed attempt, §5g.3 ladder untouched):** the single change
+   is to strengthen the M3 pin-(e) guidance so the absent-block
+   byte-identity pin builds its expected object from `buildAgentEnv`'s
+   ACTUAL clean-base output (the base keys PLUS the unconditional
+   `NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING`, mirroring
+   the file's first existing `buildAgentEnv` test), never the bare base
+   env. Nothing else in v3.2/T2 changes; the estimate re-bases to
+   $0.7–$1.2 for ONE run.
+7. **Bookkeeping:** row 13's cell gains the T2 FAILED outcome; the
+   §5i increment record is complete through §5i.6; the five-session
+   window advances to 48–52 (Session 47's §5 entry compressed to the
+   HANDOFF digest and moved verbatim to
+   `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph updated in
+   the same commit). Docs-only close-out (the failed diff reverted,
+   ZERO non-markdown bytes shipped — the Session 48 precedent): live
+   drills not re-run, the reason recorded.
+
+### July 14, 2026 — Session 53: TTT-track increment T2 RETRY (task text v3.3) — a clean R2 self-refusal, NO LANDING, recorded (§4 row 13, Phase 1 step 2)
+
+The second T2 attempt. Owner-approved paid run for the session; the
+increment did NOT land — the run self-refused under R2 after making its
+own editing-execution mistakes, distinct from Session 52's pin miss.
+Full record: `REPOSITORY_INGESTION_REPORT.md` §5i.7. The shipped tree
+is docs-only; ZERO non-markdown bytes (the run reverted its staging;
+porcelain clean throughout). Session paid total ≈ $0.7140 (the quota
+probe ≈ $0.0001 + the run $0.7139), within the $0.7–$1.2 estimate and
+far under the ≤$5/run cap.
+
+1. **Zero-paid staging, all green (§5i.7):** the v3.3 task text
+   authored = the §5i.4 v3.2 text with ONLY the M3 pin-(e) fix (name
+   `buildAgentEnv`'s unconditional `NEO4J_*`/`PG_DSN`/
+   `PYTHONUNBUFFERED`/`PYTHONIOENCODING` keys, mirror the file's FIRST
+   existing `buildAgentEnv` test — never the bare base env); `diff`
+   confirmed the ONLY change is the pin-(e) block. **Guardrail 15
+   honored:** BOTH `prompt-engineering` and `hypershot-protocol` were
+   INVOKED via the Skill tool BEFORE writing the delta (decoherence
+   prevention on the ambiguous v3.2 phrasing; positive framing;
+   invariant env-var names kept concrete). Evidence chain re-verified
+   live, read-only, ALL HELD (identical to §5i.3): entity
+   `buildagentenv` 17 ACTION edges / 0 contested / single hash
+   `c3883a2e…d0b6d0b4`; the block 3,202 chars / 3,207 bytes verbatim on
+   disk (unchanged since `trellis#12`); `stage2:check --pre --entity
+   buildagentenv` PASS; `test:selfedit-harness` ALL CHECKS PASSED;
+   dry-run echo 3-to-ingest / 300-unchanged / 0-tombstones (the 3
+   drifting files are Session 51's `scripts/*.py`, outside the chain —
+   no pre-run refresh owed); baseline `npm test` 876/87 after `npm ci`.
+   The §5i.7 staging was committed so porcelain was clean at spawn.
+2. **Quota probe FIRST (§5h.10):** a minimal completion 7 in / 8 out
+   (`ok`) — quota funded.
+3. **The run — VERDICT NO LANDING (clean R2 self-refusal; one spawn,
+   $0.7139; 231,552 in / 13,498 out; 12 model calls; 104.0s; 2 db tool
+   calls; 0 write_backs; 9 guarded ops / 0 raw splices; cited_hashes
+   EMPTY; porcelain CLEAN):** the run followed the evidence protocol
+   cleanly through E3 (one `get_ast_texts` fetch of the single hash,
+   `frame_text` + `citable()` both confirming it citable, the hash
+   HELD; citation audit `read`=[`c3883a2e…`], `cited`=[]), then its
+   staged edits contained EDITING-EXECUTION mistakes it made itself:
+   the `rlmBackend?` interface field inserted TWICE, the four
+   `TRELLIS_RLM_*` set-or-delete blocks inserted TWICE (second copy
+   misplaced/truncated after the `Session 21` comment), and the
+   test-pin inserts anchored on `describe('buildAgentArgs', () => {`
+   (the NEXT describe block, so OUTSIDE the `buildAgentEnv` describe —
+   upsum recorded `blocked: ['Could not locate buildAgentEnv describe
+   block in test file']`). V1 printed the staged diff, saw the
+   duplicates/misplacement (a visible content mismatch), and applied
+   V2 → R2: reverted BOTH files, recorded NO insight, submitted the
+   empty-cited report.
+4. **Criterion, item by item — NO LANDING:** (1) named-file diff N/A
+   (no diff, porcelain clean); (2) evidence contract NOT MET (zero
+   insights — the R2 path); (3) `stage2:check` N/A (no post-run diff;
+   `--pre` was PASS); (4) guarded-only PASS (`raw_splices` 0);
+   (5) **pins green NOT REACHED** — no `write_back`, so `npm test`
+   never ran against a diff; the v3.3 pin-(e) fix (this retry's ONLY
+   delta) was CORRECT but UNEXERCISED, the run failing at an EARLIER
+   stage; (6) human review N/A; (7) spend within estimate PASS
+   ($0.7139 vs $0.7–$1.2).
+5. **Root cause + escalation:** editing execution + an R2 over-trigger
+   — a NEW failure class, distinct from Session 52's pin miss and from
+   any machinery defect (every harness layer fired per contract — the
+   guarded family staged/reverted correctly, the citable probe and
+   Session 31 gate behaved, the parse gate was never reached). The v3.3
+   `<verification_protocol>` V2 rule let the run treat its OWN fixable
+   staging slip as a task-premise contradiction; the correct response
+   is revert-that-file-and-re-stage, R2 being reserved for a
+   contradicted SOURCE premise. **T2 has now had TWO sessions without a
+   landing (Session 52 FAILED on a pin; Session 53 self-refused), so
+   the §5g.3 three-failure ladder's third-strike escalation is now an
+   OWNER-VISIBLE decision** — presented alongside the v3.4 retry
+   proposal, which KEEPS v3.3's pin-(e) fix and adds three
+   editing-execution safeguards (anti-duplication assert-exactly-once
+   before write_back; a robust test anchor on the block's last existing
+   `it(...)`; the R2 scope clarification). Estimate re-bases to
+   $0.6–$1.1 for ONE run. No machinery change indicated.
+6. **Cleanup: NONE OWED** — the R2 path wrote nothing; the graph is
+   byte-for-byte as Session 52 left it (`DERIVED_INSIGHT` 298, 0
+   `buildagentenv -forwards_by_name-> mcpcredentialenv` edges, the one
+   edgeless `mcpcredentialenv` orphan node preserved, guardrail 2).
+   Docs-only close-out (ZERO non-markdown bytes shipped — the
+   Session 48/52 precedent): `npm test` 876/87, `npm run build`,
+   `npm run python:check`, `docker compose --profile test config
+   --quiet` all green; the full standing drill block NOT re-run
+   (nothing non-markdown moved), reason recorded; `test:selfedit-harness`
+   and `stage2:check --pre` were run green during staging.
+7. **Bookkeeping:** row 13's cell gains the T2-retry NO-LANDING
+   outcome; the §5i increment record is complete through §5i.7; the
+   five-session window advances to 49–53 (Session 48's §5 entry moved
+   verbatim to `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph
+   updated in the same commit).
+
+### July 14, 2026 — Session 54: TTT-track increment T2 RETRY (task text v3.4) — a clean R2 self-refusal, NO LANDING; THIRD strike → owner picked TOOLING SHAPE (§4 row 13, Phase 1 step 2)
+
+The third T2 attempt, owner-approved after #100 (Session 53) merged.
+The v3.4 run did NOT land — a clean R2 self-refusal after a NEW
+editing-execution sub-failure. Full record:
+`REPOSITORY_INGESTION_REPORT.md` §5i.8. Docs-only; ZERO non-markdown
+bytes (the run reverted its own staging; porcelain clean throughout).
+Session paid total ≈ $0.8164 (the quota probe ≈ $0.0001 + the run
+$0.8163), within the $0.6–$1.1 estimate, under the ≤$5/run cap.
+
+1. **Zero-paid staging (§5i.8):** task text v3.4 = v3.3 (§5i.7,
+   carrying the correct M3 pin-(e) fix) PLUS three editing-execution
+   safeguards, each closing a named §5i.7 sub-cause — (1)
+   anti-duplication (an after-each-insert exactly-once rule + a new M4
+   exactly-once staging check before write_back), (2) a robust test
+   anchor (M3 anchors on the LAST existing `it(...)` in the
+   buildAgentEnv describe, never a bare `});`), (3) an R2 scope
+   clarification (R2/V2: R2 ONLY for a contradicted SOURCE premise,
+   never your own fixable staging slip). `diff` confirmed exactly the
+   three safeguards changed. **Guardrail 15 honored** (BOTH prompt
+   skills invoked before authoring). Evidence chain re-verified live,
+   ALL HELD (identical to §5i.3/§5i.7): `buildagentenv` 17 edges / 0
+   contested / single hash `c3883a2e…`; block 3,202 chars verbatim on
+   disk; `stage2:check --pre` PASS; harness green; dry-run 3/300/0.
+   `#100` was merged (squash) FIRST so v3.4 branched off clean master.
+2. **Quota probe FIRST (§5h.10):** 7 in / 5 out (`ok`).
+3. **The run — NO LANDING (clean R2 self-refusal; one spawn, $0.8163;
+   278,234 in / 12,067 out; 14 model calls; 84.8s; 0 write_backs; 4
+   guarded ops / 0 raw splices; cited_hashes EMPTY; porcelain CLEAN):**
+   the run reached E3 cleanly and held the citable hash. **The v3.4
+   safeguards CLOSED the Session 53 classes — none recurred:** no
+   duplicate inserts, the test anchored on the correct unique `it(...)`,
+   and staging errors were correctly treated as FIXABLE (revert +
+   re-stage, no R2 over-trigger). **But a NEW editing-execution class
+   surfaced:** the run BATCHED multiple guarded `insert_lines` in ONE
+   cell using pre-staging line numbers (insert_a at line 155, insert_b
+   at line 209 in the same cell); staging insert_a's 13-line block
+   shifted every later line, so insert_b's `anchor_before='  }\r'` at
+   stale line 209 hit the wrong line → `AnchorMismatchError` (×11). The
+   guarded family behaved EXACTLY per contract (a mismatched anchor
+   stages nothing, teaches re-derivation); the run kept re-batching
+   with stale addresses, consumed 14 of 16 iterations without one
+   verified edit, and R2'd. The task's "one insert per cell, re-locate
+   between" rule (unchanged since v3.2) was NOT obeyed.
+4. **Criterion — NO LANDING:** guarded-only PASS (`raw_splices` 0);
+   spend PASS ($0.8163); evidence contract NOT MET (zero insights);
+   item 5 (pins green) NOT REACHED (no write_back). No machinery
+   defect — every layer fired per contract.
+5. **Cleanup: NONE OWED** — the R2 path wrote nothing; `DERIVED_INSIGHT`
+   stays 298; the edgeless `mcpcredentialenv` orphan preserved
+   (guardrail 2). `npm test` stays 876/87.
+6. **THE PATTERN + THE ESCALATION (§5g.3 third-strike ACTIVE; the S48
+   §5h.8 escalation rule).** T2 has now had THREE no-landings, each a
+   DISTINCT editing-execution sub-failure the prior task-text fix did
+   NOT prevent recurring in a new form: §5i.6 mis-written test pin →
+   §5i.7 duplicate inserts + wrong-describe anchor + R2 over-trigger →
+   §5i.8 stale line addresses from batched inserts. Each prompt patch
+   closed its target and the model surfaced a new way to mis-drive the
+   guarded toolkit — the exact signal the owner doctrine names (close
+   behavioral failure classes by TOOLING SHAPE, not prompt text) and
+   the S48 §5h.8 escalation rule anticipated. **The owner picked
+   TOOLING SHAPE** (over one-more-prompt / pause): close the class in
+   the guarded editing toolkit per CODE_MEDIATED_TEXT doctrine (the
+   model never counts; the engine computes addresses) — an
+   engine-resolved-anchor insert (the model passes a UNIQUE anchor
+   substring, the engine finds the line, computes the exact address +
+   terminator; non-unique/absent = typed refusal) and/or a
+   batch/transaction insert that re-resolves addresses internally.
+   ADDITIVE to the Session 41 guarded family (raw `splice` + existing
+   guarded methods stay byte-identical and pinned), design-record-first
+   in the §5e/§5g mold, zero-paid, drill-pinned, then a re-attempt T2
+   run measures it. T2 is PAUSED pending the tooling increment.
+7. **Bookkeeping:** row 13's cell gains the T2 v3.4 NO-LANDING outcome
+   + the tooling-shape pivot; §5i.8 completes; the five-session window
+   advances to 50–54 (Session 49's §5 entry moved verbatim to
+   `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph updated in
+   the same commit). Docs-only close-out (the failed diff reverted,
+   ZERO non-markdown bytes shipped — the Session 48/53 precedent):
+   `npm test` 876/87, build, python:check, compose config green; full
+   standing drill block NOT re-run (nothing non-markdown moved),
+   reason recorded; `test:selfedit-harness` + `stage2:check --pre`
+   green during staging.
+
 ### July 14, 2026 — Owner-directed engineering-loop program initialization: EL-00 roadmap/catalog ACCEPTED, zero-paid
 
 The owner approved implementation of the engineering-session loop on a new
 feature branch, then directed that the work be decomposed across context
 windows before implementation. The branch `engineering-loop-spec` was created
-from `74c3b48` (the Session 51 head). This is a pre-Session-52 owner-directed
-program-initialization entry, not a completed numbered implementation session;
-Session 52 is re-pointed from TTT T2 to `EL-01`. The TTT row remains intact and
-paused, not cancelled.
+from `74c3b48` (the Session 51 head). This program initialization ran in parallel with the merged TTT Sessions 52–54
+and consumes no numbered implementation session. After those histories were
+reconciled, `EL-01` is recorded as Session 55. The TTT row remains intact and
+paused, not cancelled; the engineering-loop program remains owner-prioritized.
 
 1. **Decision:** a lone `SPEC.md` is necessary but insufficient. The bootstrap
    control plane is a concise human roadmap plus a machine-readable feature DAG
@@ -1474,9 +1216,9 @@ paused, not cancelled.
    contract, and conformance matrix. Explicit exclusions: control-kernel code,
    `WORKFLOW.md`, production prompts, Codex invocation, and handoff migration.
 
-### July 14, 2026 — Session 52: EL-01 architecture record and normative specification ACCEPTED, zero-paid
+### July 14, 2026 — Session 55: EL-01 architecture record and normative specification ACCEPTED, zero-paid
 
-Session 52 executed only engineering-loop feature `EL-01`. No controller code,
+Session 55 executed only engineering-loop feature `EL-01`. No controller code,
 production prompt, `WORKFLOW.md`, model call, paid service, database, queue,
 worker, API, source file, dependency, or prompt pin changed. The paused TTT T2
 objective remains untouched.
@@ -1507,15 +1249,16 @@ objective remains untouched.
    to an existing `EL-*` feature, exact catalog acceptance ID, and matching
    `static`, `integration`, `review`, or `measurement` class. Catalog semantics
    remain `ids=10 edges=13 acceptance=34 order_parity=true`; Draft 2020-12
-   schema validation prints `10`. `features.json` marks only EL-01 accepted;
-   the product roadmap advances only to EL-02.
+   schema validation prints `10`. `features.json` marks EL-00 and EL-01
+   accepted; the product roadmap advances only to EL-02.
 4. **Acceptance commands and observations:** `npm test` passed **87 files / 876
    tests**; `npm run build` passed; `npm run python:check` reported runtime
    syntax/imports/rubric/module assets verified; the inline requirement audit
    printed `requirements=106 mapped=106 unmapped=0 features=10`; the inline
    semantic catalog audit printed `ids=10 edges=13 acceptance=34
    order_parity=true`; the required `python -c` JSON Schema command printed
-   `10`; the local-link/unidentified-normative check printed
+   `10`; `docker compose config --quiet` passed; the
+   local-link/unidentified-normative check printed
    `local_links=resolved unidentified_normative_must=0`; `git diff --check`
    passed; final status listed only the two EL-01 artifacts and required
    roadmap/catalog/archive/HANDOFF closeout files.
@@ -1527,10 +1270,13 @@ objective remains untouched.
    retry used a diagnostic timeout and expired after five seconds; the same
    exact command then passed with the suite timeout. A compact semantic-check
    one-liner was rejected by PowerShell quoting before execution; the literal
-   stdin form passed. No paid work occurred.
-6. **Bookkeeping and next:** Session 47's entry moved verbatim to
-   `docs/archive/ROADMAP_HISTORY.md`; the live session window is 48–52.
-   `HANDOFF.md` regenerated per §0. Next is `EL-02` only: deterministic control
+   stdin form passed. The reconciliation merge against current `master`
+   reran the 87-file / 876-test suite, build, Python runtime check, Compose
+   config validation, schema validation, mapping/catalog audit, and diff
+   checks with the same green results. No paid work occurred.
+6. **Bookkeeping and next:** Session 50 and its same-day follow-on entry moved
+   verbatim to `docs/archive/ROADMAP_HISTORY.md`; the live session window is
+   51–55. `HANDOFF.md` regenerated per §0. Next is Session 56, `EL-02` only: deterministic control
    kernel schemas/transitions/state/events/lock/fake dependencies, zero-model
    and zero-paid. Real runner integration, production prompts, repository
    observation/rendering, verification policy, migration, scheduling, and TTT

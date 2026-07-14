@@ -3087,6 +3087,1759 @@ is recorded as the template the remaining T-series (T2 onward)
 inherits and adapts. A live A/B of v3.1 vs v3.2 adherence would be
 its own owner-approved paid proposal, not run here.
 
+### 5i Increment T2 — the `buildAgentEnv` forward/strip increment (Session 52, staged July 14, 2026)
+
+TTT-track increment T2 (roadmap §4 row 13, Phase 1 step 2; the
+ratified queue's next step after T1 landed in Session 50). A
+FEATURE-CLASS self-edit (§12.6) run through the stage-2 harness on
+the Session 50 scaffolds: the task text is authored by the session
+under the house `prompt-engineering` + `hypershot-protocol` skills
+(both INVOKED before a byte of task text was written — Guardrail 15,
+honored), presented with an estimate at session start, run ONLY on
+the owner's yes, one diff human-reviewed, landing a human PR. The
+spec is UNCHANGED and human-authored: `MODEL_BACKEND_SEAM.md` §3.3
+(the credential three-part rule) + §4 layer 2 (the unconditional
+`OPENAI_BASE_URL` delete) + the §8 T2 skeleton.
+
+#### 5i.1 Scope, named files, and the wiring-deferral decision
+
+Named files (exactly two — a diff touching any other file FAILS the
+named-file/scope criterion):
+
+- `src/workers/rlm_job.ts` — `AgentEnvConfig` gains the optional
+  `rlmBackend` block (the `textedit`/`retrievalBudget` optional-block
+  mold, `rlm_job.ts:132–155`); `buildAgentEnv` gains set-or-delete
+  for each `TRELLIS_RLM_*` variable (the `TRELLIS_MCP_SERVERS` /
+  `retrievalBudget` set-or-delete mold, `rlm_job.ts:179–209`); the
+  unconditional `delete env.OPENAI_BASE_URL` joins the
+  experiment-flag deletion block (`rlm_job.ts:216–232`, the
+  `TRELLIS_EXP_*` mold); the named key variable's VALUE forwarded
+  under its own name (the `mcpCredentialEnv` loop precedent,
+  `rlm_job.ts:235–237`).
+- `src/workers/rlm_job.test.ts` — new pins ADDED to the existing
+  `buildAgentEnv` describe block WITHOUT modifying any existing test
+  (the zero-existing-tests-changed criterion item covers it):
+  set-forwards / unset-deletes per variable; `OPENAI_BASE_URL`
+  stripped even when cfg sets a base URL (the child gets
+  `TRELLIS_RLM_BASE_URL`, never the SDK variable); key value
+  forwarded under its own name; absent-block byte-identity.
+
+**The recorded open point, decided (§8 T2 note):** the one-line
+`rlm_worker.ts` wiring that passes `config.rlmBackend` into
+`buildAgentEnv`'s cfg (`rlm_worker.ts:291`, joining the
+`retrievalBudget: config.retrieval.budgetPerRun` line) lands in **T3,
+not T2**. T2 stays a pure-function increment with zero live consumers
+(the T1 shape: the seam is built and pinned before anything feeds
+it), and T3 — which rewires the agent side — wires the worker side in
+the same increment. So `rlm_worker.ts` is NOT a named file for T2,
+and the production path (`cfg.rlmBackend` absent) is the
+absent-block-byte-identity path the pins cover.
+
+#### 5i.2 No stub needed; the geometry difference from T1
+
+Unlike T1 (§5h.2), NEITHER named file needs a pre-staged stub: both
+`src/workers/rlm_job.ts` and `src/workers/rlm_job.test.ts` exist and
+`rlm_job.test.ts` already carries a `buildAgentEnv` describe block, so
+there is no editing-toolkit-cannot-create-files ceremony and no
+vitest-red window. T2's test edit ADDS `it(...)` pins inside the
+existing describe block; the existing tests stay byte-intact.
+
+**One real geometry difference from T1, recorded honestly.** T1's
+cited block (the index.ts budget/credential validation block) sat at
+a location T1's inserts did NOT touch, so it stayed verbatim-
+contiguous on disk and the completion-time re-check could re-scan
+disk. T2's guarded inserts land INSIDE the cited `buildAgentEnv`
+function-body block (the four `TRELLIS_RLM_*` set-or-delete section,
+the `OPENAI_BASE_URL` delete, the key-value forward all sit inside
+that block's span), so the block's original 3,202-char text is NOT a
+verbatim-contiguous substring of the file after the edits. The
+adaptation vs v3.2, spelled out in the task text: the disk-verbatim
+citability check runs ONCE at the evidence phase (E3, before any
+edit, block verbatim on disk + `citable()` agrees), the surviving
+hash is HELD, and the completion-time re-check (C1) uses `citable()`
+ONLY — which reads the substrate (retrieval-set membership + the
+`gatherHashEvidence` current-version join), NOT the working frame, so
+the guarded inserts interleaving the block on disk correctly do NOT
+revoke citability. `stage2:check`'s evidence layer is DB-membership
+based (`checkEvidence` → the current-version bridge) and is likewise
+unaffected by the on-disk interleave. The Session 31 write gate
+checks retrieval membership, satisfied identically. This keeps the
+insight at completion time (post-verification — preserving the R2
+revert-before-write integrity) while handling the geometry honestly.
+
+#### 5i.3 Live evidence verification (the §5g.2/§5h.3 mold; probes read-only, July 14, 2026)
+
+The substrate is FRESH for the target file: `repo:trellis:src/workers/rlm_job.ts`
+is at version 2 (root `a0d3b0d2…3516`), the Session 50 policy-1
+refresh (`trellis#12`, extraction ran July 13) that ingested
+`rlm_job.ts` v2 WITH Session 50's `TRELLIS_TASK_NAMED_FILES` delete.
+All premises verified read-only, ALL HELD:
+
+- **The graph chain.** The entity `buildagentenv` has 17 ACTION
+  edges, ALL uncontested (0 contested), and ALL cite the single
+  sourceNodeIds hash `c3883a2ef98e7e2c5de039707cf4d8ed8b4fd10ec7035ef851539266c0b6d0b4`
+  — the `buildAgentEnv` function-body block. Sample edges:
+  `buildagentenv -deletes-> trellis_exp_omit_retrieval` (the
+  experiment-flag deletion-block mold T2 extends with
+  `OPENAI_BASE_URL`), `buildagentenv -sets-> trellis_mcp_servers`
+  (the set-or-delete discipline T2 mirrors for the four
+  `TRELLIS_RLM_*` variables). The primary citation candidate is that
+  hash.
+- **The block bytes.** Block `c3883a2e…d0b6d0b4` (3,202 chars /
+  3,207 bytes, CRLF) is a VERBATIM SUBSTRING of the on-disk
+  `src/workers/rlm_job.ts` (the file is uniform CRLF: 259 CRLF lines,
+  0 lone LF). It carries BOTH molds T2 mirrors: the unconditional
+  experiment-flag deletion block (`delete env.TRELLIS_EXP_OMIT_CMT`
+  … `delete env.TRELLIS_TASK_NAMED_FILES;`) AND the credential
+  forwarding loop (`for (const [name, value] of
+  Object.entries(cfg.mcpCredentialEnv ?? {})) { env[name] = value; }`).
+  It is a live member of the current-version root (a re-ingest during
+  the run is impossible — the run edits the worktree, never
+  re-ingests — so the block stays live at write time).
+- **`--pre` gate.** `stage2:check --pre --entity buildagentenv
+  --named-file src/workers/rlm_job.ts --named-file
+  src/workers/rlm_job.test.ts` → `PASS: zero findings` (the entity
+  found + uncontested + zero contested attached edges; both named-file
+  substrate documents present, each at version 2).
+- **Harness.** `test:selfedit-harness` → ALL CHECKS PASSED (the
+  citable-vs-`gatherHashEvidence` mirror pins included).
+- **Drift.** The split-scope policy-1 `--dry-run` echo read 3 to
+  ingest / 300 unchanged / 0 tombstones; the 3 drifting files are
+  Session 51's changed `scripts/*.py` (test_modules / test_scaffold_unit
+  / test_rlm_sandbox), OUTSIDE T2's evidence chain and named files —
+  the §5h.11 drift-reasoning precedent defers them to the post-landing
+  refresh. `rlm_job.ts` is among the 300 unchanged; no pre-run refresh
+  owed. (Session 51's src/rlm prompt-byte edits owe a policy-2
+  `src/rlm` leg that rides the next src/rlm-touching PR; T2 touches
+  only `src/workers`, so its post-landing refresh is a policy-1 leg
+  and does not clear that carry-forward.)
+
+**Pre-stated evidence edge (the criterion item-2 insight):**
+`buildagentenv` `-forwards_by_name->` `mcpcredentialenv`, citing
+exactly `[c3883a2e…d0b6d0b4]` — TRUE and grounded verbatim in the
+cited block's credential-forwarding loop, and it is precisely the
+§3.3 mold T2 extends (forward the named key variable's value under
+its own name). The object `mcpcredentialenv` is created fresh by the
+write (it has no ACTION edges in `rlm_job.ts`'s graph today — so it
+is NOT passed to `--pre`, which would flag a missing entity; a fresh
+entity is uncontested by construction). **Churn note:** a landed T2
+re-chunks `rlm_job.ts`, and the next split-scope refresh kills
+`c3883a2e…` and CONTESTS this fresh edge — ordinary lazy recovery,
+never a criterion item and never "cleaned up" (exactly the T1
+pattern, §5h.11).
+
+**Named failure modes and their catching layers (the §5e mold):**
+
+| Failure class | Caught by |
+|---|---|
+| Diff touches a file other than the two named | `stage2:check` scope layer (`checkEditScope`) + human review |
+| Insight cites a hash not retrieved / not bridging to a named file | the task's R1/R2 (evidence-phase verbatim + `citable()`); `stage2:check` evidence layer (`checkEvidence` current-version bridge); the Session 31 write gate |
+| A raw `splice` (address-drift / neighbor-retype risk) | the guarded-only criterion (`textedit_raw_splices == 0`), telemetry-pinned |
+| A named file left unparseable | `stage2:check` parse gate (`named_file_unparseable`, `.ts` single-file parse) |
+| An existing test modified / deleted | the zero-existing-tests-changed criterion (human `npm test` + diff review) |
+| `buildAgentEnv` absent-block output drifts from today | the absent-block-byte-identity pin (clean base env → today's exact object) |
+
+#### 5i.4 Task text (authored under `prompt-engineering` + `hypershot-protocol`; Guardrail 15 honored)
+
+Authored on the §5h.12 v3.2 template — the skills-strengthened
+T-series template — with T2's spec spliced and the geometry
+adaptation (§5i.2) woven into R1/E3/C1. Both skills were INVOKED via
+the Skill tool BEFORE any task-text byte was written (unlike
+Session 50's v3.1 amendment; Guardrail 15). Skill principles applied:
+the `<mission>` names the ONE failure the task prevents
+(decoherence-prevention, `prompt-engineering` BP3); the four
+governing rules carry stable `R1|R2|R3|R4` trigger tokens in
+attention zones at head AND tail (toolkit E), positive-led
+(`prompt-engineering` BP4); `upsum` and the final report are
+instantiable hypershot FRAMES with instruction-bearing variables
+(`hypershot-protocol` Rules B/C), while the invariant vocabulary —
+tool names, the entity `buildagentenv`, the two mold strings, the
+spec bounds — stays CONCRETE (the §6 invariance test); the cited hash
+stays a hypershot variable `{Citable_Rlm_Job_Hash_From_E3}` because
+the model must RETRIEVE it, never receive it in the prompt.
+
+```
+Stage-2 self-edit task (feature-class increment T2: the buildAgentEnv
+backend forward/strip surface).
+
+<mission>
+Extend buildAgentEnv in src/workers/rlm_job.ts, and add its unit pins
+to src/workers/rlm_job.test.ts, exactly per <specification>. This task
+text is the entire spec channel — the design record it quotes
+(MODEL_BACKEND_SEAM.md §3.3 and §4 layer 2) lives outside your reach,
+so follow the bytes here literally.
+ONE failure has killed a prior increment in this series: recording a
+derived insight that cites a hash the run never retrieved from the
+target file. <governing_rules> exists to make that failure
+impossible. Read it first and obey it over every other instinct.
+</mission>
+
+<governing_rules>
+*** CRITICAL — these four rules govern the whole run. Re-read them BY
+CODE with trellis_task.grep('R1|R2|R3|R4') before each decisive step
+(the first write_back, the insight write, the submit). If any
+instruction below ever seems to conflict with a rule here, THE RULE
+HERE WINS. ***
+
+R1  CITE ONLY WHAT YOU RETRIEVED FROM THE TARGET, CONFIRMED BEFORE
+    YOU EDIT. A hash is citable only when BOTH held at evidence step
+    E3, BEFORE any edit: you fetched it THIS RUN via
+    trellis_postgres.get_ast_texts or trellis_postgres.vector_search,
+    AND its retrieved text appeared verbatim inside
+    src/workers/rlm_job.ts. Retrieval plus that one pre-edit verbatim
+    confirmation confer citability; HOLD the surviving hash in a
+    variable. Your guarded inserts land INSIDE that block and will
+    interleave its bytes on disk afterward — this is EXPECTED and does
+    NOT revoke citability. Confirm with citable(hashes) — which reads
+    the substrate, not your working frame — and trust its `citable`
+    field. A hash you have seen only inside a trellis_textedit frame
+    is NOT citable.
+
+R2  WHEN NOTHING IS CITABLE, WRITE NOTHING — THE STOP CONDITION. If
+    E3 leaves no hash satisfying R1, revert every staged edit with
+    trellis_textedit.revert, submit the <output_contract> report with
+    cited_hashes empty and a reason, and end. Citing a related block
+    from any other file (for example src/config/index.ts) is the exact
+    failure this task guards against — it is forbidden, never a
+    fallback.
+
+R3  ONE RETRIEVAL CALL PER CELL. Give every get_ast_texts and every
+    vector_search its OWN repl cell with nothing after it in that
+    cell. A "Retrieval Discipline" refusal is a raised exception that
+    kills the rest of its cell, so keep each retrieval behind its own
+    cell boundary. When a refusal says a hash was already retrieved,
+    reuse the variable you already hold and fetch nothing.
+
+R4  EDIT ONLY THROUGH THE GUARDED FAMILY. Move bytes only with
+    trellis_textedit.replace_lines / insert_lines / delete_lines.
+    Success requires textedit_raw_splices == 0.
+</governing_rules>
+
+<state_protocol>
+Keep a running upsum dict in the repl (the system prompt requires
+it). Create it in your FIRST cell in exactly this shape, update it at
+the END of every cell, and PRINT it before each decisive step:
+
+  upsum = {
+      "done": [{One_Line_Per_Completed_Step}],
+      "pending": [{One_Line_Per_Step_Not_Yet_Done}],
+      "blocked": [{One_Line_Per_Blocker_With_Its_Cause}],
+      "decisive_facts": [{Citable_Hash_Ids}, {Anchor_Lines_Verified}],
+  }
+
+A step still in "pending" is work you have NOT done, however far back
+the transcript claims otherwise — believe upsum over the scrollback.
+Keep len(str(upsum)) at or under UPSUM_BUDGET by REWRITING each list
+in place, never appending endlessly.
+</state_protocol>
+
+<specification>
+All edits are in src/workers/rlm_job.ts and src/workers/rlm_job.test.ts.
+buildAgentEnv is a PURE function; when cfg.rlmBackend is undefined its
+output must be byte-identical to today for a clean base env (this is
+the T1 shape: the surface is built and pinned before any caller feeds
+it — you change NO call site, and rlm_worker.ts is NOT yours to edit).
+
+Part 1 — AgentEnvConfig gains ONE new OPTIONAL field, mirroring the
+existing optional-block molds (textedit, retrievalBudget) already in
+the interface:
+  rlmBackend?: {
+    backend?: string;
+    model?: string;
+    baseUrl?: string;
+    apiKeyEnv?: string;
+    apiKeyValue?: string;
+  };
+Add a doc comment in the file's house style naming
+MODEL_BACKEND_SEAM.md §3.3/§4 as the design record: the block is
+present ONLY when the operator configured backend keys; the first
+four fields are config.rlmBackend's validated values (each undefined
+when its key is unset) and apiKeyValue is the fail-fast resolved value
+of the named key variable (the config.mcp.credentialEnv precedent —
+never logged); when the whole block is omitted, every TRELLIS_RLM_*
+variable is stripped so the child only ever sees validated backend
+config (the TRELLIS_MCP_SERVERS discipline).
+
+Part 2 — buildAgentEnv gains a set-or-delete section for the four
+TRELLIS_RLM_* variables, one variable per if/else, in the exact shape
+of the existing retrievalBudget block (if the field is defined set the
+env var to it, else delete the env var):
+  TRELLIS_RLM_BACKEND   <- cfg.rlmBackend?.backend
+  TRELLIS_RLM_MODEL     <- cfg.rlmBackend?.model
+  TRELLIS_RLM_BASE_URL  <- cfg.rlmBackend?.baseUrl
+  TRELLIS_RLM_API_KEY_ENV <- cfg.rlmBackend?.apiKeyEnv
+These values are already strings — no String() wrapping. Place this
+section among the other set-or-delete blocks (immediately after the
+retrievalBudget block's closing brace is natural), so an unset field —
+or an entirely absent rlmBackend block — strips any raw inherited
+value of that variable.
+
+Part 3 — the unconditional ambient-transport strip. Add exactly one
+line, delete env.OPENAI_BASE_URL;, to the experiment-flag deletion
+block (immediately after delete env.TRELLIS_TASK_NAMED_FILES;), with a
+comment naming MODEL_BACKEND_SEAM.md §4 layer 2: the worker never
+forwards the ambient SDK transport variable, so an inherited value can
+never redirect a spawned agent — the strip holds unconditionally, even
+when cfg sets a base URL (the child gets TRELLIS_RLM_BASE_URL, never
+OPENAI_BASE_URL) and even for callers that bypassed config validation.
+
+Part 4 — forward the named key variable's VALUE under its own name
+(the mcpCredentialEnv loop precedent, §3.3). After the existing
+mcpCredentialEnv forwarding loop and before return env, add: when BOTH
+cfg.rlmBackend?.apiKeyEnv and cfg.rlmBackend?.apiKeyValue are defined,
+set env[cfg.rlmBackend.apiKeyEnv] = cfg.rlmBackend.apiKeyValue (the
+child resolves the named variable to the fail-fast value; never
+logged). The NAME itself is already forwarded by Part 2's
+TRELLIS_RLM_API_KEY_ENV set — this Part forwards the VALUE under that
+name.
+
+No other behavior changes. No call site changes anywhere. rlm_worker.ts
+is out of scope (its one-line wiring is T3's).
+</specification>
+
+<evidence_protocol goal="get one citable src/workers/rlm_job.ts hash into your retrieval set, confirm the task premise from its bytes, and HOLD it before any edit">
+E1 (one cell). Query the graph for the ACTION neighborhood of the
+   entity 'buildagentenv' (names are lowercase-normalized; provenance
+   rides edges in either direction, so match undirected):
+     MATCH (e:Entity)-[r:ACTION]-(o:Entity)
+     WHERE e.name = '{The_Buildagentenv_Entity}'
+     RETURN r.verb, o.name, r.sourceNodeIds,
+            coalesce(r.contested, false) AS contested
+   Keep only rows where contested is false. Every uncontested edge
+   here carries the SAME sourceNodeIds hash — the buildAgentEnv
+   function-body block, part of src/workers/rlm_job.ts. Collect the
+   distinct hashes from all uncontested edges into a variable (there
+   is one).
+
+E2 (one cell — R3). Fetch every collected hash in ONE get_ast_texts
+   call. Print the first line of each returned text.
+
+E3 (one cell). Load src/workers/rlm_job.ts, then classify — THIS is
+   the one-and-only pre-edit verbatim gate (R1):
+   a. text = frame_text('src/workers/rlm_job.ts')   # canonical join,
+      "\r" terminators intact on this CRLF file.
+   b. For each fetched hash: CITABLE when its full retrieved text is a
+      verbatim substring of text; otherwise NOT-CITABLE.
+   c. Cross-check with citable(all_fetched_hashes) and PRINT the
+      report. Keep a hash ONLY when your verbatim check AND the
+      probe's `citable` field agree. HOLD the survivors in a variable
+      for the completion protocol — you will NOT re-scan disk for
+      verbatim later, because your edits interleave this block.
+   d. Confirm from the citable bytes that BOTH molds you mirror live
+      in this block: the unconditional experiment-flag deletion block
+      (delete env.TRELLIS_EXP_OMIT_CMT … delete
+      env.TRELLIS_TASK_NAMED_FILES;) that Part 3 extends, and the
+      mcpCredentialEnv forwarding loop
+      (for (const [name, value] of Object.entries(cfg.mcpCredentialEnv
+      ?? {})) { env[name] = value; }) that Part 4 mirrors.
+
+E4 (fallback — ONLY if E3 left zero citable hashes). Make at most TWO
+   vector_search calls, each in its own cell (R3), querying about the
+   buildAgentEnv forward/strip discipline or the mcpCredentialEnv
+   forwarding loop in src/workers/rlm_job.ts; fetch nothing you
+   already hold; re-run E3's classification. Still nothing citable =>
+   R2 (THE STOP CONDITION) governs.
+</evidence_protocol>
+
+<editing_protocol>
+Author only genuinely NEW lines; move existing bytes by slicing them
+in code — never retype an existing line as your own. Line addresses
+shift after every staged insert, so for EACH insert re-read its
+neighborhood with trellis_textedit.lines() in the SAME cell, build
+byte-exact anchors that INCLUDE the trailing "\r", insert, then stop
+and re-locate before the next one. An AnchorMismatchError staged
+nothing — re-read and retry. Leave every existing line byte-unchanged.
+
+M1 (one cell). Read the current buildAgentEnv describe block in
+   src/workers/rlm_job.test.ts and one neighboring buildAgentEnv it()
+   (e.g. the retrieval-budget strip test) to learn the house test
+   mold: buildAgentEnv(base, {...CFG, ...}) with a hand-built base env
+   and a toEqual / `in` assertion. You will write fresh it() blocks in
+   these conventions and modify NO existing test.
+
+M2. Apply guarded inserts to src/workers/rlm_job.ts (R4), one insert
+   per labeled item, each re-located in its own cell:
+   a. The rlmBackend?: {...} optional field, INSIDE AgentEnvConfig,
+      immediately after the retrievalBudget?: number; field's own
+      comment-and-line, so the optional blocks stay grouped and the
+      closing brace of the interface is untouched.
+   b. The four TRELLIS_RLM_* set-or-delete if/else blocks in
+      buildAgentEnv, placed immediately after the retrievalBudget
+      set-or-delete block's closing line and before the
+      experiment-flag deletion comments.
+   c. The single delete env.OPENAI_BASE_URL; line plus its
+      §4-layer-2 comment, placed immediately after
+      delete env.TRELLIS_TASK_NAMED_FILES; and before the
+      mcpCredentialEnv forwarding comment.
+   d. The Part-4 key-value forward, placed immediately after the
+      mcpCredentialEnv forwarding loop's closing brace and before
+      return env;.
+
+M3. Author the new pins in src/workers/rlm_job.test.ts with guarded
+   insert_lines anchored on an existing line inside the buildAgentEnv
+   describe block (for example the block's final closing "});"), so
+   every existing test stays byte-intact. Add it() blocks pinning:
+   (a) forwards each of the four TRELLIS_RLM_* variables when
+       cfg.rlmBackend sets that field;
+   (b) strips each TRELLIS_RLM_* variable when the field is unset
+       (a raw inherited value is removed) and when the whole
+       rlmBackend block is absent;
+   (c) OPENAI_BASE_URL is stripped unconditionally — both when
+       cfg.rlmBackend is absent AND when cfg.rlmBackend.baseUrl is
+       set (assert the child env has TRELLIS_RLM_BASE_URL set and no
+       OPENAI_BASE_URL key);
+   (d) the named key variable's value is forwarded under its own name
+       (cfg.rlmBackend = { apiKeyEnv: 'SOME_NAME', apiKeyValue: 'v', …}
+       => env.SOME_NAME === 'v');
+   (e) absent-block byte-identity: buildAgentEnv(cleanBase, CFG) with
+       cfg.rlmBackend absent deep-equals the exact object today's
+       buildAgentEnv returns for that clean base (no TRELLIS_RLM_*
+       keys, no OPENAI_BASE_URL key added).
+
+M4. Review each file with trellis_textedit.diff, then write_back each
+   file.
+</editing_protocol>
+
+<verification_protocol>
+V1 (its OWN iteration — never a write cell or the submit cell).
+   Re-read the edited regions of src/workers/rlm_job.ts and the new
+   test it() blocks, PRINT each, and assert in code with each result
+   printed. ASSERTION DISCIPLINE — compare STRUCTURE, never
+   terminator-stripped text:
+   - multi-line region: region_equal(relpath, start,
+     [{Expected_Line_With_Trailing_CR}, ...]) OR
+     region_lines(relpath, start, end) == your expected LIST.
+   - whole-file substring: use frame_text(relpath) (terminators kept).
+   A concatenation of lines() texts without terminators reads false
+   even when the region is correct — never assert against one.
+   Assert: (a) the rlmBackend?: field appears exactly once inside
+   AgentEnvConfig; (b) each of the four TRELLIS_RLM_* set-or-delete
+   blocks appears exactly once in buildAgentEnv; (c) the line
+   delete env.OPENAI_BASE_URL; appears exactly once; (d) the four
+   existing experiment-flag deletes and the mcpCredentialEnv loop are
+   byte-unchanged; (e) every existing it() in the test file is
+   byte-unchanged and your new it() blocks are present.
+
+V2. When an assertion prints false but the PRINTED region shows the
+   intended content, the assertion is the bug: fix the assertion and
+   re-verify in a new iteration. A genuine content mismatch VISIBLE
+   in the printed region itself is the ONE case that triggers R2
+   (revert, no insight, report).
+</verification_protocol>
+
+<completion_protocol>
+C1. In a LATER iteration, after every V1 assertion has printed true:
+   re-read the rules with trellis_task.grep('R1|R2|R3|R4'), PRINT
+   upsum, and call citable() on your HELD survivors once more. This
+   re-check reads the substrate (retrieval + current-version bridge),
+   NOT the working frame — do NOT re-scan the file for verbatim, your
+   edits interleaved the block on purpose. Keep only hashes whose
+   `citable` field is True. If that leaves the list empty, R2 governs.
+
+C2. Record EXACTLY ONE derived insight, citing only the survivors:
+   trellis_neo4j.write_derived_insight(
+       subject='buildagentenv', verb='forwards_by_name',
+       obj='mcpcredentialenv',
+       sourceNodeIds=[{Citable_Rlm_Job_Hash_From_E3}])
+
+C3. Submit the report through trellis_answer.submit by REFERENCE
+   (trellis_answer.submit("report")), instantiating the
+   <output_contract> frame.
+</completion_protocol>
+
+<output_contract>
+Build this dict and submit it by reference. Fill every field; leave
+cited_hashes empty ONLY on the R2 path.
+
+  report = {
+      "graph_finding": "{What_The_Uncontested_buildagentenv_Edges_Named}",
+      "bytes_confirmed": "{The_Deletion_Block_And_The_mcpCredentialEnv_Loop}",
+      "edits_made": "{Each_rlm_job_ts_Insert_And_The_Test_Pins_One_Line_Each}",
+      "anchors_used": [{Byte_Exact_Anchor_Line_Per_Insert}],
+      "cited_hashes": [{Hash_Ids_That_Passed_R1}],
+      "why_citable": "{Retrieved_This_Run_AND_Verbatim_In_rlm_job_ts_At_E3}",
+  }
+</output_contract>
+
+<definition_of_done>
+The run is correct when ALL hold: exactly src/workers/rlm_job.ts and
+src/workers/rlm_job.test.ts changed; textedit_raw_splices == 0; every
+V1 assertion printed true; every existing test byte-unchanged; exactly
+one insight recorded, its sourceNodeIds a subset of your R1-passing
+survivors; the report submitted by reference. If any cannot be met,
+R2 governs: revert, record no insight, submit the empty-cited report.
+</definition_of_done>
+
+Edit no other file. If the graph, the retrieved bytes, or the file
+contents contradict this task (a mold is absent, or nothing is
+citable), R2 governs.
+
+*** THE TWO RULES THAT DECIDE THE RUN, ONCE MORE ***
+- R1 + R2: cite only a hash RETRIEVED THIS RUN whose bytes were
+  verbatim in src/workers/rlm_job.ts at evidence step E3 (before your
+  edits), confirmed by citable(); if none qualifies, record NO
+  insight at all.
+- R3: exactly one retrieval call per repl cell.
+```
+
+#### 5i.5 Run proposal and estimate
+
+- **Gate:** owner-approved per run. The proposal is presented at
+  session start; the run happens only on the owner's yes. Unapproved
+  = zero-paid session: this §5i record + the verified chain + the
+  handoff (the Session 42/49 mold).
+- **Quota probe FIRST (the §5h.10 protocol):** one minimal completion
+  before the spawn — `models.list` proves the key authenticates, NOT
+  that the account has completion quota. A `429 insufficient_quota`
+  ⇒ record ENVIRONMENTALLY BLOCKED, skip the spawn, hand off
+  zero-paid.
+- **Driver (the §5h.11 mold, verbatim):** porcelain clean at spawn;
+  `trellis_agent.py` spawned directly, research mode,
+  `--max-iterations 16`, `TRELLIS_EDIT_ROOT` at the worktree,
+  `TRELLIS_CITATION_AUDIT=1`, `PYTHONUTF8=1`,
+  `TRELLIS_TASK_NAMED_FILES=["src/workers/rlm_job.ts","src/workers/rlm_job.test.ts"]`,
+  full stdout to ONE log file (never `tee | head`).
+- **Estimate: $0.5–$1.0 for ONE run, no pre-bundled contingency**
+  (T1's actual was $0.5781 for a two-file 173-insertion authoring
+  run on the same scaffolds; T2 is a comparable two-file shape with a
+  smaller spec). Under the ≤$5/run cap. The post-landing split-scope
+  policy-1 refresh for the changed `src/workers` files adds roughly
+  $0.10–$0.30 (Session 50's refresh actual was $0.2701 for 33 blocks
+  across both legs; T2 changes two `src/workers` files — policy-1 leg
+  only).
+- **Criterion (the standing feature-class mold, judged item by
+  item):** (1) named-file-only diff (exactly the two files);
+  (2) exactly one recorded insight through the Session 31 gate citing
+  the held live `rlm_job.ts` block — `buildagentenv`
+  `forwards_by_name` `mcpcredentialenv`; (3) `stage2:check` zero
+  findings (scope + evidence + parse; comment-class not declared);
+  (4) guarded-only (`textedit_raw_splices == 0`); (5) the increment's
+  own pins green — `npm test` grows from 876/87, zero existing tests
+  changed; (6) human `git diff` review against the spec (the
+  set-or-delete per variable, the unconditional strip's position in
+  the deletion block, the credential-loop key-value forward,
+  absent-block byte-identity); (7) spend within estimate. A harness
+  flag or a failing pin FAILS the increment — record, stop, diagnose;
+  a retry is its own proposal (the increments-1/2 treatment).
+
+#### 5i.6 The run — VERDICT FAILED (Session 52, July 14, 2026; one spawn, $1.0888)
+
+The owner approved the proposal at session start. The quota probe ran
+FIRST (§5h.10): a minimal completion returned 12 in / 4 out (`ok`) —
+quota RESTORED (the account behind the ambient `OPENAI_API_KEY`, which
+was exhausted at Session 49's block, is funded). One spawn followed,
+research mode, `--max-iterations 16`, `PYTHONUTF8=1`,
+`TRELLIS_EDIT_ROOT` at the worktree, `TRELLIS_CITATION_AUDIT=1`,
+`TRELLIS_TASK_NAMED_FILES` as staged, full stdout to
+`benchmark_logs/s52_t2_run1.log` (local, gitignored). Exit 0, 108.7s
+wall.
+
+**Run telemetry: $1.0888 computed from tokens (371,136 in / 16,097
+out at the gpt-5.4 rates $2.50/M in + $10/M out — OVER the $0.5–$1.0
+estimate), 16 root iterations of the 16 allowed, 106.2s agent time;
+3 db tool calls / 1 retrieved address / 1 retrieval fetch / 0 dedup
+refusals / 0 budget refusals; 54 textedit ops / 2 files held /
+2 write_backs / 5 guarded ops / 0 raw splices; `answer_submits` 1;
+porcelain after the run: exactly the two named files.** The run
+followed the amended protocols end to end: the graph query surfaced
+the single uncontested provenance hash, ONE `get_ast_texts` call
+fetched it, `frame_text` + the `citable()` probe both confirmed it
+citable at E3 (pre-edit), the hash was HELD, the guarded inserts
+interleaved the block as designed, and at completion the run cited
+the held hash `c3883a2e…d0b6d0b4` through the Session 31 gate
+(`buildagentenv` `-forwards_by_name->` `mcpcredentialenv`).
+
+**Criterion verdict, item by item — TWO MISSES; increment T2
+FAILED:**
+
+1. Named-file-only diff PASS — porcelain showed exactly
+   `src/workers/rlm_job.ts` + `src/workers/rlm_job.test.ts`,
+   insert-only.
+2. Evidence contract PASS — exactly one DERIVED_INSIGHT `buildagentenv`
+   `-forwards_by_name->` `mcpcredentialenv` through the Session 31
+   gate, citing exactly [`c3883a2e…d0b6d0b4`] (retrieved this run;
+   bridges to `repo:trellis:src/workers/rlm_job.ts`); the citation
+   audit reads cited ⊆ read.
+3. `stage2:check` zero findings PASS (scope + evidence + parse gate;
+   comment-class not declared).
+4. Guarded-only PASS — `textedit_raw_splices` 0 (5 guarded ops).
+5. **The increment's own pins green — FAIL (the hard-fail trigger).**
+   `npx vitest run src/workers/rlm_job.test.ts` with the diff applied:
+   **1 failed | 36 passed.** Four of the five authored pins are
+   correct; the FIFTH — the absent-block byte-identity pin — asserted
+   `expect(buildAgentEnv(cleanBase, CFG)).toEqual({ PATH: '/usr/bin' })`,
+   which is WRONG: `buildAgentEnv` unconditionally injects
+   `NEO4J_URI`/`NEO4J_USER`/`NEO4J_PASSWORD`, `PG_DSN`,
+   `PYTHONUNBUFFERED`, and `PYTHONIOENCODING` from `CFG`, so the clean-
+   base output is the seven-key object, never the bare `{PATH}`. The
+   pin compared to the base env alone instead of the base env PLUS
+   `buildAgentEnv`'s own unconditional connection/runtime keys (the
+   shape the file's FIRST existing `buildAgentEnv` test already
+   expects).
+6. Human `git diff` review — the `rlm_job.ts` production diff is
+   SPEC-PERFECT (all four Parts placed exactly: the `rlmBackend?`
+   optional block after `retrievalBudget?`; the four `TRELLIS_RLM_*`
+   set-or-delete blocks in the exact `retrievalBudget` shape after its
+   block; `delete env.OPENAI_BASE_URL;` with the §4-layer-2 comment
+   immediately after the `TRELLIS_TASK_NAMED_FILES` delete; the
+   key-value forward after the `mcpCredentialEnv` loop before
+   `return env;` — insert-only, existing lines byte-unchanged, CRLF
+   uniform). The sole defect is the pin-(e) assertion in the test
+   file (item 5).
+7. **Spend within estimate — MISS.** $1.0888 against $0.5–$1.0 (over
+   by ~$0.09; well within the ≤$5/run cap). The run consumed all 16
+   iterations vs T1's 11 — the rlms root loop accumulates the full
+   transcript, so more iterations drive input tokens (371,136 vs T1's
+   192,978). Reported honestly per guardrail 8's Session 48 version:
+   an overrun is a recorded criterion miss even when it is not the
+   decisive one.
+
+**Verdict: FAILED, no second run this session (the §5f.5 / §5g.3
+precedent — a retry is its own owner-approved proposal). The
+production change was authored correctly; the failure is entirely a
+mis-written test assertion caught mechanically by `npm test`.** No
+machinery defect: every layer fired per contract — `stage2:check` was
+correctly blind (it verifies scope/evidence/parse, not test-green; a
+parseable file with a wrong assertion is exactly what `npm test`
+exists to catch), the parse gate correctly passed a well-formed file,
+and the guarded family / Session 31 gate / citable probe all behaved
+exactly. The failure class is TASK DISCIPLINE, closable in the retry
+task text.
+
+**Cleanup (the bounded operator-cleanup precedent, guardrail 5):** the
+failed run's own residual insight write was deleted before any retry —
+`MATCH (s:Entity {name:'buildagentenv'})-[r:DERIVED_INSIGHT
+{verb:'forwards_by_name'}]->(o:Entity {name:'mcpcredentialenv'}) DELETE
+r` (total `DERIVED_INSIGHT` edges 299 → 298; the target edge 1 → 0).
+The freshly-created `mcpcredentialenv` entity NODE was left in place
+(guardrail 2 — entities are contested or retired, never deleted; an
+edgeless orphan is harmless). The diff was reverted
+(`git checkout -- src/workers/rlm_job.ts src/workers/rlm_job.test.ts`;
+the preserved diff is `benchmark_logs/s52_t2_run1_failed.diff`, local,
+gitignored — never resurrected as a patch source, the Session 48
+precedent); `npx vitest run src/workers/rlm_job.test.ts` back to 32/32,
+`npm test` back to 876/87. The final tree ships ZERO non-markdown
+bytes.
+
+**Retry material (the v3.3 task material — a NEW owner-approved
+proposal; T2 now stands at ONE failed attempt, §5g.3 ladder
+untouched):** the single change needed is to strengthen the M3 pin-(e)
+guidance. The absent-block byte-identity pin must build its expected
+object from `buildAgentEnv`'s ACTUAL clean-base output — the base env
+keys PLUS the unconditionally-injected `NEO4J_URI`/`NEO4J_USER`/
+`NEO4J_PASSWORD`, `PG_DSN`, `PYTHONUNBUFFERED`, `PYTHONIOENCODING`
+(and `PYTHONPATH` only when `pythonPath` is set) — i.e. mirror the
+shape the file's FIRST existing `buildAgentEnv` test already asserts,
+NOT the bare base env. The task text should say this explicitly (name
+the seven keys, or instruct the model to read the neighboring
+connection-values test's expected object and reuse its shape). Nothing
+else in v3.2/T2 changes — the specification, the evidence chain, the
+production edits, and the invariant vocabulary all held. The estimate
+for the retry re-bases to $0.7–$1.2 for ONE run (the 16-iteration
+actual observed here), still under the ≤$5/run cap. No machinery
+change anywhere; the escalation rule (a harness-side read-only
+citability query) was never needed and is not triggered by a
+test-assertion defect.
+
+#### 5i.7 The v3.3 retry — Session 53 (July 14, 2026)
+
+The second T2 attempt. T2 stands at ONE failed attempt (§5i.6); this
+retry is its own owner-approved proposal (the increments-1/2
+treatment), presented with an estimate at session start, run ONLY on
+the owner's yes, one diff human-reviewed, landing a human PR. The
+§5g.3 three-failure ladder is untouched.
+
+**Guardrail 15 honored.** Before a single byte of the v3.3 task-text
+delta was written, BOTH `prompt-engineering` (the Lexideck
+meta-prompting protocol) AND `hypershot-protocol` were INVOKED via the
+Skill tool and the fix authored against their loaded guidance — a
+process gate, not a prose claim. Principles applied to the pin-(e)
+delta: decoherence prevention (`prompt-engineering` BP3) — the v3.2
+pin's phrase "the exact object today's buildAgentEnv returns for that
+clean base" was the ambiguity the model resolved wrongly (to
+`{ PATH }`); v3.3 turns it into unambiguous instruction by NAMING the
+exact injected keys; positive instruction framing (BP4) — the pin now
+states what the expected object IS (cleanBase PLUS the unconditional
+keys), not merely what it is not; the invariance test
+(`hypershot-protocol` §6) — the env-var key names (`NEO4J_URI`,
+`NEO4J_USER`, `NEO4J_PASSWORD`, `PG_DSN`, `PYTHONUNBUFFERED`,
+`PYTHONIOENCODING`, `PYTHONPATH`) and the neighboring test's title are
+invariant tokens and stay CONCRETE at the instruction layer, while the
+cited hash stays the hypershot variable `{Citable_Rlm_Job_Hash_From_E3}`
+because the model must RETRIEVE it. The rest of v3.3 is byte-for-byte
+v3.2 (verified by `diff`: the ONLY change is the M3 pin-(e) block).
+
+**Live evidence re-verification (the §5g.2/§5h.3 mold; zero-paid,
+read-only, July 14, 2026; ALL HELD — identical to §5i.3):**
+
+- **Graph chain.** Entity `buildagentenv` has 17 ACTION edges (matched
+  undirected), 0 contested, all citing the single sourceNodeIds hash
+  `c3883a2ef98e7e2c5de039707cf4d8ed8b4fd10ec7035ef851539266c0b6d0b4` —
+  the `buildAgentEnv` function-body block.
+- **Block bytes.** Block `c3883a2e…d0b6d0b4` is 3,202 chars / 3,207
+  bytes and is a VERBATIM SUBSTRING of the on-disk
+  `src/workers/rlm_job.ts` — unchanged since `trellis#12`. It carries
+  BOTH molds T2 mirrors (the unconditional experiment-flag deletion
+  block and the `mcpCredentialEnv` forwarding loop).
+- **`--pre` gate.** `stage2:check --pre --entity buildagentenv
+  --named-file src/workers/rlm_job.ts --named-file
+  src/workers/rlm_job.test.ts` → `PASS: zero findings`.
+- **Harness.** `test:selfedit-harness` → ALL CHECKS PASSED (section
+  [9] scaffold + citable-vs-`gatherHashEvidence` mirror pins included).
+- **Drift.** The split-scope policy-1 `--dry-run` echo read 3 to
+  ingest / 300 unchanged / 0 tombstones — the 3 drifting files are
+  Session 51's changed `scripts/*.py` (OUTSIDE T2's evidence chain and
+  named files); `rlm_job.ts` is among the 300 unchanged (its cited
+  block is verbatim on disk). No pre-run refresh owed; the §5h.11
+  drift-reasoning precedent defers to the post-landing policy-1 refresh.
+- **Baseline.** `npm test` = 876 passing across 87 files after `npm ci`.
+
+**The single pin-(e) delta (§5i.6 is the design input).** v3.2's M3
+pin (e) asserted the absent-block output "deep-equals the exact object
+today's buildAgentEnv returns for that clean base (no TRELLIS_RLM_*
+keys, no OPENAI_BASE_URL key added)" — which the run resolved to
+`toEqual({ PATH })`, missing that `buildAgentEnv` unconditionally
+injects `NEO4J_URI`/`NEO4J_USER`/`NEO4J_PASSWORD`, `PG_DSN`,
+`PYTHONUNBUFFERED`, `PYTHONIOENCODING` (and `PYTHONPATH` when
+`cfg.pythonPath` is set). v3.3's pin (e) names those keys explicitly,
+points at the file's FIRST existing `buildAgentEnv` test ('forwards
+the validated connection values and Python runtime flags') as the
+mirror shape, and calls out `toEqual({ PATH })` as WRONG. Nothing
+else in v3.2/T2 changes — the specification (the four Parts), the
+evidence chain, the geometry adaptation (§5i.2), the pre-stated
+insight, the criterion, and the driver all stand.
+
+Task text v3.3, verbatim:
+
+```
+Stage-2 self-edit task (feature-class increment T2: the buildAgentEnv
+backend forward/strip surface).
+
+<mission>
+Extend buildAgentEnv in src/workers/rlm_job.ts, and add its unit pins
+to src/workers/rlm_job.test.ts, exactly per <specification>. This task
+text is the entire spec channel — the design record it quotes
+(MODEL_BACKEND_SEAM.md §3.3 and §4 layer 2) lives outside your reach,
+so follow the bytes here literally.
+ONE failure has killed a prior increment in this series: recording a
+derived insight that cites a hash the run never retrieved from the
+target file. <governing_rules> exists to make that failure
+impossible. Read it first and obey it over every other instinct.
+</mission>
+
+<governing_rules>
+*** CRITICAL — these four rules govern the whole run. Re-read them BY
+CODE with trellis_task.grep('R1|R2|R3|R4') before each decisive step
+(the first write_back, the insight write, the submit). If any
+instruction below ever seems to conflict with a rule here, THE RULE
+HERE WINS. ***
+
+R1  CITE ONLY WHAT YOU RETRIEVED FROM THE TARGET, CONFIRMED BEFORE
+    YOU EDIT. A hash is citable only when BOTH held at evidence step
+    E3, BEFORE any edit: you fetched it THIS RUN via
+    trellis_postgres.get_ast_texts or trellis_postgres.vector_search,
+    AND its retrieved text appeared verbatim inside
+    src/workers/rlm_job.ts. Retrieval plus that one pre-edit verbatim
+    confirmation confer citability; HOLD the surviving hash in a
+    variable. Your guarded inserts land INSIDE that block and will
+    interleave its bytes on disk afterward — this is EXPECTED and does
+    NOT revoke citability. Confirm with citable(hashes) — which reads
+    the substrate, not your working frame — and trust its `citable`
+    field. A hash you have seen only inside a trellis_textedit frame
+    is NOT citable.
+
+R2  WHEN NOTHING IS CITABLE, WRITE NOTHING — THE STOP CONDITION. If
+    E3 leaves no hash satisfying R1, revert every staged edit with
+    trellis_textedit.revert, submit the <output_contract> report with
+    cited_hashes empty and a reason, and end. Citing a related block
+    from any other file (for example src/config/index.ts) is the exact
+    failure this task guards against — it is forbidden, never a
+    fallback.
+
+R3  ONE RETRIEVAL CALL PER CELL. Give every get_ast_texts and every
+    vector_search its OWN repl cell with nothing after it in that
+    cell. A "Retrieval Discipline" refusal is a raised exception that
+    kills the rest of its cell, so keep each retrieval behind its own
+    cell boundary. When a refusal says a hash was already retrieved,
+    reuse the variable you already hold and fetch nothing.
+
+R4  EDIT ONLY THROUGH THE GUARDED FAMILY. Move bytes only with
+    trellis_textedit.replace_lines / insert_lines / delete_lines.
+    Success requires textedit_raw_splices == 0.
+</governing_rules>
+
+<state_protocol>
+Keep a running upsum dict in the repl (the system prompt requires
+it). Create it in your FIRST cell in exactly this shape, update it at
+the END of every cell, and PRINT it before each decisive step:
+
+  upsum = {
+      "done": [{One_Line_Per_Completed_Step}],
+      "pending": [{One_Line_Per_Step_Not_Yet_Done}],
+      "blocked": [{One_Line_Per_Blocker_With_Its_Cause}],
+      "decisive_facts": [{Citable_Hash_Ids}, {Anchor_Lines_Verified}],
+  }
+
+A step still in "pending" is work you have NOT done, however far back
+the transcript claims otherwise — believe upsum over the scrollback.
+Keep len(str(upsum)) at or under UPSUM_BUDGET by REWRITING each list
+in place, never appending endlessly.
+</state_protocol>
+
+<specification>
+All edits are in src/workers/rlm_job.ts and src/workers/rlm_job.test.ts.
+buildAgentEnv is a PURE function; when cfg.rlmBackend is undefined its
+output must be byte-identical to today for a clean base env (this is
+the T1 shape: the surface is built and pinned before any caller feeds
+it — you change NO call site, and rlm_worker.ts is NOT yours to edit).
+
+Part 1 — AgentEnvConfig gains ONE new OPTIONAL field, mirroring the
+existing optional-block molds (textedit, retrievalBudget) already in
+the interface:
+  rlmBackend?: {
+    backend?: string;
+    model?: string;
+    baseUrl?: string;
+    apiKeyEnv?: string;
+    apiKeyValue?: string;
+  };
+Add a doc comment in the file's house style naming
+MODEL_BACKEND_SEAM.md §3.3/§4 as the design record: the block is
+present ONLY when the operator configured backend keys; the first
+four fields are config.rlmBackend's validated values (each undefined
+when its key is unset) and apiKeyValue is the fail-fast resolved value
+of the named key variable (the config.mcp.credentialEnv precedent —
+never logged); when the whole block is omitted, every TRELLIS_RLM_*
+variable is stripped so the child only ever sees validated backend
+config (the TRELLIS_MCP_SERVERS discipline).
+
+Part 2 — buildAgentEnv gains a set-or-delete section for the four
+TRELLIS_RLM_* variables, one variable per if/else, in the exact shape
+of the existing retrievalBudget block (if the field is defined set the
+env var to it, else delete the env var):
+  TRELLIS_RLM_BACKEND   <- cfg.rlmBackend?.backend
+  TRELLIS_RLM_MODEL     <- cfg.rlmBackend?.model
+  TRELLIS_RLM_BASE_URL  <- cfg.rlmBackend?.baseUrl
+  TRELLIS_RLM_API_KEY_ENV <- cfg.rlmBackend?.apiKeyEnv
+These values are already strings — no String() wrapping. Place this
+section among the other set-or-delete blocks (immediately after the
+retrievalBudget block's closing brace is natural), so an unset field —
+or an entirely absent rlmBackend block — strips any raw inherited
+value of that variable.
+
+Part 3 — the unconditional ambient-transport strip. Add exactly one
+line, delete env.OPENAI_BASE_URL;, to the experiment-flag deletion
+block (immediately after delete env.TRELLIS_TASK_NAMED_FILES;), with a
+comment naming MODEL_BACKEND_SEAM.md §4 layer 2: the worker never
+forwards the ambient SDK transport variable, so an inherited value can
+never redirect a spawned agent — the strip holds unconditionally, even
+when cfg sets a base URL (the child gets TRELLIS_RLM_BASE_URL, never
+OPENAI_BASE_URL) and even for callers that bypassed config validation.
+
+Part 4 — forward the named key variable's VALUE under its own name
+(the mcpCredentialEnv loop precedent, §3.3). After the existing
+mcpCredentialEnv forwarding loop and before return env, add: when BOTH
+cfg.rlmBackend?.apiKeyEnv and cfg.rlmBackend?.apiKeyValue are defined,
+set env[cfg.rlmBackend.apiKeyEnv] = cfg.rlmBackend.apiKeyValue (the
+child resolves the named variable to the fail-fast value; never
+logged). The NAME itself is already forwarded by Part 2's
+TRELLIS_RLM_API_KEY_ENV set — this Part forwards the VALUE under that
+name.
+
+No other behavior changes. No call site changes anywhere. rlm_worker.ts
+is out of scope (its one-line wiring is T3's).
+</specification>
+
+<evidence_protocol goal="get one citable src/workers/rlm_job.ts hash into your retrieval set, confirm the task premise from its bytes, and HOLD it before any edit">
+E1 (one cell). Query the graph for the ACTION neighborhood of the
+   entity 'buildagentenv' (names are lowercase-normalized; provenance
+   rides edges in either direction, so match undirected):
+     MATCH (e:Entity)-[r:ACTION]-(o:Entity)
+     WHERE e.name = '{The_Buildagentenv_Entity}'
+     RETURN r.verb, o.name, r.sourceNodeIds,
+            coalesce(r.contested, false) AS contested
+   Keep only rows where contested is false. Every uncontested edge
+   here carries the SAME sourceNodeIds hash — the buildAgentEnv
+   function-body block, part of src/workers/rlm_job.ts. Collect the
+   distinct hashes from all uncontested edges into a variable (there
+   is one).
+
+E2 (one cell — R3). Fetch every collected hash in ONE get_ast_texts
+   call. Print the first line of each returned text.
+
+E3 (one cell). Load src/workers/rlm_job.ts, then classify — THIS is
+   the one-and-only pre-edit verbatim gate (R1):
+   a. text = frame_text('src/workers/rlm_job.ts')   # canonical join,
+      "\r" terminators intact on this CRLF file.
+   b. For each fetched hash: CITABLE when its full retrieved text is a
+      verbatim substring of text; otherwise NOT-CITABLE.
+   c. Cross-check with citable(all_fetched_hashes) and PRINT the
+      report. Keep a hash ONLY when your verbatim check AND the
+      probe's `citable` field agree. HOLD the survivors in a variable
+      for the completion protocol — you will NOT re-scan disk for
+      verbatim later, because your edits interleave this block.
+   d. Confirm from the citable bytes that BOTH molds you mirror live
+      in this block: the unconditional experiment-flag deletion block
+      (delete env.TRELLIS_EXP_OMIT_CMT … delete
+      env.TRELLIS_TASK_NAMED_FILES;) that Part 3 extends, and the
+      mcpCredentialEnv forwarding loop
+      (for (const [name, value] of Object.entries(cfg.mcpCredentialEnv
+      ?? {})) { env[name] = value; }) that Part 4 mirrors.
+
+E4 (fallback — ONLY if E3 left zero citable hashes). Make at most TWO
+   vector_search calls, each in its own cell (R3), querying about the
+   buildAgentEnv forward/strip discipline or the mcpCredentialEnv
+   forwarding loop in src/workers/rlm_job.ts; fetch nothing you
+   already hold; re-run E3's classification. Still nothing citable =>
+   R2 (THE STOP CONDITION) governs.
+</evidence_protocol>
+
+<editing_protocol>
+Author only genuinely NEW lines; move existing bytes by slicing them
+in code — never retype an existing line as your own. Line addresses
+shift after every staged insert, so for EACH insert re-read its
+neighborhood with trellis_textedit.lines() in the SAME cell, build
+byte-exact anchors that INCLUDE the trailing "\r", insert, then stop
+and re-locate before the next one. An AnchorMismatchError staged
+nothing — re-read and retry. Leave every existing line byte-unchanged.
+
+M1 (one cell). Read the current buildAgentEnv describe block in
+   src/workers/rlm_job.test.ts and one neighboring buildAgentEnv it()
+   (e.g. the retrieval-budget strip test) to learn the house test
+   mold: buildAgentEnv(base, {...CFG, ...}) with a hand-built base env
+   and a toEqual / `in` assertion. You will write fresh it() blocks in
+   these conventions and modify NO existing test.
+
+M2. Apply guarded inserts to src/workers/rlm_job.ts (R4), one insert
+   per labeled item, each re-located in its own cell:
+   a. The rlmBackend?: {...} optional field, INSIDE AgentEnvConfig,
+      immediately after the retrievalBudget?: number; field's own
+      comment-and-line, so the optional blocks stay grouped and the
+      closing brace of the interface is untouched.
+   b. The four TRELLIS_RLM_* set-or-delete if/else blocks in
+      buildAgentEnv, placed immediately after the retrievalBudget
+      set-or-delete block's closing line and before the
+      experiment-flag deletion comments.
+   c. The single delete env.OPENAI_BASE_URL; line plus its
+      §4-layer-2 comment, placed immediately after
+      delete env.TRELLIS_TASK_NAMED_FILES; and before the
+      mcpCredentialEnv forwarding comment.
+   d. The Part-4 key-value forward, placed immediately after the
+      mcpCredentialEnv forwarding loop's closing brace and before
+      return env;.
+
+M3. Author the new pins in src/workers/rlm_job.test.ts with guarded
+   insert_lines anchored on an existing line inside the buildAgentEnv
+   describe block (for example the block's final closing "});"), so
+   every existing test stays byte-intact. Add it() blocks pinning:
+   (a) forwards each of the four TRELLIS_RLM_* variables when
+       cfg.rlmBackend sets that field;
+   (b) strips each TRELLIS_RLM_* variable when the field is unset
+       (a raw inherited value is removed) and when the whole
+       rlmBackend block is absent;
+   (c) OPENAI_BASE_URL is stripped unconditionally — both when
+       cfg.rlmBackend is absent AND when cfg.rlmBackend.baseUrl is
+       set (assert the child env has TRELLIS_RLM_BASE_URL set and no
+       OPENAI_BASE_URL key);
+   (d) the named key variable's value is forwarded under its own name
+       (cfg.rlmBackend = { apiKeyEnv: 'SOME_NAME', apiKeyValue: 'v', …}
+       => env.SOME_NAME === 'v');
+   (e) absent-block byte-identity: with cfg.rlmBackend absent,
+       buildAgentEnv(cleanBase, CFG) deep-equals cleanBase PLUS the
+       keys buildAgentEnv injects UNCONDITIONALLY from CFG — it is NOT
+       the bare base env. Those unconditional keys are exactly:
+       NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD (from cfg.neo4j), PG_DSN
+       (from cfg.pgDsn), PYTHONUNBUFFERED === '1', PYTHONIOENCODING ===
+       'utf-8', and PYTHONPATH ONLY when cfg.pythonPath is set. Build
+       the expected object by mirroring the file's FIRST existing
+       buildAgentEnv test, 'forwards the validated connection values
+       and Python runtime flags': read that test's expected object and
+       reuse its exact key shape for your CFG (include PYTHONPATH
+       exactly when your CFG sets pythonPath), then also assert that NO
+       TRELLIS_RLM_* key and NO OPENAI_BASE_URL key is present.
+       Asserting toEqual({ PATH: ... }) — the bare base env alone — is
+       WRONG: it omits buildAgentEnv's own unconditional
+       connection/runtime keys and the pin goes red.
+
+M4. Review each file with trellis_textedit.diff, then write_back each
+   file.
+</editing_protocol>
+
+<verification_protocol>
+V1 (its OWN iteration — never a write cell or the submit cell).
+   Re-read the edited regions of src/workers/rlm_job.ts and the new
+   test it() blocks, PRINT each, and assert in code with each result
+   printed. ASSERTION DISCIPLINE — compare STRUCTURE, never
+   terminator-stripped text:
+   - multi-line region: region_equal(relpath, start,
+     [{Expected_Line_With_Trailing_CR}, ...]) OR
+     region_lines(relpath, start, end) == your expected LIST.
+   - whole-file substring: use frame_text(relpath) (terminators kept).
+   A concatenation of lines() texts without terminators reads false
+   even when the region is correct — never assert against one.
+   Assert: (a) the rlmBackend?: field appears exactly once inside
+   AgentEnvConfig; (b) each of the four TRELLIS_RLM_* set-or-delete
+   blocks appears exactly once in buildAgentEnv; (c) the line
+   delete env.OPENAI_BASE_URL; appears exactly once; (d) the four
+   existing experiment-flag deletes and the mcpCredentialEnv loop are
+   byte-unchanged; (e) every existing it() in the test file is
+   byte-unchanged and your new it() blocks are present.
+
+V2. When an assertion prints false but the PRINTED region shows the
+   intended content, the assertion is the bug: fix the assertion and
+   re-verify in a new iteration. A genuine content mismatch VISIBLE
+   in the printed region itself is the ONE case that triggers R2
+   (revert, no insight, report).
+</verification_protocol>
+
+<completion_protocol>
+C1. In a LATER iteration, after every V1 assertion has printed true:
+   re-read the rules with trellis_task.grep('R1|R2|R3|R4'), PRINT
+   upsum, and call citable() on your HELD survivors once more. This
+   re-check reads the substrate (retrieval + current-version bridge),
+   NOT the working frame — do NOT re-scan the file for verbatim, your
+   edits interleaved the block on purpose. Keep only hashes whose
+   `citable` field is True. If that leaves the list empty, R2 governs.
+
+C2. Record EXACTLY ONE derived insight, citing only the survivors:
+   trellis_neo4j.write_derived_insight(
+       subject='buildagentenv', verb='forwards_by_name',
+       obj='mcpcredentialenv',
+       sourceNodeIds=[{Citable_Rlm_Job_Hash_From_E3}])
+
+C3. Submit the report through trellis_answer.submit by REFERENCE
+   (trellis_answer.submit("report")), instantiating the
+   <output_contract> frame.
+</completion_protocol>
+
+<output_contract>
+Build this dict and submit it by reference. Fill every field; leave
+cited_hashes empty ONLY on the R2 path.
+
+  report = {
+      "graph_finding": "{What_The_Uncontested_buildagentenv_Edges_Named}",
+      "bytes_confirmed": "{The_Deletion_Block_And_The_mcpCredentialEnv_Loop}",
+      "edits_made": "{Each_rlm_job_ts_Insert_And_The_Test_Pins_One_Line_Each}",
+      "anchors_used": [{Byte_Exact_Anchor_Line_Per_Insert}],
+      "cited_hashes": [{Hash_Ids_That_Passed_R1}],
+      "why_citable": "{Retrieved_This_Run_AND_Verbatim_In_rlm_job_ts_At_E3}",
+  }
+</output_contract>
+
+<definition_of_done>
+The run is correct when ALL hold: exactly src/workers/rlm_job.ts and
+src/workers/rlm_job.test.ts changed; textedit_raw_splices == 0; every
+V1 assertion printed true; every existing test byte-unchanged; exactly
+one insight recorded, its sourceNodeIds a subset of your R1-passing
+survivors; the report submitted by reference. If any cannot be met,
+R2 governs: revert, record no insight, submit the empty-cited report.
+</definition_of_done>
+
+Edit no other file. If the graph, the retrieved bytes, or the file
+contents contradict this task (a mold is absent, or nothing is
+citable), R2 governs.
+
+*** THE TWO RULES THAT DECIDE THE RUN, ONCE MORE ***
+- R1 + R2: cite only a hash RETRIEVED THIS RUN whose bytes were
+  verbatim in src/workers/rlm_job.ts at evidence step E3 (before your
+  edits), confirmed by citable(); if none qualifies, record NO
+  insight at all.
+- R3: exactly one retrieval call per repl cell.
+```
+
+**Run proposal and estimate.** Gate: owner-approved per run (the
+quota probe runs FIRST — §5h.10). Driver (the §5h.11 mold): porcelain
+clean at spawn; `trellis_agent.py` spawned directly, research mode,
+`--max-iterations 16`, `TRELLIS_EDIT_ROOT` at the worktree,
+`TRELLIS_CITATION_AUDIT=1`, `PYTHONUTF8=1`,
+`TRELLIS_TASK_NAMED_FILES=["src/workers/rlm_job.ts","src/workers/rlm_job.test.ts"]`,
+full stdout to ONE log file (never `tee | head`). Estimate: $0.7–$1.2
+for ONE run, no pre-bundled contingency (Session 52's actual was
+$1.0888 at 16 full iterations), under the ≤$5/run cap; the
+post-landing split-scope policy-1 refresh for the changed
+`src/workers` files adds roughly $0.10–$0.30. Criterion: the standing
+feature-class mold judged item by item (§5i.5) — the pin-(e) fix
+targets item 5.
+
+**The run — VERDICT: NO LANDING (a clean R2 self-refusal; Session 53,
+July 14, 2026; one spawn, $0.7139).** The owner had pre-approved the
+paid run for this session. The quota probe ran FIRST (§5h.10): a
+minimal completion returned 7 in / 8 out (`ok`) — quota funded. One
+spawn followed, research mode, `--max-iterations 16`, `PYTHONUTF8=1`,
+`TRELLIS_EDIT_ROOT` at the worktree, `TRELLIS_CITATION_AUDIT=1`,
+`TRELLIS_TASK_NAMED_FILES` as staged, full stdout to
+`benchmark_logs/s53_t2_retry_run1.log` (local, gitignored). Exit 0,
+104.0s wall.
+
+**Run telemetry: $0.7139 computed from tokens (231,552 in / 13,498 out
+at the gpt-5.4 rates $2.50/M in + $10/M out — WITHIN the $0.7–$1.2
+estimate), 12 model calls, 104.0s agent time; 2 db tool calls / 1
+retrieved address / 1 retrieval fetch / 0 dedup refusals / 0 budget
+refusals; 43 textedit ops / 2 files held / 0 write_backs / 9 guarded
+ops / 0 raw splices; `answer_submits` 1; cited_hashes EMPTY; porcelain
+after the run: CLEAN (zero files changed).** The run followed the
+evidence protocol cleanly through E3: the graph query surfaced the
+single uncontested provenance hash, ONE `get_ast_texts` fetched it,
+`frame_text` + `citable()` both confirmed it citable at E3, the hash
+was HELD (citation audit: `read` = [`c3883a2e…d0b6d0b4`], `cited` = [],
+`citedButUnread` = []).
+
+**Then the run self-refused (R2, the V2 trigger) — NO LANDING.** Its
+staged edits contained EDITING-EXECUTION mistakes it made itself: the
+`rlmBackend?` interface field was inserted TWICE inside
+`AgentEnvConfig`, the four `TRELLIS_RLM_*` set-or-delete blocks were
+inserted TWICE in `buildAgentEnv` (the second copy landing after the
+`Session 21` comment line, truncated), and the test-pin inserts
+anchored on `describe('buildAgentArgs', () => {` — the NEXT describe
+block — so they landed OUTSIDE the `buildAgentEnv` describe (the run's
+upsum recorded `blocked: ['Could not locate buildAgentEnv describe
+block in test file']`). Its V1 review printed the staged diff, saw the
+duplicates and the misplacement (a genuine content mismatch VISIBLE in
+the printed region), and applied V2 → R2: it reverted BOTH files
+(`trellis_textedit.revert`), recorded NO insight, and submitted the
+empty-cited `<output_contract>` report. The self-refusal was clean and
+correct on its own terms — the discipline prevented a broken diff from
+landing — but the increment did NOT land.
+
+**Criterion verdict, item by item — NO LANDING (a self-refusal, not a
+completed increment):**
+
+1. Named-file-only diff — N/A: no diff was produced (porcelain clean,
+   0 write_backs). Not a scope violation, but nothing landed.
+2. Evidence contract — NOT MET: zero recorded insights (the R2 path
+   correctly records none, but the increment's "exactly one insight"
+   is not satisfied).
+3. `stage2:check` zero findings — N/A: no post-run diff to check
+   (`--pre` was PASS pre-run; the guarded family, citable probe, and
+   Session 31 gate all behaved).
+4. Guarded-only PASS — `textedit_raw_splices` 0 (9 guarded ops).
+5. **The increment's own pins green — NOT REACHED.** No `write_back`
+   occurred, so `npm test` never ran against a diff. The v3.3 pin-(e)
+   fix (this retry's ONLY delta from v3.2) was CORRECT but UNEXERCISED
+   — the run failed at an EARLIER, DIFFERENT stage (editing execution).
+6. Human `git diff` review — N/A: no diff.
+7. Spend within estimate PASS — $0.7139 against $0.7–$1.2 (12 model
+   calls vs Session 52's 16; the run ended at self-refusal). Session
+   paid total ≈ $0.7140 (the quota probe ≈ $0.0001 + the run), under
+   the ≤$5/run cap.
+
+**Root cause: editing execution, and an R2 over-trigger — a NEW
+failure class, distinct from Session 52's pin miss and from any
+machinery defect.** Two mechanical sub-causes: (i) the guarded
+`insert_lines` sequence double-applied the interface-field insert and
+the set-or-delete block insert (address-shift after a staged insert,
+re-issued); (ii) the test-pin anchor was the ambiguous describe-block
+closing `});`, which the run could not disambiguate from the many
+other `});` lines, so it anchored on the following `describe(...)`
+instead. Compounding both: the v3.3 `<verification_protocol>` V2 rule
+("a genuine content mismatch VISIBLE in the printed region … triggers
+R2") let the run treat its OWN fixable staging slip as a task-premise
+contradiction and stop, when the correct response to a self-inflicted
+duplicate/misplaced insert is to revert THAT file and RE-STAGE — R2 is
+reserved for a contradicted SOURCE premise (a mold absent, nothing
+citable, a mismatch in the RETRIEVED bytes). Every harness layer fired
+per contract: the guarded family staged and reverted correctly, the
+citable probe and Session 31 gate behaved, the parse gate was never
+reached (no write), `stage2:check` had no diff to judge. No machinery
+change is indicated.
+
+**Cleanup: NONE OWED.** The R2 path called no `write_derived_insight`;
+the graph is byte-for-byte as Session 52 left it — 0 `buildagentenv`
+`-forwards_by_name->` `mcpcredentialenv` edges, `DERIVED_INSIGHT` total
+298, and the one edgeless `mcpcredentialenv` orphan node from
+Session 52's cleanup (guardrail 2 — left in place, harmless). No diff
+to revert; porcelain was clean before and after. `npm test` stays at
+876/87. The final tree ships ZERO non-markdown bytes.
+
+**Retry material (the v3.4 task material — a NEW owner-approved
+proposal; T2 has now had TWO sessions without a landing, so the §5g.3
+three-failure ladder's third-strike escalation is an OWNER-VISIBLE
+decision, presented alongside the retry).** v3.4 KEEPS v3.3's pin-(e)
+fix verbatim (it was correct, only unexercised) and adds three
+editing-execution safeguards, each targeting a named sub-cause:
+(1) **anti-duplication** — after all M2 inserts stage and before any
+`write_back`, count each inserted marker (`rlmBackend?: {`, each
+`env.TRELLIS_RLM_*` line, `delete env.OPENAI_BASE_URL;`) in the staged
+frame and assert EXACTLY ONCE; a duplicated or misplaced staged insert
+is a FIXABLE staging error → revert that file and re-stage, NEVER R2;
+(2) **a robust test anchor** — anchor the M3 test inserts on the LAST
+existing `it(...)` inside the `buildAgentEnv` describe (the Session-50
+`'always strips the citability-probe named-files input'` test at the
+block's tail), not the ambiguous final `});`; (3) **an R2 scope
+clarification** — R2 fires ONLY for a contradicted SOURCE premise (a
+mold absent, nothing citable, a mismatch in RETRIEVED bytes); a
+duplicate / misplaced / typo in your OWN staged edit is corrected in a
+new iteration, never escalated to R2. The estimate re-bases to
+$0.6–$1.1 for ONE run (this run was $0.7139 at 12 model calls). No
+machinery change anywhere; the failure class is task/run discipline,
+closable in the v4 task text.
+
+#### 5i.8 The v3.4 retry — Session 54 (July 14, 2026)
+
+The third T2 attempt. T2 has TWO no-landings (§5i.6 pin fail, §5i.7
+self-refusal); the owner ratified the v3.4 retry over the §5g.3
+third-strike escalation (both presented). Own owner-approved proposal,
+run ONLY on the owner's yes, one diff human-reviewed, landing a human
+PR (its own branch, off the merged Session 53 master).
+
+**Guardrail 15 honored.** Before a byte of the v3.4 safeguards was
+written, BOTH `prompt-engineering` and `hypershot-protocol` were
+INVOKED via the Skill tool and the safeguards authored against their
+guidance. Principles applied: decoherence prevention
+(`prompt-engineering` BP3) — v3.3's V2 rule ("a genuine content
+mismatch VISIBLE … triggers R2") was the fork the Session 53 run
+resolved wrongly (it read its OWN duplicate/misplaced staging as an R2
+trigger); v3.4 splits that check into three unambiguous branches;
+positive framing (BP4) — the run is told what to DO (revert that file,
+re-stage) not merely what to avoid; the invariance test
+(`hypershot-protocol` §6) — the marker strings (`rlmBackend?: {`, the
+four `env.TRELLIS_RLM_*` lines, `delete env.OPENAI_BASE_URL;`, the test
+title `'always strips the citability-probe named-files input'`) are
+invariant concrete tokens and stay concrete at the instruction layer,
+while the cited hash stays the hypershot variable
+`{Citable_Rlm_Job_Hash_From_E3}`.
+
+**v3.4 = v3.3 (§5i.7, already carrying the correct M3 pin-(e) fix)
+PLUS three editing-execution safeguards, each closing a named §5i.7
+sub-cause (verified by `diff`: exactly four hunks changed, everything
+else byte-for-byte v3.3):**
+
+1. **Anti-duplication** (§5i.7 sub-cause i, the duplicated
+   `rlmBackend?` field + the four doubled `TRELLIS_RLM_*` blocks): the
+   `<editing_protocol>` intro gains an after-each-insert exactly-once
+   confirmation and a NEVER-re-issue-an-already-staged-insert rule, and
+   a new **M4 "exactly-once staging check"** runs in code BEFORE any
+   `write_back` — count each inserted marker in `frame_text` and assert
+   each is present exactly once (and each new test sits inside the
+   `buildAgentEnv` describe); a wrong count is a FIXABLE staging error
+   (revert that file, re-stage), never R2.
+2. **A robust test anchor** (§5i.7 sub-cause ii, the pins anchored on
+   the next describe block): **M3** now anchors the test inserts on the
+   LAST existing `it(...)` inside the `buildAgentEnv` describe (the
+   Session-50 `'always strips the citability-probe named-files input'`
+   test, a UNIQUE line) and forbids anchoring on a bare `});` (not
+   unique — the exact way the Session 53 run mis-placed the pins).
+3. **An R2 scope clarification** (§5i.7 sub-cause iii, the R2
+   over-trigger): **R2** (in `<governing_rules>`) and **V2** (in
+   `<verification_protocol>`) now state R2 fires ONLY for a contradicted
+   SOURCE premise (no hash citable, a mold absent from the retrieved
+   bytes, or the retrieved bytes/graph contradicting the task); a
+   duplicate/misplaced/mistyped insert in your OWN staged edit is a
+   fixable staging error, never an R2 stop. V2 is rewritten from one
+   sentence into three explicitly-diagnosed causes (assertion wrong →
+   fix assertion; staging wrong → re-stage; source contradicts → R2).
+
+**Live evidence re-verification (the §5g.2/§5h.3 mold; zero-paid,
+read-only, July 14, 2026; ALL HELD — identical to §5i.3/§5i.7):**
+entity `buildagentenv` 17 ACTION edges / 0 contested / single hash
+`c3883a2e…d0b6d0b4`; block 3,202 chars verbatim on disk (`rlm_job.ts`
+unchanged — Session 53 shipped ZERO code bytes and merged docs-only);
+`stage2:check --pre --entity buildagentenv --named-file
+src/workers/rlm_job.ts --named-file src/workers/rlm_job.test.ts` →
+`PASS: zero findings`; `test:selfedit-harness` → ALL CHECKS PASSED;
+the split-scope policy-1 `--dry-run` echo read 3 to ingest / 300
+unchanged / 0 tombstones (the 3 are Session 51's `scripts/*.py`,
+outside the chain — no pre-run refresh owed); baseline `npm test`
+876/87 after `npm ci`.
+
+Task text v3.4, verbatim:
+
+```
+Stage-2 self-edit task (feature-class increment T2: the buildAgentEnv
+backend forward/strip surface).
+
+<mission>
+Extend buildAgentEnv in src/workers/rlm_job.ts, and add its unit pins
+to src/workers/rlm_job.test.ts, exactly per <specification>. This task
+text is the entire spec channel — the design record it quotes
+(MODEL_BACKEND_SEAM.md §3.3 and §4 layer 2) lives outside your reach,
+so follow the bytes here literally.
+ONE failure has killed a prior increment in this series: recording a
+derived insight that cites a hash the run never retrieved from the
+target file. <governing_rules> exists to make that failure
+impossible. Read it first and obey it over every other instinct.
+</mission>
+
+<governing_rules>
+*** CRITICAL — these four rules govern the whole run. Re-read them BY
+CODE with trellis_task.grep('R1|R2|R3|R4') before each decisive step
+(the first write_back, the insight write, the submit). If any
+instruction below ever seems to conflict with a rule here, THE RULE
+HERE WINS. ***
+
+R1  CITE ONLY WHAT YOU RETRIEVED FROM THE TARGET, CONFIRMED BEFORE
+    YOU EDIT. A hash is citable only when BOTH held at evidence step
+    E3, BEFORE any edit: you fetched it THIS RUN via
+    trellis_postgres.get_ast_texts or trellis_postgres.vector_search,
+    AND its retrieved text appeared verbatim inside
+    src/workers/rlm_job.ts. Retrieval plus that one pre-edit verbatim
+    confirmation confer citability; HOLD the surviving hash in a
+    variable. Your guarded inserts land INSIDE that block and will
+    interleave its bytes on disk afterward — this is EXPECTED and does
+    NOT revoke citability. Confirm with citable(hashes) — which reads
+    the substrate, not your working frame — and trust its `citable`
+    field. A hash you have seen only inside a trellis_textedit frame
+    is NOT citable.
+
+R2  WHEN NOTHING IS CITABLE, WRITE NOTHING — THE STOP CONDITION. If
+    E3 leaves no hash satisfying R1, revert every staged edit with
+    trellis_textedit.revert, submit the <output_contract> report with
+    cited_hashes empty and a reason, and end. Citing a related block
+    from any other file (for example src/config/index.ts) is the exact
+    failure this task guards against — it is forbidden, never a
+    fallback. R2 fires ONLY for a contradicted SOURCE premise: no hash
+    is citable, OR a mold you must mirror is ABSENT from the retrieved
+    bytes, OR the retrieved bytes/graph contradict the task. A
+    duplicate, misplaced, or mistyped insert in your OWN staged edit is
+    NOT an R2 condition — it is a fixable staging error you correct and
+    re-stage (M4, V2). Never revert-and-stop over a mistake YOU made
+    while editing.
+
+R3  ONE RETRIEVAL CALL PER CELL. Give every get_ast_texts and every
+    vector_search its OWN repl cell with nothing after it in that
+    cell. A "Retrieval Discipline" refusal is a raised exception that
+    kills the rest of its cell, so keep each retrieval behind its own
+    cell boundary. When a refusal says a hash was already retrieved,
+    reuse the variable you already hold and fetch nothing.
+
+R4  EDIT ONLY THROUGH THE GUARDED FAMILY. Move bytes only with
+    trellis_textedit.replace_lines / insert_lines / delete_lines.
+    Success requires textedit_raw_splices == 0.
+</governing_rules>
+
+<state_protocol>
+Keep a running upsum dict in the repl (the system prompt requires
+it). Create it in your FIRST cell in exactly this shape, update it at
+the END of every cell, and PRINT it before each decisive step:
+
+  upsum = {
+      "done": [{One_Line_Per_Completed_Step}],
+      "pending": [{One_Line_Per_Step_Not_Yet_Done}],
+      "blocked": [{One_Line_Per_Blocker_With_Its_Cause}],
+      "decisive_facts": [{Citable_Hash_Ids}, {Anchor_Lines_Verified}],
+  }
+
+A step still in "pending" is work you have NOT done, however far back
+the transcript claims otherwise — believe upsum over the scrollback.
+Keep len(str(upsum)) at or under UPSUM_BUDGET by REWRITING each list
+in place, never appending endlessly.
+</state_protocol>
+
+<specification>
+All edits are in src/workers/rlm_job.ts and src/workers/rlm_job.test.ts.
+buildAgentEnv is a PURE function; when cfg.rlmBackend is undefined its
+output must be byte-identical to today for a clean base env (this is
+the T1 shape: the surface is built and pinned before any caller feeds
+it — you change NO call site, and rlm_worker.ts is NOT yours to edit).
+
+Part 1 — AgentEnvConfig gains ONE new OPTIONAL field, mirroring the
+existing optional-block molds (textedit, retrievalBudget) already in
+the interface:
+  rlmBackend?: {
+    backend?: string;
+    model?: string;
+    baseUrl?: string;
+    apiKeyEnv?: string;
+    apiKeyValue?: string;
+  };
+Add a doc comment in the file's house style naming
+MODEL_BACKEND_SEAM.md §3.3/§4 as the design record: the block is
+present ONLY when the operator configured backend keys; the first
+four fields are config.rlmBackend's validated values (each undefined
+when its key is unset) and apiKeyValue is the fail-fast resolved value
+of the named key variable (the config.mcp.credentialEnv precedent —
+never logged); when the whole block is omitted, every TRELLIS_RLM_*
+variable is stripped so the child only ever sees validated backend
+config (the TRELLIS_MCP_SERVERS discipline).
+
+Part 2 — buildAgentEnv gains a set-or-delete section for the four
+TRELLIS_RLM_* variables, one variable per if/else, in the exact shape
+of the existing retrievalBudget block (if the field is defined set the
+env var to it, else delete the env var):
+  TRELLIS_RLM_BACKEND   <- cfg.rlmBackend?.backend
+  TRELLIS_RLM_MODEL     <- cfg.rlmBackend?.model
+  TRELLIS_RLM_BASE_URL  <- cfg.rlmBackend?.baseUrl
+  TRELLIS_RLM_API_KEY_ENV <- cfg.rlmBackend?.apiKeyEnv
+These values are already strings — no String() wrapping. Place this
+section among the other set-or-delete blocks (immediately after the
+retrievalBudget block's closing brace is natural), so an unset field —
+or an entirely absent rlmBackend block — strips any raw inherited
+value of that variable.
+
+Part 3 — the unconditional ambient-transport strip. Add exactly one
+line, delete env.OPENAI_BASE_URL;, to the experiment-flag deletion
+block (immediately after delete env.TRELLIS_TASK_NAMED_FILES;), with a
+comment naming MODEL_BACKEND_SEAM.md §4 layer 2: the worker never
+forwards the ambient SDK transport variable, so an inherited value can
+never redirect a spawned agent — the strip holds unconditionally, even
+when cfg sets a base URL (the child gets TRELLIS_RLM_BASE_URL, never
+OPENAI_BASE_URL) and even for callers that bypassed config validation.
+
+Part 4 — forward the named key variable's VALUE under its own name
+(the mcpCredentialEnv loop precedent, §3.3). After the existing
+mcpCredentialEnv forwarding loop and before return env, add: when BOTH
+cfg.rlmBackend?.apiKeyEnv and cfg.rlmBackend?.apiKeyValue are defined,
+set env[cfg.rlmBackend.apiKeyEnv] = cfg.rlmBackend.apiKeyValue (the
+child resolves the named variable to the fail-fast value; never
+logged). The NAME itself is already forwarded by Part 2's
+TRELLIS_RLM_API_KEY_ENV set — this Part forwards the VALUE under that
+name.
+
+No other behavior changes. No call site changes anywhere. rlm_worker.ts
+is out of scope (its one-line wiring is T3's).
+</specification>
+
+<evidence_protocol goal="get one citable src/workers/rlm_job.ts hash into your retrieval set, confirm the task premise from its bytes, and HOLD it before any edit">
+E1 (one cell). Query the graph for the ACTION neighborhood of the
+   entity 'buildagentenv' (names are lowercase-normalized; provenance
+   rides edges in either direction, so match undirected):
+     MATCH (e:Entity)-[r:ACTION]-(o:Entity)
+     WHERE e.name = '{The_Buildagentenv_Entity}'
+     RETURN r.verb, o.name, r.sourceNodeIds,
+            coalesce(r.contested, false) AS contested
+   Keep only rows where contested is false. Every uncontested edge
+   here carries the SAME sourceNodeIds hash — the buildAgentEnv
+   function-body block, part of src/workers/rlm_job.ts. Collect the
+   distinct hashes from all uncontested edges into a variable (there
+   is one).
+
+E2 (one cell — R3). Fetch every collected hash in ONE get_ast_texts
+   call. Print the first line of each returned text.
+
+E3 (one cell). Load src/workers/rlm_job.ts, then classify — THIS is
+   the one-and-only pre-edit verbatim gate (R1):
+   a. text = frame_text('src/workers/rlm_job.ts')   # canonical join,
+      "\r" terminators intact on this CRLF file.
+   b. For each fetched hash: CITABLE when its full retrieved text is a
+      verbatim substring of text; otherwise NOT-CITABLE.
+   c. Cross-check with citable(all_fetched_hashes) and PRINT the
+      report. Keep a hash ONLY when your verbatim check AND the
+      probe's `citable` field agree. HOLD the survivors in a variable
+      for the completion protocol — you will NOT re-scan disk for
+      verbatim later, because your edits interleave this block.
+   d. Confirm from the citable bytes that BOTH molds you mirror live
+      in this block: the unconditional experiment-flag deletion block
+      (delete env.TRELLIS_EXP_OMIT_CMT … delete
+      env.TRELLIS_TASK_NAMED_FILES;) that Part 3 extends, and the
+      mcpCredentialEnv forwarding loop
+      (for (const [name, value] of Object.entries(cfg.mcpCredentialEnv
+      ?? {})) { env[name] = value; }) that Part 4 mirrors.
+
+E4 (fallback — ONLY if E3 left zero citable hashes). Make at most TWO
+   vector_search calls, each in its own cell (R3), querying about the
+   buildAgentEnv forward/strip discipline or the mcpCredentialEnv
+   forwarding loop in src/workers/rlm_job.ts; fetch nothing you
+   already hold; re-run E3's classification. Still nothing citable =>
+   R2 (THE STOP CONDITION) governs.
+</evidence_protocol>
+
+<editing_protocol>
+Author only genuinely NEW lines; move existing bytes by slicing them
+in code — never retype an existing line as your own. Line addresses
+shift after every staged insert, so for EACH insert re-read its
+neighborhood with trellis_textedit.lines() in the SAME cell, build
+byte-exact anchors that INCLUDE the trailing "\r", insert, then stop
+and re-locate before the next one. An AnchorMismatchError staged
+nothing — re-read and retry. Leave every existing line byte-unchanged.
+After each insert, CONFIRM it landed EXACTLY ONCE before moving on:
+re-read the region and check the inserted marker is present a single
+time. NEVER re-issue an insert you already staged — a repeated
+insert_lines call stages a SECOND copy. (A prior run of this task
+duplicated the interface field and the four set-or-delete blocks
+exactly this way; M4 makes the exactly-once check explicit and
+mandatory before write_back.)
+
+M1 (one cell). Read the current buildAgentEnv describe block in
+   src/workers/rlm_job.test.ts and one neighboring buildAgentEnv it()
+   (e.g. the retrieval-budget strip test) to learn the house test
+   mold: buildAgentEnv(base, {...CFG, ...}) with a hand-built base env
+   and a toEqual / `in` assertion. You will write fresh it() blocks in
+   these conventions and modify NO existing test.
+
+M2. Apply guarded inserts to src/workers/rlm_job.ts (R4), one insert
+   per labeled item, each re-located in its own cell:
+   a. The rlmBackend?: {...} optional field, INSIDE AgentEnvConfig,
+      immediately after the retrievalBudget?: number; field's own
+      comment-and-line, so the optional blocks stay grouped and the
+      closing brace of the interface is untouched.
+   b. The four TRELLIS_RLM_* set-or-delete if/else blocks in
+      buildAgentEnv, placed immediately after the retrievalBudget
+      set-or-delete block's closing line and before the
+      experiment-flag deletion comments.
+   c. The single delete env.OPENAI_BASE_URL; line plus its
+      §4-layer-2 comment, placed immediately after
+      delete env.TRELLIS_TASK_NAMED_FILES; and before the
+      mcpCredentialEnv forwarding comment.
+   d. The Part-4 key-value forward, placed immediately after the
+      mcpCredentialEnv forwarding loop's closing brace and before
+      return env;.
+
+M3. Author the new pins in src/workers/rlm_job.test.ts with guarded
+   insert_lines. ANCHOR them on the LAST existing it(...) inside the
+   buildAgentEnv describe block — the test titled 'always strips the
+   citability-probe named-files input' — and insert your new it()
+   blocks immediately after THAT test's closing "});", still inside the
+   describe and BEFORE the "describe('buildAgentArgs', ...)" that
+   follows. Do NOT anchor on a bare "});": that string appears many
+   times in this file and is NOT unique, so a bare-brace anchor can
+   silently land your tests in the WRONG describe block (a prior run
+   anchored on the buildAgentArgs describe and placed the pins outside
+   buildAgentEnv). Build the anchor from the UNIQUE
+   it('always strips the citability-probe named-files input', ...) line
+   plus its short body so the location is unambiguous. Every existing
+   test stays byte-intact. Add it() blocks pinning:
+   (a) forwards each of the four TRELLIS_RLM_* variables when
+       cfg.rlmBackend sets that field;
+   (b) strips each TRELLIS_RLM_* variable when the field is unset
+       (a raw inherited value is removed) and when the whole
+       rlmBackend block is absent;
+   (c) OPENAI_BASE_URL is stripped unconditionally — both when
+       cfg.rlmBackend is absent AND when cfg.rlmBackend.baseUrl is
+       set (assert the child env has TRELLIS_RLM_BASE_URL set and no
+       OPENAI_BASE_URL key);
+   (d) the named key variable's value is forwarded under its own name
+       (cfg.rlmBackend = { apiKeyEnv: 'SOME_NAME', apiKeyValue: 'v', …}
+       => env.SOME_NAME === 'v');
+   (e) absent-block byte-identity: with cfg.rlmBackend absent,
+       buildAgentEnv(cleanBase, CFG) deep-equals cleanBase PLUS the
+       keys buildAgentEnv injects UNCONDITIONALLY from CFG — it is NOT
+       the bare base env. Those unconditional keys are exactly:
+       NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD (from cfg.neo4j), PG_DSN
+       (from cfg.pgDsn), PYTHONUNBUFFERED === '1', PYTHONIOENCODING ===
+       'utf-8', and PYTHONPATH ONLY when cfg.pythonPath is set. Build
+       the expected object by mirroring the file's FIRST existing
+       buildAgentEnv test, 'forwards the validated connection values
+       and Python runtime flags': read that test's expected object and
+       reuse its exact key shape for your CFG (include PYTHONPATH
+       exactly when your CFG sets pythonPath), then also assert that NO
+       TRELLIS_RLM_* key and NO OPENAI_BASE_URL key is present.
+       Asserting toEqual({ PATH: ... }) — the bare base env alone — is
+       WRONG: it omits buildAgentEnv's own unconditional
+       connection/runtime keys and the pin goes red.
+
+M4. THE EXACTLY-ONCE STAGING CHECK — run this in code BEFORE any
+   write_back (a prior run duplicated inserts and misplaced a test
+   block; this step catches both). Using frame_text, count occurrences
+   and assert each is EXACTLY ONE:
+   - in src/workers/rlm_job.ts: 'rlmBackend?: {' (the interface field);
+     'env.TRELLIS_RLM_BACKEND', 'env.TRELLIS_RLM_MODEL',
+     'env.TRELLIS_RLM_BASE_URL', 'env.TRELLIS_RLM_API_KEY_ENV' (the four
+     set-or-delete blocks); 'delete env.OPENAI_BASE_URL;'.
+   - in src/workers/rlm_job.test.ts: each NEW it(...) title you added
+     appears EXACTLY ONCE, and every one sits BETWEEN the
+     'always strips the citability-probe named-files input' test and the
+     "describe('buildAgentArgs'" line (i.e. still inside the
+     buildAgentEnv describe).
+   If ANY count is not one, or a new test sits outside that range, that
+   is a FIXABLE STAGING ERROR (V2), NOT an R2 stop: revert THAT file
+   with trellis_textedit.revert, re-stage the affected inserts
+   correctly (M2/M3), and re-run this check. Only when every count is
+   exactly one and every new test is inside the describe: review each
+   file with trellis_textedit.diff, then write_back each file.
+</editing_protocol>
+
+<verification_protocol>
+V1 (its OWN iteration — never a write cell or the submit cell).
+   Re-read the edited regions of src/workers/rlm_job.ts and the new
+   test it() blocks, PRINT each, and assert in code with each result
+   printed. ASSERTION DISCIPLINE — compare STRUCTURE, never
+   terminator-stripped text:
+   - multi-line region: region_equal(relpath, start,
+     [{Expected_Line_With_Trailing_CR}, ...]) OR
+     region_lines(relpath, start, end) == your expected LIST.
+   - whole-file substring: use frame_text(relpath) (terminators kept).
+   A concatenation of lines() texts without terminators reads false
+   even when the region is correct — never assert against one.
+   Assert: (a) the rlmBackend?: field appears exactly once inside
+   AgentEnvConfig; (b) each of the four TRELLIS_RLM_* set-or-delete
+   blocks appears exactly once in buildAgentEnv; (c) the line
+   delete env.OPENAI_BASE_URL; appears exactly once; (d) the four
+   existing experiment-flag deletes and the mcpCredentialEnv loop are
+   byte-unchanged; (e) every existing it() in the test file is
+   byte-unchanged and your new it() blocks are present.
+
+V2. A check that reads false has THREE causes, handled DIFFERENTLY —
+   diagnose which before you act:
+   - THE ASSERTION IS WRONG (the printed region shows the intended
+     content): the assertion is the bug — fix the assertion, re-verify
+     in a new iteration.
+   - YOUR STAGED EDIT IS WRONG (the printed region shows a duplicate
+     insert, a misplaced insert, or a mistyped line — a mistake YOU
+     made while editing): this is a FIXABLE STAGING ERROR, NOT a stop
+     condition. Revert THAT file with trellis_textedit.revert, re-stage
+     the affected inserts correctly (M2/M3), re-run M4, and re-verify.
+     Do NOT trigger R2.
+   - THE SOURCE CONTRADICTS THE TASK (a mold you must mirror is ABSENT
+     from the retrieved bytes, or nothing is citable): THIS is the ONE
+     case that triggers R2 (revert, no insight, report).
+   Only a contradicted SOURCE premise is R2. Your own editing slip is
+   always fixable — correct it and continue.
+</verification_protocol>
+
+<completion_protocol>
+C1. In a LATER iteration, after every V1 assertion has printed true:
+   re-read the rules with trellis_task.grep('R1|R2|R3|R4'), PRINT
+   upsum, and call citable() on your HELD survivors once more. This
+   re-check reads the substrate (retrieval + current-version bridge),
+   NOT the working frame — do NOT re-scan the file for verbatim, your
+   edits interleaved the block on purpose. Keep only hashes whose
+   `citable` field is True. If that leaves the list empty, R2 governs.
+
+C2. Record EXACTLY ONE derived insight, citing only the survivors:
+   trellis_neo4j.write_derived_insight(
+       subject='buildagentenv', verb='forwards_by_name',
+       obj='mcpcredentialenv',
+       sourceNodeIds=[{Citable_Rlm_Job_Hash_From_E3}])
+
+C3. Submit the report through trellis_answer.submit by REFERENCE
+   (trellis_answer.submit("report")), instantiating the
+   <output_contract> frame.
+</completion_protocol>
+
+<output_contract>
+Build this dict and submit it by reference. Fill every field; leave
+cited_hashes empty ONLY on the R2 path.
+
+  report = {
+      "graph_finding": "{What_The_Uncontested_buildagentenv_Edges_Named}",
+      "bytes_confirmed": "{The_Deletion_Block_And_The_mcpCredentialEnv_Loop}",
+      "edits_made": "{Each_rlm_job_ts_Insert_And_The_Test_Pins_One_Line_Each}",
+      "anchors_used": [{Byte_Exact_Anchor_Line_Per_Insert}],
+      "cited_hashes": [{Hash_Ids_That_Passed_R1}],
+      "why_citable": "{Retrieved_This_Run_AND_Verbatim_In_rlm_job_ts_At_E3}",
+  }
+</output_contract>
+
+<definition_of_done>
+The run is correct when ALL hold: exactly src/workers/rlm_job.ts and
+src/workers/rlm_job.test.ts changed; textedit_raw_splices == 0; every
+V1 assertion printed true; every existing test byte-unchanged; exactly
+one insight recorded, its sourceNodeIds a subset of your R1-passing
+survivors; the report submitted by reference. If any cannot be met,
+R2 governs: revert, record no insight, submit the empty-cited report.
+</definition_of_done>
+
+Edit no other file. If the graph, the retrieved bytes, or the file
+contents contradict this task (a mold is absent, or nothing is
+citable), R2 governs.
+
+*** THE TWO RULES THAT DECIDE THE RUN, ONCE MORE ***
+- R1 + R2: cite only a hash RETRIEVED THIS RUN whose bytes were
+  verbatim in src/workers/rlm_job.ts at evidence step E3 (before your
+  edits), confirmed by citable(); if none qualifies, record NO
+  insight at all.
+- R3: exactly one retrieval call per repl cell.
+```
+
+**Run proposal and estimate.** Gate: owner-approved per run (the owner
+ratified the v3.4 retry over the §5g.3 escalation). The quota probe
+runs FIRST (§5h.10). Driver (the §5i.6 mold, verbatim): porcelain
+clean at spawn; `trellis_agent.py` spawned directly, research mode,
+`--max-iterations 16`, `TRELLIS_EDIT_ROOT` at the worktree,
+`TRELLIS_CITATION_AUDIT=1`, `PYTHONUTF8=1`,
+`TRELLIS_TASK_NAMED_FILES=["src/workers/rlm_job.ts","src/workers/rlm_job.test.ts"]`,
+full stdout to ONE log file. Estimate: $0.6–$1.1 for ONE run, no
+pre-bundled contingency (Session 53's actual was $0.7139 at 12 model
+calls), under the ≤$5/run cap; the post-landing split-scope policy-1
+refresh for the changed `src/workers` files adds ≈$0.10–$0.30.
+Criterion: the standing feature-class mold judged item by item (§5i.5)
+— the three safeguards target the editing-execution class that failed
+to produce a diff in §5i.7.
+
+**The run — VERDICT: NO LANDING (a clean R2 self-refusal; Session 54,
+July 14, 2026; one spawn, $0.8163). THIRD consecutive T2 no-landing —
+the §5g.3 third-strike escalation is now ACTIVE.** Quota probe FIRST
+(§5h.10): 7 in / 5 out (`ok`). One spawn, research mode,
+`--max-iterations 16`, `PYTHONUTF8=1`, `TRELLIS_EDIT_ROOT` at the
+worktree, `TRELLIS_CITATION_AUDIT=1`, `TRELLIS_TASK_NAMED_FILES` as
+staged, full stdout to `benchmark_logs/s54_t2_run1.log` (local,
+gitignored). Exit 0, 87.0s wall.
+
+**Run telemetry: $0.8163 (278,234 in / 12,067 out at $2.50/M in +
+$10/M out — WITHIN the $0.6–$1.1 estimate), 14 model calls, 84.8s
+agent time; 2 db tool calls / 1 retrieved address / 1 retrieval fetch
+/ 0 dedup refusals; 44 textedit ops / 2 files held / 0 write_backs /
+4 guarded ops / 0 raw splices; `answer_submits` 1; cited_hashes EMPTY;
+porcelain CLEAN (zero files changed).** The run reached E3 cleanly
+(one `get_ast_texts` fetch, `frame_text` + `citable()` confirming, the
+hash HELD; citation audit `read`=[`c3883a2e…`], `cited`=[]).
+
+**What the v3.4 safeguards DID close — the Session 53 classes did NOT
+recur:** (i) NO duplicate inserts (4 guarded ops, no doubled markers —
+the anti-duplication rule + the exactly-once discipline held);
+(ii) the run anchored the test pins on the CORRECT unique line
+(`it('always strips the citability-probe named-files input (Session
+50)', ...)` — Safeguard 2's exact target, never the `buildAgentArgs`
+describe); (iii) it correctly treated staging failures as FIXABLE and
+reverted-and-re-staged mid-run without an R2 over-trigger ("Recovered
+from fixable staging error by reverting" — Safeguard 3 held).
+
+**The NEW failure class — stale line addresses from batched inserts.**
+The run BATCHED multiple guarded `insert_lines` calls in ONE repl cell
+using line numbers computed BEFORE any staging (e.g. insert_a at line
+155, then insert_b at line 209 in the same cell). Staging insert_a
+(the 13-line `rlmBackend?` field) shifted every subsequent line down,
+so insert_b's `anchor_before='  }\r'` at the now-stale line 209 landed
+on `  // spawn env can set it.\r` instead → `AnchorMismatchError`
+(11 mismatches total across the run). The guarded family behaved
+EXACTLY per contract — a byte-exact anchor that does not match stages
+NOTHING and teaches re-derivation. But the run kept re-batching with
+stale addresses, consumed 14 of 16 iterations without a single
+verified completed edit, and R2'd ("no verified edited completion was
+achieved"). The task text's "one insert per cell, re-locate between"
+rule (M2 + the editing-protocol intro, unchanged since v3.2) was NOT
+obeyed — the model batched.
+
+**Criterion, item by item — NO LANDING:** guarded-only PASS
+(`raw_splices` 0); spend within estimate PASS ($0.8163 vs $0.6–$1.1);
+evidence contract NOT MET (zero insights, the R2 path); item 5 (pins
+green) NOT REACHED (no `write_back`); scope/review N/A (no diff). No
+machinery defect — every layer fired per contract (the guarded family
+refused every mismatched anchor; the citable probe and Session 31 gate
+behaved; the parse gate was never reached).
+
+**Cleanup: NONE OWED.** The R2 path wrote nothing; the graph is
+byte-for-byte as Session 52 left it (0 `buildagentenv`
+`-forwards_by_name->` `mcpcredentialenv` edges, `DERIVED_INSIGHT` total
+298, the one edgeless `mcpcredentialenv` orphan preserved, guardrail
+2). No diff to revert; porcelain clean before and after; `npm test`
+stays 876/87. ZERO non-markdown bytes shipped.
+
+**The pattern and the escalation (§5g.3 third-strike, ACTIVE; the S48
+§5h.8 escalation rule).** T2 has now had THREE no-landings, each a
+DISTINCT editing-execution sub-failure that the prior task-text fix
+did NOT prevent from recurring in a new form: §5i.6 a mis-written test
+pin (fixed in v3.3) → §5i.7 duplicate inserts + a wrong-describe test
+anchor + an R2 over-trigger (fixed in v3.4) → §5i.8 stale line
+addresses from batched inserts. Each prompt patch closed its target
+class and the model surfaced a new way to mis-drive the guarded
+toolkit. This is the exact signal the owner doctrine names (close
+behavioral failure classes by TOOLING SHAPE, not prompt text; roadmap
+§4 / the tooling-over-prompt-modules direction) and the S48 §5h.8
+escalation rule anticipated (recurrence closes by tooling shape,
+owner-gated, never a write gate). **RECOMMENDATION (owner-visible
+decision — NOT implemented here): close the class in the guarded
+editing toolkit itself, per CODE_MEDIATED_TEXT doctrine (the model
+never counts; the engine computes addresses).** Candidate designs, to
+be chosen in a design record before any code:
+1. an engine-resolved-anchor insert — the model passes a UNIQUE anchor
+   substring, the engine finds the single matching line, computes the
+   exact address AND the terminator, and inserts; a non-unique or
+   absent anchor is a typed refusal. Removes model-typed line numbers
+   and `\r` byte-matching entirely (the two things S53/S54 got wrong);
+2. a batch/transaction insert that takes a list of
+   (unique-anchor, new-lines) and applies them in ONE engine pass,
+   re-resolving addresses internally so post-insert drift is the
+   engine's concern, not the model's.
+Either is an ADDITIVE change to the Session 41 guarded family (raw
+`splice` and the existing guarded methods stay byte-identical and
+pinned), lands zero-paid with a design record + drill pins in the
+§5e/§5g mold, and is re-measured by a subsequent T2 attempt. The
+alternative owner options remain: one more prompt attempt (v3.5 adding
+an explicit anti-batching rule — LOW confidence given the pattern), or
+PAUSE T2 and take a different objective. The escalation is the owner's
+call.
+
 
 ## 6. Verification summary
 
