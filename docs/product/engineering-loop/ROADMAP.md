@@ -22,11 +22,12 @@ program:
 1. `TRELLIS_ROADMAP.md` decides whether this program is scheduled.
 2. This file decides the program's feature sequence.
 3. `features.json` is the machine-readable twin of that sequence.
-4. The future `tools/engineering-loop/SPEC.md` will govern implementation
+4. `RESEARCH.md` preserves the evidence and hypothesis behind the sequence.
+5. The future `tools/engineering-loop/SPEC.md` will govern implementation
    conformance.
-5. `HANDOFF.md` selects one bounded feature for the next session and points to
+6. `HANDOFF.md` selects one bounded feature for the next session and points to
    the relevant sections; it must not copy this roadmap wholesale.
-6. Code, tests, and captured command evidence decide whether a feature passed.
+7. Code, tests, and captured command evidence decide whether a feature passed.
 
 Until `EL-02` establishes protected controller state, this file and
 `features.json` temporarily carry bootstrap status in Git. After `EL-02`, the
@@ -113,6 +114,7 @@ scope, gates, and acceptance without reconstructing this research conversation.
 Artifacts:
 
 - `docs/product/engineering-loop/ROADMAP.md`
+- `docs/product/engineering-loop/RESEARCH.md`
 - `docs/product/engineering-loop/features.json`
 - `docs/product/engineering-loop/feature.schema.json`
 - One scheduling pointer in `TRELLIS_ROADMAP.md` §4

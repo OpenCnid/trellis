@@ -1565,11 +1565,15 @@ paused, not cancelled.
    control plane is a concise human roadmap plus a machine-readable feature DAG
    and JSON Schema. The normative specification and architecture record are the
    next bounded feature; controller code begins only after ratification.
-2. **Artifacts:** `docs/product/engineering-loop/ROADMAP.md`, `features.json`,
-   and `feature.schema.json`; §4 gained one pointer row rather than copying the
-   program plan into the root roadmap. Ten features (`EL-00`–`EL-09`), thirteen
-   dependency edges, and thirty-four acceptance items are declared. `EL-08`
-   and `EL-09` are deferred and require new proposals.
+2. **Artifacts:** `docs/product/engineering-loop/ROADMAP.md`, `RESEARCH.md`,
+   `features.json`, and `feature.schema.json`; §4 gained one pointer row rather
+   than copying the program plan into the root roadmap. `RESEARCH.md` preserves
+   the local measurements, primary-source findings, alternatives, selected
+   hypothesis, prompt-protocol disposition, and pre-stated evaluation so later
+   contexts do not depend on this conversation. Ten features
+   (`EL-00`–`EL-09`), thirteen dependency edges, and thirty-four acceptance
+   items are declared. `EL-08` and `EL-09` are deferred and require new
+   proposals.
 3. **Boundary recorded:** repository-owned source/policy, out-of-process
    controller, protected mutable state outside the agent-writable worktree,
    one writer initially, resume within an episode and fresh context across

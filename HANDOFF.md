@@ -1735,6 +1735,8 @@ into a bounded multi-session program:
 
 - `docs/product/engineering-loop/ROADMAP.md` is the human sequence and session
   protocol.
+- `docs/product/engineering-loop/RESEARCH.md` preserves the research evidence,
+  alternatives, selected hypothesis, and primary-source links.
 - `docs/product/engineering-loop/features.json` is its machine-readable twin.
 - `docs/product/engineering-loop/feature.schema.json` is the bootstrap schema.
 - `TRELLIS_ROADMAP.md` §4 prioritizes the program ahead of the preserved TTT
@@ -1843,6 +1845,7 @@ are versioned and pinned, and outputs cross strict schemas.
 Read first:
 
 - `docs/product/engineering-loop/ROADMAP.md`
+- `docs/product/engineering-loop/RESEARCH.md`
 - `docs/product/engineering-loop/features.json`
 - `docs/product/engineering-loop/feature.schema.json`
 - This file §§3–8
