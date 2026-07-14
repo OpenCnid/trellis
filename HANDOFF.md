@@ -8,15 +8,15 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–42 and their same-day follow-ons (July 4–13, 2026; PRs
-#21–#85) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–46 and their same-day follow-ons (July 4–13, 2026; PRs
+#21–#90) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 42 with the Session 47 PR — this file keeps full
-narrative only for the most recent five sessions). The one-paragraph
-digest, oldest first; §1 below carries everything from this span that
-a new session must actually know:
+recently Session 46 with the Session 51 PR — this file keeps full
+narrative only for the most recent five sessions, now 47–51). The
+one-paragraph digest, oldest first; §1 below carries everything from
+this span that a new session must actually know:
 
 - **Sessions 1–8 + T-items** built the substrate: verified ingest
   (persist → read-back re-hash → membership → Merkle diff), the
@@ -439,68 +439,25 @@ a new session must actually know:
   retrieval set?". Honest scope: TTT impossible on the current API
   backend; H2 has no direct literature support.
 
-**Session 46 (July 13, 2026, PR #90) is complete: TTT-track rung
-R2a — the backend-seam census + the rlms verdict — delivered
-docs-only, zero-paid, READ-ONLY (roadmap §4 row 13, Phase 0 step 1;
-the full deliverable is `TEST_TIME_TRAINING.md` §13). Zero code
-bytes, zero prompt bytes (both composed-prompt pins unmoved), zero
-config changes, zero rlms bytes; no refresh owed.** **(1) The
-judge-calibration decision, presented at session START (the duty
-that had carried two sessions): the owner picked ACCEPT the strict
-judge.** No action — the benchmark-era `q_` pool contests at high
-rates as sampling reaches it, lazy recovery handles it, the strict
-verdict is honest (`has_category` labels are derived, never entailed
-by block text). A rubric change stays available as its own designed
-session if derived-classification claims ever become load-bearing.
-The decision duty is CLOSED. **(2) The census (§13.2):** every
-`chat.completions.create` (11) and `embeddings.create` (5) site
-disposed into six classes — the root RLM seam (the two
-`trellis_agent.py` `backend_kwargs` sites at lines 329/532 = T3's
-exact scope, the experimental checker client, two FROZEN probe
-instruments); worker/engine completions where the model id is
-ALREADY config-shaped through ONE seam (`EXTRACTION_MODEL`,
-`src/config/index.ts:109` → `config.llm.extractionModel`, ten
-consumers — a worker-side model change is an env-var change today)
-and only the transport is assumed (seven zero-arg `new OpenAI()`
-constructions); the embedder (NON-GOAL — three production
-`text-embedding-3-small` literals, schema-coupled `vector(1536)`);
-pricing constants (`PRICE_PER_M_INPUT 2.5`/`PRICE_PER_M_OUTPUT 10`
-in `oolong/scoring.ts` + `AUTHOR_EST_PRICE_PER_1K_USD 0.02` —
-estimate-only by design, unit-pinned); token accounting (moves
-cleanly; ONE recorded asymmetry — house `chatUsage` tolerates
-missing `usage`, rlms `_track_cost` THROWS on it); report stamps
-(gate nothing). **(3) The rlms verdict (§13.1): YES — rlms==0.1.3
-admits a base-URL/backend override WITHOUT library modification.**
-`RLM(backend=...)` selectable (default "openai"); `get_client`
-routes eight backends including an explicit `vllm` arm (the OpenAI
-client + asserted mandatory `base_url`);
-`OpenAIClient.__init__(api_key, model_name, base_url, ...)` takes
-`base_url` first-class into `openai.OpenAI(**client_kwargs)`
-("Works with vLLM as well"); `other_backends` gives depth-1
-sub-call separability. The seam = additive kwargs at the two
-construction sites. Caveats recorded: the endpoint MUST return
-`usage` on completions or rlms raises (R3a smoke asserts this
-FIRST); token/context lookups are compaction-only with safe
-fallbacks; local endpoints want an explicit dummy `api_key`; rlms
-runs `load_dotenv()` at import — an unmanaged credential input
-channel handed to R2b. **(4) The one real discovery (§13.3): the
-unmanaged `OPENAI_BASE_URL` pass-through.** Both installed SDKs
-(Node `openai@^6.45.0`, Python `openai==2.44.0`) resolve their base
-URL from ambient `OPENAI_BASE_URL` when unset (verified in both SDK
-sources) — the transport is ALREADY overridable today, but
-UNMANAGED: no validation, no typed refusal, no telemetry, no pin,
-and `buildAgentEnv` neither deliberately forwards nor strips it. An
-inherited value would redirect root completions, the checker, AND
-the `vector_search` embedder TOGETHER — the exact coupling the
-record's §4.2 forbids. NOT a defect (nothing sets it, nothing
-broke; the event-loop rule was checked: no queue jump) — it is the
-precise gap T1/T2/T3 close, with the census recommendation to R2b:
-strip `OPENAI_BASE_URL` unconditionally and express backend choice
-only through validated config. **(5) Close-out (docs-only mold):**
-`npm test` 837/85 green first try after `npm ci`; live drills NOT
-re-run (zero non-markdown bytes — the Session 45 precedent, reason
-recorded); Session 41 compressed to the digest, its §5 entry moved
-verbatim to the archive (window now 42–46).
+- **Session 46 (PR #90)** delivered TTT-track rung R2a docs-only,
+  zero-paid: the backend-seam census (`TEST_TIME_TRAINING.md` §13 —
+  every `chat.completions.create`/`embeddings.create` site disposed
+  into six classes; the worker-side model id ALREADY config-shaped
+  via `EXTRACTION_MODEL`; the root RLM seam = the two
+  `trellis_agent.py` `backend_kwargs` sites = T3's scope) and the
+  rlms verdict (YES — rlms==0.1.3 admits a base-URL/backend override
+  without library modification: `OpenAIClient(base_url=...)`
+  first-class, explicit `vllm` backend, one hard caveat — the
+  endpoint MUST return `usage` or `_track_cost` raises). The one real
+  discovery (§13.3): the UNMANAGED ambient `OPENAI_BASE_URL` SDK
+  pass-through (both installed SDKs read it when unset) that an
+  inherited value would use to redirect root completions, the
+  checker, AND the embedder TOGETHER — not a defect, the exact
+  T1/T2/T3 gap; census recommendation = strip it unconditionally,
+  express backend choice only through validated config. The
+  judge-calibration decision was presented and the owner picked
+  ACCEPT the strict judge (`has_category` labels are derived, not
+  entailed; the duty CLOSED).
 
 **Session 47 (July 13, 2026, PR #91) is complete: TTT-track rung
 R2b — the HUMAN-authored model-backend seam design record —
@@ -845,9 +802,52 @@ the same commit, `test:modules` green); T2 proceeds on the current
 addendum bytes either way.** The full review record is the roadmap
 §5 entry + the two PR comments.
 
+**Session 51 (July 13, 2026, PR #98) is complete: the S2a UPSUM
+refinement RATIFIED and IMPLEMENTED as a human-authored
+kernel-prompt increment — an owner-directed DETOUR from the default
+T2 objective, zero-paid ($0.0000, no LLM run). The full record is
+the roadmap §5 entry.** The owner adjudicated the PR-#96 §7
+proposal and ratified all four refinements; the increment landed:
+(1) `_ADDENDUM_BASE_SUFFIX` in `trellis_agent.py` rewritten so the
+`upsum` discipline pins its four load-bearing properties — the four
+lists REWRITTEN in place each turn never appended (the property the
+name promises; append regrows the 402,781-token bloat), an
+emergent-domain key allowed, the size bound CODE-CHECKED against the
+new `UPSUM_BUDGET` constant (`len(str(upsum))`, CODE_MEDIATED_TEXT
+§1 — the model never counts by eye), and the ITERATION BUDGET
+back-filled into the record; (2) `UPSUM_BUDGET = 2000` added to
+`trellis_scaffold.py` (kernel constant, never env-tunable) and
+injected into every research run's REPL namespace beside
+`trellis_task` (`custom_tools["UPSUM_BUDGET"]` — rlms accepts a bare
+int by construction, verified against the `rlm` package source);
+(3) both composed-prompt pins recomputed in the same commit
+(`e57e7a55…24bd`/`a37d2b4a…764e` → `6183de3a…ed50`/`34b00be6…d02a`,
+histories appended, `test:modules` [4]/[7] green); (4) new offline
+pins — scaffold vitest 28→29 (`UPSUM_BUDGET` positive-int),
+`test:modules` [4] +3 (addendum teaches rewrite-not-append + the
+code-checked budget; agent re-exports the constant),
+`test:rlm-sandbox` [8] 118→119 (the injection static pin). Authored
+under BOTH the prompt-engineering and hypershot-protocol skills
+BEFORE writing addendum bytes (Guardrail 15 — honored, unlike
+Session 50's v3.1 amendment). `docs/architecture/RLM_HARNESS_SCAFFOLDING.md`
+§3 amended to the four ratified properties (authoritative spec), §7
+stamped RATIFIED/IMPLEMENTED (proposal preserved as decision
+record). HONEST SCOPE: UNMEASURED, no behavior claim — spec-
+conformance of an already-landed scaffold to its own name, the
+pillar, and the record (guardrail 8, the Session 50 version).
+Acceptance: `npm test` 875/87 → 876/87 (zero existing tests
+changed); the FULL standing zero-LLM drill block green (sandbox
+119, harness [9], all 18 + drill:scale 1.68x CLOSED max 286 +
+Compose integration project `trellis_s51_ci` 11 assertions). No
+refresh owed this session (prompt/constant bytes only, no paid run
+consumed the substrate); Session 51's two changed src/rlm files owe
+a split-scope policy-2 `src/rlm` refresh that rides the next
+src/rlm-touching PR. T2 is UNCONSUMED and is Session 52's objective
+below, on the current addendum bytes.
+
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 51: TTT-track increment T2 — the
+Your objective is **Session 52: TTT-track increment T2 — the
 `buildAgentEnv` forward/strip increment (roadmap §4 row 13, Phase 1
 step 2; the RATIFIED queue's next step after T1 landed in
 Session 50). The spec is UNCHANGED and human-authored:
@@ -894,7 +894,7 @@ find an uncontested graph edge whose provenance is a live
 `PYTHONUTF8=1`, ONE log file. The criterion is the standing
 feature-class mold: the five items + guarded-only
 (`textedit_raw_splices == 0`) + the parse gate + the increment's
-own pins green (`npm test` grows from 875/87, zero existing tests
+own pins green (`npm test` grows from 876/87, zero existing tests
 changed) + spend within estimate — a harness flag or failing pin
 FAILS the increment (record, stop, diagnose; a retry is its own
 proposal). NO OPENAI quota risk is assumed: run the minimal
@@ -1271,9 +1271,9 @@ immutable, content-addressed physical location in source material.
      MODULES ONLY this kernel edition. Addendum files are brace-free;
      both validators are bound-for-bound twins. The composed default
      prompt is pinned at `COMPOSED_SYSTEM_PROMPT_SHA256 =
-     5d27e474…fe2a`; the omit-arm pin is `45987904…0b56`
-     (`test:modules` [7] re-proves the structural relationship every
-     run). Module #1 (`workspace-discipline`) is at version 2. Module
+     6183de3a…ed50`; the omit-arm pin is `34b00be6…d02a`
+     (Session 51 S2a UPSUM refinement; `test:modules` [4]/[7]
+     re-prove the structural relationship every run). Module #1 (`workspace-discipline`) is at version 2. Module
      #2 (`estimation-discipline`) is RETIRED (loader refuses
      composition — `test:modules` [8]). The owner direction is
      PERMANENT: behavioral failure classes close by tooling shape,
@@ -1399,17 +1399,26 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- `master`: the head after the July 13, 2026 Session 50 PR
-  (Part A scaffolds + the LANDED T1 increment — the PR that carries
-  this file; code surface: `src/rlm/trellis_scaffold.py` +
-  `trellis_scaffold.test.ts` + `scripts/test_scaffold_unit.py` NEW,
-  `trellis_agent.py` wired, `rlm_job.ts`/`rlm_job.test.ts` strip
-  pin, drill/check extensions, plus the RUN-AUTHORED T1 diff:
-  `src/config/index.ts` + the NEW `src/config/rlm_backend.test.ts`),
-  plus the post-Session-50 same-day collaborator PR #96 (docs-only,
-  merged `7a37418`: `TEST_TIME_TRAINING.md` §12.7 + rows 12–14;
-  `RLM_HARNESS_SCAFFOLDING.md` §7 — the S2a UPSUM refinement
-  PROPOSAL, owner decision pending).
+- `master`: the head after the July 13, 2026 Session 51 PR (#98 —
+  the PR that carries this file). Session 51 was an owner-directed
+  DETOUR from T2: it RATIFIED and IMPLEMENTED the S2a UPSUM
+  refinement (`RLM_HARNESS_SCAFFOLDING.md` §7, proposed in PR #96)
+  as a human-authored kernel-prompt increment, zero-paid. Code
+  surface: `src/rlm/trellis_scaffold.py` (new `UPSUM_BUDGET = 2000`
+  constant + docstring), `src/rlm/trellis_agent.py` (import + inject
+  the constant beside `trellis_task` + the rewritten
+  `_ADDENDUM_BASE_SUFFIX`), `scripts/test_modules.py` (both
+  composed-prompt pins recomputed + 3 checks),
+  `scripts/test_scaffold_unit.py` + `trellis_scaffold.test.ts`
+  (`UPSUM_BUDGET` pin), `scripts/test_rlm_sandbox.py` (injection
+  pin), and the two docs. Prior heads carried by earlier PRs: the
+  Session 50 PR (#95 — Part A scaffolds + the LANDED T1 increment:
+  `src/rlm/trellis_scaffold.py` NEW, `trellis_agent.py` wired,
+  `rlm_job.ts`/`rlm_job.test.ts` strip pin, plus the RUN-AUTHORED
+  T1 diff `src/config/index.ts` + the NEW
+  `src/config/rlm_backend.test.ts`) and the collaborator PR #96
+  (docs-only, merged `7a37418`: `TEST_TIME_TRAINING.md` §12.7 +
+  rows 12–14; `RLM_HARNESS_SCAFFOLDING.md` §7 the S2a proposal).
   Use `git log -- HANDOFF.md` to confirm this PR landed; if it is
   still unmerged when this session starts, STOP and merge it first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); module
@@ -1461,13 +1470,16 @@ Repository state at handoff creation:
   describes the OWNER'S durable dev PG (Session 43 ran on it;
   Session 42's ephemeral container staging died with the container,
   by design).
-- Session 50 moved code AND prompt bytes WITTINGLY: the
-  composed-prompt pins are now default `e57e7a55…24bd` / omit-arm
-  `a37d2b4a…764e` (the Session 50 scaffolding pass, then the
-  same-day skills re-authoring of the addendum — Guardrail 15;
-  histories in `scripts/test_modules.py` — recompute BOTH in the
-  same commit only if the kernel prompt or rubric legitimately
-  changes; `test:modules` green). The T1 diff is LANDED and is measured
+- Session 51 moved kernel-prompt bytes WITTINGLY (the S2a UPSUM
+  refinement): the composed-prompt pins are now default
+  `6183de3a…ed50` / omit-arm `34b00be6…d02a` (was Session 50's
+  `e57e7a55…24bd` / `a37d2b4a…764e`; histories in
+  `scripts/test_modules.py` — recompute BOTH in the same commit
+  only if the kernel prompt or rubric legitimately changes;
+  `test:modules` green). The S2a change is spec-conformance of an
+  already-landed scaffold (rewrite-not-append + code-checked
+  `UPSUM_BUDGET` + emergent-domain key), UNMEASURED, carrying NO
+  behavior claim (guardrail 8). The T1 diff is LANDED and is measured
   evidence — `src/config/index.ts` + `src/config/rlm_backend.test.ts`
   as the run authored them, two recorded cosmetic notes included
   (§5h.11); NEVER hand-edit it (the increments-1/2 precedent). The
@@ -1488,11 +1500,11 @@ Repository state at handoff creation:
   pull pandas transitively from `unstructured==0.23.1`); Docker Hub
   blob-CDN denials are recoverable with
   `registry-mirrors: ["https://mirror.gcr.io"]`.
-- Offline baseline: `npm test` = **875 passing across 87 files**
-  (Session 50: 837/85 pre-session → 866/86 after Part A → 875/87
-  after the landed T1 diff; the run's nine pin groups + the 28
-  scaffold pins + the buildAgentEnv strip pin; zero existing tests
-  changed).
+- Offline baseline: `npm test` = **876 passing across 87 files**
+  (Session 51: 875/87 → 876/87, the +1 scaffold `UPSUM_BUDGET` pin;
+  scaffold vitest 28 → 29; zero existing tests changed). Session 50
+  history: 837/85 pre-session → 866/86 after Part A → 875/87 after
+  the landed T1 diff.
 - `npm run build` and `npm run python:check` pass (the check imports
   polars — an environment without it fails the check by design).
 - `npm run drill:scale`: gate CLOSED at max provenance 286.
@@ -1508,24 +1520,24 @@ Repository state at handoff creation:
   committed copy is Session 50's 1.90x CLOSED run). Run the scale
   drill ALONE — never concurrently with other live drills on the
   shared dev database.
-- Live zero-LLM checks: Session 50 observed ALL 18 standing drills
+- Live zero-LLM checks: Session 51 observed ALL 18 standing drills
   green on the owner's Windows machine against the durable dev PG
-  (post-refresh, one sequential chain): `test:selfedit-harness`
-  (ALL CHECKS PASSED — with the NEW section [9]; the count is
+  (stack up, one sequential chain): `test:selfedit-harness`
+  (ALL CHECKS PASSED — with section [9]; the count is
   environment-shaped; runs the rehearsal python, so it needs the
   Python runtime deps), `test:answer-channel`, `test:textedit`
   (129 on Windows is the pin; 130 POSIX), `test:module-lifecycle`,
-  `test:modules` (pins at their NEW Session 50 values),
-  `test:promotion`, `test:rlm-workspace`, `test:rlm-mcp`,
-  `test:rlm-sandbox` (**118** — with the new section [8]),
-  `test:verification-sweep` (66 — it CANNOT pass on a host where
-  bare `python` lacks the runtime deps),
+  `test:modules` (both recomputed S2a pins + the 3 new UPSUM
+  checks), `test:promotion`, `test:rlm-workspace`, `test:rlm-mcp`,
+  `test:rlm-sandbox` (**119** — with the new S2a injection pin in
+  section [8]), `test:verification-sweep` (66 — it CANNOT pass on a
+  host where bare `python` lacks the runtime deps),
   `test:agent-loop`, `test:a2a`, `test:repo-ingest` ("All
   checks passed" is the signal — the [PASS] count is
   environment-dependent by construction),
   `test:benchmark-hardening`, `test:entity-resolution`,
   `test:api-hardening`, `test:belief-recovery`,
-  `test:invalidation-sweep`. A Session 51 that lands T2
+  `test:invalidation-sweep`. A Session 52 that lands T2
   (non-markdown bytes) runs the FULL standing block again.
 - Isolated Compose integration: 11 assertions (`--profile test`,
   unique project name; includes the containerized credentialed MCP
@@ -1547,9 +1559,10 @@ Repository state at handoff creation:
   unchanged in Sessions 39–50 — both layers stay cached.
 - The standing owner-conditional items — all propose-with-estimate,
   never self-served: **(1) TTT-track increment T2 — THE OBJECTIVE
-  (§3)** (T1 LANDED in Session 50 — record §5h.11; the RATIFIED
+  (§3)** (T1 LANDED in Session 50 — record §5h.11; S2a UPSUM
+  refinement LANDED in Session 51; the RATIFIED
   queue: T2 → T3 → T4 → Phase 2, record §12.6, spec
-  MODEL_BACKEND_SEAM.md §8; T2's task text is authored fresh this
+  MODEL_BACKEND_SEAM.md §8; T2's task text is authored fresh next
   session under the prompt-engineering + hypershot protocols on the
   Session 50 scaffolds, presented with the estimate at session
   START, run ONLY on the owner's yes; the quota probe runs FIRST
@@ -1621,20 +1634,15 @@ Repository state at handoff creation:
   the reliance claim decomposed C1 supported / C2 extrapolated — the
   load-bearing gap / C3 untested); questions 2–4 stand, question 4
   sharpened to "eligibility boundary = the run's retrieval set?";
-  official LaCT code exists (ICLR 2026); (12) the S2a UPSUM
-  refinement ratification (`RLM_HARNESS_SCAFFOLDING.md` §7, PR #96,
-  July 13, 2026): owner decision pending — if ratified, its own
-  human-authored kernel-prompt increment amending §3 and bringing
-  the live addendum into conformance with the amended record
-  (Guardrail 15 authoring under both skills, both composed-prompt
-  pins recomputed in the same commit, `test:modules` green); never
-  self-served, and NOT a Session 51 prerequisite — T2 proceeds on
-  the current addendum bytes. Row 10's measurement
+  official LaCT code exists (ICLR 2026). Row 10's measurement
   (Session 43), the judge-calibration MEASUREMENT (Session 44), the
   calibration DECISION (ACCEPT, Session 46), the R2a census
   (Session 46), the R2b design record (Session 47), the harness
-  scaffolds (Session 50 Part A), and increment T1 (Session 50
-  Part B) are DONE and off this list. If the owner approves
+  scaffolds (Session 50 Part A), increment T1 (Session 50
+  Part B), and the S2a UPSUM refinement RATIFICATION (Session 51 —
+  `RLM_HARNESS_SCAFFOLDING.md` §7 ratified and implemented, both
+  composed-prompt pins recomputed, `UPSUM_BUDGET = 2000` injected)
+  are DONE and off this list. If the owner approves
   nothing this session, the zero-paid proposal-staging work in §3
   still stands alone. OPERATIONAL NOTES (Windows): stopping
   `npm run dev:workers` through the session harness — OR a failed
@@ -1685,7 +1693,7 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 51 problem statement
+## 3. Session 52 problem statement
 
 **TTT-track increment T2: the `buildAgentEnv` forward/strip
 increment — the second FEATURE-CLASS self-edit, run through the
@@ -1693,8 +1701,17 @@ stage-2 harness on the Session 50 scaffolds.** T1 landed in
 Session 50 (record §5h.11): the `TRELLIS_RLM_*` config surface and
 the ambient `OPENAI_BASE_URL` guard are LIVE in
 `src/config/index.ts` with ZERO consumers. T2 makes the worker's
-child-environment builder honor them. The facts a new session must
-act on:
+child-environment builder honor them. (Session 51 was an
+owner-directed detour — it ratified + landed the S2a UPSUM
+refinement, moving both composed-prompt pins to
+`6183de3a…ed50` / `34b00be6…d02a`; it did NOT touch
+`src/workers/rlm_job.ts`, so T2's evidence chain and named files are
+unaffected. One carry-forward: Session 51's src/rlm prompt-byte
+edits — `trellis_agent.py`, `trellis_scaffold.py` — owe a
+split-scope policy-2 `src/rlm` refresh that rides the next
+src/rlm-touching PR; T2's own post-landing refresh is a policy-1
+`src/workers` leg and does not clear it.) The facts a new session
+must act on:
 
 - **What T2 lands (the spec is `MODEL_BACKEND_SEAM.md` §3.3 + §4
   layer 2 + the §8 T2 skeleton — quote the spec sections VERBATIM
@@ -1780,7 +1797,7 @@ act on:
   staging and pre-stated in the proposal; (3) `stage2:check` zero
   findings (scope + evidence + parse; comment-class not declared);
   (4) guarded-only (`textedit_raw_splices == 0`); (5) the
-  increment's own pins green — `npm test` grows from 875/87, zero
+  increment's own pins green — `npm test` grows from 876/87, zero
   existing tests changed (run by the human with the diff applied);
   (6) human `git diff` review against the spec (set-or-delete per
   variable, the unconditional strip's position in the deletion
@@ -1802,8 +1819,8 @@ act on:
 
 ## 4. Required design
 
-- **Pre-flight (zero-paid):** confirm the Session 50 PR merged
-  (`git log -- HANDOFF.md`); `npm ci`; `npm test` (875/87
+- **Pre-flight (zero-paid):** confirm the Session 51 PR merged
+  (`git log -- HANDOFF.md`); `npm ci`; `npm test` (876/87
   expected); re-read `MODEL_BACKEND_SEAM.md` §3.3/§4/§8-T2 and
   `REPOSITORY_INGESTION_REPORT.md` §5h.11 (the T1 landing IS the
   design input — its task shape is the template); the Windows
@@ -1985,7 +2002,7 @@ Update:
   standing decisions (the stage-1b prose chunk, the row-12 rollout
   continuation, row-11 defect-class increment 3 whenever a real
   target surfaces) remain owner alternates. Keep the five-session
-  narrative window (47–51 after this session): compress Session 46
+  narrative window (48–52 after this session): compress Session 47
   into the digest and move its roadmap §5 entry verbatim to
   `docs/archive/ROADMAP_HISTORY.md` (and update the archive-pointer
   paragraph in the same commit).
@@ -2259,8 +2276,8 @@ Update:
    the injection defense covers PRE-EXISTING data only (the
    same-run echo residual stands).
 9. Do not break existing consumers: the composed-prompt pins
-   (`e57e7a55…24bd` default / `a37d2b4a…764e` omit-arm since the
-   Session 50 skills re-authoring of the scaffold addendum,
+   (`6183de3a…ed50` default / `34b00be6…d02a` omit-arm since the
+   Session 51 S2a UPSUM refinement of the scaffold addendum,
    `test:modules` [4]/[7])
    move only with a witting kernel change, both recomputed in the
    same commit; module #1's pins hold; the legacy extraction-job

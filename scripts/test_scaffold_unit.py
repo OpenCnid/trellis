@@ -17,6 +17,7 @@ from trellis_scaffold import (  # noqa: E402
     CITABLE_ADDENDUM,
     HELPERS_ADDENDUM,
     TASK_GREP_MAX_HITS,
+    UPSUM_BUDGET,
     TrellisTask,
     build_citable_addendum,
     build_helpers_addendum,
@@ -67,6 +68,15 @@ out["grep_cap"] = {
     "capped": g["capped"],
     "max": TASK_GREP_MAX_HITS,
 }
+
+# --- S2a: the code-checked UPSUM budget constant (Session 51) -------------
+# The budget the addendum's len(str(upsum)) check compares against — an
+# engine-provided int (never a model-typed literal, the round-1 fix).
+out["upsum_budget"] = UPSUM_BUDGET
+out["upsum_budget_is_positive_int"] = (
+    isinstance(UPSUM_BUDGET, int) and not isinstance(UPSUM_BUDGET, bool)
+    and UPSUM_BUDGET > 0
+)
 
 # --- the named-files driver input ----------------------------------------
 out["ptnf_unset"] = parse_task_named_files({}) is None

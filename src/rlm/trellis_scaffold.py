@@ -27,10 +27,14 @@ rlms modification, the trellis_neo4j injection path):
   recorded in the design record §2: this defends against pre-existing
   injected content, not against a same-run echo loop.
 
-  S2a — UPSUM is addendum-only (the REPL's persistent locals ARE the
-  state store); nothing in this module implements it. S2b (rlms
-  compaction) is DEFERRED behind its own measured proposal and is
-  deliberately absent here.
+  S2a — UPSUM is taught by the addendum (the REPL's persistent locals
+  ARE the state store); this module carries only its code-checked size
+  budget, the UPSUM_BUDGET constant the driver injects into every
+  research run's namespace so the model bounds state size BY CODE
+  (len(str(upsum)) against the constant), never by eye — the counting
+  doctrine of CODE_MEDIATED_TEXT.md §1 (RLM_HARNESS_SCAFFOLDING.md
+  §3/§7). S2b (rlms compaction) is DEFERRED behind its own measured
+  proposal and is deliberately absent here.
 
   S3 — staged helpers, each a mechanical answer to a measured failure
   class: `frame_text` / `region_lines` / `region_equal` (the
@@ -81,6 +85,15 @@ CITABLE_MAX_HASHES = 64
 # (repo-key `trellis`, REPOSITORY_INGESTION_REPORT.md §5d). Drills
 # construct the factory with their own fixture prefix.
 TASK_DOC_KEY_PREFIX_DEFAULT = "repo:trellis:"
+# S2a UPSUM (RLM_HARNESS_SCAFFOLDING.md §3/§7): the code-checked size
+# budget, in characters of the serialized `upsum` dict, for the model's
+# running-state summary. The driver injects it into every research run's
+# REPL namespace beside trellis_task so the model bounds state size BY
+# CODE — computing len(str(upsum)) and comparing it to THIS constant,
+# never eyeballing a length (CODE_MEDIATED_TEXT.md §1: the model never
+# counts). A soft, self-correcting target the model compresses toward;
+# kernel constant, never env-tunable.
+UPSUM_BUDGET = 2000
 
 
 def wrap_task_text(text, run_uuid):

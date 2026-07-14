@@ -48,6 +48,16 @@ describe('S1: wrap_task_text (the uuid wrapper)', () => {
   });
 });
 
+describe('S2a: the code-checked UPSUM budget constant', () => {
+  it('exposes UPSUM_BUDGET as a positive integer kernel constant (2000)', () => {
+    // The engine-provided budget the addendum's len(str(upsum)) check
+    // compares against — injected beside trellis_task, never a model-
+    // typed literal (RLM_HARNESS_SCAFFOLDING.md §3/§7).
+    expect(R.upsum_budget).toBe(2000);
+    expect(R.upsum_budget_is_positive_int).toBe(true);
+  });
+});
+
 describe('S1: the trellis_task surface', () => {
   it('text() returns the operator task verbatim (braces and CR intact)', () => {
     expect(R.task_text_verbatim).toBe(true);

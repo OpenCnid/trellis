@@ -42,6 +42,7 @@ from trellis_textedit import (
 from trellis_answer import TrellisAnswer, get_answer_submit_count
 from trellis_scaffold import (
     TrellisTask,
+    UPSUM_BUDGET,
     build_citable_addendum,
     build_helpers_addendum,
     build_scaffold_helpers,
@@ -201,11 +202,14 @@ CRITICAL API CONTRACT: every tool method returns a JSON STRING, never a parsed o
 
 """
 
-_ADDENDUM_BASE_SUFFIX = """UPSUM (RUNNING STATE): keep a dict named `upsum` in your REPL namespace — your single source of truth for where the task stands. Create it in your FIRST ```repl``` block, update it at the end of EVERY block, and print it before every decisive step so it drives your next move. It has four list-valued keys, each holding short strings:
+_ADDENDUM_BASE_SUFFIX = """UPSUM (RUNNING STATE): keep a dict named `upsum` in your REPL namespace — your single source of truth for where the task stands. Create it in your FIRST ```repl``` block and REWRITE it at the end of EVERY block. It has four standing list-valued keys, each a list of short strings:
 - `done`: steps you have finished.
 - `pending`: steps still ahead of you — trust this list over the scrollback, which may claim otherwise.
 - `blocked`: what is stuck, each item with its cause.
 - `decisive_facts`: the load-bearing facts you have verified this run (addresses, hashes, confirmed anchors).
+Rewrite each list IN PLACE every turn, replacing the previous turn's list — never append to it. A rewritten working state stays small; an append-only list regrows exactly the transcript bloat this discipline exists to prevent. Add your own key beyond these four when the work opens a domain they do not cover, and give it ONE short note you keep current.
+
+Bound the whole dict BY CODE, never by eye: each turn compute `size = len(str(upsum))`, compare it to `UPSUM_BUDGET` (an integer already in your namespace), and when `size` exceeds it, compress the least-decisive entries and recompute `size`. Print `upsum` before every decisive step so it drives your next move.
 
 ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
 
@@ -494,6 +498,11 @@ def main():
             "trellis_postgres": postgres_tool,
             "trellis_answer": TrellisAnswer(),
             "trellis_task": task_surface,
+            # Session 51 (RLM_HARNESS_SCAFFOLDING.md §3/§7, S2a refinement):
+            # the code-checked UPSUM size budget, injected as a bare REPL
+            # constant on EVERY research run so the model bounds its running
+            # state by computing len(str(upsum)) against it — never by eye.
+            "UPSUM_BUDGET": UPSUM_BUDGET,
         }
 
         # Session 14: the Tier-3 workspace is injected only when external
