@@ -4746,7 +4746,99 @@ Criterion: the standing feature-class mold judged item by item (§5i.5)
 — the three safeguards target the editing-execution class that failed
 to produce a diff in §5i.7.
 
-<!-- 5i.8 RUN RECORD + VERDICT appended after the run -->
+**The run — VERDICT: NO LANDING (a clean R2 self-refusal; Session 54,
+July 14, 2026; one spawn, $0.8163). THIRD consecutive T2 no-landing —
+the §5g.3 third-strike escalation is now ACTIVE.** Quota probe FIRST
+(§5h.10): 7 in / 5 out (`ok`). One spawn, research mode,
+`--max-iterations 16`, `PYTHONUTF8=1`, `TRELLIS_EDIT_ROOT` at the
+worktree, `TRELLIS_CITATION_AUDIT=1`, `TRELLIS_TASK_NAMED_FILES` as
+staged, full stdout to `benchmark_logs/s54_t2_run1.log` (local,
+gitignored). Exit 0, 87.0s wall.
+
+**Run telemetry: $0.8163 (278,234 in / 12,067 out at $2.50/M in +
+$10/M out — WITHIN the $0.6–$1.1 estimate), 14 model calls, 84.8s
+agent time; 2 db tool calls / 1 retrieved address / 1 retrieval fetch
+/ 0 dedup refusals; 44 textedit ops / 2 files held / 0 write_backs /
+4 guarded ops / 0 raw splices; `answer_submits` 1; cited_hashes EMPTY;
+porcelain CLEAN (zero files changed).** The run reached E3 cleanly
+(one `get_ast_texts` fetch, `frame_text` + `citable()` confirming, the
+hash HELD; citation audit `read`=[`c3883a2e…`], `cited`=[]).
+
+**What the v3.4 safeguards DID close — the Session 53 classes did NOT
+recur:** (i) NO duplicate inserts (4 guarded ops, no doubled markers —
+the anti-duplication rule + the exactly-once discipline held);
+(ii) the run anchored the test pins on the CORRECT unique line
+(`it('always strips the citability-probe named-files input (Session
+50)', ...)` — Safeguard 2's exact target, never the `buildAgentArgs`
+describe); (iii) it correctly treated staging failures as FIXABLE and
+reverted-and-re-staged mid-run without an R2 over-trigger ("Recovered
+from fixable staging error by reverting" — Safeguard 3 held).
+
+**The NEW failure class — stale line addresses from batched inserts.**
+The run BATCHED multiple guarded `insert_lines` calls in ONE repl cell
+using line numbers computed BEFORE any staging (e.g. insert_a at line
+155, then insert_b at line 209 in the same cell). Staging insert_a
+(the 13-line `rlmBackend?` field) shifted every subsequent line down,
+so insert_b's `anchor_before='  }\r'` at the now-stale line 209 landed
+on `  // spawn env can set it.\r` instead → `AnchorMismatchError`
+(11 mismatches total across the run). The guarded family behaved
+EXACTLY per contract — a byte-exact anchor that does not match stages
+NOTHING and teaches re-derivation. But the run kept re-batching with
+stale addresses, consumed 14 of 16 iterations without a single
+verified completed edit, and R2'd ("no verified edited completion was
+achieved"). The task text's "one insert per cell, re-locate between"
+rule (M2 + the editing-protocol intro, unchanged since v3.2) was NOT
+obeyed — the model batched.
+
+**Criterion, item by item — NO LANDING:** guarded-only PASS
+(`raw_splices` 0); spend within estimate PASS ($0.8163 vs $0.6–$1.1);
+evidence contract NOT MET (zero insights, the R2 path); item 5 (pins
+green) NOT REACHED (no `write_back`); scope/review N/A (no diff). No
+machinery defect — every layer fired per contract (the guarded family
+refused every mismatched anchor; the citable probe and Session 31 gate
+behaved; the parse gate was never reached).
+
+**Cleanup: NONE OWED.** The R2 path wrote nothing; the graph is
+byte-for-byte as Session 52 left it (0 `buildagentenv`
+`-forwards_by_name->` `mcpcredentialenv` edges, `DERIVED_INSIGHT` total
+298, the one edgeless `mcpcredentialenv` orphan preserved, guardrail
+2). No diff to revert; porcelain clean before and after; `npm test`
+stays 876/87. ZERO non-markdown bytes shipped.
+
+**The pattern and the escalation (§5g.3 third-strike, ACTIVE; the S48
+§5h.8 escalation rule).** T2 has now had THREE no-landings, each a
+DISTINCT editing-execution sub-failure that the prior task-text fix
+did NOT prevent from recurring in a new form: §5i.6 a mis-written test
+pin (fixed in v3.3) → §5i.7 duplicate inserts + a wrong-describe test
+anchor + an R2 over-trigger (fixed in v3.4) → §5i.8 stale line
+addresses from batched inserts. Each prompt patch closed its target
+class and the model surfaced a new way to mis-drive the guarded
+toolkit. This is the exact signal the owner doctrine names (close
+behavioral failure classes by TOOLING SHAPE, not prompt text; roadmap
+§4 / the tooling-over-prompt-modules direction) and the S48 §5h.8
+escalation rule anticipated (recurrence closes by tooling shape,
+owner-gated, never a write gate). **RECOMMENDATION (owner-visible
+decision — NOT implemented here): close the class in the guarded
+editing toolkit itself, per CODE_MEDIATED_TEXT doctrine (the model
+never counts; the engine computes addresses).** Candidate designs, to
+be chosen in a design record before any code:
+1. an engine-resolved-anchor insert — the model passes a UNIQUE anchor
+   substring, the engine finds the single matching line, computes the
+   exact address AND the terminator, and inserts; a non-unique or
+   absent anchor is a typed refusal. Removes model-typed line numbers
+   and `\r` byte-matching entirely (the two things S53/S54 got wrong);
+2. a batch/transaction insert that takes a list of
+   (unique-anchor, new-lines) and applies them in ONE engine pass,
+   re-resolving addresses internally so post-insert drift is the
+   engine's concern, not the model's.
+Either is an ADDITIVE change to the Session 41 guarded family (raw
+`splice` and the existing guarded methods stay byte-identical and
+pinned), lands zero-paid with a design record + drill pins in the
+§5e/§5g mold, and is re-measured by a subsequent T2 attempt. The
+alternative owner options remain: one more prompt attempt (v3.5 adding
+an explicit anti-batching rule — LOW confidence given the pattern), or
+PAUSE T2 and take a different objective. The escalation is the owner's
+call.
 
 
 ## 6. Verification summary
