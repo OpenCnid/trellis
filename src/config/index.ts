@@ -131,6 +131,20 @@ const EnvSchema = z.object({
   // default; a set value is validated here fail-fast and re-validated
   // by the Python twin parse_retrieval_budget() with identical bounds.
   TRELLIS_RETRIEVAL_BUDGET_PER_RUN: z.coerce.number().int().positive().max(1024).optional(),
+  // MODEL_BACKEND_SEAM.md design record, sections 3 and 4 layer 1.
+  // No consumer reads these values yet; T2/T3 wire them.
+  TRELLIS_RLM_BACKEND: z.enum(['openai', 'vllm']).optional(),
+  // MODEL_BACKEND_SEAM.md design record, sections 3 and 4 layer 1.
+  // No consumer reads these values yet; T2/T3 wire them.
+  TRELLIS_RLM_MODEL: z.string().min(1).max(256).optional(),
+  // MODEL_BACKEND_SEAM.md design record, sections 3 and 4 layer 1.
+  // No consumer reads these values yet; T2/T3 wire them.
+  TRELLIS_RLM_BASE_URL: z.url().optional().refine((value) => value === undefined || value.startsWith('http://') || value.startsWith('https://'), {
+    message: 'TRELLIS_RLM_BASE_URL must use http or https',
+  }),
+  // MODEL_BACKEND_SEAM.md design record, sections 3 and 4 layer 1.
+  // No consumer reads these values yet; T2/T3 wire them.
+  TRELLIS_RLM_API_KEY_ENV: z.string().min(1).max(128).optional(),
 
   // A2A server surface (Session 11). Off by default: with the switch
   // unset the API registers no A2A routes and is byte-identical to a
@@ -256,6 +270,24 @@ const loadedModules = loadModules(moduleSelection);
 // precedent): an operator who set TRELLIS_EDIT_ROOT to a path that is
 // not an existing directory must learn it before any run, not from a
 // mid-run toolkit failure. Blank means unset.
+if ('OPENAI_BASE_URL' in process.env) {
+  throw new Error('Backend config: OPENAI_BASE_URL is not honored; set TRELLIS_RLM_BASE_URL (root agent) — worker transport is not yet configurable.');
+}
+
+const rlmApiKeyValue = env.TRELLIS_RLM_API_KEY_ENV ? process.env[env.TRELLIS_RLM_API_KEY_ENV]?.trim() || undefined : undefined;
+
+if (env.TRELLIS_RLM_BACKEND === 'vllm' && env.TRELLIS_RLM_BASE_URL === undefined) {
+  throw new Error('Backend config: TRELLIS_RLM_BACKEND and TRELLIS_RLM_BASE_URL must be set together when backend is vllm.');
+}
+
+if (env.TRELLIS_RLM_API_KEY_ENV !== undefined && env.TRELLIS_RLM_BASE_URL === undefined) {
+  throw new Error('Backend config: TRELLIS_RLM_API_KEY_ENV and TRELLIS_RLM_BASE_URL must be set together.');
+}
+
+if (env.TRELLIS_RLM_API_KEY_ENV !== undefined && rlmApiKeyValue === undefined) {
+  throw new Error(`Backend config: TRELLIS_RLM_API_KEY_ENV names ${env.TRELLIS_RLM_API_KEY_ENV}, which must be present and non-empty in process.env.`);
+}
+
 const editRoot = env.TRELLIS_EDIT_ROOT?.trim() || undefined;
 if (editRoot !== undefined) {
   let isDirectory = false;
@@ -368,6 +400,15 @@ export const config = {
     maxSegments: env.TRELLIS_WORKSPACE_MAX_SEGMENTS,
     maxBytes: env.TRELLIS_WORKSPACE_MAX_BYTES,
   },
+  // The resolved apiKeyValue never appears in logs or serializations.
+  rlmBackend: {
+    backend: env.TRELLIS_RLM_BACKEND,
+    model: env.TRELLIS_RLM_MODEL,
+    baseUrl: env.TRELLIS_RLM_BASE_URL,
+    apiKeyEnv: env.TRELLIS_RLM_API_KEY_ENV,
+    apiKeyValue: rlmApiKeyValue,
+  },
+
   textedit: {
     /** Operator-owned enablement + containment root; undefined = toolkit off. */
     editRoot,
