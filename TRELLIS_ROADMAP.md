@@ -1381,3 +1381,40 @@ killed), all far under the ≤$5/run cap.
    ratification entries — all Session 45 PR records) moved verbatim
    to `docs/archive/ROADMAP_HISTORY.md` (window now 46–50);
    HANDOFF regenerated (next objective: T2).
+7. **Same-day owner exchange (post-PR-#95, the §0 step-5 loop): the
+   prompt-authoring process gate — Guardrail 15 RATIFIED.** The
+   owner asked whether the `prompt-engineering` (meta-prompting) and
+   `hypershot-protocol` skills were invoked to author Session 50's
+   prompts. Honest answer, recorded: NO — neither Skill was invoked
+   this session. Part B's v3.1 was treated as a surgical amendment
+   inheriting v3's protocol authoring (Session 48, under both
+   protocols); Part A's addendum bytes followed the established
+   kernel conventions (themselves from the July-12 prompt-engineering
+   pass). A PROCESS gap, not a product one. The owner directed
+   (a) hard-requiring both skills for T2 authoring, (b) a
+   retroactive audit now, and (c) a PERMANENT rule: every future
+   session that creates or edits prompt text invokes BOTH skills
+   first. **The retroactive audit (both skills loaded, then read
+   against the landed bytes):** v3.1 is FULLY compliant — proper
+   semantic tags (`<mission>`/`<hard_rules>`/`<state_protocol>`/
+   `<specification>`/the four protocol blocks), attention zones at
+   head (`*** CRITICAL ***`) and tail (`*** THE TWO DECISIVE RULES,
+   ONCE MORE ***`), hypershot instruction-bearing variables for the
+   run-specific fills (`{The_Entity_Named_Above}`,
+   `{Citable_Index_Ts_Hashes_Held_From_Step_3}`, the
+   `[{Expected_Line}, ...]` assertion frame), and the §6 invariance
+   test correctly applied (tool names / entity names / the exact
+   guard message / spec bounds stay concrete as the task's
+   invariant vocabulary). Part A's addendum is substantially
+   compliant — hierarchical markers matching the kernel's numbered
+   TOOLS list, the `(HARD RULE)` attention convention, positive
+   framing that leads, the decisive-step rule reinforced at TOOLS-item
+   tail AND workflow-rules tail; the ONE hypershot opportunity (a
+   frame for the `upsum` dict shape) is BLOCKED by the rlms
+   no-literal-braces constraint, so prose is forced and correct.
+   **Verdict: the landed bytes PASS the audit — no re-authoring
+   warranted** (and it would move pins with no measurement / re-run
+   a landed T1). The gap was invoking the skills, not the output;
+   Guardrail 15 (permanent, HANDOFF §7) closes it so future prompts
+   get the discipline by construction. Also recorded as a feedback
+   memory. Zero-paid, docs-only.

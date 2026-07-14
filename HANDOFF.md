@@ -1677,12 +1677,25 @@ act on:
   proposal states the choice; the owner's yes covers it.
 - **Feature-class mechanics (record §12.6, the T1/v3.1 lineage):**
   the task text is authored THIS session under the house
-  prompt-engineering + hypershot protocols, with the scaffold
+  prompt-engineering + hypershot protocols. **HARD REQUIREMENT
+  (Guardrail 15, owner-directed July 13, 2026): before writing a
+  single byte of the T2 task text, INVOKE both skills via the Skill
+  tool — `prompt-engineering` (the meta-prompting protocol) AND
+  `hypershot-protocol` — and author against their loaded guidance;
+  this is a process gate, not a claim to make in prose. Session 50
+  authored v3.1 as an amendment WITHOUT re-invoking them (the
+  retroactive audit found the bytes compliant but the step skipped —
+  roadmap §5); T2 is net-new task text and gets the full treatment.**
+  Apply the scaffold
   disciplines: hard rules re-read through `trellis_task.grep`; the
   `<state_protocol>` upsum block; ONE retrieval call per cell;
   guarded-only edits; `frame_text`/`region_equal` verification;
   `citable()` before the ONE insight write; the STOP rule (no
-  citable hash = no insight). The driver sets
+  citable hash = no insight). Use hypershot instruction-bearing
+  variables for the run-specific fills (entity names, cited-hash
+  list) and keep the task's invariant vocabulary (tool names, the
+  exact spec bounds, guard messages) concrete — the §6 invariance
+  test. The driver sets
   `TRELLIS_TASK_NAMED_FILES=["src/workers/rlm_job.ts","src/workers/rlm_job.test.ts"]`,
   `PYTHONUTF8=1`, `TRELLIS_EDIT_ROOT` at the worktree,
   `TRELLIS_CITATION_AUDIT=1`, `--max-iterations 16`, ONE log file
@@ -1749,6 +1762,14 @@ act on:
 - **The quota probe FIRST** (one minimal completion — `models.list`
   proves nothing; §5h.10). Refused = record, skip the spawn, hand
   off zero-paid with the staged §5i record.
+- **INVOKE `prompt-engineering` AND `hypershot-protocol` (Skill
+  tool) BEFORE authoring the §5i.4 task text** — Guardrail 15, a
+  hard process gate: load both, author the task text against their
+  guidance (semantic tags, attention zones head+tail, hypershot
+  instruction-bearing variables for run-specific fills, the §6
+  invariance test for concrete vocabulary), and note in §5i.4 that
+  they were invoked. This applies to ANY prompt-authoring work in
+  any session, not only T2 (Guardrail 15).
 - **Stage the §5i increment record document-first (the §5h mold):**
   scope + named files (§5i.1), no stub needed (both files exist —
   record the difference from §5h.2), the live evidence verification
@@ -2250,6 +2271,35 @@ Update:
     this doctrine applied to the splice contract itself. Prompt text
     may reinforce the discipline but never substitutes for tooling
     shape.
+15. Prompt authoring runs the protocols (permanent; owner-directed
+    July 13, 2026 — survives every rewrite). ANY session that
+    creates or edits prompt text — a kernel/module addendum, an
+    RLM task text, an agent or sub-agent instruction, an extraction
+    or classification prompt, an output schema, a hypershot frame,
+    or any artifact that primes a model's generation — MUST FIRST
+    invoke BOTH the `prompt-engineering` skill (the Lexideck
+    meta-prompting protocol: semantic tags, hierarchical markers,
+    structured placeholders, collections, attention management) AND
+    the `hypershot-protocol` skill (contamination-free structural
+    examples: frames with free variables, the primacy/invariance
+    rules) via the Skill tool, and author against their loaded
+    guidance. This is a PROCESS gate, checked before the bytes are
+    written — never a claim asserted in prose after the fact. It
+    applies even to amendments of protocol-authored text (Session 50
+    skipped it for the v3.1 amendment; the retroactive audit found
+    the bytes compliant but the step missing — the rule closes that
+    gap so future prompts get the discipline by construction, not by
+    luck). The invariance test (`hypershot-protocol` §6) governs
+    what may sit at the system/prompt layer: only tokens identical
+    across every invocation (tool names, fixed schema fields, the
+    exact guard messages, spec bounds) stay concrete; everything
+    run-specific becomes a hypershot variable or moves to the data
+    layer. The rlms no-literal-braces constraint on composed-prompt
+    addenda still binds — where a brace-bearing hypershot frame
+    would break `.format()`, the prose description is the forced and
+    correct choice (recorded so it is not mistaken for a protocol
+    lapse). Recompute both composed-prompt pins in the same commit
+    whenever kernel prompt bytes move (Guardrail 9).
 
 ## 8. Explicit exclusions
 
