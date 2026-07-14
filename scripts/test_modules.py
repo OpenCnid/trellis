@@ -78,7 +78,17 @@ def expect_raises(name, fn, needle=""):
 #     UPSUM running-state discipline added before ITERATION BUDGET,
 #     and the decisive-step re-read rule added to the workflow tail
 #     (tooling in src/rlm/trellis_scaffold.py; the prompt teaches it).
-COMPOSED_SYSTEM_PROMPT_SHA256 = "6b8d41e843c6c9aae9c3f759ec07e16133b6f60fb99f26a393f483ada887b626"
+#   e57e7a55...24bd — Session 50 same-day (owner-directed, Guardrail
+#     15): the S1+S2a addendum bytes re-authored under the
+#     prompt-engineering + hypershot-protocol skills — positive-led
+#     framing, a stable "RE-READ BEFORE YOU ACT" label replacing the
+#     three drifting phrasings of the re-read/precedence rule, the
+#     UPSUM keys promoted to a sub-bullet list with per-key meaning,
+#     and the intro re-led on "your instructions are the operator
+#     task." Brace-free (the addendum cannot carry hypershot braces —
+#     rlms .format()); semantic content unchanged (structure-only,
+#     the July-12 pass precedent). T1 ran on the prior bytes.
+COMPOSED_SYSTEM_PROMPT_SHA256 = "e57e7a5539df6c59370878f8c5e7466ed4fc6bd1c24783ba98508655001824bd"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -287,7 +297,11 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     rule, and upsum discipline are kernel scaffolding, not part of
 #     the discipline experiment (still structurally default minus
 #     exactly the block).
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "5d3057f29f97f7006983809853c9c943bd256fc4cc705dcabdc353f16dc37dd6"
+#   a37d2b4a...764e — Session 50 same-day skills pass (see the default
+#     pin's history) lands in BOTH arms — the structural re-authoring
+#     of the scaffold addendum is not part of the discipline
+#     experiment (still structurally default minus exactly the block).
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "a37d2b4a506258e47058f15783e9d9ae5d31322b60a5f3ee55abe97c1112764e"
 
 import subprocess  # noqa: E402
 

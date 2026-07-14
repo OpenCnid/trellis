@@ -1275,7 +1275,9 @@ killed), all far under the ≤$5/run cap.
    PRECEDENCE hard rule), the UPSUM running-state discipline, and
    the decisive-step re-read workflow rule — a WITTING
    composed-prompt change, both pins recomputed in the same commit
-   (default `6b8d41e8…b626`, omit-arm `5d3057f2…7dd6`; history
+   (initially default `6b8d41e8…b626` / omit-arm `5d3057f2…7dd6`,
+   then RE-AUTHORED same-day under the skills — see item 8 — to
+   default `e57e7a55…24bd` / omit-arm `a37d2b4a…764e`; history
    entries appended in `scripts/test_modules.py`). `buildAgentEnv`
    gains the unconditional `TRELLIS_TASK_NAMED_FILES` delete (the
    experiment-flag deletion mold — a direct-spawn driver input,
@@ -1411,10 +1413,38 @@ killed), all far under the ≤$5/run cap.
    framing that leads, the decisive-step rule reinforced at TOOLS-item
    tail AND workflow-rules tail; the ONE hypershot opportunity (a
    frame for the `upsum` dict shape) is BLOCKED by the rlms
-   no-literal-braces constraint, so prose is forced and correct.
-   **Verdict: the landed bytes PASS the audit — no re-authoring
-   warranted** (and it would move pins with no measurement / re-run
-   a landed T1). The gap was invoking the skills, not the output;
-   Guardrail 15 (permanent, HANDOFF §7) closes it so future prompts
-   get the discipline by construction. Also recorded as a feedback
-   memory. Zero-paid, docs-only.
+   no-literal-braces constraint, so prose is forced there. The audit
+   confirmed structural COMPLIANCE. Guardrail 15 (permanent, HANDOFF
+   §7) closes the process gap; also recorded as a feedback memory.
+   Zero-paid, docs-only.
+8. **Owner override + the two skills passes (same-day, the §0
+   step-5 loop): the "PASS, no re-authoring" verdict was TOO
+   LENIENT — it checked compliance, not STRENGTH.** The owner
+   directed a genuine prompt-engineering pass with both skills
+   INVOKED. Two artifacts re-authored, each recorded and pin/byte
+   verified: **(a) task text v3.2** (`REPOSITORY_INGESTION_REPORT.md`
+   §5h.12 — v3.1 preserved verbatim as the historical T1 input;
+   v3.2 is the new T-series template): mission names the failure it
+   prevents; rules renamed R1–R4 with stable grep tokens and THE
+   STOP CONDITION promoted to R2 with explicit conflict priority;
+   positive-led framing throughout; `upsum` and the final report
+   given as hypershot FRAMES (braces are legal in the task text —
+   verified the escape+`.format()` round-trip is identical, no
+   KeyError); dense steps decomposed E1–E4/M1–M4/V1–V2/C1–C3; a new
+   `<definition_of_done>`; and M2(b)/(c) fix the exact divergence
+   the landed T1 diff showed (the guard-block misplacement + block
+   spacing — iterative refinement at the point of divergence).
+   **(b) the Part A kernel addendum** re-authored under the skills:
+   positive-led framing, a stable "RE-READ BEFORE YOU ACT" label
+   replacing three drifting phrasings, the UPSUM keys promoted to a
+   per-meaning sub-bullet list, the intro re-led on "your
+   instructions are the operator task"; brace-free by necessity
+   (the addendum passes rlms `.format()` — no hypershot braces, the
+   forced-prose case recorded in Guardrail 15). BOTH composed-prompt
+   pins recomputed (default `6b8d41e8`→`e57e7a55…24bd`, omit-arm
+   `5d3057f2`→`a37d2b4a…764e`; `test:modules` green); T1 ran on the
+   prior bytes — the strengthened addendum serves T2 onward. Both
+   passes are STRUCTURAL (spec, evidence chain, criterion, invariant
+   vocabulary unchanged); no comparison run needed (the owner's
+   standing evidence: the protocols significantly raise prompt
+   strength and adherence). Zero-paid, same PR (#95).

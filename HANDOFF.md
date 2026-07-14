@@ -733,9 +733,14 @@ wrapped at BOTH injection points, `trellis_task` kernel surface,
 helpers through the factory, two conditional addenda (empty when
 gated off — byte-identical prompt pinned). The always-on addendum
 gained TOOLS item 4 + TASK PRECEDENCE, the UPSUM discipline, and
-the decisive-step re-read workflow rule — the WITTING
-composed-prompt change: BOTH pins recomputed in the same commit
-(default `6b8d41e8…b626`, omit-arm `5d3057f2…7dd6`; histories
+the decisive-step re-read workflow rule — a WITTING composed-prompt
+change (pins recomputed), then RE-AUTHORED same-day under the
+`prompt-engineering` + `hypershot-protocol` skills (Guardrail 15;
+positive-led framing, the stable "RE-READ BEFORE YOU ACT" label,
+the UPSUM keys as a per-meaning sub-bullet list — brace-free, the
+addendum cannot carry hypershot braces). Current pins: default
+`e57e7a55…24bd`, omit-arm `a37d2b4a…764e` (T1 ran on the prior
+`6b8d41e8` bytes; both recomputes are in the same PR, histories
 appended). `buildAgentEnv` deletes `TRELLIS_TASK_NAMED_FILES`
 unconditionally (the experiment-flag mold) + unit pin. Author mode
 untouched (recorded scope decision). S2b (rlms compaction) NOT
@@ -1422,11 +1427,12 @@ Repository state at handoff creation:
   Session 42's ephemeral container staging died with the container,
   by design).
 - Session 50 moved code AND prompt bytes WITTINGLY: the
-  composed-prompt pins are now default `6b8d41e8…b626` / omit-arm
-  `5d3057f2…7dd6` (the Session 50 scaffolding pass; histories in
-  `scripts/test_modules.py` — recompute BOTH in the same commit only
-  if the kernel prompt or rubric legitimately changes;
-  `test:modules` green). The T1 diff is LANDED and is measured
+  composed-prompt pins are now default `e57e7a55…24bd` / omit-arm
+  `a37d2b4a…764e` (the Session 50 scaffolding pass, then the
+  same-day skills re-authoring of the addendum — Guardrail 15;
+  histories in `scripts/test_modules.py` — recompute BOTH in the
+  same commit only if the kernel prompt or rubric legitimately
+  changes; `test:modules` green). The T1 diff is LANDED and is measured
   evidence — `src/config/index.ts` + `src/config/rlm_backend.test.ts`
   as the run authored them, two recorded cosmetic notes included
   (§5h.11); NEVER hand-edit it (the increments-1/2 precedent). The
@@ -2210,8 +2216,9 @@ Update:
    the injection defense covers PRE-EXISTING data only (the
    same-run echo residual stands).
 9. Do not break existing consumers: the composed-prompt pins
-   (`6b8d41e8…b626` default / `5d3057f2…7dd6` omit-arm since the
-   Session 50 scaffolding pass, `test:modules` [4]/[7])
+   (`e57e7a55…24bd` default / `a37d2b4a…764e` omit-arm since the
+   Session 50 skills re-authoring of the scaffold addendum,
+   `test:modules` [4]/[7])
    move only with a witting kernel change, both recomputed in the
    same commit; module #1's pins hold; the legacy extraction-job
    payload and the `prose` payload both process with the exact pinned
