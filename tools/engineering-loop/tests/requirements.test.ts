@@ -1,7 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { EL02_REQUIREMENT_EVIDENCE, EL03_REQUIREMENT_EVIDENCE } from '../src/requirements';
+import {
+  EL02_REQUIREMENT_EVIDENCE,
+  EL03_REQUIREMENT_EVIDENCE,
+  EL04_REQUIREMENT_EVIDENCE,
+} from '../src/requirements';
 
 function requirementIds(spec: string, feature: string): string[] {
   return [...spec.matchAll(new RegExp(`^\\| \`(EL-REQ-[A-Z]+-\\d{3})\` \\| \`${feature}\` \\|`, 'gm'))]
@@ -44,6 +48,36 @@ describe('EL-02 normative linkage', () => {
 
   it('links all 12 EL-03 rows to concrete TypeScript sources and deterministic named tests', async () => {
     for (const evidence of EL03_REQUIREMENT_EVIDENCE) {
+      expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.every(test => test.includes(':'))).toBe(true);
+      for (const source of evidence.source) {
+        expect(source.endsWith('.ts')).toBe(true);
+        await expect(readFile(resolve('tools/engineering-loop/src', source), 'utf8')).resolves.not.toHaveLength(0);
+      }
+    }
+  });
+
+  it('independently computes and pins every and only EL-04-owned conformance row', async () => {
+    const spec = await readFile(resolve('tools/engineering-loop/SPEC.md'), 'utf8');
+    const computed = requirementIds(spec, 'EL-04');
+    expect(computed).toEqual([
+      'EL-REQ-PROMPT-001',
+      'EL-REQ-PROMPT-002',
+      'EL-REQ-PROMPT-003',
+      'EL-REQ-PROMPT-004',
+      'EL-REQ-PROMPT-005',
+      'EL-REQ-PROMPT-006',
+      'EL-REQ-PROMPT-007',
+    ]);
+    const mapped = EL04_REQUIREMENT_EVIDENCE.map(item => item.requirement).sort();
+    expect(computed).toHaveLength(7);
+    expect(new Set(mapped).size).toBe(7);
+    expect(mapped).toEqual(computed);
+  });
+
+  it('links all seven EL-04 rows to concrete TypeScript sources and deterministic named tests', async () => {
+    for (const evidence of EL04_REQUIREMENT_EVIDENCE) {
       expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
       expect(evidence.tests.length, evidence.requirement).toBeGreaterThan(0);
       expect(evidence.tests.every(test => test.includes(':'))).toBe(true);
@@ -110,6 +144,10 @@ describe('EL-02 normative linkage', () => {
     expect(byId.get('EL-02')?.dependencies).toEqual(['EL-01']);
     expect(byId.get('EL-02')?.bootstrapStatus).toBe('accepted');
     expect(byId.get('EL-03')?.dependencies).toEqual(['EL-02']);
+    expect(byId.get('EL-03')?.bootstrapStatus).toBe('accepted');
+    expect(byId.get('EL-04')?.dependencies).toEqual(['EL-01', 'EL-02']);
+    expect(byId.get('EL-04')?.bootstrapStatus).toBe('accepted');
+    expect(byId.get('EL-04')?.dependencies.every(id => byId.get(id)?.bootstrapStatus === 'accepted')).toBe(true);
     expect(['bootstrap_git_until_el_02', 'protected_controller_state']).toContain(catalog.statusAuthority);
   });
 });

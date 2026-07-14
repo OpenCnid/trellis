@@ -1,12 +1,12 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **repository observer accepted; prompt compiler next**
+Status: **prompt compiler ready for owner review; Codex runner proposed next**
 
 Owner direction: July 14, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current feature: `EL-04`
+Current feature: `EL-05` (proposed after owner acceptance of `EL-04`)
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than
@@ -85,7 +85,7 @@ At session close:
 | 1 | `EL-01` | Architecture record and normative service specification | `EL-00` | Forbidden | Accepted |
 | 2 | `EL-02` | Control kernel: schemas, transitions, durable state, event journal, fake runner | `EL-01` | Forbidden | Accepted |
 | 3 | `EL-03` | Repository observer and deterministic handoff renderer | `EL-02` | Forbidden | Accepted |
-| 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Planned |
+| 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Accepted (owner review pending) |
 | 5 | `EL-05` | Codex app-server runner adapter and episode rotation | `EL-02`, `EL-04` | Forbidden in acceptance | Planned |
 | 6 | `EL-06` | Verification, protected gates, recovery, and independent checker | `EL-03`, `EL-04`, `EL-05` | Forbidden in deterministic acceptance | Planned |
 | 7 | `EL-07` | Bounded pilot, repeated evaluation, and `HANDOFF.md` migration decision | `EL-06` | Owner-gated | Planned |
@@ -240,6 +240,19 @@ Acceptance focus:
 - No task-specific concrete example contaminates a reusable system template.
 - All model outputs cross a strict schema boundary.
 
+Deterministic implementation evidence (Session 58): all seven EL-04
+requirements map one-for-one to concrete source and deterministic tests. Four
+normalized, versioned, hash-pinned invariant role assets compile ahead of six
+separately bounded typed context collections. Strict input, packet, and
+role-output schemas refuse unknown fields, role or identity mismatch,
+duplicates, sensitive material, and byte-budget overflow. Static contamination
+scans and pure-assembly import pins exclude mutable session facts and external
+effects. Focused acceptance passed 60 tests across 3 files; repository-wide
+acceptance passed 1,032 tests across 98 files, plus build, Python, Compose,
+catalog/schema, and diff checks. Model calls = 0; paid calls = 0. The catalog
+status is the Session 58 bootstrap proposal; owner review and ratification have
+not occurred.
+
 ### EL-05 — Codex runner and episode rotation
 
 Outcome: the controller can start, observe, interrupt, and resume bounded Codex
@@ -346,12 +359,14 @@ the engineering-loop subset; it does not create a competing historical log.
 
 ## 8. Current next step
 
-`EL-00`, `EL-01`, and `EL-02` are accepted. The next session takes only
-`EL-03`: implement the repository observer and deterministic handoff renderer
-defined by `tools/engineering-loop/SPEC.md`. It computes bounded Git and command
-observations, refuses repository divergence and out-of-scope paths, and renders
-byte-identical status and handoff previews from trusted state. It must not add a
-real Codex adapter, production prompt, checker, approval service, tracker,
+`EL-00` through `EL-03` are owner-accepted. `EL-04` has deterministic
+acceptance and awaits owner review. After that review, the next
+dependency-unblocked feature is `EL-05`: implement only the adapter-neutral
+runner contract, pinned Codex app-server boundary, bounded lifecycle
+observations, and episode-continuity/fresh-boundary policy defined by
+`tools/engineering-loop/SPEC.md`. Acceptance uses deterministic protocol
+fixtures and a zero-completion integration smoke test. It must not add the
+EL-06 verifier, checker execution, approvals, protected effects, tracker,
 scheduler, automatic push/merge, product-runtime integration, or paid/model
 work. Manual `HANDOFF.md` remains authoritative until the EL-07 migration
 verdict.

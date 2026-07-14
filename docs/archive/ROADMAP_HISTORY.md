@@ -6433,3 +6433,95 @@ the run $1.0888) under the ≤$5/run cap. The increment record is
    the same commit). Docs-only close-out (the failed diff reverted,
    ZERO non-markdown bytes shipped — the Session 48 precedent): live
    drills not re-run, the reason recorded.
+
+### July 14, 2026 — Session 53: TTT-track increment T2 RETRY (task text v3.3) — a clean R2 self-refusal, NO LANDING, recorded (§4 row 13, Phase 1 step 2)
+
+The second T2 attempt. Owner-approved paid run for the session; the
+increment did NOT land — the run self-refused under R2 after making its
+own editing-execution mistakes, distinct from Session 52's pin miss.
+Full record: `REPOSITORY_INGESTION_REPORT.md` §5i.7. The shipped tree
+is docs-only; ZERO non-markdown bytes (the run reverted its staging;
+porcelain clean throughout). Session paid total ≈ $0.7140 (the quota
+probe ≈ $0.0001 + the run $0.7139), within the $0.7–$1.2 estimate and
+far under the ≤$5/run cap.
+
+1. **Zero-paid staging, all green (§5i.7):** the v3.3 task text
+   authored = the §5i.4 v3.2 text with ONLY the M3 pin-(e) fix (name
+   `buildAgentEnv`'s unconditional `NEO4J_*`/`PG_DSN`/
+   `PYTHONUNBUFFERED`/`PYTHONIOENCODING` keys, mirror the file's FIRST
+   existing `buildAgentEnv` test — never the bare base env); `diff`
+   confirmed the ONLY change is the pin-(e) block. **Guardrail 15
+   honored:** BOTH `prompt-engineering` and `hypershot-protocol` were
+   INVOKED via the Skill tool BEFORE writing the delta (decoherence
+   prevention on the ambiguous v3.2 phrasing; positive framing;
+   invariant env-var names kept concrete). Evidence chain re-verified
+   live, read-only, ALL HELD (identical to §5i.3): entity
+   `buildagentenv` 17 ACTION edges / 0 contested / single hash
+   `c3883a2e…d0b6d0b4`; the block 3,202 chars / 3,207 bytes verbatim on
+   disk (unchanged since `trellis#12`); `stage2:check --pre --entity
+   buildagentenv` PASS; `test:selfedit-harness` ALL CHECKS PASSED;
+   dry-run echo 3-to-ingest / 300-unchanged / 0-tombstones (the 3
+   drifting files are Session 51's `scripts/*.py`, outside the chain —
+   no pre-run refresh owed); baseline `npm test` 876/87 after `npm ci`.
+   The §5i.7 staging was committed so porcelain was clean at spawn.
+2. **Quota probe FIRST (§5h.10):** a minimal completion 7 in / 8 out
+   (`ok`) — quota funded.
+3. **The run — VERDICT NO LANDING (clean R2 self-refusal; one spawn,
+   $0.7139; 231,552 in / 13,498 out; 12 model calls; 104.0s; 2 db tool
+   calls; 0 write_backs; 9 guarded ops / 0 raw splices; cited_hashes
+   EMPTY; porcelain CLEAN):** the run followed the evidence protocol
+   cleanly through E3 (one `get_ast_texts` fetch of the single hash,
+   `frame_text` + `citable()` both confirming it citable, the hash
+   HELD; citation audit `read`=[`c3883a2e…`], `cited`=[]), then its
+   staged edits contained EDITING-EXECUTION mistakes it made itself:
+   the `rlmBackend?` interface field inserted TWICE, the four
+   `TRELLIS_RLM_*` set-or-delete blocks inserted TWICE (second copy
+   misplaced/truncated after the `Session 21` comment), and the
+   test-pin inserts anchored on `describe('buildAgentArgs', () => {`
+   (the NEXT describe block, so OUTSIDE the `buildAgentEnv` describe —
+   upsum recorded `blocked: ['Could not locate buildAgentEnv describe
+   block in test file']`). V1 printed the staged diff, saw the
+   duplicates/misplacement (a visible content mismatch), and applied
+   V2 → R2: reverted BOTH files, recorded NO insight, submitted the
+   empty-cited report.
+4. **Criterion, item by item — NO LANDING:** (1) named-file diff N/A
+   (no diff, porcelain clean); (2) evidence contract NOT MET (zero
+   insights — the R2 path); (3) `stage2:check` N/A (no post-run diff;
+   `--pre` was PASS); (4) guarded-only PASS (`raw_splices` 0);
+   (5) **pins green NOT REACHED** — no `write_back`, so `npm test`
+   never ran against a diff; the v3.3 pin-(e) fix (this retry's ONLY
+   delta) was CORRECT but UNEXERCISED, the run failing at an EARLIER
+   stage; (6) human review N/A; (7) spend within estimate PASS
+   ($0.7139 vs $0.7–$1.2).
+5. **Root cause + escalation:** editing execution + an R2 over-trigger
+   — a NEW failure class, distinct from Session 52's pin miss and from
+   any machinery defect (every harness layer fired per contract — the
+   guarded family staged/reverted correctly, the citable probe and
+   Session 31 gate behaved, the parse gate was never reached). The v3.3
+   `<verification_protocol>` V2 rule let the run treat its OWN fixable
+   staging slip as a task-premise contradiction; the correct response
+   is revert-that-file-and-re-stage, R2 being reserved for a
+   contradicted SOURCE premise. **T2 has now had TWO sessions without a
+   landing (Session 52 FAILED on a pin; Session 53 self-refused), so
+   the §5g.3 three-failure ladder's third-strike escalation is now an
+   OWNER-VISIBLE decision** — presented alongside the v3.4 retry
+   proposal, which KEEPS v3.3's pin-(e) fix and adds three
+   editing-execution safeguards (anti-duplication assert-exactly-once
+   before write_back; a robust test anchor on the block's last existing
+   `it(...)`; the R2 scope clarification). Estimate re-bases to
+   $0.6–$1.1 for ONE run. No machinery change indicated.
+6. **Cleanup: NONE OWED** — the R2 path wrote nothing; the graph is
+   byte-for-byte as Session 52 left it (`DERIVED_INSIGHT` 298, 0
+   `buildagentenv -forwards_by_name-> mcpcredentialenv` edges, the one
+   edgeless `mcpcredentialenv` orphan node preserved, guardrail 2).
+   Docs-only close-out (ZERO non-markdown bytes shipped — the
+   Session 48/52 precedent): `npm test` 876/87, `npm run build`,
+   `npm run python:check`, `docker compose --profile test config
+   --quiet` all green; the full standing drill block NOT re-run
+   (nothing non-markdown moved), reason recorded; `test:selfedit-harness`
+   and `stage2:check --pre` were run green during staging.
+7. **Bookkeeping:** row 13's cell gains the T2-retry NO-LANDING
+   outcome; the §5i increment record is complete through §5i.7; the
+   five-session window advances to 49–53 (Session 48's §5 entry moved
+   verbatim to `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph
+   updated in the same commit).

@@ -191,7 +191,7 @@ Ordered roughly by severity.
 
 | Order | Item | Rationale |
 |---|---|---|
-| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 + EL-01 + EL-02 + EL-03 ACCEPTED; EL-04 NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-01 ratified the architecture boundary and mapped all 106 mandatory requirements to existing feature acceptance/test classes. EL-02 added the owner-ratified deterministic control kernel. EL-03 adds all 12 owned requirements under `tools/engineering-loop/`: engine-computed Git observation, complete NUL-delimited paths, segment-safe scope and divergence refusal, bounded shell-free command evidence, protected retained artifacts, trusted strict-report derivation, and pure byte-pinned status/handoff previews. Focused acceptance passed 64 tests across 5 files and repository-wide acceptance passed 977 tests across 96 files, zero-model and zero-paid. The owner reviewed and ratified the EL-03 closeout on July 14, 2026, then explicitly authorized commit, merge, and push to `master`; manual `HANDOFF.md` remains authoritative through EL-07. EL-04 is next: prompt compiler, four strict role contracts, byte normalization/version/hash/budget/pins, and contamination refusal. No real runner, model call, scheduler, tracker, automatic push/merge, or paid work enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
+| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 + EL-01 + EL-02 + EL-03 OWNER-ACCEPTED; EL-04 DETERMINISTIC ACCEPTANCE COMPLETE, OWNER REVIEW PENDING; EL-05 PROPOSED NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-04 implements its exact seven requirements under `tools/engineering-loop/`: four normalized/versioned/hash-pinned invariant role assets, pure deterministic compilation with six typed downstream context collections and explicit byte budgets, strict compiler/packet/role-output schemas, deterministic overflow/fresh-episode refusal, and static contamination/authority scans. Focused acceptance passed 60 tests across 3 files and repository-wide acceptance passed 1,032 tests across 98 files, zero-model and zero-paid. EL-04 is unstaged and uncommitted for owner review; its bootstrap-status proposal does not claim ratification. After owner acceptance, EL-05 is next: the adapter-neutral runner boundary, pinned Codex app-server protocol adapter, bounded observations, and episode rotation, accepted through deterministic fixtures with no paid/model completion. No EL-06 verifier/checker execution/approval service, scheduler, tracker, automatic push/merge, or product-runtime integration enters before its named feature and gate. Manual `HANDOFF.md` remains authoritative through EL-07. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
 | ~~1~~ | ~~Structured logging and basic metrics (3.2 #9 / T16)~~ | **Done (July 6, 2026)** — split-process logs/metrics shipped; see §5 |
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
@@ -255,9 +255,10 @@ records, the Session 28 entry-plus-addendum precedent) with the
 Session 50 PR, Session 46 with the Session 51 PR, Session 47 with the
 Session 52 PR, Session 48 with the Session 53 PR, Session 49 with the
 Session 54 PR, Session 50 (its session entry plus the same-day PR #96/#97
-follow-ons) with the Session 55 EL-01 PR, and Session 51 with the Session 56
-EL-02 feature branch, and Session 52 with the Session 57 EL-03 feature branch.
-The live ledger below keeps the most recent five sessions: 53–57.)*
+follow-ons) with the Session 55 EL-01 PR, Session 51 with the Session 56
+EL-02 feature branch, Session 52 with the Session 57 EL-03 feature branch,
+and Session 53 with the Session 58 EL-04 feature branch. The live ledger below
+keeps the most recent five sessions: 54–58.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -794,98 +795,6 @@ the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
 
 
-### July 14, 2026 — Session 53: TTT-track increment T2 RETRY (task text v3.3) — a clean R2 self-refusal, NO LANDING, recorded (§4 row 13, Phase 1 step 2)
-
-The second T2 attempt. Owner-approved paid run for the session; the
-increment did NOT land — the run self-refused under R2 after making its
-own editing-execution mistakes, distinct from Session 52's pin miss.
-Full record: `REPOSITORY_INGESTION_REPORT.md` §5i.7. The shipped tree
-is docs-only; ZERO non-markdown bytes (the run reverted its staging;
-porcelain clean throughout). Session paid total ≈ $0.7140 (the quota
-probe ≈ $0.0001 + the run $0.7139), within the $0.7–$1.2 estimate and
-far under the ≤$5/run cap.
-
-1. **Zero-paid staging, all green (§5i.7):** the v3.3 task text
-   authored = the §5i.4 v3.2 text with ONLY the M3 pin-(e) fix (name
-   `buildAgentEnv`'s unconditional `NEO4J_*`/`PG_DSN`/
-   `PYTHONUNBUFFERED`/`PYTHONIOENCODING` keys, mirror the file's FIRST
-   existing `buildAgentEnv` test — never the bare base env); `diff`
-   confirmed the ONLY change is the pin-(e) block. **Guardrail 15
-   honored:** BOTH `prompt-engineering` and `hypershot-protocol` were
-   INVOKED via the Skill tool BEFORE writing the delta (decoherence
-   prevention on the ambiguous v3.2 phrasing; positive framing;
-   invariant env-var names kept concrete). Evidence chain re-verified
-   live, read-only, ALL HELD (identical to §5i.3): entity
-   `buildagentenv` 17 ACTION edges / 0 contested / single hash
-   `c3883a2e…d0b6d0b4`; the block 3,202 chars / 3,207 bytes verbatim on
-   disk (unchanged since `trellis#12`); `stage2:check --pre --entity
-   buildagentenv` PASS; `test:selfedit-harness` ALL CHECKS PASSED;
-   dry-run echo 3-to-ingest / 300-unchanged / 0-tombstones (the 3
-   drifting files are Session 51's `scripts/*.py`, outside the chain —
-   no pre-run refresh owed); baseline `npm test` 876/87 after `npm ci`.
-   The §5i.7 staging was committed so porcelain was clean at spawn.
-2. **Quota probe FIRST (§5h.10):** a minimal completion 7 in / 8 out
-   (`ok`) — quota funded.
-3. **The run — VERDICT NO LANDING (clean R2 self-refusal; one spawn,
-   $0.7139; 231,552 in / 13,498 out; 12 model calls; 104.0s; 2 db tool
-   calls; 0 write_backs; 9 guarded ops / 0 raw splices; cited_hashes
-   EMPTY; porcelain CLEAN):** the run followed the evidence protocol
-   cleanly through E3 (one `get_ast_texts` fetch of the single hash,
-   `frame_text` + `citable()` both confirming it citable, the hash
-   HELD; citation audit `read`=[`c3883a2e…`], `cited`=[]), then its
-   staged edits contained EDITING-EXECUTION mistakes it made itself:
-   the `rlmBackend?` interface field inserted TWICE, the four
-   `TRELLIS_RLM_*` set-or-delete blocks inserted TWICE (second copy
-   misplaced/truncated after the `Session 21` comment), and the
-   test-pin inserts anchored on `describe('buildAgentArgs', () => {`
-   (the NEXT describe block, so OUTSIDE the `buildAgentEnv` describe —
-   upsum recorded `blocked: ['Could not locate buildAgentEnv describe
-   block in test file']`). V1 printed the staged diff, saw the
-   duplicates/misplacement (a visible content mismatch), and applied
-   V2 → R2: reverted BOTH files, recorded NO insight, submitted the
-   empty-cited report.
-4. **Criterion, item by item — NO LANDING:** (1) named-file diff N/A
-   (no diff, porcelain clean); (2) evidence contract NOT MET (zero
-   insights — the R2 path); (3) `stage2:check` N/A (no post-run diff;
-   `--pre` was PASS); (4) guarded-only PASS (`raw_splices` 0);
-   (5) **pins green NOT REACHED** — no `write_back`, so `npm test`
-   never ran against a diff; the v3.3 pin-(e) fix (this retry's ONLY
-   delta) was CORRECT but UNEXERCISED, the run failing at an EARLIER
-   stage; (6) human review N/A; (7) spend within estimate PASS
-   ($0.7139 vs $0.7–$1.2).
-5. **Root cause + escalation:** editing execution + an R2 over-trigger
-   — a NEW failure class, distinct from Session 52's pin miss and from
-   any machinery defect (every harness layer fired per contract — the
-   guarded family staged/reverted correctly, the citable probe and
-   Session 31 gate behaved, the parse gate was never reached). The v3.3
-   `<verification_protocol>` V2 rule let the run treat its OWN fixable
-   staging slip as a task-premise contradiction; the correct response
-   is revert-that-file-and-re-stage, R2 being reserved for a
-   contradicted SOURCE premise. **T2 has now had TWO sessions without a
-   landing (Session 52 FAILED on a pin; Session 53 self-refused), so
-   the §5g.3 three-failure ladder's third-strike escalation is now an
-   OWNER-VISIBLE decision** — presented alongside the v3.4 retry
-   proposal, which KEEPS v3.3's pin-(e) fix and adds three
-   editing-execution safeguards (anti-duplication assert-exactly-once
-   before write_back; a robust test anchor on the block's last existing
-   `it(...)`; the R2 scope clarification). Estimate re-bases to
-   $0.6–$1.1 for ONE run. No machinery change indicated.
-6. **Cleanup: NONE OWED** — the R2 path wrote nothing; the graph is
-   byte-for-byte as Session 52 left it (`DERIVED_INSIGHT` 298, 0
-   `buildagentenv -forwards_by_name-> mcpcredentialenv` edges, the one
-   edgeless `mcpcredentialenv` orphan node preserved, guardrail 2).
-   Docs-only close-out (ZERO non-markdown bytes shipped — the
-   Session 48/52 precedent): `npm test` 876/87, `npm run build`,
-   `npm run python:check`, `docker compose --profile test config
-   --quiet` all green; the full standing drill block NOT re-run
-   (nothing non-markdown moved), reason recorded; `test:selfedit-harness`
-   and `stage2:check --pre` were run green during staging.
-7. **Bookkeeping:** row 13's cell gains the T2-retry NO-LANDING
-   outcome; the §5i increment record is complete through §5i.7; the
-   five-session window advances to 49–53 (Session 48's §5 entry moved
-   verbatim to `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph
-   updated in the same commit).
-
 ### July 14, 2026 — Session 54: TTT-track increment T2 RETRY (task text v3.4) — a clean R2 self-refusal, NO LANDING; THIRD strike → owner picked TOOLING SHAPE (§4 row 13, Phase 1 step 2)
 
 The third T2 attempt, owner-approved after #100 (Session 53) merged.
@@ -1226,3 +1135,85 @@ then explicitly authorized commit, merge, and push to `master`.
    `EL-04` is dependency-unblocked and proposed next: prompt compiler and strict
    role contracts under the mandatory prompt-engineering/hypershot gate. The
    paused TTT T2 tooling objective remains untouched.
+
+### July 14, 2026 — Session 58: EL-04 deterministic prompt compiler READY FOR OWNER REVIEW, zero-model and zero-paid
+
+Session 58 executed only engineering-loop feature `EL-04` on
+`implement-el04-prompt-compiler`, based on required master commit
+`197ec194ccc12c30f130df42d415e73fa87c9745`. The changes remain unstaged and
+uncommitted for owner review. No owner ratification, acceptance decision,
+commit, merge, push, or PR is claimed.
+
+1. **All seven owned requirements implemented and linked:** an independent
+   SPEC §18 audit computed exactly `EL-REQ-PROMPT-001` through
+   `EL-REQ-PROMPT-007`. Each maps one-for-one to concrete source and
+   deterministic tests in `tools/engineering-loop/src/requirements.ts`;
+   required = 7, implemented = 7, verified = 7, outstanding = 0.
+2. **Four invariant role assets and pure compilation:** planner, implementer,
+   read-only checker, and recovery assets place stable authority/trust
+   boundaries before typed downstream data. Assets normalize to UTF-8 without
+   BOM, LF, and one terminal newline; carry explicit versions and SHA-256 pins;
+   and pass static contamination scans. The assembly function imports no file,
+   Git, command, clock, environment, network, state-store, or model effect. It
+   compiles six separately bounded collections in semantic order: invariant
+   policy, validated state, active plan, controller evidence, episode summary,
+   and archive references.
+3. **Strict refusal boundaries:** compiler inputs, compiled packets, and all
+   four advisory role outputs use strict bounded schemas. Unknown fields, role
+   mismatch, malformed or duplicate identities, stale plan linkage, unlinked
+   evidence/effects, sensitive or approval material, and UTF-8 byte overflow
+   refuse. Per-section and total budget boundaries are pinned exactly;
+   overflow produces a canonical refusal and a fresh-episode boundary when the
+   bounded prior episode is the overflowing section. Worker output cannot
+   create controller evidence, satisfy verification, consume approval, invoke
+   an effect, or transition state.
+4. **Protocol and byte evidence:** the requested Prompt-Engineering and
+   Hypershot skills were unavailable in this environment, so the request's
+   authorized direct-file fallback was used. Both protocol files were read
+   completely before any prompt, meta-prompt, schema, or HANDOFF bytes were
+   authored. Semantic tagging, hierarchy/primacy, positive framing,
+   invariant-versus-data separation, attention management, and contamination
+   control are reflected in the assets and tests. Four asset digests, four
+   compiled packet digests, and success/refusal boundaries are snapshot-pinned.
+5. **Acceptance evidence:** baseline was 96 files / 977 tests. The exact
+   focused command `npx vitest run tools/engineering-loop/tests/prompt_contracts.test.ts
+   tools/engineering-loop/tests/prompt_compiler.test.ts
+   tools/engineering-loop/tests/requirements.test.ts` passed **60 tests across
+   3 files**. Final `npm test` passed **1,032 tests across 98 files**; `npm run
+   build` passed; `npm run python:check` printed `Python runtime syntax,
+   imports, rubric, and module assets verified.`; `docker compose config
+   --quiet` exited 0; Draft 2020-12 catalog validation printed **10**; `git
+   diff --check` exited 0. Model calls = 0; paid calls = 0.
+6. **Findings and scope audit:** preflight fetched `origin/master` and verified
+   HEAD, `origin/master`, and `FETCH_HEAD` all equal the required commit before
+   branch creation. The initial focused pin run exposed only the intentionally
+   unset snapshot values, which were replaced with engine-computed digests.
+   The first build exposed three TypeScript-only declaration/refinement errors;
+   they were corrected without widening runtime scope. The first post-closeout
+   focused run then correctly failed one stale catalog assertion that still
+   required EL-04 to be `planned`; the pin was advanced to the proposed
+   `accepted` bootstrap status. The full suite then exposed EL-03's intentional
+   catalog-derived view pins: `next_feature` advanced from EL-04 to EL-05, so
+   the canonical next-feature outcome and engine-computed report/status/handoff
+   digests were updated wittingly while renderer code stayed unchanged. The
+   entire acceptance block was restarted after those edits. The final Git
+   audit also observed shared `master`/`origin/master` advance one descendant
+   commit to `0925c3eef560a808eea10f70e32308e15ba65977` (PR #103: unrelated
+   reasoning-template architecture/module files) after the successful
+   preflight; EL-04 remains based on the explicitly required `197ec194…`, with
+   that commit as merge base and no rebase or merge attempted. The owner must
+   choose reconciliation before landing. All final acceptance passed. The
+   final diff contains no dependency, product
+   `src/`, RLM prompt,
+   existing prompt-pin, database, queue, worker, API, frontend, module, runner,
+   verifier, approval service, scheduler, tracker, automatic Git effect, AI
+   attribution, or EL-05+ implementation.
+7. **Closeout and next:** the catalog changes only EL-04's bootstrap status;
+   this is a proposal pending owner review. Session 53 moved verbatim to the
+   archive so the live ledger remains five. `HANDOFF.md` was regenerated for
+   dependency-unblocked `EL-05` while preserving §0 byte-for-byte and retaining
+   manual handoff authority. After owner acceptance of EL-04, EL-05 is proposed
+   next: adapter-neutral runner lifecycle, the pinned Codex app-server adapter,
+   bounded observations, and episode rotation, all under zero-completion
+   deterministic acceptance. The paused TTT T2 tooling objective remains
+   untouched.

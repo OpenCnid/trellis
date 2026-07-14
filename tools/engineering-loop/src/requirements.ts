@@ -49,3 +49,13 @@ export const EL03_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
   { requirement: 'EL-REQ-VIEW-003', source: ['handoff_renderer.ts'], tests: ['handoff_renderer: manual handoff authority'] },
   { requirement: 'EL-REQ-VIEW-005', source: ['handoff_renderer.ts'], tests: ['handoff_renderer: bounded reference-only context'] },
 ] as const;
+
+export const EL04_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
+  { requirement: 'EL-REQ-PROMPT-001', source: ['prompt_compiler.ts', 'prompt_contracts.ts'], tests: ['prompt_compiler: named prompt-change boundary'] },
+  { requirement: 'EL-REQ-PROMPT-002', source: ['prompt_compiler.ts'], tests: ['prompt_compiler: protocol-authored invariant asset review'] },
+  { requirement: 'EL-REQ-PROMPT-003', source: ['prompt_compiler.ts'], tests: ['prompt_compiler: invariant frame precedes typed task data'] },
+  { requirement: 'EL-REQ-PROMPT-004', source: ['prompt_contracts.ts', 'prompt_compiler.ts'], tests: ['prompt_compiler: six separate progressively disclosed collections'] },
+  { requirement: 'EL-REQ-PROMPT-005', source: ['prompt_contracts.ts', 'prompt_compiler.ts'], tests: ['prompt_compiler: normalization versions budgets digests and snapshot pins'] },
+  { requirement: 'EL-REQ-PROMPT-006', source: ['prompt_contracts.ts'], tests: ['prompt_contracts: four strict advisory role outputs'] },
+  { requirement: 'EL-REQ-PROMPT-007', source: ['prompt_contracts.ts', 'prompt_compiler.ts'], tests: ['prompt_compiler: contamination and deterministic overflow refusal'] },
+] as const;
