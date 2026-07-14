@@ -16,6 +16,7 @@ export const StableIdSchema = z
 
 const TimestampSchema = z.string().datetime({ offset: true });
 const DigestSchema = z.string().regex(/^[0-9a-f]{64}$/, 'must be a lowercase sha256 digest');
+const GitCommitSchema = z.string().regex(/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/, 'must be a full Git commit identity');
 const BoundedTextSchema = z.string().min(1).max(MAX_TEXT_LENGTH);
 const BoundedPathSchema = z.string().min(1).max(MAX_PATH_LENGTH);
 
@@ -65,8 +66,8 @@ export const RepositoryObservationSchema = z.strictObject({
   repositoryId: StableIdSchema,
   worktreeId: StableIdSchema,
   branch: z.string().min(1).max(256),
-  baseCommit: DigestSchema,
-  headCommit: DigestSchema,
+  baseCommit: GitCommitSchema,
+  headCommit: GitCommitSchema,
   clean: z.boolean(),
 });
 
@@ -285,7 +286,7 @@ export const ReportSchema = z.strictObject({
   feature: StableIdSchema,
   result: z.enum(['ready_for_owner_review', 'blocked']),
   artifacts: uniqueArray(BoundedPathSchema),
-  normativeRequirements: z.strictObject({
+  normative_requirements: z.strictObject({
     required: z.number().int().nonnegative().max(10_000),
     implemented: z.number().int().nonnegative().max(10_000),
     verified: z.number().int().nonnegative().max(10_000),
@@ -296,7 +297,7 @@ export const ReportSchema = z.strictObject({
     result: z.string().min(1).max(4_096),
   })).max(MAX_COLLECTION_ITEMS),
   findings: z.array(z.string().min(1).max(2_048)).max(MAX_COLLECTION_ITEMS),
-  nextFeature: StableIdSchema.nullable(),
+  next_feature: StableIdSchema.nullable(),
 });
 
 export type Report = z.infer<typeof ReportSchema>;
@@ -382,10 +383,16 @@ const EffectOutcomeEventPayloadSchema = z.strictObject({
   outcome: EffectOutcomeSchema,
 });
 
+const EvidenceRecordedEventPayloadSchema = z.strictObject({
+  kind: z.literal('evidence_recorded'),
+  evidence: EvidenceSchema,
+});
+
 export const EventPayloadSchema = z.discriminatedUnion('kind', [
   TransitionEventPayloadSchema,
   EffectIntentEventPayloadSchema,
   EffectOutcomeEventPayloadSchema,
+  EvidenceRecordedEventPayloadSchema,
 ]);
 
 export type EventPayload = z.infer<typeof EventPayloadSchema>;
@@ -400,7 +407,7 @@ export const EventSchema = z.strictObject({
   sequence: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
   previousDigest: DigestSchema,
   actor: ActorAuthoritySchema,
-  eventType: z.enum(['transition', 'effect_intent', 'effect_outcome']),
+  eventType: z.enum(['transition', 'effect_intent', 'effect_outcome', 'evidence_recorded']),
   payload: EventPayloadSchema,
   digest: DigestSchema,
 }).superRefine((event, ctx) => {

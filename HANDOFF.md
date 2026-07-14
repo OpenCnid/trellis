@@ -8,13 +8,13 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–51 and their same-day follow-ons (July 4–14, 2026; PRs
+Sessions 1–52 and their same-day follow-ons (July 4–14, 2026; PRs
 #21–#98) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 51 with the Session 56 EL-02 feature branch — this file keeps
-full narrative only for the most recent five sessions, now 52–56). The
+recently Session 52 with the Session 57 EL-03 feature branch — this file keeps
+full narrative only for the most recent five sessions, now 53–57). The
 one-paragraph digest, oldest first; §1 below carries everything from
 this span that a new session must actually know:
 
@@ -705,68 +705,13 @@ a split-scope policy-2 `src/rlm` refresh that rides the next
 src/rlm-touching PR. T2 was Session 52's objective, run on the current addendum bytes
 (see Session 52 below).
 
-**Session 52 (July 14, 2026, PR #99) ran TTT-track increment T2 —
-the `buildAgentEnv` forward/strip self-edit — owner-approved through
-the stage-2 harness on the Session 50 scaffolds, and the increment
-FAILED on the pre-stated criterion; the final tree ships ZERO code
-bytes (the failed diff reverted; no prompt byte; both composed-prompt
-pins unmoved). Session paid total $1.0889 (the quota probe ≈$0.0001 +
-the run $1.0888) under the ≤$5/run cap. The increment record is
-`REPOSITORY_INGESTION_REPORT.md` §5i.** **(1) Zero-paid staging, all
-green before the proposal (§5i.1–§5i.3):** the substrate FRESH for the
-target (`repo:trellis:src/workers/rlm_job.ts` v2 at `trellis#12`);
-entity `buildagentenv` with 17 uncontested ACTION edges ALL citing the
-live `buildAgentEnv` function-body block `c3883a2e…` (carrying BOTH
-molds T2 mirrors — the unconditional experiment-flag deletion block +
-the `mcpCredentialEnv` loop), verbatim on disk (CRLF);
-`stage2:check --pre` PASS; harness green; dry-run echo 3-to-ingest
-(Session 51's `scripts/*.py`, outside the chain — deferred) / 300
-unchanged / 0 tombstones. NEITHER named file needed a stub (both
-exist). The `rlm_worker.ts` wiring open point decided: deferred to T3
-(T2 stays a pure-function increment, the T1 shape). **(2) The geometry
-difference from T1 (§5i.2):** T2's guarded inserts land INSIDE the
-cited block, so disk-verbatim is confirmed ONCE at the pre-edit
-evidence phase (E3) and HELD, and the completion re-check uses
-`citable()` only (DB membership — edit-invariant); `stage2:check`'s
-evidence layer is likewise DB-based. Guardrail 15 honored: BOTH prompt
-skills INVOKED via the Skill tool before the task text (§5i.4,
-v3.2-template based). **(3) The run — VERDICT FAILED, two criterion
-misses ($1.0888; 371,136 in / 16,097 out; 16/16 iterations; 108.7s;
-5 guarded ops / 0 raw splices; ONE gated insight `buildagentenv`
-`-forwards_by_name->` `mcpcredentialenv` citing the held live block):**
-items 1–4 + 6 PASS — named-file-only diff (exactly the two files), the
-gated insight (citation audit clean), `stage2:check` zero findings,
-guarded-only, and the `rlm_job.ts` production diff SPEC-PERFECT (all
-four Parts placed exactly, insert-only, byte-clean). **Item 5 (pins
-green) FAILED** — the FIFTH authored pin, the absent-block
-byte-identity test, asserted `buildAgentEnv(cleanBase, CFG)` equals
-`{PATH}`, wrong because `buildAgentEnv` unconditionally injects the
-`NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING` keys —
-`vitest` 1 failed / 36 passed. **Item 7 (spend) MISSED** — $1.0888 vs
-the $0.5–$1.0 estimate (16 full iterations vs T1's 11). A failing pin
-FAILS the increment; NO machinery defect (every layer fired per
-contract — `stage2:check` is correctly blind to test-green, the parse
-gate correctly passed a well-formed file; the class is a mis-written
-test assertion caught by `npm test`). **(4) Cleanup (guardrail 5):**
-the failed run's residual insight write deleted (`DERIVED_INSIGHT` 299
-→ 298; the fresh `mcpcredentialenv` entity NODE left in place,
-guardrail 2), the diff reverted
-(`benchmark_logs/s52_t2_run1_failed.diff` preserved local/gitignored,
-never a patch source), `npm test` back to 876/87. **(5) Retry material
-(the v3.3 task — a NEW owner-approved proposal; T2 stands at ONE failed
-attempt, the §5g.3 ladder untouched):** the SINGLE change is to
-strengthen the M3 pin-(e) guidance so the absent-block byte-identity
-pin builds its expected object from `buildAgentEnv`'s ACTUAL clean-base
-output — the base keys PLUS the unconditional
-`NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING` (mirror the
-file's first existing `buildAgentEnv` test's shape), never the bare
-base env; nothing else in v3.2/T2 changes; estimate re-bases to
-$0.7–$1.2 for ONE run. **(6) Bookkeeping:** Session 47 compressed to
-the digest, its §5 entry moved verbatim to the archive (window now
-48–52); the roadmap row-13 cell + §5 entry updated; §5i.6 completes
-the increment record. Docs-only close-out (the failed diff reverted,
-ZERO non-markdown bytes shipped — the Session 48 precedent): live
-drills not re-run, reason recorded.
+**Session 52 (July 14, 2026, PR #99) is archived.** It attempted the
+TTT `buildAgentEnv` forward/strip increment through the stage-2 harness;
+the production diff was spec-correct but an authored byte-identity pin was
+wrong, so the increment failed, the residual insight was removed, and the
+code diff was reverted. Full evidence, spend, cleanup, and retry material
+remain verbatim in `docs/archive/ROADMAP_HISTORY.md` and
+`REPOSITORY_INGESTION_REPORT.md` §5i.
 
 **Session 53 (July 14, 2026, this PR) ran the TTT-track increment T2
 RETRY (task text v3.3) — the second `buildAgentEnv` forward/strip
@@ -942,19 +887,33 @@ runner, Git observer, or renderer entered. Session 51 moved verbatim to the
 archive; the live window is 52–56. The owner reviewed the complete diff and
 explicitly authorized commit, merge, and push to `master`.
 
-Your objective is **Session 57: engineering-loop `EL-03` — repository observer
-and deterministic handoff renderer.** Implement only the 12 SPEC requirements
-owned by EL-03 under `tools/engineering-loop/`: engine-computed repository
-identity and status, segment-safe allowed-path scope, divergence refusal,
-bounded command evidence and protected retained artifacts, a trusted-state
-report, and byte-identical derived status/handoff previews. Manual `HANDOFF.md`
-remains authoritative. No production prompt, Codex adapter, model call,
-verification service, approval channel, scheduler, tracker, automatic
-push/merge, product-runtime change, or paid work.
+**Session 57 (July 14, 2026, `implement-el03-repository-observer`) completed
+EL-03 deterministic acceptance and was owner-ratified, zero-model and
+zero-paid.** All 12 EL-03 requirements have concrete source and
+deterministic-test linkage. The controller now computes Git/worktree identity
+and complete NUL-delimited changed paths; refuses segment-scope and
+between-check divergence; runs bounded shell-free argv; retains full output as
+protected digest-addressed artifacts linked to controller evidence; derives
+strict reports from trusted state; and renders pure, byte-pinned report,
+status, and handoff-preview bytes. Focused acceptance passed 64 tests across 5
+files; repository acceptance passed 977 tests across 96 files, plus build,
+Python, Compose, schema/catalog, SPEC linkage, and diff checks. The remote URL
+normalization defect found by the first focused run was fixed and pinned. The
+owner reviewed the complete diff and explicitly authorized commit, merge, and
+push to `master`. Manual `HANDOFF.md` remains authoritative.
+
+Your objective is **Session 58: engineering-loop `EL-04` — prompt compiler,
+strict role contracts, pins, and context budgets.** Implement only the seven
+EL-04 prompt requirements under `tools/engineering-loop/`, after confirming
+the owner reviewed and accepted EL-03. Invoke the Prompt-Engineering and
+Hypershot protocols before writing prompt or meta-prompt bytes. Add no real
+Codex adapter, model call, verification service, approval channel, scheduler,
+tracker, automatic push/merge, product-runtime change, or paid work.
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00`, `EL-01`,
-and `EL-02` are accepted; `EL-03` is the next dependency-unblocked feature.
+`EL-02`, and `EL-03` are owner-accepted. `EL-04` is the next
+dependency-unblocked feature.
 The merged Session 54 tooling-shape objective is preserved in Appendix A and
 remains paused unless the owner re-prioritizes it.
 
@@ -1446,584 +1405,306 @@ immutable, content-addressed physical location in source material.
      only MCP server acceptance ever configures.
 
 16. **Engineering-session loop (owner-prioritized July 14, 2026).** The
-    manual `HANDOFF.md` cycle is now an explicit multi-session program. Its
+    manual `HANDOFF.md` cycle is an explicit multi-session program. Its
     bounded feature DAG and bootstrap protocol live in
     `docs/product/engineering-loop/ROADMAP.md` with the machine twin
-    `features.json` and Draft 2020-12 schema. The ratified direction is
-    repository-owned policy/source plus an out-of-process controller whose
-    trusted mutable state is outside the agent-writable worktree; one writer
-    initially; resume inside one episode and fresh context across semantic
-    boundaries; deterministic evidence outranks model claims; paid,
-    destructive, push, and merge actions remain human gates. `EL-00` and
-    `EL-01` are accepted; the EL-02 implementation and closeout are ready for owner
-    review. The ratified architecture record is
-    `docs/architecture/ENGINEERING_LOOP.md`; the conformance authority is
-    `tools/engineering-loop/SPEC.md` (106 mandatory requirements, 106 mapped,
-    zero unmapped). The EL-02 TypeScript kernel under
-    `tools/engineering-loop/` now owns strict domain validation, exhaustive
-    transition authority, protected external state, exclusive locking,
-    integrity-linked event-first snapshots/replay, and fake idempotent-effect
-    recovery. `EL-03` is next and adds engine-computed Git/command evidence plus
-    deterministic derived status and handoff previews. The existing manual
-    handoff remains authoritative until the measured `EL-07` migration verdict.
+    `features.json`; `tools/engineering-loop/SPEC.md` is normative. The
+    controller remains out of process, one-writer, and protected outside the
+    worktree. EL-02 supplies strict domain validation, exhaustive transition
+    authority, locking, event-first snapshots/replay, and fake idempotent
+    effects. EL-03 now supplies controller-computed repository identity and
+    complete changed paths, segment-safe scope and divergence refusal, bounded
+    shell-free command evidence, protected digest-addressed retained bytes,
+    trusted strict reports, and pure byte-pinned status/handoff previews. Its
+    12 requirements passed deterministic acceptance and were owner-ratified.
+    `EL-04` is next and owns the seven prompt/compiler requirements.
+    Real runner integration remains EL-05; verification, protected effects,
+    approvals, and checking remain EL-06. Manual `HANDOFF.md` stays
+    authoritative until the measured EL-07 owner verdict.
 
 ## 2. Current baseline
 
 Repository state at handoff creation:
 
-- **Active owner-prioritized program:** the Session 56 feature branch
-  `implement-el02-control-kernel` starts at
-  `51d9c7a46f72615baf0ec810ee0600307fbe9bac` (merged EL-00/EL-01) and carries
-  the owner-ratified `bootstrapStatus: accepted` EL-02 closeout. The SPEC still
-  has 106 stable mandatory requirements mapped 106/106; EL-02 independently
-  computes and links its exact 28-row subset. Catalog validation remains 10
-  unique features, 13 resolved acyclic dependency edges, and 34 unique
-  acceptance items. Standing acceptance is now **92 test files / 916 tests**;
-  the EL-02 tool subset is 5 files / 40 tests and includes all 14 crash points.
-  Build, Python runtime, Compose configuration, Draft 2020-12 catalog schema,
-  catalog semantics, SPEC linkage, and diff checks pass. Fresh-worktree `npm
-  ci` installed 317 packages with 0 vulnerabilities but warned that this local
-  Node v20.19.2 shell is below four Babel packages' Node 22.18+ engine floor;
-  CI's Node 22 remains authoritative, and local install/tests/build passed.
-  `EL-03` is next. The control kernel exists; no production prompt, real runner,
-  repository observer, handoff renderer, model call, scheduler, product
-  coupling, or handoff-authority migration exists yet. Confirm Session 56 was
-  reviewed and landed on `master` before beginning EL-03.
-
-- `origin/master` at Session 56 branch creation was
-  `51d9c7a46f72615baf0ec810ee0600307fbe9bac`, the merged Session 55 EL-01
-  closeout (PR #102). The owner ratified Session 56 and authorized commit,
-  merge, and push; the next session must confirm its landing rather than assume
-  it. Prior master history: **Session 54 ran the TTT-track increment T2
-  RETRY (task text v3.4) and the run SELF-REFUSED under R2 with NO
-  LANDING — a THIRD consecutive T2 no-landing. The tree ships ZERO
-  non-markdown bytes (the run reverted its own staging; porcelain clean
-  throughout). NO effect on the durable dev graph: the R2 path wrote
-  nothing, so `DERIVED_INSIGHT` stays at 298 and the one edgeless
-  `mcpcredentialenv` orphan node (Session 52's cleanup, guardrail 2) is
-  unchanged — NO cleanup owed. The owner then picked TOOLING SHAPE (the
-  §5g.3 third-strike decision): close the editing-execution failure
-  class in the guarded toolkit, not prompt text — now preserved in Appendix A while the owner-prioritized
-  engineering-loop program runs first.** The Session 54 PR is docs-only:
-  `REPOSITORY_INGESTION_REPORT.md` §5i.8 (the v3.4 retry record + the
-  NO-LANDING verdict + the tooling-shape recommendation),
-  `TRELLIS_ROADMAP.md` (row-13 cell + §5 entry), the archive move
-  (Session 49), and this file. Use `git log -- HANDOFF.md` to confirm
-  this PR landed; if it is still unmerged when this session starts,
-  STOP and merge it first. The prior head was the July 14, 2026
-  Session 53 PR (#100 — the T2 second attempt, task text v3.3: a clean
-  R2 self-refusal, NO landing, from editing-execution duplicates + an
-  R2 over-trigger; docs-only, §5i.7). The head before that was the
-  July 14, 2026 Session 52 PR (#99 — the T2 first attempt: a
-  SPEC-PERFECT production diff FAILED by a mis-written test pin and a
-  spend overrun; docs-only, the diff reverted; §5i through §5i.6). The
-  head before that was the July 13, 2026 Session 51 PR
-  (#98 — an owner-directed DETOUR from T2 that RATIFIED and
-  IMPLEMENTED the S2a UPSUM refinement `RLM_HARNESS_SCAFFOLDING.md`
-  §7 as a human-authored kernel-prompt increment: `trellis_scaffold.py`
-  `UPSUM_BUDGET = 2000` + `trellis_agent.py` inject/rewrite +
-  `scripts/test_modules.py` both composed-prompt pins recomputed +
-  the scaffold/sandbox pins). Prior heads carried by earlier PRs: the
-  Session 50 PR (#95 — Part A scaffolds + the LANDED T1 increment:
-  `src/rlm/trellis_scaffold.py` NEW, `trellis_agent.py` wired,
-  `rlm_job.ts`/`rlm_job.test.ts` strip pin, plus the RUN-AUTHORED
-  T1 diff `src/config/index.ts` + the NEW
-  `src/config/rlm_backend.test.ts`) and the collaborator PR #96
-  (docs-only, merged `7a37418`: `TEST_TIME_TRAINING.md` §12.7 +
-  rows 12–14; `RLM_HARNESS_SCAFFOLDING.md` §7 the S2a proposal).
-  Use `git log -- HANDOFF.md` to confirm this PR landed; if it is
-  still unmerged when this session starts, STOP and merge it first.
-- `modules/workspace-discipline/` is at VERSION 2 (module #1); module
-  #2 (`estimation-discipline`) is RETIRED (loader refuses
-  composition; the graph entity persists as history). The dev PG
-  durably carries the four probe corpora, the three promoted research
-  docs, and — since July 13, 2026 — **the self-substrate at snapshots
-  `trellis#12`** (Session 50 policy-1 refresh, everything except
-  src/rlm: the T1-landed `src/config/index.ts` + the new
-  `rlm_backend.test.ts` + `rlm_job.*` + the Part-A drill files —
-  10 ingested / 305 unchanged / 0 tombstones) **and `trellis#13`**
-  (Session 50 policy-2 src/rlm refresh: `trellis_agent.py` with the
-  scaffold wiring, the NEW `trellis_scaffold.py`,
-  `trellis_scaffold.test.ts` — 4 ingested / 0 tombstones) over
-  `trellis#11`/`#10`/`#9`/`#8`/`#7`/`#6`/`#5`/`#3`/`#2`/`#1`.
-  Stage-1 extraction produced 1,995 entities / 1,788 ACTION
-  relationships; refresh churn quarantines are standard lazy
-  recovery, never "cleaned up" (Session 43's refresh contested 9
-  nodes / 6 relationships — all `poison_drill_runner.ts` orphans).
-  Known state by design: the THREE
-  standing DERIVED_INSIGHT beliefs (`trellis_agent` `wires`
-  `get_retrieved_addresses`; `_verify_hashes_retrieved` `consumes`
-  `get_retrieved_addresses`; `get_retrieved_addresses`
-  `returns_copy_of` `_retrieved_addresses`) all read UNCONTESTED
-  after the Session 50 refresh (FOURTH consecutive clean refresh
-  for them). The FOURTH derived insight — Session 50's T1 evidence
-  edge `config` `resolves_fail_fast` `mcpcredentialenv` — reads
-  CONTESTED exactly as pre-recorded (§5h.3/§5h.11: the `index.ts`
-  re-chunk killed its cited block `fc17205c…6311`) — ordinary lazy
-  recovery, NEVER "cleaned up"; re-derive through the ordinary
-  write path only when something actually needs the belief. The
-  `main` entity reads contested (monolith-era sources died in the
-  re-chunk — data, not a defect; leave it).
-  Dead-block embedding pollution is CLOSED at the T15 seam
-  (Session 40); the dead embeddings REMAIN in storage (queryable by
-  hash; the sweep alternative stays an owner menu item). ~650+
-  documents in `documents`; the contested OOLONG-era edges now
-  number 98 (15 from the July 13 first sweep + 83 from the
-  Session 44 judge-calibration measurement — lazy-recovery residue,
-  never "cleaned up"; the remaining unchecked `q_` pool is 356
-  pairs). Roadmap
-  §4 rows 5/6/6a/8/9/**10 (CLOSED — Session 43's measured verdict)**
-  and row 11 STAGE 1 are STRUCK; row 11's
-  executable-class prerequisite (structural splice addressing) is
-  SATISFIED — increment 3 stays ARMED but has no target (the
-  Session 44 search found none; it enters as a NEW proposal when a
-  real one surfaces); row 12 increments 1–2 are done; row 7 stays
-  trigger-blocked. Everything in this bullet
-  describes the OWNER'S durable dev PG (Session 43 ran on it;
-  Session 42's ephemeral container staging died with the container,
-  by design).
-- Session 54 moved ZERO code/prompt bytes (the v3.4 run self-refused
-  and reverted its own staging): the composed-prompt pins stand at
-  Session 51's default `6183de3a…ed50` / omit-arm `34b00be6…d02a`
-  (histories in `scripts/test_modules.py` — recompute BOTH in the same
-  commit only if the kernel prompt or rubric legitimately changes;
-  `test:modules` green). **PAUSED APPENDIX A NOTE: if the tooling
-  increment is reprioritized, it teaches a new guarded method in the
-  addendum → BOTH composed-prompt pins MOVE in that later session,
-  recomputed in the same commit (Guardrail 9/15).**
-  `src/workers/rlm_job.ts` /
-  `rlm_job.test.ts` remain at their Session 50 bytes (Sessions 52/53/54
-  all reverted their T2 diffs), and the `TRELLIS_RLM_*` config surface
-  + the ambient `OPENAI_BASE_URL` guard in `src/config/index.ts` (T1's
-  LANDED, measured-evidence diff — NEVER hand-edit it, the
-  increments-1/2 precedent) STILL have ZERO consumers (T2 wires
-  `buildAgentEnv`, T3 wires the agent + `rlm_worker.ts`).
-  `src/rlm/trellis_textedit.py` carries the Session 41 guarded family
-  (`replace_lines`/`insert_lines`/`delete_lines`) UNCHANGED — the
-  paused tooling increment would add a method beside them, never edit
-  them. Run log `benchmark_logs/s54_t2_run1.log` (+ the Session
-  48/49/50/52/53 logs and Session 52's preserved
-  `s52_t2_run1_failed.diff`) is local, gitignored — NO Session 54 diff
-  exists (self-refusal), and the Session 52 failed diff is never a
-  patch source. Reminder from Session 24: `block_parity.test.ts` SPAWNS
-  the real Python walk inside plain `npm test` — a machine without
-  Python on PATH fails the unit suite; CI sets up Python 3.13
-  before `npm test`. Reminder from Session 41 pre-flight: a
-  worktree with a PRE-POPULATED but stale `node_modules` fails the
-  four tree-sitter-importing test files with module-not-found — run
-  `npm ci` before believing a fresh worktree's `npm test`.
-  Session 42 bring-up notes for policy-restricted containers:
-  `REDISMS_DISABLE_POSTINSTALL=1 npm ci` (the PoC-only
-  `redis-memory-server` postinstall downloads a binary and aborts
-  behind restricted egress); Python in a dedicated venv with BOTH
-  requirements files PLUS `pandas` (a clean uv resolver does not
-  pull pandas transitively from `unstructured==0.23.1`); Docker Hub
-  blob-CDN denials are recoverable with
-  `registry-mirrors: ["https://mirror.gcr.io"]`.
-- Offline baseline: `npm test` = **916 passing across 92 files**. EL-02 added
-  40 deterministic tests across 5 files without changing the existing 87
-  files / 876 tests. The suite pins 132 transition pairs, 14 durable crash
-  points, 8 corruption classes, protected-root/lock refusal, fake dependency
-  behavior, catalog semantics, and all 28 requirement links. Earlier history:
-  Session 51 875/87 → 876/87; Session 50 837/85 → 866/86 → 875/87.
-- `npm run build` and `npm run python:check` pass (the check imports
-  polars — an environment without it fails the check by design).
-- `npm run drill:scale`: gate CLOSED at max provenance 286.
-  Session 50 read 1.90x CLOSED in-band, first try; Session 44 read
-  1.04x (below band) then 1.54x in-band on the guardrail-8 re-run;
-  Session 43 1.64x; Session 42 (fresh Linux container DB) 1.10x
-  then 1.52x; Session 41 1.39x/1.45x; Session 40 2.05x; Session 39
-  2.18x; Session 38 1.69x.
-  If a future run reads OPEN, re-run before believing it — a
-  REPRODUCING open reading is the migration trigger (roadmap §4
-  row 7) and the owner adjudicates. The drill rewrites the tracked
-  `scale_drill_results.json` — commit it with the session PR (the
-  committed copy is Session 50's 1.90x CLOSED run). Run the scale
-  drill ALONE — never concurrently with other live drills on the
-  shared dev database.
-- Live zero-LLM checks: Session 51 observed ALL 18 standing drills
-  green on the owner's Windows machine against the durable dev PG
-  (stack up, one sequential chain): `test:selfedit-harness`
-  (ALL CHECKS PASSED — with section [9]; the count is
-  environment-shaped; runs the rehearsal python, so it needs the
-  Python runtime deps), `test:answer-channel`, `test:textedit`
-  (129 on Windows is the pin; 130 POSIX), `test:module-lifecycle`,
-  `test:modules` (both recomputed S2a pins + the 3 new UPSUM
-  checks), `test:promotion`, `test:rlm-workspace`, `test:rlm-mcp`,
-  `test:rlm-sandbox` (**119** — with the new S2a injection pin in
-  section [8]), `test:verification-sweep` (66 — it CANNOT pass on a
-  host where bare `python` lacks the runtime deps),
-  `test:agent-loop`, `test:a2a`, `test:repo-ingest` ("All
-  checks passed" is the signal — the [PASS] count is
-  environment-dependent by construction),
-  `test:benchmark-hardening`, `test:entity-resolution`,
-  `test:api-hardening`, `test:belief-recovery`,
-  `test:invalidation-sweep`. Session 54 was docs-only (the v3.4 run
-  self-refused, ZERO non-markdown bytes) and ran the docs-only
-  close-out plus `test:selfedit-harness` + `stage2:check --pre` green
-  during staging; the paused tooling increment would move code
-  (`trellis_textedit.py` + the addendum + pins) and run the FULL
-  standing block when reprioritized — `test:textedit`, `test:selfedit-harness`,
-  `test:modules` (recomputed pins), and `test:rlm-sandbox` are the
-  first-line checks for it.
-- Isolated Compose integration: 11 assertions (`--profile test`,
-  unique project name; includes the containerized credentialed MCP
-  fixture probe and the in-container `polars 1.34.0` import probe).
-  Session 50 ran it as project `trellis_s50_ci` (all assertions
-  PASS) and tore it down with `--volumes`, as Sessions 43/44 had;
-  Session 42 could not (its remote
-  container's egress policy denied the image build's apt stage —
-  recorded, not routed around). The CI-mold invocation:
-  env `COMPOSE_PROJECT_NAME` + the five host-port variables at 0 +
-  an `API_KEY`, then `docker compose --profile test up --build
-  --abort-on-container-exit --exit-code-from integration
-  integration`, then `down --volumes --remove-orphans`. The isolation
-  host-port variables are EXACTLY `TRELLIS_POSTGRES_HOST_PORT`,
-  `TRELLIS_NEO4J_HTTP_HOST_PORT`, `TRELLIS_NEO4J_BOLT_HOST_PORT`,
-  `TRELLIS_REDIS_HOST_PORT`, `TRELLIS_API_HOST_PORT` — set each to 0.
-  NOTE: C: runs tight on free space; a FULL image rebuild needs
-  several GB of headroom. `requirements.txt` and `package.json`
-  unchanged in Sessions 39–50 — both layers stay cached.
-- The standing owner-conditional items — all propose-with-estimate,
-  never self-served: **(1) the PAUSED TOOLING-SHAPE increment (the
-  guarded editing family) — preserved in Appendix A, ZERO-PAID when
-  reprioritized** (the owner's
-  §5g.3 third-strike decision after T2's THREE no-landings — record
-  §5i.6/§5i.7/§5i.8, three DISTINCT editing-execution sub-failures each
-  closed by a prompt patch only to surface a new one; the doctrine
-  response is TOOLING SHAPE not prompt text). Build an
-  engine-resolved-anchor guarded insert in `src/rlm/trellis_textedit.py`
-  (unique anchor substring → engine computes address + terminator;
-  non-unique/absent = typed refusal), ADDITIVE beside the Session 41
-  family, design-record-first in `STRUCTURAL_SPLICE.md`, both
-  composed-prompt pins recomputed for the addendum change (Guardrail
-  9/15), new `test:textedit` + harness pins; `npm test` grows from
-  876/87. **Then T2 re-attempts as a SEPARATE later owner-approved paid
-  proposal** — a v4 task text using the new insert, measuring whether
-  the tooling closes the class. T1 LANDED in Session 50 (§5h.11); S2a
-  UPSUM LANDED in Session 51; T2 is PAUSED at THREE no-landings; the
-  RATIFIED queue T2 → T3 → T4 → Phase 2 (record §12.6, spec
-  MODEL_BACKEND_SEAM.md §8) resumes once T2 lands;
-  **(2) the judge-calibration decision — RESOLVED July 13, 2026: the
-  owner picked ACCEPT the strict judge** (presented Session 46;
-  recorded in the roadmap §5 entry; no action — the contested `q_`
-  edges stay lazy-recovery residue; a rubric change re-enters only
-  with new data, as its own designed session); **(3) the stage-1b
-  prose chunk** (~2,900 blocks ≈ $7.8
-  full bound at Session 34 pricing — re-derive with a zero-paid plan
-  echo before proposing; CHUNKED owner-gated scoped runs under the
-  ≤$5/run cap; the recorded partition strawman: run A =
-  `docs/architecture`, run B = `docs/benchmarks` + remaining
-  `docs/`, run C = root markdown; the churn question the proposal
-  MUST price for the owner: `HANDOFF.md`/`TRELLIS_ROADMAP.md` are
-  rewritten every session — exclude them, include-and-price the
-  recurring refresh, or include only the append-mostly
-  `docs/archive/ROADMAP_HISTORY.md`; prose chunks under policy 1;
-  the stage-1 criterion mold adapted to prose; a landed stage-1b
-  joins the policy-1 refresh leg — full §3-grade spec preserved in
-  the Session 44-era HANDOFF in git history; NOTE: a landed
-  stage-1b would also make MODEL_BACKEND_SEAM.md queryable from the
-  substrate — a synergy for the T-series, not a prerequisite);
-  **(4) the row-11
-  executable-class increment 3** (prerequisite SATISFIED by
-  Session 41; guarded-only criterion — `textedit_raw_splices == 0`
-  joins the standing five items; the Session 44 search found NO real
-  target — it re-enters as a NEW proposal only when one genuinely
-  surfaces, never manufactured); (5) the pandas head-to-head probe
-  round; (6) the cross-process concurrency proof run (coverage-audit
-  gap #1); **(7) the substrate freshness cadence** (ADOPTED July 13:
-  one scoped refresh per merged PR + refresh-before-use ahead of
-  stage-2 edit runs; each refresh's extraction spend still gated per
-  run — UNDER THE SPLIT-SCOPE RECIPE, §1 item 6; Session 50 paid
-  its own refresh in-session — `trellis#12`/`#13`, $0.2701; a
-  landed T2 owes a policy-1 refresh for its changed `src/workers`
-  files); **(8)
-  the targeted stage-1 entailment sweep AS WORDED IS BLOCKED BY
-  SHAPE** (recorded by
-  Session 44: stage-1 extraction wrote ACTION edges; the detector
-  selects DERIVED_INSIGHT only — widening its selection is a
-  recorded owner-visible design change to row-9 machinery, not a
-  flag; the item stays on the menu as that design decision); **(9)
-  the row-12 rollout continuation** (widening policy-2 scope,
-  retuning merge density, or reverting the pilot — owner's call with
-  the record §10.3 + §11.4 together); **(10) the
-  superseded-embedding SWEEP** (storage reclamation only;
-  destructive, re-buys embeddings on recovery; stays unchosen);
-  **(11) the TTT-track RATIFIED QUEUE beyond T2** (record §12.6;
-  each step its own owner-approved proposal): **T3–T4** (Phase 1
-  continues after T2: T3 the `trellis_agent.py`
-  construction-site rewire per §3/§4 layer 3/§5/§7 + §8 — the twin
-  `parse_rlm_backend()`, the delete-unless-configured, the checker
-  following the seam, the two telemetry fields, and the
-  `rlm_worker.ts` cfg wiring if T2 deferred it; T4 the
-  zero-LLM fixture-endpoint drill per §8 (the stub MUST return
-  `usage` and gains a no-usage misbehaving mode) — each owner-gated
-  ≤$5, each an increment record in the §5e/§5g mold, each diff
-  human-reviewed); **Phase 2** R3a
-  serving bring-up + protocol smoke, R3b the paired baseline (the
-  reproduction half; the baseline arm = the SAME open checkpoint the
-  retrofit starts from; GPU-hours or hosted per-token, priced in the
-  proposal — the skeleton is MODEL_BACKEND_SEAM.md §9), then R4a–R4d
-  when the collaborator's retrofit
-  checkpoint lands exact-pinned (the expansion half — C2/C3, which
-  NO external study covers); **Phase 3** R5. Context: R1 question 1
-  ANSWERED (LaCT, record §12; retrofit training COLLABORATOR-SIDE;
-  the reliance claim decomposed C1 supported / C2 extrapolated — the
-  load-bearing gap / C3 untested); questions 2–4 stand, question 4
-  sharpened to "eligibility boundary = the run's retrieval set?";
-  official LaCT code exists (ICLR 2026). Row 10's measurement
-  (Session 43), the judge-calibration MEASUREMENT (Session 44), the
-  calibration DECISION (ACCEPT, Session 46), the R2a census
-  (Session 46), the R2b design record (Session 47), the harness
-  scaffolds (Session 50 Part A), increment T1 (Session 50
-  Part B), and the S2a UPSUM refinement RATIFICATION (Session 51 —
-  `RLM_HARNESS_SCAFFOLDING.md` §7 ratified and implemented, both
-  composed-prompt pins recomputed, `UPSUM_BUDGET = 2000` injected)
-  are DONE and off this list. If the owner approves
-  nothing this session, the zero-paid proposal-staging work in §3
-  still stands alone. OPERATIONAL NOTES (Windows): stopping
-  `npm run dev:workers` through the session harness — OR a failed
-  pipeline start (a missing `benchmark_logs/` directory broke a Tee
-  and orphaned the npm tree, Session 38) — leaves stale consumers
-  that steal queue-drill jobs ("timeout" while effects apply = the
-  tell). Create `benchmark_logs/` before piping worker output; KILL
-  THE CHILD PROCESS TREE and verify zero node/tsx worker processes
-  (`Get-CimInstance Win32_Process`) before any queue drill. gpt-5.4
-  $2.50/M in + $10/M out; metrics port 9464 for worker actuals
-  (per-process registries — split consumers lose totals; read the
-  metrics BEFORE killing workers). Session 44's lesson: NEVER
-  capture a long-output CLI through `tee | head` — head's early
-  exit kills tee on EPIPE mid-stream and manufactures a truncation
-  (redirect to a file, then read the file). Session 49's lessons:
-  set `PYTHONUTF8=1` when spawning `trellis_agent.py` with
-  redirected stdout on Windows (the rlms rich logger prints U+25C6
-  panel glyphs; a cp1252 stream encoder kills the process inside
-  the `RLM(...)` constructor, pre-API); and `models.list`
-  succeeding proves the key AUTHENTICATES, not that the account
-  has completion quota — the minimal completion probe is the
-  decisive pre-flight check before any paid spawn.
-- CI target is Node 22 (the `offline` job also runs `test:textedit`
-  after its Python-runtime install). Local environment: Node
-  20.19.2, Python 3.13.1, Docker Compose v2, PostgreSQL 16.14,
-  Neo4j 5.11.
-- Python runtime deps are pinned in `requirements.txt` (`rlms==0.1.3`,
-  `openai`, `neo4j`, `psycopg2-binary`, `unstructured`, `mcp==1.12.4`,
-  `polars==1.34.0` — pinned NOT adopted, no kernel/contract/prompt
-  path imports it); `npm run python:check` verifies
-  syntax/imports/assets.
-- The `documents.origin` column ships in the idempotent bootstrap.
-- Raw probe/run logs live under `benchmark_logs/` (gitignored — local
-  only; the numbers live in the committed reports).
-- The frontend has NO offline tests and NO CI coverage today.
+- **Program and Git:** branch `implement-el03-repository-observer` was created
+  from required master commit
+  `e0504b1b5bfda85be6c0c8518234d2c6348a4625` only after a clean preflight.
+  The required `git fetch origin master` observed `origin/master` at exactly
+  that commit, whose EL-02 closeout was owner-ratified and accepted. EL-03
+  implementation and closeout were owner-reviewed and explicitly authorized
+  for commit, merge, and push; no later master/merge commit is claimed in these
+  self-referential bytes. The next session must confirm the actual landed
+  commit, a clean worktree, and catalog dependencies before creating its
+  feature branch.
+- **Conformance:** SPEC has 106 mandatory requirements mapped 106/106. EL-02
+  retains its exact 28-row mapping and 40 deterministic tests. EL-03
+  independently computes and links exactly 12 rows: `DATA-006`, `OBS-005`,
+  `REPO-001`–`REPO-006`, `VIEW-001`, `VIEW-002`, `VIEW-003`, and
+  `VIEW-005`, with zero outstanding IDs. EL-04 owns exactly
+  `PROMPT-001`–`PROMPT-007`; recompute that set from SPEC §18 before work.
+- **Acceptance baseline:** `npm test` passes **977 tests across 96 files**.
+  The focused EL-03 command passes **64 tests across 5 files**; this is four
+  new files and 61 net tests over the pre-EL-03 92/916 baseline, with all 40
+  EL-02 tests preserved. `npm run build`, `npm run python:check`,
+  `docker compose config --quiet`, Draft 2020-12 catalog validation (10
+  features), catalog semantics, SPEC linkage, and `git diff --check` pass.
+  Renderer SHA-256 pins: report
+  `4c085f4b023e6efb3c770a5957e835c502f5884907d33e026b043d96686fa262`,
+  status `8f77a23f77d99d0515ddbfe07af3b5e572ceb21ddd83fa7e98612153011568b8`,
+  handoff preview
+  `961e09a7142b25604482a98cad94711a3da7cd794498b6b5580027051f4c911f`.
+- **Environment:** fresh `npm ci` installed 317 packages with 0
+  vulnerabilities. Local Node v20.19.2 emits four Babel Node 22.18+ engine
+  warnings; CI uses Node 22, and local install/tests/build passed. No model
+  call, paid call, production runner, or deterministic-test remote call
+  occurred. The only remote contact was the required preflight fetch.
+- **Authority:** manual `HANDOFF.md` remains authoritative. EL-03's renderer
+  produces a read-only preview and does not migrate authority. The frontend
+  still has no offline tests or CI coverage.
 
 Fresh worktrees do not contain `node_modules`. Start with:
 
 ```
- git status --short --branch
- git branch --show-current
- npm ci
- npm test
- npm run build
- npm run python:check
- docker compose config --quiet
+git status --short --branch
+git branch --show-current
+npm ci
+npm test
+npm run build
+npm run python:check
+docker compose config --quiet
 ```
 
-Work on a feature branch and target `master`.
+Work on one feature branch and target `master`.
 
-## 3. Session 57 problem statement
+## 3. Session 58 problem statement
 
-**Engineering-session loop `EL-03`: implement the repository observer and
-deterministic handoff renderer.** EL-02 supplies the strict domain boundary,
-single-writer protected state, append-only events, snapshots, and injected
-dependency pattern. The SPEC conformance matrix assigns exactly 12 requirements
-to EL-03: `DATA-006`, `REPO-001` through `REPO-006`, `OBS-005`, and `VIEW-001`,
-`VIEW-002`, `VIEW-003`, and `VIEW-005`.
+**Engineering-session loop `EL-04`: implement the prompt compiler, strict
+role contracts, byte pins, and context budgets.** This session begins only
+after the owner has reviewed EL-03, accepted or otherwise directed its
+closeout, and landed a clean master commit. If that precondition is absent,
+make no implementation edit and report the Git/controller evidence.
 
-Today repository facts in reports and this handoff are still authored by the
-session operator. The kernel has no trusted Git observer, normalized changed-
-path scope decision, typed command-evidence record, protected retained-output
-artifact, deterministic report derivation, or byte-stable status/handoff
-preview. That gap prevents later verification and runner features from treating
-branch, HEAD, diff, command, or test-count claims as controller evidence.
+The SPEC conformance matrix assigns exactly seven requirements to EL-04:
+`PROMPT-001` through `PROMPT-007`. Recompute that set from SPEC §18 rather
+than trusting this summary. EL-04 is the first feature authorized to add
+production prompt and meta-prompt bytes. It separates stable role/invariant
+frames from typed, bounded task context; produces normalized, versioned,
+hashed, budgeted, snapshot-pinned packets; and validates every planner,
+implementer, checker, and recovery result through a strict schema.
 
-Session 57 implements only those deterministic observation and derived-view
-surfaces under `tools/engineering-loop/`. It may invoke local Git and fixture
-commands through an injected bounded executor, but it does not run an agent,
-compile a prompt, decide semantic acceptance, replace manual `HANDOFF.md`, or
-perform a protected external effect.
+EL-04 compiles and validates packets only. It does not call a model, start a
+Codex task, interpret a checker recommendation as authority, execute a command,
+approve an effect, or migrate manual `HANDOFF.md`. Those belong to later
+features.
 
 ## 4. Required design
 
-### 4.1 Package and dependency boundary
+### 4.1 Protocol gate before prompt bytes
 
-Extend only `tools/engineering-loop/` plus the existing build/test integration
-and required closeout documents. Reuse EL-02's strict schemas, canonical JSON,
-clock injection, protected `StateStore`, and requirement-linkage convention.
-Add no package dependency and do not import controller code from `src/`.
+Before authoring or amending any prompt, meta-prompt, role frame, or prompt
+compiler instruction:
 
-Recommended cohesive modules:
+1. Read `C:/Users/Darian/Downloads/Prompt-Engineering.md` and
+   `C:/Users/Darian/Downloads/Hypershot-Protocol.md` completely.
+2. Invoke the corresponding prompt-engineering and hypershot skills when they
+   are available. If either is unavailable and the owner request explicitly
+   authorizes the direct-file fallback, record that fact and apply the complete
+   protocol files; otherwise stop before authoring.
+3. Keep the reusable invariant frame primary and stable. Put current feature
+   facts, repository observations, plans, evidence, and history only in typed
+   downstream collections.
+4. Use the established Markdown/semantic hierarchy, positive capability
+   framing, explicit authority, attention management, and contamination
+   controls. A reusable template contains no concrete task input/output
+   example, approval token, credential, secret, repository path instance,
+   commit value, or captured session claim.
 
-- `src/repo_observer.ts` — typed local Git observation and divergence checks;
-- `src/command_evidence.ts` — bounded argv execution records and protected
-  output artifacts;
-- `src/path_scope.ts` — normalized, segment-safe changed-path decisions;
-- `src/handoff_renderer.ts` — pure status, report, and handoff-preview bytes;
-- small extensions to `domain.ts`, `events.ts`, `state_machine.ts`, and
-  `requirements.ts` only where EL-03 records must enter protected state;
-- deterministic Git-fixture and renderer tests under
-  `tools/engineering-loop/tests/`.
+Protocol review is acceptance evidence, not a substitute for deterministic
+compiler and scanner pins.
 
-### 4.2 Repository observation
+### 4.2 Package and dependency boundary
 
-The observer computes, never accepts from model text:
+Implement only under `tools/engineering-loop/`, plus tests and required
+closeout documents. Add no package dependency and import no Trellis product
+runtime.
 
-- canonical repository root and assigned worktree identity;
-- exact branch, current HEAD, configured base commit, clean/dirty state;
-- configured remote name plus normalized remote identity;
-- every tracked, staged, unstaged, untracked, deleted, renamed, and unusual
-  changed path needed for scope decisions.
+Recommended cohesive files:
 
-Use stable machine-readable Git commands with explicit argv and `cwd`. Parse
-NUL-delimited output where filenames are returned; preserve spaces, Unicode,
-leading dashes, and rename pairs without shell interpolation. Treat detached
-HEAD, missing/ambiguous remote, invalid base, submodule/worktree mismatch,
-unexpected branch/HEAD/base, command timeout, nonzero status, malformed output,
-or observation disagreement as typed refusal. Do not fetch or contact a remote
-during deterministic acceptance.
+- `src/prompt_contracts.ts` — strict bounded role, compiler-input, compiled-
+  packet, and role-output schemas;
+- `src/prompt_compiler.ts` — pure normalization, assembly, budgeting,
+  identity, hashing, and deterministic refusal;
+- `prompts/planner.md`, `prompts/implementer.md`,
+  `prompts/checker.md`, and `prompts/recovery.md` — invariant role assets;
+- an optional strict `prompts/manifest.json` only if it removes duplicated
+  version/hash/role declarations and is schema-validated;
+- focused `prompt_contracts.test.ts` and `prompt_compiler.test.ts` pins;
+- the exact EL-04 rows in `src/requirements.ts`.
 
-### 4.3 Allowed-path scope and divergence
+Make only the smallest backward-compatible additions to EL-02/EL-03 domain or
+event types if a compiled-packet identity must be retained. Do not change the
+transition matrix, repository observer, command executor, renderer authority,
+approval semantics, or protected storage contract.
 
-Bind the session's immutable allowed paths before observation. Normalize Git
-paths to repository-relative slash form and compare by path segment, never raw
-string prefix. A scope entry for one directory includes that directory and its
-descendants, not similarly prefixed siblings. Refuse absolute paths, traversal,
-empty segments, platform aliases, repository escapes, and symlink-mediated
-access to protected state.
+### 4.3 Invariant role assets
 
-Compute the complete changed-path set before verification or review. A changed
-path outside scope, a changed worktree identity, or unexpected branch, HEAD, or
-base stops before another edit, command result, renderer result, or effect can
-be accepted. Pin before/after observation fixtures so a time-of-check/time-of-
-use divergence is loud.
+Each role asset begins with the invariant authority and trust frame before any
+generation instruction. Keep stable policy and role behavior in the asset;
+compile current facts later from typed data.
 
-### 4.4 Command evidence and protected artifacts
+- **Planner:** produces a bounded plan aligned to the active feature,
+  normative requirement IDs, allowed paths, dependencies, risks, and
+  verification requests. It cannot authorize edits or protected effects.
+- **Implementer:** works only inside the supplied plan and allowed-path set,
+  reports proposed changes and blockers, and treats repository/command facts
+  as controller evidence rather than self-certified truth.
+- **Read-only checker:** evaluates supplied implementation/evidence against
+  requirements and emits findings/recommendations. It cannot edit, transition,
+  approve, or replace deterministic verification.
+- **Recovery analyst:** classifies a supplied blocked/unknown state and
+  recommends bounded next evidence or human action. It cannot retry a protected
+  effect or resolve an unknown outcome by assertion.
 
-Define strict versioned records for command request, execution observation,
-bounded output metadata, and retained artifact reference. A record includes
-the exact argv array, canonical working directory, injected start/end times,
-exit status or signal, timeout/cancellation state, stdout/stderr byte counts,
-bounded previews, full-byte digests, media types, and protected references when
-full output is retained.
+Normalize assets to UTF-8 without BOM and LF line endings, with one terminal
+newline. Reject unknown role/version, mutable placeholders outside the typed
+context seam, and asset/manifest hash disagreement. Prompt amendments are
+versioned and every pin moves wittingly with history in the same change.
 
-Keep argv execution free of shell parsing. Bound argv count/bytes, cwd, timeout,
-preview bytes, output bytes, and retained-artifact size. Large output and diffs
-are written only under the EL-02 protected state root by hash-addressed atomic
-creation, then referenced by a journal-linked evidence event. Duplicate bytes
-deduplicate by digest; digest/reference mismatch, existing-byte disagreement,
-path alias, partial artifact, or worktree retention refuses. Worker-reported
-commands and counts remain `runner_reported` evidence and never substitute for
-these controller-observed records.
+### 4.4 Typed downstream context and progressive disclosure
 
-### 4.5 Trusted report derivation
+Define a strict `PromptCompilationInput` whose collections remain separate:
 
-EL-03 owns SPEC `DATA-006`. Align the strict report serialization with the
-normative field names: `feature`, `result`, `artifacts`,
-`normative_requirements` with engine-computed counts and outstanding/unmapped
-IDs, `verification`, `findings`, and `next_feature`. Derive fields only from a
-validated snapshot, catalog/SPEC linkage, controller-observed repository and
-command evidence, and protected artifact references. Report ordering,
-normalization, newline, and omission/null rules are renderer-versioned and
-byte-pinned.
+- invariant policy and role-asset identity;
+- current validated workflow snapshot and active feature definition;
+- active bounded plan;
+- controller-observed repository/command evidence identities and protected
+  artifact references;
+- bounded episode summary facts;
+- bounded archive/report references.
 
-### 4.6 Deterministic derived views
+Every string, identifier, collection, nested object, and serialized byte
+sequence has an explicit type, item count, per-item byte bound, and total bound.
+Reject unknown keys, duplicate or conflicting identities, unlinked evidence,
+untrusted substitutions, invalid ordering, and context overflow. Preserve
+declared semantic order; sort only collections declared unordered.
 
-Implement pure renderer functions whose complete inputs are strict data:
-trusted snapshot, bounded evidence/reference collections, repository
-observation, catalog data, renderer version, and the invariant output frame.
-Identical canonical inputs must produce byte-identical status and handoff
-preview bytes across repeated runs. Sort only collections declared unordered;
-preserve semantic argv/path/event order. Compute counts and paths in code.
+Progressive disclosure includes references and bounded summaries by default.
+It never copies a full event journal, transcript, diff, retained command
+output, roadmap history, credential-bearing environment, or untrusted runner
+report into a reusable frame. Full protected bytes remain addressable for a
+later authorized reader; the compiler does not read them implicitly.
 
-The handoff output is a **preview artifact**, not a write to `HANDOFF.md`.
-Rendering has no state-store mutation, Git write, command execution, clock read,
-or external effect. Manual `HANDOFF.md` remains authoritative through EL-06 and
-the EL-07 comparison unless the owner later records an adopt verdict. Generated
-context points to bounded reports/archive references and never copies the full
-journal, transcript, diff, command output, or roadmap history.
+### 4.5 Deterministic packet identity and budgets
 
-### 4.7 Requirement linkage
+Compile from validated asset bytes plus validated typed context without reading
+the clock, Git, state store, filesystem, network, environment, or model inside
+the pure assembly function. Keep file loading and schema validation at a
+separate boundary.
 
-Compute and pin every EL-03 conformance row directly from SPEC §18. The expected
-set has 12 IDs: one data/report requirement, six repository requirements, one
-protected-artifact observability requirement, and four derived-view
-requirements. Each ID needs concrete source and deterministic test evidence;
-do not remap requirement text to fit the implementation.
+A compiled packet records at minimum:
+
+- schema, compiler, policy, role, prompt, and output-contract versions;
+- role and normalized asset digest;
+- workflow snapshot ID/digest, feature ID, and linked evidence IDs;
+- normalized UTF-8 bytes, exact byte count, and SHA-256 digest;
+- configured section/item/total byte budgets and observed use;
+- deterministic refusal kind when any budget or validation boundary fails.
+
+Use an explicit conservative byte budget with per-section reservations; do not
+estimate tokens by eye. Identical canonical input must produce byte-identical
+packet bytes and metadata. A changed asset, version, state digest, evidence
+identity, or typed context value changes the packet digest. Snapshot pins must
+cover all four roles and both success/refusal boundaries.
+
+### 4.6 Strict role-output contracts
+
+Define distinct strict schemas and parsers for planner, implementer, checker,
+and recovery outputs. Each includes a versioned discriminant and bounded
+collections. The exact field design should stay minimal, but it must express:
+
+- planner steps, requirement IDs, allowed-path requests, risks, and verification
+  requests;
+- implementer proposed changed paths, requirement dispositions, verification
+  requests, findings, and blockers;
+- checker recommendation, requirement assessments, findings, and evidence
+  references;
+- recovery classification, safe next evidence/action recommendation, human
+  action requirement, and unresolved effect identities.
+
+Unknown fields/enums, invalid IDs, duplicates, oversized values, structurally
+invalid JSON, approval/credential material, and role/schema mismatch refuse.
+Parsed output remains worker/model-reported advisory data. It cannot create
+controller-observed repository/command evidence, satisfy verification, consume
+an approval, invoke an effect, or perform a state transition.
+
+### 4.7 Contamination controls and requirement linkage
+
+Add deterministic static scans over every reusable asset and compiled invariant
+frame. Pin absence of task-specific concrete examples, approval tokens,
+credentials/secrets, current repository facts, mutable session claims, raw
+transcript/diff/output blocks, and out-of-layer placeholders. Pin that
+feature-specific values appear only in typed downstream sections and that the
+invariant frame precedes them in every compiled packet.
+
+Compute all seven EL-04 rows directly from SPEC §18 and map each to concrete
+source plus deterministic test evidence in `requirements.ts`. Keep the
+catalog feature/acceptance mapping exact; do not remap requirement wording to
+fit an implementation.
 
 ## 5. File-level starting points
 
-Read first:
+Read before designing:
 
-- `docs/architecture/ENGINEERING_LOOP.md` — especially §§3–7 and §§10–14;
-- `tools/engineering-loop/SPEC.md` — especially §§4, 7, 14, 16, and the exact
-  EL-03 rows in §18;
-- `docs/product/engineering-loop/ROADMAP.md` EL-03;
-- `docs/product/engineering-loop/features.json` EL-03 and
-  `feature.schema.json`;
-- EL-02 source and tests under `tools/engineering-loop/`, especially
-  `domain.ts`, `events.ts`, `state_store.ts`, `fakes.ts`, `requirements.ts`,
-  and their fixtures;
-- existing repository test conventions for temporary Git repositories and
-  child-process fixtures, without importing product runtime.
+- `AGENTS.md`, this file, `docs/GLOSSARY.md`, and root `README.md`;
+- both complete protocol files named in §4.1 and both skills when available;
+- `docs/architecture/ENGINEERING_LOOP.md`, especially context/trust/prompt
+  sections;
+- `tools/engineering-loop/SPEC.md` §§4, 8, 14, 17, and exact EL-04 rows in
+  §18;
+- `docs/product/engineering-loop/ROADMAP.md` EL-04;
+- `features.json` EL-04 plus `feature.schema.json`;
+- EL-02/EL-03 `domain.ts`, `events.ts`, `requirements.ts`,
+  `state_machine.ts`, `command_evidence.ts`, `repo_observer.ts`, and
+  `handoff_renderer.ts`;
+- all engineering-loop tests, canonical JSON helpers, fake time, protected-root
+  conventions, and existing byte-pin history conventions;
+- `package.json`, TypeScript configuration, and Vitest configuration.
 
-Implement under `tools/engineering-loop/` only:
-
-- the observer, scope, command-evidence, artifact, and renderer modules/tests
-  described in §4;
-- the smallest strict EL-02 domain/event extensions needed to retain EL-03
-  evidence; preserve existing event replay and crash invariants;
-- bounded Git repositories and command fixtures created under temporary test
-  directories, never the developer's actual repository state.
-
-Update only after acceptance:
-
-- `docs/product/engineering-loop/features.json` (EL-03 status only);
-- `docs/product/engineering-loop/ROADMAP.md`;
-- `TRELLIS_ROADMAP.md` §4/§5 and archive rotation;
-- `HANDOFF.md` per §0.
-
-Do not add a daemon or general verification runner. EL-03 may execute the local
-Git/fixture commands required to produce typed observation evidence; EL-05 owns
-the real agent runner and EL-06 owns acceptance-command policy, real approvals,
-retry, and the checker.
+Implement only the compiler/contracts/assets/tests and minimal linkage
+described above. Update the feature catalog, product roadmap, root ledger,
+archive rotation, and this handoff only after deterministic acceptance. Keep
+manual handoff authority explicit.
 
 ## 6. Test strategy and acceptance
 
-EL-03 is zero-model and zero-paid. Acceptance requires:
+EL-04 is zero-model and zero-paid. Acceptance requires:
 
-1. All 12 EL-03-owned requirements have implementation and deterministic test
-   evidence with no requirement remap.
-2. Git fixtures compute exact root/worktree, branch, base, HEAD, dirty state,
-   remote identity, and complete changed paths without model-authored values.
-3. Staged, unstaged, untracked, deleted, renamed, spaced, Unicode, and leading-
-   dash paths parse losslessly; segment-safe scope allows only declared paths.
-4. Unexpected branch, base, HEAD, worktree, remote, scope, or between-check
-   divergence refuses before another accepted observation or rendered result.
-5. Command records carry exact argv/cwd/time/status/timeout/cancellation and
-   bounded output metadata; large bytes retain atomically outside the worktree
-   with digest, media type, byte count, and journal reference.
-6. Worker-reported Git/command/test claims cannot satisfy controller-observed
-   evidence requirements or alter renderer truth.
-7. Identical canonical inputs render byte-identical status, report, and handoff
-   preview bytes; input changes alter only their deterministic fields.
-8. Rendering is read-only and does not alter protected state, Git, or manual
-   `HANDOFF.md`; generated context remains bounded and reference-based.
-9. All 40 EL-02 tool tests and the existing 87 files / 876 tests remain green;
-   new counts are recorded. Catalog/schema/semantic and SPEC linkage audits
-   remain green, with no EL-04+ implementation or production prompt.
+1. The independently computed seven EL-04 requirements map to implementation
+   and deterministic evidence with zero outstanding/remapped IDs.
+2. All four role assets pass protocol review, contamination scans, strict
+   normalization, version/hash/manifest validation, and exact byte pins.
+3. Identical canonical input produces byte-identical packets and metadata for
+   every role; meaningful asset/state/evidence/context changes alter the
+   digest.
+4. Invariant frames precede generation and typed task context. Concrete task
+   facts never enter reusable assets.
+5. Section, collection, string, item, and total byte limits are boundary-pinned;
+   overflow deterministically refuses or requests a fresh episode.
+6. Planner, implementer, checker, and recovery outputs accept only their exact
+   bounded schemas. Unknown/mismatched/oversized/approval-or-secret-bearing
+   outputs refuse.
+7. Model/worker output cannot become controller-observed evidence, satisfy
+   verification, approve an effect, or transition controller state.
+8. Compilation is pure: no clock, command, Git, state-store, file, network,
+   environment, effect, or model mutation during assembly.
+9. All existing 96 files / 977 tests remain green; new counts and all prompt
+   pins are engine-observed. No EL-05+ implementation or product-runtime change
+   enters.
 
 Run at minimum:
 
 ```powershell
+npx vitest run tools/engineering-loop/tests/prompt_contracts.test.ts tools/engineering-loop/tests/prompt_compiler.test.ts tools/engineering-loop/tests/requirements.test.ts
 npm test
 npm run build
 npm run python:check
@@ -2033,74 +1714,72 @@ git diff --check
 git status --short --branch
 ```
 
-Extend the deterministic SPEC-linkage and catalog-semantic tests for EL-03.
-Add focused commands that report exact Git-fixture cases, scope decisions,
-divergence refusals, retained-artifact cases, and renderer byte pins. No live
-product drill, remote fetch, model call, or isolated Compose integration is
-required when the final diff stays in the authorized controller and closeout
-scope. If it escapes that scope, stop and redesign.
+Add focused commands that print exact role-asset count, strict-schema cases,
+budget boundary/refusal cases, contamination cases, requirement count, and
+byte-pin digests. Run no model, paid call, remote-dependent test, product drill,
+or isolated Compose integration when the diff remains in authorized controller
+and closeout scope.
+
+After the implementation block passes, prepare only the EL-04 status proposal,
+roadmap evidence, five-session archive rotation, and next handoff. Re-run the
+complete block after every late code or closeout edit.
 
 ## 7. Guardrails
 
-1. `AGENTS.md`, the architecture record, EL-02 kernel code, and every EL-03-
-   mapped SPEC requirement bind implementation; code outranks glossary and
-   prose when existing behavior disagrees.
-2. Repository facts, paths, command results, counts, and report fields are
-   engine-computed. Model/runner/checker statements remain advisory evidence.
-3. Parse filenames with NUL-delimited Git output and compare normalized path
-   segments. Never interpolate a path or argv through a shell string.
-4. Observe before execution and re-observe at protected boundaries. Any
-   repository or scope divergence stops; do not update the expected value to
-   make the observation pass.
-5. Keep protected state and retained artifacts outside the worktree. Refuse
-   lexical/canonical/symlink aliases in either direction.
-6. Preserve EL-02 invariants: one writer, append-only integrity-linked events,
-   event-before-snapshot durability, deterministic replay, terminal
-   immutability, approval authority, and unknown-effect blocking.
-7. Derived views are pure and read-only. They cannot mutate or outrank journal,
-   snapshot, approval, evidence, repository observation, or manual handoff.
-8. Manual `HANDOFF.md` stays authoritative. EL-03 produces a preview artifact
-   only; adoption remains an EL-07 measured owner decision.
-9. Bound argv, paths, timeouts, output previews, retained bytes, collections,
-   and rendered bytes. Validate every read/write/external boundary with strict
-   schemas and reject unknown fields/enums.
-10. Add no dependency. Use existing Zod, Vitest, TypeScript, Node, and local Git
-    facilities; acceptance uses temporary repositories and no network.
-11. Author no production prompt. The Prompt-Engineering and Hypershot protocols
-    govern any future EL-04 prompt bytes, not EL-03 renderer data.
-12. No model/paid work, Codex invocation, Trellis RLM, product database/queue/
-    API/worker dependency, tracker, scheduler, automatic push, or merge.
-13. No AI attribution, generated-with footer, or co-author trailer.
-14. Report exact commands, exit results, fixture/case counts, renderer pins, and
-    residuals honestly. Update status and regenerate this handoff only after the
-    full EL-03 block passes.
+1. Confirm owner acceptance and the actual EL-03 landing before editing. Work
+   from that exact clean master commit on one EL-04 feature branch.
+2. Read and apply the complete prompt-engineering/hypershot protocols before
+   any prompt/meta-prompt byte. Record skill availability and the authorized
+   fallback honestly.
+3. Stable invariant frames precede generation; mutable feature/task/state/
+   evidence/history data stays in strict downstream collections.
+4. Validate and bound every asset, compiler input, packet, output, persisted
+   identity, and read/write boundary. Unknown fields and overflow refuse.
+5. Planner/implementer/checker/recovery output is advisory. Deterministic
+   controller evidence and transition authority outrank it.
+6. Preserve EL-02 and EL-03 invariants: protected one-writer state,
+   integrity-linked event-first storage, replay, repository re-observation,
+   segment-safe scope, shell-free bounded commands, artifact digests, and pure
+   derived views.
+7. Reusable assets contain no task-specific concrete I/O example, approval
+   token, credential, secret, current repository fact, or session claim.
+8. Normalize, version, hash, budget, and snapshot-pin every compiled role
+   packet. Move pins wittingly with explicit history.
+9. No model call, paid work, Codex adapter, product runtime, verification
+   service, protected approval/effect, tracker, scheduler, push, merge, or PR.
+10. Manual `HANDOFF.md` remains authoritative; generated preview adoption is
+    still an EL-07 measured owner decision.
+11. Add no dependency and no AI attribution, generated-with footer, or
+    co-author trailer.
+12. Report exact commands, counts, pins, protocol/skill findings, and residuals.
+    Update status and regenerate this file only after the full EL-04 block
+    passes.
 
 ## 8. Explicit exclusions
 
-Session 57 does not:
+Session 58 does not:
 
-- alter the EL-02 transition table, approval policy, effect semantics,
-  lock discipline, journal integrity, or crash boundary contract except for the
-  smallest backward-compatible EL-03 evidence event/schema extension;
-- author EL-04 production prompts, prompt compiler, output schemas for model
-  roles, prompt pins, planner/implementer/checker/recovery prompt text, or
-  `WORKFLOW.md`;
-- implement EL-05 Codex app-server integration, current wire types, real thread
-  lifecycle, process management, timeout transport, or any model call;
-- implement EL-06 deterministic acceptance-command execution, real approval
-  channel, paid/destructive/push/merge effects, independent checker, redaction
-  policy, retention service, or production retry policy;
-- run EL-07 trials, overwrite manual `HANDOFF.md`, or alter its authority;
+- alter EL-02 transition, approval, effect, lock, journal, replay, or crash
+  contracts;
+- weaken or extend EL-03 repository observation, command execution, path scope,
+  retained-artifact, trusted-report, or renderer authority;
+- implement EL-05 Codex app-server transport, task/thread lifecycle, process
+  management, timeout transport, resume/rotation, or any model call;
+- implement EL-06 verification policy, acceptance-command allowlists, real
+  approvals, paid/destructive/push/merge effects, independent checker
+  execution, redaction/retention service, or retry/backoff policy;
+- run EL-07 trials, overwrite manual `HANDOFF.md`, or decide migration;
 - decide EL-08 tracker, scheduler, concurrency, multi-machine durability,
   standalone extraction, or generic workflow-engine adoption;
-- decide EL-09 report sanitization or Trellis ingestion;
-- modify product `src/`, `scripts/`, package dependencies, databases, queues, workers,
-  APIs, frontend, modules, RLM code, existing prompts, or prompt pins;
-- create a daemon, service, HTTP endpoint, worker, general verification runner,
-  or scheduler;
-- fetch, contact a remote, write controller state/artifacts into the repository,
-  push, commit, open a PR, or merge without later explicit scope;
-- resume the paused TTT T2 objective or alter any TTT design/measurement record.
+- decide EL-09 completed-report sanitization or Trellis ingestion;
+- modify product `src/`, `scripts/`, databases, queues, workers, APIs,
+  frontend, modules, RLM prompt bytes, existing prompt pins, or dependencies;
+- create a daemon, HTTP endpoint, service, general runner, checker service, or
+  scheduler;
+- contact a remote during deterministic tests, place protected state/artifacts
+  in the repository, stage, commit, push, merge, or open a PR without later
+  explicit owner authorization;
+- resume or modify the paused TTT T2 tooling-shape objective.
 
 ## Appendix A. Paused tooling-shape objective inherited from the pre-reconciliation Session 55 handoff — retained for history, do not execute
 

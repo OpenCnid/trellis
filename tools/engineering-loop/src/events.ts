@@ -48,7 +48,8 @@ export function sha256Canonical(value: unknown): string {
 function payloadBindings(payload: EventPayload) {
   if (payload.kind === 'transition') return payload.decision;
   if (payload.kind === 'effect_intent') return payload.intent;
-  return payload.outcome;
+  if (payload.kind === 'effect_outcome') return payload.outcome;
+  return payload.evidence;
 }
 
 export function createDomainEvent(input: {

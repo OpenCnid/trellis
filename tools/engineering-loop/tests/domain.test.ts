@@ -57,8 +57,8 @@ function nineObjects() {
       id: 'report:1', schemaVersion: 1, createdAt: NOW,
       workflowId: WORKFLOW.id, featureId: FEATURE.featureId, sessionId: SESSION.id,
       feature: FEATURE.featureId, result: 'ready_for_owner_review', artifacts: [],
-      normativeRequirements: { required: 28, implemented: 28, verified: 28, outstanding: [] },
-      verification: [], findings: [], nextFeature: 'EL-03',
+      normative_requirements: { required: 28, implemented: 28, verified: 28, outstanding: [] },
+      verification: [], findings: [], next_feature: 'EL-03',
     }],
   ] as const;
 }

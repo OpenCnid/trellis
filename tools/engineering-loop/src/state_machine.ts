@@ -518,6 +518,23 @@ export function applyDomainEvent(currentValue: unknown, event: DomainEvent): Sta
   if (event.actor !== 'controller') throw new StateTransitionError('Only the controller may record effects');
   assertBindings(event, current, 'Effect event');
 
+  if (event.payload.kind === 'evidence_recorded') {
+    const { evidence } = event.payload;
+    assertBindings(evidence, current, 'Recorded evidence');
+    if (evidence.origin !== 'controller_observed') {
+      throw new StateTransitionError('Only controller-observed evidence may enter the protected journal directly');
+    }
+    if (current.evidenceIds.includes(evidence.id)) {
+      throw new StateTransitionError(`Duplicate evidence '${evidence.id}' in journal`);
+    }
+    return parseBoundary(StateSnapshotSchema, {
+      ...current,
+      lastEventSequence: event.sequence,
+      lastEventDigest: event.digest,
+      evidenceIds: [...current.evidenceIds, evidence.id],
+    }, 'evidence-recorded snapshot');
+  }
+
   if (event.payload.kind === 'effect_intent') {
     const { intent, consumedApproval } = event.payload;
     assertBindings(intent, current, 'Effect intent');

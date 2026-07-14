@@ -6337,3 +6337,99 @@ current addendum bytes either way.**
 6. **Bookkeeping:** row 13's cell gains the S2a RATIFIED outcome and
    standing item 12 is struck; the default next objective returns to
    T2 (Session 52). No paid work, no owner-conditional run.
+
+### July 14, 2026 — Session 52: TTT-track increment T2 (`buildAgentEnv` forward/strip) attempted through the stage-2 harness — verdict FAILED, recorded (§4 row 13, Phase 1 step 2)
+
+TTT-track increment T2, the second FEATURE-CLASS self-edit (§12.6):
+`buildAgentEnv` gains the `TRELLIS_RLM_*` forward/strip surface and
+the unconditional `OPENAI_BASE_URL` delete per `MODEL_BACKEND_SEAM.md`
+§3.3 + §4 layer 2 + the §8 T2 skeleton. The increment FAILED on the
+pre-stated criterion; the final tree ships ZERO code bytes (the failed
+diff reverted). Session paid total $1.0889 (the quota probe ≈$0.0001 +
+the run $1.0888) under the ≤$5/run cap. The increment record is
+`REPOSITORY_INGESTION_REPORT.md` §5i.
+
+1. **Zero-paid staging, all verified read-only before the proposal
+   (§5i.1–§5i.3):** the substrate is FRESH for the target
+   (`repo:trellis:src/workers/rlm_job.ts` v2 at `trellis#12`, root
+   `a0d3b0d2…`, extraction ran July 13). The entity `buildagentenv`
+   has 17 ACTION edges, ALL uncontested, ALL citing the single live
+   block `c3883a2e…d0b6d0b4` — the `buildAgentEnv` function-body block
+   carrying BOTH molds T2 mirrors (the unconditional experiment-flag
+   deletion block + the `mcpCredentialEnv` forwarding loop). The block
+   is a verbatim substring of the on-disk file (uniform CRLF).
+   `stage2:check --pre --entity buildagentenv` PASS zero findings;
+   `test:selfedit-harness` green; the split-scope policy-1 `--dry-run`
+   echo read 3 to ingest / 300 unchanged / 0 tombstones (the 3 drifting
+   files are Session 51's changed `scripts/*.py`, outside the evidence
+   chain and named files — deferred to the post-landing refresh; no
+   pre-run refresh owed). NEITHER named file needed a stub (both exist;
+   the test file already carries a `buildAgentEnv` describe). **The
+   recorded open point decided:** the one-line `rlm_worker.ts` wiring
+   defers to T3 (T2 stays a pure-function increment, zero live
+   consumers — the T1 shape).
+2. **The geometry difference from T1, recorded honestly (§5i.2):** T2's
+   guarded inserts land INSIDE the cited `buildAgentEnv` block, so it
+   is not verbatim-contiguous on disk after the edits. The adaptation:
+   confirm disk-verbatim ONCE at the pre-edit evidence phase (E3), HOLD
+   the surviving hash, and re-check at completion via `citable()` only
+   (DB membership + retrieval set — edit-invariant); `stage2:check`'s
+   evidence layer is likewise DB-membership based and unaffected. The
+   insight stays at completion time, preserving the R2 revert-before-
+   write integrity.
+3. **Guardrail 15 honored:** BOTH the `prompt-engineering` and
+   `hypershot-protocol` skills were INVOKED via the Skill tool BEFORE
+   any T2 task-text byte was written; the task text (§5i.4, verbatim)
+   was authored on the §5h.12 v3.2 template with the T2 spec spliced
+   and the geometry adaptation woven into R1/E3/C1.
+4. **The run — VERDICT FAILED, two criterion misses (§5i.6):** the
+   quota probe FIRST returned quota RESTORED (12 in / 4 out); ONE
+   spawn, research mode, `--max-iterations 16`, `PYTHONUTF8=1`,
+   `TRELLIS_TASK_NAMED_FILES` as staged, one log file (exit 0, 108.7s;
+   16/16 iterations; 371,136 in / 16,097 out; 5 guarded ops / 0 raw
+   splices; the ONE gated insight `buildagentenv -forwards_by_name->`
+   `mcpcredentialenv` citing the held live block `c3883a2e…`). Items
+   1–4 + 6 PASS: named-file-only diff (exactly the two files),
+   evidence contract (the gated insight, citation audit clean),
+   `stage2:check` zero findings, guarded-only, and the `rlm_job.ts`
+   production diff is SPEC-PERFECT (all four Parts placed exactly,
+   insert-only, byte-clean). **Item 5 (pins green) FAILED** — the
+   fifth authored pin, the absent-block byte-identity test, asserted
+   `buildAgentEnv(cleanBase, CFG)` deep-equals `{ PATH }`, wrong
+   because `buildAgentEnv` unconditionally injects the
+   `NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING` keys —
+   `npx vitest run src/workers/rlm_job.test.ts` = 1 failed / 36
+   passed. **Item 7 (spend) MISSED** — $1.0888 vs the $0.5–$1.0
+   estimate (16 full iterations vs T1's 11). A failing pin FAILS the
+   increment; no second run this session (the retry is its own
+   proposal). NO machinery defect — every layer fired per contract;
+   the class is a mis-written test assertion caught mechanically by
+   `npm test` (`stage2:check` is correctly blind to test-green, the
+   parse gate correctly passed a well-formed file).
+5. **Cleanup (guardrail 5, the bounded operator-cleanup precedent):**
+   the failed run's own residual insight write was deleted —
+   `MATCH (s:Entity {name:'buildagentenv'})-[r:DERIVED_INSIGHT
+   {verb:'forwards_by_name'}]->(o:Entity {name:'mcpcredentialenv'})
+   DELETE r` (`DERIVED_INSIGHT` edges 299 → 298; target 1 → 0); the
+   freshly-created `mcpcredentialenv` entity NODE was left in place
+   (guardrail 2 — entities are never deleted). The diff was reverted
+   (`git checkout --`; preserved as
+   `benchmark_logs/s52_t2_run1_failed.diff`, local/gitignored, never a
+   patch source); `npm test` back to 876/87.
+6. **Retry material (v3.3 — a NEW owner-approved proposal; T2 stands
+   at ONE failed attempt, §5g.3 ladder untouched):** the single change
+   is to strengthen the M3 pin-(e) guidance so the absent-block
+   byte-identity pin builds its expected object from `buildAgentEnv`'s
+   ACTUAL clean-base output (the base keys PLUS the unconditional
+   `NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING`, mirroring
+   the file's first existing `buildAgentEnv` test), never the bare base
+   env. Nothing else in v3.2/T2 changes; the estimate re-bases to
+   $0.7–$1.2 for ONE run.
+7. **Bookkeeping:** row 13's cell gains the T2 FAILED outcome; the
+   §5i increment record is complete through §5i.6; the five-session
+   window advances to 48–52 (Session 47's §5 entry compressed to the
+   HANDOFF digest and moved verbatim to
+   `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph updated in
+   the same commit). Docs-only close-out (the failed diff reverted,
+   ZERO non-markdown bytes shipped — the Session 48 precedent): live
+   drills not re-run, the reason recorded.

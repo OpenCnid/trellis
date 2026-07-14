@@ -191,7 +191,7 @@ Ordered roughly by severity.
 
 | Order | Item | Rationale |
 |---|---|---|
-| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 + EL-01 + EL-02 ACCEPTED; EL-03 NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-01 ratified the architecture boundary and mapped all 106 mandatory requirements to existing feature acceptance/test classes. EL-02 added the deterministic control kernel under `tools/engineering-loop/`: all 28 owned requirements, 40 deterministic tool tests, exhaustive 41-allowed/91-forbidden state pairs, protected external state, event-first replayable storage, locking, and fake dependencies, zero-model and zero-paid. The owner reviewed and ratified the EL-02 closeout on July 14, 2026. EL-03 follows: repository observation, bounded command evidence, scope/divergence refusal, and deterministic status/handoff preview rendering. No real runner, prompt, model call, scheduler, tracker, automatic push/merge, or paid work enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
+| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 + EL-01 + EL-02 + EL-03 ACCEPTED; EL-04 NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-01 ratified the architecture boundary and mapped all 106 mandatory requirements to existing feature acceptance/test classes. EL-02 added the owner-ratified deterministic control kernel. EL-03 adds all 12 owned requirements under `tools/engineering-loop/`: engine-computed Git observation, complete NUL-delimited paths, segment-safe scope and divergence refusal, bounded shell-free command evidence, protected retained artifacts, trusted strict-report derivation, and pure byte-pinned status/handoff previews. Focused acceptance passed 64 tests across 5 files and repository-wide acceptance passed 977 tests across 96 files, zero-model and zero-paid. The owner reviewed and ratified the EL-03 closeout on July 14, 2026, then explicitly authorized commit, merge, and push to `master`; manual `HANDOFF.md` remains authoritative through EL-07. EL-04 is next: prompt compiler, four strict role contracts, byte normalization/version/hash/budget/pins, and contamination refusal. No real runner, model call, scheduler, tracker, automatic push/merge, or paid work enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
 | ~~1~~ | ~~Structured logging and basic metrics (3.2 #9 / T16)~~ | **Done (July 6, 2026)** — split-process logs/metrics shipped; see §5 |
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
@@ -256,8 +256,8 @@ Session 50 PR, Session 46 with the Session 51 PR, Session 47 with the
 Session 52 PR, Session 48 with the Session 53 PR, Session 49 with the
 Session 54 PR, Session 50 (its session entry plus the same-day PR #96/#97
 follow-ons) with the Session 55 EL-01 PR, and Session 51 with the Session 56
-EL-02 feature branch.
-The live ledger below keeps the most recent five sessions: 52–56.)*
+EL-02 feature branch, and Session 52 with the Session 57 EL-03 feature branch.
+The live ledger below keeps the most recent five sessions: 53–57.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -793,101 +793,6 @@ owner invited a document-first design record for Trellis serving MCP;
 the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
 
-### July 14, 2026 — Session 52: TTT-track increment T2 (`buildAgentEnv` forward/strip) attempted through the stage-2 harness — verdict FAILED, recorded (§4 row 13, Phase 1 step 2)
-
-TTT-track increment T2, the second FEATURE-CLASS self-edit (§12.6):
-`buildAgentEnv` gains the `TRELLIS_RLM_*` forward/strip surface and
-the unconditional `OPENAI_BASE_URL` delete per `MODEL_BACKEND_SEAM.md`
-§3.3 + §4 layer 2 + the §8 T2 skeleton. The increment FAILED on the
-pre-stated criterion; the final tree ships ZERO code bytes (the failed
-diff reverted). Session paid total $1.0889 (the quota probe ≈$0.0001 +
-the run $1.0888) under the ≤$5/run cap. The increment record is
-`REPOSITORY_INGESTION_REPORT.md` §5i.
-
-1. **Zero-paid staging, all verified read-only before the proposal
-   (§5i.1–§5i.3):** the substrate is FRESH for the target
-   (`repo:trellis:src/workers/rlm_job.ts` v2 at `trellis#12`, root
-   `a0d3b0d2…`, extraction ran July 13). The entity `buildagentenv`
-   has 17 ACTION edges, ALL uncontested, ALL citing the single live
-   block `c3883a2e…d0b6d0b4` — the `buildAgentEnv` function-body block
-   carrying BOTH molds T2 mirrors (the unconditional experiment-flag
-   deletion block + the `mcpCredentialEnv` forwarding loop). The block
-   is a verbatim substring of the on-disk file (uniform CRLF).
-   `stage2:check --pre --entity buildagentenv` PASS zero findings;
-   `test:selfedit-harness` green; the split-scope policy-1 `--dry-run`
-   echo read 3 to ingest / 300 unchanged / 0 tombstones (the 3 drifting
-   files are Session 51's changed `scripts/*.py`, outside the evidence
-   chain and named files — deferred to the post-landing refresh; no
-   pre-run refresh owed). NEITHER named file needed a stub (both exist;
-   the test file already carries a `buildAgentEnv` describe). **The
-   recorded open point decided:** the one-line `rlm_worker.ts` wiring
-   defers to T3 (T2 stays a pure-function increment, zero live
-   consumers — the T1 shape).
-2. **The geometry difference from T1, recorded honestly (§5i.2):** T2's
-   guarded inserts land INSIDE the cited `buildAgentEnv` block, so it
-   is not verbatim-contiguous on disk after the edits. The adaptation:
-   confirm disk-verbatim ONCE at the pre-edit evidence phase (E3), HOLD
-   the surviving hash, and re-check at completion via `citable()` only
-   (DB membership + retrieval set — edit-invariant); `stage2:check`'s
-   evidence layer is likewise DB-membership based and unaffected. The
-   insight stays at completion time, preserving the R2 revert-before-
-   write integrity.
-3. **Guardrail 15 honored:** BOTH the `prompt-engineering` and
-   `hypershot-protocol` skills were INVOKED via the Skill tool BEFORE
-   any T2 task-text byte was written; the task text (§5i.4, verbatim)
-   was authored on the §5h.12 v3.2 template with the T2 spec spliced
-   and the geometry adaptation woven into R1/E3/C1.
-4. **The run — VERDICT FAILED, two criterion misses (§5i.6):** the
-   quota probe FIRST returned quota RESTORED (12 in / 4 out); ONE
-   spawn, research mode, `--max-iterations 16`, `PYTHONUTF8=1`,
-   `TRELLIS_TASK_NAMED_FILES` as staged, one log file (exit 0, 108.7s;
-   16/16 iterations; 371,136 in / 16,097 out; 5 guarded ops / 0 raw
-   splices; the ONE gated insight `buildagentenv -forwards_by_name->`
-   `mcpcredentialenv` citing the held live block `c3883a2e…`). Items
-   1–4 + 6 PASS: named-file-only diff (exactly the two files),
-   evidence contract (the gated insight, citation audit clean),
-   `stage2:check` zero findings, guarded-only, and the `rlm_job.ts`
-   production diff is SPEC-PERFECT (all four Parts placed exactly,
-   insert-only, byte-clean). **Item 5 (pins green) FAILED** — the
-   fifth authored pin, the absent-block byte-identity test, asserted
-   `buildAgentEnv(cleanBase, CFG)` deep-equals `{ PATH }`, wrong
-   because `buildAgentEnv` unconditionally injects the
-   `NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING` keys —
-   `npx vitest run src/workers/rlm_job.test.ts` = 1 failed / 36
-   passed. **Item 7 (spend) MISSED** — $1.0888 vs the $0.5–$1.0
-   estimate (16 full iterations vs T1's 11). A failing pin FAILS the
-   increment; no second run this session (the retry is its own
-   proposal). NO machinery defect — every layer fired per contract;
-   the class is a mis-written test assertion caught mechanically by
-   `npm test` (`stage2:check` is correctly blind to test-green, the
-   parse gate correctly passed a well-formed file).
-5. **Cleanup (guardrail 5, the bounded operator-cleanup precedent):**
-   the failed run's own residual insight write was deleted —
-   `MATCH (s:Entity {name:'buildagentenv'})-[r:DERIVED_INSIGHT
-   {verb:'forwards_by_name'}]->(o:Entity {name:'mcpcredentialenv'})
-   DELETE r` (`DERIVED_INSIGHT` edges 299 → 298; target 1 → 0); the
-   freshly-created `mcpcredentialenv` entity NODE was left in place
-   (guardrail 2 — entities are never deleted). The diff was reverted
-   (`git checkout --`; preserved as
-   `benchmark_logs/s52_t2_run1_failed.diff`, local/gitignored, never a
-   patch source); `npm test` back to 876/87.
-6. **Retry material (v3.3 — a NEW owner-approved proposal; T2 stands
-   at ONE failed attempt, §5g.3 ladder untouched):** the single change
-   is to strengthen the M3 pin-(e) guidance so the absent-block
-   byte-identity pin builds its expected object from `buildAgentEnv`'s
-   ACTUAL clean-base output (the base keys PLUS the unconditional
-   `NEO4J_*`/`PG_DSN`/`PYTHONUNBUFFERED`/`PYTHONIOENCODING`, mirroring
-   the file's first existing `buildAgentEnv` test), never the bare base
-   env. Nothing else in v3.2/T2 changes; the estimate re-bases to
-   $0.7–$1.2 for ONE run.
-7. **Bookkeeping:** row 13's cell gains the T2 FAILED outcome; the
-   §5i increment record is complete through §5i.6; the five-session
-   window advances to 48–52 (Session 47's §5 entry compressed to the
-   HANDOFF digest and moved verbatim to
-   `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph updated in
-   the same commit). Docs-only close-out (the failed diff reverted,
-   ZERO non-markdown bytes shipped — the Session 48 precedent): live
-   drills not re-run, the reason recorded.
 
 ### July 14, 2026 — Session 53: TTT-track increment T2 RETRY (task text v3.3) — a clean R2 self-refusal, NO LANDING, recorded (§4 row 13, Phase 1 step 2)
 
@@ -1245,3 +1150,79 @@ commit, merge, and push to `master`.
    remains.
 8. **Next:** `EL-03` is dependency-unblocked and is the next feature in the
    program sequence. The paused TTT T2 objective remains untouched.
+
+### July 14, 2026 — Session 57: EL-03 repository observer and deterministic handoff renderer owner-ratified and accepted, zero-model and zero-paid
+
+Session 57 executed only engineering-loop feature `EL-03` on
+`implement-el03-repository-observer`, based on required master commit
+`e0504b1b5bfda85be6c0c8518234d2c6348a4625`. The implementation adds no
+dependency, product-runtime source, production prompt, real agent runner,
+verification service, scheduler, tracker, model call, paid call, automatic
+push, or automatic merge. The owner reviewed and ratified the complete diff,
+then explicitly authorized commit, merge, and push to `master`.
+
+1. **All 12 owned requirements implemented and linked:** an independent SPEC
+   §18 audit computed exactly `DATA-006`, `OBS-005`, `REPO-001` through
+   `REPO-006`, `VIEW-001`, `VIEW-002`, `VIEW-003`, and `VIEW-005`. Each maps
+   one-for-one to concrete source and deterministic tests in
+   `tools/engineering-loop/src/requirements.ts`; outstanding IDs = 0.
+2. **Repository observation and scope are engine-owned:**
+   `repo_observer.ts` computes canonical repository/worktree/common-Git
+   identity, branch, base, HEAD, clean state, normalized remote identity, and
+   every changed path through explicit local Git argv. Porcelain-v2 NUL parsing
+   preserves staged, unstaged, untracked, deleted, renamed, spaced, Unicode,
+   and leading-dash names. `path_scope.ts` validates NFC slash paths, refuses
+   absolute/traversal/platform aliases, compares path segments, and stops on
+   out-of-scope or between-check divergence rather than widening expected
+   state.
+3. **Commands and retained bytes are bounded and protected:**
+   `command_evidence.ts` uses `spawn` with `shell: false`, explicit argv/cwd,
+   injected time, timeouts/cancellation, exact byte counts, bounded base64
+   previews, and full SHA-256 digests. Complete output is atomically retained
+   outside the worktree under the EL-02 protected root, deduplicated by digest,
+   revalidated at read/journal boundaries, and linked by controller-observed
+   evidence. Aliases, partial files, disagreement, over-bounds, and worker
+   substitutions refuse.
+4. **Reports and previews derive only from trusted state:**
+   `handoff_renderer.ts` validates journal-linked repository and command
+   evidence, computes strict snake-case report fields and requirement counts,
+   refuses failed verification for a ready-review result, and renders pure,
+   bounded canonical bytes. SHA-256 pins are report
+   `4c085f4b023e6efb3c770a5957e835c502f5884907d33e026b043d96686fa262`,
+   status `8f77a23f77d99d0515ddbfe07af3b5e572ceb21ddd83fa7e98612153011568b8`,
+   and handoff preview
+   `961e09a7142b25604482a98cad94711a3da7cd794498b6b5580027051f4c911f`.
+   Rendering performs no command, clock, Git, state-store, file, network, or
+   manual-HANDOFF mutation; manual `HANDOFF.md` remains authoritative.
+5. **Deterministic test evidence:** the focused command
+   `npx vitest run tools/engineering-loop/tests/path_scope.test.ts
+   tools/engineering-loop/tests/command_evidence.test.ts
+   tools/engineering-loop/tests/repo_observer.test.ts
+   tools/engineering-loop/tests/handoff_renderer.test.ts
+   tools/engineering-loop/tests/requirements.test.ts` passed **64 tests across
+   5 files**. The repository suite moved from 92 files / 916 tests to **96
+   files / 977 tests**: four new test files and 61 net tests, with all 40 EL-02
+   tests preserved. `npm run build` passed; `npm run python:check` printed
+   `Python runtime syntax, imports, rubric, and module assets verified.`;
+   `docker compose config --quiet` exited 0; Draft 2020-12 catalog validation
+   printed **10**; `git diff --check` exited 0.
+6. **Findings and dispositions:** preflight fetched `origin/master` and
+   verified it exactly matched the required commit before branch creation.
+   Fresh `npm ci` installed 317 packages with 0 vulnerabilities and repeated
+   the local Node v20.19.2 versus four Babel packages' Node 22.18+ warnings;
+   install, tests, and build still passed, while CI remains Node 22. The first
+   focused run exposed a remote-normalization precedence defect that treated an
+   HTTPS URL as SCP syntax; URL parsing precedence was corrected and multiple-
+   remote/malformed-status refusal pins were added. The final focused and full
+   suites are green. A final parallel sandboxed npm check repeated the known
+   Windows `EPERM` realpath refusal, and sandboxed Compose could not read the
+   user Docker config; both exact commands passed on scoped rerun, with Compose
+   silent. Deterministic tests made zero remote calls; the sole
+   remote contact was the required preflight fetch. Model calls = 0; paid calls
+   = 0.
+7. **Closeout and next:** only the EL-03 bootstrap-status field changed in
+   `features.json`; the owner ratified that closeout after reviewing the diff.
+   Session 52 moved verbatim to the archive so the live ledger remains five.
+   `EL-04` is dependency-unblocked and proposed next: prompt compiler and strict
+   role contracts under the mandatory prompt-engineering/hypershot gate. The
+   paused TTT T2 tooling objective remains untouched.

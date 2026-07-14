@@ -34,3 +34,18 @@ export const EL02_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
   { requirement: 'EL-REQ-SEC-001', source: ['state_store.ts', 'writer_lock.ts', 'fakes.ts'], tests: ['state_store: worktree isolation'] },
   { requirement: 'EL-REQ-SEC-007', source: ['domain.ts'], tests: ['domain: explicit bounds'] },
 ] as const;
+
+export const EL03_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
+  { requirement: 'EL-REQ-DATA-006', source: ['domain.ts', 'handoff_renderer.ts'], tests: ['handoff_renderer: trusted report fields and counts'] },
+  { requirement: 'EL-REQ-REPO-001', source: ['repo_observer.ts', 'command_evidence.ts'], tests: ['repo_observer: engine-computed repository identity'] },
+  { requirement: 'EL-REQ-REPO-002', source: ['repo_observer.ts', 'path_scope.ts'], tests: ['repo_observer: complete NUL-delimited changed paths'] },
+  { requirement: 'EL-REQ-REPO-003', source: ['repo_observer.ts', 'path_scope.ts'], tests: ['repo_observer: divergence refusal matrix'] },
+  { requirement: 'EL-REQ-REPO-004', source: ['command_evidence.ts'], tests: ['command_evidence: exact bounded command observation'] },
+  { requirement: 'EL-REQ-REPO-005', source: ['handoff_renderer.ts', 'domain.ts'], tests: ['handoff_renderer: evidence precedence'] },
+  { requirement: 'EL-REQ-REPO-006', source: ['state_store.ts', 'command_evidence.ts'], tests: ['command_evidence: protected artifact placement'] },
+  { requirement: 'EL-REQ-OBS-005', source: ['command_evidence.ts', 'events.ts', 'state_machine.ts'], tests: ['command_evidence: digest-linked retained artifacts'] },
+  { requirement: 'EL-REQ-VIEW-001', source: ['handoff_renderer.ts'], tests: ['handoff_renderer: byte-identical renderer pins'] },
+  { requirement: 'EL-REQ-VIEW-002', source: ['handoff_renderer.ts'], tests: ['handoff_renderer: pure read-only rendering'] },
+  { requirement: 'EL-REQ-VIEW-003', source: ['handoff_renderer.ts'], tests: ['handoff_renderer: manual handoff authority'] },
+  { requirement: 'EL-REQ-VIEW-005', source: ['handoff_renderer.ts'], tests: ['handoff_renderer: bounded reference-only context'] },
+] as const;

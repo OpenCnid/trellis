@@ -1,12 +1,12 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **control kernel accepted; repository observer next**
+Status: **repository observer accepted; prompt compiler next**
 
 Owner direction: July 14, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current feature: `EL-03`
+Current feature: `EL-04`
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than
@@ -84,7 +84,7 @@ At session close:
 | 0 | `EL-00` | Program roadmap and machine-readable feature catalog | — | Forbidden | Accepted |
 | 1 | `EL-01` | Architecture record and normative service specification | `EL-00` | Forbidden | Accepted |
 | 2 | `EL-02` | Control kernel: schemas, transitions, durable state, event journal, fake runner | `EL-01` | Forbidden | Accepted |
-| 3 | `EL-03` | Repository observer and deterministic handoff renderer | `EL-02` | Forbidden | Planned |
+| 3 | `EL-03` | Repository observer and deterministic handoff renderer | `EL-02` | Forbidden | Accepted |
 | 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Planned |
 | 5 | `EL-05` | Codex app-server runner adapter and episode rotation | `EL-02`, `EL-04` | Forbidden in acceptance | Planned |
 | 6 | `EL-06` | Verification, protected gates, recovery, and independent checker | `EL-03`, `EL-04`, `EL-05` | Forbidden in deterministic acceptance | Planned |
@@ -158,7 +158,7 @@ class, with zero unmapped requirements. EL-01 added no runtime or prompt bytes.
 
 Outcome: deterministic code owns workflow truth before any real agent can run.
 
-Planned capabilities:
+Implemented capabilities:
 
 - Zod schemas for workflow, feature, state, event, decision, and episode report
 - Explicit allowed and forbidden transitions
@@ -203,6 +203,20 @@ Acceptance focus:
 - Identical state renders identical bytes.
 - Out-of-scope edits and repository divergence stop the loop.
 - The existing manual handoff remains authoritative until `EL-07`.
+
+Deterministic acceptance passed July 14, 2026: the controller computes local
+Git identity and complete NUL-delimited changed paths, refuses segment-scope
+and repository divergence, executes bounded shell-free argv, retains full
+output as protected digest-addressed artifacts, journals controller-observed
+evidence, derives the strict report from trusted state, and renders byte-pinned
+report, status, and handoff-preview bytes without external effects. All 12
+EL-03 requirements have source and deterministic-test linkage; the focused
+suite passed 64 tests across 5 files and repository-wide acceptance passed 977
+tests across 96 files. Build, Python, Compose, catalog/schema, SPEC-linkage,
+and diff checks passed with zero model calls and zero paid work. The owner
+reviewed and ratified the EL-03 closeout on July 14, 2026, then explicitly
+authorized commit, merge, and push to `master`. Manual `HANDOFF.md` remains
+authoritative through the EL-07 migration decision.
 
 ### EL-04 — prompt compiler
 

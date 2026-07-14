@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { EL02_REQUIREMENT_EVIDENCE } from '../src/requirements';
+import { EL02_REQUIREMENT_EVIDENCE, EL03_REQUIREMENT_EVIDENCE } from '../src/requirements';
 
-function el02RequirementIds(spec: string): string[] {
-  return [...spec.matchAll(/^\| `(EL-REQ-[A-Z]+-\d{3})` \| `EL-02` \|/gm)]
+function requirementIds(spec: string, feature: string): string[] {
+  return [...spec.matchAll(new RegExp(`^\\| \`(EL-REQ-[A-Z]+-\\d{3})\` \\| \`${feature}\` \\|`, 'gm'))]
     .map(match => match[1])
     .sort();
 }
@@ -12,11 +12,46 @@ function el02RequirementIds(spec: string): string[] {
 describe('EL-02 normative linkage', () => {
   it('maps every and only EL-02-owned requirement in the SPEC conformance matrix', async () => {
     const spec = await readFile(resolve('tools/engineering-loop/SPEC.md'), 'utf8');
-    const computed = el02RequirementIds(spec);
+    const computed = requirementIds(spec, 'EL-02');
     const mapped = EL02_REQUIREMENT_EVIDENCE.map(item => item.requirement).sort();
     expect(computed).toHaveLength(28);
     expect(new Set(mapped).size).toBe(28);
     expect(mapped).toEqual(computed);
+  });
+
+  it('independently computes and pins every and only EL-03-owned conformance row', async () => {
+    const spec = await readFile(resolve('tools/engineering-loop/SPEC.md'), 'utf8');
+    const computed = requirementIds(spec, 'EL-03');
+    expect(computed).toEqual([
+      'EL-REQ-DATA-006',
+      'EL-REQ-OBS-005',
+      'EL-REQ-REPO-001',
+      'EL-REQ-REPO-002',
+      'EL-REQ-REPO-003',
+      'EL-REQ-REPO-004',
+      'EL-REQ-REPO-005',
+      'EL-REQ-REPO-006',
+      'EL-REQ-VIEW-001',
+      'EL-REQ-VIEW-002',
+      'EL-REQ-VIEW-003',
+      'EL-REQ-VIEW-005',
+    ]);
+    const mapped = EL03_REQUIREMENT_EVIDENCE.map(item => item.requirement).sort();
+    expect(computed).toHaveLength(12);
+    expect(new Set(mapped).size).toBe(12);
+    expect(mapped).toEqual(computed);
+  });
+
+  it('links all 12 EL-03 rows to concrete TypeScript sources and deterministic named tests', async () => {
+    for (const evidence of EL03_REQUIREMENT_EVIDENCE) {
+      expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.every(test => test.includes(':'))).toBe(true);
+      for (const source of evidence.source) {
+        expect(source.endsWith('.ts')).toBe(true);
+        await expect(readFile(resolve('tools/engineering-loop/src', source), 'utf8')).resolves.not.toHaveLength(0);
+      }
+    }
   });
 
   it('links each requirement to nonempty source and deterministic test evidence', () => {
@@ -73,6 +108,8 @@ describe('EL-02 normative linkage', () => {
     }
     expect(byId.get('EL-01')?.bootstrapStatus).toBe('accepted');
     expect(byId.get('EL-02')?.dependencies).toEqual(['EL-01']);
+    expect(byId.get('EL-02')?.bootstrapStatus).toBe('accepted');
+    expect(byId.get('EL-03')?.dependencies).toEqual(['EL-02']);
     expect(['bootstrap_git_until_el_02', 'protected_controller_state']).toContain(catalog.statusAuthority);
   });
 });
