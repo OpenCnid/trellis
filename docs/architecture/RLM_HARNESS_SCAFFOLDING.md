@@ -158,28 +158,48 @@ prosthetics; weight-level adaptation remains the TTT track's measured
 question (H1), and this record's motivating example is that track's
 first native evidence.
 
-## 7. Proposed S2a refinement — UPSUM as an updated summary (proposal, July 13, 2026)
+## 7. Proposed S2a refinement — UPSUM as a rewritten, budgeted summary (proposal, July 13, 2026)
 
-Proposal for owner review before Part A implements S2a; additive to §3, no existing byte changed here. §3's S2a names an `upsum` dict with the fixed fields `done`, `pending`, `blocked`, `decisive_facts`. Those four are the run-control invariants and stay. Two properties make the structure match its name (UPdated SUMmary) and close the growth the doc cites (the 402,781-token run): the four fields are joined by domains that emerge from the work, and each note is rewritten to a budget every turn, so coverage grows while total size holds. The addendum teaches this frame, brace-free for the rlms `.format()` contract and ASCII for the Windows-spawn encoder:
+Proposal for owner review. S2a landed in Session 50 (PR #95) implementing §3 as then written; the live addendum is in `trellis_agent.py` (`_ADDENDUM_BASE_SUFFIX`), and it teaches `upsum` as four list-valued keys (`done`, `pending`, `blocked`, `decisive_facts`) plus an ITERATION BUDGET paragraph. If this refinement is ratified, §3 is amended and the live addendum is brought into conformance with the amended record; final bytes authored under the prompt-engineering and hypershot-protocol skills (Guardrail 15), both composed-prompt pins recomputed in the same commit (Guardrail 9), `test:modules` green. The landed bytes carry no authority over the record; they are the record's current implementation.
 
-    UPSUM
-    A running summary of the work, held in the REPL and refreshed each turn.
+Three gaps between §3's name for the structure (UPdated SUMmary) and what the landed addendum teaches, each a recorded decision for the amended §3:
 
-      UPSUM
-        done           : <what_is_finished>
-        pending        : <what_remains>
-        blocked        : <what_is_waiting_and_on_what>
-        decisive_facts : <the_load_bearing_findings>
-        <domain_that_emerged_from_the_work> : <one_current_compressed_note>
-        ...
+**7.1 Key shape pinned: four list-valued keys, rewritten not appended.** §3 names the four keys and is silent on value shape; the landed addendum specifies four list-valued keys holding short strings. Keep the lists (per-item granularity is genuinely useful for `done` and `pending`), and pin the load-bearing property the name promises: every list is REWRITTEN each turn, never appended. Append-only lists reproduce exactly the growth this section targets (the 402,781-token run); a bounded, rewritten working state is what long-horizon agent-memory work converges on (rlms' own compaction is the in-library version of the same move; rolling working-context summaries in the MemGPT and Reflexion lineage are the external precedent). The record states the shape; the addendum follows it.
+
+**7.2 Emergent domains carry one compressed note each.** Beyond the four standing keys, the model adds a key when the work introduces a domain the four do not cover, each carrying one compressed note, rewritten to stay current. Coverage grows; the four invariants hold their meaning.
+
+**7.3 The size bound is a code-checked constant, not a model estimate.** CODE_MEDIATED_TEXT (§1): the model never counts. The amended discipline names a character budget as a constant and checks it BY CODE in the REPL: the model computes `len(...)` over the serialized `upsum`, compares it to the constant in code, and reacts to the printed number by compressing the least-decisive entries. The value itself is an implementation-time decision; the record fixes only that the check is computed, never eyeballed.
+
+**7.4 Back-fill: the record captures the ITERATION BUDGET the addendum already teaches.** The landed `_ADDENDUM_BASE_SUFFIX` carries an ITERATION BUDGET paragraph (combine protocol steps into single REPL blocks; no tiny exploratory prints) that §3 never specified. Since this ratification already amends the S2a section, fold the back-fill in so the record is the single source for the addendum's behavioral content: the amended §3 records the iteration-budget discipline as part of the UPSUM protocol.
+
+The frame the addendum teaches, brace-free (rlms `.format()` contract) and ASCII (Windows-spawn encoder):
+
+    UPSUM (RUNNING STATE)
+    Keep a dict named upsum in the REPL: the single source of truth for
+    where the task stands. Create it in the first repl block, rewrite it
+    at the end of every block, and print it before every decisive step.
+
+    Four standing keys, each a list of short strings, rewritten (never
+    appended) each turn:
+      done           : steps finished
+      pending        : steps still ahead (trust this over the scrollback)
+      blocked        : what is stuck, each item with its cause
+      decisive_facts : load-bearing facts verified this run (addresses,
+                       hashes, confirmed anchors)
+    Add a key when the work introduces a domain the four do not cover;
+    give it one compressed note, rewritten to stay current.
 
     Each turn:
-      1. read the new activity ...
-      2. update the four standing fields; add a domain when the work introduces one
-      3. rewrite each note so it stays current and within its budget
-      4. keep the whole within TOTAL_BUDGET; compress the least-decisive domains to make room
-      5. re-emit UPSUM by code before each decisive step
+      1. read the new activity
+      2. rewrite the four standing lists; add or update a domain key when
+         the work introduces one
+      3. compute size = len(serialized upsum) in code; if it exceeds
+         UPSUM_BUDGET, compress the least-decisive entries and recompute
+      4. print upsum before each decisive step
+
+    ITERATION BUDGET: few REPL turns; combine loading, classifying,
+    caching, and computing into single blocks; no tiny exploratory prints.
 
     Coverage grows; size holds steady.
 
-The mechanism is unchanged from §3: persistent REPL locals, re-emitted at decisive steps, nothing to build, the same pin ceremony as S1. The §3 example still holds; run 2 would have re-encountered "vector_search never ran" in `upsum.pending` at the insight step. This refinement adds the summarize-to-budget step and the emergent domains; the four standing fields and the free, protocol-level character are preserved.
+The mechanism is unchanged from §3: persistent REPL locals, printed at decisive steps, nothing new to build. The §3 example still holds; run 2 would have re-encountered "vector_search never ran" in its own `upsum['pending']` at the insight step. This refinement pins the rewrite-to-budget property, the emergent-domain rule, the code-checked size bound, and the iteration-budget back-fill; the four standing keys and the free, protocol-level character are preserved.
