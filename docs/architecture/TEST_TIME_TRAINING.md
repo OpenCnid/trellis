@@ -497,7 +497,7 @@ the roadmap §5 entry — unchanged ceremony). Hosted open-model endpoints
    citability — retrieved substrate blocks, tool outputs, the prefix
    only, or everything in the REPL?
 
-## 10. Reading list (dependency order, arXiv ids verified July 13, 2026)
+## 10. Reading list (dependency order, identifiers verified July 13, 2026)
 
 | # | work | why it matters here |
 |---|---|---|
@@ -512,6 +512,9 @@ the roadmap §5 entry — unchanged ceremony). Hosted open-model endpoints
 | 9 | *Beyond Perplexity*, arXiv:2607.00368 | the behavioral-evaluation framework §6 adopts |
 | 10 | *Cartridges*, arXiv:2506.06266; *SEAL*, arXiv:2506.10943 | Family C: compiled prefix state; persistent self-edits (out of scope) |
 | 11 | *Self-Guided TTT*, arXiv:2607.09415; LaCT, arXiv:2505.23884 | span-selected adaptation; hardware-efficient large-chunk TTT — the §12 selected mechanism |
+| 12 | Szafer et al., *Navigating the Cost-Performance Pareto Frontier of Test-Time LLM Agent Adaptation*, ICLR 2026 (OpenReview tWAnCRYMcT) | cost-performance frontier; adaptation helps reasoning not facts; rollout dominates wall-clock |
+| 13 | Hu et al., *Test-Time Learning for Large Language Models*, arXiv:2505.20633 (ICML 2025) | reports (Observation 3) LoRA mitigates forgetting more than full-parameter updates in the TTL setting; the drift-bound citation |
+| 14 | Gurnee et al., *Verbalizable Representations Form a Global Workspace in Language Models*, transformer-circuits.pub/2026/workspace | workspace / Jacobian-lens; the §12.7 potential avenue; small-model reproductions |
 
 ## 11. Interaction with standing guardrails (nothing weakened)
 
@@ -774,6 +777,20 @@ spec; task text carries the spec verbatim (the increments-1/2
 channel) until stage-1b chunk A lands (a natural synergy, not a
 prerequisite). (2) Refresh-before-use applies to every T-increment's
 target area (the split-scope recipe; `src/rlm` is the policy-2 leg).
+
+### 12.7 External cost-performance evidence and an adaptation-behavior avenue (added July 13, 2026, same day)
+
+Three items logged after the §10 list was compiled, recorded here because they sharpen the R3/R4 criterion and the estimate basis; no gate moves.
+
+1. Cost-performance frontier (Szafer et al., ICLR 2026; OpenReview tWAnCRYMcT). A unified empirical study of test-time agent adaptation under verifiable feedback (binary correctness, unit tests), streaming evaluation scored on pre-update predictions, adaptation compute measured as wall-clock, comparing in-context memory (ExpRAG, ReMem) against in-weights GRPO (LoRA, full fine-tuning) on open reasoning models (Qwen3-8B, Olmo3-7B). Two findings bear on this track:
+   - Gains concentrate on tasks that need better reasoning over knowledge the model already holds, and are near-zero on tasks that need facts the model never learned. On Qwen3-8B, AIME24 rises 0.536 to 0.642 for both LoRA and full fine-tuning; AIME25 rises 0.429 to 0.500 (LoRA) and 0.464 (full fine-tuning); GPQA and MMLU-Pro show no consistent gain. This is external support for the H1 framing and against "quality of response overall," and it hardens the existing requirement that an R3/R4 criterion be scored on reasoning- and protocol-shaped items; a knowledge-recall criterion would flatline for reasons unrelated to whether TTT works.
+   - The backward pass is a small fraction of per-step wall-clock; forward-pass generation (rollout) dominates. Consequence for R4's propose-with-estimate: the paid estimate is a generation-token estimate, not a training-cost estimate, and LoRA versus full fine-tuning is not the cost driver (the paper attributes its slower LoRA wall-clock to an adapter merge-and-reload artifact, not an inherent cost). This sets the unit the R4 estimate is built in; it moves no gate.
+
+2. LoRA and catastrophic forgetting (Hu et al., *Test-Time Learning for Large Language Models*, arXiv:2505.20633, ICML 2025). The paper reports (its Observation 3) that LoRA mitigates catastrophic forgetting more effectively than full-parameter updates in the test-time-learning setting, and adopts LoRA for its test-time updates on that basis. Recorded as complementary to item 1, not conflated with it: the cost-Pareto study does not measure forgetting (it defers retention to future work), so the drift-bound property rests on this citation alone, and on that paper's own TTL-setting observation rather than an independent head-to-head. If an R4 arm is instantiated, this is the citation behind preferring a low-rank adapter as the retention-bounding choice.
+
+3. Workspace manipulation as a potential avenue of investigation (not a rung). The global-workspace / Jacobian-lens result (Gurnee et al., *Verbalizable Representations Form a Global Workspace in Language Models*, transformer-circuits.pub/2026/workspace, July 6 2026) identifies a small, causally-privileged subspace that a residual-stream read can inspect; the article's own experiments are on Claude models only. What makes it an avenue for a track that can only instrument open checkpoints is the separate tooling: Anthropic released the reference implementation `anthropics/jacobian-lens` (Apache 2.0), which fits the lens on open-weight decoders, and independent third-party replications on small open models exist (e.g. github.com/tao-hpu/jspace-replication, github.com/solarkyle/jspace, spanning GPT-2 124M through Qwen3 and Gemma-3 sizes). Reproduction is partial and mixed: the lens read-out reproduces and beats a logit-lens baseline, while some higher-order effects (e.g. hidden-intermediate multi-hop) do not reproduce at the smallest scales. The possible avenue: use that instrument to probe, and perhaps manipulate, the subspace to strengthen meta-prompt adherence, i.e. H2's mechanism approached through measurement rather than fast weights. Recorded as an avenue only; out of scope for R2 through R5, no criterion attached, no claim, its viability explicitly gated on the still-partial open-checkpoint reproducibility, and subject to the same paired-arm and owner-gated discipline as everything else here should it ever be taken up.
+
+No gate moved; no default changed; no TTT claim attaches without a paired arm.
 
 ## 13. R2a — the backend-seam census and the rlms verdict (Session 46, July 13, 2026)
 
