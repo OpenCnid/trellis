@@ -284,6 +284,15 @@ describe('buildAgentEnv', () => {
     const env = buildAgentEnv({ TRELLIS_EXP_OMIT_RETRIEVAL: '1' }, CFG);
     expect('TRELLIS_EXP_OMIT_RETRIEVAL' in env).toBe(false);
   });
+
+  it('always strips the citability-probe named-files input (Session 50)', () => {
+    // TRELLIS_TASK_NAMED_FILES is a direct-spawn driver input
+    // (RLM_HARNESS_SCAFFOLDING.md §4): no config field, never
+    // forwarded — an inherited value can never inject the probe into
+    // a production worker run.
+    const env = buildAgentEnv({ TRELLIS_TASK_NAMED_FILES: '["src/x.ts"]' }, CFG);
+    expect('TRELLIS_TASK_NAMED_FILES' in env).toBe(false);
+  });
 });
 
 describe('buildAgentArgs', () => {
