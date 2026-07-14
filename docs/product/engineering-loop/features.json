@@ -112,7 +112,7 @@
       ],
       "gates": ["human_review"],
       "paidWork": "forbidden",
-      "bootstrapStatus": "planned"
+      "bootstrapStatus": "accepted"
     },
     {
       "id": "EL-03",

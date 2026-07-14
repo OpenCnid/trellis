@@ -191,7 +191,7 @@ Ordered roughly by severity.
 
 | Order | Item | Rationale |
 |---|---|---|
-| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 + EL-01 ACCEPTED; EL-02 NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` now governs conformance. EL-01 ratified the architecture boundary and mapped all 106 mandatory requirements to existing feature acceptance/test classes, zero-paid and docs-only. EL-02 is the deterministic control kernel: schemas, exhaustive transitions, protected external state, append-only events, atomic snapshots, locking, and fake dependencies only. No real runner, prompt, model call, repository observer, scheduling, or paid work enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
+| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 + EL-01 + EL-02 ACCEPTED; EL-03 NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-01 ratified the architecture boundary and mapped all 106 mandatory requirements to existing feature acceptance/test classes. EL-02 added the deterministic control kernel under `tools/engineering-loop/`: all 28 owned requirements, 40 deterministic tool tests, exhaustive 41-allowed/91-forbidden state pairs, protected external state, event-first replayable storage, locking, and fake dependencies, zero-model and zero-paid. The owner reviewed and ratified the EL-02 closeout on July 14, 2026. EL-03 follows: repository observation, bounded command evidence, scope/divergence refusal, and deterministic status/handoff preview rendering. No real runner, prompt, model call, scheduler, tracker, automatic push/merge, or paid work enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
 | ~~1~~ | ~~Structured logging and basic metrics (3.2 #9 / T16)~~ | **Done (July 6, 2026)** — split-process logs/metrics shipped; see §5 |
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
@@ -255,8 +255,9 @@ records, the Session 28 entry-plus-addendum precedent) with the
 Session 50 PR, Session 46 with the Session 51 PR, Session 47 with the
 Session 52 PR, Session 48 with the Session 53 PR, Session 49 with the
 Session 54 PR, Session 50 (its session entry plus the same-day PR #96/#97
-follow-ons) with the Session 55 EL-01 PR.
-The live ledger below keeps the most recent five sessions: 51–55.)*
+follow-ons) with the Session 55 EL-01 PR, and Session 51 with the Session 56
+EL-02 feature branch.
+The live ledger below keeps the most recent five sessions: 52–56.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -792,115 +793,6 @@ owner invited a document-first design record for Trellis serving MCP;
 the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
 
-### July 13, 2026 — Session 51: the S2a UPSUM refinement RATIFIED and implemented (owner-directed detour from T2) — a kernel-prompt increment, zero-paid
-
-Session 51's default objective was TTT-track increment T2 (the
-`buildAgentEnv` forward/strip); the owner instead directed the
-standing decision on the S2a UPSUM refinement (HANDOFF §2 standing
-item 12, `RLM_HARNESS_SCAFFOLDING.md` §7, PROPOSED in PR #96). The
-proposal was adjudicated, the owner RATIFIED all four refinements,
-and the increment was implemented and landed as its own
-human-authored kernel-prompt increment (PR #98). **Zero-paid
-($0.0000 — no LLM run; the subject is prompt composition and one
-kernel constant, all verifiable offline and by the zero-LLM
-drills). T2 is unconsumed and becomes Session 52's objective on the
-current addendum bytes either way.**
-
-1. **The adjudication (presented at session start):** the three
-   deltas between `_ADDENDUM_BASE_SUFFIX` (as Session 50 landed it)
-   and §3's name for the structure, plus the ITERATION-BUDGET
-   back-fill. The engineering read: 7.1 (lists rewritten in place
-   each turn, never appended) is a load-bearing CORRECTNESS fix —
-   the live bytes ("update at the end of every block") were
-   ambiguous, and an append reading regrows exactly the
-   402,781-token bloat the scaffold exists to prevent; 7.3
-   (code-checked size bound) is CORE-PILLAR conformance (the model
-   never counts by eye); 7.2 (emergent-domain key) and 7.4 (record
-   back-fill) are low-cost and free. The honest tension recorded:
-   this moves kernel-prompt bytes and is UNMEASURED — but it is
-   spec-conformance of an already-landed scaffold to its own name,
-   the pillar, and the record, not new prompt-module authoring, and
-   it carries NO behavior claim (guardrail 8, the Session 50
-   version). Recommendation RATIFY tight scope; the owner ratified
-   all four.
-
-2. **The one forced consequence (round-1's fix, honored):** 7.3's
-   `UPSUM_BUDGET` MUST be engine-provided, not a model-typed literal
-   — otherwise the model chooses the budget, the "undefined
-   model-estimated size budget" round 1 rejected. So the constant is
-   defined in `src/rlm/trellis_scaffold.py` (`UPSUM_BUDGET = 2000`
-   chars; a kernel constant, never env-tunable; a soft self-correcting
-   target) and injected into every research run's REPL namespace
-   beside `trellis_task` (`custom_tools["UPSUM_BUDGET"] = UPSUM_BUDGET`
-   in `trellis_agent.py`). rlms accepts a bare int in `custom_tools`
-   by construction (`base_env.parse_tool_entry` treats a non-`{"tool":…}`
-   value as a plain value; `format_tools_for_prompt` renders it "A
-   custom int value"; `UPSUM_BUDGET` is not a reserved REPL name) —
-   verified against the installed `rlm` package source. The injection
-   does not touch the pinned static prompt; the only pin move is the
-   addendum edit.
-
-3. **Guardrail 15 (the process gate, honored this time):** BOTH the
-   `prompt-engineering` and `hypershot-protocol` skills were invoked
-   via the Skill tool BEFORE a byte of the addendum was authored
-   (Session 50 skipped this for the v3.1 amendment; the rule closes
-   that gap). The addendum's UPSUM block is pure invariant protocol
-   text (the invariance test, hypershot §6: the same block every
-   run), so concrete named tokens (`upsum`, the four keys,
-   `UPSUM_BUDGET`, `len(str(upsum))`) sit correctly at the system
-   layer; no hypershot free-variables (braces would break rlms
-   `.format()` — the record's forced-prose case). Authored with
-   positive framing (prompt-engineering best-practice 4) and
-   attention emphasis on the load-bearing "REWRITE … IN PLACE …
-   never append" property.
-
-4. **The bytes moved (all in one commit):**
-   `src/rlm/trellis_scaffold.py` (the `UPSUM_BUDGET` constant +
-   docstring S2a paragraph updated: the module now carries the
-   code-checked budget, no longer "addendum-only");
-   `src/rlm/trellis_agent.py` (import + inject + the rewritten
-   `_ADDENDUM_BASE_SUFFIX`); both composed-prompt pins recomputed in
-   `scripts/test_modules.py` with history lines (default
-   `e57e7a55…24bd` → `6183de3a…ed50`; omit-arm `a37d2b4a…764e` →
-   `34b00be6…d02a`; the omit arm still equals default-minus-block,
-   check [7] re-proves it); `docs/architecture/RLM_HARNESS_SCAFFOLDING.md`
-   (§3 S2a bullet amended to the four ratified properties as the
-   authoritative spec; §7 stamped RATIFIED/IMPLEMENTED, proposal
-   preserved as the decision record). New pins:
-   `scripts/test_scaffold_unit.py` + `trellis_scaffold.test.ts`
-   (`UPSUM_BUDGET` a positive int == 2000; scaffold vitest 28 → 29);
-   `test_modules.py` [4] (+3: the base addendum teaches
-   rewrite-not-append and the code-checked budget; `trellis_agent`
-   re-exports the constant); `test_rlm_sandbox.py` [8] (+1: the agent
-   injects the constant into `custom_tools`; sandbox 118 → 119).
-
-5. **Acceptance (all green, offline + full standing block):**
-   `npm test` 875/87 → 876/87 (the +1 scaffold pin; ZERO existing
-   tests changed); `test:modules` all pass (both recomputed pins +
-   the 3 new checks); `npm run build`, `npm run python:check`
-   (polars present) green. Full standing zero-LLM drill block on the
-   owner's Windows machine against the durable dev PG (stack up 5
-   days): `test:rlm-sandbox` **119**, `test:selfedit-harness` ALL
-   CHECKS PASSED, and all of `test:answer-channel`, `test:textedit`,
-   `test:module-lifecycle`, `test:promotion`, `test:rlm-workspace`,
-   `test:rlm-mcp`, `test:verification-sweep`, `test:agent-loop`,
-   `test:a2a`, `test:repo-ingest`, `test:benchmark-hardening`,
-   `test:entity-resolution`, `test:api-hardening`,
-   `test:belief-recovery`, `test:invalidation-sweep` PASS.
-   `drill:scale` ALONE: gate CLOSED, max cardinality 286, sweep
-   latency 1.68x in-band (`scale_drill_results.json` committed).
-   Isolated Compose integration in the CI mold (project
-   `trellis_s51_ci`, host ports 0). No refresh owed: `src/rlm`
-   changed, but the change is prompt/constant bytes only and no paid
-   run consumed the substrate; the per-PR refresh for the two
-   changed `src/rlm` files rides the next src/rlm-touching PR under
-   the split-scope recipe (recorded, not skipped silently — a
-   zero-paid session owes no extraction spend, guardrail 4/§8).
-
-6. **Bookkeeping:** row 13's cell gains the S2a RATIFIED outcome and
-   standing item 12 is struck; the default next objective returns to
-   T2 (Session 52). No paid work, no owner-conditional run.
-
 ### July 14, 2026 — Session 52: TTT-track increment T2 (`buildAgentEnv` forward/strip) attempted through the stage-2 harness — verdict FAILED, recorded (§4 row 13, Phase 1 step 2)
 
 TTT-track increment T2, the second FEATURE-CLASS self-edit (§12.6):
@@ -1281,3 +1173,75 @@ objective remains untouched.
    and zero-paid. Real runner integration, production prompts, repository
    observation/rendering, verification policy, migration, scheduling, and TTT
    remain excluded.
+
+### July 14, 2026 — Session 56: EL-02 deterministic control kernel owner-ratified and accepted, zero-model and zero-paid
+
+Session 56 executed only engineering-loop feature `EL-02` on
+`implement-el02-control-kernel`, based on
+`51d9c7a46f72615baf0ec810ee0600307fbe9bac`. The work added no dependency,
+production prompt, real runner, repository observer, renderer, external
+service, scheduler, tracker, product-runtime change, model call, or paid work.
+The owner reviewed and ratified the complete diff, then explicitly authorized
+commit, merge, and push to `master`.
+
+1. **All 28 owned requirements implemented and linked:** the conformance-matrix
+   audit independently computed exactly 28 EL-02 rows and matched them one for
+   one to `tools/engineering-loop/src/requirements.ts`, with nonempty source and
+   deterministic-test evidence and zero outstanding IDs. Strict versioned Zod
+   boundaries cover the nine protocol domain objects plus protected snapshots,
+   effect records, repository observations, runner evidence, locks, and event
+   payloads.
+2. **Pure transition authority pinned exhaustively:** 11 persisted states plus
+   genesis produce 132 source/destination pairs; exactly 41 allowed pairs pass
+   and 91 unlisted pairs refuse before any fake effect. Ordinary progress is
+   pinned through `preparing`, `running`, `verifying`, and `awaiting_review`;
+   terminal states are immutable; controller-observed evidence is required for
+   review-bearing transitions; runner/checker/model authority and forged,
+   expired, consumed, widened-scope, or repository-mismatched approvals refuse.
+3. **Protected single-writer storage implemented:** the operator root is
+   canonicalized outside the worktree and refuses lexical, canonical, and both
+   directions of symlink alias. The controller takes an exclusive `wx` writer
+   lock before reading mutable state; a second writer makes no journal or
+   snapshot mutation, and stale locks are never stolen automatically. Events
+   append with monotonic sequence, previous digest, canonical SHA-256 integrity,
+   and durable flush before an atomically replaced full snapshot is exposed.
+4. **Restart, corruption, and crash behavior pinned:** restart validates the
+   journal prefix against the newest published snapshot, seeds replay from that
+   snapshot, and applies later events deterministically. Eight corruption
+   classes stop without repair:
+   missing/out-of-order sequence, digest mismatch, invalid schema, recomputed
+   impossible transition, malformed JSON, unterminated JSONL tail, an over-bound
+   event record, and snapshot/journal disagreement.
+   All 14 declared crash points are covered: six journal/snapshot boundaries
+   and eight approval/intent/invocation/outcome boundaries. Every crash case
+   reconstructs the uninterrupted logical oracle and a completed fake effect
+   is invoked exactly once.
+5. **Intent/outcome recovery remains fake-only:** stable operation and
+   idempotency identifiers are durably recorded before invocation; typed
+   outcomes follow invocation; identical retries return the durable outcome;
+   changed records, key reuse, or consumed-approval replay refuse. Restart
+   reconstructs first, re-observes
+   the fake repository, and reconciles incomplete intents before runner resume.
+   An unknown outcome records required reconciliation, transitions to
+   `blocked`, and never invokes the target again automatically.
+6. **Acceptance evidence:** baseline after `npm ci` was 87 files / 876 tests.
+   Focused `npx vitest run tools/engineering-loop/tests` passed 40 tests across
+   5 files. Final `npm test` passed **916 tests across 92 files**; `npm run
+   build` passed; `npm run python:check` printed `Python runtime syntax,
+   imports, rubric, and module assets verified.`; `docker compose config
+   --quiet` exited 0; Draft 2020-12 catalog validation printed **10**;
+   catalog identifier/order/dependency/acyclic/acceptance semantics and SPEC
+   linkage passed inside the tool suite; `git diff --check` exited 0.
+7. **Findings and dispositions:** sandboxed Node commands initially hit Windows
+   `EPERM` while resolving the worktree and `git fetch` initially lacked
+   permission to update the worktree Git metadata; scoped escalation made both
+   classes pass without repository workaround. The implementation audit closed
+   fail-open default transition facts, missing controller-origin evidence,
+   unvalidated injected repository/runner/reconciliation values, a worktree
+   symlink alias into protected state, same-instance concurrent commits,
+   consumed-approval replay, protected-action substitution on approval resume,
+   torn and over-bound persisted records, and full-journal replay where literal
+   validated-snapshot tail replay was required. No residual acceptance defect
+   remains.
+8. **Next:** `EL-03` is dependency-unblocked and is the next feature in the
+   program sequence. The paused TTT T2 objective remains untouched.

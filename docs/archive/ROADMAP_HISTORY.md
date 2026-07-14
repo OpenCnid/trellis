@@ -6229,3 +6229,111 @@ is unchanged by this merge.
    conditional items; HANDOFF §2 baseline updated to `7a37418`.
    No session number consumed; the five-session narrative window
    (46–50) is unchanged.
+### July 13, 2026 — Session 51: the S2a UPSUM refinement RATIFIED and implemented (owner-directed detour from T2) — a kernel-prompt increment, zero-paid
+
+Session 51's default objective was TTT-track increment T2 (the
+`buildAgentEnv` forward/strip); the owner instead directed the
+standing decision on the S2a UPSUM refinement (HANDOFF §2 standing
+item 12, `RLM_HARNESS_SCAFFOLDING.md` §7, PROPOSED in PR #96). The
+proposal was adjudicated, the owner RATIFIED all four refinements,
+and the increment was implemented and landed as its own
+human-authored kernel-prompt increment (PR #98). **Zero-paid
+($0.0000 — no LLM run; the subject is prompt composition and one
+kernel constant, all verifiable offline and by the zero-LLM
+drills). T2 is unconsumed and becomes Session 52's objective on the
+current addendum bytes either way.**
+
+1. **The adjudication (presented at session start):** the three
+   deltas between `_ADDENDUM_BASE_SUFFIX` (as Session 50 landed it)
+   and §3's name for the structure, plus the ITERATION-BUDGET
+   back-fill. The engineering read: 7.1 (lists rewritten in place
+   each turn, never appended) is a load-bearing CORRECTNESS fix —
+   the live bytes ("update at the end of every block") were
+   ambiguous, and an append reading regrows exactly the
+   402,781-token bloat the scaffold exists to prevent; 7.3
+   (code-checked size bound) is CORE-PILLAR conformance (the model
+   never counts by eye); 7.2 (emergent-domain key) and 7.4 (record
+   back-fill) are low-cost and free. The honest tension recorded:
+   this moves kernel-prompt bytes and is UNMEASURED — but it is
+   spec-conformance of an already-landed scaffold to its own name,
+   the pillar, and the record, not new prompt-module authoring, and
+   it carries NO behavior claim (guardrail 8, the Session 50
+   version). Recommendation RATIFY tight scope; the owner ratified
+   all four.
+
+2. **The one forced consequence (round-1's fix, honored):** 7.3's
+   `UPSUM_BUDGET` MUST be engine-provided, not a model-typed literal
+   — otherwise the model chooses the budget, the "undefined
+   model-estimated size budget" round 1 rejected. So the constant is
+   defined in `src/rlm/trellis_scaffold.py` (`UPSUM_BUDGET = 2000`
+   chars; a kernel constant, never env-tunable; a soft self-correcting
+   target) and injected into every research run's REPL namespace
+   beside `trellis_task` (`custom_tools["UPSUM_BUDGET"] = UPSUM_BUDGET`
+   in `trellis_agent.py`). rlms accepts a bare int in `custom_tools`
+   by construction (`base_env.parse_tool_entry` treats a non-`{"tool":…}`
+   value as a plain value; `format_tools_for_prompt` renders it "A
+   custom int value"; `UPSUM_BUDGET` is not a reserved REPL name) —
+   verified against the installed `rlm` package source. The injection
+   does not touch the pinned static prompt; the only pin move is the
+   addendum edit.
+
+3. **Guardrail 15 (the process gate, honored this time):** BOTH the
+   `prompt-engineering` and `hypershot-protocol` skills were invoked
+   via the Skill tool BEFORE a byte of the addendum was authored
+   (Session 50 skipped this for the v3.1 amendment; the rule closes
+   that gap). The addendum's UPSUM block is pure invariant protocol
+   text (the invariance test, hypershot §6: the same block every
+   run), so concrete named tokens (`upsum`, the four keys,
+   `UPSUM_BUDGET`, `len(str(upsum))`) sit correctly at the system
+   layer; no hypershot free-variables (braces would break rlms
+   `.format()` — the record's forced-prose case). Authored with
+   positive framing (prompt-engineering best-practice 4) and
+   attention emphasis on the load-bearing "REWRITE … IN PLACE …
+   never append" property.
+
+4. **The bytes moved (all in one commit):**
+   `src/rlm/trellis_scaffold.py` (the `UPSUM_BUDGET` constant +
+   docstring S2a paragraph updated: the module now carries the
+   code-checked budget, no longer "addendum-only");
+   `src/rlm/trellis_agent.py` (import + inject + the rewritten
+   `_ADDENDUM_BASE_SUFFIX`); both composed-prompt pins recomputed in
+   `scripts/test_modules.py` with history lines (default
+   `e57e7a55…24bd` → `6183de3a…ed50`; omit-arm `a37d2b4a…764e` →
+   `34b00be6…d02a`; the omit arm still equals default-minus-block,
+   check [7] re-proves it); `docs/architecture/RLM_HARNESS_SCAFFOLDING.md`
+   (§3 S2a bullet amended to the four ratified properties as the
+   authoritative spec; §7 stamped RATIFIED/IMPLEMENTED, proposal
+   preserved as the decision record). New pins:
+   `scripts/test_scaffold_unit.py` + `trellis_scaffold.test.ts`
+   (`UPSUM_BUDGET` a positive int == 2000; scaffold vitest 28 → 29);
+   `test_modules.py` [4] (+3: the base addendum teaches
+   rewrite-not-append and the code-checked budget; `trellis_agent`
+   re-exports the constant); `test_rlm_sandbox.py` [8] (+1: the agent
+   injects the constant into `custom_tools`; sandbox 118 → 119).
+
+5. **Acceptance (all green, offline + full standing block):**
+   `npm test` 875/87 → 876/87 (the +1 scaffold pin; ZERO existing
+   tests changed); `test:modules` all pass (both recomputed pins +
+   the 3 new checks); `npm run build`, `npm run python:check`
+   (polars present) green. Full standing zero-LLM drill block on the
+   owner's Windows machine against the durable dev PG (stack up 5
+   days): `test:rlm-sandbox` **119**, `test:selfedit-harness` ALL
+   CHECKS PASSED, and all of `test:answer-channel`, `test:textedit`,
+   `test:module-lifecycle`, `test:promotion`, `test:rlm-workspace`,
+   `test:rlm-mcp`, `test:verification-sweep`, `test:agent-loop`,
+   `test:a2a`, `test:repo-ingest`, `test:benchmark-hardening`,
+   `test:entity-resolution`, `test:api-hardening`,
+   `test:belief-recovery`, `test:invalidation-sweep` PASS.
+   `drill:scale` ALONE: gate CLOSED, max cardinality 286, sweep
+   latency 1.68x in-band (`scale_drill_results.json` committed).
+   Isolated Compose integration in the CI mold (project
+   `trellis_s51_ci`, host ports 0). No refresh owed: `src/rlm`
+   changed, but the change is prompt/constant bytes only and no paid
+   run consumed the substrate; the per-PR refresh for the two
+   changed `src/rlm` files rides the next src/rlm-touching PR under
+   the split-scope recipe (recorded, not skipped silently — a
+   zero-paid session owes no extraction spend, guardrail 4/§8).
+
+6. **Bookkeeping:** row 13's cell gains the S2a RATIFIED outcome and
+   standing item 12 is struck; the default next objective returns to
+   T2 (Session 52). No paid work, no owner-conditional run.

@@ -17,7 +17,8 @@
     "scripts/start_all.ts",
     "scripts/start_workers.ts",
     "scripts/scale_provenance_drill.ts",
-    "scripts/test_compose_roundtrip.ts"
+    "scripts/test_compose_roundtrip.ts",
+    "tools/engineering-loop/src/**/*.ts"
   ],
   "exclude": [
     "**/*.test.ts",

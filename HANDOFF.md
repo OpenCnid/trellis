@@ -8,13 +8,13 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–50 and their same-day follow-ons (July 4–14, 2026; PRs
-#21–#97) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–51 and their same-day follow-ons (July 4–14, 2026; PRs
+#21–#98) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 50 with the Session 55 EL-01 PR — this file keeps full
-narrative only for the most recent five sessions, now 51–55). The
+recently Session 51 with the Session 56 EL-02 feature branch — this file keeps
+full narrative only for the most recent five sessions, now 52–56). The
 one-paragraph digest, oldest first; §1 below carries everything from
 this span that a new session must actually know:
 
@@ -925,21 +925,37 @@ and matching test class; unmapped = 0.** Acceptance: catalog `10` features,
 python check, links, schema, and diff checks green. EL-01 alone is marked
 accepted. Session 50 and its same-day follow-on moved to the archive; the live window is 51–55.
 
-Your objective is **Session 56: engineering-loop `EL-02` — the deterministic
-control kernel.** Implement only the 28 SPEC requirements owned by EL-02 under
-`tools/engineering-loop/`: strict versioned schemas, the exhaustive pure state
-machine, protected external state-root refusal, one-writer locking, integrity-
-linked append-only events, event-first atomic snapshots, restart replay and
-corruption stop, intent/outcome/idempotency records, and deterministic fake
-clock/repository/runner/effect dependencies with crash injection at every
-durable boundary. Wire the tool tests into Vitest and the non-test source into
-the TypeScript build without a new dependency. No real Codex adapter, model
-call, prompt, Git observer, renderer, verification service, approval channel,
-external effect, scheduler, tracker, product runtime change, or paid work.
+**Session 56 (July 14, 2026, `implement-el02-control-kernel`) completed EL-02
+deterministic acceptance and was owner-ratified, zero-model and
+zero-paid.** The TypeScript reference kernel under `tools/engineering-loop/`
+implements all 28 owned requirements: strict versioned schemas; the exhaustive
+41-allowed/91-forbidden transition matrix; controller-origin evidence and
+approval refusals; protected external state and an exclusive writer lock;
+integrity-linked event-first storage, atomic snapshots, replay, and corruption
+stop; stable intent/outcome/idempotency recovery; and injected fake clock,
+repository, runner, and effect dependencies. All 14 durable crash points
+reconstruct the uninterrupted logical oracle without a duplicate completed
+effect. Acceptance passed 40 tool tests and 916 repository tests across 92
+files, plus build, Python, Compose, schema/catalog, linkage, and diff checks.
+No model call, paid work, dependency, production prompt, product source, real
+runner, Git observer, or renderer entered. Session 51 moved verbatim to the
+archive; the live window is 52–56. The owner reviewed the complete diff and
+explicitly authorized commit, merge, and push to `master`.
+
+Your objective is **Session 57: engineering-loop `EL-03` — repository observer
+and deterministic handoff renderer.** Implement only the 12 SPEC requirements
+owned by EL-03 under `tools/engineering-loop/`: engine-computed repository
+identity and status, segment-safe allowed-path scope, divergence refusal,
+bounded command evidence and protected retained artifacts, a trusted-state
+report, and byte-identical derived status/handoff previews. Manual `HANDOFF.md`
+remains authoritative. No production prompt, Codex adapter, model call,
+verification service, approval channel, scheduler, tracker, automatic
+push/merge, product-runtime change, or paid work.
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
-prioritized ahead of the paused TTT tooling-shape objective. `EL-00` and `EL-01` are
-accepted; `EL-02` is the next dependency-unblocked feature. The merged Session 54 tooling-shape objective is preserved in Appendix A and
+prioritized ahead of the paused TTT tooling-shape objective. `EL-00`, `EL-01`,
+and `EL-02` are accepted; `EL-03` is the next dependency-unblocked feature.
+The merged Session 54 tooling-shape objective is preserved in Appendix A and
 remains paused unless the owner re-prioritizes it.
 
 ---
@@ -1439,34 +1455,46 @@ immutable, content-addressed physical location in source material.
     initially; resume inside one episode and fresh context across semantic
     boundaries; deterministic evidence outranks model claims; paid,
     destructive, push, and merge actions remain human gates. `EL-00` and
-    `EL-01` are accepted. The ratified architecture record is
+    `EL-01` are accepted; the EL-02 implementation and closeout are ready for owner
+    review. The ratified architecture record is
     `docs/architecture/ENGINEERING_LOOP.md`; the conformance authority is
     `tools/engineering-loop/SPEC.md` (106 mandatory requirements, 106 mapped,
-    zero unmapped). `EL-02` is next and implements only the deterministic
-    control kernel. The existing manual handoff remains authoritative until
-    the measured `EL-07` migration verdict.
+    zero unmapped). The EL-02 TypeScript kernel under
+    `tools/engineering-loop/` now owns strict domain validation, exhaustive
+    transition authority, protected external state, exclusive locking,
+    integrity-linked event-first snapshots/replay, and fake idempotent-effect
+    recovery. `EL-03` is next and adds engine-computed Git/command evidence plus
+    deterministic derived status and handoff previews. The existing manual
+    handoff remains authoritative until the measured `EL-07` migration verdict.
 
 ## 2. Current baseline
 
 Repository state at handoff creation:
 
-- **Active owner-prioritized program:** branch `engineering-loop-spec` began
-  at `74c3b48` and carries accepted `EL-00` plus accepted, zero-paid `EL-01`.
-  EL-01 added `docs/architecture/ENGINEERING_LOOP.md` and
-  `tools/engineering-loop/SPEC.md`; the latter has 106 stable mandatory
-  requirements mapped 106/106 to existing features, exact acceptance IDs, and
-  matching test classes. Catalog validation remains 10 unique features, 13
-  resolved acyclic dependency edges, 34 unique acceptance items, and exact
-  Markdown/JSON order parity. Standing acceptance remains 87 test files / 876
-  tests, build, and Python runtime check. Fresh-worktree `npm ci` installed 317
-  packages with 0 vulnerabilities but warned that this local Node v20.19.2
-  shell is below four Babel packages' Node 22.18+ engine floor; CI's Node 22
-  remains authoritative, and local install/tests/build passed. `EL-02` is
-  next. No controller runtime, production prompt, model call, scheduler,
-  product coupling, or handoff migration exists yet.
+- **Active owner-prioritized program:** the Session 56 feature branch
+  `implement-el02-control-kernel` starts at
+  `51d9c7a46f72615baf0ec810ee0600307fbe9bac` (merged EL-00/EL-01) and carries
+  the owner-ratified `bootstrapStatus: accepted` EL-02 closeout. The SPEC still
+  has 106 stable mandatory requirements mapped 106/106; EL-02 independently
+  computes and links its exact 28-row subset. Catalog validation remains 10
+  unique features, 13 resolved acyclic dependency edges, and 34 unique
+  acceptance items. Standing acceptance is now **92 test files / 916 tests**;
+  the EL-02 tool subset is 5 files / 40 tests and includes all 14 crash points.
+  Build, Python runtime, Compose configuration, Draft 2020-12 catalog schema,
+  catalog semantics, SPEC linkage, and diff checks pass. Fresh-worktree `npm
+  ci` installed 317 packages with 0 vulnerabilities but warned that this local
+  Node v20.19.2 shell is below four Babel packages' Node 22.18+ engine floor;
+  CI's Node 22 remains authoritative, and local install/tests/build passed.
+  `EL-03` is next. The control kernel exists; no production prompt, real runner,
+  repository observer, handoff renderer, model call, scheduler, product
+  coupling, or handoff-authority migration exists yet. Confirm Session 56 was
+  reviewed and landed on `master` before beginning EL-03.
 
-- `master`: the head after the July 14, 2026 Session 54 PR (the PR
-  that carries this file). **Session 54 ran the TTT-track increment T2
+- `origin/master` at Session 56 branch creation was
+  `51d9c7a46f72615baf0ec810ee0600307fbe9bac`, the merged Session 55 EL-01
+  closeout (PR #102). The owner ratified Session 56 and authorized commit,
+  merge, and push; the next session must confirm its landing rather than assume
+  it. Prior master history: **Session 54 ran the TTT-track increment T2
   RETRY (task text v3.4) and the run SELF-REFUSED under R2 with NO
   LANDING — a THIRD consecutive T2 no-landing. The tree ships ZERO
   non-markdown bytes (the run reverted its own staging; porcelain clean
@@ -1592,13 +1620,12 @@ Repository state at handoff creation:
   pull pandas transitively from `unstructured==0.23.1`); Docker Hub
   blob-CDN denials are recoverable with
   `registry-mirrors: ["https://mirror.gcr.io"]`.
-- Offline baseline: `npm test` = **876 passing across 87 files**
-  (unchanged by Session 54 — the v3.4 run self-refused and wrote no
-  diff; likewise Session 53; Session 52's T2 diff was reverted). The
-  paused tooling increment would grow this count with its new
-  `test:textedit` section and unit pins. Session 51: 875/87 → 876/87,
-  the +1 scaffold `UPSUM_BUDGET` pin. Session 50 history: 837/85 →
-  866/86 (Part A) → 875/87 (landed T1 diff).
+- Offline baseline: `npm test` = **916 passing across 92 files**. EL-02 added
+  40 deterministic tests across 5 files without changing the existing 87
+  files / 876 tests. The suite pins 132 transition pairs, 14 durable crash
+  points, 8 corruption classes, protected-root/lock refusal, fake dependency
+  behavior, catalog semantics, and all 28 requirement links. Earlier history:
+  Session 51 875/87 → 876/87; Session 50 837/85 → 866/86 → 875/87.
 - `npm run build` and `npm run python:check` pass (the check imports
   polars — an environment without it fails the check by design).
 - `npm run drill:scale`: gate CLOSED at max provenance 286.
@@ -1803,208 +1830,196 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 56 problem statement
+## 3. Session 57 problem statement
 
-**Engineering-session loop `EL-02`: implement the deterministic control
-kernel.** EL-01 is accepted and now supplies both governing documents:
+**Engineering-session loop `EL-03`: implement the repository observer and
+deterministic handoff renderer.** EL-02 supplies the strict domain boundary,
+single-writer protected state, append-only events, snapshots, and injected
+dependency pattern. The SPEC conformance matrix assigns exactly 12 requirements
+to EL-03: `DATA-006`, `REPO-001` through `REPO-006`, `OBS-005`, and `VIEW-001`,
+`VIEW-002`, `VIEW-003`, and `VIEW-005`.
 
-- `docs/architecture/ENGINEERING_LOOP.md` ratifies repository-owned source,
-  an out-of-process controller, protected mutable state outside the
-  agent-writable worktree, and one writer initially.
-- `tools/engineering-loop/SPEC.md` defines 106 mandatory requirements and maps
-  all 106 to existing catalog features and planned test classes. Exactly 28 are
-  owned by EL-02.
+Today repository facts in reports and this handoff are still authored by the
+session operator. The kernel has no trusted Git observer, normalized changed-
+path scope decision, typed command-evidence record, protected retained-output
+artifact, deterministic report derivation, or byte-stable status/handoff
+preview. That gap prevents later verification and runner features from treating
+branch, HEAD, diff, command, or test-count claims as controller evidence.
 
-The repository still has no executable engineering-loop state authority. Until
-EL-02 lands, bootstrap status lives in Git, there is no typed transition kernel,
-no protected external state store, no append-only event journal, no atomic
-snapshot/replay path, no writer lock, and no deterministic fake environment for
-crash testing. Building a real Codex adapter or production prompt before those
-mechanics would put stochastic execution ahead of workflow truth.
-
-Session 56 implements only the pure/durable kernel under
-`tools/engineering-loop/`: schemas, transitions, events, state snapshots,
-single-writer locking, restart reconstruction, idempotent-effect records, and
-fake clock/repository/runner/effect dependencies. It does not run an agent or
-perform a real external effect.
+Session 57 implements only those deterministic observation and derived-view
+surfaces under `tools/engineering-loop/`. It may invoke local Git and fixture
+commands through an injected bounded executor, but it does not run an agent,
+compile a prompt, decide semantic acceptance, replace manual `HANDOFF.md`, or
+perform a protected external effect.
 
 ## 4. Required design
 
-### 4.1 Package and build boundary
+### 4.1 Package and dependency boundary
 
-Keep all controller code under `tools/engineering-loop/`. The intended
-reference implementation is TypeScript using the repository's existing Zod,
-Vitest, TypeScript, and Node runtime; add no package dependency. A recommended
-small layout is:
+Extend only `tools/engineering-loop/` plus the existing build/test integration
+and required closeout documents. Reuse EL-02's strict schemas, canonical JSON,
+clock injection, protected `StateStore`, and requirement-linkage convention.
+Add no package dependency and do not import controller code from `src/`.
 
-- `src/domain.ts` — versioned Zod schemas and inferred types;
-- `src/state_machine.ts` — state classes, allowed transitions, pure validation;
-- `src/events.ts` — canonical event payloads, sequence/integrity chain;
-- `src/state_store.ts` — append, atomic snapshot, load, replay, corruption stop;
-- `src/writer_lock.ts` — one-writer acquisition/refusal and explicit release;
-- `src/fakes.ts` — fake clock, repository, runner, and side-effect target;
-- adjacent `*.test.ts` files or `tests/` fixtures for every acceptance class.
+Recommended cohesive modules:
 
-Names may be consolidated where cohesion improves, but do not create empty
-scaffolds. Update `vitest.config.ts` so `tools/engineering-loop/**/*.test.ts`
-joins `npm test`, and update `tsconfig.build.json` so the non-test controller
-source type-checks and emits under the existing build. Do not move product code
-or import controller code from `src/`.
+- `src/repo_observer.ts` — typed local Git observation and divergence checks;
+- `src/command_evidence.ts` — bounded argv execution records and protected
+  output artifacts;
+- `src/path_scope.ts` — normalized, segment-safe changed-path decisions;
+- `src/handoff_renderer.ts` — pure status, report, and handoff-preview bytes;
+- small extensions to `domain.ts`, `events.ts`, `state_machine.ts`, and
+  `requirements.ts` only where EL-03 records must enter protected state;
+- deterministic Git-fixture and renderer tests under
+  `tools/engineering-loop/tests/`.
 
-### 4.2 Typed domain and authority
+### 4.2 Repository observation
 
-Implement the nine SPEC §4 objects: workflow, feature, session, episode, event,
-approval, evidence, decision, and report. Every persisted object is schema-
-versioned and linked to workflow/feature/session as applicable. Use strict
-objects and bounded strings/collections; unknown enums or object fields refuse.
+The observer computes, never accepts from model text:
 
-The session binds one immutable feature-definition digest. A transition cannot
-replace acceptance or scope in place. Approval is a typed protected-state
-object, never a string in runner/model output or a file in the worktree. EL-02
-needs the structural approval reference and refusal behavior required by
-`EL-02-A3`; the real human approval channel and full protected policy remain
-EL-06.
+- canonical repository root and assigned worktree identity;
+- exact branch, current HEAD, configured base commit, clean/dirty state;
+- configured remote name plus normalized remote identity;
+- every tracked, staged, unstaged, untracked, deleted, renamed, and unusual
+  changed path needed for scope decisions.
 
-### 4.3 Pure state machine
+Use stable machine-readable Git commands with explicit argv and `cwd`. Parse
+NUL-delimited output where filenames are returned; preserve spaces, Unicode,
+leading dashes, and rename pairs without shell interpolation. Treat detached
+HEAD, missing/ambiguous remote, invalid base, submodule/worktree mismatch,
+unexpected branch/HEAD/base, command timeout, nonzero status, malformed output,
+or observation disagreement as typed refusal. Do not fetch or contact a remote
+during deterministic acceptance.
 
-Implement SPEC §5's exact state set and allowed transition table. Keep the
-decision function pure: current snapshot + candidate decision + referenced
-evidence/approval metadata produces either the next snapshot/event material or
-a typed refusal, with no I/O. Exhaustively test the cross-product of states and
-candidate destinations so every unlisted edge refuses before a fake effect.
+### 4.3 Allowed-path scope and divergence
 
-Required distinctions:
+Bind the session's immutable allowed paths before observation. Normalize Git
+paths to repository-relative slash form and compare by path segment, never raw
+string prefix. A scope entry for one directory includes that directory and its
+descendants, not similarly prefixed siblings. Refuse absolute paths, traversal,
+empty segments, platform aliases, repository escapes, and symlink-mediated
+access to protected state.
 
-- ordinary progress visits `preparing`, `running`, `verifying`, and
-  `awaiting_review`;
-- `awaiting_approval`/`awaiting_review` are protected waits;
-- `recovering` returns only to the state reconstructed from durable history;
-- `accepted`, `blocked`, `failed`, and `cancelled` are terminal and immutable;
-- model/runner/checker reports are observations with no transition authority;
-- `accepted` requires the SPEC §5.3 preconditions, represented by controller-
-  owned evidence references in this fake-only increment.
+Compute the complete changed-path set before verification or review. A changed
+path outside scope, a changed worktree identity, or unexpected branch, HEAD, or
+base stops before another edit, command result, renderer result, or effect can
+be accepted. Pin before/after observation fixtures so a time-of-check/time-of-
+use divergence is loud.
 
-### 4.4 Protected single-writer store
+### 4.4 Command evidence and protected artifacts
 
-The store root is operator supplied and canonicalized. Refuse a root inside or
-aliasing into the assigned worktree. Tests use temporary directories outside
-their fake worktree; no test writes controller state into the repository.
+Define strict versioned records for command request, execution observation,
+bounded output metadata, and retained artifact reference. A record includes
+the exact argv array, canonical working directory, injected start/end times,
+exit status or signal, timeout/cancellation state, stdout/stderr byte counts,
+bounded previews, full-byte digests, media types, and protected references when
+full output is retained.
 
-The store follows the event-first protocol:
+Keep argv execution free of shell parsing. Bound argv count/bytes, cwd, timeout,
+preview bytes, output bytes, and retained-artifact size. Large output and diffs
+are written only under the EL-02 protected state root by hash-addressed atomic
+creation, then referenced by a journal-linked evidence event. Duplicate bytes
+deduplicate by digest; digest/reference mismatch, existing-byte disagreement,
+path alias, partial artifact, or worktree retention refuses. Worker-reported
+commands and counts remain `runner_reported` evidence and never substitute for
+these controller-observed records.
 
-1. acquire the exclusive writer lock;
-2. validate current snapshot and candidate transition;
-3. append and durably flush the next monotonically sequenced,
-   integrity-linked event;
-4. write the full next snapshot to a temporary sibling, durably close it, and
-   atomically replace the published snapshot;
-5. expose the transition as committed.
+### 4.5 Trusted report derivation
 
-Snapshots identify the last applied event sequence and digest. Restart loads
-the newest valid snapshot and replays later valid events. A missing sequence,
-digest mismatch, invalid object, impossible transition, or snapshot/journal
-disagreement stops with a typed recovery error; never truncate, skip, or repair
-history silently.
+EL-03 owns SPEC `DATA-006`. Align the strict report serialization with the
+normative field names: `feature`, `result`, `artifacts`,
+`normative_requirements` with engine-computed counts and outstanding/unmapped
+IDs, `verification`, `findings`, and `next_feature`. Derive fields only from a
+validated snapshot, catalog/SPEC linkage, controller-observed repository and
+command evidence, and protected artifact references. Report ordering,
+normalization, newline, and omission/null rules are renderer-versioned and
+byte-pinned.
 
-Choose and document a cross-platform one-writer primitive available in the
-existing Node runtime. A second writer refuses without changing state. Stale
-lock disposition must be explicit and safe; do not guess that an owner is dead
-and take over while its effect outcome could be unknown.
+### 4.6 Deterministic derived views
 
-### 4.5 Effect records, recovery, and crash injection
+Implement pure renderer functions whose complete inputs are strict data:
+trusted snapshot, bounded evidence/reference collections, repository
+observation, catalog data, renderer version, and the invariant output frame.
+Identical canonical inputs must produce byte-identical status and handoff
+preview bytes across repeated runs. Sort only collections declared unordered;
+preserve semantic argv/path/event order. Compute counts and paths in code.
 
-Implement the protocol shape, not real effects. The fake effect target records
-stable operation/idempotency IDs, intent, typed outcome, and unknown outcome.
-An identical confirmed-idempotent retry reuses the same IDs; an unknown outcome
-stops and cannot be auto-retried.
-
-Inject deterministic crashes at every durable boundary named by
-`EL-REQ-STORE-008`: before/after journal durability, before/after snapshot temp
-write and replacement, approval consumption, intent creation, and effect
-outcome recording. On restart, the reconstructed logical state must equal the
-uninterrupted oracle and a completed fake effect must never execute twice.
-
-### 4.6 Fake dependencies
-
-The fake clock controls every timestamp and retry delay. The fake repository
-provides typed identity/status observations without invoking Git. The fake
-runner implements only the adapter-neutral lifecycle needed by the kernel and
-never invokes Codex or a model. The fake effect target is deterministic and
-counts invocations. These fakes are injected; the kernel does not read ambient
-time, process-global worktree state, or network services in acceptance tests.
-
-No production controller CLI, daemon, repository observer, renderer, prompt
-compiler, Codex adapter, checker, or external-effect adapter enters EL-02.
+The handoff output is a **preview artifact**, not a write to `HANDOFF.md`.
+Rendering has no state-store mutation, Git write, command execution, clock read,
+or external effect. Manual `HANDOFF.md` remains authoritative through EL-06 and
+the EL-07 comparison unless the owner later records an adopt verdict. Generated
+context points to bounded reports/archive references and never copies the full
+journal, transcript, diff, command output, or roadmap history.
 
 ### 4.7 Requirement linkage
 
-Implement and pin the 28 SPEC matrix rows owned by EL-02:
-
-- core: protected external state, one writer, and one dependency-satisfied
-  feature per session;
-- data/state: boundary schemas, stable linkage, evidence origin, exhaustive
-  transitions, terminal immutability, and reconstruction;
-- store: root containment refusal, lock, event chain, event-first commit,
-  atomic snapshot, replay, corruption stop, and crash injection;
-- fakes/effects/security: fake runner/clock, intent/outcome/idempotency records,
-  restart reconciliation, worktree isolation, and explicit bounds.
-
-Do not edit requirement text or remap a row merely to fit an implementation. A
-contradiction in a ratified requirement stops for owner review.
+Compute and pin every EL-03 conformance row directly from SPEC §18. The expected
+set has 12 IDs: one data/report requirement, six repository requirements, one
+protected-artifact observability requirement, and four derived-view
+requirements. Each ID needs concrete source and deterministic test evidence;
+do not remap requirement text to fit the implementation.
 
 ## 5. File-level starting points
 
 Read first:
 
-- `docs/architecture/ENGINEERING_LOOP.md` — especially §§2–7 and §§10–14;
-- `tools/engineering-loop/SPEC.md` — especially §§3–6, §§9, §13, §16, and the
-  EL-02 rows in §18;
-- `docs/product/engineering-loop/ROADMAP.md` EL-02;
-- `docs/product/engineering-loop/features.json` EL-02 and
+- `docs/architecture/ENGINEERING_LOOP.md` — especially §§3–7 and §§10–14;
+- `tools/engineering-loop/SPEC.md` — especially §§4, 7, 14, 16, and the exact
+  EL-03 rows in §18;
+- `docs/product/engineering-loop/ROADMAP.md` EL-03;
+- `docs/product/engineering-loop/features.json` EL-03 and
   `feature.schema.json`;
-- `vitest.config.ts` and `tsconfig.build.json` (today they include only
-  `src`/`scripts`; EL-02 must add its own tool paths explicitly);
-- `src/core/agent/decision.ts` and `goal_loop.ts` only for the existing pure-
-  decision/dependency-injection testing mold, never for runtime reuse.
+- EL-02 source and tests under `tools/engineering-loop/`, especially
+  `domain.ts`, `events.ts`, `state_store.ts`, `fakes.ts`, `requirements.ts`,
+  and their fixtures;
+- existing repository test conventions for temporary Git repositories and
+  child-process fixtures, without importing product runtime.
 
-Create under `tools/engineering-loop/` only:
+Implement under `tools/engineering-loop/` only:
 
-- the cohesive TypeScript kernel modules and tests described in §4;
-- small deterministic JSON fixtures only where inline builders are less clear.
+- the observer, scope, command-evidence, artifact, and renderer modules/tests
+  described in §4;
+- the smallest strict EL-02 domain/event extensions needed to retain EL-03
+  evidence; preserve existing event replay and crash invariants;
+- bounded Git repositories and command fixtures created under temporary test
+  directories, never the developer's actual repository state.
 
 Update only after acceptance:
 
-- `docs/product/engineering-loop/features.json` (EL-02 status only);
+- `docs/product/engineering-loop/features.json` (EL-03 status only);
 - `docs/product/engineering-loop/ROADMAP.md`;
 - `TRELLIS_ROADMAP.md` §4/§5 and archive rotation;
 - `HANDOFF.md` per §0.
 
-Do not add a runtime entry point simply to reserve one. EL-05 owns the first
-real runner adapter; EL-03 owns Git observation and handoff rendering; EL-06
-owns real verification/approval policy.
+Do not add a daemon or general verification runner. EL-03 may execute the local
+Git/fixture commands required to produce typed observation evidence; EL-05 owns
+the real agent runner and EL-06 owns acceptance-command policy, real approvals,
+retry, and the checker.
 
 ## 6. Test strategy and acceptance
 
-EL-02 is zero-model and zero-paid. Acceptance requires:
+EL-03 is zero-model and zero-paid. Acceptance requires:
 
-1. All 28 EL-02-owned mandatory requirements have implementation and test
+1. All 12 EL-03-owned requirements have implementation and deterministic test
    evidence with no requirement remap.
-2. All allowed transitions pass, every forbidden state pair refuses before a
-   fake effect, protected transitions reject missing/mismatched approval
-   objects, and terminal states have no outgoing edge.
-3. A second writer refuses without mutation; protected-state roots inside or
-   aliasing the fake worktree refuse.
-4. Crash injection at every durable boundary reconstructs the same logical
-   state and never duplicates a completed fake effect.
-5. Missing/corrupt/out-of-order events, bad digests, invalid snapshots, and
-   impossible replay transitions stop loudly without journal repair.
-6. Fake clock/repository/runner/effect acceptance performs zero process spawn,
-   network, Git, model, paid, database, queue, API, or worker I/O.
-7. `npm test` includes the tool suite; `npm run build` type-checks/emits the
-   non-test kernel source; existing 87 files / 876 tests remain green and the
-   new counts are recorded.
-8. Catalog/schema/dependency/order and SPEC mapping audits remain green; the
-   diff contains no EL-03+ implementation or production prompt.
+2. Git fixtures compute exact root/worktree, branch, base, HEAD, dirty state,
+   remote identity, and complete changed paths without model-authored values.
+3. Staged, unstaged, untracked, deleted, renamed, spaced, Unicode, and leading-
+   dash paths parse losslessly; segment-safe scope allows only declared paths.
+4. Unexpected branch, base, HEAD, worktree, remote, scope, or between-check
+   divergence refuses before another accepted observation or rendered result.
+5. Command records carry exact argv/cwd/time/status/timeout/cancellation and
+   bounded output metadata; large bytes retain atomically outside the worktree
+   with digest, media type, byte count, and journal reference.
+6. Worker-reported Git/command/test claims cannot satisfy controller-observed
+   evidence requirements or alter renderer truth.
+7. Identical canonical inputs render byte-identical status, report, and handoff
+   preview bytes; input changes alter only their deterministic fields.
+8. Rendering is read-only and does not alter protected state, Git, or manual
+   `HANDOFF.md`; generated context remains bounded and reference-based.
+9. All 40 EL-02 tool tests and the existing 87 files / 876 tests remain green;
+   new counts are recorded. Catalog/schema/semantic and SPEC linkage audits
+   remain green, with no EL-04+ implementation or production prompt.
 
 Run at minimum:
 
@@ -2018,52 +2033,55 @@ git diff --check
 git status --short --branch
 ```
 
-Add deterministic spec-linkage and catalog-semantic checks under
-`tools/engineering-loop/tests` as part of EL-02 rather than relying on a
-session-only script. No live product drill or isolated Compose integration is
-required when the final diff remains confined to `tools/engineering-loop/`,
-`vitest.config.ts`, `tsconfig.build.json`, and required Markdown/JSON closeout:
-the controller kernel is product-independent and its acceptance fakes every
-dependency. If the diff escapes that scope, stop and redesign rather than
-silently widening the acceptance block.
+Extend the deterministic SPEC-linkage and catalog-semantic tests for EL-03.
+Add focused commands that report exact Git-fixture cases, scope decisions,
+divergence refusals, retained-artifact cases, and renderer byte pins. No live
+product drill, remote fetch, model call, or isolated Compose integration is
+required when the final diff stays in the authorized controller and closeout
+scope. If it escapes that scope, stop and redesign.
 
 ## 7. Guardrails
 
-1. `AGENTS.md`, the EL-01 architecture record, and every EL-02-mapped SPEC
-   requirement bind the implementation; code still outranks prose when reading
-   existing repository behavior.
-2. Keep the controller out of Trellis product runtime and keep protected state
-   outside the worktree. Tests use external temp roots and prove containment.
-3. One writer means one writer. Do not add optimistic multi-writer merge,
-   scheduler, leader election, or stale-lock stealing.
-4. Event history is append-only; snapshots are derived checkpoints. Never edit,
-   delete, reorder, truncate, or silently repair a committed event.
-5. Event durability precedes snapshot publication. Crash behavior is part of
-   the contract and is tested at every named boundary.
-6. Model output, fake-runner output, and checker-shaped fixtures are
-   observations only. They never grant approval or terminal state.
-7. Implement only fake external effects. An unknown outcome stops; no retry may
-   make a second call on hope.
-8. Validate every persisted and external boundary with strict, bounded schemas.
-   Reject unknown fields/enums and over-bound values loudly.
-9. Add no dependency. Use existing Zod/Vitest/TypeScript/Node facilities and
-   platform-safe filesystem primitives.
-10. Do not author prompt text. If a later feature does, the permanent dual-
-    protocol process gate and byte-pin doctrine apply before writing bytes.
-11. No paid/model work, no Codex invocation, no Trellis RLM, and no product
-    database/queue/API/worker dependency.
-12. No AI attribution, generated-with footer, or co-author trailer.
-13. Report exact commands, raw counts, crash cases, and any residual honestly.
-    A spec contradiction or recovery ambiguity blocks acceptance.
-14. Update program status and regenerate this handoff only after the full EL-02
-    acceptance block passes.
+1. `AGENTS.md`, the architecture record, EL-02 kernel code, and every EL-03-
+   mapped SPEC requirement bind implementation; code outranks glossary and
+   prose when existing behavior disagrees.
+2. Repository facts, paths, command results, counts, and report fields are
+   engine-computed. Model/runner/checker statements remain advisory evidence.
+3. Parse filenames with NUL-delimited Git output and compare normalized path
+   segments. Never interpolate a path or argv through a shell string.
+4. Observe before execution and re-observe at protected boundaries. Any
+   repository or scope divergence stops; do not update the expected value to
+   make the observation pass.
+5. Keep protected state and retained artifacts outside the worktree. Refuse
+   lexical/canonical/symlink aliases in either direction.
+6. Preserve EL-02 invariants: one writer, append-only integrity-linked events,
+   event-before-snapshot durability, deterministic replay, terminal
+   immutability, approval authority, and unknown-effect blocking.
+7. Derived views are pure and read-only. They cannot mutate or outrank journal,
+   snapshot, approval, evidence, repository observation, or manual handoff.
+8. Manual `HANDOFF.md` stays authoritative. EL-03 produces a preview artifact
+   only; adoption remains an EL-07 measured owner decision.
+9. Bound argv, paths, timeouts, output previews, retained bytes, collections,
+   and rendered bytes. Validate every read/write/external boundary with strict
+   schemas and reject unknown fields/enums.
+10. Add no dependency. Use existing Zod, Vitest, TypeScript, Node, and local Git
+    facilities; acceptance uses temporary repositories and no network.
+11. Author no production prompt. The Prompt-Engineering and Hypershot protocols
+    govern any future EL-04 prompt bytes, not EL-03 renderer data.
+12. No model/paid work, Codex invocation, Trellis RLM, product database/queue/
+    API/worker dependency, tracker, scheduler, automatic push, or merge.
+13. No AI attribution, generated-with footer, or co-author trailer.
+14. Report exact commands, exit results, fixture/case counts, renderer pins, and
+    residuals honestly. Update status and regenerate this handoff only after the
+    full EL-03 block passes.
 
 ## 8. Explicit exclusions
 
-Session 56 does not:
+Session 57 does not:
 
-- implement EL-03 Git observation, command execution evidence, scope checking,
-  status rendering, or handoff rendering;
+- alter the EL-02 transition table, approval policy, effect semantics,
+  lock discipline, journal integrity, or crash boundary contract except for the
+  smallest backward-compatible EL-03 evidence event/schema extension;
 - author EL-04 production prompts, prompt compiler, output schemas for model
   roles, prompt pins, planner/implementer/checker/recovery prompt text, or
   `WORKFLOW.md`;
@@ -2072,15 +2090,16 @@ Session 56 does not:
 - implement EL-06 deterministic acceptance-command execution, real approval
   channel, paid/destructive/push/merge effects, independent checker, redaction
   policy, retention service, or production retry policy;
-- run EL-07 trials or alter manual `HANDOFF.md` authority;
+- run EL-07 trials, overwrite manual `HANDOFF.md`, or alter its authority;
 - decide EL-08 tracker, scheduler, concurrency, multi-machine durability,
   standalone extraction, or generic workflow-engine adoption;
 - decide EL-09 report sanitization or Trellis ingestion;
-- modify `src/`, `scripts/`, package dependencies, databases, queues, workers,
+- modify product `src/`, `scripts/`, package dependencies, databases, queues, workers,
   APIs, frontend, modules, RLM code, existing prompts, or prompt pins;
-- create a daemon, CLI, service, HTTP endpoint, worker, or scheduler;
-- invoke Git from kernel acceptance fakes, write controller state into the
-  repository, push, commit, open a PR, or merge without later explicit scope;
+- create a daemon, service, HTTP endpoint, worker, general verification runner,
+  or scheduler;
+- fetch, contact a remote, write controller state/artifacts into the repository,
+  push, commit, open a PR, or merge without later explicit scope;
 - resume the paused TTT T2 objective or alter any TTT design/measurement record.
 
 ## Appendix A. Paused tooling-shape objective inherited from the pre-reconciliation Session 55 handoff — retained for history, do not execute

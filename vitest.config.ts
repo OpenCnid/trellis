@@ -6,7 +6,11 @@ import { defineConfig } from 'vitest/config';
 // its own toolchain and is excluded.
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
+    include: [
+      'src/**/*.test.ts',
+      'scripts/**/*.test.ts',
+      'tools/engineering-loop/**/*.test.ts',
+    ],
     exclude: ['src/frontend/**', 'node_modules/**'],
   },
 });

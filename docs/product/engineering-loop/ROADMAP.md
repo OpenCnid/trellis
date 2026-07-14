@@ -1,12 +1,12 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **architecture and specification accepted; control kernel next**
+Status: **control kernel accepted; repository observer next**
 
 Owner direction: July 14, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current feature: `EL-02`
+Current feature: `EL-03`
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than
@@ -83,7 +83,7 @@ At session close:
 |---:|---|---|---|---|---|
 | 0 | `EL-00` | Program roadmap and machine-readable feature catalog | — | Forbidden | Accepted |
 | 1 | `EL-01` | Architecture record and normative service specification | `EL-00` | Forbidden | Accepted |
-| 2 | `EL-02` | Control kernel: schemas, transitions, durable state, event journal, fake runner | `EL-01` | Forbidden | Planned |
+| 2 | `EL-02` | Control kernel: schemas, transitions, durable state, event journal, fake runner | `EL-01` | Forbidden | Accepted |
 | 3 | `EL-03` | Repository observer and deterministic handoff renderer | `EL-02` | Forbidden | Planned |
 | 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Planned |
 | 5 | `EL-05` | Codex app-server runner adapter and episode rotation | `EL-02`, `EL-04` | Forbidden in acceptance | Planned |
@@ -173,6 +173,18 @@ Acceptance focus:
 - Completed side effects are not duplicated.
 - Invalid transitions and forged approvals are refused.
 - The entire suite is zero-model and zero-paid.
+
+Deterministic acceptance passed July 14, 2026: the TypeScript reference kernel under
+`tools/engineering-loop/` implements all 28 EL-02-owned requirements. Its
+strict schemas, exhaustive 132-pair transition matrix (41 allowed / 91
+forbidden), protected external state, exclusive writer lock, integrity-linked
+event journal, event-first atomic snapshots, replay/corruption refusal, and
+fake intent/outcome recovery passed 40 deterministic tool tests. Repository-
+wide acceptance passed 916 tests across 92 files, the TypeScript build, Python
+runtime checks, Compose configuration validation, catalog/schema/semantic
+audits, SPEC linkage, and diff checks with zero model calls and zero paid work.
+The owner reviewed and ratified the closeout on July 14, 2026, then explicitly
+authorized commit, merge, and push to `master`.
 
 ### EL-03 — repository observer and handoff renderer
 
@@ -320,10 +332,12 @@ the engineering-loop subset; it does not create a competing historical log.
 
 ## 8. Current next step
 
-`EL-00` and `EL-01` are accepted. The next session takes only `EL-02`: implement
-the deterministic control kernel defined by `tools/engineering-loop/SPEC.md`
-for typed schemas, exhaustive transitions, protected external state, the
-append-only event journal, atomic snapshots, the single-writer lock, and a fake
-runner/clock/repository test harness. It must not add a real Codex adapter,
-production prompts, repository observer, generated handoff, tracker, scheduler,
-or paid/model work.
+`EL-00`, `EL-01`, and `EL-02` are accepted. The next session takes only
+`EL-03`: implement the repository observer and deterministic handoff renderer
+defined by `tools/engineering-loop/SPEC.md`. It computes bounded Git and command
+observations, refuses repository divergence and out-of-scope paths, and renders
+byte-identical status and handoff previews from trusted state. It must not add a
+real Codex adapter, production prompt, checker, approval service, tracker,
+scheduler, automatic push/merge, product-runtime integration, or paid/model
+work. Manual `HANDOFF.md` remains authoritative until the EL-07 migration
+verdict.
