@@ -209,7 +209,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
     expect(derived.artifacts).toEqual(['tools/engineering-loop/src/repo_observer.ts']);
     expect(derived.verification[0].command).toBe('cwd="/fixture/worktree" argv=["npm","test"]');
     expect(derived.verification[0].result).toContain('exit=0 timeout=false cancelled=false');
-    expect(derived.next_feature).toBe('EL-04');
+    expect(derived.next_feature).toBe('EL-05');
   });
 
   it('refuses unjournaled or runner-reported command claims as verification truth', async () => {
@@ -294,7 +294,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
       rendererVersion: HANDOFF_RENDERER_VERSION,
       report: derived,
       repository: REPOSITORY,
-      nextFeatureOutcome: 'Role-specific prompt packets are compiled from invariant frames and typed task data.',
+      nextFeatureOutcome: 'The controller can start, observe, interrupt, and resume bounded Codex episodes without treating conversation history as workflow truth.',
       evidenceReferences: [VERIFY_COMMAND.recordReference],
       archiveReferences: ['docs/archive/ROADMAP_HISTORY.md#engineering-loop'],
     };
@@ -303,9 +303,9 @@ describe('EL-03 trusted report and deterministic derived views', () => {
     expect(renderStatusBytes({ rendererVersion: HANDOFF_RENDERER_VERSION, snapshot: structuredClone(SNAPSHOT), repository: structuredClone(REPOSITORY), report: structuredClone(derived) })).toEqual(statusBytes);
     expect(renderHandoffPreviewBytes(structuredClone(previewInput))).toEqual(previewBytes);
     expect({ report: digest(reportBytes), status: digest(statusBytes), handoff: digest(previewBytes) }).toEqual({
-      report: '4c085f4b023e6efb3c770a5957e835c502f5884907d33e026b043d96686fa262',
-      status: '8f77a23f77d99d0515ddbfe07af3b5e572ceb21ddd83fa7e98612153011568b8',
-      handoff: '961e09a7142b25604482a98cad94711a3da7cd794498b6b5580027051f4c911f',
+      report: 'fe8359b8aea623e07c36e3d6a21011b173b9960c794917bf2761b569e0419018',
+      status: '03f8394eb35d714245fea4dcfc73dac9330053763411cf96a543b581d327e85f',
+      handoff: 'c72d997545de023e7290287292ff7b08117466dbba7c1db6c0eb648a82bcbbe7',
     });
   });
 
