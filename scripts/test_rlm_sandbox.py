@@ -16,8 +16,10 @@
 # gate (PROVENANCE_THREADING.md slice d) on top of it; section [7] pins
 # the Session 33 retrieval discipline (RETRIEVAL_DISCIPLINE.md —
 # held-state dedup + the per-run budget, active only on
-# discipline-enabled construction). Probe AST rows are token-scoped:
-# inserted by this test, deleted by this test.
+# discipline-enabled construction); section [8] pins the Session 50
+# citability probe (RLM_HARNESS_SCAFFOLDING.md §4 — read-only, never a
+# gate) and the scaffold injection seams. Probe AST rows are
+# token-scoped: inserted by this test, deleted by this test.
 import hashlib
 import json
 import os
@@ -798,6 +800,158 @@ try:
     finally:
         disc.close()
 
+    # --- Session 50: the citability probe (RLM_HARNESS_SCAFFOLDING.md) --
+    print("\n[8] citability probe (read-only; never a gate) + scaffold seams")
+
+    from trellis_scaffold import build_scaffold_helpers
+
+    # A live-but-unretrieved probe: its own single-node document gives
+    # it current-version membership (the Session 40 liveness shape),
+    # and no tool has fetched its bytes.
+    CIT_LIVE_HASH = hashlib.sha256(b"trellis-sandbox-citable-live").hexdigest()
+    CIT_DOC_KEY = "sandbox:probe:citable"
+    with pg.conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO ast_nodes (id, document_id, data) VALUES (%s, %s, %s) ON CONFLICT (id) DO NOTHING",
+            (CIT_LIVE_HASH, "sandbox_probe_doc",
+             json.dumps({"type": "text", "content": "citable probe block"})),
+        )
+        cur.execute(
+            "INSERT INTO documents (doc_key, version, root_hash) VALUES (%s, 1, %s) "
+            "ON CONFLICT (doc_key, version) DO NOTHING",
+            (CIT_DOC_KEY, CIT_LIVE_HASH),
+        )
+        cur.execute(
+            "INSERT INTO document_nodes (root_hash, node_id) VALUES (%s, %s) "
+            "ON CONFLICT (root_hash, node_id) DO NOTHING",
+            (CIT_LIVE_HASH, CIT_LIVE_HASH),
+        )
+    pg.conn.commit()
+
+    check("bare scaffold construction injects nothing (injection mold)",
+          build_scaffold_helpers() == {})
+    scaffold = build_scaffold_helpers(
+        postgres=pg,
+        retrieved_addresses_fn=get_retrieved_addresses,
+        named_files=["embed", "citable"],
+        doc_key_prefix="sandbox:probe:",
+    )
+    check("named files + database surfaces inject exactly the citable probe",
+          sorted(scaffold) == ["citable"])
+    citable = scaffold["citable"]
+
+    # By this point in the drill: EMBED_HASH was retrieved (its bytes
+    # rode a vector_search result) and is live under a named doc;
+    # PROBE_HASH was retrieved but has NO current-version membership;
+    # CIT_LIVE_HASH is live under a named doc but never retrieved;
+    # `unknown` is well-formed and absent from ast_nodes.
+    tc_before_cit = get_tool_call_count()
+    rs_before_cit = get_retrieved_address_count()
+    report = citable([EMBED_HASH, PROBE_HASH, CIT_LIVE_HASH, unknown])
+    check("retrieved + live-under-a-named-doc reports citable",
+          report[EMBED_HASH]["citable"] is True
+          and report[EMBED_HASH]["retrieved"] is True
+          and report[EMBED_HASH]["live_doc_keys"] == [EMBED_DOC_KEY]
+          and report[EMBED_HASH]["bridges_named_file"] is True,
+          json.dumps(report[EMBED_HASH]))
+    check("retrieved-but-membership-less reports NOT citable (dead class)",
+          report[PROBE_HASH]["citable"] is False
+          and report[PROBE_HASH]["retrieved"] is True
+          and report[PROBE_HASH]["exists"] is True
+          and report[PROBE_HASH]["live_doc_keys"] == [],
+          json.dumps(report[PROBE_HASH]))
+    check("live-but-unretrieved reports NOT citable (retrieval is the missing half)",
+          report[CIT_LIVE_HASH]["citable"] is False
+          and report[CIT_LIVE_HASH]["retrieved"] is False
+          and report[CIT_LIVE_HASH]["bridges_named_file"] is True,
+          json.dumps(report[CIT_LIVE_HASH]))
+    check("a ghost hash reports absent on every axis",
+          report[unknown]["exists"] is False
+          and report[unknown]["retrieved"] is False
+          and report[unknown]["live_doc_keys"] == []
+          and report[unknown]["citable"] is False,
+          json.dumps(report[unknown]))
+
+    # The probe is bookkeeping-inert: no tool-call count, no retrieval
+    # set growth, no audit bucket — reading it earns nothing.
+    check("citable never increments the database tool-call count",
+          get_tool_call_count() == tc_before_cit)
+    check("citable never feeds the retrieval set",
+          get_retrieved_address_count() == rs_before_cit)
+    audit_after_cit = get_citation_audit()
+    check("citable never touches the citation audit buckets",
+          audit_after_cit["read"] == [] and audit_after_cit["cited"] == [])
+
+    # The taught remedy works through the probe too: retrieve the live
+    # hash, and the SAME probe call flips to citable.
+    json.loads(pg.get_ast_texts([CIT_LIVE_HASH]))
+    report2 = citable([CIT_LIVE_HASH])
+    check("after get_ast_texts the same hash reports citable",
+          report2[CIT_LIVE_HASH]["citable"] is True)
+
+    # NEVER A GATE: an unretrieved-but-live hash still refuses at the
+    # Session 31 write gate even though the probe can describe it —
+    # the probe informs; the gate decides (drilled here so the two are
+    # observed together, never conflated).
+    gated_cit = TrellisNeo4j(
+        ast_existence_check=pg.ast_hashes_exist,
+        retrieved_addresses_check=get_retrieved_addresses,
+    )
+    try:
+        probe_only = citable([GATE_BOUND_HASHES[0]])
+        check("the probe describes an uncitable hash without writing anything",
+              probe_only[GATE_BOUND_HASHES[0]]["citable"] is False)
+        try:
+            gated_cit.write_derived_insight(
+                "sandbox citable subject", "mentions", "sandbox citable object",
+                [GATE_BOUND_HASHES[0]])
+            check("the write gate still refuses regardless of the probe", False,
+                  "nothing raised")
+        except ValueError as e:
+            check("the write gate still refuses regardless of the probe",
+                  "never retrieved" in str(e), str(e)[:200])
+    finally:
+        gated_cit.close()
+
+    # Validation refusals: typed, before any round trip.
+    for bad, needle in ((None, "LIST"), ([], "LIST"), (["x", 5], "LIST")):
+        try:
+            citable(bad)
+            check(f"citable refuses {bad!r}", False, "nothing raised")
+        except ValueError as e:
+            check(f"citable refuses {bad!r}", needle in str(e), str(e)[:120])
+    try:
+        citable([hashlib.sha256(f"over-{i}".encode()).hexdigest() for i in range(65)])
+        check("citable refuses an over-cap batch", False, "nothing raised")
+    except ValueError as e:
+        check("citable refuses an over-cap batch", "at most" in str(e), str(e)[:120])
+
+    # Static pins (the section [5]/[6]/[7] mold): the agent wires the
+    # scaffolds at the recorded seams, and the scaffold module never
+    # touches the tracking internals (it reads only through the
+    # injected accessor).
+    check("trellis_agent.py injects the task surface",
+          '"trellis_task": task_surface' in agent_source)
+    check("trellis_agent.py wraps the task at the system-prompt splice",
+          "wrap_task_text(safe_query, run_uuid)" in agent_source)
+    check("trellis_agent.py wraps the task at the completion query",
+          "wrap_task_text(args.query, run_uuid)" in agent_source)
+    check("trellis_agent.py validates the named-files input before paid work",
+          "task_named_files = parse_task_named_files()" in agent_source)
+    check("trellis_agent.py injects the helpers through the scaffold factory",
+          "build_scaffold_helpers(" in agent_source
+          and "named_files=task_named_files" in agent_source)
+    check("trellis_agent.py composes both conditional scaffold addenda",
+          "build_helpers_addendum(scaffold_helpers)" in agent_source
+          and "build_citable_addendum(scaffold_helpers)" in agent_source)
+    with open(os.path.join(RLM_DIR, "trellis_scaffold.py"), "r", encoding="utf-8") as fh:
+        scaffold_source = fh.read()
+    check("trellis_scaffold.py never touches the retrieval-tracking seam",
+          "_retrieved_addresses" not in scaffold_source
+          and "_audit_add" not in scaffold_source
+          and "_held" not in scaffold_source
+          and "_count_tool_call" not in scaffold_source)
+
     # Cleanup of the probe facts — the test owns a direct write session;
     # this is not the sandbox path.
     with client.driver.session() as s:
@@ -818,12 +972,12 @@ finally:
             # their foreign keys never block the ast_nodes delete.
             cur.execute(
                 "DELETE FROM document_nodes WHERE root_hash IN "
-                "(SELECT root_hash FROM documents WHERE doc_key = %s)",
-                ("sandbox:probe:embed",),
+                "(SELECT root_hash FROM documents WHERE doc_key IN (%s, %s))",
+                ("sandbox:probe:embed", "sandbox:probe:citable"),
             )
             cur.execute(
-                "DELETE FROM documents WHERE doc_key = %s",
-                ("sandbox:probe:embed",),
+                "DELETE FROM documents WHERE doc_key IN (%s, %s)",
+                ("sandbox:probe:embed", "sandbox:probe:citable"),
             )
             cur.execute(
                 "DELETE FROM ast_nodes WHERE document_id = %s",

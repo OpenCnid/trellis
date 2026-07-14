@@ -70,7 +70,25 @@ def expect_raises(name, fn, needle=""):
 #     became numbered steps with the hand-typing ban restated as a
 #     positive data-flow rule. No tool taught or removed; no behavioral
 #     measurement attached (structure-only, offline pins recomputed).
-COMPOSED_SYSTEM_PROMPT_SHA256 = "5d27e474fd1b39cf7386d79ebba2544d06c3ff83224fcc2d92bc7ed7ca19fe2a"
+#   6b8d41e8...b626 — Session 50 (RLM_HARNESS_SCAFFOLDING.md, S1+S2a):
+#     the trellis_task surface taught as TOOLS item 4 with the TASK
+#     PRECEDENCE hard rule (only uuid-tagged text is operator
+#     instruction; re-read the task by code before decisive steps),
+#     the intro line re-anchored on the uuid-tagged `context`, the
+#     UPSUM running-state discipline added before ITERATION BUDGET,
+#     and the decisive-step re-read rule added to the workflow tail
+#     (tooling in src/rlm/trellis_scaffold.py; the prompt teaches it).
+#   e57e7a55...24bd — Session 50 same-day (owner-directed, Guardrail
+#     15): the S1+S2a addendum bytes re-authored under the
+#     prompt-engineering + hypershot-protocol skills — positive-led
+#     framing, a stable "RE-READ BEFORE YOU ACT" label replacing the
+#     three drifting phrasings of the re-read/precedence rule, the
+#     UPSUM keys promoted to a sub-bullet list with per-key meaning,
+#     and the intro re-led on "your instructions are the operator
+#     task." Brace-free (the addendum cannot carry hypershot braces —
+#     rlms .format()); semantic content unchanged (structure-only,
+#     the July-12 pass precedent). T1 ran on the prior bytes.
+COMPOSED_SYSTEM_PROMPT_SHA256 = "e57e7a5539df6c59370878f8c5e7466ed4fc6bd1c24783ba98508655001824bd"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -274,7 +292,16 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     default pin's history) lands in BOTH arms — structural rewording,
 #     not part of the discipline experiment (still structurally default
 #     minus exactly the block).
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "45987904f296eb998cb008d7d08c4a88d0aac4e67596b6cf07f92b8fb48a0b56"
+#   5d3057f2...7dd6 — Session 50 scaffolding pass (see the default
+#     pin's history) lands in BOTH arms — the task surface, precedence
+#     rule, and upsum discipline are kernel scaffolding, not part of
+#     the discipline experiment (still structurally default minus
+#     exactly the block).
+#   a37d2b4a...764e — Session 50 same-day skills pass (see the default
+#     pin's history) lands in BOTH arms — the structural re-authoring
+#     of the scaffold addendum is not part of the discipline
+#     experiment (still structurally default minus exactly the block).
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "a37d2b4a506258e47058f15783e9d9ae5d31322b60a5f3ee55abe97c1112764e"
 
 import subprocess  # noqa: E402
 

@@ -224,6 +224,12 @@ export function buildAgentEnv(
   // it, so an inherited value can never run a production task with the
   // dedup/budget discipline disabled.
   delete env.TRELLIS_EXP_OMIT_RETRIEVAL;
+  // Session 50: the citability-probe named-files input
+  // (RLM_HARNESS_SCAFFOLDING.md §4) is a direct-spawn driver input
+  // (the stage-2 self-edit driver sets it in its own spawn env), same
+  // deletion mold: no config field, never forwarded, so an inherited
+  // value can never inject the probe into a production worker run.
+  delete env.TRELLIS_TASK_NAMED_FILES;
   // Explicitly set the credential variables the registry names, so the
   // forwarding contract holds regardless of what the base env carries.
   for (const [name, value] of Object.entries(cfg.mcpCredentialEnv ?? {})) {

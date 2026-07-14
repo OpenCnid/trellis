@@ -18,10 +18,16 @@
 # real sequence through the guarded splice family: one OBSERVED
 # AnchorMismatchError refusal (a retyped-from-memory expected line),
 # the taught self-correction (re-read, then the minimal verified
-# replace), write_back, and the gated write. The tool construction
-# mirrors trellis_agent.py research wiring: a discipline-enabled
-# TrellisPostgres and a TrellisNeo4j carrying both the existence
-# check and the retrieved_addresses_check seam.
+# replace), write_back, and the gated write. Session 50
+# (RLM_HARNESS_SCAFFOLDING.md): the guarded arm additionally drives
+# the scaffolds — the trellis_task surface (grep over the task text),
+# region_equal verification through the staged helpers, and the
+# citable() probe BEFORE the insight write, reporting per-hash
+# classifications the harness cross-checks against the TypeScript
+# gatherHashEvidence on the same fixture (the mirror pin). The tool
+# construction mirrors trellis_agent.py research wiring: a
+# discipline-enabled TrellisPostgres and a TrellisNeo4j carrying both
+# the existence check and the retrieved_addresses_check seam.
 import argparse
 import json
 import os
@@ -34,6 +40,7 @@ from trellis_tools import (  # noqa: E402
     TrellisPostgres,
     get_retrieved_addresses,
 )
+from trellis_scaffold import TrellisTask, build_scaffold_helpers  # noqa: E402
 from trellis_textedit import AnchorMismatchError, TrellisTextEdit  # noqa: E402
 
 
@@ -47,6 +54,12 @@ def main():
                         help="The fixture block hash the rehearsal fetches and cites")
     parser.add_argument("--off-hash", required=True,
                         help="A real-but-unfetched hash the violation arm tries to cite")
+    parser.add_argument("--dead-hash", default=None,
+                        help="Guarded arm: a superseded fixture hash for the citable probe")
+    parser.add_argument("--ghost-hash", default=None,
+                        help="Guarded arm: a never-inserted hash for the citable probe")
+    parser.add_argument("--doc-prefix", default=None,
+                        help="Guarded arm: the fixture doc-key prefix the citable probe bridges against")
     parser.add_argument("--subject", required=True)
     parser.add_argument("--object", required=True)
     args = parser.parse_args()
@@ -61,6 +74,9 @@ def main():
         "raw_splices": 0,
         "insight_written": False,
         "writes": [],
+        "task_grep_total": None,
+        "region_verified": None,
+        "citable_report": None,
     }
 
     pg = TrellisPostgres(retrieval_discipline=True)
@@ -85,7 +101,25 @@ def main():
         texts = json.loads(pg.get_ast_texts([args.block_hash]))
         result["fetched"] = args.block_hash in texts
 
-        # 3. The edit, through the toolkit only.
+        # 3. The edit, through the toolkit only. The guarded arm also
+        #    constructs the Session 50 scaffolds exactly the way
+        #    trellis_agent.py does (the factory, gated by what the run
+        #    has), and re-reads its task by code first.
+        scaffold = {}
+        if args.mode == "guarded":
+            task = TrellisTask(
+                "Correct the STALE line in notes.txt through the guarded "
+                "family; cite only fetched notes.txt blocks.",
+                "rehearsal-uuid",
+            )
+            result["task_grep_total"] = json.loads(task.grep("notes.txt"))["totalHits"]
+            scaffold = build_scaffold_helpers(
+                textedit=editor,
+                postgres=pg,
+                retrieved_addresses_fn=get_retrieved_addresses,
+                named_files=["notes.txt"],
+                doc_key_prefix=args.doc_prefix or "",
+            )
         editor.load("notes.txt")
         located = json.loads(editor.locate("notes.txt", "STALE:"))
         hit = located["hits"][0]["line"]
@@ -115,6 +149,21 @@ def main():
         result["guarded_ops"] = stats["textedit_guarded_ops"]
         result["raw_splices"] = stats["textedit_raw_splices"]
         result["writes"].append("notes.txt")
+
+        if args.mode == "guarded":
+            # The Session 50 verification discipline: the edited region
+            # asserted as a LIST through the staged helper, never a
+            # terminator-less substring check.
+            result["region_verified"] = scaffold["region_equal"](
+                "notes.txt", hit, [corrected])
+            # The citable() probe BEFORE the insight write — per-hash
+            # classifications the harness mirror-pins against the
+            # TypeScript gatherHashEvidence over the same fixture.
+            probe_hashes = [args.block_hash, args.off_hash]
+            for extra in (args.dead_hash, args.ghost_hash):
+                if extra:
+                    probe_hashes.append(extra)
+            result["citable_report"] = scaffold["citable"](probe_hashes)
 
         if args.mode == "violation":
             # 4a. Cite a hash this run never fetched: the live gate must

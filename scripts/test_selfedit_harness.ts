@@ -41,6 +41,11 @@
 //      a guarded-only telemetry split (raw_splices 0), the Session 31
 //      gated write, and the full checker at ZERO findings with the
 //      edited file's neighbors byte-intact.
+//   9. The Session 50 scaffolds (RLM_HARNESS_SCAFFOLDING.md) on the
+//      guarded arm: the trellis_task re-read by code, region_equal
+//      verification, and the citable() probe MIRROR-PINNED against
+//      gatherHashEvidence over the same fixture (the two liveness
+//      joins move together, never a silent divergence).
 //
 // All database state is token-scoped: inserted by this drill, deleted
 // by this drill. The repo:trellis substrate is only ever READ.
@@ -155,6 +160,14 @@ async function plantedEvidence(subject: string, verb: string, object: string) {
   });
 }
 
+interface CitableEntry {
+  retrieved: boolean;
+  exists: boolean;
+  live_doc_keys: string[];
+  bridges_named_file: boolean;
+  citable: boolean;
+}
+
 interface RehearsalResult {
   mode: string;
   cypher_hashes: string[];
@@ -165,6 +178,9 @@ interface RehearsalResult {
   raw_splices: number;
   insight_written: boolean;
   writes: string[];
+  task_grep_total: number | null;
+  region_verified: boolean | null;
+  citable_report: Record<string, CitableEntry> | null;
 }
 
 async function runRehearsal(mode: 'clean' | 'violation' | 'guarded', editRoot: string, subject: string, object: string): Promise<RehearsalResult> {
@@ -178,6 +194,9 @@ async function runRehearsal(mode: 'clean' | 'violation' | 'guarded', editRoot: s
       '--target-entity', TARGET_ENTITY,
       '--block-hash', B,
       '--off-hash', O,
+      '--dead-hash', D,
+      '--ghost-hash', G,
+      '--doc-prefix', DOC_PREFIX,
       '--subject', subject,
       '--object', object,
     ],
@@ -617,6 +636,50 @@ async function main(): Promise<void> {
       !notesGuarded.includes('STALE:'),
     JSON.stringify(notesGuardedLines.slice(0, 3))
   );
+
+  // --- [9] The Session 50 scaffolds on the guarded arm -----------------
+  // (RLM_HARNESS_SCAFFOLDING.md): the task surface re-read by code, the
+  // region asserted through the staged helper, and the citable() probe
+  // MIRROR-PINNED against the TypeScript gatherHashEvidence over the
+  // same fixture — the two liveness joins move together or this fails.
+  console.log('\n[9] scaffolds on the guarded arm (task re-read, region_equal, citable mirror pin)');
+  check('the rehearsal re-read its task by code (grep hits)', (guarded.task_grep_total ?? 0) >= 1,
+    String(guarded.task_grep_total));
+  check('the edited region verified as a LIST through region_equal', guarded.region_verified === true,
+    String(guarded.region_verified));
+  const rep = guarded.citable_report;
+  check('the citable probe reported on all four fixture hashes',
+    rep !== null && [B, O, D, G].every(h => h in (rep ?? {})),
+    JSON.stringify(Object.keys(rep ?? {})));
+  if (rep) {
+    check(
+      'fetched + named-file-bridging block reports citable (B)',
+      rep[B].citable === true && rep[B].retrieved === true && rep[B].bridges_named_file === true,
+      JSON.stringify(rep[B])
+    );
+    check(
+      'mirror pin: citable live_doc_keys equal gatherHashEvidence liveDocKeys (B)',
+      JSON.stringify(rep[B].live_doc_keys) === JSON.stringify(evB.liveDocKeys),
+      JSON.stringify({ python: rep[B].live_doc_keys, typescript: evB.liveDocKeys })
+    );
+    check(
+      'off-document block reports unbridged and uncitable (O)',
+      rep[O].citable === false && rep[O].bridges_named_file === false &&
+        JSON.stringify(rep[O].live_doc_keys) === JSON.stringify(evO.liveDocKeys),
+      JSON.stringify({ python: rep[O], typescript: evO.liveDocKeys })
+    );
+    check(
+      'mirror pin: the superseded block reports empty membership on both sides (D)',
+      rep[D].exists === true && rep[D].live_doc_keys.length === 0 &&
+        evD.existsInAstNodes && evD.liveDocKeys.length === 0,
+      JSON.stringify({ python: rep[D], typescript: evD })
+    );
+    check(
+      'mirror pin: the ghost hash reports absent on both sides (G)',
+      rep[G].exists === false && !evG.existsInAstNodes && rep[G].citable === false,
+      JSON.stringify({ python: rep[G], typescript: evG })
+    );
+  }
 }
 
 async function cleanup(): Promise<void> {
