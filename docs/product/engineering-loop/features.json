@@ -76,7 +76,7 @@
       ],
       "gates": ["owner_ratification", "human_review"],
       "paidWork": "forbidden",
-      "bootstrapStatus": "planned"
+      "bootstrapStatus": "accepted"
     },
     {
       "id": "EL-02",

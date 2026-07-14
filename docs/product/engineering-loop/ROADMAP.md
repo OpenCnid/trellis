@@ -1,12 +1,12 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **bootstrap roadmap accepted; specification next**
+Status: **architecture and specification accepted; control kernel next**
 
 Owner direction: July 14, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current bootstrap feature: `EL-01`
+Current feature: `EL-02`
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than
@@ -23,8 +23,7 @@ program:
 2. This file decides the program's feature sequence.
 3. `features.json` is the machine-readable twin of that sequence.
 4. `RESEARCH.md` preserves the evidence and hypothesis behind the sequence.
-5. The future `tools/engineering-loop/SPEC.md` will govern implementation
-   conformance.
+5. `tools/engineering-loop/SPEC.md` governs implementation conformance.
 6. `HANDOFF.md` selects one bounded feature for the next session and points to
    the relevant sections; it must not copy this roadmap wholesale.
 7. Code, tests, and captured command evidence decide whether a feature passed.
@@ -83,7 +82,7 @@ At session close:
 | Order | ID | Feature | Depends on | Paid work | Bootstrap status |
 |---:|---|---|---|---|---|
 | 0 | `EL-00` | Program roadmap and machine-readable feature catalog | — | Forbidden | Accepted |
-| 1 | `EL-01` | Architecture record and normative service specification | `EL-00` | Forbidden | Planned |
+| 1 | `EL-01` | Architecture record and normative service specification | `EL-00` | Forbidden | Accepted |
 | 2 | `EL-02` | Control kernel: schemas, transitions, durable state, event journal, fake runner | `EL-01` | Forbidden | Planned |
 | 3 | `EL-03` | Repository observer and deterministic handoff renderer | `EL-02` | Forbidden | Planned |
 | 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Planned |
@@ -134,7 +133,7 @@ Outcome: a language-independent contract defines what a conforming controller
 must do, while a Trellis architecture record explains why the selected boundary
 exists.
 
-Planned artifacts:
+Artifacts:
 
 - `docs/architecture/ENGINEERING_LOOP.md`
 - `tools/engineering-loop/SPEC.md`
@@ -148,6 +147,12 @@ Acceptance focus:
 - Safe retry and unknown-side-effect behavior are specified.
 - No unresolved priority-zero decision changes the trust boundary.
 - No runtime implementation or production prompt is added.
+
+Accepted July 14, 2026: the architecture record ratifies the repository-owned,
+out-of-process, protected-state boundary and resolves all priority-zero trust
+questions. The specification defines 106 stable mandatory requirements; all
+106 map to an existing feature, catalog acceptance item, and planned test
+class, with zero unmapped requirements. EL-01 added no runtime or prompt bytes.
 
 ### EL-02 — control kernel
 
@@ -315,6 +320,10 @@ the engineering-loop subset; it does not create a competing historical log.
 
 ## 8. Current next step
 
-`EL-00` is accepted. The next session takes only `EL-01`: author and ratify the
-architecture record plus normative specification. It must not start the
-control kernel, author production prompts, or invoke Codex programmatically.
+`EL-00` and `EL-01` are accepted. The next session takes only `EL-02`: implement
+the deterministic control kernel defined by `tools/engineering-loop/SPEC.md`
+for typed schemas, exhaustive transitions, protected external state, the
+append-only event journal, atomic snapshots, the single-writer lock, and a fake
+runner/clock/repository test harness. It must not add a real Codex adapter,
+production prompts, repository observer, generated handoff, tracker, scheduler,
+or paid/model work.

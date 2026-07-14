@@ -8,13 +8,13 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–46 and their same-day follow-ons (July 4–13, 2026; PRs
-#21–#90) are complete, merged, and ARCHIVED: the full dated ledger for
+Sessions 1–47 and their same-day follow-ons (July 4–13, 2026; PRs
+#21–#91) are complete, merged, and ARCHIVED: the full dated ledger for
 that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 46 with the Session 51 PR — this file keeps full
-narrative only for the most recent five sessions, now 47–51). The
+recently Session 47 with the Session 52 PR — this file keeps full
+narrative only for the most recent five sessions, now 48–52). The
 one-paragraph digest, oldest first; §1 below carries everything from
 this span that a new session must actually know:
 
@@ -459,92 +459,15 @@ this span that a new session must actually know:
   ACCEPT the strict judge (`has_category` labels are derived, not
   entailed; the duty CLOSED).
 
-**Session 47 (July 13, 2026, PR #91) is complete: TTT-track rung
-R2b — the HUMAN-authored model-backend seam design record —
-delivered docs-only, zero-paid (roadmap §4 row 13, Phase 0 step 2;
-the deliverable is `docs/architecture/MODEL_BACKEND_SEAM.md`, its
-own file by recorded choice — it is quoted verbatim by four
-T-increment task texts and one R3 proposal, so it gets one stable
-address). Zero code bytes, zero prompt bytes (both composed-prompt
-pins unmoved), zero config keys, zero env twins, zero rlms bytes;
-no refresh owed; NO census correction needed (§13 stands as
-recorded).** **(1) The three-way split, decided per lane (record
-§2):** the root RLM completion moves via the T-series; the worker
-TRANSPORT is DEFERRED with its prerequisite named — the worker
-completion client and the embedding client are today ONE
-`new OpenAI()` construction (`extraction_worker.ts:26` serves both
-call classes), so any future worker-transport override must first
-SPLIT the two clients or it moves the embedder as a side effect,
-the forbidden §4.2 coupling (until that split exists, the T1
-ambient guard makes the coupling structurally unreachable, not just
-unmanaged); the embedder does not move; the worker MODEL id needs
-nothing (already config-shaped via `EXTRACTION_MODEL`). **(2) The
-T1 config strawman (record §3):** four optional keys —
-`TRELLIS_RLM_BACKEND` (`z.enum(['openai','vllm'])`; only the two
-arms the track needs, widening is a later recorded decision),
-`TRELLIS_RLM_MODEL` (the kernel default literal STAYS in
-`trellis_agent.py` Python-side, the `RETRIEVAL_BUDGET_DEFAULT` mold
-— unset is byte-identical trivially), `TRELLIS_RLM_BASE_URL`
-(`z.url()` + http/https refinement), `TRELLIS_RLM_API_KEY_ENV`
-(name-indirection, the `mcpCredentialEnv` mold, resolved
-fail-fast); three cross-field refusals (vllm requires base URL;
-key-env requires base URL; the named variable must resolve
-non-empty); the credential three-part rule (§3.3: default endpoint
-= no `api_key` kwarg, ambient `OPENAI_API_KEY` inheritance
-unchanged by design; custom endpoint without a named key = the
-explicit literal dummy `api_key="trellis-local"`; custom with a
-real key = named-env value forwarded under its own name, never
-logged). **(3) The ambient-transport disposition (record §4) — the
-census §13.3 recommendation ADOPTED, three layers:** T1 refuses
-ambient `OPENAI_BASE_URL` fail-fast at config load with a typed
-message naming the validated keys; T2 deletes it unconditionally in
-`buildAgentEnv` (the `TRELLIS_EXP_*` deletion-block mold); T3
-deletes it from the agent's own environment before construction
-unless a validated base URL was configured — which also closes the
-rlms `load_dotenv()` re-introduction channel for this variable
-(import-time dotenv runs before `main()`; construction happens
-inside `main()`; the delete wins). Recorded residual: the dotenv
-channel stays open for OTHER variables (`OPENAI_API_KEY` is
-wanted); managing it wholesale would mean modifying rlms
-(guardrail 10) — named, bounded, not denied. **(4) The checker
-decision (record §5): FOLLOWS the seam (T3 scope)** — it already
-shares the root's ambient transport by construction; freezing it
-would take NEW code and recreate the §13.3 split inside one
-process; it is off by default, and a cross-backend run that enables
-it records the checker's backend with the run. The frozen
-instruments (probe scripts, archived experiment scripts) stay
-frozen. **(5) Refusals and telemetry (record §6–§7):** every
-backend-config check is construction-time — no in-run refusal
-surface exists; the Python twin `parse_rlm_backend()` raises in the
-`parse_retrieval_budget` message mold before any paid work.
-Telemetry: two additive `TRELLIS_TELEMETRY` fields (`rlm_backend`
-enum echo, `rlm_base_url_set` boolean — the URL itself NEVER, T16);
-`model_usage` already keys by model name; no Prometheus change.
-**(6) The T-increment skeletons (record §8), all four pre-stated**
-with scope, named files, task-text skeleton, and the full
-feature-class criterion: T1 `src/config/index.ts` + NEW
-`src/config/rlm_backend.test.ts` (no call-site change); T2
-`src/workers/rlm_job.ts` + `rlm_job.test.ts`; T3
-`src/rlm/trellis_agent.py` only (unset-arm construction-kwargs
-byte-identity pinned); T4 NEW `scripts/fixture_openai_server.py` +
-`scripts/test_backend_seam.ts` + the `package.json` entry (the stub
-MUST return `usage` and gains a no-usage misbehaving mode). Task
-texts carry spec sections VERBATIM (the record lives in `docs/`,
-outside extraction scope); refresh-before-use per increment under
-the split-scope recipe. **(7) The R3 skeleton (record §9):** R3a
-serving bring-up + protocol smoke (FIRST assertion: the endpoint
-returns `usage` on non-streaming completions); R3b the paired
-est-suite + protocol-adherence baseline against a same-day gpt-5.4
-arm, arm assignment verified per run from telemetry both directions
-(the Session 43 mold — the `rlm_backend` echo exists for exactly
-this); estimate class = GPU-hours under an owner-set per-run
-compute budget, or hosted per-token under the ≤$5/run cap.
-**(8) Close-out (docs-only mold):** `npm test` 837/85 green first
-try after `npm ci`; build, python:check, compose config green; live
-drills NOT re-run (zero non-markdown bytes — the Session 45/46
-precedent, reason recorded); Session 42 compressed to the digest,
-its §5 entry moved verbatim to the archive (window now 43–47; the
-archive-pointer paragraph updated in the same commit).
+- **Session 47 (PR #91)** delivered TTT rung R2b docs-only, zero-paid:
+  `MODEL_BACKEND_SEAM.md` ratified the root-completion/worker-transport/embedder
+  split; four optional `TRELLIS_RLM_*` keys and their cross-field/credential
+  rules; the three-layer ambient `OPENAI_BASE_URL` disposition; checker-follows-
+  seam decision; two bounded telemetry fields; T1–T4 and R3 skeletons. The
+  worker transport remains deferred behind a completion/embedder client split;
+  the embedder never moves as a completion-backend side effect. Closeout was
+  837/85 tests plus build/python/compose config; no live drills or refresh were
+  owed because only Markdown moved.
 
 **Session 48 (July 13, 2026, PR #92) ran TTT-track increment T1 —
 the first feature-class self-edit — owner-approved through the
@@ -847,74 +770,42 @@ below, on the current addendum bytes.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
-Your objective is **Session 52: TTT-track increment T2 — the
-`buildAgentEnv` forward/strip increment (roadmap §4 row 13, Phase 1
-step 2; the RATIFIED queue's next step after T1 landed in
-Session 50). The spec is UNCHANGED and human-authored:
-`docs/architecture/MODEL_BACKEND_SEAM.md` §3.3 (the credential
-three-part rule) + §4 layer 2 (the unconditional `OPENAI_BASE_URL`
-delete) + the §8 T2 skeleton. Like T1, T2 is a FEATURE-CLASS
-self-edit increment (record §12.6): the task text is authored by the
-session under the house prompt-engineering + hypershot protocols
-(the v3.1 lineage — route the disciplines through the Session 50
-scaffolds: `trellis_task.grep` re-reads, the `upsum` state
-protocol, `frame_text`/`region_equal` verification, `citable()`
-before the insight write, `TRELLIS_TASK_NAMED_FILES` set by the
-driver), presented with an estimate at session START, run ONLY on
-the owner's yes, one diff human-reviewed, landing a human PR.**
-Scope (the §8 T2 skeleton, exactly): `src/workers/rlm_job.ts` —
-`AgentEnvConfig` gains the optional `rlmBackend` block;
-`buildAgentEnv` set-or-delete for each `TRELLIS_RLM_*` variable
-(the `TRELLIS_MCP_SERVERS` discipline); the unconditional
-`delete env.OPENAI_BASE_URL` joining the experiment-flag deletion
-block; the named key variable forwarded explicitly under its own
-name (the `mcpCredentialEnv` loop precedent) — and
-`src/workers/rlm_job.test.ts` for the pins (set-forwards /
-unset-deletes per variable; `OPENAI_BASE_URL` stripped even when
-cfg sets a base URL — the child gets `TRELLIS_RLM_BASE_URL`, never
-the SDK variable; key value forwarded under its own name;
-absent-block byte-identity). The record leaves ONE open point for
-the proposal to state: the one-line `rlm_worker.ts` wiring that
-passes `config.rlmBackend` into `buildAgentEnv`'s cfg may land in
-T2 or T3 — recommend T3 (keeps T2 a pure-function increment with
-zero live consumers, the T1 shape). Estimate class: T1's actual was
-$0.5781 for a two-file 173-insertion authoring run; T2 is a
-comparable two-file shape — propose $0.5–$1.0, ONE run, no
-pre-bundled contingency, under the ≤$5 cap. Evidence-chain staging
-(the §5g.2/§5h.3 mold, zero-paid, BEFORE the proposal): the
-substrate is FRESH for this exact file (`trellis#12` ingested
-`src/workers/rlm_job.ts` v2 with Session 50's
-`TRELLIS_TASK_NAMED_FILES` delete; its extraction ran July 13) —
-find an uncontested graph edge whose provenance is a live
-`rlm_job.ts` block carrying the deletion-block and/or
-`mcpCredentialEnv`-loop molds, verify the bytes on disk, pick clean
-`--pre` entities, and record the chain in the increment record
-(§5i, the §5h mold) before presenting. The driver sets
-`TRELLIS_TASK_NAMED_FILES=["src/workers/rlm_job.ts","src/workers/rlm_job.test.ts"]`,
-`PYTHONUTF8=1`, ONE log file. The criterion is the standing
-feature-class mold: the five items + guarded-only
-(`textedit_raw_splices == 0`) + the parse gate + the increment's
-own pins green (`npm test` grows from 876/87, zero existing tests
-changed) + spend within estimate — a harness flag or failing pin
-FAILS the increment (record, stop, diagnose; a retry is its own
-proposal). NO OPENAI quota risk is assumed: run the minimal
-completion probe FIRST anyway (the §5h.10 protocol — cheap, inside
-the envelope). Part A of Session 50 needs NO follow-up (S2b rlms
-compaction stays DEFERRED behind its own measured proposal — do not
-enable it). If the owner instead directs the stage-1b prose chunk
-(standing item, §2 menu), the row-12 rollout continuation, or a
-surfaced row-11 increment-3 target, take that. The toolkit never
-touches git. Do not re-plan or re-implement completed work. RLM
-expands exclusively to Recursive Language Model (the MIT CSAIL
-formulation).
+**Session 52 (July 14, 2026, EL-01 working tree) is complete: the engineering-
+session loop architecture record and normative specification are RATIFIED and
+ACCEPTED, zero-paid. No runtime, production prompt, model call, product source,
+dependency, or prompt pin moved.** `docs/architecture/ENGINEERING_LOOP.md`
+records the Trellis-specific problem, process/non-reuse boundary, trust and
+authority model, six-tier context model, consequences/risks, extraction
+criteria, and ten resolved priority-zero decisions. The normative spec at
+`tools/engineering-loop/SPEC.md` defines the language-independent protocol with TypeScript as the
+reference implementation: nine typed objects; ordinary/protected/recovery/
+terminal/forbidden transitions; external single-writer state; append-only
+events; atomic snapshots and replay; repository observation; the EL-04 prompt
+contract without prompt bytes; adapter-neutral runner/episodes; evidence
+precedence; approval/effect/retry/recovery rules; observability/retention;
+generated-view migration; and security posture. Its **106 stable mandatory
+requirements map 106/106 to an existing feature, exact catalog acceptance ID,
+and matching test class; unmapped = 0.** Acceptance: catalog `10` features,
+`13` edges, `34` acceptance items, order parity true; `npm test` 876/87; build,
+python check, links, schema, and diff checks green. EL-01 alone is marked
+accepted. Session 47 moved to the archive; the live window is 48–52.
 
-**Owner direction, July 14, 2026:** the engineering-session loop program is
-now prioritized ahead of TTT T2. `EL-00` established the bounded roadmap,
-machine-readable feature catalog, and schema on branch
-`engineering-loop-spec`, zero-paid. Session 52 is re-pointed to `EL-01`: the
-architecture record and normative specification only. The TTT T2 objective is
-preserved later in this file as superseded session history; do not execute it
-unless the owner re-prioritizes it.
+Your objective is **Session 53: engineering-loop `EL-02` — the deterministic
+control kernel.** Implement only the 28 SPEC requirements owned by EL-02 under
+`tools/engineering-loop/`: strict versioned schemas, the exhaustive pure state
+machine, protected external state-root refusal, one-writer locking, integrity-
+linked append-only events, event-first atomic snapshots, restart replay and
+corruption stop, intent/outcome/idempotency records, and deterministic fake
+clock/repository/runner/effect dependencies with crash injection at every
+durable boundary. Wire the tool tests into Vitest and the non-test source into
+the TypeScript build without a new dependency. No real Codex adapter, model
+call, prompt, Git observer, renderer, verification service, approval channel,
+external effect, scheduler, tracker, product runtime change, or paid work.
+
+**Owner direction, July 14, 2026:** the engineering-session loop remains
+prioritized ahead of the paused TTT T2 objective. `EL-00` and `EL-01` are
+accepted; `EL-02` is the next dependency-unblocked feature. The TTT T2 record
+remains in Appendix A and is not executed unless the owner re-prioritizes it.
 
 ---
 
@@ -1412,26 +1303,32 @@ immutable, content-addressed physical location in source material.
     trusted mutable state is outside the agent-writable worktree; one writer
     initially; resume inside one episode and fresh context across semantic
     boundaries; deterministic evidence outranks model claims; paid,
-    destructive, push, and merge actions remain human gates. `EL-00` is
-    accepted. `EL-01` writes the architecture and normative contract only;
-    implementation begins at `EL-02`. The existing manual handoff remains
-    authoritative until the measured `EL-07` migration verdict.
+    destructive, push, and merge actions remain human gates. `EL-00` and
+    `EL-01` are accepted. The ratified architecture record is
+    `docs/architecture/ENGINEERING_LOOP.md`; the conformance authority is
+    `tools/engineering-loop/SPEC.md` (106 mandatory requirements, 106 mapped,
+    zero unmapped). `EL-02` is next and implements only the deterministic
+    control kernel. The existing manual handoff remains authoritative until
+    the measured `EL-07` migration verdict.
 
 ## 2. Current baseline
 
 Repository state at handoff creation:
 
 - **Active owner-prioritized program:** branch `engineering-loop-spec` began
-  at `74c3b48` and carries the zero-paid `EL-00` roadmap/catalog/schema plus
-  the root sequencing pointer. Catalog validation: 10 unique features, 13
-  resolved acyclic dependency edges, 34 unique acceptance items, exact
-  Markdown/JSON order parity. Standing acceptance stayed green: 87 test files
-  / 876 tests, build, and Python runtime check. Fresh-worktree `npm ci`
-  installed 317 packages with 0 vulnerabilities but warned that this local
-  Node v20.19.2 shell is below four Babel packages' Node 22.18+ engine floor;
-  CI's Node 22 remains authoritative, and local install/tests/build passed.
-  `EL-01` is next. No controller code, production prompt, model call,
-  scheduler, or handoff migration exists yet.
+  at `74c3b48` and carries accepted `EL-00` plus accepted, zero-paid `EL-01`.
+  EL-01 added `docs/architecture/ENGINEERING_LOOP.md` and
+  `tools/engineering-loop/SPEC.md`; the latter has 106 stable mandatory
+  requirements mapped 106/106 to existing features, exact acceptance IDs, and
+  matching test classes. Catalog validation remains 10 unique features, 13
+  resolved acyclic dependency edges, 34 unique acceptance items, and exact
+  Markdown/JSON order parity. Standing acceptance remains 87 test files / 876
+  tests, build, and Python runtime check. Fresh-worktree `npm ci` installed 317
+  packages with 0 vulnerabilities but warned that this local Node v20.19.2
+  shell is below four Babel packages' Node 22.18+ engine floor; CI's Node 22
+  remains authoritative, and local install/tests/build passed. `EL-02` is
+  next. No controller runtime, production prompt, model call, scheduler,
+  product coupling, or handoff migration exists yet.
 
 - `master`: the head after the July 13, 2026 Session 51 PR (#98 —
   the PR that carries this file). Session 51 was an owner-directed
@@ -1727,239 +1624,285 @@ Fresh worktrees do not contain `node_modules`. Start with:
 
 Work on a feature branch and target `master`.
 
-## 3. Session 52 problem statement
+## 3. Session 53 problem statement
 
-**Engineering-session loop `EL-01`: author and ratify the architecture record
-and normative service specification.** `EL-00` converted the research result
-into a bounded multi-session program:
+**Engineering-session loop `EL-02`: implement the deterministic control
+kernel.** EL-01 is accepted and now supplies both governing documents:
 
-- `docs/product/engineering-loop/ROADMAP.md` is the human sequence and session
-  protocol.
-- `docs/product/engineering-loop/RESEARCH.md` preserves the research evidence,
-  alternatives, selected hypothesis, and primary-source links.
-- `docs/product/engineering-loop/features.json` is its machine-readable twin.
-- `docs/product/engineering-loop/feature.schema.json` is the bootstrap schema.
-- `TRELLIS_ROADMAP.md` §4 prioritizes the program ahead of the preserved TTT
-  T2 continuation.
+- `docs/architecture/ENGINEERING_LOOP.md` ratifies repository-owned source,
+  an out-of-process controller, protected mutable state outside the
+  agent-writable worktree, and one writer initially.
+- `tools/engineering-loop/SPEC.md` defines 106 mandatory requirements and maps
+  all 106 to existing catalog features and planned test classes. Exactly 28 are
+  owned by EL-02.
 
-The problem for Session 52 is specification, not implementation. A lone
-Symphony-style service specification would state behavior but would not record
-the Trellis-specific architectural reason for keeping the controller outside
-the product runtime. Conversely, architecture prose without normative
-conformance language would leave later implementations free to weaken gates.
-`EL-01` therefore produces two coordinated artifacts:
+The repository still has no executable engineering-loop state authority. Until
+EL-02 lands, bootstrap status lives in Git, there is no typed transition kernel,
+no protected external state store, no append-only event journal, no atomic
+snapshot/replay path, no writer lock, and no deterministic fake environment for
+crash testing. Building a real Codex adapter or production prompt before those
+mechanics would put stochastic execution ahead of workflow truth.
 
-1. `docs/architecture/ENGINEERING_LOOP.md` — the Trellis design record: why,
-   boundary, trust model, alternatives, and consequences.
-2. `tools/engineering-loop/SPEC.md` — the implementation-independent normative
-   contract: `MUST`/`SHOULD`/`MAY`, state machine, storage, episodes, runner,
-   evidence, approvals, recovery, observability, and conformance matrix.
-
-The design is already decided at the level needed to author these documents:
-
-- Source and stable policy live in the repository; the controller runs as a
-  separate process and does not enter `src/core/agent/`, API/workers, BullMQ,
-  PostgreSQL, Neo4j, or the RLM runtime.
-- Trusted mutable controller state lives outside the agent-writable worktree.
-- One controller is the only state writer initially.
-- Codex continuation is episode-local; semantic phase boundaries receive a
-  fresh thread compiled from typed state and observed evidence.
-- Model output is an observation. Code-observed commands, repository state,
-  and protected approvals decide transitions.
-- Paid calls, destructive actions, pushes, merges, acceptance changes, and
-  harness self-modification remain explicit gates.
-- The manual `HANDOFF.md` remains authoritative until `EL-07` measures and
-  ratifies migration.
+Session 53 implements only the pure/durable kernel under
+`tools/engineering-loop/`: schemas, transitions, events, state snapshots,
+single-writer locking, restart reconstruction, idempotent-effect records, and
+fake clock/repository/runner/effect dependencies. It does not run an agent or
+perform a real external effect.
 
 ## 4. Required design
 
-### 4.1 Architecture record
+### 4.1 Package and build boundary
 
-`docs/architecture/ENGINEERING_LOOP.md` must contain:
+Keep all controller code under `tools/engineering-loop/`. The intended
+reference implementation is TypeScript using the repository's existing Zod,
+Vitest, TypeScript, and Node runtime; add no package dependency. A recommended
+small layout is:
 
-1. Problem statement: the current manual outer loop, context growth, state
-   drift, and the distinction from both the RLM loop and `agent_queue`.
-2. Decision: same-repository source, separate process, protected external
-   mutable state.
-3. Trust boundaries and authorities: human, controller, runner, worker agent,
-   checker, repository, and external systems.
-4. Context model: invariant policy, current typed state, active plan, evidence,
-   episode history, and archive; progressive disclosure between tiers.
-5. Considered alternatives: indefinite resumed thread, shell/Ralph loop,
-   file-only episodic harness, existing Trellis goal loop, Symphony-style
-   tracker daemon, and generic durable workflow engine.
-6. Consequences, risks, and extraction criteria for a future standalone
-   project or durable workflow dependency.
-7. Relationship to code-mediated text, provenance, paid-work doctrine,
-   prompt pins, and the future generated handoff.
+- `src/domain.ts` — versioned Zod schemas and inferred types;
+- `src/state_machine.ts` — state classes, allowed transitions, pure validation;
+- `src/events.ts` — canonical event payloads, sequence/integrity chain;
+- `src/state_store.ts` — append, atomic snapshot, load, replay, corruption stop;
+- `src/writer_lock.ts` — one-writer acquisition/refusal and explicit release;
+- `src/fakes.ts` — fake clock, repository, runner, and side-effect target;
+- adjacent `*.test.ts` files or `tests/` fixtures for every acceptance class.
 
-### 4.2 Normative specification
+Names may be consolidated where cohesion improves, but do not create empty
+scaffolds. Update `vitest.config.ts` so `tools/engineering-loop/**/*.test.ts`
+joins `npm test`, and update `tsconfig.build.json` so the non-test controller
+source type-checks and emits under the existing build. Do not move product code
+or import controller code from `src/`.
 
-`tools/engineering-loop/SPEC.md` must be language-independent at the protocol
-level while naming TypeScript as the intended reference implementation. It
-must define:
+### 4.2 Typed domain and authority
 
-1. Normative language and terminology.
-2. Goals and explicit non-goals.
-3. Component model and process boundary.
-4. Typed domain objects: workflow, feature, session, episode, event, approval,
-   evidence, decision, and report.
-5. State machine with allowed, forbidden, protected, terminal, and recovery
-   transitions.
-6. Single-writer state store, atomic snapshots, append-only events, locking,
-   and restart reconstruction.
-7. Repository-observation and scope semantics.
-8. Prompt-compilation contract without authoring production prompt text.
-9. `AgentRunner` contract and Codex app-server as the first planned adapter,
-   without importing its current wire schema into this feature.
-10. Episode continuation and fresh-context rules.
-11. Deterministic verification and evidence precedence.
-12. Approval scope, estimates, expiry, and protected external effects.
-13. Failure taxonomy, idempotency, retry bounds, and unknown-side-effect stop.
-14. Observability, redaction, retention, and prompt/model/version telemetry.
-15. Generated-view and eventual handoff migration semantics.
-16. Threat model and security posture.
-17. Conformance matrix mapping every normative `MUST` to an `EL-*` feature and
-    a planned test profile.
+Implement the nine SPEC §4 objects: workflow, feature, session, episode, event,
+approval, evidence, decision, and report. Every persisted object is schema-
+versioned and linked to workflow/feature/session as applicable. Use strict
+objects and bounded strings/collections; unknown enums or object fields refuse.
 
-### 4.3 Feature and conformance linkage
+The session binds one immutable feature-definition digest. A transition cannot
+replace acceptance or scope in place. Approval is a typed protected-state
+object, never a string in runner/model output or a file in the worktree. EL-02
+needs the structural approval reference and refusal behavior required by
+`EL-02-A3`; the real human approval channel and full protected policy remain
+EL-06.
 
-- Every normative `MUST` receives a stable requirement ID.
-- Every requirement maps to one feature in `features.json` and one planned
-  conformance test class: static, integration, review, or measurement.
-- `EL-01` may refine feature acceptance wording if needed for consistency, but
-  may not add runtime scope or change a ratified boundary without owner review.
-- Priority-zero open questions must be resolved in the design record. Lower
-  priority future choices may be explicitly deferred to their owning feature.
+### 4.3 Pure state machine
 
-### 4.4 Prompt-protocol disposition
+Implement SPEC §5's exact state set and allowed transition table. Keep the
+decision function pure: current snapshot + candidate decision + referenced
+evidence/approval metadata produces either the next snapshot/event material or
+a typed refusal, with no I/O. Exhaustively test the cross-product of states and
+candidate destinations so every unlisted edge refuses before a fake effect.
 
-No production prompt or meta-prompt is authored in `EL-01`. The specification
-must reserve the `EL-04` contract: the attached Prompt-Engineering and
-Hypershot protocols govern all later prompt artifacts; invariant structural
-frames precede generation, concrete task data remains downstream, prompt bytes
-are versioned and pinned, and outputs cross strict schemas.
+Required distinctions:
+
+- ordinary progress visits `preparing`, `running`, `verifying`, and
+  `awaiting_review`;
+- `awaiting_approval`/`awaiting_review` are protected waits;
+- `recovering` returns only to the state reconstructed from durable history;
+- `accepted`, `blocked`, `failed`, and `cancelled` are terminal and immutable;
+- model/runner/checker reports are observations with no transition authority;
+- `accepted` requires the SPEC §5.3 preconditions, represented by controller-
+  owned evidence references in this fake-only increment.
+
+### 4.4 Protected single-writer store
+
+The store root is operator supplied and canonicalized. Refuse a root inside or
+aliasing into the assigned worktree. Tests use temporary directories outside
+their fake worktree; no test writes controller state into the repository.
+
+The store follows the event-first protocol:
+
+1. acquire the exclusive writer lock;
+2. validate current snapshot and candidate transition;
+3. append and durably flush the next monotonically sequenced,
+   integrity-linked event;
+4. write the full next snapshot to a temporary sibling, durably close it, and
+   atomically replace the published snapshot;
+5. expose the transition as committed.
+
+Snapshots identify the last applied event sequence and digest. Restart loads
+the newest valid snapshot and replays later valid events. A missing sequence,
+digest mismatch, invalid object, impossible transition, or snapshot/journal
+disagreement stops with a typed recovery error; never truncate, skip, or repair
+history silently.
+
+Choose and document a cross-platform one-writer primitive available in the
+existing Node runtime. A second writer refuses without changing state. Stale
+lock disposition must be explicit and safe; do not guess that an owner is dead
+and take over while its effect outcome could be unknown.
+
+### 4.5 Effect records, recovery, and crash injection
+
+Implement the protocol shape, not real effects. The fake effect target records
+stable operation/idempotency IDs, intent, typed outcome, and unknown outcome.
+An identical confirmed-idempotent retry reuses the same IDs; an unknown outcome
+stops and cannot be auto-retried.
+
+Inject deterministic crashes at every durable boundary named by
+`EL-REQ-STORE-008`: before/after journal durability, before/after snapshot temp
+write and replacement, approval consumption, intent creation, and effect
+outcome recording. On restart, the reconstructed logical state must equal the
+uninterrupted oracle and a completed fake effect must never execute twice.
+
+### 4.6 Fake dependencies
+
+The fake clock controls every timestamp and retry delay. The fake repository
+provides typed identity/status observations without invoking Git. The fake
+runner implements only the adapter-neutral lifecycle needed by the kernel and
+never invokes Codex or a model. The fake effect target is deterministic and
+counts invocations. These fakes are injected; the kernel does not read ambient
+time, process-global worktree state, or network services in acceptance tests.
+
+No production controller CLI, daemon, repository observer, renderer, prompt
+compiler, Codex adapter, checker, or external-effect adapter enters EL-02.
+
+### 4.7 Requirement linkage
+
+Implement and pin the 28 SPEC matrix rows owned by EL-02:
+
+- core: protected external state, one writer, and one dependency-satisfied
+  feature per session;
+- data/state: boundary schemas, stable linkage, evidence origin, exhaustive
+  transitions, terminal immutability, and reconstruction;
+- store: root containment refusal, lock, event chain, event-first commit,
+  atomic snapshot, replay, corruption stop, and crash injection;
+- fakes/effects/security: fake runner/clock, intent/outcome/idempotency records,
+  restart reconciliation, worktree isolation, and explicit bounds.
+
+Do not edit requirement text or remap a row merely to fit an implementation. A
+contradiction in a ratified requirement stops for owner review.
 
 ## 5. File-level starting points
 
 Read first:
 
-- `docs/product/engineering-loop/ROADMAP.md`
-- `docs/product/engineering-loop/RESEARCH.md`
-- `docs/product/engineering-loop/features.json`
-- `docs/product/engineering-loop/feature.schema.json`
-- This file §§3–8
-- `docs/architecture/WORKSPACE_AND_MODULES.md` for the manual capability-loop
-  framing
-- `docs/architecture/CODE_MEDIATED_TEXT.md` for enforcement doctrine
-- `src/core/agent/goal_loop.ts`, `decision.ts`, and
-  `orchestrator_prompt.ts` only to state the non-reuse boundary accurately
+- `docs/architecture/ENGINEERING_LOOP.md` — especially §§2–7 and §§10–14;
+- `tools/engineering-loop/SPEC.md` — especially §§3–6, §§9, §13, §16, and the
+  EL-02 rows in §18;
+- `docs/product/engineering-loop/ROADMAP.md` EL-02;
+- `docs/product/engineering-loop/features.json` EL-02 and
+  `feature.schema.json`;
+- `vitest.config.ts` and `tsconfig.build.json` (today they include only
+  `src`/`scripts`; EL-02 must add its own tool paths explicitly);
+- `src/core/agent/decision.ts` and `goal_loop.ts` only for the existing pure-
+  decision/dependency-injection testing mold, never for runtime reuse.
 
-Create:
+Create under `tools/engineering-loop/` only:
 
-- `docs/architecture/ENGINEERING_LOOP.md`
-- `tools/engineering-loop/SPEC.md`
+- the cohesive TypeScript kernel modules and tests described in §4;
+- small deterministic JSON fixtures only where inline builders are less clear.
 
-Update only as required by acceptance/closeout:
+Update only after acceptance:
 
-- `docs/product/engineering-loop/features.json`
-- `docs/product/engineering-loop/ROADMAP.md`
-- `TRELLIS_ROADMAP.md`
-- `HANDOFF.md`
+- `docs/product/engineering-loop/features.json` (EL-02 status only);
+- `docs/product/engineering-loop/ROADMAP.md`;
+- `TRELLIS_ROADMAP.md` §4/§5 and archive rotation;
+- `HANDOFF.md` per §0.
 
-Do not create empty runtime scaffolding merely to reserve paths. The
-`tools/engineering-loop/` directory earns its existence through the normative
-specification in this feature; source and tests begin in `EL-02`.
+Do not add a runtime entry point simply to reserve one. EL-05 owns the first
+real runner adapter; EL-03 owns Git observation and handoff rendering; EL-06
+owns real verification/approval policy.
 
 ## 6. Test strategy and acceptance
 
-`EL-01` is zero-model and zero-paid. Acceptance requires:
+EL-02 is zero-model and zero-paid. Acceptance requires:
 
-1. Both new documents exist, cross-link each other, and link the roadmap.
-2. The architecture record contains the decision, alternatives, trust model,
-   consequences, and extraction criteria.
-3. The normative spec covers every §4.2 topic and assigns stable IDs to all
-   `MUST` requirements.
-4. Every `MUST` maps to an existing `EL-*` feature and planned test class.
-5. The state-transition table distinguishes ordinary, protected, terminal,
-   and recovery states; model output cannot authorize a protected transition.
-6. Retry semantics distinguish safe transient retry from unknown side-effect
-   outcomes, which stop.
-7. The feature catalog and schema remain valid, dependency-resolved, acyclic,
-   and order-identical to the roadmap.
-8. The diff contains no runtime TypeScript/Python, production prompt,
-   `WORKFLOW.md`, scheduler, tracker integration, Codex invocation, or manual
-   handoff replacement.
+1. All 28 EL-02-owned mandatory requirements have implementation and test
+   evidence with no requirement remap.
+2. All allowed transitions pass, every forbidden state pair refuses before a
+   fake effect, protected transitions reject missing/mismatched approval
+   objects, and terminal states have no outgoing edge.
+3. A second writer refuses without mutation; protected-state roots inside or
+   aliasing the fake worktree refuse.
+4. Crash injection at every durable boundary reconstructs the same logical
+   state and never duplicates a completed fake effect.
+5. Missing/corrupt/out-of-order events, bad digests, invalid snapshots, and
+   impossible replay transitions stop loudly without journal repair.
+6. Fake clock/repository/runner/effect acceptance performs zero process spawn,
+   network, Git, model, paid, database, queue, API, or worker I/O.
+7. `npm test` includes the tool suite; `npm run build` type-checks/emits the
+   non-test kernel source; existing 87 files / 876 tests remain green and the
+   new counts are recorded.
+8. Catalog/schema/dependency/order and SPEC mapping audits remain green; the
+   diff contains no EL-03+ implementation or production prompt.
 
-Run, at minimum:
+Run at minimum:
 
 ```powershell
-python -c "import json,jsonschema; c=json.load(open('docs/product/engineering-loop/features.json', encoding='utf-8')); s=json.load(open('docs/product/engineering-loop/feature.schema.json', encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s); jsonschema.validate(c, s); print(len(c['features']))"
 npm test
 npm run build
 npm run python:check
+docker compose config --quiet
+python -c "import json,jsonschema; c=json.load(open('docs/product/engineering-loop/features.json', encoding='utf-8')); s=json.load(open('docs/product/engineering-loop/feature.schema.json', encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s); jsonschema.validate(c, s); print(len(c['features']))"
 git diff --check
 git status --short --branch
 ```
 
-Add a zero-dependency spec-conformance check during the session if prose review
-alone cannot prove requirement/feature/test mapping. Do not add a permanent
-validator outside `tools/engineering-loop/tests` before `EL-02`.
+Add deterministic spec-linkage and catalog-semantic checks under
+`tools/engineering-loop/tests` as part of EL-02 rather than relying on a
+session-only script. No live product drill or isolated Compose integration is
+required when the final diff remains confined to `tools/engineering-loop/`,
+`vitest.config.ts`, `tsconfig.build.json`, and required Markdown/JSON closeout:
+the controller kernel is product-independent and its acceptance fakes every
+dependency. If the diff escapes that scope, stop and redesign rather than
+silently widening the acceptance block.
 
 ## 7. Guardrails
 
-1. `AGENTS.md` hard rules and authority order bind this docs-only feature.
-2. Preserve AST immutability, entity non-deletion, provenance enforcement,
-   live-only default discovery, and code-mediated text doctrine in the design.
-3. Tooling shape enforces behavior; prompt text only reinforces it. The spec
-   must not claim prompts can protect approvals, evidence, or state.
-4. Keep the engineering controller independent of Trellis product health so it
-   can diagnose and repair a broken Trellis stack.
-5. Trusted mutable state, approval truth, and verification truth must not be
-   writable by the implementation agent.
-6. No model may approve its own semantic work or advance protected state.
-7. No controller-owned retry may repeat an external effect whose result is
-   unknown.
-8. The reference implementation may target TypeScript, but the protocol spec
-   must not copy unstable Codex wire types; the adapter consults its pinned
-   protocol version in `EL-05`.
-9. Do not couple the controller to BullMQ, Redis, PostgreSQL, Neo4j, RLM
-   modules, or the existing product goal loop.
-10. Do not add a generic workflow engine until measurement shows the
-    single-writer store is insufficient.
-11. Paid work remains owner-gated, estimated first, hard-capped, and reported.
-    `EL-01` performs none.
-12. Production prompts are excluded. If any prompt-like explanatory frame is
-    unavoidable, apply the attached Prompt-Engineering and Hypershot protocols
-    before authoring and keep it structural and contamination-free.
-13. No AI attribution, generated-with footer, or co-author trailer.
-14. Report raw counts and unresolved questions honestly; a specification
-    contradiction blocks ratification.
-15. One feature branch and one PR to `master`; close out the root roadmap and
-    regenerate this handoff after acceptance.
+1. `AGENTS.md`, the EL-01 architecture record, and every EL-02-mapped SPEC
+   requirement bind the implementation; code still outranks prose when reading
+   existing repository behavior.
+2. Keep the controller out of Trellis product runtime and keep protected state
+   outside the worktree. Tests use external temp roots and prove containment.
+3. One writer means one writer. Do not add optimistic multi-writer merge,
+   scheduler, leader election, or stale-lock stealing.
+4. Event history is append-only; snapshots are derived checkpoints. Never edit,
+   delete, reorder, truncate, or silently repair a committed event.
+5. Event durability precedes snapshot publication. Crash behavior is part of
+   the contract and is tested at every named boundary.
+6. Model output, fake-runner output, and checker-shaped fixtures are
+   observations only. They never grant approval or terminal state.
+7. Implement only fake external effects. An unknown outcome stops; no retry may
+   make a second call on hope.
+8. Validate every persisted and external boundary with strict, bounded schemas.
+   Reject unknown fields/enums and over-bound values loudly.
+9. Add no dependency. Use existing Zod/Vitest/TypeScript/Node facilities and
+   platform-safe filesystem primitives.
+10. Do not author prompt text. If a later feature does, the permanent dual-
+    protocol process gate and byte-pin doctrine apply before writing bytes.
+11. No paid/model work, no Codex invocation, no Trellis RLM, and no product
+    database/queue/API/worker dependency.
+12. No AI attribution, generated-with footer, or co-author trailer.
+13. Report exact commands, raw counts, crash cases, and any residual honestly.
+    A spec contradiction or recovery ambiguity blocks acceptance.
+14. Update program status and regenerate this handoff only after the full EL-02
+    acceptance block passes.
 
 ## 8. Explicit exclusions
 
-Session 52 does not:
+Session 53 does not:
 
-- implement the state machine, state store, event journal, lock, fake runner,
-  repository observer, verifier, policy engine, recovery engine, or renderer;
-- create `WORKFLOW.md`, production prompts, prompt pins, or output schemas for
-  model execution;
-- invoke Codex, the OpenAI API, the RLM, a checker model, or any paid service;
-- modify `src/`, `scripts/`, existing tests, package dependencies, database
-  schemas, queues, API surfaces, or workers;
-- schedule work, poll an issue tracker, create concurrent agents, push, open a
-  PR, merge, or change approval policy;
-- replace, shorten, or generate the manual `HANDOFF.md` outside the required
-  session closeout;
-- resume TTT T2, alter `MODEL_BACKEND_SEAM.md`, or change any completed TTT/RLM
-  prompt pin;
-- decide `EL-08` scheduling/extraction or `EL-09` Trellis ingestion;
-- claim that the loop improves engineering outcomes before the repeated
-  `EL-07` evaluation.
-
----
+- implement EL-03 Git observation, command execution evidence, scope checking,
+  status rendering, or handoff rendering;
+- author EL-04 production prompts, prompt compiler, output schemas for model
+  roles, prompt pins, planner/implementer/checker/recovery prompt text, or
+  `WORKFLOW.md`;
+- implement EL-05 Codex app-server integration, current wire types, real thread
+  lifecycle, process management, timeout transport, or any model call;
+- implement EL-06 deterministic acceptance-command execution, real approval
+  channel, paid/destructive/push/merge effects, independent checker, redaction
+  policy, retention service, or production retry policy;
+- run EL-07 trials or alter manual `HANDOFF.md` authority;
+- decide EL-08 tracker, scheduler, concurrency, multi-machine durability,
+  standalone extraction, or generic workflow-engine adoption;
+- decide EL-09 report sanitization or Trellis ingestion;
+- modify `src/`, `scripts/`, package dependencies, databases, queues, workers,
+  APIs, frontend, modules, RLM code, existing prompts, or prompt pins;
+- create a daemon, CLI, service, HTTP endpoint, worker, or scheduler;
+- invoke Git from kernel acceptance fakes, write controller state into the
+  repository, push, commit, open a PR, or merge without later explicit scope;
+- resume the paused TTT T2 objective or alter any TTT design/measurement record.
 
 ## Appendix A. Superseded Session 52 TTT T2 objective — retained for history, do not execute
 

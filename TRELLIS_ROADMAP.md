@@ -191,7 +191,7 @@ Ordered roughly by severity.
 
 | Order | Item | Rationale |
 |---|---|---|
-| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 ACCEPTED; EL-01 NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`. `EL-00` established and validated the roadmap/catalog/schema zero-paid; `EL-01` is the architecture record + normative spec only. No runtime, prompt, model call, scheduling, or paid work enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
+| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 + EL-01 ACCEPTED; EL-02 NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` now governs conformance. EL-01 ratified the architecture boundary and mapped all 106 mandatory requirements to existing feature acceptance/test classes, zero-paid and docs-only. EL-02 is the deterministic control kernel: schemas, exhaustive transitions, protected external state, append-only events, atomic snapshots, locking, and fake dependencies only. No real runner, prompt, model call, repository observer, scheduling, or paid work enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
 | ~~1~~ | ~~Structured logging and basic metrics (3.2 #9 / T16)~~ | **Done (July 6, 2026)** — split-process logs/metrics shipped; see §5 |
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
@@ -252,8 +252,9 @@ Session 42 with the Session 47 PR, Session 43 with the Session 48 PR,
 Session 44 with the Session 49 PR, Session 45 (its session entry plus
 the same-day R1-exchange and ratification entries — all Session 45 PR
 records, the Session 28 entry-plus-addendum precedent) with the
-Session 50 PR, Session 46 with the Session 51 PR.
-The live ledger below keeps the most recent five sessions: 47–51.)*
+Session 50 PR, Session 46 with the Session 51 PR, Session 47 with the
+Session 52 PR.
+The live ledger below keeps the most recent five sessions: 48–52.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -788,128 +789,6 @@ if the user needs to, but that shouldn't be the default."
 owner invited a document-first design record for Trellis serving MCP;
 the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
-
-### July 13, 2026 — Session 47: TTT-track rung R2b — the model-backend seam design record (§4 row 13, Phase 0 step 2)
-
-The human-authored seam design record ratified by §12.6's
-spec-before-pen rule landed as
-`docs/architecture/MODEL_BACKEND_SEAM.md` — its own file, the choice
-recorded in the record's header (it is quoted verbatim by four
-T-increment task texts and one R3 proposal; a standalone file gives
-those texts one stable address). Zero-paid, docs-only, READ-ONLY
-against the census: no code byte, no config key, no env twin, no rlms
-byte, no prompt byte (both composed-prompt pins unmoved), no census
-correction needed (§13 stands as recorded). Exact commands and
-counts below.
-
-1. **The three-way split, decided per lane (record §2):** the root
-   RLM completion moves via the T-series (the two `trellis_agent.py`
-   construction sites, 329/532); the worker TRANSPORT is DEFERRED
-   with its prerequisite named — the worker completion client and the
-   embedding client are today the same `new OpenAI()` construction
-   (`extraction_worker.ts:26` serves both call classes), so any
-   future worker-transport override must first SPLIT the two clients
-   or the override moves the embedder as a side effect, the coupling
-   `TEST_TIME_TRAINING.md` §4.2 forbids (until that split exists, the
-   T1 ambient guard makes the coupling structurally unreachable);
-   the embedder does not move (non-goal restated). The worker MODEL
-   id needs nothing — already config-shaped via `EXTRACTION_MODEL`.
-2. **The config strawman (record §3, T1's spec):** four optional
-   keys — `TRELLIS_RLM_BACKEND` (`z.enum(['openai','vllm'])`; only
-   the two arms the ratified track needs, widening is a later
-   recorded decision), `TRELLIS_RLM_MODEL` (the kernel default
-   literal STAYS in `trellis_agent.py` Python-side, the
-   `RETRIEVAL_BUDGET_DEFAULT` mold, so unset is byte-identical
-   trivially), `TRELLIS_RLM_BASE_URL` (`z.url()` + http/https
-   refinement), `TRELLIS_RLM_API_KEY_ENV` (name-indirection, the
-   `mcpCredentialEnv` mold, resolved fail-fast). Three cross-field
-   refusals (vllm requires base URL; key-env requires base URL; a
-   named key variable must resolve non-empty). Credential expression
-   without new credential handling (§3.3): default endpoint = no
-   `api_key` kwarg (ambient `OPENAI_API_KEY` inheritance unchanged,
-   by design); custom endpoint without a named key = the explicit
-   literal dummy `api_key="trellis-local"` (the §13.1 caveat made
-   mechanical); custom endpoint with a real key = the named-env
-   value forwarded under its own name, never logged.
-3. **The ambient-transport disposition (record §4) — the census
-   §13.3 recommendation ADOPTED, three layers:** T1 refuses ambient
-   `OPENAI_BASE_URL` fail-fast at config load with a typed message
-   naming the validated keys (nothing sets the variable today, so
-   the refusal breaks no one — it converts a silent redirect into a
-   loud instruction); T2 deletes it unconditionally in
-   `buildAgentEnv` (the `TRELLIS_EXP_*` deletion-block mold); T3
-   deletes it from the agent's own environment before construction
-   unless a validated base URL was configured — which also closes
-   the rlms `load_dotenv()` re-introduction channel for this
-   variable (import-time dotenv runs before `main()`; construction
-   happens inside `main()`; the delete wins). Recorded residual: the
-   dotenv channel stays open for OTHER variables (`OPENAI_API_KEY`
-   is wanted); managing it wholesale would mean modifying rlms
-   (guardrail 10) — named, bounded, not denied.
-4. **The checker decision (record §5):** `make_entailment_check`'s
-   client FOLLOWS the seam (T3 scope). It already shares the root's
-   transport by construction (both resolve the same ambient env);
-   freezing it would take NEW code and would recreate the §13.3
-   split inside one process; it is off by default and any
-   cross-backend measurement records the checker's backend with the
-   run. The frozen instruments (probe scripts, archived experiment
-   scripts) stay frozen.
-5. **Refusals and telemetry (record §6–§7):** every backend-config
-   check is construction-time — there is no in-run refusal surface;
-   the twin `parse_rlm_backend()` raises in the
-   `parse_retrieval_budget` message mold before any paid work.
-   Telemetry: two additive `TRELLIS_TELEMETRY` fields (`rlm_backend`
-   enum echo, `rlm_base_url_set` boolean — the URL itself never
-   appears, T16); `model_usage` already keys by model name; no
-   Prometheus change.
-6. **The T-increment skeletons (record §8):** all four pre-stated
-   with scope, named files, task-text skeleton, and the full
-   feature-class criterion (standing five + guarded-only
-   `textedit_raw_splices == 0` + parse gate + the increment's own
-   new unit pins). T1 `src/config/index.ts` + config tests (no
-   call-site change); T2 `src/workers/rlm_job.ts` +
-   `rlm_job.test.ts` (forward/strip both directions pinned); T3
-   `src/rlm/trellis_agent.py` only (twin parse, both construction
-   sites, unset-arm kwargs byte-identity pinned, the policy-2
-   substrate already covers the file); T4 NEW
-   `scripts/fixture_openai_server.py` + `scripts/test_backend_seam.ts`
-   + the `package.json` script entry (the stub MUST return `usage`
-   on completions and gains a no-usage misbehaving mode so rlms's
-   typed failure is drillable — the fixture-MCP-server precedent).
-   Task texts carry spec sections VERBATIM (this record lives in
-   `docs/`, outside extraction scope — the increments-1/2 channel);
-   refresh-before-use applies per increment under the split-scope
-   recipe.
-7. **The R3 proposal skeleton (record §9):** R3a serving bring-up +
-   protocol smoke, FIRST assertion = the endpoint returns `usage` on
-   non-streaming completions (a failure stops the rung at a recorded
-   finding costing minutes, not a run); R3b the paired est-suite +
-   protocol-adherence baseline against a same-day gpt-5.4 arm, arm
-   assignment verified per run from telemetry both directions (the
-   Session 43 mold — §7's `rlm_backend` echo exists for exactly
-   this); estimate class = GPU-hours under an owner-set per-run
-   compute budget, or hosted per-token under the standing ≤$5/run
-   cap; the gating question stays protocol competence; the
-   positive-control duty applies before any null is believed.
-8. **Acceptance (docs-only; the Session 45/46 precedent, reason
-   recorded):** `npm test` 837 passing / 85 files green first try
-   after `npm ci` in the fresh worktree; `npm run build`,
-   `npm run python:check`, and `docker compose config --quiet`
-   green; zero non-markdown bytes moved, so the live drill block and
-   `drill:scale` were not re-run (the Session 44 observation stands
-   as the latest reading); no refresh owed (docs-only PR; `docs/` is
-   outside extraction scope until stage-1b). Defects found in
-   existing kernel code: NONE. Every decision the Session 46 handoff
-   enumerated is decided in the record with its reason — no TBD
-   cells, no new owner questions.
-9. **Bookkeeping:** Session 42's §5 entry moved verbatim to
-   `docs/archive/ROADMAP_HISTORY.md` (the live window is now 43–47;
-   the archive-pointer paragraph updated in the same commit);
-   row 13's cell gains the R2b outcome; HANDOFF regenerated per §0
-   with the §0 step-5 re-check (next objective: T1, the config
-   surface — the first Trellis-edits-Trellis feature-class
-   increment, entering as its own owner-approved proposal built from
-   the record's §8 skeleton).
 
 ### July 13, 2026 — Session 48: TTT-track increment T1 attempted through the stage-2 harness — verdict FAILED, recorded in full (§4 row 13, Phase 1 step 1)
 
@@ -1594,3 +1473,65 @@ paused, not cancelled.
    `tools/engineering-loop/SPEC.md`, including the threat model, transition
    contract, and conformance matrix. Explicit exclusions: control-kernel code,
    `WORKFLOW.md`, production prompts, Codex invocation, and handoff migration.
+
+### July 14, 2026 — Session 52: EL-01 architecture record and normative specification ACCEPTED, zero-paid
+
+Session 52 executed only engineering-loop feature `EL-01`. No controller code,
+production prompt, `WORKFLOW.md`, model call, paid service, database, queue,
+worker, API, source file, dependency, or prompt pin changed. The paused TTT T2
+objective remains untouched.
+
+1. **Architecture ratified:** new
+   `docs/architecture/ENGINEERING_LOOP.md` records the problem and the
+   non-reuse boundary against the in-memory RLM/product goal loops; selects
+   repository-owned source plus an out-of-process controller and protected
+   mutable state outside the agent-writable worktree; assigns human,
+   controller, runner, worker, checker, repository, external-system, and
+   product-runtime authority; defines six context tiers and episode/fresh-
+   context rules; resolves all ten priority-zero decisions; records the six
+   required alternative families, consequences, risks, extraction/dependency
+   triggers, and lower-priority choices under EL-02–EL-09.
+2. **Normative contract ratified:** new `tools/engineering-loop/SPEC.md`
+   defines the language-independent protocol and TypeScript reference intent;
+   typed workflow/feature/session/episode/event/approval/evidence/decision/
+   report objects; ordinary, protected, recovery, forbidden, and terminal
+   transitions; external single-writer state, append-only integrity-linked
+   events, atomic snapshots, restart replay, repository observation, prompt-
+   compilation reservation, adapter-neutral `AgentRunner`, episode rotation,
+   evidence precedence, approvals, failure taxonomy, idempotency, retry,
+   unknown-side-effect stop, observability/redaction/retention, generated views,
+   migration, and security posture. It contains **106 stable mandatory
+   requirement IDs**.
+3. **Feature/conformance linkage:** the engine-computed spec audit found
+   `requirements=106 mapped=106 unmapped=0 features=10`. Every requirement maps
+   to an existing `EL-*` feature, exact catalog acceptance ID, and matching
+   `static`, `integration`, `review`, or `measurement` class. Catalog semantics
+   remain `ids=10 edges=13 acceptance=34 order_parity=true`; Draft 2020-12
+   schema validation prints `10`. `features.json` marks only EL-01 accepted;
+   the product roadmap advances only to EL-02.
+4. **Acceptance commands and observations:** `npm test` passed **87 files / 876
+   tests**; `npm run build` passed; `npm run python:check` reported runtime
+   syntax/imports/rubric/module assets verified; the inline requirement audit
+   printed `requirements=106 mapped=106 unmapped=0 features=10`; the inline
+   semantic catalog audit printed `ids=10 edges=13 acceptance=34
+   order_parity=true`; the required `python -c` JSON Schema command printed
+   `10`; the local-link/unidentified-normative check printed
+   `local_links=resolved unidentified_normative_must=0`; `git diff --check`
+   passed; final status listed only the two EL-01 artifacts and required
+   roadmap/catalog/archive/HANDOFF closeout files.
+5. **Findings:** no priority-zero contradiction, unmapped requirement, catalog
+   mismatch, runtime regression, or existing-code defect was found. Two local
+   command-path incidents were environmental and recorded rather than hidden:
+   sandboxed `npm test` failed before Vitest with `EPERM` while traversing the
+   requested worktree outside the active sandbox root, and the first approved
+   retry used a diagnostic timeout and expired after five seconds; the same
+   exact command then passed with the suite timeout. A compact semantic-check
+   one-liner was rejected by PowerShell quoting before execution; the literal
+   stdin form passed. No paid work occurred.
+6. **Bookkeeping and next:** Session 47's entry moved verbatim to
+   `docs/archive/ROADMAP_HISTORY.md`; the live session window is 48–52.
+   `HANDOFF.md` regenerated per §0. Next is `EL-02` only: deterministic control
+   kernel schemas/transitions/state/events/lock/fake dependencies, zero-model
+   and zero-paid. Real runner integration, production prompts, repository
+   observation/rendering, verification policy, migration, scheduling, and TTT
+   remain excluded.
