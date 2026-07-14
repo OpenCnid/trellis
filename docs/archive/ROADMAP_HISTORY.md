@@ -5485,3 +5485,94 @@ its own owner-approved proposal with its own estimate.
 5. HANDOFF re-pointed: Session 46 = R2a, with R2b + the T-series
    queued behind it; folded into the Session 45 PR under the §0
    step-5 event-loop rule.
+
+### July 13, 2026 — Session 46: TTT-track rung R2a — the backend-seam census + the rlms verdict (§4 row 13, Phase 0 step 1); the judge-calibration decision PRESENTED and DECIDED
+
+Zero-paid, read-only, docs-only: no code byte, no prompt byte (both
+composed-prompt pins unmoved), no config change, no rlms byte
+(guardrail 10 — the package inspection was read-only). The full
+deliverable is `docs/architecture/TEST_TIME_TRAINING.md` §13.
+
+1. **The judge-calibration decision (presented at session START, the
+   duty that had carried two sessions).** The Session 44 data was put
+   to the owner (`PROVENANCE_THREADING.md` §10.2: strict judge
+   consistent; `has_category` 73/74 flagged = 98.6%; `mentions`
+   15/26 = 57.7%; 356 unchecked `q_` pairs remain) with the three
+   recorded options. **The owner picked ACCEPT the strict judge:**
+   no action — the benchmark-era `q_` pool contests at high rates as
+   sampling reaches it, lazy recovery handles it, and the strict
+   verdict is honest (`has_category` labels are derived, never
+   entailed by block text). A rubric change stays available as its
+   own designed owner-visible session if derived-classification
+   claims ever become load-bearing. The decision duty is CLOSED.
+2. **The census (R2a deliverable a; §13.2).** Grep-driven sweep of
+   `src/rlm/`, `src/workers/`, `src/core/`, `src/config/`, and
+   `scripts/`; every `chat.completions.create` (11 sites) and
+   `embeddings.create` (5 sites) in the tree disposed into six
+   classes: (1) the root RLM completion seam — the two
+   `trellis_agent.py` `backend_kwargs` construction sites (lines
+   329/532, T3's exact scope), the experimental checker client
+   (lines 87/101), and the two FROZEN probe instruments; (2)
+   worker/engine completions — the model id is ALREADY config-shaped
+   through ONE seam (`EXTRACTION_MODEL`, zod default at
+   `src/config/index.ts:109` → `config.llm.extractionModel`, ten
+   consumers enumerated), only the transport is assumed (seven
+   zero-arg `new OpenAI()` constructions); (3) the embedder
+   (NON-GOAL §4.2) — three production `text-embedding-3-small`
+   literals (extraction worker, `vector_search`, `/retrieve`
+   fallback) plus two frozen instruments, all schema-coupled to
+   `vector(1536)`; (4) pricing constants — `PRICE_PER_M_INPUT
+   2.5`/`PRICE_PER_M_OUTPUT 10` (`oolong/scoring.ts`, four importers
+   incl. the exp runner's spend gate) and `AUTHOR_EST_PRICE_PER_1K_USD
+   0.02` (the author ceiling), both estimate-only by design and
+   unit-pinned; (5) token accounting — moves cleanly (telemetry keys
+   model-agnostic, `model_usage` keyed by model name additive, the
+   Node scanner tolerant-pinned), with ONE recorded asymmetry: house
+   `chatUsage` tolerates a missing `usage` block, rlms `_track_cost`
+   THROWS on it; (6) report stamps and prose (gate nothing).
+3. **The rlms verdict (R2a deliverable b; §13.1): YES —
+   rlms==0.1.3 admits a base-URL/backend override WITHOUT library
+   modification.** Quoted evidence from the installed package:
+   `RLM(backend="openai" default, backend_kwargs=...)`;
+   `get_client` routes eight backends including an explicit `vllm`
+   arm (OpenAI client + asserted mandatory `base_url`);
+   `OpenAIClient.__init__(api_key, model_name, base_url, ...)` takes
+   `base_url` first-class into `openai.OpenAI(**client_kwargs)`
+   ("Works with vLLM as well"); `other_backends` gives depth-1
+   sub-call separability. The seam is additive kwargs at the two
+   existing construction sites. Caveats recorded for the T-series
+   and R3: the endpoint MUST return `usage` on completions or
+   `_track_cost` raises `ValueError` (R3a smoke asserts this first);
+   token/context lookups have safe fallbacks and are compaction-only;
+   API-key resolution for local endpoints wants an explicit dummy
+   kwarg; rlms runs `load_dotenv()` at import (an unmanaged
+   credential input channel, handed to R2b).
+4. **The one real discovery (§13.3): the unmanaged `OPENAI_BASE_URL`
+   pass-through.** Both installed SDKs (Node `openai@^6.45.0`,
+   Python `openai==2.44.0`) resolve their base URL from ambient
+   `OPENAI_BASE_URL` when unset — verified at
+   `node_modules/openai/client.js:140` and
+   `openai/_client.py:251`. Consequence: the transport is ALREADY
+   overridable today with zero code change, but UNMANAGED (no
+   validation, no typed refusal, no telemetry, no pin), and
+   `buildAgentEnv` neither forwards-deliberately nor strips it — an
+   inherited value would redirect root completions, the checker,
+   AND the `vector_search` embedder TOGETHER, the exact coupling
+   §4.2 forbids. NOT a defect (nothing sets it; nothing broke; no
+   behavior changed) — recorded as the precise gap T1/T2/T3 close,
+   with the census recommendation to R2b: strip `OPENAI_BASE_URL`
+   unconditionally and express backend choice only through validated
+   config. The event-loop rule was checked against this finding: no
+   queue jump — it is R2b/T-series input, not a broken invariant.
+5. **Acceptance (docs-only; the Session 45 precedent, reason
+   recorded):** `npm test` 837/85 green first try after `npm ci` in
+   the fresh worktree; zero non-markdown bytes moved, so the live
+   drill block and `drill:scale` were not re-run (the Session 44
+   observation stands as the latest reading); no refresh owed
+   (docs-only PR; `docs/` is outside extraction scope until
+   stage-1b). Defects found in existing kernel code: NONE.
+6. **Bookkeeping:** Session 41's §5 entry moved verbatim to
+   `docs/archive/ROADMAP_HISTORY.md` (the live window is now 42–46);
+   row 13's cell gains the R2a outcome; HANDOFF regenerated per §0
+   with the §0 step-5 re-check (next objective: R2b, the
+   human-authored seam design record — spec-before-pen).

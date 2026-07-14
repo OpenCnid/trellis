@@ -88,7 +88,18 @@ def expect_raises(name, fn, needle=""):
 #     task." Brace-free (the addendum cannot carry hypershot braces —
 #     rlms .format()); semantic content unchanged (structure-only,
 #     the July-12 pass precedent). T1 ran on the prior bytes.
-COMPOSED_SYSTEM_PROMPT_SHA256 = "e57e7a5539df6c59370878f8c5e7466ed4fc6bd1c24783ba98508655001824bd"
+#   6183de3a...ed50 — Session 51 (RLM_HARNESS_SCAFFOLDING.md §7, S2a
+#     refinement, owner-ratified): the UPSUM discipline tightened in
+#     _ADDENDUM_BASE_SUFFIX — the four lists REWRITTEN in place each
+#     turn never appended (the load-bearing property the name promises),
+#     an emergent-domain key allowed, and the size bound made a
+#     code-checked comparison of len(str(upsum)) against the injected
+#     UPSUM_BUDGET constant (CODE_MEDIATED_TEXT.md §1 — the model never
+#     counts by eye), plus the pre-existing ITERATION BUDGET paragraph.
+#     Authored under the prompt-engineering + hypershot-protocol skills
+#     (Guardrail 15); the constant lives in src/rlm/trellis_scaffold.py
+#     and is injected beside trellis_task — the prompt only teaches it.
+COMPOSED_SYSTEM_PROMPT_SHA256 = "6183de3a0f348d2849e3f93570d0e7ea29160ae301700ad7d949228a6027ed50"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -174,6 +185,19 @@ empty_addendum = (
 )
 check("the empty selection composes exactly base + workflow rules",
       empty_addendum == trellis_agent.TRELLIS_ADDENDUM_BASE + trellis_agent.TRELLIS_WORKFLOW_RULES)
+
+# Session 51 (RLM_HARNESS_SCAFFOLDING.md §7, S2a refinement,
+# owner-ratified): the base addendum teaches the load-bearing UPSUM
+# properties — the four lists rewritten IN PLACE each turn (never
+# appended) and the size bound checked BY CODE against the injected
+# UPSUM_BUDGET constant (CODE_MEDIATED_TEXT.md §1), not eyeballed.
+_base_addendum = trellis_agent.TRELLIS_ADDENDUM_BASE
+check("the base addendum teaches the rewrite-not-append UPSUM rule",
+      "IN PLACE" in _base_addendum and "never append" in _base_addendum)
+check("the base addendum teaches the code-checked UPSUM budget",
+      "UPSUM_BUDGET" in _base_addendum and "len(str(upsum))" in _base_addendum)
+check("trellis_agent re-exports the injected UPSUM_BUDGET constant (2000)",
+      trellis_agent.UPSUM_BUDGET == 2000)
 
 stripped = trellis_agent.TRELLIS_ADDENDUM.replace("{{", "").replace("}}", "")
 check("the composed addendum has no unescaped braces (rlms .format() safety)",
@@ -301,7 +325,11 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     pin's history) lands in BOTH arms — the structural re-authoring
 #     of the scaffold addendum is not part of the discipline
 #     experiment (still structurally default minus exactly the block).
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "a37d2b4a506258e47058f15783e9d9ae5d31322b60a5f3ee55abe97c1112764e"
+#   34b00be6...d02a — Session 51 S2a UPSUM refinement (see the default
+#     pin's history) lands in BOTH arms — the UPSUM tightening is
+#     kernel scaffolding, not part of the discipline experiment (still
+#     structurally default minus exactly the block).
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "34b00be69dd7bbdd623ae4b50774a6753591a2178ec38fcaca3c1ff4fe84d02a"
 
 import subprocess  # noqa: E402
 

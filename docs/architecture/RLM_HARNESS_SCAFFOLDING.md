@@ -93,13 +93,43 @@ The growth problem (402,781 input tokens by iteration 14 of one run)
 and the "where am I" problem share one answer: a running state the
 model maintains and re-reads.
 
-- **S2a (free, protocol-level — FIRST):** the REPL's persistent
-  locals ARE the state store. The addendum/task discipline teaches an
-  `upsum` dict the model updates every iteration (`done`, `pending`,
-  `blocked`, `decisive_facts`) and re-prints at decisive steps.
-  Nothing to build; run 2 would have re-encountered "vector_search
-  never ran" in its own `upsum.pending` at the insight step. Costs
-  addendum bytes only (same pin ceremony as S1; they land together).
+- **S2a (protocol-level — FIRST):** the REPL's persistent locals ARE
+  the state store. The addendum/task discipline teaches an `upsum`
+  dict the model maintains every iteration, with four standing
+  list-valued keys (`done`, `pending`, `blocked`, `decisive_facts`),
+  and re-prints at decisive steps. Run 2 would have re-encountered
+  "vector_search never ran" in its own `upsum['pending']` at the
+  insight step. Four properties are load-bearing and pinned (the §7
+  refinement, owner-ratified July 13, 2026):
+  - **Rewritten, never appended.** Each list is rewritten in place
+    every turn, replacing the previous turn's list. This is the
+    property the name (UPdated SUMmary) promises: an append-only list
+    regrows exactly the transcript bloat this section targets (the
+    402,781-token run). Bounded, rewritten working state is what
+    long-horizon agent-memory work converges on (rlms' own compaction
+    is the in-library version; MemGPT/Reflexion rolling working
+    context is the external precedent).
+  - **Emergent domains.** Beyond the four standing keys the model adds
+    a key when the work opens a domain the four do not cover, each
+    carrying one compressed note kept current. Coverage grows; the
+    four invariants hold their meaning.
+  - **Code-checked size bound.** The budget is the constant
+    `UPSUM_BUDGET`, injected into every research run's REPL namespace
+    (`trellis_scaffold.py`, beside `trellis_task`), and checked BY
+    CODE: the model computes `len(str(upsum))` and compares it to the
+    constant, compressing the least-decisive entries when it exceeds
+    (CODE_MEDIATED_TEXT.md §1 — the model never counts by eye). The
+    value is an implementation decision (2000 chars this edition); the
+    record fixes only that the check is computed, never eyeballed.
+  - **Iteration budget.** Combine protocol steps into single REPL
+    blocks; no tiny exploratory prints. The addendum has taught this
+    since Session 50; §7.4 back-filled it into this record so §3 is
+    the single source for the addendum's behavioral content.
+
+  This costs addendum bytes plus the one injected constant (the same
+  pin ceremony as S1; they land together). The landed addendum bytes
+  are this record's current implementation, never an authority over
+  it.
 - **S2b (machinery, MEASURED before adoption):** rlms compaction
   already exists behind a constructor flag (`compaction=True`): it
   mirrors the full history into the REPL variable `history` (the
@@ -158,9 +188,24 @@ prosthetics; weight-level adaptation remains the TTT track's measured
 question (H1), and this record's motivating example is that track's
 first native evidence.
 
-## 7. Proposed S2a refinement — UPSUM as a rewritten, budgeted summary (proposal, July 13, 2026)
+## 7. S2a refinement — UPSUM as a rewritten, budgeted summary (RATIFIED July 13, 2026, Session 51)
 
-Proposal for owner review. S2a landed in Session 50 (PR #95) implementing §3 as then written; the live addendum is in `trellis_agent.py` (`_ADDENDUM_BASE_SUFFIX`), and it teaches `upsum` as four list-valued keys (`done`, `pending`, `blocked`, `decisive_facts`) plus an ITERATION BUDGET paragraph. If this refinement is ratified, §3 is amended and the live addendum is brought into conformance with the amended record; final bytes authored under the prompt-engineering and hypershot-protocol skills (Guardrail 15), both composed-prompt pins recomputed in the same commit (Guardrail 9), `test:modules` green. The landed bytes carry no authority over the record; they are the record's current implementation.
+**Status: RATIFIED and IMPLEMENTED (Session 51, PR #98).** The owner
+ratified all four refinements below; §3 above is the amended,
+authoritative spec and the live `_ADDENDUM_BASE_SUFFIX` in
+`trellis_agent.py` was brought into conformance in the same commit.
+The addendum bytes were authored under the prompt-engineering and
+hypershot-protocol skills (Guardrail 15), the `UPSUM_BUDGET` constant
+added to `trellis_scaffold.py` and injected beside `trellis_task`, and
+both composed-prompt pins recomputed in the same commit (Guardrail 9,
+`test:modules` [4]/[7]: default `6183de3a…ed50`, omit-arm
+`34b00be6…d02a`). No behavior claim attends the change — it is a
+spec-conformance tightening of an already-landed scaffold to its own
+name (7.1), the CORE PILLAR (7.3), and the record (7.4), carrying no
+measured-improvement claim (guardrail 8, the Session 50 version). The
+proposal text is preserved below as the decision record; the landed
+bytes carry no authority over it — they are its current
+implementation.
 
 Three gaps between §3's name for the structure (UPdated SUMmary) and what the landed addendum teaches, each a recorded decision for the amended §3:
 

@@ -932,6 +932,8 @@ try:
     # injected accessor).
     check("trellis_agent.py injects the task surface",
           '"trellis_task": task_surface' in agent_source)
+    check("trellis_agent.py injects the UPSUM_BUDGET constant into custom_tools",
+          '"UPSUM_BUDGET": UPSUM_BUDGET' in agent_source)
     check("trellis_agent.py wraps the task at the system-prompt splice",
           "wrap_task_text(safe_query, run_uuid)" in agent_source)
     check("trellis_agent.py wraps the task at the completion query",
