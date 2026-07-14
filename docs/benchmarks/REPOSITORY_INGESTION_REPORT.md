@@ -3622,6 +3622,125 @@ citable), R2 governs.
   flag or a failing pin FAILS the increment — record, stop, diagnose;
   a retry is its own proposal (the increments-1/2 treatment).
 
+#### 5i.6 The run — VERDICT FAILED (Session 52, July 14, 2026; one spawn, $1.0888)
+
+The owner approved the proposal at session start. The quota probe ran
+FIRST (§5h.10): a minimal completion returned 12 in / 4 out (`ok`) —
+quota RESTORED (the account behind the ambient `OPENAI_API_KEY`, which
+was exhausted at Session 49's block, is funded). One spawn followed,
+research mode, `--max-iterations 16`, `PYTHONUTF8=1`,
+`TRELLIS_EDIT_ROOT` at the worktree, `TRELLIS_CITATION_AUDIT=1`,
+`TRELLIS_TASK_NAMED_FILES` as staged, full stdout to
+`benchmark_logs/s52_t2_run1.log` (local, gitignored). Exit 0, 108.7s
+wall.
+
+**Run telemetry: $1.0888 computed from tokens (371,136 in / 16,097
+out at the gpt-5.4 rates $2.50/M in + $10/M out — OVER the $0.5–$1.0
+estimate), 16 root iterations of the 16 allowed, 106.2s agent time;
+3 db tool calls / 1 retrieved address / 1 retrieval fetch / 0 dedup
+refusals / 0 budget refusals; 54 textedit ops / 2 files held /
+2 write_backs / 5 guarded ops / 0 raw splices; `answer_submits` 1;
+porcelain after the run: exactly the two named files.** The run
+followed the amended protocols end to end: the graph query surfaced
+the single uncontested provenance hash, ONE `get_ast_texts` call
+fetched it, `frame_text` + the `citable()` probe both confirmed it
+citable at E3 (pre-edit), the hash was HELD, the guarded inserts
+interleaved the block as designed, and at completion the run cited
+the held hash `c3883a2e…d0b6d0b4` through the Session 31 gate
+(`buildagentenv` `-forwards_by_name->` `mcpcredentialenv`).
+
+**Criterion verdict, item by item — TWO MISSES; increment T2
+FAILED:**
+
+1. Named-file-only diff PASS — porcelain showed exactly
+   `src/workers/rlm_job.ts` + `src/workers/rlm_job.test.ts`,
+   insert-only.
+2. Evidence contract PASS — exactly one DERIVED_INSIGHT `buildagentenv`
+   `-forwards_by_name->` `mcpcredentialenv` through the Session 31
+   gate, citing exactly [`c3883a2e…d0b6d0b4`] (retrieved this run;
+   bridges to `repo:trellis:src/workers/rlm_job.ts`); the citation
+   audit reads cited ⊆ read.
+3. `stage2:check` zero findings PASS (scope + evidence + parse gate;
+   comment-class not declared).
+4. Guarded-only PASS — `textedit_raw_splices` 0 (5 guarded ops).
+5. **The increment's own pins green — FAIL (the hard-fail trigger).**
+   `npx vitest run src/workers/rlm_job.test.ts` with the diff applied:
+   **1 failed | 36 passed.** Four of the five authored pins are
+   correct; the FIFTH — the absent-block byte-identity pin — asserted
+   `expect(buildAgentEnv(cleanBase, CFG)).toEqual({ PATH: '/usr/bin' })`,
+   which is WRONG: `buildAgentEnv` unconditionally injects
+   `NEO4J_URI`/`NEO4J_USER`/`NEO4J_PASSWORD`, `PG_DSN`,
+   `PYTHONUNBUFFERED`, and `PYTHONIOENCODING` from `CFG`, so the clean-
+   base output is the seven-key object, never the bare `{PATH}`. The
+   pin compared to the base env alone instead of the base env PLUS
+   `buildAgentEnv`'s own unconditional connection/runtime keys (the
+   shape the file's FIRST existing `buildAgentEnv` test already
+   expects).
+6. Human `git diff` review — the `rlm_job.ts` production diff is
+   SPEC-PERFECT (all four Parts placed exactly: the `rlmBackend?`
+   optional block after `retrievalBudget?`; the four `TRELLIS_RLM_*`
+   set-or-delete blocks in the exact `retrievalBudget` shape after its
+   block; `delete env.OPENAI_BASE_URL;` with the §4-layer-2 comment
+   immediately after the `TRELLIS_TASK_NAMED_FILES` delete; the
+   key-value forward after the `mcpCredentialEnv` loop before
+   `return env;` — insert-only, existing lines byte-unchanged, CRLF
+   uniform). The sole defect is the pin-(e) assertion in the test
+   file (item 5).
+7. **Spend within estimate — MISS.** $1.0888 against $0.5–$1.0 (over
+   by ~$0.09; well within the ≤$5/run cap). The run consumed all 16
+   iterations vs T1's 11 — the rlms root loop accumulates the full
+   transcript, so more iterations drive input tokens (371,136 vs T1's
+   192,978). Reported honestly per guardrail 8's Session 48 version:
+   an overrun is a recorded criterion miss even when it is not the
+   decisive one.
+
+**Verdict: FAILED, no second run this session (the §5f.5 / §5g.3
+precedent — a retry is its own owner-approved proposal). The
+production change was authored correctly; the failure is entirely a
+mis-written test assertion caught mechanically by `npm test`.** No
+machinery defect: every layer fired per contract — `stage2:check` was
+correctly blind (it verifies scope/evidence/parse, not test-green; a
+parseable file with a wrong assertion is exactly what `npm test`
+exists to catch), the parse gate correctly passed a well-formed file,
+and the guarded family / Session 31 gate / citable probe all behaved
+exactly. The failure class is TASK DISCIPLINE, closable in the retry
+task text.
+
+**Cleanup (the bounded operator-cleanup precedent, guardrail 5):** the
+failed run's own residual insight write was deleted before any retry —
+`MATCH (s:Entity {name:'buildagentenv'})-[r:DERIVED_INSIGHT
+{verb:'forwards_by_name'}]->(o:Entity {name:'mcpcredentialenv'}) DELETE
+r` (total `DERIVED_INSIGHT` edges 299 → 298; the target edge 1 → 0).
+The freshly-created `mcpcredentialenv` entity NODE was left in place
+(guardrail 2 — entities are contested or retired, never deleted; an
+edgeless orphan is harmless). The diff was reverted
+(`git checkout -- src/workers/rlm_job.ts src/workers/rlm_job.test.ts`;
+the preserved diff is `benchmark_logs/s52_t2_run1_failed.diff`, local,
+gitignored — never resurrected as a patch source, the Session 48
+precedent); `npx vitest run src/workers/rlm_job.test.ts` back to 32/32,
+`npm test` back to 876/87. The final tree ships ZERO non-markdown
+bytes.
+
+**Retry material (the v3.3 task material — a NEW owner-approved
+proposal; T2 now stands at ONE failed attempt, §5g.3 ladder
+untouched):** the single change needed is to strengthen the M3 pin-(e)
+guidance. The absent-block byte-identity pin must build its expected
+object from `buildAgentEnv`'s ACTUAL clean-base output — the base env
+keys PLUS the unconditionally-injected `NEO4J_URI`/`NEO4J_USER`/
+`NEO4J_PASSWORD`, `PG_DSN`, `PYTHONUNBUFFERED`, `PYTHONIOENCODING`
+(and `PYTHONPATH` only when `pythonPath` is set) — i.e. mirror the
+shape the file's FIRST existing `buildAgentEnv` test already asserts,
+NOT the bare base env. The task text should say this explicitly (name
+the seven keys, or instruct the model to read the neighboring
+connection-values test's expected object and reuse its shape). Nothing
+else in v3.2/T2 changes — the specification, the evidence chain, the
+production edits, and the invariant vocabulary all held. The estimate
+for the retry re-bases to $0.7–$1.2 for ONE run (the 16-iteration
+actual observed here), still under the ≤$5/run cap. No machinery
+change anywhere; the escalation rule (a harness-side read-only
+citability query) was never needed and is not triggered by a
+test-assertion defect.
+
 
 ## 6. Verification summary
 
