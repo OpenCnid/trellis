@@ -4161,7 +4161,118 @@ post-landing split-scope policy-1 refresh for the changed
 feature-class mold judged item by item (§5i.5) — the pin-(e) fix
 targets item 5.
 
-<!-- 5i.7 RUN RECORD + VERDICT appended after the run -->
+**The run — VERDICT: NO LANDING (a clean R2 self-refusal; Session 53,
+July 14, 2026; one spawn, $0.7139).** The owner had pre-approved the
+paid run for this session. The quota probe ran FIRST (§5h.10): a
+minimal completion returned 7 in / 8 out (`ok`) — quota funded. One
+spawn followed, research mode, `--max-iterations 16`, `PYTHONUTF8=1`,
+`TRELLIS_EDIT_ROOT` at the worktree, `TRELLIS_CITATION_AUDIT=1`,
+`TRELLIS_TASK_NAMED_FILES` as staged, full stdout to
+`benchmark_logs/s53_t2_retry_run1.log` (local, gitignored). Exit 0,
+104.0s wall.
+
+**Run telemetry: $0.7139 computed from tokens (231,552 in / 13,498 out
+at the gpt-5.4 rates $2.50/M in + $10/M out — WITHIN the $0.7–$1.2
+estimate), 12 model calls, 104.0s agent time; 2 db tool calls / 1
+retrieved address / 1 retrieval fetch / 0 dedup refusals / 0 budget
+refusals; 43 textedit ops / 2 files held / 0 write_backs / 9 guarded
+ops / 0 raw splices; `answer_submits` 1; cited_hashes EMPTY; porcelain
+after the run: CLEAN (zero files changed).** The run followed the
+evidence protocol cleanly through E3: the graph query surfaced the
+single uncontested provenance hash, ONE `get_ast_texts` fetched it,
+`frame_text` + `citable()` both confirmed it citable at E3, the hash
+was HELD (citation audit: `read` = [`c3883a2e…d0b6d0b4`], `cited` = [],
+`citedButUnread` = []).
+
+**Then the run self-refused (R2, the V2 trigger) — NO LANDING.** Its
+staged edits contained EDITING-EXECUTION mistakes it made itself: the
+`rlmBackend?` interface field was inserted TWICE inside
+`AgentEnvConfig`, the four `TRELLIS_RLM_*` set-or-delete blocks were
+inserted TWICE in `buildAgentEnv` (the second copy landing after the
+`Session 21` comment line, truncated), and the test-pin inserts
+anchored on `describe('buildAgentArgs', () => {` — the NEXT describe
+block — so they landed OUTSIDE the `buildAgentEnv` describe (the run's
+upsum recorded `blocked: ['Could not locate buildAgentEnv describe
+block in test file']`). Its V1 review printed the staged diff, saw the
+duplicates and the misplacement (a genuine content mismatch VISIBLE in
+the printed region), and applied V2 → R2: it reverted BOTH files
+(`trellis_textedit.revert`), recorded NO insight, and submitted the
+empty-cited `<output_contract>` report. The self-refusal was clean and
+correct on its own terms — the discipline prevented a broken diff from
+landing — but the increment did NOT land.
+
+**Criterion verdict, item by item — NO LANDING (a self-refusal, not a
+completed increment):**
+
+1. Named-file-only diff — N/A: no diff was produced (porcelain clean,
+   0 write_backs). Not a scope violation, but nothing landed.
+2. Evidence contract — NOT MET: zero recorded insights (the R2 path
+   correctly records none, but the increment's "exactly one insight"
+   is not satisfied).
+3. `stage2:check` zero findings — N/A: no post-run diff to check
+   (`--pre` was PASS pre-run; the guarded family, citable probe, and
+   Session 31 gate all behaved).
+4. Guarded-only PASS — `textedit_raw_splices` 0 (9 guarded ops).
+5. **The increment's own pins green — NOT REACHED.** No `write_back`
+   occurred, so `npm test` never ran against a diff. The v3.3 pin-(e)
+   fix (this retry's ONLY delta from v3.2) was CORRECT but UNEXERCISED
+   — the run failed at an EARLIER, DIFFERENT stage (editing execution).
+6. Human `git diff` review — N/A: no diff.
+7. Spend within estimate PASS — $0.7139 against $0.7–$1.2 (12 model
+   calls vs Session 52's 16; the run ended at self-refusal). Session
+   paid total ≈ $0.7140 (the quota probe ≈ $0.0001 + the run), under
+   the ≤$5/run cap.
+
+**Root cause: editing execution, and an R2 over-trigger — a NEW
+failure class, distinct from Session 52's pin miss and from any
+machinery defect.** Two mechanical sub-causes: (i) the guarded
+`insert_lines` sequence double-applied the interface-field insert and
+the set-or-delete block insert (address-shift after a staged insert,
+re-issued); (ii) the test-pin anchor was the ambiguous describe-block
+closing `});`, which the run could not disambiguate from the many
+other `});` lines, so it anchored on the following `describe(...)`
+instead. Compounding both: the v3.3 `<verification_protocol>` V2 rule
+("a genuine content mismatch VISIBLE in the printed region … triggers
+R2") let the run treat its OWN fixable staging slip as a task-premise
+contradiction and stop, when the correct response to a self-inflicted
+duplicate/misplaced insert is to revert THAT file and RE-STAGE — R2 is
+reserved for a contradicted SOURCE premise (a mold absent, nothing
+citable, a mismatch in the RETRIEVED bytes). Every harness layer fired
+per contract: the guarded family staged and reverted correctly, the
+citable probe and Session 31 gate behaved, the parse gate was never
+reached (no write), `stage2:check` had no diff to judge. No machinery
+change is indicated.
+
+**Cleanup: NONE OWED.** The R2 path called no `write_derived_insight`;
+the graph is byte-for-byte as Session 52 left it — 0 `buildagentenv`
+`-forwards_by_name->` `mcpcredentialenv` edges, `DERIVED_INSIGHT` total
+298, and the one edgeless `mcpcredentialenv` orphan node from
+Session 52's cleanup (guardrail 2 — left in place, harmless). No diff
+to revert; porcelain was clean before and after. `npm test` stays at
+876/87. The final tree ships ZERO non-markdown bytes.
+
+**Retry material (the v3.4 task material — a NEW owner-approved
+proposal; T2 has now had TWO sessions without a landing, so the §5g.3
+three-failure ladder's third-strike escalation is an OWNER-VISIBLE
+decision, presented alongside the retry).** v3.4 KEEPS v3.3's pin-(e)
+fix verbatim (it was correct, only unexercised) and adds three
+editing-execution safeguards, each targeting a named sub-cause:
+(1) **anti-duplication** — after all M2 inserts stage and before any
+`write_back`, count each inserted marker (`rlmBackend?: {`, each
+`env.TRELLIS_RLM_*` line, `delete env.OPENAI_BASE_URL;`) in the staged
+frame and assert EXACTLY ONCE; a duplicated or misplaced staged insert
+is a FIXABLE staging error → revert that file and re-stage, NEVER R2;
+(2) **a robust test anchor** — anchor the M3 test inserts on the LAST
+existing `it(...)` inside the `buildAgentEnv` describe (the Session-50
+`'always strips the citability-probe named-files input'` test at the
+block's tail), not the ambiguous final `});`; (3) **an R2 scope
+clarification** — R2 fires ONLY for a contradicted SOURCE premise (a
+mold absent, nothing citable, a mismatch in RETRIEVED bytes); a
+duplicate / misplaced / typo in your OWN staged edit is corrected in a
+new iteration, never escalated to R2. The estimate re-bases to
+$0.6–$1.1 for ONE run (this run was $0.7139 at 12 model calls). No
+machinery change anywhere; the failure class is task/run discipline,
+closable in the v4 task text.
 
 
 ## 6. Verification summary
