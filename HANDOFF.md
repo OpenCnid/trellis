@@ -908,6 +908,14 @@ touches git. Do not re-plan or re-implement completed work. RLM
 expands exclusively to Recursive Language Model (the MIT CSAIL
 formulation).
 
+**Owner direction, July 14, 2026:** the engineering-session loop program is
+now prioritized ahead of TTT T2. `EL-00` established the bounded roadmap,
+machine-readable feature catalog, and schema on branch
+`engineering-loop-spec`, zero-paid. Session 52 is re-pointed to `EL-01`: the
+architecture record and normative specification only. The TTT T2 objective is
+preserved later in this file as superseded session history; do not execute it
+unless the owner re-prioritizes it.
+
 ---
 
 ## 0. The handoff loop (permanent — preserve this section in every rewrite)
@@ -1395,9 +1403,35 @@ immutable, content-addressed physical location in source material.
    - The fixture MCP server (`scripts/fixture_mcp_server.py`) is the
      only MCP server acceptance ever configures.
 
+16. **Engineering-session loop (owner-prioritized July 14, 2026).** The
+    manual `HANDOFF.md` cycle is now an explicit multi-session program. Its
+    bounded feature DAG and bootstrap protocol live in
+    `docs/product/engineering-loop/ROADMAP.md` with the machine twin
+    `features.json` and Draft 2020-12 schema. The ratified direction is
+    repository-owned policy/source plus an out-of-process controller whose
+    trusted mutable state is outside the agent-writable worktree; one writer
+    initially; resume inside one episode and fresh context across semantic
+    boundaries; deterministic evidence outranks model claims; paid,
+    destructive, push, and merge actions remain human gates. `EL-00` is
+    accepted. `EL-01` writes the architecture and normative contract only;
+    implementation begins at `EL-02`. The existing manual handoff remains
+    authoritative until the measured `EL-07` migration verdict.
+
 ## 2. Current baseline
 
 Repository state at handoff creation:
+
+- **Active owner-prioritized program:** branch `engineering-loop-spec` began
+  at `74c3b48` and carries the zero-paid `EL-00` roadmap/catalog/schema plus
+  the root sequencing pointer. Catalog validation: 10 unique features, 13
+  resolved acyclic dependency edges, 34 unique acceptance items, exact
+  Markdown/JSON order parity. Standing acceptance stayed green: 87 test files
+  / 876 tests, build, and Python runtime check. Fresh-worktree `npm ci`
+  installed 317 packages with 0 vulnerabilities but warned that this local
+  Node v20.19.2 shell is below four Babel packages' Node 22.18+ engine floor;
+  CI's Node 22 remains authoritative, and local install/tests/build passed.
+  `EL-01` is next. No controller code, production prompt, model call,
+  scheduler, or handoff migration exists yet.
 
 - `master`: the head after the July 13, 2026 Session 51 PR (#98 —
   the PR that carries this file). Session 51 was an owner-directed
@@ -1695,6 +1729,237 @@ Work on a feature branch and target `master`.
 
 ## 3. Session 52 problem statement
 
+**Engineering-session loop `EL-01`: author and ratify the architecture record
+and normative service specification.** `EL-00` converted the research result
+into a bounded multi-session program:
+
+- `docs/product/engineering-loop/ROADMAP.md` is the human sequence and session
+  protocol.
+- `docs/product/engineering-loop/features.json` is its machine-readable twin.
+- `docs/product/engineering-loop/feature.schema.json` is the bootstrap schema.
+- `TRELLIS_ROADMAP.md` §4 prioritizes the program ahead of the preserved TTT
+  T2 continuation.
+
+The problem for Session 52 is specification, not implementation. A lone
+Symphony-style service specification would state behavior but would not record
+the Trellis-specific architectural reason for keeping the controller outside
+the product runtime. Conversely, architecture prose without normative
+conformance language would leave later implementations free to weaken gates.
+`EL-01` therefore produces two coordinated artifacts:
+
+1. `docs/architecture/ENGINEERING_LOOP.md` — the Trellis design record: why,
+   boundary, trust model, alternatives, and consequences.
+2. `tools/engineering-loop/SPEC.md` — the implementation-independent normative
+   contract: `MUST`/`SHOULD`/`MAY`, state machine, storage, episodes, runner,
+   evidence, approvals, recovery, observability, and conformance matrix.
+
+The design is already decided at the level needed to author these documents:
+
+- Source and stable policy live in the repository; the controller runs as a
+  separate process and does not enter `src/core/agent/`, API/workers, BullMQ,
+  PostgreSQL, Neo4j, or the RLM runtime.
+- Trusted mutable controller state lives outside the agent-writable worktree.
+- One controller is the only state writer initially.
+- Codex continuation is episode-local; semantic phase boundaries receive a
+  fresh thread compiled from typed state and observed evidence.
+- Model output is an observation. Code-observed commands, repository state,
+  and protected approvals decide transitions.
+- Paid calls, destructive actions, pushes, merges, acceptance changes, and
+  harness self-modification remain explicit gates.
+- The manual `HANDOFF.md` remains authoritative until `EL-07` measures and
+  ratifies migration.
+
+## 4. Required design
+
+### 4.1 Architecture record
+
+`docs/architecture/ENGINEERING_LOOP.md` must contain:
+
+1. Problem statement: the current manual outer loop, context growth, state
+   drift, and the distinction from both the RLM loop and `agent_queue`.
+2. Decision: same-repository source, separate process, protected external
+   mutable state.
+3. Trust boundaries and authorities: human, controller, runner, worker agent,
+   checker, repository, and external systems.
+4. Context model: invariant policy, current typed state, active plan, evidence,
+   episode history, and archive; progressive disclosure between tiers.
+5. Considered alternatives: indefinite resumed thread, shell/Ralph loop,
+   file-only episodic harness, existing Trellis goal loop, Symphony-style
+   tracker daemon, and generic durable workflow engine.
+6. Consequences, risks, and extraction criteria for a future standalone
+   project or durable workflow dependency.
+7. Relationship to code-mediated text, provenance, paid-work doctrine,
+   prompt pins, and the future generated handoff.
+
+### 4.2 Normative specification
+
+`tools/engineering-loop/SPEC.md` must be language-independent at the protocol
+level while naming TypeScript as the intended reference implementation. It
+must define:
+
+1. Normative language and terminology.
+2. Goals and explicit non-goals.
+3. Component model and process boundary.
+4. Typed domain objects: workflow, feature, session, episode, event, approval,
+   evidence, decision, and report.
+5. State machine with allowed, forbidden, protected, terminal, and recovery
+   transitions.
+6. Single-writer state store, atomic snapshots, append-only events, locking,
+   and restart reconstruction.
+7. Repository-observation and scope semantics.
+8. Prompt-compilation contract without authoring production prompt text.
+9. `AgentRunner` contract and Codex app-server as the first planned adapter,
+   without importing its current wire schema into this feature.
+10. Episode continuation and fresh-context rules.
+11. Deterministic verification and evidence precedence.
+12. Approval scope, estimates, expiry, and protected external effects.
+13. Failure taxonomy, idempotency, retry bounds, and unknown-side-effect stop.
+14. Observability, redaction, retention, and prompt/model/version telemetry.
+15. Generated-view and eventual handoff migration semantics.
+16. Threat model and security posture.
+17. Conformance matrix mapping every normative `MUST` to an `EL-*` feature and
+    a planned test profile.
+
+### 4.3 Feature and conformance linkage
+
+- Every normative `MUST` receives a stable requirement ID.
+- Every requirement maps to one feature in `features.json` and one planned
+  conformance test class: static, integration, review, or measurement.
+- `EL-01` may refine feature acceptance wording if needed for consistency, but
+  may not add runtime scope or change a ratified boundary without owner review.
+- Priority-zero open questions must be resolved in the design record. Lower
+  priority future choices may be explicitly deferred to their owning feature.
+
+### 4.4 Prompt-protocol disposition
+
+No production prompt or meta-prompt is authored in `EL-01`. The specification
+must reserve the `EL-04` contract: the attached Prompt-Engineering and
+Hypershot protocols govern all later prompt artifacts; invariant structural
+frames precede generation, concrete task data remains downstream, prompt bytes
+are versioned and pinned, and outputs cross strict schemas.
+
+## 5. File-level starting points
+
+Read first:
+
+- `docs/product/engineering-loop/ROADMAP.md`
+- `docs/product/engineering-loop/features.json`
+- `docs/product/engineering-loop/feature.schema.json`
+- This file §§3–8
+- `docs/architecture/WORKSPACE_AND_MODULES.md` for the manual capability-loop
+  framing
+- `docs/architecture/CODE_MEDIATED_TEXT.md` for enforcement doctrine
+- `src/core/agent/goal_loop.ts`, `decision.ts`, and
+  `orchestrator_prompt.ts` only to state the non-reuse boundary accurately
+
+Create:
+
+- `docs/architecture/ENGINEERING_LOOP.md`
+- `tools/engineering-loop/SPEC.md`
+
+Update only as required by acceptance/closeout:
+
+- `docs/product/engineering-loop/features.json`
+- `docs/product/engineering-loop/ROADMAP.md`
+- `TRELLIS_ROADMAP.md`
+- `HANDOFF.md`
+
+Do not create empty runtime scaffolding merely to reserve paths. The
+`tools/engineering-loop/` directory earns its existence through the normative
+specification in this feature; source and tests begin in `EL-02`.
+
+## 6. Test strategy and acceptance
+
+`EL-01` is zero-model and zero-paid. Acceptance requires:
+
+1. Both new documents exist, cross-link each other, and link the roadmap.
+2. The architecture record contains the decision, alternatives, trust model,
+   consequences, and extraction criteria.
+3. The normative spec covers every §4.2 topic and assigns stable IDs to all
+   `MUST` requirements.
+4. Every `MUST` maps to an existing `EL-*` feature and planned test class.
+5. The state-transition table distinguishes ordinary, protected, terminal,
+   and recovery states; model output cannot authorize a protected transition.
+6. Retry semantics distinguish safe transient retry from unknown side-effect
+   outcomes, which stop.
+7. The feature catalog and schema remain valid, dependency-resolved, acyclic,
+   and order-identical to the roadmap.
+8. The diff contains no runtime TypeScript/Python, production prompt,
+   `WORKFLOW.md`, scheduler, tracker integration, Codex invocation, or manual
+   handoff replacement.
+
+Run, at minimum:
+
+```powershell
+python -c "import json,jsonschema; c=json.load(open('docs/product/engineering-loop/features.json', encoding='utf-8')); s=json.load(open('docs/product/engineering-loop/feature.schema.json', encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s); jsonschema.validate(c, s); print(len(c['features']))"
+npm test
+npm run build
+npm run python:check
+git diff --check
+git status --short --branch
+```
+
+Add a zero-dependency spec-conformance check during the session if prose review
+alone cannot prove requirement/feature/test mapping. Do not add a permanent
+validator outside `tools/engineering-loop/tests` before `EL-02`.
+
+## 7. Guardrails
+
+1. `AGENTS.md` hard rules and authority order bind this docs-only feature.
+2. Preserve AST immutability, entity non-deletion, provenance enforcement,
+   live-only default discovery, and code-mediated text doctrine in the design.
+3. Tooling shape enforces behavior; prompt text only reinforces it. The spec
+   must not claim prompts can protect approvals, evidence, or state.
+4. Keep the engineering controller independent of Trellis product health so it
+   can diagnose and repair a broken Trellis stack.
+5. Trusted mutable state, approval truth, and verification truth must not be
+   writable by the implementation agent.
+6. No model may approve its own semantic work or advance protected state.
+7. No controller-owned retry may repeat an external effect whose result is
+   unknown.
+8. The reference implementation may target TypeScript, but the protocol spec
+   must not copy unstable Codex wire types; the adapter consults its pinned
+   protocol version in `EL-05`.
+9. Do not couple the controller to BullMQ, Redis, PostgreSQL, Neo4j, RLM
+   modules, or the existing product goal loop.
+10. Do not add a generic workflow engine until measurement shows the
+    single-writer store is insufficient.
+11. Paid work remains owner-gated, estimated first, hard-capped, and reported.
+    `EL-01` performs none.
+12. Production prompts are excluded. If any prompt-like explanatory frame is
+    unavoidable, apply the attached Prompt-Engineering and Hypershot protocols
+    before authoring and keep it structural and contamination-free.
+13. No AI attribution, generated-with footer, or co-author trailer.
+14. Report raw counts and unresolved questions honestly; a specification
+    contradiction blocks ratification.
+15. One feature branch and one PR to `master`; close out the root roadmap and
+    regenerate this handoff after acceptance.
+
+## 8. Explicit exclusions
+
+Session 52 does not:
+
+- implement the state machine, state store, event journal, lock, fake runner,
+  repository observer, verifier, policy engine, recovery engine, or renderer;
+- create `WORKFLOW.md`, production prompts, prompt pins, or output schemas for
+  model execution;
+- invoke Codex, the OpenAI API, the RLM, a checker model, or any paid service;
+- modify `src/`, `scripts/`, existing tests, package dependencies, database
+  schemas, queues, API surfaces, or workers;
+- schedule work, poll an issue tracker, create concurrent agents, push, open a
+  PR, merge, or change approval policy;
+- replace, shorten, or generate the manual `HANDOFF.md` outside the required
+  session closeout;
+- resume TTT T2, alter `MODEL_BACKEND_SEAM.md`, or change any completed TTT/RLM
+  prompt pin;
+- decide `EL-08` scheduling/extraction or `EL-09` Trellis ingestion;
+- claim that the loop improves engineering outcomes before the repeated
+  `EL-07` evaluation.
+
+---
+
+## Appendix A. Superseded Session 52 TTT T2 objective — retained for history, do not execute
+
 **TTT-track increment T2: the `buildAgentEnv` forward/strip
 increment — the second FEATURE-CLASS self-edit, run through the
 stage-2 harness on the Session 50 scaffolds.** T1 landed in
@@ -1817,7 +2082,7 @@ must act on:
   session START. Unapproved = zero-paid session: stage the §5i
   record, verify the chain, hand off (the Session 42/49 mold).
 
-## 4. Required design
+### Appendix A.1. Superseded required design
 
 - **Pre-flight (zero-paid):** confirm the Session 51 PR merged
   (`git log -- HANDOFF.md`); `npm ci`; `npm test` (876/87
@@ -1886,7 +2151,7 @@ must act on:
   silently; a failed run's residual insight write is cleaned under
   the bounded operator-cleanup precedent with the Cypher recorded.
 
-## 5. File-level starting points
+### Appendix A.2. Superseded file-level starting points
 
 - `docs/architecture/MODEL_BACKEND_SEAM.md` — THE spec: §3.3 (the
   credential three-part rule), §4 layer 2 (the unconditional
@@ -1921,7 +2186,7 @@ must act on:
   owner's machine): the T1 landing transcript; diagnostic
   reference for what a clean scaffolded run looks like.
 
-## 6. Test strategy and acceptance
+### Appendix A.3. Superseded test strategy and acceptance
 
 The expected machinery footprint IS the T2 diff (two named files) —
 authored by the run, landed by the human PR — plus this session's
@@ -2007,7 +2272,7 @@ Update:
   `docs/archive/ROADMAP_HISTORY.md` (and update the archive-pointer
   paragraph in the same commit).
 
-## 7. Guardrails
+### Appendix A.4. Superseded guardrails
 
 1. Never mutate an AST. The T13 hash preimage is pinned;
    `rederiveAstNodeId` stays authoritative; nothing positional is ever
@@ -2373,7 +2638,7 @@ Update:
     lapse). Recompute both composed-prompt pins in the same commit
     whenever kernel prompt bytes move (Guardrail 9).
 
-## 8. Explicit exclusions
+### Appendix A.5. Superseded exclusions
 
 Do not include: retuning, re-arguing, or embellishing the RECORDED
 Session 43 slice (d) verdict (`RETRIEVAL_DISCIPLINE.md` §9 is the

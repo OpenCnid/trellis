@@ -191,6 +191,7 @@ Ordered roughly by severity.
 
 | Order | Item | Rationale |
 |---|---|---|
+| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 ACCEPTED; EL-01 NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`. `EL-00` established and validated the roadmap/catalog/schema zero-paid; `EL-01` is the architecture record + normative spec only. No runtime, prompt, model call, scheduling, or paid work enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
 | ~~1~~ | ~~Structured logging and basic metrics (3.2 #9 / T16)~~ | **Done (July 6, 2026)** — split-process logs/metrics shipped; see §5 |
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
@@ -1549,3 +1550,43 @@ current addendum bytes either way.**
 6. **Bookkeeping:** row 13's cell gains the S2a RATIFIED outcome and
    standing item 12 is struck; the default next objective returns to
    T2 (Session 52). No paid work, no owner-conditional run.
+
+### July 14, 2026 — Owner-directed engineering-loop program initialization: EL-00 roadmap/catalog ACCEPTED, zero-paid
+
+The owner approved implementation of the engineering-session loop on a new
+feature branch, then directed that the work be decomposed across context
+windows before implementation. The branch `engineering-loop-spec` was created
+from `74c3b48` (the Session 51 head). This is a pre-Session-52 owner-directed
+program-initialization entry, not a completed numbered implementation session;
+Session 52 is re-pointed from TTT T2 to `EL-01`. The TTT row remains intact and
+paused, not cancelled.
+
+1. **Decision:** a lone `SPEC.md` is necessary but insufficient. The bootstrap
+   control plane is a concise human roadmap plus a machine-readable feature DAG
+   and JSON Schema. The normative specification and architecture record are the
+   next bounded feature; controller code begins only after ratification.
+2. **Artifacts:** `docs/product/engineering-loop/ROADMAP.md`, `features.json`,
+   and `feature.schema.json`; §4 gained one pointer row rather than copying the
+   program plan into the root roadmap. Ten features (`EL-00`–`EL-09`), thirteen
+   dependency edges, and thirty-four acceptance items are declared. `EL-08`
+   and `EL-09` are deferred and require new proposals.
+3. **Boundary recorded:** repository-owned source/policy, out-of-process
+   controller, protected mutable state outside the agent-writable worktree,
+   one writer initially, resume within an episode and fresh context across
+   semantic phases, deterministic verification over model claims, and explicit
+   paid/destructive/push/merge gates.
+4. **Acceptance:** fresh-worktree `npm ci` installed 317 packages with 0
+   vulnerabilities; it also surfaced an honest environment warning — the local
+   shell is Node v20.19.2/npm 11.10.0 while four Babel packages require Node
+   22.18+ (CI remains Node 22; install, tests, and build still passed). `npm
+   test` passed 87 files / 876 tests; `npm run build` and `npm run
+   python:check` passed. Python `jsonschema` Draft 2020-12 validation passed
+   (`features=10`); the zero-dependency semantic check passed (`ids=10`,
+   `edges=13`, `acceptance=34`) with unique IDs, resolved dependencies, an
+   acyclic graph, sequential order, unique acceptance IDs, and exact
+   Markdown/catalog order parity; `git diff --check` passed. No runtime code,
+   prompt, model call, or paid work was introduced.
+5. **Next:** `EL-01` only — `docs/architecture/ENGINEERING_LOOP.md` plus
+   `tools/engineering-loop/SPEC.md`, including the threat model, transition
+   contract, and conformance matrix. Explicit exclusions: control-kernel code,
+   `WORKFLOW.md`, production prompts, Codex invocation, and handoff migration.
