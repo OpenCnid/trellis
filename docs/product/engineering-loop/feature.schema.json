@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open.cnid.dev/schemas/trellis-engineering-loop-feature-catalog-v1.json",
+  "title": "Trellis engineering-loop feature catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "program", "statusAuthority", "features"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "program": {
+      "const": "trellis-engineering-loop"
+    },
+    "statusAuthority": {
+      "enum": ["bootstrap_git_until_el_02", "protected_controller_state"]
+    },
+    "features": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/feature"
+      }
+    }
+  },
+  "$defs": {
+    "feature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "order",
+        "title",
+        "outcome",
+        "dependencies",
+        "artifacts",
+        "acceptance",
+        "gates",
+        "paidWork",
+        "bootstrapStatus"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^EL-[0-9]{2}$"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^EL-[0-9]{2}$"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "acceptance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/acceptance"
+          }
+        },
+        "gates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "owner_ratification",
+              "human_review",
+              "paid_run",
+              "prompt_change",
+              "destructive_action",
+              "push",
+              "merge"
+            ]
+          }
+        },
+        "paidWork": {
+          "enum": ["forbidden", "owner_gated", "separately_proposed"]
+        },
+        "bootstrapStatus": {
+          "enum": ["planned", "active", "accepted", "blocked", "deferred"]
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "requirement"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^EL-[0-9]{2}-A[0-9]+$"
+        },
+        "kind": {
+          "enum": ["static", "integration", "review", "measurement"]
+        },
+        "requirement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    }
+  }
+}

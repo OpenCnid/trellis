@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "program": "trellis-engineering-loop",
+  "statusAuthority": "bootstrap_git_until_el_02",
+  "features": [
+    {
+      "id": "EL-00",
+      "order": 0,
+      "title": "Program roadmap and machine-readable feature catalog",
+      "outcome": "A fresh session can select one bounded feature with explicit dependencies, gates, artifacts, and acceptance criteria.",
+      "dependencies": [],
+      "artifacts": [
+        "docs/product/engineering-loop/ROADMAP.md",
+        "docs/product/engineering-loop/RESEARCH.md",
+        "docs/product/engineering-loop/features.json",
+        "docs/product/engineering-loop/feature.schema.json",
+        "TRELLIS_ROADMAP.md"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-00-A1",
+          "kind": "static",
+          "requirement": "Both JSON artifacts parse and the catalog satisfies feature.schema.json."
+        },
+        {
+          "id": "EL-00-A2",
+          "kind": "static",
+          "requirement": "Feature identifiers are unique, all dependencies resolve, and the dependency graph is acyclic."
+        },
+        {
+          "id": "EL-00-A3",
+          "kind": "review",
+          "requirement": "The human-readable roadmap and machine-readable feature order agree."
+        },
+        {
+          "id": "EL-00-A4",
+          "kind": "static",
+          "requirement": "No runtime code, prompt, model call, or paid work is introduced."
+        }
+      ],
+      "gates": ["human_review"],
+      "paidWork": "forbidden",
+      "bootstrapStatus": "accepted"
+    },
+    {
+      "id": "EL-01",
+      "order": 1,
+      "title": "Architecture record and normative service specification",
+      "outcome": "A ratified architecture record explains the selected boundary and a normative specification defines conformance without implementing the controller.",
+      "dependencies": ["EL-00"],
+      "artifacts": [
+        "docs/architecture/ENGINEERING_LOOP.md",
+        "tools/engineering-loop/SPEC.md"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-01-A1",
+          "kind": "review",
+          "requirement": "Process, trust, storage, episode, verification, approval, and recovery boundaries are explicit."
+        },
+        {
+          "id": "EL-01-A2",
+          "kind": "static",
+          "requirement": "Every normative MUST maps to a feature and a planned conformance test."
+        },
+        {
+          "id": "EL-01-A3",
+          "kind": "review",
+          "requirement": "Safe retry and unknown-side-effect behavior are specified with no unresolved priority-zero trust decision."
+        },
+        {
+          "id": "EL-01-A4",
+          "kind": "static",
+          "requirement": "No runtime implementation or production prompt is added."
+        }
+      ],
+      "gates": ["owner_ratification", "human_review"],
+      "paidWork": "forbidden",
+      "bootstrapStatus": "accepted"
+    },
+    {
+      "id": "EL-02",
+      "order": 2,
+      "title": "Deterministic control kernel",
+      "outcome": "Typed code owns workflow truth through validated transitions, durable snapshots, append-only events, locking, and a fake runner.",
+      "dependencies": ["EL-01"],
+      "artifacts": [
+        "tools/engineering-loop/src",
+        "tools/engineering-loop/tests"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-02-A1",
+          "kind": "static",
+          "requirement": "Allowed and forbidden transitions are exhaustively unit-tested."
+        },
+        {
+          "id": "EL-02-A2",
+          "kind": "integration",
+          "requirement": "Injected crashes recover the same state without duplicating completed side effects."
+        },
+        {
+          "id": "EL-02-A3",
+          "kind": "static",
+          "requirement": "Forged approvals, invalid events, and concurrent writers are refused."
+        },
+        {
+          "id": "EL-02-A4",
+          "kind": "static",
+          "requirement": "All acceptance uses fake time, repository, and agent runner with zero model calls."
+        }
+      ],
+      "gates": ["human_review"],
+      "paidWork": "forbidden",
+      "bootstrapStatus": "planned"
+    },
+    {
+      "id": "EL-03",
+      "order": 3,
+      "title": "Repository observer and deterministic handoff renderer",
+      "outcome": "Git and command observations replace model claims about repository state and render a deterministic handoff preview.",
+      "dependencies": ["EL-02"],
+      "artifacts": [
+        "tools/engineering-loop/src/repo_observer.ts",
+        "tools/engineering-loop/src/handoff_renderer.ts"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-03-A1",
+          "kind": "static",
+          "requirement": "Branch, base commit, dirty state, changed paths, and scope are computed rather than model-authored."
+        },
+        {
+          "id": "EL-03-A2",
+          "kind": "static",
+          "requirement": "Identical trusted state renders byte-identical status and handoff previews."
+        },
+        {
+          "id": "EL-03-A3",
+          "kind": "integration",
+          "requirement": "Out-of-scope edits and unexpected repository divergence stop execution."
+        },
+        {
+          "id": "EL-03-A4",
+          "kind": "review",
+          "requirement": "Manual HANDOFF.md remains authoritative pending the EL-07 migration verdict."
+        }
+      ],
+      "gates": ["human_review"],
+      "paidWork": "forbidden",
+      "bootstrapStatus": "planned"
+    },
+    {
+      "id": "EL-04",
+      "order": 4,
+      "title": "Prompt compiler and prompt contracts",
+      "outcome": "Role-specific prompt packets are compiled from invariant hypershot frames and typed task data under explicit context budgets.",
+      "dependencies": ["EL-01", "EL-02"],
+      "artifacts": [
+        "tools/engineering-loop/src/prompt_compiler.ts",
+        "tools/engineering-loop/prompts"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-04-A1",
+          "kind": "review",
+          "requirement": "All prompt and meta-prompt artifacts follow the attached Prompt-Engineering and Hypershot protocols."
+        },
+        {
+          "id": "EL-04-A2",
+          "kind": "static",
+          "requirement": "Invariant frames and concrete task data occupy separate layers and no reusable template contains a task-specific concrete example."
+        },
+        {
+          "id": "EL-04-A3",
+          "kind": "static",
+          "requirement": "Prompt bytes are normalized, versioned, hashed, budgeted, and snapshot-pinned."
+        },
+        {
+          "id": "EL-04-A4",
+          "kind": "static",
+          "requirement": "Planner, implementer, checker, and recovery outputs cross strict schemas."
+        }
+      ],
+      "gates": ["prompt_change", "human_review"],
+      "paidWork": "forbidden",
+      "bootstrapStatus": "planned"
+    },
+    {
+      "id": "EL-05",
+      "order": 5,
+      "title": "Codex app-server runner and episode rotation",
+      "outcome": "The controller can start, observe, interrupt, and resume bounded Codex episodes without treating conversation history as workflow truth.",
+      "dependencies": ["EL-02", "EL-04"],
+      "artifacts": [
+        "tools/engineering-loop/src/runners/runner.ts",
+        "tools/engineering-loop/src/runners/codex_app_server_runner.ts"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-05-A1",
+          "kind": "integration",
+          "requirement": "Protocol fixtures cover start, resume, interrupt, timeout, failure, and controller restart."
+        },
+        {
+          "id": "EL-05-A2",
+          "kind": "static",
+          "requirement": "Thread continuation is limited to one episode and semantic boundaries create fresh threads."
+        },
+        {
+          "id": "EL-05-A3",
+          "kind": "static",
+          "requirement": "The runner cannot advance protected controller state directly."
+        },
+        {
+          "id": "EL-05-A4",
+          "kind": "integration",
+          "requirement": "Real integration smoke testing requires no paid model completion."
+        }
+      ],
+      "gates": ["human_review"],
+      "paidWork": "forbidden",
+      "bootstrapStatus": "planned"
+    },
+    {
+      "id": "EL-06",
+      "order": 6,
+      "title": "Verification, protected gates, recovery, and checker",
+      "outcome": "Only independent evidence and explicit authority can advance implementation toward completion.",
+      "dependencies": ["EL-03", "EL-04", "EL-05"],
+      "artifacts": [
+        "tools/engineering-loop/src/verifier.ts",
+        "tools/engineering-loop/src/policy.ts",
+        "tools/engineering-loop/src/recovery.ts"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-06-A1",
+          "kind": "static",
+          "requirement": "Model reports cannot fabricate passing commands, approval records, or protected transitions."
+        },
+        {
+          "id": "EL-06-A2",
+          "kind": "integration",
+          "requirement": "Paid, destructive, push, merge, and acceptance-change gates withstand adversarial fixtures."
+        },
+        {
+          "id": "EL-06-A3",
+          "kind": "static",
+          "requirement": "Only typed transient failures retry automatically and all retries are bounded."
+        },
+        {
+          "id": "EL-06-A4",
+          "kind": "integration",
+          "requirement": "Unknown external side-effect outcomes stop and the independent checker is read-only."
+        }
+      ],
+      "gates": ["owner_ratification", "human_review"],
+      "paidWork": "forbidden",
+      "bootstrapStatus": "planned"
+    },
+    {
+      "id": "EL-07",
+      "order": 7,
+      "title": "Bounded pilot, repeated evaluation, and handoff migration verdict",
+      "outcome": "Measured evidence determines whether the controller replaces the manual session workflow.",
+      "dependencies": ["EL-06"],
+      "artifacts": [
+        "docs/benchmarks/ENGINEERING_LOOP_REPORT.md",
+        "HANDOFF.md"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-07-A1",
+          "kind": "measurement",
+          "requirement": "Isolated repeated trials report context, time, cost, intervention, stale-state, and acceptance-reliability measurements."
+        },
+        {
+          "id": "EL-07-A2",
+          "kind": "review",
+          "requirement": "Failure transcripts are reviewed for agent, grader, environment, and harness error."
+        },
+        {
+          "id": "EL-07-A3",
+          "kind": "measurement",
+          "requirement": "Protected-gate adversarial tests remain perfect and no acceptance reliability regression is observed."
+        },
+        {
+          "id": "EL-07-A4",
+          "kind": "review",
+          "requirement": "The owner records an adopt, revise, or reject verdict before HANDOFF.md authority changes."
+        }
+      ],
+      "gates": ["paid_run", "owner_ratification", "human_review"],
+      "paidWork": "owner_gated",
+      "bootstrapStatus": "planned"
+    },
+    {
+      "id": "EL-08",
+      "order": 8,
+      "title": "Optional scheduling and scale expansion",
+      "outcome": "Evidence determines whether tracker polling, scheduling, concurrency, multi-machine durability, or extraction into a standalone project is justified.",
+      "dependencies": ["EL-07"],
+      "artifacts": [],
+      "acceptance": [
+        {
+          "id": "EL-08-A1",
+          "kind": "review",
+          "requirement": "A new owner-approved proposal identifies a measured limitation of the single-controller implementation."
+        }
+      ],
+      "gates": ["owner_ratification"],
+      "paidWork": "separately_proposed",
+      "bootstrapStatus": "deferred"
+    },
+    {
+      "id": "EL-09",
+      "order": 9,
+      "title": "Optional verified ingestion of completed run reports",
+      "outcome": "Sanitized completed-run evidence may enter Trellis for retrospective research without becoming part of the live control path.",
+      "dependencies": ["EL-07"],
+      "artifacts": [],
+      "acceptance": [
+        {
+          "id": "EL-09-A1",
+          "kind": "review",
+          "requirement": "A new owner-approved design specifies sanitization, source bytes, provenance, retention, and the prohibition on circular control dependencies."
+        }
+      ],
+      "gates": ["owner_ratification"],
+      "paidWork": "separately_proposed",
+      "bootstrapStatus": "deferred"
+    }
+  ]
+}
