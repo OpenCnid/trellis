@@ -5698,3 +5698,119 @@ counts below.
    surface — the first Trellis-edits-Trellis feature-class
    increment, entering as its own owner-approved proposal built from
    the record's §8 skeleton).
+
+### July 13, 2026 — Session 48: TTT-track increment T1 attempted through the stage-2 harness — verdict FAILED, recorded in full (§4 row 13, Phase 1 step 1)
+
+The first feature-class self-edit increment ran owner-approved and
+FAILED on the pre-stated criterion; both runs, the diagnosis, the
+cleanup, and the retry lessons are recorded in
+`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` §5h (the increment
+record, written document-first before any spend). Session paid total
+**$2.1063** (run 1 $0.8760 + run 2 $1.2303) against the ≤$1.80
+approved envelope — the overrun itself is a recorded criterion
+failure — under the standing ≤$5/run cap. The final tree ships ZERO
+code bytes (the failed diff reverted, the pre-staged stub removed);
+no prompt byte; both composed-prompt pins unmoved; no refresh owed
+(no in-scope file changed at close-out).
+
+1. **Zero-paid staging (all green before the proposal):** the §5h
+   record document-first; `stage2:check --pre` PASS on the two clean
+   evidence entities (`resolvemcpcredentialenv`, `mcpcredentialenv`;
+   the contested attached edges on `config` and
+   `trellis_retrieval_budget_per_run` are named in §5h.3 with the
+   reasoning for not pre-gating on them); the split-scope policy-1
+   dry-run echo read 0 to ingest / 301 unchanged / 0 tombstones
+   (refresh-before-use satisfied with no refresh);
+   `test:selfedit-harness` ALL CHECKS PASSED; `npm test` 837/85.
+   Two staging discoveries recorded: the toolkit cannot create files
+   (`load` refuses non-files) — resolved by the pre-staged four-line
+   stub header committed before the run (§5h.2, with the
+   vitest-red-window consequence recorded); and prerequisites
+   verified first (egress 401 probe, key present) per the
+   Session 43 lesson.
+2. **Run 1 ($0.8760 — 290,167 in / 15,060 out; 15 iterations, 96s;
+   0 write_backs, 0 raw splices): clean SELF-REFUSAL.** Its step-6
+   verification assembled multi-line expectations without line
+   terminators, three assertions read false, and the run reverted
+   its staging and reported per the task's contradiction rule — the
+   printed regions in the same cell show the staged content was
+   spec-correct. Two live `AnchorMismatchError` refusals caught
+   address-shift inserts mid-run (the Session 41 teaching loop,
+   observed). Diagnosis and task v2 (assertion discipline: line
+   LISTS, never terminator-less concatenations; the re-locate rule;
+   the fix-the-assertion-not-the-edit step) recorded in §5h.7
+   BEFORE the contingency spawned.
+3. **Run 2 ($1.2303 — 402,781 in / 22,332 out; 14 calls, 123.5s;
+   2 write_backs, 0 raw splices): wrote a content-correct diff,
+   FAILED the evidence contract.** The diff: insert-only, 220
+   insertions across exactly the two named files (the four
+   `TRELLIS_RLM_*` keys, the ambient `OPENAI_BASE_URL` guard with
+   the exact §4.1 message, the three cross-field refusals, the
+   `config.rlmBackend` export, the full pin file under the
+   byte-intact stub header); diagnostic `npm test` with the diff
+   applied read 846/86 all green. The failure: a retrieval-dedup
+   refusal (correct behavior — the cell re-fetched an
+   already-fetched hash) killed the evidence cell BEFORE its two
+   `vector_search` calls executed; the run never re-ran them; no
+   `index.ts` block entered the retrieval set; at insight time the
+   run cited the one address it had — the `mcp_servers.ts`
+   implementation block — instead of stopping. `stage2:check`
+   flagged `unbridged_evidence` (the second live firing ever). The
+   Session 31 gate correctly permitted the write; the bridge check
+   correctly caught the wrong-document citation.
+4. **Verdict and cleanup:** a harness flag fails the increment
+   (never argued away) and the spend breached the approved envelope
+   — **T1 FAILED, no third run** (the §5f.5 two-failure precedent).
+   The residual insight edge was deleted under the bounded
+   operator-cleanup precedent (exact Cypher and before/after counts
+   in §5h.8); the tree reverted; the stub removed in a recorded
+   commit; `npm test` back to 837/85 green. The run logs and the
+   preserved diff live in `benchmark_logs/` (local, gitignored).
+5. **What the failure taught (the §5h.8 retry material):** the
+   citable-evidence chain must arrive graph-first (the
+   `uses_config_key` edge on `trellis_retrieval_budget_per_run`
+   cites `fc17205c…6311`, an `index.ts` block — with the `--pre`
+   tension on entity `config`'s unrelated contested edge recorded
+   as an open design point); the task needs an explicit STOP rule
+   for the no-citable-address case; evidence cells make one
+   retrieval call each (a typed refusal kills the whole cell);
+   feature-class two-file authoring prices $0.9–$1.3 per run, not
+   the $0.4–$0.9 the landed comment-class runs suggested. The
+   machinery itself needed NO change: every layer — the anchor
+   guard, the dedup refusal, the write gate, the bridge check —
+   fired exactly per contract; run 2's failure is task-discipline
+   class, closed by task text v3 in the retry proposal.
+6. **Close-out (docs-only tree):** `npm test` 837/85, `npm run
+   build`, `npm run python:check`, `docker compose --profile test
+   config --quiet` green; live drills not re-run beyond
+   `test:selfedit-harness` (zero non-markdown bytes in the final
+   tree — the Session 45–47 precedent; the reverted run bytes never
+   shipped); no refresh owed (the dry-run echo at staging read
+   current, and the close-out tree changes docs only). Bookkeeping:
+   Session 43 compressed to the HANDOFF digest, its §5 entry moved
+   verbatim to `docs/archive/ROADMAP_HISTORY.md` (live ledger now
+   44–48, pointer paragraph updated in the same commit); row 13's
+   cell gains the T1 outcome; HANDOFF regenerated per §0 with the
+   step-5 re-check (next objective: the T1 RETRY as its own
+   owner-approved proposal, task v3 built from §5h.8).
+7. **Same-day addendum (owner-directed, the §0 step-5 rule):** task
+   text v3 was DRAFTED and staged in §5h.9 so Session 49 presents a
+   ready proposal — authored under the house prompt-engineering and
+   hypershot protocols (the July 12 kernel-prompt precedent applied
+   to a task text for the first time: semantic tags, the two
+   decisive rules in attention zones at head AND tail, positive
+   framing, hypershot frames with instruction-bearing variables;
+   run 2's violated citation rule had been buried mid-step prose).
+   The §5h.8 open `--pre` design point is RESOLVED in §5h.9 (clean
+   pre-gate entities kept; the task filters uncontested edges
+   in-query; the evidence chain re-verified live read-only — the
+   `uses_config_key` edge uncontested, its provenance `fc17205c…`
+   carrying BOTH molds). The escalation rule is recorded: a
+   recurrence of the evidence class closes by TOOLING SHAPE (a
+   harness-side read-only citability query — retrieval-set
+   membership AND named-file bridge), proposed owner-gated, never a
+   write gate. The mechanical-vs-task-text position is recorded:
+   detection layers are already mechanical and all fired per
+   contract; the retry closes run competence in task text first,
+   tooling on recurrence (the increment-2 ladder shape). Estimate
+   for the retry: $0.9–$1.3, ONE run, no pre-bundled contingency.
