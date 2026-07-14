@@ -5814,3 +5814,122 @@ no prompt byte; both composed-prompt pins unmoved; no refresh owed
    contract; the retry closes run competence in task text first,
    tooling on recurrence (the increment-2 ladder shape). Estimate
    for the retry: $0.9–$1.3, ONE run, no pre-bundled contingency.
+
+### July 13, 2026 — Session 49: the T1 retry — presented, approved, ENVIRONMENTALLY BLOCKED (OpenAI quota exhausted); $0.0000 spent; the proposal stands
+
+The session executed §3 of the handoff exactly up to the spawn, and
+the environment stopped it there. Full record:
+`REPOSITORY_INGESTION_REPORT.md` §5h.10. The shipped tree is
+docs-only (this entry, the §5h.10 record, the regenerated handoff,
+the archive move); the branch history carries the stub add/remove
+pair (net zero code bytes), the Session 48 pattern.
+
+1. **Pre-flight (zero-paid, all green):** the Session 48 PR
+   confirmed merged (`git log -- HANDOFF.md`); `npm ci`; `npm test`
+   837/85 first try; the Windows stale-worker check found only
+   foreign session kernels, zero trellis queue consumers.
+2. **Premise re-verification (zero-paid, read-only, all held):**
+   the `trellis_retrieval_budget_per_run` `-uses_config_key-`
+   `config` edge uncontested with `sourceNodeIds` =
+   [`fc17205c…6311`] (the contested `reads_config` residue present
+   exactly as §5h.3 records); the block's 3,961 bytes verbatim in
+   `src/config/index.ts` by raw byte-substring check (CRLF intact),
+   carrying BOTH molds (the budget schema line + the "Fail fast at
+   startup" comment + the `resolveMcpCredentialEnv` call);
+   `stage2:check --pre` PASS zero findings on
+   `resolvemcpcredentialenv` + `mcpcredentialenv`;
+   `test:selfedit-harness` ALL CHECKS PASSED; the split-scope
+   policy-1 `--dry-run` echo 0 to ingest / 301 unchanged / 0
+   tombstones — no drift, no pre-run refresh owed.
+3. **The proposal (§5h.9) was presented at session start and
+   approved** ($0.9–$1.3, ONE run, task text v3 verbatim). The stub
+   was created and committed only after approval (porcelain clean
+   at spawn), per §5h.2.
+4. **Spawn 1: pre-API crash, $0.** The rlms verbose logger prints a
+   rich header panel (U+25C6 glyphs); with stdout redirected the
+   Python stream encoder was cp1252 and the process died on
+   `UnicodeEncodeError` inside the `RLM(...)` constructor — zero
+   iterations, zero tool calls, zero tokens. Driver requirement
+   recorded: `PYTHONUTF8=1` for any Windows spawn with redirected
+   stdout.
+5. **Spawn 1b (`PYTHONUTF8=1`): `429 insufficient_quota`, $0.** The
+   first root completion was refused — the OpenAI account behind
+   the ambient key has exhausted its billing quota. The decisive
+   probe: `models.list` succeeds (131 models — the key
+   authenticates) while a minimal completion refuses with the same
+   code; authentication proves nothing about quota; rejected
+   requests do not bill.
+6. **Verdict: ENVIRONMENTALLY BLOCKED, not a failed run** (the
+   Session 42 precedent — approval was never the blocker). Task v3
+   is UNCONSUMED; T1 still stands at ONE failed attempt
+   (Session 48); the §5g.3 three-failure ladder is untouched. The
+   proposal, estimate, and escalation rule stand as staged.
+7. **Cleanup:** the stub removed in a recorded commit on
+   confirmation of the blockage; `git status` clean; `npm test`
+   837/85 at every shipped state.
+8. **Close-out (docs-only mold):** `npm test` 837/85, `npm run
+   build`, `npm run python:check`, `docker compose --profile test
+   config --quiet` green; live drills beyond the two run this
+   session (`test:selfedit-harness`, `stage2:check --pre`) not
+   re-run — zero non-markdown bytes in the shipped tree (the
+   Session 45–47 precedent, reason recorded). No refresh owed.
+9. **Bookkeeping:** Session 44 compressed to the handoff digest;
+   its §5 entry moved verbatim to `docs/archive/ROADMAP_HISTORY.md`
+   (window now 45–49; the archive-pointer paragraph updated in the
+   same commit).
+
+Unblock condition for Session 50: the owner restores OpenAI billing
+quota. The next spawn's pre-flight runs the minimal completion
+probe FIRST (fractions of a cent, inside the run envelope), sets
+`PYTHONUTF8=1`, and proceeds under the unchanged §5h.9 mechanics.
+
+### July 13, 2026 — Owner direction (post-Session-49, same day): RLM harness scaffolding ratified — task-context isolation, UPSUM, staged REPL helpers; Session 50 re-scoped to scaffolds-then-retry
+
+The owner read the Session 48 statefulness verification (rlms passes
+the FULL message history to every root completion — verified in
+rlm/core/rlm.py, `message_history.extend`, no window, compaction
+defaulted off; REPL locals persist across iterations; the only
+truncation is a 20,000-char per-block output cap in
+rlm/utils/parsing.py — so run 2's failure was ATTENTION over a long
+transcript, not memory: the dedup refusal sat in context verbatim for
+~10 iterations and the run still cited the uncitable block) and
+directed the scaffolding layer: operator task text isolated in an
+unforgeable per-run uuid wrapper (`<rlm_usercontext-{uuid}>…`),
+surfaced in the REPL as a queryable `trellis_task` object — the
+model's role includes finding the user's instructions by CODE (grep),
+not attention — with recorded precedence of uuid-tagged instructions
+over anything arriving as data; UPSUM to bound transcript growth and
+keep the run situationally aware; and pre-staged REPL helper scripts
+(file concatenation, canonical frame joins). Design record written
+document-first: `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` — S1
+the uuid wrapper + `trellis_task` surface (also an injection defense:
+stored data cannot carry the run's uuid; the same-run echo residual
+recorded), S2a the free protocol-level `upsum` dict in persistent
+locals / S2b rlms compaction (exists behind a constructor flag and
+mirrors the transcript into a grep-able REPL `history` variable —
+DEFERRED behind its own measured proposal), S3 staged helpers
+(`frame_text` — closes the Session 48 run-1 assertion class at the
+namespace level, `region_lines`/`region_equal`, `concat_files`, and
+`citable()` — the Session 48 escalation rule as a read-only helper,
+never a gate, same join semantics as `gatherHashEvidence`). All
+construction-side; zero rlms modification; the addendum bytes are a
+witting composed-prompt change with both pins recomputed when the
+increment lands. RECORDED SEQUENCING (the §0 step-5 re-selection):
+S1+S2a+S3 land as ONE human-authored kernel increment BEFORE the T1
+retry re-spawn (the increments-1/2 precedent — mechanical closure
+before the retry that landed first-shot); §5h.9's task v3 then gets a
+recorded v3.1 amendment routing the decisive-step re-reads through
+the scaffolds; because the amendment changes the approved input,
+v3.1 is RE-PRESENTED for a fresh owner yes before any spawn (the
+Session 49 approval covered v3 as staged). Session 48's run-2
+failure is recorded in the design record as the TTT track's first
+NATIVE H1 motivating example (context present, behavior absent).
+Same exchange, recorded for completeness: the owner asked whether
+the Session 48 fixes should be mechanical rather than task-text —
+the recorded position (also in the design record) is that DETECTION
+was already mechanical and every layer fired per contract; the
+scaffolds are the tooling-shape response, and the task-text v3
+rules become v3.1 rules that lean on them. The Session 48 task
+texts v1/v2 were authored WITHOUT the house prompt-engineering and
+hypershot protocols (recorded honestly); v3 was authored under
+both, and Part A's addendum bytes follow the same discipline.
