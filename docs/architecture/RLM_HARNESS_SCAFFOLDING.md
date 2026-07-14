@@ -157,3 +157,29 @@ claim that scaffolds produce "learning" — they are attention
 prosthetics; weight-level adaptation remains the TTT track's measured
 question (H1), and this record's motivating example is that track's
 first native evidence.
+
+## 7. Proposed S2a refinement — UPSUM as an updated summary (proposal, July 13, 2026)
+
+Proposal for owner review before Part A implements S2a; additive to §3, no existing byte changed here. §3's S2a names an `upsum` dict with the fixed fields `done`, `pending`, `blocked`, `decisive_facts`. Those four are the run-control invariants and stay. Two properties make the structure match its name (UPdated SUMmary) and close the growth the doc cites (the 402,781-token run): the four fields are joined by domains that emerge from the work, and each note is rewritten to a budget every turn, so coverage grows while total size holds. The addendum teaches this frame, brace-free for the rlms `.format()` contract and ASCII for the Windows-spawn encoder:
+
+    UPSUM
+    A running summary of the work, held in the REPL and refreshed each turn.
+
+      UPSUM
+        done           : <what_is_finished>
+        pending        : <what_remains>
+        blocked        : <what_is_waiting_and_on_what>
+        decisive_facts : <the_load_bearing_findings>
+        <domain_that_emerged_from_the_work> : <one_current_compressed_note>
+        ...
+
+    Each turn:
+      1. read the new activity ...
+      2. update the four standing fields; add a domain when the work introduces one
+      3. rewrite each note so it stays current and within its budget
+      4. keep the whole within TOTAL_BUDGET; compress the least-decisive domains to make room
+      5. re-emit UPSUM by code before each decisive step
+
+    Coverage grows; size holds steady.
+
+The mechanism is unchanged from §3: persistent REPL locals, re-emitted at decisive steps, nothing to build, the same pin ceremony as S1. The §3 example still holds; run 2 would have re-encountered "vector_search never ran" in `upsum.pending` at the insight step. This refinement adds the summarize-to-budget step and the emergent domains; the four standing fields and the free, protocol-level character are preserved.
