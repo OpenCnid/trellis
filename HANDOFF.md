@@ -816,6 +816,35 @@ entries, all PR #89 records) moved verbatim to the archive (window
 now 46–50); the roadmap row-13 cell and §5 entry updated; task
 texts and records §5h.11 in the increment record.
 
+Post-Session-50 same-day exchange (July 13, 2026, collaborator
+PR #96, reviewed in two rounds and squash-merged as `7a37418`;
+docs-only, $0, no gate/default/pin moved, no refresh owed —
+`docs/` is outside extraction scope): `TEST_TIME_TRAINING.md`
+gained §12.7 + reading-list rows 12–14 (header now "identifiers
+verified") — the R3/R4 criterion sharpened (scored on reasoning-
+and protocol-shaped items; a knowledge-recall criterion would
+flatline for reasons unrelated to whether TTT works; Szafer et
+al., ICLR 2026), the R4 estimate unit fixed (GENERATION tokens,
+not training cost — rollout dominates wall-clock), the LoRA
+drift-bound citation pinned (Hu et al., arXiv:2505.20633, ICML
+2025, its Observation 3 — verified against the paper body), and
+the global-workspace/Jacobian-lens result recorded as an AVENUE
+ONLY (not a rung, no criterion, viability explicitly gated on
+still-partial open-checkpoint reproducibility; one recorded
+cosmetic nit — item 3 says "Gemma-3", the cited repos cover
+Gemma-2/Gemma-4 — rides the next touch). `RLM_HARNESS_SCAFFOLDING.md`
+gained §7: the S2a UPSUM refinement PROPOSAL, framed document-first
+(the record governs; the landed addendum bytes are its current
+implementation, never an authority over it) — lists rewritten
+never appended, emergent domains one compressed note each, the
+code-checked `UPSUM_BUDGET` constant (the counting doctrine), the
+ITERATION-BUDGET back-fill. **OWNER DECISION PENDING — nothing
+implemented; if ratified it is its own kernel-prompt increment
+(Guardrail 15 authoring, both composed-prompt pins recomputed in
+the same commit, `test:modules` green); T2 proceeds on the current
+addendum bytes either way.** The full review record is the roadmap
+§5 entry + the two PR comments.
+
 OpenCnid selected the MIT License on July 6, 2026.
 
 Your objective is **Session 51: TTT-track increment T2 — the
@@ -1162,7 +1191,9 @@ immutable, content-addressed physical location in source material.
      cumulative paid runs, zero transcription errors.
    - **The RLM harness scaffolds (Session 50;
      `src/rlm/trellis_scaffold.py`, design record
-     `docs/architecture/RLM_HARNESS_SCAFFOLDING.md`):** the model
+     `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` — its §7 carries
+     the PENDING S2a UPSUM refinement proposal, PR #96, owner
+     decision):** the model
      finds the operator's instructions BY CODE. Every research run:
      one uuid per run; the task text wrapped in
      `<rlm_usercontext-uuid>` tags at BOTH injection points (the
@@ -1374,7 +1405,11 @@ Repository state at handoff creation:
   `trellis_scaffold.test.ts` + `scripts/test_scaffold_unit.py` NEW,
   `trellis_agent.py` wired, `rlm_job.ts`/`rlm_job.test.ts` strip
   pin, drill/check extensions, plus the RUN-AUTHORED T1 diff:
-  `src/config/index.ts` + the NEW `src/config/rlm_backend.test.ts`).
+  `src/config/index.ts` + the NEW `src/config/rlm_backend.test.ts`),
+  plus the post-Session-50 same-day collaborator PR #96 (docs-only,
+  merged `7a37418`: `TEST_TIME_TRAINING.md` §12.7 + rows 12–14;
+  `RLM_HARNESS_SCAFFOLDING.md` §7 — the S2a UPSUM refinement
+  PROPOSAL, owner decision pending).
   Use `git log -- HANDOFF.md` to confirm this PR landed; if it is
   still unmerged when this session starts, STOP and merge it first.
 - `modules/workspace-discipline/` is at VERSION 2 (module #1); module
@@ -1586,7 +1621,15 @@ Repository state at handoff creation:
   the reliance claim decomposed C1 supported / C2 extrapolated — the
   load-bearing gap / C3 untested); questions 2–4 stand, question 4
   sharpened to "eligibility boundary = the run's retrieval set?";
-  official LaCT code exists (ICLR 2026). Row 10's measurement
+  official LaCT code exists (ICLR 2026); (12) the S2a UPSUM
+  refinement ratification (`RLM_HARNESS_SCAFFOLDING.md` §7, PR #96,
+  July 13, 2026): owner decision pending — if ratified, its own
+  human-authored kernel-prompt increment amending §3 and bringing
+  the live addendum into conformance with the amended record
+  (Guardrail 15 authoring under both skills, both composed-prompt
+  pins recomputed in the same commit, `test:modules` green); never
+  self-served, and NOT a Session 51 prerequisite — T2 proceeds on
+  the current addendum bytes. Row 10's measurement
   (Session 43), the judge-calibration MEASUREMENT (Session 44), the
   calibration DECISION (ACCEPT, Session 46), the R2a census
   (Session 46), the R2b design record (Session 47), the harness
