@@ -366,6 +366,135 @@ eligibility boundary BE the run's retrieval set — provenance-gated
 fast-weight training, so what the model absorbed is auditable the way
 what it cited is today?
 
+## Postscript 4 — the engineering loop, and the day it refused to start (added July 15, 2026)
+
+**First, the thing that affects you directly: your TTT track is paused.** On
+July 14 the owner opened a new program and prioritized it ahead of the row-13
+continuation. Nothing in Postscript 3 is withdrawn — the record, the
+decomposition, and the §12.4 question to you all stand, and the row resumes
+after this program or a later reprioritization. This postscript explains what
+displaced it, because the displacing thing turned out to be about *evidence*,
+which is your subject.
+
+**What the engineering loop is.** Everything above describes Trellis editing
+Trellis. One altitude up sits a loop we had never mechanized: the loop that
+*builds* Trellis. A human writes a handoff prompt, an agent works a bounded
+feature, a human reviews, the handoff is rewritten for the next session. That
+loop is currently run by hand, and `HANDOFF.md` — the prompt you have seen
+referenced — is its state, maintained manually. The engineering-loop program
+builds a controller that owns that loop's truth deterministically, on one
+premise: **deterministic verification outranks model claims.** The controller
+observes the repository, compiles role prompts, drives a bounded agent episode,
+runs acceptance itself, and holds the result in protected state *outside the
+worktree the agent can write* — so that an agent cannot forge the record of its
+own success. Ten bounded features, `EL-00` through `EL-09`.
+
+**Where it got to.** Six features accepted in six sessions: the control kernel
+(schemas, an exhaustive 132-pair transition matrix, an integrity-linked journal,
+crash injection at every durable boundary), the repository observer, the prompt
+compiler, a real Codex runner adapter with a pinned wire protocol, and
+deterministic verification gates. 1,161 passing tests. All zero-paid.
+
+**Then `EL-07` refused to start.** `EL-07` is the pilot: run the manual workflow
+against the controller workflow on identical tasks, measure both, and let the
+owner decide whether `HANDOFF.md` becomes machine-generated. Its preflight
+demands seven facts agree, and closes with a line worth the whole program:
+*conversation or repository prose alone is not acceptance.* Six agreed. The
+seventh — protected controller acceptance — was **absent**. Not stale. Never
+instantiated.
+
+**The controller had never run.** `StateStore.open()` takes the protected root
+as a caller-supplied argument with no default; every caller was a test handing
+it a temp directory; there was no entrypoint, no CLI, no npm script, no importer
+anywhere in the product source, and no state root on disk. Six features had
+built a correct, thoroughly tested, and completely inert library.
+
+Decomposed the way you decomposed the LaCT reliance claim: **1,161 passing tests
+establish that the kernel is *correct*. They establish nothing about whether it
+is *reachable*.** Those are independent claims, and the suite speaks only to the
+first. No test asserted that a non-test caller existed, so nothing failed. The
+green checkmarks were all true and all beside the point. Note what did *not* go
+wrong: every acceptance was real, because a human ratified each feature and
+merged it through a reviewed PR. The trust was sound. It was simply being held
+by a mechanism other than the one the architecture specified — and nobody
+noticed, because the mechanism that was working produced the same output as the
+mechanism that didn't exist.
+
+**The second finding is the one that should annoy you.** The machine-readable
+catalog still declared `statusAuthority: "bootstrap_git_until_el_02"` — status
+lives in Git *temporarily*, until EL-02 stands up protected state. The schema
+had always offered the target value, `protected_controller_state`. It was never
+flipped. "Temporarily" ran four features past its stated end.
+
+The cause: that migration was written in a roadmap paragraph and **nowhere
+else**. No requirement identifier, no conformance row, no test that could fail.
+The audit checked that `statusAuthority` was one of two permitted values and
+never which one. This repository's stated authority order is *code > glossary >
+prose* — and the rule was broken by the paragraph stating the rule. In the
+vocabulary of your Altitude −1 section: we wrote a conservation law and
+conserved nothing. Prose is not a constraint; it is a wish.
+
+**The fix, and its recursion.** A new feature, `EL-10`, now gates `EL-07`: stand
+the controller up, and move status into protected state. Building it exposed the
+sharper problem. Protected state is empty and must be told that `EL-00` through
+`EL-06` were accepted — but the only thing available to write that is the agent,
+and protected state exists *precisely because* the agent's claims about
+acceptance are not trustworthy. Described neutrally, a seeding tool is a forgery
+tool with a benign name. **You cannot bootstrap trust from the untrusted side.**
+
+The design answers it the same way grounded authoring answered module #1:
+remove the affordance rather than ask for good behavior. The agent composes the
+*request*; the owner authors the *authorization* outside the controller, into a
+channel the agent reads but cannot write; the approval is consumed atomically so
+it cannot be replayed; the scope enumerates each feature/status pair explicitly,
+so approving it is approving each claim individually; and seeding refuses
+outright against a non-empty ledger. One tempting shortcut was forbidden
+normatively rather than merely avoided: representing acceptance by walking a
+synthetic workflow to its `accepted` state would have manufactured
+controller-attested events for runs nobody ran — module #1's laundering,
+reintroduced at the foundation, as the trust store's first entry.
+
+There is also a measurement point you will recognize. Had `EL-07` proceeded, it
+would have recorded the metrics deciding "is this machinery trustworthy enough
+to be given authority" into a temp directory, because the protected journal did
+not exist — using unprotected evidence to certify the protection. The feature
+that decides how far the evidence chain can be trusted was the worst possible
+place to leave the evidence chain unestablished.
+
+**Three questions for you, in your cross-domain capacity:**
+
+1. **Seeding is a root-of-trust ceremony, and we are probably reinventing it.**
+   The operation "establish a trust anchor when nothing trustworthy exists yet"
+   is solved, repeatedly, outside our field — DNSSEC root KSK ceremonies, CA
+   root key generation, TPM provisioning. Is there a discipline there we should
+   be borrowing wholesale? Specifically: what does that literature say about the
+   one operation that cannot be authorized by the thing it establishes, and does
+   "witnessed, scripted, single-shot, refuses-if-already-initialized" exhaust
+   the requirements or is our list naive?
+2. **Does "correct but unreachable" have a proper name?** We caught it because a
+   gate refused, not because a test failed — which means we caught it by luck of
+   process, not by construction. Is there a test-shaped invariant that catches
+   "this verified module has no non-test caller" without collapsing into
+   dead-code analysis? This feels like the implementation gap between model
+   checking and deployment, and we would rather import the right frame than
+   invent a worse one.
+3. **Where else are we conserving nothing?** The `statusAuthority` drift was
+   machine-visible for four features and no test looked. If you read the SPEC
+   with fresh eyes, we are interested in every place a stated invariant has no
+   enforcement attached. Those are the defects that survive review indefinitely,
+   because reviewers read the sentence and believe it.
+
+Reading, in dependency order:
+[`docs/architecture/ENGINEERING_LOOP.md`](architecture/ENGINEERING_LOOP.md) (why
+the boundary is where it is),
+[`tools/engineering-loop/SPEC.md`](../tools/engineering-loop/SPEC.md) (111
+mandatory requirements; §6.1 is the new activation section), and
+[`docs/product/engineering-loop/EL10_CONTROLLER_ACTIVATION_PROPOSAL.md`](product/engineering-loop/EL10_CONTROLLER_ACTIVATION_PROPOSAL.md)
+(the finding, the evidence, and §9's ledger design — its §4.6 records a scope
+claim we got wrong mid-session rather than quietly deleting it).
+
+---
+
 ## Where you can help next
 
 When you propose — on any item below — please use this frame, one per
