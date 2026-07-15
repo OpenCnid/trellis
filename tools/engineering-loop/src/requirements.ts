@@ -59,3 +59,21 @@ export const EL04_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
   { requirement: 'EL-REQ-PROMPT-006', source: ['prompt_contracts.ts'], tests: ['prompt_contracts: four strict advisory role outputs'] },
   { requirement: 'EL-REQ-PROMPT-007', source: ['prompt_contracts.ts', 'prompt_compiler.ts'], tests: ['prompt_compiler: contamination and deterministic overflow refusal'] },
 ] as const;
+
+export const EL05_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
+  { requirement: 'EL-REQ-RUNNER-001', source: ['runners/runner.ts', 'fakes.ts', 'kernel.ts'], tests: ['runner: full lifecycle conformance'] },
+  { requirement: 'EL-REQ-RUNNER-002', source: ['runners/codex_app_server_runner.ts'], tests: ['codex_app_server_runner: pinned negotiation and zero-turn smoke'] },
+  { requirement: 'EL-REQ-RUNNER-003', source: ['runners/codex_app_server_runner.ts', 'runners/runner.ts'], tests: ['codex_app_server_runner: boundary-only canonical translation'] },
+  { requirement: 'EL-REQ-RUNNER-005', source: ['runners/runner.ts', 'kernel.ts', 'state_machine.ts'], tests: ['runner: advisory report has no controller authority'] },
+  { requirement: 'EL-REQ-RUNNER-006', source: ['runners/runner.ts', 'runners/codex_app_server_runner.ts'], tests: ['codex_app_server_runner: exhaustive stable correlations'] },
+  { requirement: 'EL-REQ-RUNNER-007', source: ['runners/runner.ts', 'runners/codex_app_server_runner.ts'], tests: ['codex_app_server_runner: typed bounded terminal outcome matrix'] },
+  { requirement: 'EL-REQ-RUNNER-008', source: ['runners/runner.ts', 'runners/codex_app_server_runner.ts'], tests: ['codex_app_server_runner: ordering bounds duplicate refusal and redaction'] },
+  { requirement: 'EL-REQ-EPISODE-001', source: ['episode_policy.ts'], tests: ['episode_policy: complete immutable episode bindings'] },
+  { requirement: 'EL-REQ-EPISODE-002', source: ['episode_policy.ts'], tests: ['episode_policy: unchanged current resume only'] },
+  { requirement: 'EL-REQ-EPISODE-003', source: ['episode_policy.ts'], tests: ['episode_policy: named fresh episode and thread matrix'] },
+  { requirement: 'EL-REQ-EPISODE-005', source: ['episode_policy.ts', 'runners/runner.ts'], tests: ['episode_policy: conversation and runner memory exclusion'] },
+  { requirement: 'EL-REQ-EPISODE-006', source: ['episode_policy.ts', 'prompt_contracts.ts', 'prompt_compiler.ts'], tests: ['prompt_compiler: validated typed fresh packet and bounded references'] },
+  { requirement: 'EL-REQ-EPISODE-007', source: ['episode_policy.ts', 'runners/codex_app_server_runner.ts'], tests: ['episode_policy: stale divergence expiry and incompatibility matrix'] },
+  { requirement: 'EL-REQ-EPISODE-008', source: ['runners/runner.ts', 'runners/codex_app_server_runner.ts', 'fakes.ts'], tests: ['runner: exactly one terminal observation and bounded report'] },
+  { requirement: 'EL-REQ-OBS-001', source: ['runners/runner.ts'], tests: ['runner: timestamp actor bindings type sequence and metadata'] },
+] as const;

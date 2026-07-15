@@ -1,12 +1,12 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **prompt compiler ready for owner review; Codex runner proposed next**
+Status: **Codex runner owner-accepted; verification and gates proposed next**
 
 Owner direction: July 14, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current feature: `EL-05` (proposed after owner acceptance of `EL-04`)
+Current feature: `EL-06` (dependency-unblocked after owner acceptance of `EL-05`)
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than
@@ -85,8 +85,8 @@ At session close:
 | 1 | `EL-01` | Architecture record and normative service specification | `EL-00` | Forbidden | Accepted |
 | 2 | `EL-02` | Control kernel: schemas, transitions, durable state, event journal, fake runner | `EL-01` | Forbidden | Accepted |
 | 3 | `EL-03` | Repository observer and deterministic handoff renderer | `EL-02` | Forbidden | Accepted |
-| 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Accepted (owner review pending) |
-| 5 | `EL-05` | Codex app-server runner adapter and episode rotation | `EL-02`, `EL-04` | Forbidden in acceptance | Planned |
+| 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Accepted |
+| 5 | `EL-05` | Codex app-server runner adapter and episode rotation | `EL-02`, `EL-04` | Forbidden in acceptance | Accepted |
 | 6 | `EL-06` | Verification, protected gates, recovery, and independent checker | `EL-03`, `EL-04`, `EL-05` | Forbidden in deterministic acceptance | Planned |
 | 7 | `EL-07` | Bounded pilot, repeated evaluation, and `HANDOFF.md` migration decision | `EL-06` | Owner-gated | Planned |
 | 8 | `EL-08` | Optional tracker, scheduler, concurrency, and multi-repository extraction decision | `EL-07` | Separately proposed | Deferred |
@@ -250,15 +250,15 @@ scans and pure-assembly import pins exclude mutable session facts and external
 effects. Focused acceptance passed 60 tests across 3 files; repository-wide
 acceptance passed 1,032 tests across 98 files, plus build, Python, Compose,
 catalog/schema, and diff checks. Model calls = 0; paid calls = 0. The catalog
-status is the Session 58 bootstrap proposal; owner review and ratification have
-not occurred.
+status was owner-ratified and merged as PR #104 at
+`e1ee564923c9c02f532e08f1a5561d9837a7493a`.
 
 ### EL-05 — Codex runner and episode rotation
 
 Outcome: the controller can start, observe, interrupt, and resume bounded Codex
 episodes without treating a conversation as durable workflow truth.
 
-Planned capabilities:
+Implemented capabilities:
 
 - `AgentRunner` interface
 - Fake runner remains the conformance oracle
@@ -272,6 +272,24 @@ Acceptance focus:
 - Protocol fixtures cover start, resume, interrupt, failure, and restart.
 - Real integration smoke tests make no paid model call.
 - The adapter cannot advance protected controller state directly.
+
+Deterministic implementation evidence (Session 59): all 15 EL-05 requirements
+map one-for-one to concrete source and deterministic tests. The versioned
+adapter-neutral runner covers start, resume, interrupt, observe, and dispose;
+the fake remains a zero-effect conformance oracle. The sole Codex wire boundary
+pins `codex-app-server-jsonl:v2@0.144.2` and stable v2 schema SHA-256
+`4d236168d44edcfb8df0244c90bd58b4fb8f85e443e29144d70bc564403ea8af`.
+Lifecycle observations are ordered, correlated, byte/event/time bounded,
+redacted before return, and terminal exactly once. The pure episode policy
+resumes only unchanged current bindings and requires a fresh episode/thread at
+every named semantic, repository, protocol, or context boundary. Focused
+acceptance passed 69 tests across 4 files; repository-wide acceptance passed
+1,094 tests across 101 files, plus build, Python, Compose, catalog/schema, and
+diff checks. The explicit local smoke negotiated and disposed with outbound
+methods `initialize`, `initialized`, zero thread requests, and zero turn
+requests. Model completions = 0; paid calls = 0. On July 15, 2026, the owner
+reviewed and ratified the EL-05 closeout and explicitly authorized commit,
+merge, and push through the feature-branch pull-request path.
 
 ### EL-06 — verification, gates, recovery, and checker
 
@@ -359,14 +377,13 @@ the engineering-loop subset; it does not create a competing historical log.
 
 ## 8. Current next step
 
-`EL-00` through `EL-03` are owner-accepted. `EL-04` has deterministic
-acceptance and awaits owner review. After that review, the next
-dependency-unblocked feature is `EL-05`: implement only the adapter-neutral
-runner contract, pinned Codex app-server boundary, bounded lifecycle
-observations, and episode-continuity/fresh-boundary policy defined by
-`tools/engineering-loop/SPEC.md`. Acceptance uses deterministic protocol
-fixtures and a zero-completion integration smoke test. It must not add the
-EL-06 verifier, checker execution, approvals, protected effects, tracker,
-scheduler, automatic push/merge, product-runtime integration, or paid/model
-work. Manual `HANDOFF.md` remains authoritative until the EL-07 migration
-verdict.
+`EL-00` through `EL-05` are owner-accepted. The next dependency-unblocked
+feature is `EL-06`: implement only deterministic
+verification, protected-effect policy gates, bounded recovery classification,
+and a fresh read-only checker as defined by `tools/engineering-loop/SPEC.md`.
+Runner or model output must not fabricate command evidence, approval, protected
+effects, or transitions. Acceptance remains deterministic, zero-completion,
+zero-paid, and remote-free. It must not add the EL-07 pilot or migration,
+tracker, scheduler, daemon, automatic push/merge, product-runtime integration,
+or concurrent controller writers. Manual `HANDOFF.md` remains authoritative
+until the EL-07 migration verdict.

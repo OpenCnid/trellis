@@ -25,7 +25,7 @@ import {
   type Workflow,
   type WorkflowState,
 } from './domain.js';
-import { canonicalJson } from './events.js';
+import { canonicalJson, sha256Canonical } from './events.js';
 import {
   EffectReconciliationSchema,
   EffectResultSchema,
@@ -34,6 +34,15 @@ import {
   type RepositoryPort,
   type RunnerPort,
 } from './fakes.js';
+import {
+  AGENT_RUNNER_CONTRACT_VERSION,
+  MAX_RUNNER_BUFFERED_EVENTS,
+  RUNNER_SCHEMA_VERSION,
+  RunnerLaunchResultSchema,
+  RunnerObserveResultSchema,
+  RunnerStartRequestSchema,
+  sameRunnerCorrelation,
+} from './runners/runner.js';
 import {
   StateTransitionError,
   makeDefaultFacts,
@@ -178,7 +187,7 @@ export class ControlKernel {
     return snapshot;
   }
 
-  async collectRunnerEvidence(input: { episodeId: string; requestId: string }): Promise<Evidence> {
+  async collectRunnerEvidence(input: unknown): Promise<Evidence> {
     const snapshot = this.store.snapshot;
     if (snapshot === null || snapshot.state !== 'running') {
       throw new StateTransitionError('Fake runner may start only from running state');
@@ -189,22 +198,73 @@ export class ControlKernel {
     if (snapshot.outcomes.some(outcome => outcome.status === 'unknown')) {
       throw new StateTransitionError('Runner cannot start with an unknown external effect outcome');
     }
-    const evidence = parseBoundary(EvidenceSchema, await this.runner.start({
+    const parsedRequest = RunnerStartRequestSchema.safeParse(input);
+    if (!parsedRequest.success) {
+      throw new StateTransitionError('Controller runner evidence collection requires a complete validated AgentRunner request');
+    }
+    const request = parsedRequest.data;
+    if (
+      request.workflowId !== snapshot.workflowId
+      || request.featureId !== snapshot.featureId
+      || request.sessionId !== snapshot.sessionId
+    ) {
+      throw new StateTransitionError('AgentRunner request is bound to another active session');
+    }
+    const launch = parseBoundary(
+      RunnerLaunchResultSchema,
+      await this.runner.start(request),
+      'kernel runner launch result'
+    );
+    const expectedCorrelation = {
+      workflowId: request.workflowId,
+      featureId: request.featureId,
+      sessionId: request.sessionId,
+      episodeId: request.episodeId,
+      requestId: request.requestId,
+      runnerId: request.runnerId,
+    };
+    for (const [key, value] of Object.entries(expectedCorrelation)) {
+      if (launch.correlation[key as keyof typeof expectedCorrelation] !== value) {
+        throw new StateTransitionError(`Runner launch correlation ${key} does not match the controller request`);
+      }
+    }
+    const observed = parseBoundary(RunnerObserveResultSchema, await this.runner.observe({
+      schemaVersion: RUNNER_SCHEMA_VERSION,
+      contractVersion: AGENT_RUNNER_CONTRACT_VERSION,
+      correlation: launch.correlation,
+      afterSequence: 0,
+      maxEvents: MAX_RUNNER_BUFFERED_EVENTS,
+      durationMs: 0,
+    }), 'kernel runner observation result');
+    if (!sameRunnerCorrelation(launch.correlation, observed.correlation)) {
+      throw new StateTransitionError('Runner observation correlation does not match its launch result');
+    }
+    if (observed.report === null) {
+      throw new StateTransitionError('Runner report is advisory and may become evidence only after a bounded terminal observation');
+    }
+    const material = { launch, report: observed.report };
+    const encoded = canonicalJson(material);
+    return parseBoundary(EvidenceSchema, {
+      id: `evidence:runner:${request.requestId}`,
+      schemaVersion: DOMAIN_SCHEMA_VERSION,
+      createdAt: this.clock.now(),
       workflowId: snapshot.workflowId,
       featureId: snapshot.featureId,
       sessionId: snapshot.sessionId,
-      episodeId: input.episodeId,
-      requestId: input.requestId,
-    }), 'kernel runner evidence');
-    if (
-      evidence.workflowId !== snapshot.workflowId
-      || evidence.featureId !== snapshot.featureId
-      || evidence.sessionId !== snapshot.sessionId
-      || evidence.origin !== 'runner_reported'
-    ) {
-      throw new StateTransitionError('Runner evidence is forged or bound to another active session');
-    }
-    return evidence;
+      origin: 'runner_reported',
+      observedAt: observed.report.endedAt,
+      digest: sha256Canonical(material),
+      immutableReference: null,
+      mediaType: 'application/vnd.trellis.runner-report+json',
+      byteCount: Buffer.byteLength(encoded, 'utf8'),
+      metadata: [
+        { key: 'status', value: observed.report.terminalStatus },
+        { key: 'episodeId', value: request.episodeId },
+        { key: 'runnerId', value: launch.correlation.runnerId },
+        { key: 'threadId', value: launch.correlation.threadId ?? 'none' },
+        { key: 'turnId', value: launch.correlation.turnId ?? 'none' },
+      ],
+    }, 'controller-derived runner evidence');
   }
 
   private consumeEffectApproval(intent: EffectIntent, approvalValues: readonly unknown[]): Approval | null {
