@@ -286,6 +286,49 @@ describe('EL-10 controller activation entrypoint', () => {
     expect(RECOMMENDED_PROTECTED_LOCATIONS.win32).not.toMatch(/^[A-Za-z]:\\/);
   });
 
+  it('activate: reports a protected root that resolves somewhere other than configured', async () => {
+    const { config, base } = await layout();
+
+    // No redirect on ordinary roots.
+    const plain = await resolveActivation(config);
+    expect(plain.redirects).toEqual([]);
+
+    // A root reached through a symlinked ANCESTOR resolves elsewhere. That is
+    // the shape a containerized host produces when it redirects writes to
+    // per-user application-data directories into a private package cache: the
+    // configuration is honoured, the directory is real, and it is not the
+    // directory an uncontainerized operator reaches with the same string.
+    // Refusing it would be wrong — the root itself being a symlink is already
+    // refused by EL-02, and an ancestor link is legitimate — but it must never
+    // pass unnoticed, or the owner issues approval into a channel the controller
+    // never reads and both sides see a coherent, empty, disagreeing view.
+    const realParent = join(base, 'real-store');
+    await mkdir(realParent, { recursive: true });
+    const linkedParent = join(base, 'linked-store');
+    await symlink(realParent, linkedParent, 'junction');
+
+    const configured = join(linkedParent, 'channel');
+    const redirected = await resolveActivation({ ...config, approvalChannel: configured });
+    expect(redirected.redirects).toHaveLength(1);
+    expect(redirected.redirects[0].role).toBe('approvalChannel');
+    expect(redirected.redirects[0].configured).toBe(resolve(configured));
+    expect(redirected.redirects[0].resolved).toBe(join(await realish(realParent), 'channel'));
+    expect(redirected.redirects[0].resolved).not.toBe(redirected.redirects[0].configured);
+  });
+
+  it('activate: the recommended locations avoid virtualized application-data directories', () => {
+    // %LOCALAPPDATA% and its POSIX equivalents are redirected into a per-package
+    // cache by MSIX, Flatpak, Snap, and the macOS app sandbox. A protected root
+    // there resolves differently for a contained process than for the owner's
+    // shell, which silently splits the ledger in two.
+    for (const value of Object.values(RECOMMENDED_PROTECTED_LOCATIONS)) {
+      expect(value).not.toContain('LOCALAPPDATA');
+      expect(value).not.toContain('XDG_STATE_HOME');
+      expect(value).not.toContain('Library');
+      expect(value).not.toContain('AppData');
+    }
+  });
+
   it('activate: seed arguments are strict, complete, and bounded', () => {
     const complete = [
       '--branch', 'master',

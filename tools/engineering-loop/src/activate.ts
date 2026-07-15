@@ -123,6 +123,22 @@ export interface ResolvedActivation {
   stateRoot: string;
   worktree: string;
   approvalChannel: string;
+  /**
+   * Roles whose configured path is not the path it actually resolved to.
+   *
+   * A containerized host redirects writes to per-user application-data
+   * directories into a private package cache, so the same configuration means a
+   * different directory to the controller than to an operator in an
+   * uncontainerized shell. Both sides then see a coherent, empty, disagreeing
+   * ledger. The divergence is reported rather than refused: a symbolic link is a
+   * legitimate redirect and `validateProtectedStateRoot` already judges whether
+   * a root is safe. What must never happen is that it passes unnoticed.
+   */
+  redirects: readonly { role: string; configured: string; resolved: string }[];
+}
+
+function redirectOf(role: string, configured: string, resolved: string) {
+  return resolve(configured) === resolved ? null : { role, configured: resolve(configured), resolved };
 }
 
 /**
@@ -135,7 +151,12 @@ export async function resolveActivation(config: ActivationConfig): Promise<Resol
   const ledgerRoot = await validateProtectedStateRoot(config.ledgerRoot, worktree);
   const stateRoot = await validateProtectedStateRoot(config.stateRoot, worktree);
   const approvalChannel = await validateProtectedStateRoot(config.approvalChannel, worktree);
-  return { config, ledgerRoot, stateRoot, worktree, approvalChannel };
+  const redirects = [
+    redirectOf('ledgerRoot', config.ledgerRoot, ledgerRoot),
+    redirectOf('stateRoot', config.stateRoot, stateRoot),
+    redirectOf('approvalChannel', config.approvalChannel, approvalChannel),
+  ].filter((entry): entry is { role: string; configured: string; resolved: string } => entry !== null);
+  return { config, ledgerRoot, stateRoot, worktree, approvalChannel, redirects };
 }
 
 export interface ActivationStatus {
@@ -144,6 +165,7 @@ export interface ActivationStatus {
   stateRoot: string;
   worktree: string;
   approvalChannel: string;
+  redirects: readonly { role: string; configured: string; resolved: string }[];
   generation: number;
   ceremony: LedgerCeremony;
   recordCount: number;
@@ -298,6 +320,7 @@ export async function inspectActivation(input: {
       stateRoot: resolved.stateRoot,
       worktree: resolved.worktree,
       approvalChannel: resolved.approvalChannel,
+      redirects: resolved.redirects,
       generation: state.generation,
       ceremony,
       recordCount: state.records.length,
@@ -417,10 +440,20 @@ export async function runActivationSeed(input: ActivationSeedInput) {
  * the controller would silently start against a path nobody chose, which is the
  * implicit-magic failure this feature exists to remove. So the convention is
  * printed here for an operator to copy, and unset configuration still refuses.
+ *
+ * These deliberately avoid the per-user application-data directories
+ * (`%LOCALAPPDATA%`, `~/Library`, `$XDG_STATE_HOME`). A containerized host —
+ * MSIX on Windows, Flatpak or Snap on Linux, the macOS app sandbox — silently
+ * redirects writes there into a per-package cache. The ledger would then live
+ * inside one application's private storage, vanish if that application is reset,
+ * and, worst of all, resolve to a *different* directory for an operator running
+ * the same command from an uncontainerized shell: the owner would issue approval
+ * into a channel the controller never reads, and each would see a coherent,
+ * empty, disagreeing view. `resolveActivation` reports any such redirect.
  */
 export const RECOMMENDED_PROTECTED_LOCATIONS = {
-  win32: '%LOCALAPPDATA%\\trellis\\engineering-loop\\{ledger,state,channel}',
-  posix: '${XDG_STATE_HOME:-$HOME/.local/state}/trellis/engineering-loop/{ledger,state,channel}',
+  win32: '<drive>:\\trellis-protected\\engineering-loop\\{ledger,state,channel}',
+  posix: '$HOME/trellis-protected/engineering-loop/{ledger,state,channel}',
 } as const;
 
 const USAGE = `Trellis engineering-loop controller activation (${ACTIVATION_VERSION})
@@ -456,6 +489,14 @@ Required environment (no defaults; absent configuration refuses to start):
 Recommended locations (a convention to copy, not a fallback the code applies):
   Windows   ${RECOMMENDED_PROTECTED_LOCATIONS.win32}
   POSIX     ${RECOMMENDED_PROTECTED_LOCATIONS.posix}
+
+Do not place a protected root under a per-user application-data directory
+(%LOCALAPPDATA%, ~/Library, \$XDG_STATE_HOME). A containerized host silently
+redirects writes there into a private package cache, so the same configuration
+names a different directory for a contained process than for your shell: you
+would issue approval into a channel the controller never reads, and both sides
+would see a coherent, empty, disagreeing ledger. 'check' reports any redirect it
+observes under 'redirects'; compare it against what you configured.
 
 Every root must sit outside every worktree. A root inside, aliasing into, or
 reachable by symbolic link from the assigned worktree is refused, because an
@@ -571,6 +612,7 @@ export async function main(argv: readonly string[], environment: Record<string, 
         stateRoot: resolved.stateRoot,
         worktree: resolved.worktree,
         approvalChannel: resolved.approvalChannel,
+        redirects: resolved.redirects,
       })}\n`);
       return 0;
     }
