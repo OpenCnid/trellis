@@ -195,6 +195,35 @@ recorded migration design.
 | `EL-REQ-STORE-007` | Missing sequences, digest mismatch, invalid schema, impossible transition, or snapshot/journal disagreement MUST stop recovery and require human reconciliation; the controller MUST NOT silently repair or discard history. |
 | `EL-REQ-STORE-008` | Crash injection at each journal, snapshot, approval-consumption, and side-effect record boundary MUST demonstrate deterministic recovery without duplicated completed effects. |
 
+### 6.1 Controller activation and status authority
+
+Activation is the transition from a conforming library to a running controller.
+A library that satisfies §6 under test but has no startup entrypoint holds no
+protected state, and therefore cannot satisfy any gate that requires protected
+controller acceptance. Until activation, status necessarily lives in the
+versioned catalog as declared bootstrap; after activation it MUST NOT.
+
+Program-wide feature status is not workflow state. A state snapshot describes
+one feature's workflow in one state root; it cannot express which features the
+owner has accepted. Acceptance therefore lives in its own append-only,
+integrity-linked **acceptance ledger** under a program-scoped protected root,
+independent of any workflow snapshot and never derived from one.
+
+Seeding is the one operation that writes acceptance history into an empty
+ledger. It is the highest-risk operation in this specification: an
+unconstrained seeder is indistinguishable from a forgery tool. It is therefore
+specified as a consumer of §12 approvals with no privileged path of its own.
+Reconstructing a synthetic workflow history to reach `accepted` is forbidden:
+it would fabricate controller-attested events for runs that never occurred.
+
+| ID | Requirement |
+|---|---|
+| `EL-REQ-BOOT-001` | The controller MUST expose a startup entrypoint that resolves the acceptance-ledger root, the workflow state root, the assigned worktree, and the approval-channel location from explicit configuration, and MUST refuse to start when any is absent, ambiguous, or refused by `EL-REQ-STORE-001`. |
+| `EL-REQ-BOOT-002` | Seeding MUST write every acceptance record into the acceptance ledger under a single `acceptance_change` protected action whose scope enumerates each exact feature and status pair, whose approval material is authored outside the controller, read from the protected external channel, and atomically consumed; the controller MUST NOT synthesize, forge, or default its own approval, and MUST NOT derive an acceptance record from workflow state it produced itself. |
+| `EL-REQ-BOOT-003` | Seeding MUST refuse when the acceptance ledger already holds any record, MUST apply every scoped record or none, and MUST NOT overwrite, replay, or repair existing history. |
+| `EL-REQ-BOOT-004` | Once activated, mutable feature status MUST resolve only from the acceptance ledger; the versioned catalog MUST carry immutable feature definitions only, MUST NOT carry mutable status, and MUST declare `statusAuthority` as `protected_controller_state`. |
+| `EL-REQ-BOOT-005` | The acceptance ledger MUST be append-only, monotonically sequenced, and integrity-linked to the preceding record; a missing sequence, digest mismatch, invalid schema, or partial append MUST stop resolution and require human reconciliation, and the controller MUST NOT silently repair or discard ledger history. |
+
 ## 7. Repository observation and scope
 
 Repository observations are evidence produced by code. Implementations SHOULD
@@ -439,6 +468,11 @@ not enter the matrix.
 | `EL-REQ-STORE-006` | `EL-02` | `EL-02-A2` | integration |
 | `EL-REQ-STORE-007` | `EL-02` | `EL-02-A2` | integration |
 | `EL-REQ-STORE-008` | `EL-02` | `EL-02-A2` | integration |
+| `EL-REQ-BOOT-001` | `EL-10` | `EL-10-A1` | integration |
+| `EL-REQ-BOOT-002` | `EL-10` | `EL-10-A2` | integration |
+| `EL-REQ-BOOT-003` | `EL-10` | `EL-10-A2` | integration |
+| `EL-REQ-BOOT-004` | `EL-10` | `EL-10-A3` | static |
+| `EL-REQ-BOOT-005` | `EL-10` | `EL-10-A5` | integration |
 | `EL-REQ-REPO-001` | `EL-03` | `EL-03-A1` | static |
 | `EL-REQ-REPO-002` | `EL-03` | `EL-03-A1` | static |
 | `EL-REQ-REPO-003` | `EL-03` | `EL-03-A3` | integration |
