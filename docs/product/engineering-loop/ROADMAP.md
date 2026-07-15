@@ -1,15 +1,23 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **EL-06 owner-accepted; EL-10 ratified and next; EL-07 blocked on EL-10**
+Status: **EL-10 implemented and activated, owner acceptance not yet recorded; EL-00 through EL-06 accepted in the ledger; EL-07 blocked pending an owner unblock**
 
 Owner direction: July 15, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current feature: `EL-10` (controller activation and status-authority migration,
-ratified July 15, 2026 after the EL-07 preflight found no protected controller
-state). `EL-07` is `blocked` until `EL-10` is accepted and the owner records an
-unblock.
+Current feature: `EL-10` (controller activation and status-authority migration).
+Implemented and activated July 15, 2026: the controller runs, the acceptance
+ledger holds eleven owner-approved records, and `statusAuthority` is
+`protected_controller_state`. Owner acceptance of EL-10 is not yet recorded.
+`EL-07` stays `blocked` until the owner records an unblock in the ledger; until
+then `next_feature` resolving to `EL-10`, and to `null` once EL-10 is accepted,
+is correct rather than a defect.
+
+**Status now lives in the acceptance ledger, not this file and not
+`features.json`.** The catalog carries immutable feature definitions only. Any
+status stated in prose here is a convenience restatement of the ledger and is
+never authority; read it with `npm run el:activate -- status`.
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than

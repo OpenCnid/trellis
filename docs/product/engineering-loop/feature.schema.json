@@ -4,7 +4,12 @@
   "title": "Trellis engineering-loop feature catalog",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "program", "statusAuthority", "features"],
+  "required": [
+    "schemaVersion",
+    "program",
+    "statusAuthority",
+    "features"
+  ],
   "properties": {
     "schemaVersion": {
       "const": 1
@@ -13,7 +18,8 @@
       "const": "trellis-engineering-loop"
     },
     "statusAuthority": {
-      "enum": ["bootstrap_git_until_el_02", "protected_controller_state"]
+      "const": "protected_controller_state",
+      "description": "Mutable feature status resolves only from the acceptance ledger in protected controller state (EL-REQ-BOOT-004). A const rather than an enum: the bootstrap value survived four features past its stated end because the audit only checked that the value was one of two permitted, never which one."
     },
     "features": {
       "type": "array",
@@ -36,8 +42,7 @@
         "artifacts",
         "acceptance",
         "gates",
-        "paidWork",
-        "bootstrapStatus"
+        "paidWork"
       ],
       "properties": {
         "id": {
@@ -97,24 +102,34 @@
           }
         },
         "paidWork": {
-          "enum": ["forbidden", "owner_gated", "separately_proposed"]
-        },
-        "bootstrapStatus": {
-          "enum": ["planned", "active", "accepted", "blocked", "deferred"]
+          "enum": [
+            "forbidden",
+            "owner_gated",
+            "separately_proposed"
+          ]
         }
       }
     },
     "acceptance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "kind", "requirement"],
+      "required": [
+        "id",
+        "kind",
+        "requirement"
+      ],
       "properties": {
         "id": {
           "type": "string",
           "pattern": "^EL-[0-9]{2}-A[0-9]+$"
         },
         "kind": {
-          "enum": ["static", "integration", "review", "measurement"]
+          "enum": [
+            "static",
+            "integration",
+            "review",
+            "measurement"
+          ]
         },
         "requirement": {
           "type": "string",

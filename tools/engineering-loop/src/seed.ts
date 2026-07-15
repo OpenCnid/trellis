@@ -106,21 +106,28 @@ export function seedScope(pairs: readonly CatalogStatusPair[]): readonly string[
 }
 
 /**
- * Reads the `(featureId, status)` pairs out of the versioned catalog's
- * bootstrap status. This is the migration's source value, read once, under owner
- * approval — not a controller judgement about what is accepted.
+ * Reads `(featureId, status)` pairs out of a status document — an object whose
+ * `features` each carry an `id` and a `bootstrapStatus`.
+ *
+ * At activation that document was the versioned catalog, read once under owner
+ * approval. The migration removed `bootstrapStatus` from the catalog, so the
+ * live catalog is no longer such a document and this will refuse it: seeding is
+ * once-only and complete, and status now lives in the ledger.
+ *
+ * It survives for re-genesis (EL-REQ-BOOT-007), where the pairs come from the
+ * reconstruction basis the owner supplies, never from controller-held state.
  */
-export function catalogStatusPairs(catalogValue: unknown): readonly CatalogStatusPair[] {
-  const catalog = parseBoundary(
+export function catalogStatusPairs(statusDocumentValue: unknown): readonly CatalogStatusPair[] {
+  const document = parseBoundary(
     z.looseObject({
       features: z.array(z.looseObject({ id: StableIdSchema, bootstrapStatus: FeatureStatusSchema })).min(1),
     }),
-    catalogValue,
-    'seed catalog'
+    statusDocumentValue,
+    'seed status document'
   );
   return parseBoundary(
     CatalogStatusPairsSchema,
-    catalog.features.map(feature => ({ featureId: feature.id, status: feature.bootstrapStatus })),
+    document.features.map(feature => ({ featureId: feature.id, status: feature.bootstrapStatus })),
     'seed status pairs'
   );
 }
@@ -176,6 +183,14 @@ export interface SeedInput {
    * (EL-REQ-BOOT-007) passes the new generation explicitly.
    */
   generation?: number;
+  /**
+   * The (featureId, status) pairs to seed. Defaults to reading them out of
+   * `catalog` as a status document, which is how activation bootstrapped from
+   * the versioned catalog. After the migration the catalog carries no status,
+   * so a re-genesis caller supplies the pairs from the owner's reconstruction
+   * basis instead.
+   */
+  pairs?: readonly CatalogStatusPair[];
   /**
    * Records that open the generation ahead of the acceptance records, in the
    * same atomic append. Re-genesis passes its signed genesis record here so the
@@ -265,7 +280,9 @@ export async function seedAcceptanceLedger(input: SeedInput): Promise<SeedResult
     );
   }
 
-  const pairs = catalogStatusPairs(input.catalog);
+  const pairs = input.pairs === undefined
+    ? catalogStatusPairs(input.catalog)
+    : parseBoundary(CatalogStatusPairsSchema, input.pairs, 'seed status pairs');
   const catalogDigest = catalogDigestOf(input.catalog);
   const request = buildSeedRequest({
     pairs,

@@ -52,6 +52,13 @@ const CatalogAcceptanceSchema = z.strictObject({
   kind: z.enum(['static', 'integration', 'review', 'measurement']),
   requirement: z.string().min(1).max(500),
 });
+/**
+ * The catalog carries immutable feature definitions only (EL-REQ-BOOT-004).
+ * Mutable status resolved from the versioned catalog until EL-10 activated the
+ * controller; it now resolves solely from the acceptance ledger, so
+ * `bootstrapStatus` is absent by schema rather than merely unused — a field the
+ * schema still admitted would drift back.
+ */
 const CatalogFeatureSchema = z.strictObject({
   id: StableIdSchema,
   order: z.number().int().nonnegative().max(10_000),
@@ -62,14 +69,23 @@ const CatalogFeatureSchema = z.strictObject({
   acceptance: z.array(CatalogAcceptanceSchema).min(1).max(128),
   gates: z.array(StableIdSchema).max(32),
   paidWork: z.enum(['forbidden', 'owner_gated', 'separately_proposed']),
-  bootstrapStatus: z.enum(['planned', 'active', 'accepted', 'blocked', 'deferred']),
 });
 const CatalogSchema = z.strictObject({
   schemaVersion: z.literal(1),
   program: z.literal('trellis-engineering-loop'),
-  statusAuthority: z.enum(['bootstrap_git_until_el_02', 'protected_controller_state']),
+  // A literal, not an enum: after activation the only conforming value is
+  // protected_controller_state. `bootstrap_git_until_el_02` was permitted for
+  // four features past its stated end because the audit only checked that the
+  // value was one of two, never which one.
+  statusAuthority: z.literal('protected_controller_state'),
   features: z.array(CatalogFeatureSchema).min(1).max(128),
 });
+
+/** Feature status, resolved from the acceptance ledger. */
+export const FeatureStatusMapSchema = z
+  .record(StableIdSchema, z.enum(['planned', 'active', 'accepted', 'blocked', 'deferred']))
+  .refine(value => Object.keys(value).length <= 128, 'at most 128 features');
+export type FeatureStatusMap = z.infer<typeof FeatureStatusMapSchema>;
 
 function assertJournaledCommandEvidence(
   snapshotEvidenceIds: readonly string[],
@@ -108,20 +124,30 @@ function commandResult(observation: CommandEvidenceResult['observation']): strin
   ].join(' ');
 }
 
+/**
+ * Selects the next feature from immutable catalog definitions plus status
+ * resolved from the acceptance ledger.
+ *
+ * The status map is required rather than derived from `acceptedFeatureIds`:
+ * candidacy needs `planned`, which accepted-or-not cannot express. Treating
+ * "not accepted" as candidate would re-select the blocked EL-07 and defeat the
+ * prerequisite the catalog cannot encode as a forward edge.
+ */
 function computeNextFeature(
   catalogValue: unknown,
   currentFeature: string,
-  acceptedFeatureIds: readonly string[]
+  featureStatuses: FeatureStatusMap
 ): string | null {
   const catalog = parseBoundary(CatalogSchema, catalogValue, 'renderer catalog');
-  const accepted = new Set(acceptedFeatureIds);
-  for (const feature of catalog.features) {
-    if (feature.bootstrapStatus === 'accepted') accepted.add(feature.id);
-  }
+  const accepted = new Set(
+    Object.entries(featureStatuses)
+      .filter(([, status]) => status === 'accepted')
+      .map(([featureId]) => featureId)
+  );
   const candidates = catalog.features
     .filter(feature => (
       feature.id !== currentFeature
-      && feature.bootstrapStatus === 'planned'
+      && featureStatuses[feature.id] === 'planned'
       && feature.dependencies.every(dependency => accepted.has(dependency))
     ))
     .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id, 'en'));
@@ -139,7 +165,7 @@ export function deriveTrustedReport(input: {
   requirementEvidence: readonly unknown[];
   findings: readonly unknown[];
   catalog: unknown;
-  acceptedFeatureIds: readonly string[];
+  featureStatuses: unknown;
 }): Report {
   const reportId = parseBoundary(StableIdSchema, input.reportId, 'report identifier');
   const createdAt = parseBoundary(TimestampSchema, input.createdAt, 'report creation time');
@@ -153,7 +179,11 @@ export function deriveTrustedReport(input: {
     'trusted report requirement evidence'
   );
   const findings = parseBoundary(TrustedFindingListSchema, input.findings, 'trusted report findings');
-  const acceptedFeatureIds = z.array(StableIdSchema).max(128).parse(input.acceptedFeatureIds);
+  const featureStatuses = parseBoundary(
+    FeatureStatusMapSchema,
+    input.featureStatuses,
+    'trusted report feature statuses'
+  );
 
   if (
     snapshot.workflowId !== feature.workflowId
@@ -207,7 +237,7 @@ export function deriveTrustedReport(input: {
       result: commandResult(item.observation),
     })),
     findings: findings.map(finding => `${finding.source}:${finding.code}: ${finding.message}`),
-    next_feature: computeNextFeature(input.catalog, feature.featureId, acceptedFeatureIds),
+    next_feature: computeNextFeature(input.catalog, feature.featureId, featureStatuses),
   };
   return parseBoundary(ReportSchema, report, 'trusted report derivation');
 }
