@@ -1040,7 +1040,23 @@ application-data directories entirely, and `resolveActivation` reports every rol
 whose configured path is not the path it resolved to, since documentation alone
 would not have caught it. Protected roots in use: `D:\trellis-protected\engineering-loop\`.
 
-**6. Recorded, not closed.** `EL-REQ-APPROVAL-012` was added to SPEC §12 with no
+**6. Recorded, not closed.** **The acceptance ledger is write-once.** Seeding
+refuses a non-empty generation, and the only other gated writes are the two
+`ledger_recovery` ceremonies for corruption, so there is no path to record an
+ordinary status change: EL-10 cannot be marked `accepted`, EL-07 cannot be
+unblocked, and no future feature can ever be accepted. Record §9.6 describes that
+steady state exactly — the ordinary `acceptance_change` path that seeding is an
+instance of — but **no `EL-REQ-BOOT-*` requires it**, so it was prose with no
+row and no test that could fail, and the implementing session built the six items
+that had requirements while inverting the seventh. It is the third instance of
+this program's one pattern (`statusAuthority`, the unreachable seeder, this),
+landing in the feature whose purpose was to close it. Deferred to `EL-11` as its
+first item, with its own requirement (`EL-REQ-BOOT-008`, EL-11-owned; families
+already span features) so it cannot be prose twice. `ledger_recovery` must not be
+used for it: the `EL-10=planned` record was correct when written, so accepting
+EL-10 is new information rather than a correction, and using the corruption
+ceremony for ordinary progress would collapse the disjoint predicates §9.9 keeps
+mechanically checkable. `EL-REQ-APPROVAL-012` was added to SPEC §12 with no
 conformance-matrix row: 114 requirements declared, 113 mapped, breaking
 `EL-01-A2` with no test that can fail — the same disease this feature exists to
 close. `APPROVAL-*` belongs to accepted EL-06 (36 rows, pinned), so it needs an
