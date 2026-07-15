@@ -367,7 +367,12 @@
         {
           "id": "EL-10-A5",
           "kind": "integration",
-          "requirement": "The acceptance ledger is append-only, monotonically sequenced, and integrity-linked; missing sequences, digest mismatch, and partial appends stop with human reconciliation and no silent repair."
+          "requirement": "The acceptance ledger is append-only, monotonically sequenced, and integrity-linked; missing sequences, digest mismatch, and partial appends stop resolution and route to a recovery ceremony with no silent repair."
+        },
+        {
+          "id": "EL-10-A6",
+          "kind": "integration",
+          "requirement": "Both recovery ceremonies exist and their predicates are disjoint: content corruption on a validating chain recovers by owner-approved append-superseding, and integrity-chain corruption recovers only by out-of-band re-genesis retaining the corrupt generation read-only."
         }
       ],
       "gates": ["owner_ratification", "human_review"],

@@ -178,7 +178,7 @@ questions. The specification defined 106 stable mandatory requirements at
 ratification; all 106 mapped to an existing feature, catalog acceptance item,
 and planned test class, with zero unmapped requirements. EL-01 added no runtime
 or prompt bytes. (`EL-10` later added `EL-REQ-BOOT-001` through
-`EL-REQ-BOOT-005` on July 15, 2026, bringing the matrix to 111 rows, still with
+`EL-REQ-BOOT-007` on July 15, 2026, bringing the matrix to 113 rows, still with
 zero unmapped requirements.)
 
 ### EL-02 — control kernel
@@ -386,8 +386,10 @@ Scope:
 - Status-authority migration: `statusAuthority` to `protected_controller_state`,
   `bootstrapStatus` removed from the catalog, status resolved from the ledger.
 
-Requirements: `EL-REQ-BOOT-001` through `EL-REQ-BOOT-005` (SPEC §6.1). The
-conformance matrix moves from 106 rows to 111.
+Requirements: `EL-REQ-BOOT-001` through `EL-REQ-BOOT-007` (SPEC §6.1). The
+conformance matrix moves from 106 rows to 113. `BOOT-006` and `BOOT-007` are the
+paired recovery ceremonies added July 15, 2026 after external review found the
+original §6.1 left a corrupted ledger unrecoverable.
 
 Design record: `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md`. Its §9 is normative for
 the implementing session and was owner-approved July 15, 2026.
@@ -400,7 +402,11 @@ Acceptance focus:
   fabricate controller-attested events for runs that never occurred.
 - All scoped records apply or none.
 - The ledger refuses missing sequences, digest mismatch, and partial appends
-  without silent repair.
+  without silent repair, and routes each to its recovery ceremony.
+- Both recovery ceremonies exist with disjoint, re-derived predicates: content
+  corruption on a validating chain recovers by owner-approved append-superseding;
+  integrity-chain corruption recovers only by out-of-band re-genesis, because a
+  broken anchor cannot sign its own replacement.
 
 Ordering constraint: activation has an owner-operated step in the middle. The
 machinery lands first, the owner then authors approval material and runs
