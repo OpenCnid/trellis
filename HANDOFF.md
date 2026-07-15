@@ -1406,39 +1406,62 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- **Program and Git:** `implement-el06-verification-gates` was created only
-  after a clean preflight from merged master commit
-  `27bb7abbf9399c064bc578a2f12328eacb52c1a2`, merged PR #105, and the
-  owner-accepted EL-05 closeout. EL-06 passed deterministic acceptance; the
-  owner reviewed and accepted it on July 15, 2026 and explicitly authorized
-  commit, merge, and push to `master`. The catalog records `accepted`; EL-07 is
-  dependency-unblocked. The next session must still fetch and observe the
-  merged EL-06 master commit before starting work.
-- **Conformance:** SPEC has 106 mandatory requirements mapped 106/106. EL-06
-  independently computes and links all 36 owned rows with required = 36,
-  implemented = 36, verified = 36, outstanding = 0. EL-07 owns exactly three
-  SPEC §18 rows: `EL-REQ-OBS-003`, `EL-REQ-OBS-008`, and
-  `EL-REQ-VIEW-004`; recompute this set before design. Its catalog also carries
-  four immutable acceptance bindings, `EL-07-A1` through `EL-07-A4`.
-- **Acceptance baseline:** `npm test` passes **1,161 tests across 105 files**.
-  The focused EL-06 command passes **76 tests across 5 files**. Build, Python,
-  Compose, Draft 2020-12 catalog validation (10 features), SPEC linkage, and
-  diff checks pass. The pre-EL-06 baseline was 101 files / 1,094 tests.
-- **EL-06 authority boundary:** only immutable controller-observed command
-  results can pass deterministic verification. Approval truth comes only from
-  an injected protected external channel. Human review is required for
-  acceptance. Recovery is pure and bounded; unknown effects block. Checker
-  work is fresh, read-only, credential/network/effect-free, and advisory.
+- **Program and Git:** `origin/master` is
+  `9d50b0e9013176b8c21f42bd1f429c9adf295803`, the owner-accepted EL-06 commit.
+  Session 61 was assigned `EL-07`; **its preflight refused, and no EL-07 work
+  was performed.** Session 61 instead raised, ratified, and specified `EL-10`.
+  Its changes to `SPEC.md`, `features.json`, product `ROADMAP.md`,
+  `handoff_renderer.test.ts`, and the new EL-10 record may be uncommitted
+  pending owner Git authorization; observe actual Git state rather than assuming
+  either way.
+- **Why EL-07 was refused (the finding that created EL-10):** the preflight
+  requires protected controller acceptance and states that repository prose is
+  not acceptance. **No protected controller state has ever existed.**
+  `StateStore.open()` (`state_store.ts:249`) takes a caller-supplied `stateRoot`
+  with no default and no environment variable; every caller is a test using a
+  temp directory; no CLI, entrypoint, `package.json` bin, npm script, or `src/`
+  importer exists; no state root exists on disk. EL-02 through EL-06 built a
+  correct, well-tested, entirely inert library. **1,161 passing tests establish
+  that the kernel is correct, not that it is reachable.** Separately,
+  `statusAuthority` still reads `bootstrap_git_until_el_02` — the migration
+  product-roadmap §1 scheduled for the end of EL-02 never happened, because it
+  lived in prose with no `EL-REQ-*`, no conformance row, and no test that could
+  fail.
+- **Conformance:** SPEC has **111** mandatory requirements mapped 111/111
+  (was 106; `EL-10` added `EL-REQ-BOOT-001` through `EL-REQ-BOOT-005` in §6.1).
+  `EL-10` owns exactly those five SPEC §18 rows; recompute the set from §18
+  before design. Its catalog carries five immutable acceptance bindings,
+  `EL-10-A1` through `EL-10-A5`. `EL-06` remains 36/36/36 with zero outstanding.
+- **Acceptance baseline:** `npm test` passes **1,161 tests across 105 files** —
+  unchanged from the EL-06 baseline, because Session 61 changed assertions and
+  pins without adding or removing a test. The focused engineering-loop command
+  passes **285 tests across 18 files**. Draft 2020-12 catalog validation now
+  reports **11 features**. Build, Python, Compose, SPEC linkage, and diff checks
+  pass.
+- **Catalog shape, and the mechanism behind it:** `EL-10` carries `order: 10`
+  but **executes before `EL-07`**, which is `blocked`. The owner declined a
+  renumber, and the catalog audit forbids the obvious alternative: dependencies
+  must have a lower `order` than their dependent (`requirements.test.ts:204`)
+  and `order` must equal array index (`:190`), so a forward `EL-07 → EL-10` edge
+  is inexpressible. The prerequisite is therefore carried by EL-07's `blocked`
+  status plus prose, not a dependency edge. `computeNextFeature()` filters to
+  `planned` candidates, so `next_feature` resolves to `EL-10`. Unblocking EL-07
+  after EL-10 is accepted is a **manual owner act**, and `next_feature` correctly
+  resolves to `null` in that interval.
+- **EL-06 authority boundary (unchanged):** only immutable controller-observed
+  command results can pass deterministic verification. Approval truth comes only
+  from an injected protected external channel. Human review is required for
+  acceptance. Recovery is pure and bounded; unknown effects block. Checker work
+  is fresh, read-only, credential/network/effect-free, and advisory.
 - **Environment:** fresh `npm ci` installed 317 packages with 0 vulnerabilities.
   Local Node v20.19.2 emits four Babel Node 22.18+ engine warnings; CI uses Node
-  22 and local acceptance passed. No model completion, paid call, real
-  protected effect, or deterministic-test remote call occurred in EL-06.
+  22 and local acceptance passed. No model completion, paid call, real protected
+  effect, or deterministic-test remote call occurred in EL-06 or Session 61.
 - **Authority:** manual `HANDOFF.md` remains authoritative. Renderer previews,
   prompt-role outputs, runner observations, conversation history, and model
-  summaries are advisory only. They cannot create controller evidence,
-  approval, verification, effects, acceptance, or transitions. EL-07 may not
-  change this authority without repeated measurement, perfect protected-gate
-  evidence, human transcript review, and an explicit owner adopt verdict.
+  summaries are advisory only. They cannot create controller evidence, approval,
+  verification, effects, acceptance, or transitions. `EL-10` records no adopt
+  verdict and does not change handoff authority.
 
 Fresh worktrees do not contain `node_modules`. Start with:
 
@@ -1454,55 +1477,136 @@ docker compose config --quiet
 
 Work on one feature branch and target `master`.
 
-## 3. Session 61 problem statement
+## 3. Session 62 problem statement
 
 <feature_objective>
 
-**Engineering-session loop `EL-07`: run a bounded pilot, repeat the evaluation,
-and present an adopt/revise/reject handoff-migration verdict to the owner.**
+**Engineering-loop `EL-10`: implement controller activation and the
+status-authority migration — a program-scoped acceptance ledger, a real
+protected approval channel, a startup entrypoint, owner-approved seeding, and
+the move of mutable feature status out of the versioned catalog.**
+
+Paid work is forbidden for the whole of EL-10. This feature is deterministic
+throughout.
 
 </feature_objective>
 
+<invariant_authority priority="highest">
+
+Role: principal systems engineer.
+
+Authority order: code > glossary > prose.
+
+Controller-observed repository state, commands, protected approvals, and durable
+evidence outrank runner, checker, grader, model, conversation, transcript,
+renderer, and repository-prose reports.
+
+Human authority owns objectives, architecture, acceptance, protected approvals,
+paid work, staging, commit, push, merge, and changes to accepted controller
+policy. **Human authority alone authors approval material.** A controller that
+could author its own approval would make the acceptance ledger worthless; this
+is the single invariant EL-10 exists to establish.
+
+Runner, checker, grader, and model output is bounded advisory data only. It
+cannot create or satisfy verification evidence, consume approval, authorize
+effects, accept a feature, or transition controller state.
+
+Manual `HANDOFF.md` remains authoritative. EL-10 records no adopt verdict and
+changes no handoff authority.
+
+</invariant_authority>
+
+<response_hypershot priority="highest">
+
+Feature: EL-10
+Phase: (PREFLIGHT|DESIGN_CHECKPOINT|LEDGER|CHANNEL|ENTRYPOINT|SEEDER|AWAITING_OWNER_ACTIVATION|MIGRATION|CLOSEOUT)
+Result: (READY_FOR_OWNER_REVIEW|AWAITING_OWNER_ACTIVATION|BLOCKED)
+Summary: {Evidence_Based_Outcome_Stating_Only_What_Engine_Observation_Supports}
+Requirements: {Required_Count}/{Implemented_Count}/{Deterministically_Verified_Count}/{Outstanding_Count}
+Catalog bindings: {Required_Count}/{Satisfied_Count}/{Outstanding_Count}
+Ledger: {Root_Resolution_Record_Count_Sequence_Chain_And_Integrity_State}
+Approvals: {Read_Validated_Consumed_Refused_Counts_By_Refusal_Class}
+Refusal matrix: {Condition_Count_Covered_Count_Passing_Count_Uncovered_Count}
+Verification: [{Exact_Command_And_Engine_Observed_Result}]
+Authority findings: {Controller_Human_And_Advisory_Report_Separation}
+Git findings: {Worktree_Branch_HEAD_Origin_Master_Changed_Paths_Staged_Committed_State}
+Audit findings: [{Bounded_Finding_And_Disposition}]
+Next: {Exact_Next_Gate_And_Explicit_Owner_Actions}
+
+</response_hypershot>
+
 <preflight_gate priority="highest">
 
-The owner reviewed and accepted EL-06 on July 15, 2026. Before any EL-07 edit
-or trial, independently require all of the following to agree: protected
-controller acceptance, `features.json` status, product roadmap, root ledger,
-merged `origin/master`, clean assigned worktree, and EL-07 dependency status.
-If any item is absent or contradictory, stop without implementation or paid
-work and report the exact evidence. Conversation or repository prose alone is
-not acceptance.
+Complete every item before an implementation edit. Report `BLOCKED` with exact
+evidence if any item is absent or contradictory.
+
+1. Read `AGENTS.md` and `HANDOFF.md` completely.
+2. Observe the assigned worktree path, branch, HEAD, status, remotes, upstream,
+   and recent commits.
+3. Fetch `origin/master` with pruning.
+4. Require `origin/master` to equal
+   `9d50b0e9013176b8c21f42bd1f429c9adf295803`.
+5. Confirm EL-06 owner acceptance across `features.json`, product `ROADMAP.md`,
+   `TRELLIS_ROADMAP.md`, `HANDOFF.md`, and merged Git history.
+6. Observe whether Session 61's EL-10 ratification changes
+   (`SPEC.md` §6.1, `features.json` `EL-10` and `EL-07` `blocked`, product
+   `ROADMAP.md`, `handoff_renderer.test.ts` pins,
+   `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md`) are committed, uncommitted, or
+   absent. Reconcile before editing; do not assume.
+7. Confirm `EL-10` is `planned`, its one dependency `EL-06` is `accepted`, and
+   the derived `next_feature` resolves to `EL-10`.
+8. Confirm the worktree is clean of unrelated changes.
+9. Create or switch to `implement-el10-controller-activation` from the required
+   `origin/master` commit only after every preceding check passes. Do not base it
+   on a stale local `master`.
+
+**Do not run this feature's own preflight against protected controller state.**
+No protected controller state exists — that absence is precisely what EL-10
+builds. Requiring it here would be circular.
 
 </preflight_gate>
 
 <immutable_feature_bindings>
 
-SPEC §18 assigns exactly three requirements to EL-07:
+SPEC §6.1 assigns exactly five requirements to `EL-10`. Recompute this set from
+SPEC §18 before design and require exactly:
 
-- `EL-REQ-OBS-003`: record model, tool, retry, intervention, verification,
-  protected-action, token, cost, duration, stale-state, and terminal metrics;
-- `EL-REQ-OBS-008`: retain bounded run evidence sufficient for repeated
-  comparison and human failure analysis; and
-- `EL-REQ-VIEW-004`: migrate handoff authority only after repeated measurement
-  against pre-stated thresholds, perfect protected-gate tests, no acceptance-
-  reliability regression, human transcript review, and an owner verdict.
+- `EL-REQ-BOOT-001`: a startup entrypoint resolves the acceptance-ledger root,
+  workflow state root, assigned worktree, and approval-channel location from
+  explicit configuration, and refuses to start when any is absent, ambiguous, or
+  refused by `EL-REQ-STORE-001`.
+- `EL-REQ-BOOT-002`: seeding writes every acceptance record under a single
+  `acceptance_change` protected action whose scope enumerates each exact feature
+  and status pair, whose approval material is authored outside the controller,
+  read from the protected external channel, and atomically consumed; the
+  controller never synthesizes, forges, or defaults its own approval, and never
+  derives an acceptance record from workflow state it produced itself.
+- `EL-REQ-BOOT-003`: seeding refuses a non-empty ledger, applies every scoped
+  record or none, and never overwrites, replays, or repairs existing history.
+- `EL-REQ-BOOT-004`: mutable feature status resolves only from the acceptance
+  ledger; the catalog carries immutable feature definitions only and declares
+  `statusAuthority` as `protected_controller_state`.
+- `EL-REQ-BOOT-005`: the ledger is append-only, monotonically sequenced, and
+  integrity-linked; a missing sequence, digest mismatch, invalid schema, or
+  partial append stops resolution and requires human reconciliation without
+  silent repair.
 
-The immutable catalog bindings are `EL-07-A1` through `EL-07-A4`: repeated
-measurements, classified transcript review, perfect protected gates with no
-acceptance-reliability regression, and an owner adopt/revise/reject decision.
-Recompute the requirement set from SPEC §18 before design.
+Catalog acceptance bindings `EL-10-A1` through `EL-10-A5` are immutable.
+Implementation evidence maps one-to-one without rewriting their meaning.
 
 </immutable_feature_bindings>
 
 <authority_boundary>
 
-Deterministic fixture work may be zero-completion and zero-paid. Any repeated
-model trial requires a printed estimate first, an exact protected owner
-approval, the repository USD 5/run hard cap and any lower approved cap, stale-
-consumer checks, and actual token/cost reporting. Checker, grader, runner, and
-model reports remain advisory. The owner alone decides adopt, revise, or
-reject. Manual `HANDOFF.md` stays authoritative unless the owner explicitly
-records adopt after reviewing the complete evidence.
+All EL-10 work is zero-completion and zero-paid. This prompt authorizes no paid
+call, no protected effect, no commit, no push, no merge, and no PR.
+
+**Activation is an owner-operated step in the middle of this feature.** The
+machinery lands first; the owner then authors approval material and the
+activation run seeds the ledger; only then may `bootstrapStatus` leave the
+catalog. Present the approval material format for owner authoring before the
+activation run, and return `AWAITING_OWNER_ACTIVATION` rather than improvising a
+substitute.
 
 </authority_boundary>
 
@@ -1510,161 +1614,158 @@ records adopt after reviewing the complete evidence.
 
 <design_invariants priority="highest">
 
-Present the measurement plan and deterministic harness checkpoint before any
-trial. Freeze task fixtures, arms, repetitions, metrics, thresholds, grader
-rules, budgets, stop conditions, and transcript-review rubric before observing
-an outcome. Controller evidence outranks every runner/checker/grader report.
-The owner retains acceptance and migration authority.
+The design is already ratified. `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md` §9 is
+**normative** and was owner-approved on July 15, 2026. Build against it. Its §9.8
+carries three open questions for this session; resolve them explicitly at the
+design checkpoint rather than silently.
+
+Present the design checkpoint before the first implementation edit.
 
 </design_invariants>
 
-<implementation_plan>
+<required_design>
 
-1. **Strict evaluation plan and records.** Add the smallest versioned schemas
-   under `tools/engineering-loop/` for a frozen evaluation plan, task fixture,
-   arm assignment, trial observation, protected-gate result, transcript-review
-   disposition, aggregate comparison, and migration recommendation. Bind exact
-   feature/controller/policy/prompt/verifier versions, repository commits,
-   fixture digests, runner adapter, randomization/order, repetition count,
-   metric definitions, retention, and thresholds.
-2. **Isolated deterministic pilot harness.** Execute fixture tasks only in
-   disposable isolated repositories with injected clocks, commands, effects,
-   approvals, cancellations, runners, and fault points. Pin crash/restart,
-   stale repository, contradictory report, approval mismatch, paid-limit,
-   unknown-effect, checker isolation, and automatic push/merge adversaries.
-   A fixture may never touch the assigned implementation worktree or a real
-   protected target.
-3. **Comparable repeated arms.** Compare the manual handoff workflow and the
-   EL-06 controller on identical frozen tasks and acceptance definitions.
-   Record cold-start prompt bytes, orientation duration, stale/contradictory
-   facts, steering interventions, deterministic acceptance results, protected-
-   gate bypass attempts, duplicate effects, time to human review, runner/model/
-   tool/retry counts, tokens, and cost. Publish raw trial rows with aggregates;
-   retain nulls and outliers as findings.
-4. **Paid-trial gate.** Complete zero-paid harness acceptance first. Then print
-   an exact estimate and stop for owner approval. A protected approval must bind
-   the trial plan, arm, repetitions, model/runner, repository, session, token
-   estimate, USD limit, issue/expiry, and unused state. Enforce ≤USD 5/run and
-   any lower approved cap. Check for stale consumers before each paid enqueue;
-   record actual tokens/cost afterward. No approval inheritance or retry reuse.
-5. **Independent grading and human transcript review.** Deterministic acceptance
-   remains the correctness oracle. A fresh read-only checker may classify
-   failures but cannot create evidence or acceptance. Present bounded redacted
-   transcripts and controller references for human classification into agent,
-   grader, environment, or harness error; preserve disagreement and unresolved
-   cases.
-6. **Pure report and migration proposal.** Render
-   `docs/benchmarks/ENGINEERING_LOOP_REPORT.md` from validated records. Evaluate
-   the pre-stated targets: at least 80% cold-start-context reduction; zero
-   protected-gate bypasses; zero fabricated acceptance transitions; zero
-   duplicate paid/external effects after recovery; and no acceptance-
-   reliability regression. Produce an evidence-bound `adopt`, `revise`, or
-   `reject` recommendation for the owner. Do not mutate handoff authority.
-7. **Owner decision boundary.** Only after the owner reviews measurements,
-   transcript classifications, protected-gate results, costs, and unresolved
-   findings may a signed adopt/revise/reject record be appended. `adopt` may
-   authorize a separately reviewed manual-to-generated handoff migration;
-   `revise` or `reject` leaves manual authority unchanged.
+1. **Acceptance ledger** (record §9.2, §9.3). A program-scoped protected
+   artifact in its own root:
 
-</implementation_plan>
+   ```text
+   <ledgerRoot>/
+     .writer.lock        # WriterLock, unchanged, sentinel workflow ID
+     acceptance.jsonl    # the ledger
+   ```
 
-<scope_boundary>
+   Reuse `WriterLock` unchanged: it is scoped by path
+   (`join(root, '.writer.lock')`), with the workflow ID only identifying the
+   holder inside the record. Validate the root with the existing
+   `validateProtectedStateRoot()`.
 
-Add no dependency and import no Trellis product runtime. Keep harness and pure
-evaluation code under `tools/engineering-loop/`; report and manual handoff
-artifacts remain under their existing paths. EL-08 scheduling/tracker/
-concurrency and EL-09 ingestion remain excluded.
+   Keep the change strictly additive. Preserve `domain.ts`, `state_store.ts`,
+   `writer_lock.ts`, and EL-02's 132-pair transition matrix.
 
-</scope_boundary>
+2. **Record schema** (record §9.3). Strict, bounded, versioned: `id`,
+   `schemaVersion`, `sequence`, `previousDigest`, `createdAt`, `featureId`,
+   `status`, `catalogDigest`, `approvalId`, `requestDigest`, `actor`. Mirror the
+   catalog's existing status enum so migration moves a value rather than
+   redefining it. Pin `actor` to `human`: no other authority can produce an
+   acceptance record. Link `previousDigest` with `sha256Canonical()` from
+   `events.ts`, following `EL-REQ-STORE-003`.
+
+3. **Resolution** (record §9.4). Replay in sequence, verify the digest chain,
+   take the last record per `featureId` as current. Accepted IDs are those whose
+   current status is `accepted`. This feeds the `acceptedFeatureIds` parameter
+   that `kernel.ts:66` and `handoff_renderer.ts:142` already accept — **those
+   signatures do not change.** The migration supplies a real producer where
+   callers previously supplied fixtures. Tests continue supplying fixture status
+   directly; the renderer's job is deterministic rendering given status, not
+   knowing the truth.
+
+   Record `catalogDigest` for provenance, not enforcement: the catalog changes
+   legitimately, so a mismatch is normal and is reported in the derived view
+   rather than refused or silently ignored.
+
+4. **Approval channel.** A concrete `ProtectedApprovalChannel`
+   (`policy.ts:168`) reading owner-authored material from `protected_external`.
+   `createProtectedApprovalRecord()` and `authorizeProtectedAction()` already
+   exist and are tested; consume them rather than reimplementing. `acceptance_change`
+   is already in `PROTECTED_ACTIONS` (`policy.ts:47`); add no new protected
+   action.
+
+5. **Entrypoint.** A real non-test caller resolving all four configured
+   locations. Refuse contained, aliased, and symlink-reachable roots.
+
+6. **Seeding** (record §9.5). One `acceptance_change` whose scope enumerates
+   every `(featureId, status)` pair — eleven at activation, within
+   `MAX_PROTECTED_SCOPE_ITEMS` (64). All records append or none. Cover every
+   refusal in record §9.5's table with a test: non-empty ledger, no approval,
+   scope mismatch, digest mismatch, already-consumed approval, expired approval,
+   any invalid record.
+
+7. **Forbidden shortcut.** Reconstructing a synthetic workflow history to reach
+   `accepted` is forbidden by SPEC §6.1. It would fabricate controller-attested
+   events for runs that never occurred — forged provenance as the trust store's
+   first entry. If the ledger design appears to require it, stop and report.
+
+8. **Migration** (record §4.1 item 5), **after** the owner's activation run:
+   `statusAuthority` to `protected_controller_state`; `bootstrapStatus` removed
+   from `feature.schema.json` and every entry; status reads in
+   `computeNextFeature()` and the renderer's `CatalogSchema` resolved from the
+   ledger; `requirements.test.ts:230` tightened to assert the exact value; the
+   catalog audit's status assertions (`requirements.test.ts:217`–`229`) moved to
+   fixture-based ledger tests.
+
+   Performing this before activation leaves the repository with no status source
+   and CI unable to compute `next_feature`. Order matters.
+
+9. **Requirement linkage.** Add `EL10_REQUIREMENT_EVIDENCE` to `requirements.ts`
+   with concrete source and deterministic named tests, and an EL-10 linkage test
+   matching the existing per-feature pattern in `requirements.test.ts`.
+
+10. Preserve EL-02 through EL-06 replay, authority, repository, prompt, runner,
+    verification, approval, recovery, checker, redaction, and retention
+    invariants.
+
+</required_design>
 
 ## 5. File-level starting points
 
-Read completely before designing:
+Expected new modules under `tools/engineering-loop/src/`, with final names
+selected at the design checkpoint:
 
-- `AGENTS.md`, this `HANDOFF.md`, `docs/GLOSSARY.md`, and the root
-  README's “What Trellis is” section;
-- `docs/architecture/ENGINEERING_LOOP.md`, especially evaluation, authority,
-  migration, risk, and EL-07 decision rows;
-- `tools/engineering-loop/SPEC.md` §§4–6, 11–17, 18, and 19;
-- `docs/product/engineering-loop/ROADMAP.md` EL-07,
-  `docs/product/engineering-loop/RESEARCH.md` §§6–8, `features.json`, and
-  `feature.schema.json`;
-- `tools/engineering-loop/src/domain.ts`, `events.ts`, `fakes.ts`, `kernel.ts`,
-  `state_machine.ts`, `state_store.ts`, `command_evidence.ts`,
-  `requirements.ts`, `prompt_contracts.ts`, `prompt_compiler.ts`,
-  `episode_policy.ts`, `verifier.ts`, `policy.ts`, `recovery.ts`, `checker.ts`,
-  and `runners/runner.ts`;
-- every `tools/engineering-loop/tests/*.test.ts` file, especially fake clock,
-  fake command/effect/approval/runner, crash/restart, replay/idempotency,
-  evidence precedence, protected-action adversaries, checker isolation,
-  redaction, retention, byte-budget, and digest-pin patterns;
-- existing benchmark report conventions under `docs/benchmarks/`; and
-- root `package.json`, TypeScript configuration, and Vitest configuration.
+- `acceptance_ledger.ts` — schema, append, resolution, integrity refusals
+- `approval_channel.ts` — concrete `ProtectedApprovalChannel`
+- `activate.ts` — startup entrypoint
+- `seed.ts` — one-time approval-gated seeding
 
-Code remains stronger than the glossary and the glossary stronger than prose.
-Before editing, independently derive the three EL-07 requirements from SPEC
-§18; confirm EL-06 owner acceptance in protected state, catalog, roadmaps, Git,
-and merged history; then map all three rows and four catalog acceptance items
-to proposed source, deterministic evidence, measurements, and human review.
+Read before designing:
 
-Expected implementation remains narrow; select final names at the design
-checkpoint:
+- `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md`, especially §4.4, §4.6, and §9
+- `tools/engineering-loop/SPEC.md` §6, §6.1, §12, §16, §18
+- `src/state_store.ts` (`validateProtectedStateRoot`, `StateStore.open`)
+- `src/writer_lock.ts` (path scoping)
+- `src/policy.ts` (`PROTECTED_ACTIONS`, `ProtectedApprovalChannel`,
+  `authorizeProtectedAction`, `createProtectedApprovalRecord`)
+- `src/domain.ts` (`StateSnapshotSchema` — note it is single-feature)
+- `src/handoff_renderer.ts` (`computeNextFeature`, `CatalogSchema`)
+- `src/events.ts` (`canonicalJson`, `sha256Canonical`)
+- `tests/policy.test.ts` (the test-local `class Channel` at `:93` — the only
+  existing channel implementation)
+- `tests/requirements.test.ts` (the catalog audit and its `order` constraints)
 
-- strict evaluation plan/record and aggregate/report-renderer modules under
-  `tools/engineering-loop/src/`;
-- isolated canonical fixture repositories and deterministic fault scripts
-  under `tools/engineering-loop/fixtures/` only when inline data obscures
-  ordering or crash behavior;
-- focused evaluation, measurement, migration, requirement-linkage, and
-  protected-gate regression tests;
-- `docs/benchmarks/ENGINEERING_LOOP_REPORT.md`; and
-- minimal backward-compatible linkage to EL-02–EL-06 controller seams.
-
-Before authoring any runner/checker/grader prompt, reusable role asset, output
-schema, or HANDOFF rewrite, read the complete `Prompt-Engineering.md` and
-`Hypershot-Protocol.md` resources and invoke their skills when available. Use
-direct files only with explicit owner authorization. Preserve §0 verbatim.
+Add no dependency. Import no Trellis product runtime. Preserve product `src/`,
+scripts, databases, queues, workers, APIs, frontend, modules, RLM prompt bytes,
+and package manifests.
 
 ## 6. Test strategy and acceptance
 
-<deterministic_acceptance>
+<acceptance>
 
-Zero-paid harness acceptance requires:
+Deterministic acceptance for EL-10:
 
-1. The independently computed three EL-07 requirements map one-for-one to
-   implementation, deterministic evidence, measurement, or review: required 3,
-   implemented 3, verified 3, outstanding 0.
-2. The evaluation plan is strict, bounded, versioned, digest-pinned, and frozen
-   before any outcome. Unknown fields, changed fixtures/thresholds, missing
-   correlations, over-bound records, duplicate trials, and post-hoc arm changes
-   refuse.
-3. Isolated fixture runs use injected commands/effects/approvals/clocks/runners
-   only. Crash/restart and adversarial protected-gate matrices remain perfect;
-   no fabricated acceptance or duplicate external/paid effect is possible.
-4. Trial and aggregate records publish raw model/tool/retry/intervention/
-   verification/protected-action/token/cost/duration/stale-state/terminal counts
-   together. Null, surprising, failed, and excluded trials remain visible with
-   a typed disposition.
-5. Manual and controller arms use identical immutable tasks and acceptance
-   definitions. Metric computation and report rendering are pure and byte-
-   pinned; no model/checker/grader text upgrades controller evidence.
-6. Bounded redacted transcript review supports agent/grader/environment/harness
-   classification and preserves reviewer disagreement and unresolved findings.
-7. Migration evaluation pins the research targets: ≥80% cold-start-context
-   reduction, zero protected-gate bypasses, zero fabricated acceptance
-   transitions, zero duplicate paid/external effects after recovery, and no
-   acceptance-reliability regression.
-8. Manual `HANDOFF.md` remains authoritative absent an explicit signed owner
-   adopt verdict. No code path may automatically adopt, migrate, commit, push,
-   merge, or open a PR.
-9. Existing EL-02 through EL-06 behavior remains green. No product-runtime
-   import, remote-dependent deterministic test, real protected effect, EL-08
-   scheduler/tracker/concurrency, or EL-09 ingestion is added.
+- Five independently computed requirements map one-to-one with zero unaccounted
+  IDs.
+- The ledger is strict, versioned, bounded, canonical, and integrity-linked.
+- Every refusal in record §9.5's table has a passing test.
+- Ledger integrity refusals cover missing sequence, digest mismatch, invalid
+  schema, and truncated final line, with no silent repair.
+- Seeding is all-or-nothing; a partial append is a stop.
+- The entrypoint refuses contained, aliased, and symlink-reachable roots.
+- No synthetic workflow history is constructed.
+- EL-02 through EL-06 behavior remains green.
+- Zero model completions, zero paid work, zero real protected effects.
 
-Run at minimum, substituting only final focused filenames selected at design:
+Final EL-10 acceptance additionally requires the owner's activation run and the
+completed migration. **Landing the machinery does not satisfy `EL-10-A3`**: the
+catalog cannot lose `bootstrapStatus` until the ledger holds status, and the
+ledger cannot hold status until the owner authors approval material.
+
+</acceptance>
+
+<verification_block>
+
+Run each command separately and record its exact engine-observed result:
 
 ```
-npx vitest run tools/engineering-loop/tests/evaluation.test.ts tools/engineering-loop/tests/pilot.test.ts tools/engineering-loop/tests/report_renderer.test.ts tools/engineering-loop/tests/requirements.test.ts tools/engineering-loop/tests/policy.test.ts tools/engineering-loop/tests/recovery.test.ts tools/engineering-loop/tests/checker.test.ts
+npx vitest run tools/engineering-loop/tests/
 npm test
 npm run build
 npm run python:check
@@ -1674,32 +1775,16 @@ git diff --check
 git status --short --branch
 ```
 
-Run focused, full, and closeout blocks after every late edit. Record exact
-engine-observed counts, failures, retries, interventions, costs, nulls, and
-dispositions in the root roadmap and benchmark report.
+Baseline to compare against: **1,161 tests across 105 files**; engineering-loop
+focused **285 tests across 18 files**; catalog **11 features**; SPEC matrix
+**111 rows**.
 
-</deterministic_acceptance>
+Renderer pins move when `next_feature` or catalog-derived bytes change. **Render
+the bytes and confirm the change is exactly what you intend before repinning.**
+Do not paste digests from test output unverified — a pin accepted without
+reading its bytes is a pin that proves nothing.
 
-<paid_measurement_gate>
-
-Do not start a model trial during ordinary acceptance. After the zero-paid
-harness is green, print the exact plan digest, repetitions, model/runner,
-estimated input/output tokens, estimated USD per run and total, lower approved
-limit, and stop conditions. Continue only after a matching unused protected
-owner approval. Report actual tokens and USD immediately after each run and
-stop on limit, expiry, cancellation, unexplained divergence, or unknown effect.
-
-</paid_measurement_gate>
-
-<closeout_gate>
-
-After repeated measurements and transcript review, present all raw evidence
-and the computed threshold comparison to the owner. Record only the owner's
-actual adopt/revise/reject decision. A recommendation is not a verdict. Leave
-manual handoff authority unchanged unless a protected adopt decision explicitly
-authorizes migration.
-
-</closeout_gate>
+</verification_block>
 
 ## 7. Guardrails
 

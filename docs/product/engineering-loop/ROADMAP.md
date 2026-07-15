@@ -1,12 +1,15 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **EL-06 owner-accepted; EL-07 dependency-unblocked**
+Status: **EL-06 owner-accepted; EL-10 ratified and next; EL-07 blocked on EL-10**
 
-Owner direction: July 14, 2026
+Owner direction: July 15, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current feature: `EL-07` (dependency-unblocked after owner acceptance of `EL-06`)
+Current feature: `EL-10` (controller activation and status-authority migration,
+ratified July 15, 2026 after the EL-07 preflight found no protected controller
+state). `EL-07` is `blocked` until `EL-10` is accepted and the owner records an
+unblock.
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than
@@ -28,10 +31,21 @@ program:
    the relevant sections; it must not copy this roadmap wholesale.
 7. Code, tests, and captured command evidence decide whether a feature passed.
 
-Until `EL-02` establishes protected controller state, this file and
-`features.json` temporarily carry bootstrap status in Git. After `EL-02`, the
-controller owns mutable run status outside the agent-writable worktree and the
-versioned catalog retains immutable feature definitions only.
+Until protected controller state exists, this file and `features.json` carry
+bootstrap status in Git. Once it exists, the controller owns mutable run status
+outside the agent-writable worktree and the versioned catalog retains immutable
+feature definitions only.
+
+**This transition was originally scheduled for the end of `EL-02` and did not
+happen.** EL-02 built the state machinery and proved it under test, but nothing
+was ever stood up to own status, so "temporarily" ran through `EL-06` —
+`statusAuthority` still reads `bootstrap_git_until_el_02`. The cause is recorded
+here as a standing lesson: the transition was stated in this paragraph and
+nowhere else. It had no `EL-REQ-*`, no conformance row, and no test that could
+fail, so nothing caught four features of drift. `EL-10` both performs the
+migration and makes it normative as `EL-REQ-BOOT-004`. Authority in this
+repository is code > glossary > prose; a rule that lives only in prose is not
+enforced, including this one.
 
 ## 2. Ratified program boundary
 
@@ -88,20 +102,30 @@ At session close:
 | 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Accepted |
 | 5 | `EL-05` | Codex app-server runner adapter and episode rotation | `EL-02`, `EL-04` | Forbidden in acceptance | Accepted |
 | 6 | `EL-06` | Verification, protected gates, recovery, and independent checker | `EL-03`, `EL-04`, `EL-05` | Forbidden in deterministic acceptance | Accepted |
-| 7 | `EL-07` | Bounded pilot, repeated evaluation, and `HANDOFF.md` migration decision | `EL-06` | Owner-gated | Planned |
+| 7 | `EL-07` | Bounded pilot, repeated evaluation, and `HANDOFF.md` migration decision | `EL-06` | Owner-gated | **Blocked on `EL-10`** |
 | 8 | `EL-08` | Optional tracker, scheduler, concurrency, and multi-repository extraction decision | `EL-07` | Separately proposed | Deferred |
 | 9 | `EL-09` | Optional verified ingestion of sanitized completed-run reports | `EL-07` | Separately proposed | Deferred |
+| 10 | `EL-10` | Controller activation and status-authority migration | `EL-06` | Forbidden | Planned — **runs next, before `EL-07`** |
+
+`EL-10` carries `order: 10` but executes before `EL-07`. Order is catalog
+position, not execution sequence, for this one entry. The prerequisite is
+carried by EL-07's `blocked` status rather than a dependency edge, because the
+catalog audit requires every dependency to have a lower order than its
+dependent and the owner declined a renumber. See the EL-10 record §4.4.
 
 Dependency shape:
 
 ```text
 EL-00 -> EL-01 -> EL-02 -> EL-03 -----------+
                  |                          |
-                 +-------> EL-04 -> EL-05 -> EL-06 -> EL-07
-                                                       |  \
-                                                       |   +-> EL-09
-                                                       +-----> EL-08
+                 +-------> EL-04 -> EL-05 -> EL-06 -> EL-10 -> EL-07
+                                                                |  \
+                                                                |   +-> EL-09
+                                                                +-----> EL-08
 ```
+
+The `EL-10 -> EL-07` edge is real but is not encoded in `features.json`
+dependencies; EL-07's `blocked` status carries it. See §4 above.
 
 ## 5. Feature contracts
 
@@ -150,9 +174,12 @@ Acceptance focus:
 
 Accepted July 14, 2026: the architecture record ratifies the repository-owned,
 out-of-process, protected-state boundary and resolves all priority-zero trust
-questions. The specification defines 106 stable mandatory requirements; all
-106 map to an existing feature, catalog acceptance item, and planned test
-class, with zero unmapped requirements. EL-01 added no runtime or prompt bytes.
+questions. The specification defined 106 stable mandatory requirements at
+ratification; all 106 mapped to an existing feature, catalog acceptance item,
+and planned test class, with zero unmapped requirements. EL-01 added no runtime
+or prompt bytes. (`EL-10` later added `EL-REQ-BOOT-001` through
+`EL-REQ-BOOT-005` on July 15, 2026, bringing the matrix to 111 rows, still with
+zero unmapped requirements.)
 
 ### EL-02 — control kernel
 
@@ -327,6 +354,59 @@ Model completions, paid calls, and real protected effects were zero. On July
 15, 2026, the owner reviewed and accepted EL-06 and explicitly authorized
 commit, merge, and push to `master`.
 
+### EL-10 — controller activation and status-authority migration
+
+Ratified July 15, 2026. Runs before `EL-07`. Paid work forbidden.
+
+Outcome: the controller runs as a real process, owns mutable status in protected
+state, and the catalog retains immutable feature definitions only — completing
+the transition §1 scheduled for the end of `EL-02`.
+
+Why it exists: the `EL-07` preflight requires protected controller acceptance
+and states that repository prose is not acceptance. No protected controller
+state existed. `StateStore.open()` had no caller outside tests, no entrypoint or
+npm script existed, and no state root existed on disk. EL-02 through EL-06 built
+a correct, well-tested, and entirely inert library. Separately, `statusAuthority`
+still read `bootstrap_git_until_el_02` — the migration §1 promised after EL-02
+never happened, because it was written as prose with no `EL-REQ-*`, no
+conformance row, and no test that could fail.
+
+Scope:
+
+- A program-scoped **acceptance ledger**: a new append-only, integrity-linked
+  protected artifact holding per-feature status. Required because
+  `StateSnapshotSchema` is single-feature and nothing in protected state can
+  express which features are accepted.
+- A real `ProtectedApprovalChannel` reading owner-authored material from
+  `protected_external`.
+- A startup entrypoint resolving the ledger root, state root, worktree, and
+  channel location.
+- One-time seeding of EL-00 through EL-06 acceptance under a single
+  owner-approved, atomically consumed `acceptance_change`.
+- Status-authority migration: `statusAuthority` to `protected_controller_state`,
+  `bootstrapStatus` removed from the catalog, status resolved from the ledger.
+
+Requirements: `EL-REQ-BOOT-001` through `EL-REQ-BOOT-005` (SPEC §6.1). The
+conformance matrix moves from 106 rows to 111.
+
+Design record: `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md`. Its §9 is normative for
+the implementing session and was owner-approved July 15, 2026.
+
+Acceptance focus:
+
+- Seeding is refused without owner approval, with forged, replayed, expired, or
+  scope-mismatched approval, and against a non-empty ledger.
+- A synthetic workflow history reaching `accepted` is forbidden; it would
+  fabricate controller-attested events for runs that never occurred.
+- All scoped records apply or none.
+- The ledger refuses missing sequences, digest mismatch, and partial appends
+  without silent repair.
+
+Ordering constraint: activation has an owner-operated step in the middle. The
+machinery lands first, the owner then authors approval material and runs
+activation, and only then can `bootstrapStatus` leave the catalog — deleting it
+earlier would leave the repository with no status source at all.
+
 ### EL-07 — pilot, evaluation, and migration
 
 Outcome: measured evidence decides whether the loop replaces the manual session
@@ -391,9 +471,25 @@ the engineering-loop subset; it does not create a competing historical log.
 
 ## 8. Current next step
 
-`EL-00` through `EL-06` are owner-accepted. The next dependency-unblocked
-feature is `EL-07`: a bounded pilot, repeated comparison, human transcript
-review, and an owner adopt/revise/reject verdict. Paid trials remain separately
-owner-gated and require a printed estimate before execution. Manual
-`HANDOFF.md` remains authoritative throughout EL-07 unless the owner later
-records an adopt verdict.
+`EL-00` through `EL-06` are owner-accepted. The next feature is **`EL-10`**:
+controller activation and status-authority migration, ratified July 15, 2026 and
+zero-paid throughout. Its design record's §9 is normative and owner-approved; the
+implementing session builds against it rather than redesigning.
+
+`EL-07` is `blocked` until `EL-10` is accepted **and** the owner records an
+explicit unblock. Until then `next_feature` resolves to `EL-10`, and after
+EL-10's acceptance it resolves to `null` in the interval before the unblock — a
+correct and existing state, not a defect.
+
+EL-10 completes in three ordered steps, the middle of which is not the
+controller's to perform:
+
+1. Land the ledger, channel, entrypoint, and seeder with deterministic tests.
+2. The owner authors approval material and the activation run seeds the ledger.
+   This step cannot be self-served: `EL-REQ-BOOT-002` requires approval authored
+   outside the controller, and a controller that could author its own approval
+   would make the ledger worthless.
+3. Remove `bootstrapStatus` from the catalog and resolve status from the ledger.
+
+Manual `HANDOFF.md` remains authoritative throughout EL-10 and EL-07 unless the
+owner later records an adopt verdict.

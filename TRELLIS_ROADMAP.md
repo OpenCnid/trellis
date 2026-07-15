@@ -191,7 +191,7 @@ Ordered roughly by severity.
 
 | Order | Item | Rationale |
 |---|---|---|
-| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 THROUGH EL-06 OWNER-ACCEPTED; EL-07 DEPENDENCY-UNBLOCKED.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-06 implements its exact 36 requirements under `tools/engineering-loop/`: immutable controller-observed verification, external protected-channel approval policy, exhaustive bounded recovery, a fresh least-privilege read-only checker, redaction, retention, and one-to-one requirement linkage. Focused acceptance passed 76 tests across 5 files and repository-wide acceptance passed 1,161 tests across 105 files, zero-model and zero-paid. On July 15, 2026, the owner reviewed and accepted EL-06 and explicitly authorized commit, merge, and push to `master`. EL-07 is next: bounded pilot, repeated evaluation, human transcript review, and an owner adopt/revise/reject migration verdict. Manual `HANDOFF.md` remains authoritative throughout EL-07 unless the owner records an adopt verdict. No scheduler, tracker, automatic push/merge, concurrent writer, or product-runtime integration enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
+| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 THROUGH EL-06 OWNER-ACCEPTED; EL-10 RATIFIED AND NEXT; EL-07 BLOCKED ON EL-10.** On July 15, 2026 the EL-07 preflight refused: protected controller acceptance was absent because no controller had ever run (`StateStore.open()` had no caller outside tests; no entrypoint or state root existed), and `statusAuthority` still read `bootstrap_git_until_el_02` four features past the migration product-roadmap §1 scheduled for the end of EL-02. The owner ratified `EL-10` (controller activation and status-authority migration, zero-paid) to close both. EL-10 adds a program-scoped acceptance ledger, a real approval channel, a startup entrypoint, owner-approved seeding, and the status migration; its design record §9 is normative and owner-approved. Activation has an owner-operated step: the owner authors approval material and runs seeding before `bootstrapStatus` may leave the catalog. Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-06 implements its exact 36 requirements under `tools/engineering-loop/`: immutable controller-observed verification, external protected-channel approval policy, exhaustive bounded recovery, a fresh least-privilege read-only checker, redaction, retention, and one-to-one requirement linkage. Focused acceptance passed 76 tests across 5 files and repository-wide acceptance passed 1,161 tests across 105 files, zero-model and zero-paid. On July 15, 2026, the owner reviewed and accepted EL-06 and explicitly authorized commit, merge, and push to `master`. EL-07 is next: bounded pilot, repeated evaluation, human transcript review, and an owner adopt/revise/reject migration verdict. Manual `HANDOFF.md` remains authoritative throughout EL-07 unless the owner records an adopt verdict. No scheduler, tracker, automatic push/merge, concurrent writer, or product-runtime integration enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
 | ~~1~~ | ~~Structured logging and basic metrics (3.2 #9 / T16)~~ | **Done (July 6, 2026)** — split-process logs/metrics shipped; see §5 |
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
@@ -1103,6 +1103,119 @@ feature-branch pull-request path.
    dependency-unblocked EL-06 while preserving §0 byte-for-byte and retaining
    manual handoff authority. The owner's EL-05 acceptance dependency-unblocks
    EL-06.
+
+### July 15, 2026 — Session 61: EL-07 preflight refused; EL-10 controller activation ratified and specified, zero-model and zero-paid
+
+Session 61 was assigned engineering-loop feature `EL-07`. **The preflight gate
+refused it.** No EL-07 implementation, model trial, or paid work was performed.
+The session instead raised, ratified, and specified `EL-10`. Zero model
+completions, zero paid calls, zero protected effects, zero `src/` changes.
+
+1. **Preflight refusal (the assigned work).** The EL-07 preflight requires seven
+   items to agree and states that repository prose is not acceptance. Six agreed:
+   `origin/master` = `9d50b0e9013176b8c21f42bd1f429c9adf295803` (the EL-06 commit
+   exactly, confirmed by `git merge-base --is-ancestor`); clean worktree at that
+   HEAD; `features.json` EL-06 `accepted`; EL-07 `dependencies: ["EL-06"]`;
+   product roadmap §4/§8; root ledger §194. **Protected controller acceptance was
+   absent — not stale, never instantiated.** `StateStore.open()`
+   (`state_store.ts:249`) takes a caller-supplied `stateRoot` with no default and
+   no environment variable; every caller is a test using a temp directory; no
+   CLI, entrypoint, `package.json` bin, npm script, or `src/` importer exists; no
+   state root exists on disk. EL-02 through EL-06 built a correct, well-tested,
+   entirely inert library. 1,161 passing tests establish that the kernel is
+   correct, not that it is reachable; no test asserts a non-test caller exists.
+
+2. **Corroborating drift.** `features.json` still declares
+   `statusAuthority: "bootstrap_git_until_el_02"`, while `feature.schema.json`
+   has always offered `protected_controller_state` as the alternative. Product
+   roadmap §1 scheduled that transition for the end of EL-02; it never happened
+   and ran four features past its stated end. Cause recorded as a standing
+   lesson: the transition existed as prose with no `EL-REQ-*`, no conformance
+   row, and no test that could fail. `requirements.test.ts:230` asserted only
+   that the value was one of two permitted values, never which. Authority here is
+   code > glossary > prose, and the rule was broken by the paragraph stating it.
+
+3. **Scope of the pattern.** Interface defined and tested, real adapter never
+   built — true at the state root and the approval channel
+   (`ProtectedApprovalChannel` had exactly one implementation, a test-local
+   `class Channel` at `policy.test.ts:93`). EL-05 is the control case: it built
+   `CodexAppServerRunner`, pinned the wire protocol, and ran a live local smoke.
+   The program is not uniformly inert; these two boundaries specifically were
+   left at interface plus test.
+
+4. **Owner decisions.** The owner ratified `EL-10` as a named harness feature
+   gating `EL-07`; declined the proposed `order` renumber, directing that EL-10
+   keep `order: 10` with the prerequisite documented; delegated the
+   specification decision; and elected one session. The one-session election was
+   later superseded by finding 5.
+
+5. **Mid-session scope correction.** The EL-10 record initially asserted the
+   feature was mostly wiring existing tested parts to an entrypoint. **That was
+   wrong and is recorded rather than deleted** (record §4.6).
+   `StateSnapshotSchema` (`domain.ts:320`) is single-feature — one `featureId`,
+   one `state` — and a state root holds one workflow. Nothing in protected state
+   can express which features are accepted. `acceptedFeatureIds` is
+   caller-supplied at every site (`kernel.ts:66`, `handoff_renderer.ts:142`) and
+   nothing derives it from state. The seeding destination did not exist. EL-10
+   therefore grew an owner-approved acceptance-ledger design (record §9), and
+   implementation moved to a fresh session.
+
+6. **Ratified design (record §9, owner-approved July 15, 2026).** Feature status
+   is program-scoped; workflow state is feature-scoped; they are different facts
+   and get different artifacts. A program-scoped, append-only, integrity-linked
+   acceptance ledger lives in its own protected root, reusing `WriterLock`
+   unchanged because the lock is scoped by path (`join(root, '.writer.lock')`)
+   with the workflow ID only inside the record. Strictly additive: no change to
+   `domain.ts`, `state_store.ts`, `writer_lock.ts`, or EL-02's 132-pair
+   transition matrix. The alternative of walking a synthetic workflow to
+   `accepted` was rejected normatively: it would fabricate controller-attested
+   events for runs that never occurred — the module #1 laundering failure
+   reintroduced at the foundation.
+
+7. **Catalog mechanism forced by the owner's ordering choice.** The catalog audit
+   (`requirements.test.ts:204`) requires every dependency to have a lower `order`
+   than its dependent, and `order` must equal array index (`:190`), so `order` is
+   a dense topological sort and a forward `EL-07 → EL-10` edge is inexpressible.
+   Prose alone would leave `computeNextFeature()` still resolving `EL-07`. **As
+   landed:** `EL-10` appended at `order: 10`, `dependencies: ["EL-06"]`; `EL-07`
+   moved `planned` → `blocked`. `next_feature` resolves to `EL-10`, verified. Two
+   accepted consequences: the prerequisite is not a machine-readable graph edge,
+   and unblocking EL-07 is a manual owner act.
+
+8. **Specification.** SPEC §6.1 "Controller activation and status authority" adds
+   `EL-REQ-BOOT-001` through `EL-REQ-BOOT-005` covering entrypoint resolution,
+   approval-gated seeding, seeding refusals, status authority, and ledger
+   integrity. The conformance matrix moves from 106 to 111 rows, all mapped, zero
+   unmapped. A new `BOOT` family was chosen over extending `STORE`/`APPROVAL`.
+   `EL-REQ-VIEW-003` was reviewed and deliberately left unchanged.
+
+9. **Ordering constraint discovered.** Activation has an owner-operated step in
+   the middle: machinery lands, **the owner authors approval material and runs
+   activation**, and only then may `bootstrapStatus` leave the catalog. Deleting
+   it earlier leaves the repository with no status source and CI unable to
+   compute `next_feature`. `EL-REQ-BOOT-002` requires approval authored outside
+   the controller; a controller that could author its own approval would make the
+   ledger worthless. Landing EL-10's machinery therefore does not by itself
+   satisfy the EL-07 preflight.
+
+10. **Evidence.** Commands: `npx vitest run` → **105 files / 1,161 tests passed**
+    (unchanged from the EL-06 baseline; assertions and pins changed, no test added
+    or removed). `npx vitest run tools/engineering-loop/tests/` → 18 files / 285
+    tests passed. Catalog parses; 11 features. SPEC matrix = 111 rows; 4 BOOT
+    rows in §18 plus 5 in §6.1. Renderer pins recomputed after rendering the bytes
+    and confirming the sole change was `Proposed next feature: EL-07` → `EL-10`;
+    pins were not accepted from test output unverified. Diff touches only
+    `SPEC.md`, `features.json`, product `ROADMAP.md`, one test file, and the new
+    record. No `src/`, product runtime, prompt pin, dependency, scheduler,
+    daemon, or automatic Git effect entered.
+
+11. **Closeout and next gate.** `EL-10` is ratified, specified, and designed; **no
+    controller implementation exists.** The next session implements EL-10 against
+    record §9, which is normative. Its §9.8 carries three open questions for that
+    session. `HANDOFF.md` is regenerated for EL-10 with §0 preserved byte-for-byte;
+    manual handoff authority is retained. `EL-07` stays `blocked` and resumes only
+    after EL-10 acceptance and an explicit owner unblock; paid trials and any
+    handoff migration remain separately gated.
 
 ### July 15, 2026 — Session 60: EL-06 deterministic verification and protected gates owner-ratified and accepted, zero-model and zero-paid
 

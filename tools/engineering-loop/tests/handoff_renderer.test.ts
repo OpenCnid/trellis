@@ -209,7 +209,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
     expect(derived.artifacts).toEqual(['tools/engineering-loop/src/repo_observer.ts']);
     expect(derived.verification[0].command).toBe('cwd="/fixture/worktree" argv=["npm","test"]');
     expect(derived.verification[0].result).toContain('exit=0 timeout=false cancelled=false');
-    expect(derived.next_feature).toBe('EL-07');
+    expect(derived.next_feature).toBe('EL-10');
   });
 
   it('refuses unjournaled or runner-reported command claims as verification truth', async () => {
@@ -303,9 +303,9 @@ describe('EL-03 trusted report and deterministic derived views', () => {
     expect(renderStatusBytes({ rendererVersion: HANDOFF_RENDERER_VERSION, snapshot: structuredClone(SNAPSHOT), repository: structuredClone(REPOSITORY), report: structuredClone(derived) })).toEqual(statusBytes);
     expect(renderHandoffPreviewBytes(structuredClone(previewInput))).toEqual(previewBytes);
     expect({ report: digest(reportBytes), status: digest(statusBytes), handoff: digest(previewBytes) }).toEqual({
-      report: '3bcd10092c42b4308077164207fadd8f7ab00e99411de05afb2cfd491fcf48f4',
-      status: 'a321f7bfcff8171fa9e51c93a019d4f91fef0804df420e72345e1fcaa39baa9d',
-      handoff: '7de2b6d2fa31529055af026eaab6897b1f3ba93ba8aac748e4305fd8dd7e6370',
+      report: 'c329941dec4e79ed70ce4ef95256bd21a61bcfb135e1a16abcb1cb4b124a6c6b',
+      status: '63646e346d337f517920106af78c818230e44ce310c66356c5e1eaea398b53b4',
+      handoff: '8e5af95b6e4e502ed703843d4bbecc1c02e8b598ef06bdf8550eea7ea5ac5fd0',
     });
   });
 

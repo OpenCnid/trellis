@@ -293,7 +293,7 @@
       ],
       "gates": ["paid_run", "owner_ratification", "human_review"],
       "paidWork": "owner_gated",
-      "bootstrapStatus": "planned"
+      "bootstrapStatus": "blocked"
     },
     {
       "id": "EL-08",
@@ -330,6 +330,49 @@
       "gates": ["owner_ratification"],
       "paidWork": "separately_proposed",
       "bootstrapStatus": "deferred"
+    },
+    {
+      "id": "EL-10",
+      "order": 10,
+      "title": "Controller activation and status-authority migration",
+      "outcome": "The controller runs as a real process, owns mutable status in protected state, and the catalog retains immutable feature definitions only.",
+      "dependencies": ["EL-06"],
+      "artifacts": [
+        "tools/engineering-loop/src/acceptance_ledger.ts",
+        "tools/engineering-loop/src/approval_channel.ts",
+        "tools/engineering-loop/src/activate.ts",
+        "tools/engineering-loop/src/seed.ts"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-10-A1",
+          "kind": "integration",
+          "requirement": "A real non-test entrypoint resolves a protected state root outside the assigned worktree and refuses contained, aliased, and symlink-reachable roots."
+        },
+        {
+          "id": "EL-10-A2",
+          "kind": "integration",
+          "requirement": "Seeding succeeds only with owner approval material read from the protected external channel and atomically consumed; it is refused without approval, with forged or replayed approval, and against non-empty acceptance state."
+        },
+        {
+          "id": "EL-10-A3",
+          "kind": "static",
+          "requirement": "The catalog carries no mutable status, statusAuthority is protected_controller_state, every status read resolves from protected state, and a test asserts the exact authority value."
+        },
+        {
+          "id": "EL-10-A4",
+          "kind": "integration",
+          "requirement": "With status resolved from the acceptance ledger, the derived report, status view, and handoff preview render deterministically and resolve next_feature to EL-10."
+        },
+        {
+          "id": "EL-10-A5",
+          "kind": "integration",
+          "requirement": "The acceptance ledger is append-only, monotonically sequenced, and integrity-linked; missing sequences, digest mismatch, and partial appends stop with human reconciliation and no silent repair."
+        }
+      ],
+      "gates": ["owner_ratification", "human_review"],
+      "paidWork": "forbidden",
+      "bootstrapStatus": "planned"
     }
   ]
 }
