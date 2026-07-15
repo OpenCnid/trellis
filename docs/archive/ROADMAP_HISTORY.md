@@ -6718,3 +6718,151 @@ objective remains untouched.
    and zero-paid. Real runner integration, production prompts, repository
    observation/rendering, verification policy, migration, scheduling, and TTT
    remain excluded.
+
+### July 14, 2026 — Session 56: EL-02 deterministic control kernel owner-ratified and accepted, zero-model and zero-paid
+
+Session 56 executed only engineering-loop feature `EL-02` on
+`implement-el02-control-kernel`, based on
+`51d9c7a46f72615baf0ec810ee0600307fbe9bac`. The work added no dependency,
+production prompt, real runner, repository observer, renderer, external
+service, scheduler, tracker, product-runtime change, model call, or paid work.
+The owner reviewed and ratified the complete diff, then explicitly authorized
+commit, merge, and push to `master`.
+
+1. **All 28 owned requirements implemented and linked:** the conformance-matrix
+   audit independently computed exactly 28 EL-02 rows and matched them one for
+   one to `tools/engineering-loop/src/requirements.ts`, with nonempty source and
+   deterministic-test evidence and zero outstanding IDs. Strict versioned Zod
+   boundaries cover the nine protocol domain objects plus protected snapshots,
+   effect records, repository observations, runner evidence, locks, and event
+   payloads.
+2. **Pure transition authority pinned exhaustively:** 11 persisted states plus
+   genesis produce 132 source/destination pairs; exactly 41 allowed pairs pass
+   and 91 unlisted pairs refuse before any fake effect. Ordinary progress is
+   pinned through `preparing`, `running`, `verifying`, and `awaiting_review`;
+   terminal states are immutable; controller-observed evidence is required for
+   review-bearing transitions; runner/checker/model authority and forged,
+   expired, consumed, widened-scope, or repository-mismatched approvals refuse.
+3. **Protected single-writer storage implemented:** the operator root is
+   canonicalized outside the worktree and refuses lexical, canonical, and both
+   directions of symlink alias. The controller takes an exclusive `wx` writer
+   lock before reading mutable state; a second writer makes no journal or
+   snapshot mutation, and stale locks are never stolen automatically. Events
+   append with monotonic sequence, previous digest, canonical SHA-256 integrity,
+   and durable flush before an atomically replaced full snapshot is exposed.
+4. **Restart, corruption, and crash behavior pinned:** restart validates the
+   journal prefix against the newest published snapshot, seeds replay from that
+   snapshot, and applies later events deterministically. Eight corruption
+   classes stop without repair:
+   missing/out-of-order sequence, digest mismatch, invalid schema, recomputed
+   impossible transition, malformed JSON, unterminated JSONL tail, an over-bound
+   event record, and snapshot/journal disagreement.
+   All 14 declared crash points are covered: six journal/snapshot boundaries
+   and eight approval/intent/invocation/outcome boundaries. Every crash case
+   reconstructs the uninterrupted logical oracle and a completed fake effect
+   is invoked exactly once.
+5. **Intent/outcome recovery remains fake-only:** stable operation and
+   idempotency identifiers are durably recorded before invocation; typed
+   outcomes follow invocation; identical retries return the durable outcome;
+   changed records, key reuse, or consumed-approval replay refuse. Restart
+   reconstructs first, re-observes
+   the fake repository, and reconciles incomplete intents before runner resume.
+   An unknown outcome records required reconciliation, transitions to
+   `blocked`, and never invokes the target again automatically.
+6. **Acceptance evidence:** baseline after `npm ci` was 87 files / 876 tests.
+   Focused `npx vitest run tools/engineering-loop/tests` passed 40 tests across
+   5 files. Final `npm test` passed **916 tests across 92 files**; `npm run
+   build` passed; `npm run python:check` printed `Python runtime syntax,
+   imports, rubric, and module assets verified.`; `docker compose config
+   --quiet` exited 0; Draft 2020-12 catalog validation printed **10**;
+   catalog identifier/order/dependency/acyclic/acceptance semantics and SPEC
+   linkage passed inside the tool suite; `git diff --check` exited 0.
+7. **Findings and dispositions:** sandboxed Node commands initially hit Windows
+   `EPERM` while resolving the worktree and `git fetch` initially lacked
+   permission to update the worktree Git metadata; scoped escalation made both
+   classes pass without repository workaround. The implementation audit closed
+   fail-open default transition facts, missing controller-origin evidence,
+   unvalidated injected repository/runner/reconciliation values, a worktree
+   symlink alias into protected state, same-instance concurrent commits,
+   consumed-approval replay, protected-action substitution on approval resume,
+   torn and over-bound persisted records, and full-journal replay where literal
+   validated-snapshot tail replay was required. No residual acceptance defect
+   remains.
+8. **Next:** `EL-03` is dependency-unblocked and is the next feature in the
+   program sequence. The paused TTT T2 objective remains untouched.
+
+### July 14, 2026 — Session 57: EL-03 repository observer and deterministic handoff renderer owner-ratified and accepted, zero-model and zero-paid
+
+Session 57 executed only engineering-loop feature `EL-03` on
+`implement-el03-repository-observer`, based on required master commit
+`e0504b1b5bfda85be6c0c8518234d2c6348a4625`. The implementation adds no
+dependency, product-runtime source, production prompt, real agent runner,
+verification service, scheduler, tracker, model call, paid call, automatic
+push, or automatic merge. The owner reviewed and ratified the complete diff,
+then explicitly authorized commit, merge, and push to `master`.
+
+1. **All 12 owned requirements implemented and linked:** an independent SPEC
+   §18 audit computed exactly `DATA-006`, `OBS-005`, `REPO-001` through
+   `REPO-006`, `VIEW-001`, `VIEW-002`, `VIEW-003`, and `VIEW-005`. Each maps
+   one-for-one to concrete source and deterministic tests in
+   `tools/engineering-loop/src/requirements.ts`; outstanding IDs = 0.
+2. **Repository observation and scope are engine-owned:**
+   `repo_observer.ts` computes canonical repository/worktree/common-Git
+   identity, branch, base, HEAD, clean state, normalized remote identity, and
+   every changed path through explicit local Git argv. Porcelain-v2 NUL parsing
+   preserves staged, unstaged, untracked, deleted, renamed, spaced, Unicode,
+   and leading-dash names. `path_scope.ts` validates NFC slash paths, refuses
+   absolute/traversal/platform aliases, compares path segments, and stops on
+   out-of-scope or between-check divergence rather than widening expected
+   state.
+3. **Commands and retained bytes are bounded and protected:**
+   `command_evidence.ts` uses `spawn` with `shell: false`, explicit argv/cwd,
+   injected time, timeouts/cancellation, exact byte counts, bounded base64
+   previews, and full SHA-256 digests. Complete output is atomically retained
+   outside the worktree under the EL-02 protected root, deduplicated by digest,
+   revalidated at read/journal boundaries, and linked by controller-observed
+   evidence. Aliases, partial files, disagreement, over-bounds, and worker
+   substitutions refuse.
+4. **Reports and previews derive only from trusted state:**
+   `handoff_renderer.ts` validates journal-linked repository and command
+   evidence, computes strict snake-case report fields and requirement counts,
+   refuses failed verification for a ready-review result, and renders pure,
+   bounded canonical bytes. SHA-256 pins are report
+   `4c085f4b023e6efb3c770a5957e835c502f5884907d33e026b043d96686fa262`,
+   status `8f77a23f77d99d0515ddbfe07af3b5e572ceb21ddd83fa7e98612153011568b8`,
+   and handoff preview
+   `961e09a7142b25604482a98cad94711a3da7cd794498b6b5580027051f4c911f`.
+   Rendering performs no command, clock, Git, state-store, file, network, or
+   manual-HANDOFF mutation; manual `HANDOFF.md` remains authoritative.
+5. **Deterministic test evidence:** the focused command
+   `npx vitest run tools/engineering-loop/tests/path_scope.test.ts
+   tools/engineering-loop/tests/command_evidence.test.ts
+   tools/engineering-loop/tests/repo_observer.test.ts
+   tools/engineering-loop/tests/handoff_renderer.test.ts
+   tools/engineering-loop/tests/requirements.test.ts` passed **64 tests across
+   5 files**. The repository suite moved from 92 files / 916 tests to **96
+   files / 977 tests**: four new test files and 61 net tests, with all 40 EL-02
+   tests preserved. `npm run build` passed; `npm run python:check` printed
+   `Python runtime syntax, imports, rubric, and module assets verified.`;
+   `docker compose config --quiet` exited 0; Draft 2020-12 catalog validation
+   printed **10**; `git diff --check` exited 0.
+6. **Findings and dispositions:** preflight fetched `origin/master` and
+   verified it exactly matched the required commit before branch creation.
+   Fresh `npm ci` installed 317 packages with 0 vulnerabilities and repeated
+   the local Node v20.19.2 versus four Babel packages' Node 22.18+ warnings;
+   install, tests, and build still passed, while CI remains Node 22. The first
+   focused run exposed a remote-normalization precedence defect that treated an
+   HTTPS URL as SCP syntax; URL parsing precedence was corrected and multiple-
+   remote/malformed-status refusal pins were added. The final focused and full
+   suites are green. A final parallel sandboxed npm check repeated the known
+   Windows `EPERM` realpath refusal, and sandboxed Compose could not read the
+   user Docker config; both exact commands passed on scoped rerun, with Compose
+   silent. Deterministic tests made zero remote calls; the sole
+   remote contact was the required preflight fetch. Model calls = 0; paid calls
+   = 0.
+7. **Closeout and next:** only the EL-03 bootstrap-status field changed in
+   `features.json`; the owner ratified that closeout after reviewing the diff.
+   Session 52 moved verbatim to the archive so the live ledger remains five.
+   `EL-04` is dependency-unblocked and proposed next: prompt compiler and strict
+   role contracts under the mandatory prompt-engineering/hypershot gate. The
+   paused TTT T2 tooling objective remains untouched.
