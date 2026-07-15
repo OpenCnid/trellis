@@ -6652,3 +6652,69 @@ paused, not cancelled; the engineering-loop program remains owner-prioritized.
    `tools/engineering-loop/SPEC.md`, including the threat model, transition
    contract, and conformance matrix. Explicit exclusions: control-kernel code,
    `WORKFLOW.md`, production prompts, Codex invocation, and handoff migration.
+
+### July 14, 2026 — Session 55: EL-01 architecture record and normative specification ACCEPTED, zero-paid
+
+Session 55 executed only engineering-loop feature `EL-01`. No controller code,
+production prompt, `WORKFLOW.md`, model call, paid service, database, queue,
+worker, API, source file, dependency, or prompt pin changed. The paused TTT T2
+objective remains untouched.
+
+1. **Architecture ratified:** new
+   `docs/architecture/ENGINEERING_LOOP.md` records the problem and the
+   non-reuse boundary against the in-memory RLM/product goal loops; selects
+   repository-owned source plus an out-of-process controller and protected
+   mutable state outside the agent-writable worktree; assigns human,
+   controller, runner, worker, checker, repository, external-system, and
+   product-runtime authority; defines six context tiers and episode/fresh-
+   context rules; resolves all ten priority-zero decisions; records the six
+   required alternative families, consequences, risks, extraction/dependency
+   triggers, and lower-priority choices under EL-02–EL-09.
+2. **Normative contract ratified:** new `tools/engineering-loop/SPEC.md`
+   defines the language-independent protocol and TypeScript reference intent;
+   typed workflow/feature/session/episode/event/approval/evidence/decision/
+   report objects; ordinary, protected, recovery, forbidden, and terminal
+   transitions; external single-writer state, append-only integrity-linked
+   events, atomic snapshots, restart replay, repository observation, prompt-
+   compilation reservation, adapter-neutral `AgentRunner`, episode rotation,
+   evidence precedence, approvals, failure taxonomy, idempotency, retry,
+   unknown-side-effect stop, observability/redaction/retention, generated views,
+   migration, and security posture. It contains **106 stable mandatory
+   requirement IDs**.
+3. **Feature/conformance linkage:** the engine-computed spec audit found
+   `requirements=106 mapped=106 unmapped=0 features=10`. Every requirement maps
+   to an existing `EL-*` feature, exact catalog acceptance ID, and matching
+   `static`, `integration`, `review`, or `measurement` class. Catalog semantics
+   remain `ids=10 edges=13 acceptance=34 order_parity=true`; Draft 2020-12
+   schema validation prints `10`. `features.json` marks EL-00 and EL-01
+   accepted; the product roadmap advances only to EL-02.
+4. **Acceptance commands and observations:** `npm test` passed **87 files / 876
+   tests**; `npm run build` passed; `npm run python:check` reported runtime
+   syntax/imports/rubric/module assets verified; the inline requirement audit
+   printed `requirements=106 mapped=106 unmapped=0 features=10`; the inline
+   semantic catalog audit printed `ids=10 edges=13 acceptance=34
+   order_parity=true`; the required `python -c` JSON Schema command printed
+   `10`; `docker compose config --quiet` passed; the
+   local-link/unidentified-normative check printed
+   `local_links=resolved unidentified_normative_must=0`; `git diff --check`
+   passed; final status listed only the two EL-01 artifacts and required
+   roadmap/catalog/archive/HANDOFF closeout files.
+5. **Findings:** no priority-zero contradiction, unmapped requirement, catalog
+   mismatch, runtime regression, or existing-code defect was found. Two local
+   command-path incidents were environmental and recorded rather than hidden:
+   sandboxed `npm test` failed before Vitest with `EPERM` while traversing the
+   requested worktree outside the active sandbox root, and the first approved
+   retry used a diagnostic timeout and expired after five seconds; the same
+   exact command then passed with the suite timeout. A compact semantic-check
+   one-liner was rejected by PowerShell quoting before execution; the literal
+   stdin form passed. The reconciliation merge against current `master`
+   reran the 87-file / 876-test suite, build, Python runtime check, Compose
+   config validation, schema validation, mapping/catalog audit, and diff
+   checks with the same green results. No paid work occurred.
+6. **Bookkeeping and next:** Session 50 and its same-day follow-on entry moved
+   verbatim to `docs/archive/ROADMAP_HISTORY.md`; the live session window is
+   51–55. `HANDOFF.md` regenerated per §0. Next is Session 56, `EL-02` only: deterministic control
+   kernel schemas/transitions/state/events/lock/fake dependencies, zero-model
+   and zero-paid. Real runner integration, production prompts, repository
+   observation/rendering, verification policy, migration, scheduling, and TTT
+   remain excluded.

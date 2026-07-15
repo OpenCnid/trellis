@@ -191,7 +191,7 @@ Ordered roughly by severity.
 
 | Order | Item | Rationale |
 |---|---|---|
-| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 THROUGH EL-05 OWNER-ACCEPTED; EL-06 DEPENDENCY-UNBLOCKED AND PROPOSED NEXT.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-05 implements its exact 15 requirements under `tools/engineering-loop/`: a versioned adapter-neutral lifecycle contract, a pinned Codex app-server JSONL v2 boundary, stable correlations, ordered/bounded/redacted observations with exactly one terminal report, and a pure episode-continuity policy. Focused acceptance passed 69 tests across 4 files and repository-wide acceptance passed 1,094 tests across 101 files, zero-model and zero-paid; the explicit local handshake emitted only `initialize` and `initialized`, then disposed with zero thread/turn requests. On July 15, 2026, the owner reviewed and ratified EL-05 and explicitly authorized commit, merge, and push through the feature-branch pull-request path. EL-06 is next: deterministic verification, protected gates, bounded recovery, and a fresh read-only checker. No EL-07 pilot/migration, scheduler, tracker, automatic push/merge, concurrent writer, or product-runtime integration enters before its named feature and gate. Manual `HANDOFF.md` remains authoritative through EL-07. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
+| EL | Engineering-session loop program (owner-directed July 14, 2026) | **ACTIVE — owner-prioritized ahead of the existing TTT T2 continuation. EL-00 THROUGH EL-06 OWNER-ACCEPTED; EL-07 DEPENDENCY-UNBLOCKED.** Build the repository-owned, out-of-process engineering controller across bounded `EL-*` features; the canonical feature DAG, gates, acceptance, and session protocol live in `docs/product/engineering-loop/ROADMAP.md` with a machine-readable twin in `features.json`, while `tools/engineering-loop/SPEC.md` governs conformance. EL-06 implements its exact 36 requirements under `tools/engineering-loop/`: immutable controller-observed verification, external protected-channel approval policy, exhaustive bounded recovery, a fresh least-privilege read-only checker, redaction, retention, and one-to-one requirement linkage. Focused acceptance passed 76 tests across 5 files and repository-wide acceptance passed 1,161 tests across 105 files, zero-model and zero-paid. On July 15, 2026, the owner reviewed and accepted EL-06 and explicitly authorized commit, merge, and push to `master`. EL-07 is next: bounded pilot, repeated evaluation, human transcript review, and an owner adopt/revise/reject migration verdict. Manual `HANDOFF.md` remains authoritative throughout EL-07 unless the owner records an adopt verdict. No scheduler, tracker, automatic push/merge, concurrent writer, or product-runtime integration enters before its named feature and gate. The TTT row below is preserved unchanged and resumes only after this program or a later owner reprioritization. |
 | ~~1~~ | ~~Structured logging and basic metrics (3.2 #9 / T16)~~ | **Done (July 6, 2026)** — split-process logs/metrics shipped; see §5 |
 | ~~2~~ | ~~Entity resolution beyond exact-name identity (3.3 #2)~~ | **Done (Session 5, July 6, 2026)** — SAME_AS overlay beliefs with quarantine inheritance; see §5 |
 | ~~3~~ | ~~Benchmark maturity (3.3 #3)~~ | **Done (Session 6, July 6, 2026)** — anti-shortcut dataset v2 + first-class cache-audit metric; see §5 |
@@ -796,72 +796,6 @@ the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
 
 
-### July 14, 2026 — Session 55: EL-01 architecture record and normative specification ACCEPTED, zero-paid
-
-Session 55 executed only engineering-loop feature `EL-01`. No controller code,
-production prompt, `WORKFLOW.md`, model call, paid service, database, queue,
-worker, API, source file, dependency, or prompt pin changed. The paused TTT T2
-objective remains untouched.
-
-1. **Architecture ratified:** new
-   `docs/architecture/ENGINEERING_LOOP.md` records the problem and the
-   non-reuse boundary against the in-memory RLM/product goal loops; selects
-   repository-owned source plus an out-of-process controller and protected
-   mutable state outside the agent-writable worktree; assigns human,
-   controller, runner, worker, checker, repository, external-system, and
-   product-runtime authority; defines six context tiers and episode/fresh-
-   context rules; resolves all ten priority-zero decisions; records the six
-   required alternative families, consequences, risks, extraction/dependency
-   triggers, and lower-priority choices under EL-02–EL-09.
-2. **Normative contract ratified:** new `tools/engineering-loop/SPEC.md`
-   defines the language-independent protocol and TypeScript reference intent;
-   typed workflow/feature/session/episode/event/approval/evidence/decision/
-   report objects; ordinary, protected, recovery, forbidden, and terminal
-   transitions; external single-writer state, append-only integrity-linked
-   events, atomic snapshots, restart replay, repository observation, prompt-
-   compilation reservation, adapter-neutral `AgentRunner`, episode rotation,
-   evidence precedence, approvals, failure taxonomy, idempotency, retry,
-   unknown-side-effect stop, observability/redaction/retention, generated views,
-   migration, and security posture. It contains **106 stable mandatory
-   requirement IDs**.
-3. **Feature/conformance linkage:** the engine-computed spec audit found
-   `requirements=106 mapped=106 unmapped=0 features=10`. Every requirement maps
-   to an existing `EL-*` feature, exact catalog acceptance ID, and matching
-   `static`, `integration`, `review`, or `measurement` class. Catalog semantics
-   remain `ids=10 edges=13 acceptance=34 order_parity=true`; Draft 2020-12
-   schema validation prints `10`. `features.json` marks EL-00 and EL-01
-   accepted; the product roadmap advances only to EL-02.
-4. **Acceptance commands and observations:** `npm test` passed **87 files / 876
-   tests**; `npm run build` passed; `npm run python:check` reported runtime
-   syntax/imports/rubric/module assets verified; the inline requirement audit
-   printed `requirements=106 mapped=106 unmapped=0 features=10`; the inline
-   semantic catalog audit printed `ids=10 edges=13 acceptance=34
-   order_parity=true`; the required `python -c` JSON Schema command printed
-   `10`; `docker compose config --quiet` passed; the
-   local-link/unidentified-normative check printed
-   `local_links=resolved unidentified_normative_must=0`; `git diff --check`
-   passed; final status listed only the two EL-01 artifacts and required
-   roadmap/catalog/archive/HANDOFF closeout files.
-5. **Findings:** no priority-zero contradiction, unmapped requirement, catalog
-   mismatch, runtime regression, or existing-code defect was found. Two local
-   command-path incidents were environmental and recorded rather than hidden:
-   sandboxed `npm test` failed before Vitest with `EPERM` while traversing the
-   requested worktree outside the active sandbox root, and the first approved
-   retry used a diagnostic timeout and expired after five seconds; the same
-   exact command then passed with the suite timeout. A compact semantic-check
-   one-liner was rejected by PowerShell quoting before execution; the literal
-   stdin form passed. The reconciliation merge against current `master`
-   reran the 87-file / 876-test suite, build, Python runtime check, Compose
-   config validation, schema validation, mapping/catalog audit, and diff
-   checks with the same green results. No paid work occurred.
-6. **Bookkeeping and next:** Session 50 and its same-day follow-on entry moved
-   verbatim to `docs/archive/ROADMAP_HISTORY.md`; the live session window is
-   51–55. `HANDOFF.md` regenerated per §0. Next is Session 56, `EL-02` only: deterministic control
-   kernel schemas/transitions/state/events/lock/fake dependencies, zero-model
-   and zero-paid. Real runner integration, production prompts, repository
-   observation/rendering, verification policy, migration, scheduling, and TTT
-   remain excluded.
-
 ### July 14, 2026 — Session 56: EL-02 deterministic control kernel owner-ratified and accepted, zero-model and zero-paid
 
 Session 56 executed only engineering-loop feature `EL-02` on
@@ -1169,3 +1103,94 @@ feature-branch pull-request path.
    dependency-unblocked EL-06 while preserving §0 byte-for-byte and retaining
    manual handoff authority. The owner's EL-05 acceptance dependency-unblocks
    EL-06.
+
+### July 15, 2026 — Session 60: EL-06 deterministic verification and protected gates owner-ratified and accepted, zero-model and zero-paid
+
+Session 60 executed only engineering-loop feature `EL-06` on
+`implement-el06-verification-gates`, based on required merged master commit
+`27bb7abbf9399c064bc578a2f12328eacb52c1a2` (PR #105 / owner-accepted EL-05).
+After reviewing the complete closeout, the owner accepted EL-06 and explicitly
+authorized commit, merge, and push to `master`.
+
+1. **All 36 owned requirements implemented and linked:** an independent SPEC
+   §18 audit computed exactly `EL-REQ-DATA-003`, `005`; `STATE-005`, `007`,
+   `010`; `EPISODE-004`; `VERIFY-001`–`007`; `APPROVAL-001`–`009`;
+   `RECOVERY-001`–`003`, `007`, `009`, `010`; `OBS-002`, `004`, `006`,
+   `007`; and `SEC-002`–`005`. Each maps one-for-one to concrete source and
+   deterministic tests in `tools/engineering-loop/src/requirements.ts`;
+   required = 36, implemented = 36, verified = 36, outstanding = 0.
+2. **Controller verification and terminal gates:** `verifier.ts` binds an
+   immutable active acceptance definition to workflow, feature, session,
+   repository, scope, dependencies, requirements, retention, protected
+   preconditions, and separately executed commands. Each command observation
+   must exactly match argv, cwd, sorted non-secret environment, timeout,
+   repository before/after, exit/signal, cancellation/timeout, digest-linked
+   retained output, and engine counts. Missing, stale, contradictory,
+   incomplete, or unverifiable evidence stops advancement. Runner, checker,
+   model, conversation, and repository-prose claims remain advisory. EL-06
+   kernel transitions to `awaiting_review` or `accepted` require the matching
+   verifier gate; acceptance additionally requires protected human review,
+   consumed required approvals, satisfied dependencies/scope/preconditions,
+   and no unresolved unknown effect.
+3. **Protected policy and recovery:** `policy.ts` represents every SPEC §12
+   action as a strict request and validates exact unused approval truth only
+   through an injected protected external channel. Issuer, action, workflow,
+   feature, session, request digest, target/scope, repository, estimate/limit,
+   issue/expiry/revocation, and consumption bind exactly. Widening,
+   inheritance, contingency, retry reuse, mismatch, expiry, revocation, and
+   prior consumption refuse. Atomic decision material consumes the approval;
+   paid policy enforces the USD 5 repository cap, any lower approval cap, and
+   token/cost actuals while invoking no paid action. Push and merge expose no
+   controller execution path. `recovery.ts` classifies the full SPEC taxonomy
+   before action, permits finite automatic retry only for typed transient
+   no-effect or proven identical-idempotent operations, accounts bounded
+   implementation recovery separately, stops on exhaustion, blocks unknown
+   effects with named reconciliation, and appends rather than rewrites signed
+   human reconciliation history.
+4. **Fresh checker, secrecy, and retention:** `checker.ts` compiles only a
+   fresh start request with a distinct episode/thread/runner, read-only access
+   to its exact working directory, and no writable root, credential, network,
+   external effect, controller-evidence, approval, acceptance, or transition
+   capability. It strictly validates lifecycle ordering, terminal uniqueness,
+   correlations, byte/schema/enum/identifier/reference bounds, and advisory
+   checker output. Policy boundaries redact configured secrets and bearer
+   values before persistence or prompt reuse; metric labels are coarse enums;
+   workflows carry a retention declaration and expiry/deletion leaves a
+   non-sensitive tombstone preserving the terminal record identity.
+5. **Deterministic evidence:** baseline was 101 files / 1,094 tests. The exact
+   focused command `npx vitest run tools/engineering-loop/tests/verifier.test.ts
+   tools/engineering-loop/tests/policy.test.ts
+   tools/engineering-loop/tests/recovery.test.ts
+   tools/engineering-loop/tests/checker.test.ts
+   tools/engineering-loop/tests/requirements.test.ts` passed **76 tests across
+   5 files**. `npm test` passed **1,161 tests across 105 files**; `npm run
+   build` passed; `npm run python:check` passed; `docker compose config
+   --quiet` exited 0; Draft 2020-12 catalog/schema validation printed **10**;
+   and `git diff --check` exited 0 with only expected Windows LF→CRLF notices.
+   Tests used injected fake commands, approvals, clock, runner, repository,
+   effects, and deterministic data; remote-dependent tests, model completions,
+   paid calls, and real protected effects = 0.
+6. **Audit findings:** the first focused run exposed two fixture defects (a
+   tombstone call omitted required preservation fields and a bearer fixture
+   was shorter than the established credential pattern); both tests were
+   corrected. The subsequent authority audit found and pinned a missing
+   `cancelled` recovery class, SPEC-inaccurate environmental/harness defaults,
+   stale-definition reporting, approval issue-time ordering, unique verifier
+   finding identities, complete checker-start lifecycle proof, coarse metric
+   labels, and least-privilege read roots. Focused TypeScript/tests and the full
+   suite passed after these corrections. The required post-closeout full run
+   then caught three EL-03 derived-view pins changed by EL-06 moving from
+   `planned` to `active`: `next_feature` was correctly null while owner review
+   remained pending. After owner acceptance changed EL-06 to `accepted`, the
+   deterministic view correctly advanced to `EL-07`; report/status/handoff
+   SHA-256 pins were recomputed from those final bytes. No product-runtime import,
+   dependency, production prompt/pin, API, worker, database, queue, tracker,
+   scheduler, daemon, concurrent writer, automatic Git effect, or EL-07
+   implementation entered the diff.
+7. **Closeout and next gate:** the catalog records only EL-06's owner-accepted
+   status change. Session 55 moved
+   verbatim to `docs/archive/ROADMAP_HISTORY.md`, leaving live Sessions 56–60.
+   `HANDOFF.md` is prepared for EL-07 preflight while preserving §0 byte-for-
+   byte and retaining manual handoff authority. Owner acceptance dependency-
+   unblocks EL-07; its paid trials and any handoff migration remain separately
+   gated.

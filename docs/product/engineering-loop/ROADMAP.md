@@ -1,12 +1,12 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **Codex runner owner-accepted; verification and gates proposed next**
+Status: **EL-06 owner-accepted; EL-07 dependency-unblocked**
 
 Owner direction: July 14, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current feature: `EL-06` (dependency-unblocked after owner acceptance of `EL-05`)
+Current feature: `EL-07` (dependency-unblocked after owner acceptance of `EL-06`)
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than
@@ -87,7 +87,7 @@ At session close:
 | 3 | `EL-03` | Repository observer and deterministic handoff renderer | `EL-02` | Forbidden | Accepted |
 | 4 | `EL-04` | Prompt compiler, prompt contracts, pins, and context budgets | `EL-01`, `EL-02` | Forbidden | Accepted |
 | 5 | `EL-05` | Codex app-server runner adapter and episode rotation | `EL-02`, `EL-04` | Forbidden in acceptance | Accepted |
-| 6 | `EL-06` | Verification, protected gates, recovery, and independent checker | `EL-03`, `EL-04`, `EL-05` | Forbidden in deterministic acceptance | Planned |
+| 6 | `EL-06` | Verification, protected gates, recovery, and independent checker | `EL-03`, `EL-04`, `EL-05` | Forbidden in deterministic acceptance | Accepted |
 | 7 | `EL-07` | Bounded pilot, repeated evaluation, and `HANDOFF.md` migration decision | `EL-06` | Owner-gated | Planned |
 | 8 | `EL-08` | Optional tracker, scheduler, concurrency, and multi-repository extraction decision | `EL-07` | Separately proposed | Deferred |
 | 9 | `EL-09` | Optional verified ingestion of sanitized completed-run reports | `EL-07` | Separately proposed | Deferred |
@@ -191,7 +191,7 @@ authorized commit, merge, and push to `master`.
 Outcome: Git and command observations replace model-authored claims about the
 working tree, and the current handoff can be rendered deterministically.
 
-Planned capabilities:
+Accepted capabilities:
 
 - Branch, base commit, dirty state, changed-path, and scope observation
 - Command evidence records with exit status and bounded output metadata
@@ -298,13 +298,19 @@ authority.
 
 Planned capabilities:
 
-- Deterministic acceptance-command executor
-- Paid, destructive, push, merge, and acceptance-change gates
-- Scoped approval records with estimates and expiry
-- Transient, environmental, implementation, specification, policy, and harness
-  failure classes
-- Bounded retry policy
-- Fresh, read-only checker episode
+- Immutable acceptance definitions and separate controller-observed command
+  evidence with exact argv, cwd, environment, timeout, exit, repository,
+  retained-output, and engine-count bindings
+- External protected-channel approval policy for every §12 action, including
+  estimates, expiry, exact scope, atomic consumption material, and impossible
+  automatic push/merge
+- Pure exhaustive failure classification, finite retry/recovery budgets,
+  unknown-effect blocking, and append-only signed reconciliation
+- Fresh start-only checker episodes with read-only filesystem access, no
+  credentials/network/effects, strict correlations and output validation, and
+  advisory-only authority
+- Bounded coarse metric labels, pre-persistence redaction, retention
+  declarations, and non-sensitive tombstones
 
 Acceptance focus:
 
@@ -312,6 +318,14 @@ Acceptance focus:
 - Only classified transient failures retry automatically.
 - Unknown external side-effect outcomes stop for review.
 - Automatic push and merge remain impossible.
+
+Deterministic evidence on `implement-el06-verification-gates`: all 36 EL-06
+requirements link one-for-one to implementation and tests; focused acceptance
+passed 76 tests across 5 files; repository-wide acceptance passed 1,161 tests
+across 105 files, plus build, Python, Compose, catalog/schema, and diff checks.
+Model completions, paid calls, and real protected effects were zero. On July
+15, 2026, the owner reviewed and accepted EL-06 and explicitly authorized
+commit, merge, and push to `master`.
 
 ### EL-07 — pilot, evaluation, and migration
 
@@ -377,13 +391,9 @@ the engineering-loop subset; it does not create a competing historical log.
 
 ## 8. Current next step
 
-`EL-00` through `EL-05` are owner-accepted. The next dependency-unblocked
-feature is `EL-06`: implement only deterministic
-verification, protected-effect policy gates, bounded recovery classification,
-and a fresh read-only checker as defined by `tools/engineering-loop/SPEC.md`.
-Runner or model output must not fabricate command evidence, approval, protected
-effects, or transitions. Acceptance remains deterministic, zero-completion,
-zero-paid, and remote-free. It must not add the EL-07 pilot or migration,
-tracker, scheduler, daemon, automatic push/merge, product-runtime integration,
-or concurrent controller writers. Manual `HANDOFF.md` remains authoritative
-until the EL-07 migration verdict.
+`EL-00` through `EL-06` are owner-accepted. The next dependency-unblocked
+feature is `EL-07`: a bounded pilot, repeated comparison, human transcript
+review, and an owner adopt/revise/reject verdict. Paid trials remain separately
+owner-gated and require a printed estimate before execution. Manual
+`HANDOFF.md` remains authoritative throughout EL-07 unless the owner later
+records an adopt verdict.

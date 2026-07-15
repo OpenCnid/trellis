@@ -52,6 +52,7 @@ import {
 } from './state_machine.js';
 import type { Clock } from './state_store.js';
 import { StateStore } from './state_store.js';
+import { GateEvaluationSchema, type GateEvaluation } from './verifier.js';
 
 export interface ControlKernelOptions {
   store: StateStore;
@@ -70,10 +71,27 @@ export interface TransitionInput {
   evidence?: readonly unknown[];
   approvals?: readonly unknown[];
   facts?: Partial<TransitionFacts>;
+  verificationGate?: unknown;
 }
 
 const EffectApprovalInputSchema = z.array(ApprovalSchema).max(MAX_COLLECTION_ITEMS);
 const AcceptedFeatureIdsInputSchema = z.array(StableIdSchema).max(MAX_COLLECTION_ITEMS);
+
+export function assertEL06VerificationGate(
+  featureId: string,
+  toState: WorkflowState,
+  gateValue: unknown
+): GateEvaluation | null {
+  if (featureId !== 'EL-06' || (toState !== 'awaiting_review' && toState !== 'accepted')) return null;
+  if (gateValue === undefined) {
+    throw new StateTransitionError(`EL-06 ${toState} requires deterministic verifier gate evidence`);
+  }
+  const gate = parseBoundary(GateEvaluationSchema, gateValue, 'EL-06 verification gate');
+  if (gate.state !== toState) {
+    throw new StateTransitionError(`EL-06 ${toState} requires a '${toState}' verifier gate, observed '${gate.state}'`);
+  }
+  return gate;
+}
 
 export class ControlKernel {
   readonly store: StateStore;
@@ -170,6 +188,7 @@ export class ControlKernel {
 
   async transition(input: TransitionInput): Promise<StateSnapshot> {
     const decision = parseBoundary(DecisionSchema, input.decision, 'kernel transition decision');
+    assertEL06VerificationGate(this.feature.featureId, decision.toState, input.verificationGate);
     const payload = prepareTransition(this.store.snapshot, decision, {
       workflow: this.workflow,
       feature: this.feature,

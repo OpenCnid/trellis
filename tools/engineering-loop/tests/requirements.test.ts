@@ -6,6 +6,7 @@ import {
   EL03_REQUIREMENT_EVIDENCE,
   EL04_REQUIREMENT_EVIDENCE,
   EL05_REQUIREMENT_EVIDENCE,
+  EL06_REQUIREMENT_EVIDENCE,
 } from '../src/requirements';
 
 function requirementIds(spec: string, feature: string): string[] {
@@ -117,6 +118,40 @@ describe('EL-02 normative linkage', () => {
 
   it('links all 15 EL-05 rows to concrete TypeScript sources and deterministic named tests', async () => {
     for (const evidence of EL05_REQUIREMENT_EVIDENCE) {
+      expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.every(test => test.includes(':'))).toBe(true);
+      for (const source of evidence.source) {
+        expect(source.endsWith('.ts')).toBe(true);
+        await expect(readFile(resolve('tools/engineering-loop/src', source), 'utf8')).resolves.not.toHaveLength(0);
+      }
+    }
+  });
+
+  it('independently computes and pins every and only EL-06-owned conformance row', async () => {
+    const spec = await readFile(resolve('tools/engineering-loop/SPEC.md'), 'utf8');
+    const computed = requirementIds(spec, 'EL-06');
+    expect(computed).toEqual([
+      'EL-REQ-APPROVAL-001', 'EL-REQ-APPROVAL-002', 'EL-REQ-APPROVAL-003',
+      'EL-REQ-APPROVAL-004', 'EL-REQ-APPROVAL-005', 'EL-REQ-APPROVAL-006',
+      'EL-REQ-APPROVAL-007', 'EL-REQ-APPROVAL-008', 'EL-REQ-APPROVAL-009',
+      'EL-REQ-DATA-003', 'EL-REQ-DATA-005', 'EL-REQ-EPISODE-004',
+      'EL-REQ-OBS-002', 'EL-REQ-OBS-004', 'EL-REQ-OBS-006', 'EL-REQ-OBS-007',
+      'EL-REQ-RECOVERY-001', 'EL-REQ-RECOVERY-002', 'EL-REQ-RECOVERY-003',
+      'EL-REQ-RECOVERY-007', 'EL-REQ-RECOVERY-009', 'EL-REQ-RECOVERY-010',
+      'EL-REQ-SEC-002', 'EL-REQ-SEC-003', 'EL-REQ-SEC-004', 'EL-REQ-SEC-005',
+      'EL-REQ-STATE-005', 'EL-REQ-STATE-007', 'EL-REQ-STATE-010',
+      'EL-REQ-VERIFY-001', 'EL-REQ-VERIFY-002', 'EL-REQ-VERIFY-003', 'EL-REQ-VERIFY-004',
+      'EL-REQ-VERIFY-005', 'EL-REQ-VERIFY-006', 'EL-REQ-VERIFY-007',
+    ]);
+    const mapped = EL06_REQUIREMENT_EVIDENCE.map(item => item.requirement).sort();
+    expect(computed).toHaveLength(36);
+    expect(new Set(mapped).size).toBe(36);
+    expect(mapped).toEqual(computed);
+  });
+
+  it('links all 36 EL-06 rows one-to-one to concrete TypeScript sources and deterministic named tests', async () => {
+    for (const evidence of EL06_REQUIREMENT_EVIDENCE) {
       expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
       expect(evidence.tests.length, evidence.requirement).toBeGreaterThan(0);
       expect(evidence.tests.every(test => test.includes(':'))).toBe(true);
