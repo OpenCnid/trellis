@@ -177,6 +177,20 @@ async function catalog(): Promise<unknown> {
   return JSON.parse(await readFile('docs/product/engineering-loop/features.json', 'utf8'));
 }
 
+/**
+ * Status as the acceptance ledger resolves it, supplied here as a fixture.
+ *
+ * The renderer's job is deterministic rendering given status, not knowing the
+ * truth, so the suite states status directly rather than reading protected
+ * state. Post-migration the catalog carries none, so this fixture is now the
+ * only status source the renderer sees.
+ */
+const FEATURE_STATUSES = {
+  'EL-00': 'accepted', 'EL-01': 'accepted', 'EL-02': 'accepted', 'EL-03': 'accepted',
+  'EL-04': 'accepted', 'EL-05': 'accepted', 'EL-06': 'accepted', 'EL-07': 'blocked',
+  'EL-08': 'deferred', 'EL-09': 'deferred', 'EL-10': 'planned',
+} as const;
+
 async function report() {
   return deriveTrustedReport({
     reportId: 'report:session:57',
@@ -189,7 +203,7 @@ async function report() {
     requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
     findings: [{ source: 'controller', code: 'zero-paid', message: 'Zero model and paid calls observed.' }],
     catalog: await catalog(),
-    acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+    featureStatuses: FEATURE_STATUSES,
   });
 }
 
@@ -218,7 +232,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
       reportId: 'report:unjournaled', createdAt: NOW, result: 'blocked',
       snapshot: unjournaled, feature: FEATURE, repository: REPOSITORY,
       commandEvidence: [VERIFY_COMMAND], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
-      findings: [], catalog: await catalog(), acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+      findings: [], catalog: await catalog(), featureStatuses: FEATURE_STATUSES,
     }))).rejects.toThrow(/not journal-linked/);
 
     await expect(Promise.resolve().then(async () => deriveTrustedReport({
@@ -229,7 +243,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
         evidence: { ...VERIFY_COMMAND.evidence, origin: 'runner_reported' },
       }],
       requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
-      findings: [], catalog: await catalog(), acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+      findings: [], catalog: await catalog(), featureStatuses: FEATURE_STATUSES,
     }))).rejects.toThrow();
   });
 
@@ -258,7 +272,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
         reportId: 'report:refused-command', createdAt: NOW, result: 'ready_for_owner_review',
         snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
         commandEvidence: [result], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
-        findings: [], catalog: await catalog(), acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+        findings: [], catalog: await catalog(), featureStatuses: FEATURE_STATUSES,
       }))).rejects.toThrow(/requires successful/);
     }
   });
@@ -271,7 +285,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
       reportId: 'report:outstanding', createdAt: NOW, result: 'blocked',
       snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
       commandEvidence: [VERIFY_COMMAND], requirementEvidence: incomplete,
-      findings: [], catalog: await catalog(), acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+      findings: [], catalog: await catalog(), featureStatuses: FEATURE_STATUSES,
     });
     expect(derived.normative_requirements).toEqual({
       required: 12,

@@ -219,6 +219,39 @@ describe('EL-02 normative linkage', () => {
     }
   });
 
+  it('EL-10-A3: the catalog carries no mutable status and names the exact authority', async () => {
+    const raw = await readFile(resolve('docs/product/engineering-loop/features.json'), 'utf8');
+    const catalog = JSON.parse(raw) as {
+      statusAuthority: string;
+      features: Array<Record<string, unknown>>;
+    };
+
+    // The exact value, not membership in a permitted set. The bootstrap
+    // authority survived four features past its stated end because the audit
+    // only ever checked that the value was one of two.
+    expect(catalog.statusAuthority).toBe('protected_controller_state');
+
+    // No mutable status anywhere in the catalog, by field and by byte.
+    for (const feature of catalog.features) {
+      expect(Object.keys(feature)).not.toContain('bootstrapStatus');
+    }
+    expect(raw).not.toContain('bootstrapStatus');
+    expect(raw).not.toContain('bootstrap_git_until_el_02');
+
+    // The schema refuses the drift rather than merely not exercising it.
+    const schema = JSON.parse(
+      await readFile(resolve('docs/product/engineering-loop/feature.schema.json'), 'utf8')
+    ) as {
+      properties: { statusAuthority: { const?: string; enum?: string[] } };
+      $defs: { feature: { required: string[]; additionalProperties: boolean; properties: Record<string, unknown> } };
+    };
+    expect(schema.properties.statusAuthority.const).toBe('protected_controller_state');
+    expect(schema.properties.statusAuthority.enum).toBeUndefined();
+    expect(schema.$defs.feature.required).not.toContain('bootstrapStatus');
+    expect(Object.keys(schema.$defs.feature.properties)).not.toContain('bootstrapStatus');
+    expect(schema.$defs.feature.additionalProperties).toBe(false);
+  });
+
   it('links each requirement to nonempty source and deterministic test evidence', () => {
     for (const evidence of EL02_REQUIREMENT_EVIDENCE) {
       expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
@@ -238,7 +271,6 @@ describe('EL-02 normative linkage', () => {
         order: number;
         dependencies: string[];
         acceptance: Array<{ id: string }>;
-        bootstrapStatus: string;
       }>;
     };
     const ids = catalog.features.map(feature => feature.id);
@@ -271,19 +303,13 @@ describe('EL-02 normative linkage', () => {
     for (const feature of catalog.features) {
       expect(feature.acceptance.every(item => item.id.startsWith(`${feature.id}-A`))).toBe(true);
     }
-    expect(byId.get('EL-01')?.bootstrapStatus).toBe('accepted');
+    // Dependency shape is an immutable catalog fact and stays here. The
+    // accepted-prerequisite assertions that used to live alongside it moved to
+    // the ledger tests: status is no longer the catalog's to state.
     expect(byId.get('EL-02')?.dependencies).toEqual(['EL-01']);
-    expect(byId.get('EL-02')?.bootstrapStatus).toBe('accepted');
     expect(byId.get('EL-03')?.dependencies).toEqual(['EL-02']);
-    expect(byId.get('EL-03')?.bootstrapStatus).toBe('accepted');
     expect(byId.get('EL-04')?.dependencies).toEqual(['EL-01', 'EL-02']);
-    expect(byId.get('EL-04')?.bootstrapStatus).toBe('accepted');
-    expect(byId.get('EL-04')?.dependencies.every(id => byId.get(id)?.bootstrapStatus === 'accepted')).toBe(true);
     expect(byId.get('EL-05')?.dependencies).toEqual(['EL-02', 'EL-04']);
-    expect(byId.get('EL-05')?.bootstrapStatus).toBe('accepted');
-    expect(byId.get('EL-05')?.dependencies.every(id => byId.get(id)?.bootstrapStatus === 'accepted')).toBe(true);
     expect(byId.get('EL-06')?.dependencies).toEqual(['EL-03', 'EL-04', 'EL-05']);
-    expect(byId.get('EL-06')?.dependencies.every(id => byId.get(id)?.bootstrapStatus === 'accepted')).toBe(true);
-    expect(['bootstrap_git_until_el_02', 'protected_controller_state']).toContain(catalog.statusAuthority);
   });
 });
