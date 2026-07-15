@@ -216,13 +216,35 @@ specified as a consumer of §12 approvals with no privileged path of its own.
 Reconstructing a synthetic workflow history to reach `accepted` is forbidden:
 it would fabricate controller-attested events for runs that never occurred.
 
+Bootstrap is paired with recovery, because a trust anchor with no recovery
+ceremony is unrecoverable by its own tooling once corrupt. Two corruption cases
+exist and they do not share a ceremony:
+
+- **Content corruption with an intact chain** — a record is wrong but every
+  digest still validates. The chain can carry its own correction, so recovery
+  appends a signed reconciliation (`EL-REQ-BOOT-006`).
+- **Integrity-chain corruption** — a digest mismatch, missing sequence, invalid
+  schema, or partial append. Appending cannot correct this: the successor's
+  previous-record digest would have to reference a corrupt predecessor, so the
+  break is either inherited or masked. A broken anchor cannot sign its own
+  replacement. Recovery is therefore out of band, establishing a new generation
+  under the seeding gate (`EL-REQ-BOOT-007`).
+
+The refusal predicates are disjoint and re-derived at every attempt rather than
+carried as a flag: seeding requires an empty current generation, `ledger_recovery`
+requires a non-empty generation with a validating chain, and re-genesis requires
+a broken chain. No operation is authorized by a marker a human must remember to
+set or clear.
+
 | ID | Requirement |
 |---|---|
 | `EL-REQ-BOOT-001` | The controller MUST expose a startup entrypoint that resolves the acceptance-ledger root, the workflow state root, the assigned worktree, and the approval-channel location from explicit configuration, and MUST refuse to start when any is absent, ambiguous, or refused by `EL-REQ-STORE-001`. |
 | `EL-REQ-BOOT-002` | Seeding MUST write every acceptance record into the acceptance ledger under a single `acceptance_change` protected action whose scope enumerates each exact feature and status pair, whose approval material is authored outside the controller, read from the protected external channel, and atomically consumed; the controller MUST NOT synthesize, forge, or default its own approval, and MUST NOT derive an acceptance record from workflow state it produced itself. |
-| `EL-REQ-BOOT-003` | Seeding MUST refuse when the acceptance ledger already holds any record, MUST apply every scoped record or none, and MUST NOT overwrite, replay, or repair existing history. |
-| `EL-REQ-BOOT-004` | Once activated, mutable feature status MUST resolve only from the acceptance ledger; the versioned catalog MUST carry immutable feature definitions only, MUST NOT carry mutable status, and MUST declare `statusAuthority` as `protected_controller_state`. |
-| `EL-REQ-BOOT-005` | The acceptance ledger MUST be append-only, monotonically sequenced, and integrity-linked to the preceding record; a missing sequence, digest mismatch, invalid schema, or partial append MUST stop resolution and require human reconciliation, and the controller MUST NOT silently repair or discard ledger history. |
+| `EL-REQ-BOOT-003` | Seeding MUST refuse when the current ledger generation already holds any record, MUST apply every scoped record or none, and MUST NOT overwrite, replay, or repair existing history. A new generation established under `EL-REQ-BOOT-007` is empty, so this refusal governs it unchanged. |
+| `EL-REQ-BOOT-004` | Once activated, mutable feature status MUST resolve only from the current acceptance-ledger generation; the versioned catalog MUST carry immutable feature definitions only, MUST NOT carry mutable status, and MUST declare `statusAuthority` as `protected_controller_state`. |
+| `EL-REQ-BOOT-005` | The acceptance ledger MUST be append-only, monotonically sequenced, and integrity-linked to the preceding record; a missing sequence, digest mismatch, invalid schema, or partial append MUST stop resolution and MUST require reconciliation through `EL-REQ-BOOT-006` or `EL-REQ-BOOT-007`, and the controller MUST NOT silently repair or discard ledger history. |
+| `EL-REQ-BOOT-006` | Content corruption whose integrity chain still validates MUST be corrected by a `ledger_recovery` protected action that appends a signed reconciliation record under `EL-REQ-RECOVERY-010`, marking the superseded records without mutating, deleting, or rewriting them; the corrected state MUST carry owner approval read from the protected external channel and atomically consumed. |
+| `EL-REQ-BOOT-007` | Integrity-chain corruption MUST NOT be corrected by appending to the broken chain. Recovery MUST establish a new ledger generation out of band under the seeding gate, MUST retain the corrupt generation read-only and resolvable as history, and MUST open the new generation with a signed genesis record naming the break point, the expected and observed digests, and the reconstruction basis. |
 
 ## 7. Repository observation and scope
 
@@ -473,6 +495,8 @@ not enter the matrix.
 | `EL-REQ-BOOT-003` | `EL-10` | `EL-10-A2` | integration |
 | `EL-REQ-BOOT-004` | `EL-10` | `EL-10-A3` | static |
 | `EL-REQ-BOOT-005` | `EL-10` | `EL-10-A5` | integration |
+| `EL-REQ-BOOT-006` | `EL-10` | `EL-10-A6` | integration |
+| `EL-REQ-BOOT-007` | `EL-10` | `EL-10-A6` | integration |
 | `EL-REQ-REPO-001` | `EL-03` | `EL-03-A1` | static |
 | `EL-REQ-REPO-002` | `EL-03` | `EL-03-A1` | static |
 | `EL-REQ-REPO-003` | `EL-03` | `EL-03-A3` | integration |

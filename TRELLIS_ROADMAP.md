@@ -1183,7 +1183,7 @@ completions, zero paid calls, zero protected effects, zero `src/` changes.
    and unblocking EL-07 is a manual owner act.
 
 8. **Specification.** SPEC §6.1 "Controller activation and status authority" adds
-   `EL-REQ-BOOT-001` through `EL-REQ-BOOT-005` covering entrypoint resolution,
+   `EL-REQ-BOOT-001` through `EL-REQ-BOOT-007` covering entrypoint resolution,
    approval-gated seeding, seeding refusals, status authority, and ledger
    integrity. The conformance matrix moves from 106 to 111 rows, all mapped, zero
    unmapped. A new `BOOT` family was chosen over extending `STORE`/`APPROVAL`.
@@ -1209,7 +1209,32 @@ completions, zero paid calls, zero protected effects, zero `src/` changes.
     record. No `src/`, product runtime, prompt pin, dependency, scheduler,
     daemon, or automatic Git effect entered.
 
-11. **Closeout and next gate.** `EL-10` is ratified, specified, and designed; **no
+11. **External review; a deadlock found and closed same-day.** The collaborator
+    (briefing Postscript 4) reviewed the record and returned four proposals. Two
+    landed on the design. **A real defect:** composed, `EL-REQ-BOOT-003` (seeding
+    refuses a non-empty ledger, no repair) and `EL-REQ-BOOT-005` (stop on
+    corruption, "human reconciliation", no repair) left a corrupted ledger with
+    **no path back** except untrusted-side file surgery — the exact write the
+    design exists to prevent. The bootstrap ceremony had shipped without the
+    paired recovery ceremony the trust-anchor literature treats as mandatory
+    (RFC 5011). The first proposed fix — reuse EL-06's `EL-REQ-RECOVERY-010`
+    append-superseding — was **also wrong**, and the review caught that too: it
+    covers content corruption on a validating chain, but cannot cover
+    integrity-chain corruption, because the reconciliation record's
+    `previousDigest` would point at a corrupt predecessor and inherit or mask the
+    break. That is precisely the case `BOOT-005` stops on. **Closed by two
+    ceremonies with disjoint, re-derived predicates:** `EL-REQ-BOOT-006`
+    (`ledger_recovery`, append-superseding, intact chain) and `EL-REQ-BOOT-007`
+    (out-of-band re-genesis, new generation under the seeding gate, corrupt
+    generation retained read-only, signed genesis record naming the break point).
+    Matrix 111 → 113; `EL-10-A6` added. Record §9.9 carries the reasoning and
+    keeps the wrong first fix on the page. Also adopted from the review: an
+    exemption must be a predicate the check re-derives every run, never a flag a
+    human must remember to clear — `statusAuthority` rotted because "temporarily"
+    was a flag; had it read "bootstrap is permitted only while no protected state
+    root exists," it would have self-expired.
+
+12. **Closeout and next gate.** `EL-10` is ratified, specified, and designed; **no
     controller implementation exists.** The next session implements EL-10 against
     record §9, which is normative. Its §9.8 carries three open questions for that
     session. `HANDOFF.md` is regenerated for EL-10 with §0 preserved byte-for-byte;

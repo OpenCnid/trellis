@@ -9,9 +9,10 @@ Program ID: `trellis-engineering-loop`
 
 The owner ratified EL-10 as a named harness feature gating EL-07, approved the
 catalog changes, delegated the specification decision, and approved the §9
-acceptance-ledger design. Landed under that ratification: SPEC §6.1 and its five
+acceptance-ledger design. Landed under that ratification: SPEC §6.1 and its seven
 `EL-REQ-BOOT-*` requirements, the `EL-10` catalog entry, EL-07's `blocked`
-status, and recomputed renderer pins.
+status, and recomputed renderer pins. §9.9 was added later the same day, after
+external review found a deadlock in the original design.
 
 No controller implementation exists yet. §9 is the design the implementing
 session builds against.
@@ -305,9 +306,10 @@ SPEC currently defines 106 stable mandatory requirements, all mapped to a
 feature, acceptance item, and test class, with zero unmapped.
 
 Resolved and landed. SPEC §6.1 adds five requirements —
-`EL-REQ-BOOT-001` through `EL-REQ-BOOT-005` — covering entrypoint resolution,
+`EL-REQ-BOOT-001` through `EL-REQ-BOOT-007` — covering entrypoint resolution,
 approval-gated seeding, seeding refusals, status authority, and ledger
-integrity. The conformance matrix moves from 106 rows to 111, all mapped, with
+integrity, and the two recovery ceremonies of §9.9. The conformance matrix moves
+from 106 rows to 113, all mapped, with
 zero unmapped requirements.
 
 A new `BOOT` family was chosen over extending `STORE` or `APPROVAL`: activation
@@ -376,7 +378,7 @@ authority. Manual `HANDOFF.md` remains authoritative.
 
 Owner-approved July 15, 2026. This section is the design EL-10 implements
 against; it is normative for the implementing session and is mirrored by
-`EL-REQ-BOOT-001` through `EL-REQ-BOOT-005` in SPEC §6.1.
+`EL-REQ-BOOT-001` through `EL-REQ-BOOT-007` in SPEC §6.1.
 
 ### 9.1 Why a new artifact rather than workflow state
 
@@ -403,9 +405,17 @@ validated by the existing `validateProtectedStateRoot()`:
 
 ```text
 <ledgerRoot>/
-  .writer.lock        # WriterLock, unchanged, workflowId 'workflow:program-acceptance'
-  acceptance.jsonl    # the ledger
+  .writer.lock                      # WriterLock, unchanged, workflowId 'workflow:program-acceptance'
+  generations/
+    0/acceptance.jsonl              # generation 0
+    1/acceptance.jsonl              # a later generation, if re-genesis ever occurs
+  current                           # names the current generation
 ```
+
+Generations exist because of §9.9: integrity-chain corruption cannot be repaired
+in place or appended past, so recovery establishes a new generation and retains
+the corrupt one read-only. A program that never corrupts its ledger has exactly
+one generation and can ignore the concept.
 
 `WriterLock.acquire()` writes `join(root, '.writer.lock')` — the lock is scoped
 by *path*, and the workflow ID only identifies the holder inside the record. A
@@ -522,3 +532,52 @@ EL-08 question.
    grow a dependency on protected state.
 3. Exact on-disk approval material format, which the owner must author. Present
    it for approval before the activation run, not after.
+
+### 9.9 Recovery ceremonies (amendment, July 15, 2026)
+
+**This section corrects a deadlock in the original §9**, found by external review
+and reproduced against the merged SPEC before fixing.
+
+**The defect.** `EL-REQ-BOOT-003` refused seeding against a non-empty ledger and
+forbade repair. `EL-REQ-BOOT-005` stopped on corruption and required "human
+reconciliation" — an outcome with no tooling named. Composed: a corrupted,
+non-empty ledger had **no path back to a good state**. Seeding refused it, repair
+was forbidden twice, and the only remaining recovery was hand-editing the
+protected file — precisely the untrusted-side write this whole design exists to
+prevent. The bootstrap ceremony shipped without its paired recovery ceremony,
+which the trust-anchor literature treats as mandatory (KSK rollover, RFC 5011).
+
+**The first fix was also wrong**, and is recorded because the reasoning matters.
+Reusing EL-06's append-only signed reconciliation (`EL-REQ-RECOVERY-010`) covers
+*content* corruption on a validating chain. It cannot cover integrity-chain
+corruption, because the reconciliation record's `previousDigest` would have to
+point at a corrupt predecessor — inheriting or masking the break. And
+integrity-chain corruption is exactly what `EL-REQ-BOOT-005` stops on. The
+proposed fix did not reach the case that produced the deadlock.
+
+**Two ceremonies, disjoint predicates:**
+
+| Case | Predicate | Ceremony |
+|---|---|---|
+| Content corruption | Generation non-empty, chain validates | `ledger_recovery`: append a signed reconciliation under `EL-REQ-RECOVERY-010`, marking superseded records without mutating them. Owner-approved through the channel, atomically consumed. |
+| Integrity-chain corruption | Chain broken (missing sequence, digest mismatch, invalid schema, partial append) | Re-genesis: a new generation under the seeding gate, opened by a signed genesis record naming the break point, expected and observed digests, and the reconstruction basis. The corrupt generation is retained read-only and stays resolvable as history. |
+
+`ledger_recovery` is a new protected action. It is trust-bearing, so it belongs in
+`PROTECTED_ACTIONS`; adding it is a `policy_change` and is gated as one. It is
+distinct from `acceptance_change` for a reason beyond taxonomy: distinct actions
+keep the three refusal predicates disjoint and mechanically checkable — seeding
+requires an empty generation, `ledger_recovery` requires a non-empty validating
+one, re-genesis requires a broken one. Folding recovery into `acceptance_change`
+would force a mode flag to distinguish them, and a flag is what rots.
+
+**Why re-genesis needs no new gate.** A new generation is empty, so
+`EL-REQ-BOOT-003`'s refusal governs it unchanged and seeding applies as written.
+Re-genesis is not a privileged path around the seeding gate; it is the seeding
+gate, applied to a fresh generation, with a genesis record explaining why the
+generation exists.
+
+**Residual, stated rather than closed.** Re-genesis reconstructs from a basis the
+owner supplies, and the corrupt generation is evidence, not authority. Nothing
+here establishes that the reconstruction is *correct* — only that it is
+owner-authorized, that the break is named, and that the corrupt history survives
+for audit. Correctness of a reconstruction is a human judgment and stays one.

@@ -1428,10 +1428,10 @@ Repository state at handoff creation:
   lived in prose with no `EL-REQ-*`, no conformance row, and no test that could
   fail.
 - **Conformance:** SPEC has **111** mandatory requirements mapped 111/111
-  (was 106; `EL-10` added `EL-REQ-BOOT-001` through `EL-REQ-BOOT-005` in §6.1).
-  `EL-10` owns exactly those five SPEC §18 rows; recompute the set from §18
-  before design. Its catalog carries five immutable acceptance bindings,
-  `EL-10-A1` through `EL-10-A5`. `EL-06` remains 36/36/36 with zero outstanding.
+  (was 106; `EL-10` added `EL-REQ-BOOT-001` through `EL-REQ-BOOT-007` in §6.1).
+  `EL-10` owns exactly those seven SPEC §18 rows; recompute the set from §18
+  before design. Its catalog carries six immutable acceptance bindings,
+  `EL-10-A1` through `EL-10-A6`. `EL-06` remains 36/36/36 with zero outstanding.
 - **Acceptance baseline:** `npm test` passes **1,161 tests across 105 files** —
   unchanged from the EL-06 baseline, because Session 61 changed assertions and
   pins without adding or removing a test. The focused engineering-loop command
@@ -1568,7 +1568,7 @@ builds. Requiring it here would be circular.
 
 <immutable_feature_bindings>
 
-SPEC §6.1 assigns exactly five requirements to `EL-10`. Recompute this set from
+SPEC §6.1 assigns exactly seven requirements to `EL-10`. Recompute this set from
 SPEC §18 before design and require exactly:
 
 - `EL-REQ-BOOT-001`: a startup entrypoint resolves the acceptance-ledger root,
@@ -1588,11 +1588,25 @@ SPEC §18 before design and require exactly:
   `statusAuthority` as `protected_controller_state`.
 - `EL-REQ-BOOT-005`: the ledger is append-only, monotonically sequenced, and
   integrity-linked; a missing sequence, digest mismatch, invalid schema, or
-  partial append stops resolution and requires human reconciliation without
-  silent repair.
+  partial append stops resolution and routes to `EL-REQ-BOOT-006` or
+  `EL-REQ-BOOT-007` without silent repair.
+- `EL-REQ-BOOT-006`: content corruption on a validating chain is corrected by a
+  `ledger_recovery` protected action appending a signed reconciliation under
+  `EL-REQ-RECOVERY-010`, owner-approved and atomically consumed.
+- `EL-REQ-BOOT-007`: integrity-chain corruption is never corrected by appending
+  to the broken chain; recovery establishes a new generation out of band under
+  the seeding gate, retains the corrupt generation read-only, and opens the new
+  one with a signed genesis record naming the break point, the expected and
+  observed digests, and the reconstruction basis.
 
-Catalog acceptance bindings `EL-10-A1` through `EL-10-A5` are immutable.
+Catalog acceptance bindings `EL-10-A1` through `EL-10-A6` are immutable.
 Implementation evidence maps one-to-one without rewriting their meaning.
+
+`BOOT-006` and `BOOT-007` were added July 15, 2026 after external review found
+the original §6.1 deadlocked: seeding refused a non-empty ledger, `BOOT-005`
+forbade repair, and a corrupted ledger had no path back except untrusted-side
+file surgery. Record §9.9 carries the reasoning, including why append-superseding
+alone does not reach the case `BOOT-005` actually stops on.
 
 </immutable_feature_bindings>
 
@@ -1741,7 +1755,7 @@ and package manifests.
 
 Deterministic acceptance for EL-10:
 
-- Five independently computed requirements map one-to-one with zero unaccounted
+- Seven independently computed requirements map one-to-one with zero unaccounted
   IDs.
 - The ledger is strict, versioned, bounded, canonical, and integrity-linked.
 - Every refusal in record §9.5's table has a passing test.
@@ -1777,7 +1791,7 @@ git status --short --branch
 
 Baseline to compare against: **1,161 tests across 105 files**; engineering-loop
 focused **285 tests across 18 files**; catalog **11 features**; SPEC matrix
-**111 rows**.
+**113 rows**.
 
 Renderer pins move when `next_feature` or catalog-derived bytes change. **Render
 the bytes and confirm the change is exactly what you intend before repinning.**
