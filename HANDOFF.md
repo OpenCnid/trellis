@@ -1486,10 +1486,15 @@ Work on one feature branch and target `master`.
 
 <feature_objective>
 
-**Engineering-loop `EL-11`: close the approval-gate reachability and mapping
-gaps — map `EL-REQ-APPROVAL-012`, add the authorizing-material reachability
-requirement, amend `EL-REQ-APPROVAL-002`'s provenance clause, and relocate the
-pause-scope norm to guardrails where prose is the honest instrument.**
+**Engineering-loop `EL-11`: give the acceptance ledger its steady-state write
+path and close the gate's mapping and reachability gaps — the ledger is
+currently write-once, so no feature can ever be accepted.**
+
+In priority order: the steady-state `acceptance_change` path (which unblocks the
+whole program), then `EL-REQ-APPROVAL-012`'s missing conformance row, the
+authorizing-material reachability requirement, the mechanization of `EL-01-A2`,
+`EL-REQ-APPROVAL-002`'s provenance clause, and the relocation of the pause-scope
+norm to guardrails where prose is the honest instrument.
 
 Paid work is forbidden for the whole of EL-11. This feature is deterministic
 throughout.
@@ -1545,6 +1550,45 @@ Next: {Exact_Next_Gate_And_Explicit_Owner_Actions}
 <why_this_feature_exists>
 
 Read this before the SPEC; without it the requirements look like bookkeeping.
+
+**The acceptance ledger is write-once, so the program cannot advance.** EL-10
+activated the controller and seeded generation 0 with eleven records. The ledger
+now has exactly three gated write paths: `seedAcceptanceLedger`
+(`acceptance_change`, refuses a non-empty generation), `recoverLedgerContent`
+(`ledger_recovery`, content corruption), and `reGenesisLedger`
+(`ledger_recovery`, integrity corruption). The current generation is non-empty
+and validating, so the only ceremony available is `ledger_recovery`.
+
+**There is no path to record an ordinary status change.** EL-10 cannot be marked
+`accepted`. `EL-07` cannot be unblocked. No future feature can ever be accepted.
+The trust store advances no further than its first write.
+
+Do **not** reach for `ledger_recovery` to do it. It would work mechanically —
+supersede the `EL-10=planned` record — and it would be false: that record was
+*correct* when written. Accepting EL-10 is new information, not a correction.
+Using the corruption ceremony for ordinary progress mislabels every future
+acceptance as a reconciliation and collapses the disjoint predicates §9.9 exists
+to keep mechanically checkable.
+
+**Why it was missed, which is the part that generalizes.** Record §9.6 describes
+the steady state precisely — "moving a feature to `accepted` in the ledger is a
+separate owner act through the same `acceptance_change` path that seeding uses …
+seeding is not a privileged special case, it is the ordinary path applied to an
+empty ledger, which is why it needs no privileged code." But **no
+`EL-REQ-BOOT-*` requires it.** All seven cover the entrypoint, seeding, seeding
+refusals, status resolution, integrity, and the two recovery ceremonies. §9.6 was
+prose with no requirement, no conformance row, and no test that could fail — so
+the implementing session built the six things that had requirements and inverted
+the seventh, making seeding the *only* `acceptance_change` path rather than an
+instance of it. Nothing failed, because nothing could.
+
+That is the third instance of one pattern in this program: `statusAuthority`
+rotted for four features the same way, the seeder shipped unreachable the same
+way, and now the steady-state path was never built the same way. **It landed in
+the feature whose entire purpose was to close that pattern.** Treat this as the
+strongest available evidence for `EL-01-A2`'s mechanization below: prose that
+describes required behavior and carries no row is behavior that does not get
+built.
 
 **`EL-REQ-APPROVAL-012` is declared and unmapped.** SPEC §12 states it as a
 normative MUST. SPEC §18's conformance matrix has no row for it: 114
@@ -1605,7 +1649,47 @@ Present a concise design checkpoint before the first implementation edit.
 
 <required_design>
 
-1. **Raise `EL-11` as a named feature.** `EL-REQ-APPROVAL-007` requires that
+1. **The steady-state acceptance path, first — it unblocks everything else.**
+
+   Add a gated write that appends acceptance records to a **non-empty,
+   validating** generation under a single `acceptance_change` protected action
+   whose scope enumerates each exact `(featureId, status)` pair. This is
+   record §9.6's ordinary path, which seeding is an instance of rather than a
+   substitute for. Working name: `recordAcceptanceChange` in
+   `acceptance_ledger.ts` or a sibling of `seed.ts`.
+
+   It reuses everything: `authorizeProtectedAction`, the channel, the same
+   scope-item shape (`EL-10=accepted`), `appendAll`'s atomic all-or-nothing
+   rename, `actor: 'human'`, and consumption derived from replay. It adds no new
+   protected action — `acceptance_change` already covers it, and adding one would
+   be the mode flag §9.9 warns rots.
+
+   **Keep the ceremony predicates disjoint and total.** Today
+   `classifyLedgerGeneration` maps non-empty-and-validating to `ledger_recovery`
+   alone, which is what forecloses ordinary progress. Both an acceptance change
+   and a content reconciliation are legitimate on that same generation, so the
+   classifier can no longer name one ceremony per state. Resolve it explicitly at
+   the design checkpoint: either the classifier returns the *set* of admissible
+   ceremonies, or the acceptance path stops consulting it and states its own
+   predicate (non-empty and validating). Do not let `ledger_recovery` become a
+   general-purpose write; its predicate must stay "content corruption on a
+   validating chain", and re-genesis's must stay "broken chain".
+
+   **Give it a requirement.** Working name `EL-REQ-BOOT-008`, owned by `EL-11`,
+   with a §18 row and named tests. Requirement families already span features
+   (`OBS` spans four), so a BOOT row owned by EL-11 is consistent and leaves
+   EL-10's exactly-seven set intact. Writing the requirement is the point: §9.6
+   was prose and therefore was not built.
+
+   Acceptance for this item: an owner-approved `acceptance_change` moves
+   `EL-10` to `accepted` and `EL-07` to `planned` against a non-empty generation;
+   resolution takes the last record per `featureId`; the superseded records are
+   untouched and still present; seeding still refuses the non-empty generation;
+   `ledger_recovery` still refuses an uncorrupted one; and `next_feature`
+   resolves to `null` once EL-10 is accepted and EL-07 is still blocked, then to
+   `EL-07` once it is unblocked.
+
+2. **Raise `EL-11` as a named feature.** `EL-REQ-APPROVAL-007` requires that
    changing acceptance, policy, schema, prompt, verifier, controller, or gate
    behavior be a named reviewed feature judged by the previously accepted
    controller and policy. This amendment is a `policy_change` and gets that
@@ -1618,11 +1702,11 @@ Present a concise design checkpoint before the first implementation edit.
    order than their dependent, so unlike EL-10 the prerequisite is expressible as
    a real dependency edge and needs no `blocked`-status workaround.
 
-2. **Map `EL-REQ-APPROVAL-012` to `EL-11`** with a conformance-matrix row and a
+3. **Map `EL-REQ-APPROVAL-012` to `EL-11`** with a conformance-matrix row and a
    real test. Its text is already in SPEC §12 and is owner-authored; do not
    rewrite it. Give it the row and the evidence it lacks.
 
-3. **Add the authorizing-material reachability requirement**, working name
+4. **Add the authorizing-material reachability requirement**, working name
    `EL-REQ-APPROVAL-010`: for any protected action whose approval requires
    computed material a principal cannot author by hand — a request digest, a
    repository-precondition binding, or equivalent — the tooling MUST expose a
@@ -1635,13 +1719,13 @@ Present a concise design checkpoint before the first implementation edit.
    process entrypoints as callers. `activate.ts`'s `print-seed-request` already
    satisfies it; the requirement converts an ad-hoc fix into a check that fails.
 
-4. **Mechanize `EL-01-A2`.** Add a check that every requirement declared in a
+5. **Mechanize `EL-01-A2`.** Add a check that every requirement declared in a
    SPEC section table carries a §18 conformance row, and that every §18 row has
    declaring text. This is the check whose absence let APPROVAL-012 land
    unmapped. Note the regex trap: requirement text may begin with a backtick
    rather than a capital, and a naive pattern reports a false orphan.
 
-5. **Amend `EL-REQ-APPROVAL-002`'s provenance clause.** The gate binds the
+6. **Amend `EL-REQ-APPROVAL-002`'s provenance clause.** The gate binds the
    controller's provenance, not the developer's direction. Keep the first
    sentence unchanged. Where the amendment says "the absence of a
    controller-produced artifact MUST NOT be read as the absence of a principal's
@@ -1651,7 +1735,7 @@ Present a concise design checkpoint before the first implementation edit.
    principal-produced, so the clause as drafted is close to vacuous and reads as
    licence to seed on a conversational go-ahead.
 
-6. **Relocate the pause-scope norm to guardrails, not SPEC.** A pause refuses the
+7. **Relocate the pause-scope norm to guardrails, not SPEC.** A pause refuses the
    protected effect it names and is not licence to stand down unblocked work.
    The norm is sound; a SPEC row is the wrong home. SPEC governs a TypeScript
    kernel, and the kernel does not stand down or self-sequence — an agent in a
@@ -1660,7 +1744,7 @@ Present a concise design checkpoint before the first implementation edit.
    in `HANDOFF.md` §7 and `AGENTS.md`, where behavioral norms live and are
    honestly labelled as prose.
 
-7. **Correct the EL-02 through EL-06 requirement-linkage pointers, or record why
+8. **Correct the EL-02 through EL-06 requirement-linkage pointers, or record why
    not.** Those features name tests as human-readable `module: concept` pointers
    that resolve to nothing mechanically; a stale one cannot be caught. EL-10's
    names are literal `it(...)` titles checked by
@@ -1690,6 +1774,14 @@ Present a concise design checkpoint before the first implementation edit.
   `EL-REQ-APPROVAL-010` describes
 - `tools/engineering-loop/src/policy.ts` — `PROTECTED_ACTIONS`,
   `authorizeProtectedAction`, `createProtectedApprovalRecord`
+- `tools/engineering-loop/src/acceptance_ledger.ts` —
+  `classifyLedgerGeneration` (the predicate that currently forecloses ordinary
+  progress), `appendAll` (atomic, all-or-nothing, monotonic), `resolveFeatureStatus`
+- `tools/engineering-loop/src/seed.ts` — `seedAcceptanceLedger` and
+  `buildSeedRequest`: the shape the steady-state path reuses, including the
+  scope-item form and consumption-by-replay
+- `tools/engineering-loop/src/ledger_recovery.ts` — the two ceremonies whose
+  predicates must stay narrow
 - `docs/product/engineering-loop/EL10_CONTROLLER_ACTIVATION_PROPOSAL.md` — §9.8's
   resolved questions and §9.9's ceremonies, for precedent on recording a
   correction rather than relocating it
@@ -1704,6 +1796,16 @@ bytes.
 
 Deterministic acceptance for EL-11:
 
+- An owner-approved `acceptance_change` appends to a non-empty validating
+  generation: `EL-10` reaches `accepted` and `EL-07` reaches `planned`, the
+  superseded records survive untouched, and resolution takes the last record per
+  `featureId`.
+- The ceremony predicates stay disjoint and total: seeding still refuses a
+  non-empty generation, `ledger_recovery` still refuses an uncorrupted one, and
+  re-genesis still refuses an intact chain. `ledger_recovery` never becomes a
+  general-purpose write.
+- `next_feature` resolves to `null` while EL-10 is accepted and EL-07 is still
+  blocked, and to `EL-07` once the owner unblocks it. Both are correct.
 - Declared and mapped requirement sets agree with zero unmapped ids, proven by a
   check that fails when a requirement is declared without a row.
 - `EL-REQ-APPROVAL-012` carries a conformance row, an owning feature, and a
