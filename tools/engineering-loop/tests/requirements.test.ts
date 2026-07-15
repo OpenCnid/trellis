@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -7,6 +7,7 @@ import {
   EL04_REQUIREMENT_EVIDENCE,
   EL05_REQUIREMENT_EVIDENCE,
   EL06_REQUIREMENT_EVIDENCE,
+  EL10_REQUIREMENT_EVIDENCE,
 } from '../src/requirements';
 
 function requirementIds(spec: string, feature: string): string[] {
@@ -159,6 +160,62 @@ describe('EL-02 normative linkage', () => {
         expect(source.endsWith('.ts')).toBe(true);
         await expect(readFile(resolve('tools/engineering-loop/src', source), 'utf8')).resolves.not.toHaveLength(0);
       }
+    }
+  });
+
+  it('independently computes and pins every and only EL-10-owned conformance row', async () => {
+    const spec = await readFile(resolve('tools/engineering-loop/SPEC.md'), 'utf8');
+    const computed = requirementIds(spec, 'EL-10');
+    expect(computed).toEqual([
+      'EL-REQ-BOOT-001',
+      'EL-REQ-BOOT-002',
+      'EL-REQ-BOOT-003',
+      'EL-REQ-BOOT-004',
+      'EL-REQ-BOOT-005',
+      'EL-REQ-BOOT-006',
+      'EL-REQ-BOOT-007',
+    ]);
+    const mapped = EL10_REQUIREMENT_EVIDENCE.map(item => item.requirement).sort();
+    expect(computed).toHaveLength(7);
+    expect(new Set(mapped).size).toBe(7);
+    expect(mapped).toEqual(computed);
+  });
+
+  it('links all seven EL-10 rows to concrete TypeScript sources and deterministic named tests', async () => {
+    for (const evidence of EL10_REQUIREMENT_EVIDENCE) {
+      expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.every(test => test.includes(':'))).toBe(true);
+      for (const source of evidence.source) {
+        expect(source.endsWith('.ts')).toBe(true);
+        await expect(readFile(resolve('tools/engineering-loop/src', source), 'utf8')).resolves.not.toHaveLength(0);
+      }
+    }
+  });
+
+  it('resolves every EL-10 named test to a real test that exists', async () => {
+    // The shared linkage assertion above checks the *shape* of a test name, not
+    // that the test exists. Under it, evidence naming a test that was renamed or
+    // never written still passes, so "deterministically verified" would rest on
+    // author care rather than on a check that can fail.
+    //
+    // EL-10 names its tests as literal `it(...)` titles, so the claim is
+    // machine-checkable and is checked here. This binds EL-10 only; EL-02
+    // through EL-06 use a human-readable `module: concept` pointer convention
+    // and are accepted as they stand.
+    const directory = resolve('tools/engineering-loop/tests');
+    const corpus = (await Promise.all(
+      (await readdir(directory))
+        .filter(file => file.endsWith('.test.ts'))
+        .map(file => readFile(resolve(directory, file), 'utf8'))
+    )).join('\n');
+
+    const named = EL10_REQUIREMENT_EVIDENCE.flatMap(evidence =>
+      evidence.tests.map(test => ({ requirement: evidence.requirement, test }))
+    );
+    expect(named.length).toBeGreaterThanOrEqual(EL10_REQUIREMENT_EVIDENCE.length);
+    for (const { requirement, test } of named) {
+      expect(corpus, `${requirement} names '${test}', which resolves to no test`).toContain(`it('${test}'`);
     }
   });
 

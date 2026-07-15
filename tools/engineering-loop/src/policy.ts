@@ -45,6 +45,7 @@ export const PROTECTED_ACTIONS = [
   'push',
   'merge',
   'acceptance_change',
+  'ledger_recovery',
   'controller_change',
   'policy_change',
   'schema_change',

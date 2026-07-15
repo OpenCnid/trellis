@@ -17,6 +17,7 @@
     "start:api": "node dist/src/api/server.js",
     "start:workers": "node dist/scripts/start_workers.js",
     "python:check": "python scripts/check_python_runtime.py",
+    "el:activate": "tsx tools/engineering-loop/src/activate.ts",
     "test:roundtrip": "node dist/scripts/test_compose_roundtrip.js",
     "test": "vitest run",
     "test:watch": "vitest",

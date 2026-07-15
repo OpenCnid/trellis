@@ -116,3 +116,13 @@ export const EL06_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
   { requirement: 'EL-REQ-SEC-004', source: ['checker.ts', 'policy.ts'], tests: ['checker: credential omission and protected indirection'] },
   { requirement: 'EL-REQ-SEC-005', source: ['policy.ts'], tests: ['policy: protected controller self-modification taxonomy'] },
 ] as const;
+
+export const EL10_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
+  { requirement: 'EL-REQ-BOOT-001', source: ['activate.ts', 'state_store.ts'], tests: ['activate: explicit configuration resolution', 'activate: protected root refusal matrix'] },
+  { requirement: 'EL-REQ-BOOT-002', source: ['seed.ts', 'approval_channel.ts', 'policy.ts'], tests: ['seed: single approval-gated acceptance_change', 'seed: controller cannot author its own approval'] },
+  { requirement: 'EL-REQ-BOOT-003', source: ['seed.ts', 'acceptance_ledger.ts'], tests: ['seed: refusal matrix', 'seed: all-or-nothing append'] },
+  { requirement: 'EL-REQ-BOOT-004', source: ['acceptance_ledger.ts'], tests: ['acceptance_ledger: status resolves from the ledger'] },
+  { requirement: 'EL-REQ-BOOT-005', source: ['acceptance_ledger.ts'], tests: ['acceptance_ledger: integrity refusal matrix', 'acceptance_ledger: append-only monotonic chain'] },
+  { requirement: 'EL-REQ-BOOT-006', source: ['ledger_recovery.ts', 'recovery.ts'], tests: ['ledger_recovery: content reconciliation ceremony'] },
+  { requirement: 'EL-REQ-BOOT-007', source: ['ledger_recovery.ts', 'acceptance_ledger.ts'], tests: ['ledger_recovery: re-genesis ceremony', 'ledger_recovery: disjoint ceremony predicates'] },
+] as const;
