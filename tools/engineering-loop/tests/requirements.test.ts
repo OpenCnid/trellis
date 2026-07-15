@@ -5,6 +5,7 @@ import {
   EL02_REQUIREMENT_EVIDENCE,
   EL03_REQUIREMENT_EVIDENCE,
   EL04_REQUIREMENT_EVIDENCE,
+  EL05_REQUIREMENT_EVIDENCE,
 } from '../src/requirements';
 
 function requirementIds(spec: string, feature: string): string[] {
@@ -88,6 +89,44 @@ describe('EL-02 normative linkage', () => {
     }
   });
 
+  it('independently computes and pins every and only EL-05-owned conformance row', async () => {
+    const spec = await readFile(resolve('tools/engineering-loop/SPEC.md'), 'utf8');
+    const computed = requirementIds(spec, 'EL-05');
+    expect(computed).toEqual([
+      'EL-REQ-EPISODE-001',
+      'EL-REQ-EPISODE-002',
+      'EL-REQ-EPISODE-003',
+      'EL-REQ-EPISODE-005',
+      'EL-REQ-EPISODE-006',
+      'EL-REQ-EPISODE-007',
+      'EL-REQ-EPISODE-008',
+      'EL-REQ-OBS-001',
+      'EL-REQ-RUNNER-001',
+      'EL-REQ-RUNNER-002',
+      'EL-REQ-RUNNER-003',
+      'EL-REQ-RUNNER-005',
+      'EL-REQ-RUNNER-006',
+      'EL-REQ-RUNNER-007',
+      'EL-REQ-RUNNER-008',
+    ]);
+    const mapped = EL05_REQUIREMENT_EVIDENCE.map(item => item.requirement).sort();
+    expect(computed).toHaveLength(15);
+    expect(new Set(mapped).size).toBe(15);
+    expect(mapped).toEqual(computed);
+  });
+
+  it('links all 15 EL-05 rows to concrete TypeScript sources and deterministic named tests', async () => {
+    for (const evidence of EL05_REQUIREMENT_EVIDENCE) {
+      expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.length, evidence.requirement).toBeGreaterThan(0);
+      expect(evidence.tests.every(test => test.includes(':'))).toBe(true);
+      for (const source of evidence.source) {
+        expect(source.endsWith('.ts')).toBe(true);
+        await expect(readFile(resolve('tools/engineering-loop/src', source), 'utf8')).resolves.not.toHaveLength(0);
+      }
+    }
+  });
+
   it('links each requirement to nonempty source and deterministic test evidence', () => {
     for (const evidence of EL02_REQUIREMENT_EVIDENCE) {
       expect(evidence.source.length, evidence.requirement).toBeGreaterThan(0);
@@ -97,7 +136,7 @@ describe('EL-02 normative linkage', () => {
     }
   });
 
-  it('audits catalog identifiers, order, dependencies, acceptance IDs, and EL-02 bootstrap prerequisites', async () => {
+  it('audits catalog identifiers, order, dependencies, acceptance IDs, and accepted bootstrap prerequisites', async () => {
     const catalog = JSON.parse(
       await readFile(resolve('docs/product/engineering-loop/features.json'), 'utf8')
     ) as {
@@ -148,6 +187,11 @@ describe('EL-02 normative linkage', () => {
     expect(byId.get('EL-04')?.dependencies).toEqual(['EL-01', 'EL-02']);
     expect(byId.get('EL-04')?.bootstrapStatus).toBe('accepted');
     expect(byId.get('EL-04')?.dependencies.every(id => byId.get(id)?.bootstrapStatus === 'accepted')).toBe(true);
+    expect(byId.get('EL-05')?.dependencies).toEqual(['EL-02', 'EL-04']);
+    expect(byId.get('EL-05')?.bootstrapStatus).toBe('accepted');
+    expect(byId.get('EL-05')?.dependencies.every(id => byId.get(id)?.bootstrapStatus === 'accepted')).toBe(true);
+    expect(byId.get('EL-06')?.dependencies).toEqual(['EL-03', 'EL-04', 'EL-05']);
+    expect(byId.get('EL-06')?.dependencies.every(id => byId.get(id)?.bootstrapStatus === 'accepted')).toBe(true);
     expect(['bootstrap_git_until_el_02', 'protected_controller_state']).toContain(catalog.statusAuthority);
   });
 });

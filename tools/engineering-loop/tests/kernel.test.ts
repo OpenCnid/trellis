@@ -15,6 +15,10 @@ import {
   FakeRunner,
 } from '../src/fakes';
 import { ControlKernel } from '../src/kernel';
+import {
+  AGENT_RUNNER_CONTRACT_VERSION,
+  RUNNER_SCHEMA_VERSION,
+} from '../src/runners/runner';
 import { InjectedCrashError, StateStore, type CrashPoint } from '../src/state_store';
 import { FEATURE, NOW, REPOSITORY, SESSION, WORKFLOW, makeApproval } from './fixtures';
 
@@ -295,11 +299,25 @@ describe('EL-02 deterministic control kernel', () => {
     const kernel = await openKernel({ ...paths, owner: 'fake-contract', clock, repository, runner, effects });
     expect(kernel.snapshot?.createdAt).toBe(clock.now());
     const request = {
+      schemaVersion: RUNNER_SCHEMA_VERSION,
+      contractVersion: AGENT_RUNNER_CONTRACT_VERSION,
       workflowId: WORKFLOW.id,
       featureId: FEATURE.featureId,
       sessionId: SESSION.id,
       episodeId: 'episode:deterministic',
       requestId: 'request:deterministic',
+      runnerId: 'runner:fake',
+      role: 'implementer',
+      prompt: {
+        packetVersion: 'engineering-loop-prompt-packet:v1',
+        digest: 'f5b75fb3abfafdb8ad9e977f254084eabd38286c425e2db9cc329606bfa1becb',
+        byteCount: 11,
+        text: 'fake prompt',
+      },
+      workingDirectory: 'C:/fixture',
+      timeBudgetMs: 60_000,
+      turnBudget: 4,
+      contextBudgetTokens: 8_000,
     };
     const oracleRunner = new FakeRunner(clock);
     expect(await runner.start(request)).toEqual(await oracleRunner.start(request));

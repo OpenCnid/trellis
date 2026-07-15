@@ -1,15 +1,37 @@
 import { z } from 'zod';
 import {
-  DOMAIN_SCHEMA_VERSION,
-  EvidenceSchema,
   MAX_COLLECTION_ITEMS,
   RepositoryObservationSchema,
   parseBoundary,
   type EffectIntent,
-  type Evidence,
   type RepositoryObservation,
 } from './domain.js';
 import { sha256Canonical } from './events.js';
+import {
+  AGENT_RUNNER_CONTRACT_VERSION,
+  RUNNER_SCHEMA_VERSION,
+  RunnerDisposeRequestSchema,
+  RunnerInterruptRequestSchema,
+  RunnerObservationBuffer,
+  RunnerObserveRequestSchema,
+  RunnerResumeRequestSchema,
+  RunnerStartRequestSchema,
+  assertRunnerId,
+  correlationFromResume,
+  correlationFromStart,
+  createRunnerRedactor,
+  makeRunnerActionResult,
+  makeRunnerLaunchResult,
+  sameRunnerCorrelation,
+  type AgentRunner,
+  type RunnerAdapterIdentity,
+  type RunnerEpisodeReport,
+  type RunnerLaunchResult,
+  type RunnerObserveResult,
+  type RunnerActionResult,
+  type RunnerRedactor,
+  type RunnerTerminalStatus,
+} from './runners/runner.js';
 import {
   InjectedCrashError,
   type Clock,
@@ -65,62 +87,213 @@ export class FakeRepository implements RepositoryPort {
   }
 }
 
-const RunnerRequestSchema = z.strictObject({
-  workflowId: z.string().min(1).max(128),
-  featureId: z.string().min(1).max(128),
-  sessionId: z.string().min(1).max(128),
-  episodeId: z.string().min(1).max(128),
-  requestId: z.string().min(1).max(128),
-});
-
 const RunnerResultSchema = z.strictObject({
-  status: z.enum(['completed', 'interrupted', 'failed']),
-  summary: z.string().max(1_024),
+  status: z.enum([
+    'running',
+    'completed',
+    'interrupted',
+    'timed_out',
+    'stalled',
+    'cancelled',
+    'adapter_disconnected',
+    'process_exited',
+    'protocol_refused',
+    'failed_before_first_turn',
+    'failed',
+  ]),
+  summary: z.string().refine(value => Buffer.byteLength(value, 'utf8') <= 1_024, 'must not exceed 1024 UTF-8 bytes'),
 });
 const RunnerScriptSchema = z.array(RunnerResultSchema).max(MAX_COLLECTION_ITEMS);
 
-export interface RunnerPort {
-  start(request: unknown): Promise<Evidence>;
+export type RunnerPort = AgentRunner;
+
+const FAKE_RUNNER_IDENTITY: RunnerAdapterIdentity = Object.freeze({
+  adapter: 'fake-agent-runner',
+  adapterVersion: 'fake-agent-runner:v1',
+  protocolVersion: 'fake-runner-protocol:v1',
+  executableVersion: 'none',
+});
+
+function fakeStableId(prefix: string, value: unknown): string {
+  return `${prefix}:${sha256Canonical(value).slice(0, 32)}`;
 }
 
-export class FakeRunner implements RunnerPort {
+function terminalEvent(status: RunnerTerminalStatus): Parameters<RunnerObservationBuffer['append']>[0] {
+  const events = {
+    completed: 'episode.completed',
+    interrupted: 'episode.interrupted',
+    timed_out: 'episode.timed_out',
+    stalled: 'episode.stalled',
+    cancelled: 'episode.cancelled',
+    adapter_disconnected: 'adapter.disconnected',
+    process_exited: 'process.exited',
+    protocol_refused: 'protocol.refused',
+    failed_before_first_turn: 'episode.failed_before_first_turn',
+    failed: 'episode.failed',
+  } as const;
+  return events[status];
+}
+
+export class FakeRunner implements AgentRunner {
   readonly clock: Clock;
   readonly script: Array<z.infer<typeof RunnerResultSchema>>;
+  readonly runnerId: string;
+  readonly adapter = FAKE_RUNNER_IDENTITY;
+  readonly redact: RunnerRedactor;
   starts = 0;
+  resumes = 0;
+  interruptions = 0;
+  observations = 0;
+  disposals = 0;
   modelCalls = 0;
   paidCalls = 0;
   processSpawns = 0;
   networkCalls = 0;
+  #step = 0;
+  #buffer: RunnerObservationBuffer | null = null;
 
-  constructor(clock: Clock, script: unknown[] = [{ status: 'completed', summary: 'fake completion' }]) {
+  constructor(
+    clock: Clock,
+    script: unknown[] = [{ status: 'completed', summary: 'fake completion' }],
+    options: { runnerId?: string; sensitiveValues?: readonly string[] } = {}
+  ) {
     this.clock = clock;
     this.script = parseBoundary(RunnerScriptSchema, script, 'fake runner script');
+    this.runnerId = options.runnerId ?? 'runner:fake';
+    this.redact = createRunnerRedactor(options.sensitiveValues ?? []);
   }
 
-  async start(requestValue: unknown): Promise<Evidence> {
-    const request = parseBoundary(RunnerRequestSchema, requestValue, 'fake runner request');
-    const result = this.script[this.starts];
+  #nextResult(): z.infer<typeof RunnerResultSchema> {
+    const result = this.script[this.#step];
     if (!result) throw new Error('Fake runner script exhausted');
+    this.#step++;
+    return result;
+  }
+
+  #newBuffer(correlation: unknown): RunnerObservationBuffer {
+    if (this.#buffer !== null) throw new Error('fake runner instance already owns an episode attempt');
+    const buffer = new RunnerObservationBuffer({
+      adapter: this.adapter,
+      clock: this.clock,
+      redact: this.redact,
+    });
+    buffer.begin(correlation);
+    this.#buffer = buffer;
+    return buffer;
+  }
+
+  #finishScripted(buffer: RunnerObservationBuffer, result: z.infer<typeof RunnerResultSchema>): void {
+    if (result.status === 'running') return;
+    buffer.append(terminalEvent(result.status), { detail: result.summary });
+  }
+
+  async start(requestValue: unknown): Promise<RunnerLaunchResult> {
+    const request = parseBoundary(RunnerStartRequestSchema, requestValue, 'fake runner start request');
+    assertRunnerId(this.runnerId, request.runnerId);
+    const result = this.#nextResult();
     this.starts++;
-    const observedAt = this.clock.now();
-    return parseBoundary(EvidenceSchema, {
-      id: `evidence:runner:${request.requestId}`,
-      schemaVersion: DOMAIN_SCHEMA_VERSION,
-      createdAt: observedAt,
-      workflowId: request.workflowId,
-      featureId: request.featureId,
-      sessionId: request.sessionId,
-      origin: 'runner_reported',
-      observedAt,
-      digest: sha256Canonical({ request, result }),
-      immutableReference: null,
-      mediaType: 'application/vnd.trellis.fake-runner-observation+json',
-      byteCount: Buffer.byteLength(JSON.stringify(result), 'utf8'),
-      metadata: [
-        { key: 'status', value: result.status },
-        { key: 'episodeId', value: request.episodeId },
-      ],
-    }, 'fake runner evidence');
+    const buffer = this.#newBuffer(correlationFromStart(request));
+    const threadId = fakeStableId('thread', { episodeId: request.episodeId, runnerId: request.runnerId });
+    const turnId = fakeStableId('turn', { requestId: request.requestId, attempt: this.#step });
+    buffer.updateIdentifiers(threadId, null);
+    buffer.append('episode.started', { detail: 'fake episode started' });
+    buffer.updateIdentifiers(threadId, turnId);
+    buffer.append('turn.started', { detail: 'fake turn started' });
+    this.#finishScripted(buffer, result);
+    return makeRunnerLaunchResult({
+      status: 'started',
+      correlation: buffer.correlation!,
+      adapter: this.adapter,
+      observedAt: this.clock.now(),
+    });
+  }
+
+  async resume(requestValue: unknown): Promise<RunnerLaunchResult> {
+    const request = parseBoundary(RunnerResumeRequestSchema, requestValue, 'fake runner resume request');
+    assertRunnerId(this.runnerId, request.runnerId);
+    const result = this.#nextResult();
+    this.resumes++;
+    const buffer = this.#newBuffer(correlationFromResume(request));
+    buffer.append('episode.resumed', { detail: 'fake episode resumed' });
+    const turnId = fakeStableId('turn', { requestId: request.requestId, attempt: this.#step });
+    buffer.updateIdentifiers(request.threadId, turnId);
+    buffer.append('turn.started', { detail: 'fake resumed turn started' });
+    this.#finishScripted(buffer, result);
+    return makeRunnerLaunchResult({
+      status: 'started',
+      correlation: buffer.correlation!,
+      adapter: this.adapter,
+      observedAt: this.clock.now(),
+    });
+  }
+
+  async interrupt(requestValue: unknown): Promise<RunnerActionResult> {
+    const request = parseBoundary(RunnerInterruptRequestSchema, requestValue, 'fake runner interrupt request');
+    assertRunnerId(this.runnerId, request.correlation.runnerId);
+    if (this.#buffer === null) throw new Error('fake runner has no active episode');
+    if (
+      this.#buffer.correlation === null
+      || !sameRunnerCorrelation(this.#buffer.correlation, request.correlation)
+    ) {
+      throw new Error('fake runner action correlation does not match the active episode');
+    }
+    this.interruptions++;
+    if (this.#buffer.terminal) {
+      return makeRunnerActionResult({
+        status: 'already_terminal',
+        correlation: request.correlation,
+        requestId: request.correlation.requestId,
+        runnerId: this.runnerId,
+        observedAt: this.clock.now(),
+        detail: 'fake episode already terminal',
+        redact: this.redact,
+      });
+    }
+    const event = {
+      operator: 'episode.interrupted',
+      timeout: 'episode.timed_out',
+      stall: 'episode.stalled',
+      cancellation: 'episode.cancelled',
+    } as const;
+    this.#buffer.append(event[request.reason], { detail: `fake ${request.reason}` });
+    return makeRunnerActionResult({
+      status: 'acknowledged',
+      correlation: request.correlation,
+      requestId: request.correlation.requestId,
+      runnerId: this.runnerId,
+      observedAt: this.clock.now(),
+      detail: 'fake interrupt acknowledged',
+      redact: this.redact,
+    });
+  }
+
+  async observe(requestValue: unknown): Promise<RunnerObserveResult> {
+    const request = parseBoundary(RunnerObserveRequestSchema, requestValue, 'fake runner observe request');
+    assertRunnerId(this.runnerId, request.correlation.runnerId);
+    if (this.#buffer === null) throw new Error('fake runner has no active episode');
+    this.observations++;
+    return this.#buffer.read(request);
+  }
+
+  async dispose(requestValue: unknown): Promise<RunnerActionResult> {
+    const request = parseBoundary(RunnerDisposeRequestSchema, requestValue, 'fake runner dispose request');
+    assertRunnerId(this.runnerId, request.runnerId);
+    this.disposals++;
+    if (this.#buffer !== null && !this.#buffer.terminal) {
+      this.#buffer.append('episode.cancelled', { detail: 'fake runner disposed before terminal completion' });
+    }
+    return makeRunnerActionResult({
+      status: 'disposed',
+      requestId: request.requestId,
+      runnerId: this.runnerId,
+      observedAt: this.clock.now(),
+      detail: 'fake runner disposed',
+      redact: this.redact,
+    });
+  }
+
+  get report(): RunnerEpisodeReport | null {
+    return this.#buffer?.report ?? null;
   }
 }
 

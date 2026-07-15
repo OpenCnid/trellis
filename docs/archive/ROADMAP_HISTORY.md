@@ -6525,3 +6525,130 @@ far under the ≤$5/run cap.
    five-session window advances to 49–53 (Session 48's §5 entry moved
    verbatim to `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph
    updated in the same commit).
+
+### July 14, 2026 — Session 54: TTT-track increment T2 RETRY (task text v3.4) — a clean R2 self-refusal, NO LANDING; THIRD strike → owner picked TOOLING SHAPE (§4 row 13, Phase 1 step 2)
+
+The third T2 attempt, owner-approved after #100 (Session 53) merged.
+The v3.4 run did NOT land — a clean R2 self-refusal after a NEW
+editing-execution sub-failure. Full record:
+`REPOSITORY_INGESTION_REPORT.md` §5i.8. Docs-only; ZERO non-markdown
+bytes (the run reverted its own staging; porcelain clean throughout).
+Session paid total ≈ $0.8164 (the quota probe ≈ $0.0001 + the run
+$0.8163), within the $0.6–$1.1 estimate, under the ≤$5/run cap.
+
+1. **Zero-paid staging (§5i.8):** task text v3.4 = v3.3 (§5i.7,
+   carrying the correct M3 pin-(e) fix) PLUS three editing-execution
+   safeguards, each closing a named §5i.7 sub-cause — (1)
+   anti-duplication (an after-each-insert exactly-once rule + a new M4
+   exactly-once staging check before write_back), (2) a robust test
+   anchor (M3 anchors on the LAST existing `it(...)` in the
+   buildAgentEnv describe, never a bare `});`), (3) an R2 scope
+   clarification (R2/V2: R2 ONLY for a contradicted SOURCE premise,
+   never your own fixable staging slip). `diff` confirmed exactly the
+   three safeguards changed. **Guardrail 15 honored** (BOTH prompt
+   skills invoked before authoring). Evidence chain re-verified live,
+   ALL HELD (identical to §5i.3/§5i.7): `buildagentenv` 17 edges / 0
+   contested / single hash `c3883a2e…`; block 3,202 chars verbatim on
+   disk; `stage2:check --pre` PASS; harness green; dry-run 3/300/0.
+   `#100` was merged (squash) FIRST so v3.4 branched off clean master.
+2. **Quota probe FIRST (§5h.10):** 7 in / 5 out (`ok`).
+3. **The run — NO LANDING (clean R2 self-refusal; one spawn, $0.8163;
+   278,234 in / 12,067 out; 14 model calls; 84.8s; 0 write_backs; 4
+   guarded ops / 0 raw splices; cited_hashes EMPTY; porcelain CLEAN):**
+   the run reached E3 cleanly and held the citable hash. **The v3.4
+   safeguards CLOSED the Session 53 classes — none recurred:** no
+   duplicate inserts, the test anchored on the correct unique `it(...)`,
+   and staging errors were correctly treated as FIXABLE (revert +
+   re-stage, no R2 over-trigger). **But a NEW editing-execution class
+   surfaced:** the run BATCHED multiple guarded `insert_lines` in ONE
+   cell using pre-staging line numbers (insert_a at line 155, insert_b
+   at line 209 in the same cell); staging insert_a's 13-line block
+   shifted every later line, so insert_b's `anchor_before='  }\r'` at
+   stale line 209 hit the wrong line → `AnchorMismatchError` (×11). The
+   guarded family behaved EXACTLY per contract (a mismatched anchor
+   stages nothing, teaches re-derivation); the run kept re-batching
+   with stale addresses, consumed 14 of 16 iterations without one
+   verified edit, and R2'd. The task's "one insert per cell, re-locate
+   between" rule (unchanged since v3.2) was NOT obeyed.
+4. **Criterion — NO LANDING:** guarded-only PASS (`raw_splices` 0);
+   spend PASS ($0.8163); evidence contract NOT MET (zero insights);
+   item 5 (pins green) NOT REACHED (no write_back). No machinery
+   defect — every layer fired per contract.
+5. **Cleanup: NONE OWED** — the R2 path wrote nothing; `DERIVED_INSIGHT`
+   stays 298; the edgeless `mcpcredentialenv` orphan preserved
+   (guardrail 2). `npm test` stays 876/87.
+6. **THE PATTERN + THE ESCALATION (§5g.3 third-strike ACTIVE; the S48
+   §5h.8 escalation rule).** T2 has now had THREE no-landings, each a
+   DISTINCT editing-execution sub-failure the prior task-text fix did
+   NOT prevent recurring in a new form: §5i.6 mis-written test pin →
+   §5i.7 duplicate inserts + wrong-describe anchor + R2 over-trigger →
+   §5i.8 stale line addresses from batched inserts. Each prompt patch
+   closed its target and the model surfaced a new way to mis-drive the
+   guarded toolkit — the exact signal the owner doctrine names (close
+   behavioral failure classes by TOOLING SHAPE, not prompt text) and
+   the S48 §5h.8 escalation rule anticipated. **The owner picked
+   TOOLING SHAPE** (over one-more-prompt / pause): close the class in
+   the guarded editing toolkit per CODE_MEDIATED_TEXT doctrine (the
+   model never counts; the engine computes addresses) — an
+   engine-resolved-anchor insert (the model passes a UNIQUE anchor
+   substring, the engine finds the line, computes the exact address +
+   terminator; non-unique/absent = typed refusal) and/or a
+   batch/transaction insert that re-resolves addresses internally.
+   ADDITIVE to the Session 41 guarded family (raw `splice` + existing
+   guarded methods stay byte-identical and pinned), design-record-first
+   in the §5e/§5g mold, zero-paid, drill-pinned, then a re-attempt T2
+   run measures it. T2 is PAUSED pending the tooling increment.
+7. **Bookkeeping:** row 13's cell gains the T2 v3.4 NO-LANDING outcome
+   + the tooling-shape pivot; §5i.8 completes; the five-session window
+   advances to 50–54 (Session 49's §5 entry moved verbatim to
+   `docs/archive/ROADMAP_HISTORY.md`, the pointer paragraph updated in
+   the same commit). Docs-only close-out (the failed diff reverted,
+   ZERO non-markdown bytes shipped — the Session 48/53 precedent):
+   `npm test` 876/87, build, python:check, compose config green; full
+   standing drill block NOT re-run (nothing non-markdown moved),
+   reason recorded; `test:selfedit-harness` + `stage2:check --pre`
+   green during staging.
+
+### July 14, 2026 — Owner-directed engineering-loop program initialization: EL-00 roadmap/catalog ACCEPTED, zero-paid
+
+The owner approved implementation of the engineering-session loop on a new
+feature branch, then directed that the work be decomposed across context
+windows before implementation. The branch `engineering-loop-spec` was created
+from `74c3b48` (the Session 51 head). This program initialization ran in parallel with the merged TTT Sessions 52–54
+and consumes no numbered implementation session. After those histories were
+reconciled, `EL-01` is recorded as Session 55. The TTT row remains intact and
+paused, not cancelled; the engineering-loop program remains owner-prioritized.
+
+1. **Decision:** a lone `SPEC.md` is necessary but insufficient. The bootstrap
+   control plane is a concise human roadmap plus a machine-readable feature DAG
+   and JSON Schema. The normative specification and architecture record are the
+   next bounded feature; controller code begins only after ratification.
+2. **Artifacts:** `docs/product/engineering-loop/ROADMAP.md`, `RESEARCH.md`,
+   `features.json`, and `feature.schema.json`; §4 gained one pointer row rather
+   than copying the program plan into the root roadmap. `RESEARCH.md` preserves
+   the local measurements, primary-source findings, alternatives, selected
+   hypothesis, prompt-protocol disposition, and pre-stated evaluation so later
+   contexts do not depend on this conversation. Ten features
+   (`EL-00`–`EL-09`), thirteen dependency edges, and thirty-four acceptance
+   items are declared. `EL-08` and `EL-09` are deferred and require new
+   proposals.
+3. **Boundary recorded:** repository-owned source/policy, out-of-process
+   controller, protected mutable state outside the agent-writable worktree,
+   one writer initially, resume within an episode and fresh context across
+   semantic phases, deterministic verification over model claims, and explicit
+   paid/destructive/push/merge gates.
+4. **Acceptance:** fresh-worktree `npm ci` installed 317 packages with 0
+   vulnerabilities; it also surfaced an honest environment warning — the local
+   shell is Node v20.19.2/npm 11.10.0 while four Babel packages require Node
+   22.18+ (CI remains Node 22; install, tests, and build still passed). `npm
+   test` passed 87 files / 876 tests; `npm run build` and `npm run
+   python:check` passed. Python `jsonschema` Draft 2020-12 validation passed
+   (`features=10`); the zero-dependency semantic check passed (`ids=10`,
+   `edges=13`, `acceptance=34`) with unique IDs, resolved dependencies, an
+   acyclic graph, sequential order, unique acceptance IDs, and exact
+   Markdown/catalog order parity; `git diff --check` passed. No runtime code,
+   prompt, model call, or paid work was introduced.
+5. **Next:** `EL-01` only — `docs/architecture/ENGINEERING_LOOP.md` plus
+   `tools/engineering-loop/SPEC.md`, including the threat model, transition
+   contract, and conformance matrix. Explicit exclusions: control-kernel code,
+   `WORKFLOW.md`, production prompts, Codex invocation, and handoff migration.
