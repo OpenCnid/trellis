@@ -82,6 +82,41 @@ about the geometry is decorative: the design work below is exactly the
 machinery that moves points along one axis and forbids that motion from
 leaking into the other.
 
+### 2.1 The plane geometry (bounded)
+
+The two-axis model generalizes, deliberately conservatively. Axes ship
+only as members of a **named plane**, where each plane owns exactly one
+governance question and carries its own coherence rules (conceptual
+lineage: the dimensional-bundle decomposition of WonderScholar/WonderBuild
+2.0 — see `docs/product/epistemic-support/RESEARCH_MAP.md` S7,
+R-17…R-19; adopted as design vocabulary only, per the tooling-over-prompt
+doctrine):
+
+1. **Custody plane** (exists): *where did this come from?* Discrete,
+   structural, human-gated. Unchanged.
+2. **Support plane** (this proposal): *how has it held up?* Continuous
+   (b, d, u), judged, sweep-computed, writer-blind.
+3. **Claim-kind plane** (named, deferred): *what kind of claim is it?*
+   Bipolar **positions**, not qualities — at most three spectra:
+   grounding (empirical ↔ theoretical), scope (contextual ↔ universal),
+   modality (deterministic ↔ probabilistic). Judged, never
+   writer-authoritative. This is what dissolves the theory-vs-law
+   question: a theoretical-universal-probabilistic claim at maximal
+   support is still a theory, because kind is a position, not a
+   deficiency. Its concrete engine role, when it enters: **op-pool
+   routing** — a claim's grounding position predicts which op families
+   can render non-abstaining verdicts (the detectability spectrum,
+   §4.6), so coherence calibration becomes metric selection, i.e.,
+   tooling.
+
+Two standing rules keep the geometry from sprawling: **a new plane
+requires a driving governance question that no existing plane answers**
+(and its own drill sections before any consumer reads it), and
+**cross-plane coherence invariants are tooling, not prose** — e.g.,
+Tier-3 standing ⇒ no support computed; an all-abstain op history ⇒
+`u`-dominant opinion, never a corroboration record. Two planes ship
+first; the third waits for its driving metric family.
+
 ## 3. The support state
 
 Per belief (nodes and relationships that carry `sourceNodeIds`), an additive,

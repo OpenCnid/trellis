@@ -43,6 +43,7 @@ engineering-loop feature.
 | S4 | Trellis recorded measurements | OpenCnid | committed reports: `PROVENANCE_CITATION_AB_REPORT.md`, `POISONING_DRILL_REPORT.md`, `UPDATE_DRILL_REPORT.md`, `EFFECTIVE_CONTEXT_PROBE_REPORT.md` + result JSONs | Primary (for Trellis claims) | Yes (repo) | Committed, master | Public (MIT repo) |
 | S5 | Sister-lab review series | sister lab | `docs/review/00–06`, branch `claude/sister-lab-repo-review-5fuu19`, PR #119 | Secondary synthesis | Yes (repo, branch) | On branch, **pending OpenCnid review** | Public branch |
 | S6 | Subjective logic (opinion = belief/disbelief/uncertainty) | A. Jøsang (attribution from model background) | canonical citation **missing from session** — no artifact available | Background theory | No (memory only) | Absent | Published academic work; cite, do not ingest |
+| S7 | WonderSuite 2.0 — specifically WonderScholar 2.0 ("Topological Research Framework") and WonderBuild 2.0 ("Adaptive Knowledge Construction Framework") | gusthemole / Lexideck Technologies (same lineage as S2/S3) | https://github.com/gusthemole/WonderSuite, `WonderScholar.txt` + `WonderBuild.txt`; version 2.0; retrieval date July 16, 2026 | Secondary (conceptual framework, prompt-layer, unmeasured) | Full text (fetched raw files) | Absent | Public, **GPL v3** — cite concepts and short excerpts; do not vendor GPL text into this MIT repo |
 
 Missing metadata is marked, not invented. S6 in particular must not be
 cited in any canonical Trellis document until a real artifact is
@@ -74,6 +75,9 @@ worktree), **INF** inference, **HYP** hypothesis, **OQ** open question.
 | R-14 | S6 | A (b, d, u) opinion distinguishes balanced conflict from ignorance; a scalar cannot | Background theory — **source artifact missing** | Proposed support state | `docs/review/06_…` §3 | Suggests representation; unverifiable in-session |
 | R-15 | S2 + S3 + repo | The hypershot invariant/variant layer split ("concrete content that varies across invocations must not live at the system layer") is already **engine-enforced** in Trellis's engineering loop: the prompt compiler refuses task-specific concrete content in reusable frames | SS + RO | EL-04 prompt compiler contamination scan | `tools/engineering-loop/src/prompt_compiler.ts:64` (`CONTAMINATION_PATTERNS`); `HANDOFF.md` §7 guardrail 11 | Converges — prompt advice already converted to tooling shape |
 | R-16 | S4, `EFFECTIVE_CONTEXT_PROBE_REPORT.md` + roadmap Session 28 record | Prompt-only guidance is unreliable as enforcement: the retired estimation-discipline module failed its pooled token criterion; the CMT prompt block's arm effect vanished at scale while tooling carried the behavior | RO | "Tooling shape enforces; prompts reinforce" (owner doctrine) | `AGENTS.md` §4 rule 8; `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` | Constrains how S2/S3 claims may be adopted (as hypotheses, not enforcement) |
+| R-17 | S7, WonderScholar "Dimensional Axes of Research Space" + WonderBuild "Dimensional Axes of Knowledge Space" | Axes come bundled into a small number of **named dimensions (planes)**, each a coherent group of related spectra, rather than proliferating as loose scalar fields — five named planes bound ~30 spectra in each framework | SS (conceptual framework; no measurement) | The custody × support two-axis model in the parent record | `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md` §2 | Refines — supplies the geometry for growing beyond two axes without sprawl |
+| R-18 | S7, WonderScholar "Navigational Protocol" step 2, "Coherence Calibration" | A position in a multidimensional space must pass **coherence checks** — not every coordinate combination is valid; consistency across dimensions is itself verified | SS | Cross-plane invariants (e.g., Tier-3 standing ⇒ no support computed; `u≈1` ⇒ no authority corroboration recorded) — currently implicit only | gap (no named mechanism) | Suggests a new enforceable mechanism: coherence checks as tooling with pins |
+| R-19 | S7, WonderScholar "Epistemological Dimension" + "Analytical Dimension" spectra (Empirical↔Rational, Universal↔Contextual, Deterministic↔Probabilistic) | Some belief properties are **bipolar positions, not unipolar qualities**: where a claim sits (kind/scope/modality) is orthogonal to how well it has held up | SS | Resolves the theory-vs-law framing cleanly: "evolution is a theory" is a *claim-kind position* (theoretical, universal, probabilistic), not a support deficiency; also routes op-pool selection (R-05 detectability: empirical-pole claims admit mechanical ops) | `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md` §2, §4.6 | Suggests a third, deferred plane (claim-kind) with a fixed small vocabulary |
 
 ### 3b. Design consequences
 
@@ -95,6 +99,9 @@ worktree), **INF** inference, **HYP** hypothesis, **OQ** open question.
 | R-14 | Absent | none | Use (b, d, u) in the proposal; obtain S6 before canonizing the formalism | Operators finding the triple unusable where a scalar suffices |
 | R-15 | Enforced (EL scope only) | EL-04 conformance tests | Recognize the correspondence; if support-layer prompt artifacts are authored, they inherit the same contamination discipline | — |
 | R-16 | Enforced as doctrine | Session 28 record; probe rounds 2–4 | S2/S3 mechanism claims (e.g. primacy) remain **unmeasured hypotheses** in Trellis terms; adopt their *structural* practices, pin their artifacts, measure before relying | A paired measurement showing prompt-only protocol reliably carrying a behavior across pressure |
+| R-17 | Absent | none | Adopt the plane geometry: axes ship only as members of a named plane with a governance question; two planes now, any new plane requires a driving question no existing plane answers (collaborator guidance: allow multiple planes, do not overcomplicate) | Plane bundles proving no more legible than loose fields in operator use |
+| R-18 | Absent | none | Name cross-plane coherence invariants and enforce them in the computation/loader path; each invariant gets a drill section (extends the oracle drill's acceptance table when implemented) | A valid governance state that the declared invariants wrongly refuse |
+| R-19 | Absent | none | Record the claim-kind plane as **named-but-deferred**: three spectra maximum (grounding, scope, modality), judged never writer-authoritative, entering only when a support-metric family needs claim-kind routing for op selection | Claim-kind positions failing to predict which op families produce non-abstaining verdicts |
 
 ## 4. Cross-row synthesis
 
@@ -167,7 +174,28 @@ attraction) are plausible and **unmeasured here**. They stay hypotheses;
 the structural practices (tags, invariant/variant split, placeholder
 grammar) are adopted as authoring discipline with pinned artifacts.
 
-**4.7 Reachability, stated up front.** [E] `AGENTS.md` §4 rule 15:
+**4.7 The plane geometry (added July 16, 2026, on collaborator
+guidance).** [E] R-17: both Wonder frameworks bound ~30 bipolar spectra
+inside exactly five *named* dimensions each — the decomposition pattern
+is "few planes, each a coherent bundle," not "many fields." [E] R-19:
+WonderScholar's epistemological/analytical spectra are positions between
+poles, not scores. [I] Applied to Trellis: the custody × support model
+generalizes to a small set of orthogonal planes, each owning one
+governance question — custody answers *where did it come from*, support
+answers *how has it held up*, and a deferred claim-kind plane answers
+*what kind of claim is it* (grounding, scope, modality). [I] Claim-kind
+is what actually dissolves the theory-vs-law example: no support level
+turns a theoretical-universal-probabilistic claim into a "law," because
+that is a position, not a deficiency. [I] It also connects to R-05
+mechanically: a claim's position on the empirical↔theoretical spectrum
+predicts which op families can even render verdicts — coherence
+calibration (R-18) becomes op-pool routing, i.e., tooling. [E] Per R-16
+doctrine and the collaborator's own caution ("don't overcomplicate"),
+S7 is adopted as design vocabulary only: two planes ship first; a third
+plane enters only behind a driving governance question and its own
+drill sections.
+
+**4.8 Reachability, stated up front.** [E] `AGENTS.md` §4 rule 15:
 correct is not the same claim as reachable; this repo shipped callerless
 capabilities three times. [I] The support layer's minimal reachable
 spine is: a support computation module, a `support_sweep` job name on
@@ -221,6 +249,7 @@ flowchart LR
 | 4 | Ratchet + library-drift papers | arXiv:2605.22148; ICML 2026 workshop paper (per S1 refs) | R-08, lifecycle lineage | abstracts + selected sections | standard arXiv | `web:https://arxiv.org/abs/2605.22148` | operator | whether skill-loop lessons transfer at all |
 | 5 | Lexideck curriculum source | Patreon (S2 lineage note) | R-15 lineage, protocol completeness | **do not commit**; reference only | paywalled/proprietary — explicit authorization required | n/a | n/a | full curriculum context behind the two skills |
 | 6 | Sister-lab review series | PR #119 (branch) | S5 throughout | already in branch | none | already repo files | ordinary PR review | n/a — awaiting OpenCnid review |
+| 7 | WonderSuite 2.0 (WonderScholar + WonderBuild) | https://github.com/gusthemole/WonderSuite | R-17, R-18, R-19 | full text (public; already fetched) | GPL v3 — cite and excerpt, do not vendor into this MIT repo | `web:https://github.com/gusthemole/WonderSuite` (if provenance-citable form is wanted) | operator promotion required | nothing — in session; promotion needed only for citable provenance |
 
 ## 8. Relationship to the oracle drill, and the next decision boundary
 
@@ -247,6 +276,10 @@ this document authorizes nothing.
 - R-08 is untestable in Trellis today (no consumer of graded failures);
   R-14 rests on an unavailable source; S2/S3 mechanism claims are
   unmeasured hypotheses (R-16).
+- S7 (WonderSuite) is a prompt-layer conceptual framework with no
+  measurements of any kind; it is adopted here strictly as design
+  vocabulary (plane geometry, coherence calibration, position-vs-quality),
+  never as a mechanism claim.
 - This map was authored from session context by the sister lab. It has
   no provenance standing, has not been reviewed by OpenCnid, and may
   misread doctrine; `code > glossary > prose > session inference`
