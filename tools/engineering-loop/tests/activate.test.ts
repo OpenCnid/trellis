@@ -11,12 +11,19 @@ import {
   invokedAsEntrypoint,
   main,
   parseAcceptanceChangeArguments,
+  parseGenesisArguments,
+  parseReconciliationItem,
+  parseRecoveryArguments,
   parseSeedArguments,
   parseStatusPair,
+  printGenesisRequest,
+  printRecoveryRequest,
   printSeedRequest,
   readActivationConfig,
   resolveActivation,
   runActivationSeed,
+  runLedgerRecovery,
+  runReGenesis,
 } from '../src/activate';
 import { APPROVAL_CHANNEL_FILE } from '../src/approval_channel';
 import {
@@ -24,8 +31,10 @@ import {
   createProtectedApprovalRecord,
   protectedRequestDigest,
   type ProtectedActionRequest,
+  type ProtectedApprovalRecord,
 } from '../src/policy';
 import { buildSeedRequest, catalogStatusPairs, seedScopeItem } from '../src/seed';
+import { reconciliationScopeItem } from '../src/ledger_recovery';
 import type { RepositoryObservation } from '../src/domain';
 
 const NOW = '2026-07-15T12:00:00.000Z';
@@ -91,6 +100,72 @@ async function layout(): Promise<Layout> {
       [ACTIVATION_ENVIRONMENT_KEYS.approvalChannel]: config.approvalChannel,
     },
   };
+}
+
+const CLOCK = { now: () => NOW };
+
+function ownerApproval(request: ProtectedActionRequest): ProtectedApprovalRecord {
+  return createProtectedApprovalRecord({
+    id: request.approvalId,
+    schemaVersion: PROTECTED_POLICY_SCHEMA_VERSION,
+    createdAt: NOW,
+    channel: 'protected_external',
+    channelRecordId: `channel:${request.approvalId}`,
+    issuer: 'owner:darian',
+    workflowId: request.workflowId,
+    featureId: request.featureId,
+    sessionId: request.sessionId,
+    action: request.action,
+    requestId: request.id,
+    requestDigest: protectedRequestDigest(request),
+    target: request.target,
+    exactScope: [...request.exactScope],
+    repositoryPrecondition: request.repositoryPrecondition,
+    approvedEstimateUsd: null,
+    approvedLimitUsd: null,
+    issuedAt: '2026-07-15T11:00:00.000Z',
+    expiresAt: '2026-07-15T13:00:00.000Z',
+    revokedAt: null,
+    revocationReason: null,
+    consumptionState: 'active',
+    consumedAt: null,
+    consumptionId: null,
+  });
+}
+
+async function writeChannel(layoutValue: Layout, approvals: readonly unknown[]): Promise<void> {
+  // Pre-created at 0o700: validateProtectedStateRoot refuses pre-existing
+  // roots that grant group or other permissions on POSIX (the PR #115 class —
+  // invisible under Windows, fatal on the Linux CI runner).
+  await mkdir(layoutValue.config.approvalChannel, { recursive: true, mode: 0o700 });
+  await writeFile(
+    join(layoutValue.config.approvalChannel, APPROVAL_CHANNEL_FILE),
+    JSON.stringify(approvals, null, 2),
+    'utf8'
+  );
+}
+
+/** A layout whose generation 0 is seeded through the entrypoint's own path. */
+async function seededLayout(): Promise<Layout> {
+  const l = await layout();
+  const request = buildSeedRequest({
+    pairs: catalogStatusPairs(CATALOG),
+    repository: REPOSITORY,
+    createdAt: CREATED_AT,
+    approvalId: 'approval:el10-activation',
+  });
+  await writeChannel(l, [ownerApproval(request)]);
+  await runActivationSeed({
+    config: readActivationConfig(l.environment),
+    clock: CLOCK,
+    ownerId: 'owner:test',
+    ownerToken: 'token-0123456789abcdef',
+    repository: REPOSITORY,
+    createdAt: CREATED_AT,
+    approvalId: 'approval:el10-activation',
+    catalog: CATALOG,
+  });
+  return l;
 }
 
 describe('EL-10 controller activation entrypoint', () => {
@@ -461,6 +536,335 @@ describe('EL-10 controller activation entrypoint', () => {
       expect(await main(['record-acceptance'], environment)).toBe(1);
       // Refused for want of a scope, and the refusal names the missing input
       // rather than silently changing nothing.
+      expect(JSON.parse(stderr.join('')).message).toContain('requires at least one --set');
+    } finally {
+      process.stdout.write = writeOut;
+      process.stderr.write = writeErr;
+    }
+  });
+
+  it('activate: parses repeatable supersede items and owner reconciliation material', () => {
+    const base = [
+      '--branch', 'master',
+      '--base', '695440cfa9733a56936011276640ab9369fae5e4',
+      '--remote-name', 'origin',
+      '--remote-url', 'https://github.com/OpenCnid/trellis',
+      '--approval-id', 'approval:recovery',
+      '--created-at', CREATED_AT,
+    ];
+    const parsed = parseRecoveryArguments([
+      ...base,
+      '--supersede', 'EL-07=planned:2,5',
+      '--supersede', 'EL-10=active:3',
+      '--issuer', 'owner:darian',
+      '--signature-ref', 'protected://signatures/recovery.sig',
+      '--evidence-ref', 'protected://evidence/recovery.json',
+      '--evidence-digest', 'd'.repeat(64),
+      '--reason', 'recorded against the wrong generation',
+    ]);
+    expect(parsed.scope).toEqual([
+      { featureId: 'EL-07', status: 'planned', supersedes: [2, 5] },
+      { featureId: 'EL-10', status: 'active', supersedes: [3] },
+    ]);
+    expect(parsed.issuer).toBe('owner:darian');
+    expect(parsed.evidenceDigest).toBe('d'.repeat(64));
+    expect(parsed.approvalId).toBe('approval:recovery');
+
+    // The owner fields stay optional at parse time: print composes without them.
+    const printable = parseRecoveryArguments([...base, '--supersede', 'EL-07=planned:2']);
+    expect(printable.issuer).toBeUndefined();
+
+    expect(() => parseRecoveryArguments(base)).toThrow(/requires at least one --supersede/);
+    expect(() => parseRecoveryArguments([...base, '--supersede'])).toThrow(/requires a value/);
+    expect(() => parseRecoveryArguments([...base, '--supersede', 'EL-07=planned'])).toThrow(/is malformed/);
+    expect(() => parseRecoveryArguments([...base, '--supersede', 'EL-07=planned:'])).toThrow(/is malformed/);
+    expect(() => parseRecoveryArguments([...base, '--supersede', 'EL-07=planned:x']))
+      .toThrow(/not a nonnegative integer/);
+    expect(() => parseRecoveryArguments([...base, '--supersede', 'EL-07=planned:2,']))
+      .toThrow(/not a nonnegative integer/);
+    expect(() => parseRecoveryArguments([...base, '--supersede', 'EL-07=invented:2']))
+      .toThrow(/is not one of: planned, active, accepted, blocked, deferred/);
+    expect(() => parseRecoveryArguments([
+      ...base, '--supersede', 'EL-07=planned:2', '--issuer', 'a', '--issuer', 'b',
+    ])).toThrow(/is repeated/);
+
+    // What the owner types round-trips into the scope item the approval must
+    // match, sequences canonical: one grammar, not two that can drift.
+    expect(reconciliationScopeItem(parseReconciliationItem('EL-07=planned:5,2')))
+      .toBe('EL-07=planned:supersedes=2,5');
+  });
+
+  it('activate: parses re-genesis reconstruction pairs and two approval roles', () => {
+    const base = [
+      '--branch', 'master',
+      '--base', '695440cfa9733a56936011276640ab9369fae5e4',
+      '--remote-name', 'origin',
+      '--remote-url', 'https://github.com/OpenCnid/trellis',
+      '--genesis-approval-id', 'approval:genesis',
+      '--seed-approval-id', 'approval:reseed',
+      '--created-at', CREATED_AT,
+    ];
+    const parsed = parseGenesisArguments([
+      ...base,
+      '--set', 'EL-00=accepted',
+      '--set', 'EL-07=blocked',
+      '--issuer', 'owner:darian',
+      '--signature-ref', 'protected://signatures/genesis.sig',
+      '--reconstruction-basis', 'Reconstructed from the merged ratification record.',
+    ]);
+    expect(parsed.pairs).toEqual([
+      { featureId: 'EL-00', status: 'accepted' },
+      { featureId: 'EL-07', status: 'blocked' },
+    ]);
+    expect(parsed.genesisApprovalId).toBe('approval:genesis');
+    expect(parsed.seedApprovalId).toBe('approval:reseed');
+    expect(parsed.reconstructionBasis).toContain('merged ratification');
+
+    // The reconstruction pairs come from the owner's basis, never controller state.
+    expect(() => parseGenesisArguments(base)).toThrow(/requires at least one --set/);
+
+    // Two roles, two owner decisions, two channel records. One identity cannot
+    // cover both, and the boundary names the predicate instead of surfacing a
+    // generic approval mismatch later.
+    expect(() => parseGenesisArguments([
+      '--branch', 'master',
+      '--base', '695440cfa9733a56936011276640ab9369fae5e4',
+      '--remote-name', 'origin',
+      '--remote-url', 'https://github.com/OpenCnid/trellis',
+      '--genesis-approval-id', 'approval:same',
+      '--seed-approval-id', 'approval:same',
+      '--created-at', CREATED_AT,
+      '--set', 'EL-00=accepted',
+    ])).toThrow(/one approval identity cannot cover both/);
+
+    expect(() => parseGenesisArguments(['--approval-id', 'x', '--set', 'EL-00=accepted']))
+      .toThrow(/Unknown or malformed re-genesis argument/);
+    expect(() => parseGenesisArguments([...base, '--set', 'EL-00=accepted', '--branch', 'other']))
+      .toThrow(/is repeated/);
+    expect(() => parseGenesisArguments(['--set', 'EL-00=accepted'])).toThrow(/invalid or incomplete/);
+  });
+
+  it('activate: recovery command pair composes and executes a content reconciliation end to end', async () => {
+    const l = await seededLayout();
+    const config = readActivationConfig(l.environment);
+    const scope = [{ featureId: 'EL-07', status: 'planned' as const, supersedes: [2] }];
+
+    // Compose against an empty channel: every unprotected preparatory step
+    // completes before any approval exists (EL-REQ-APPROVAL-012).
+    await writeChannel(l, []);
+    const printed = await printRecoveryRequest({
+      config, scope, repository: REPOSITORY, createdAt: CREATED_AT,
+      approvalId: 'approval:recovery', clock: CLOCK, catalog: CATALOG,
+    });
+    expect(printed.requestDigest).toMatch(/^[0-9a-f]{64}$/);
+    expect(printed.targetGeneration).toBe(0);
+    expect(printed.ceremonies).toEqual(['steady_state_acceptance', 'ledger_recovery']);
+    const request = printed.request as ProtectedActionRequest;
+    expect(request.action).toBe('ledger_recovery');
+    expect(request.exactScope).toEqual(['EL-07=planned:supersedes=2']);
+
+    // Reordered scope arguments yield the identical digest: the same owner
+    // decision, expressed in a different flag order, is the same request.
+    const two = [
+      { featureId: 'EL-10', status: 'active' as const, supersedes: [3] },
+      { featureId: 'EL-07', status: 'planned' as const, supersedes: [2] },
+    ];
+    const forward = await printRecoveryRequest({
+      config, scope: two, repository: REPOSITORY, createdAt: CREATED_AT,
+      approvalId: 'approval:recovery', clock: CLOCK, catalog: CATALOG,
+    });
+    const reversed = await printRecoveryRequest({
+      config, scope: [...two].reverse(), repository: REPOSITORY, createdAt: CREATED_AT,
+      approvalId: 'approval:recovery', clock: CLOCK, catalog: CATALOG,
+    });
+    expect(reversed.requestDigest).toBe(forward.requestDigest);
+
+    // With no approval there is no path to a written record.
+    await expect(runLedgerRecovery({
+      config, clock: CLOCK, ownerId: 'owner:test', ownerToken: 'token-recovery-0001',
+      scope, issuer: 'owner:darian', signatureReference: 'protected://sig',
+      evidenceReference: 'protected://evidence', evidenceDigest: 'd'.repeat(64),
+      reason: 'EL-07 was recorded against the wrong generation.',
+      repository: REPOSITORY, createdAt: CREATED_AT, approvalId: 'approval:recovery',
+      catalog: CATALOG,
+    })).rejects.toThrow(/Protected approval record is missing/);
+
+    // The owner authors approval against the printed digest; execution appends.
+    await writeChannel(l, [ownerApproval(request)]);
+    const before = await readFile(join(l.config.ledgerRoot, 'generations', '0', 'acceptance.jsonl'), 'utf8');
+    const result = await runLedgerRecovery({
+      config, clock: CLOCK, ownerId: 'owner:test', ownerToken: 'token-recovery-0002',
+      scope, issuer: 'owner:darian', signatureReference: 'protected://sig',
+      evidenceReference: 'protected://evidence', evidenceDigest: 'd'.repeat(64),
+      reason: 'EL-07 was recorded against the wrong generation.',
+      repository: REPOSITORY, createdAt: CREATED_AT, approvalId: 'approval:recovery',
+      catalog: CATALOG,
+    });
+    expect(result.generation).toBe(0);
+    expect(result.records).toHaveLength(5);
+    expect(result.reconciliation.issuer).toBe('owner:darian');
+
+    // Superseding is by replay: the prior bytes survive unmutated.
+    const after = await readFile(join(l.config.ledgerRoot, 'generations', '0', 'acceptance.jsonl'), 'utf8');
+    expect(after.startsWith(before)).toBe(true);
+
+    const status = await inspectActivation({ config, clock: CLOCK, catalog: CATALOG });
+    expect(status.recordCount).toBe(5);
+    expect(status.statuses['EL-07']).toBe('planned');
+    expect(status.integrity).toBe('valid');
+  });
+
+  it('activate: re-genesis command pair opens a new generation on a corrupt fixture ledger', async () => {
+    const l = await seededLayout();
+    const config = readActivationConfig(l.environment);
+
+    // An intact chain has no break for a genesis request to name.
+    await expect(printGenesisRequest({
+      config, pairs: [{ featureId: 'EL-00', status: 'accepted' }], repository: REPOSITORY,
+      createdAt: CREATED_AT, genesisApprovalId: 'approval:genesis',
+      seedApprovalId: 'approval:reseed', clock: CLOCK, catalog: CATALOG,
+    })).rejects.toThrow(/intact integrity chain/);
+
+    // Corruption belongs in fixtures: drop the first record of the temporary
+    // ledger this test built, so the chain no longer links.
+    const generationPath = join(l.config.ledgerRoot, 'generations', '0', 'acceptance.jsonl');
+    const corruptBytes = (await readFile(generationPath, 'utf8')).split('\n').slice(1).join('\n');
+    await writeFile(generationPath, corruptBytes, 'utf8');
+    const broken = await inspectActivation({ config, clock: CLOCK, catalog: CATALOG });
+    expect(broken.integrity).toBe('broken');
+    expect(broken.ceremonies).toEqual(['re_genesis']);
+
+    // The reconstruction pairs come from the owner's basis; the catalog is the
+    // live post-migration shape and carries no status to read.
+    const MIGRATED_CATALOG = {
+      schemaVersion: 1,
+      program: 'trellis-engineering-loop',
+      features: [{ id: 'EL-00' }, { id: 'EL-06' }, { id: 'EL-07' }, { id: 'EL-10' }],
+    };
+    const pairs = [
+      { featureId: 'EL-06', status: 'accepted' as const },
+      { featureId: 'EL-00', status: 'accepted' as const },
+      { featureId: 'EL-07', status: 'blocked' as const },
+    ];
+
+    await writeChannel(l, []);
+    const printed = await printGenesisRequest({
+      config, pairs, repository: REPOSITORY, createdAt: CREATED_AT,
+      genesisApprovalId: 'approval:genesis', seedApprovalId: 'approval:reseed', clock: CLOCK,
+      catalog: MIGRATED_CATALOG,
+    });
+    expect(printed.corruptGeneration).toBe(0);
+    expect(printed.targetGeneration).toBe(1);
+    expect(printed.genesisRequestDigest).toMatch(/^[0-9a-f]{64}$/);
+    expect(printed.seedRequestDigest).toMatch(/^[0-9a-f]{64}$/);
+    expect(printed.genesisRequestDigest).not.toBe(printed.seedRequestDigest);
+    expect((printed.genesisRequest as ProtectedActionRequest).action).toBe('ledger_recovery');
+    expect((printed.seedRequest as ProtectedActionRequest).action).toBe('acceptance_change');
+
+    // Transposed reconstruction flags compose the identical seed digest.
+    const transposed = await printGenesisRequest({
+      config, pairs: [...pairs].reverse(), repository: REPOSITORY, createdAt: CREATED_AT,
+      genesisApprovalId: 'approval:genesis', seedApprovalId: 'approval:reseed', clock: CLOCK,
+      catalog: MIGRATED_CATALOG,
+    });
+    expect(transposed.seedRequestDigest).toBe(printed.seedRequestDigest);
+
+    // Two owner approvals, one per role, authored against the two printed digests.
+    await writeChannel(l, [
+      ownerApproval(printed.genesisRequest as ProtectedActionRequest),
+      ownerApproval(printed.seedRequest as ProtectedActionRequest),
+    ]);
+    const result = await runReGenesis({
+      config, clock: CLOCK, ownerId: 'owner:test', ownerToken: 'token-genesis-00001',
+      pairs, issuer: 'owner:darian', signatureReference: 'protected://sig',
+      reconstructionBasis: 'Reconstructed from the merged ratification record.',
+      repository: REPOSITORY, createdAt: CREATED_AT,
+      genesisApprovalId: 'approval:genesis', seedApprovalId: 'approval:reseed',
+      catalog: MIGRATED_CATALOG,
+    });
+    expect(result.corruptGeneration).toBe(0);
+    expect(result.newGeneration).toBe(1);
+    expect(result.genesis.kind).toBe('genesis');
+
+    // The corrupt generation is retained read-only and stays resolvable as history.
+    expect(await readFile(generationPath, 'utf8')).toBe(corruptBytes);
+
+    const status = await inspectActivation({ config, clock: CLOCK, catalog: MIGRATED_CATALOG });
+    expect(status.generation).toBe(1);
+    expect(status.integrity).toBe('valid');
+    expect(status.recordCount).toBe(4);
+    expect(status.statuses).toEqual({ 'EL-00': 'accepted', 'EL-06': 'accepted', 'EL-07': 'blocked' });
+    expect(status.ceremonies).toEqual(['steady_state_acceptance', 'ledger_recovery']);
+  });
+
+  it('activate: recovery and re-genesis refuse states outside their predicates, routing to the owning ceremony', async () => {
+    // recover on an empty generation routes to seeding.
+    const empty = await layout();
+    await writeChannel(empty, []);
+    const emptyConfig = readActivationConfig(empty.environment);
+    await expect(runLedgerRecovery({
+      config: emptyConfig, clock: CLOCK, ownerId: 'owner:test', ownerToken: 'token-route-000001',
+      scope: [{ featureId: 'EL-07', status: 'planned', supersedes: [2] }],
+      issuer: 'owner:darian', signatureReference: 'protected://sig',
+      evidenceReference: 'protected://evidence', evidenceDigest: 'd'.repeat(64),
+      reason: 'nothing to reconcile', repository: REPOSITORY, createdAt: CREATED_AT,
+      approvalId: 'approval:recovery', catalog: CATALOG,
+    })).rejects.toThrow(/is empty; there is no content to reconcile.*EL-REQ-BOOT-003/s);
+
+    // re-genesis on the same empty, intact generation routes to seeding too.
+    await expect(runReGenesis({
+      config: emptyConfig, clock: CLOCK, ownerId: 'owner:test', ownerToken: 'token-route-000002',
+      pairs: [{ featureId: 'EL-00', status: 'accepted' }],
+      issuer: 'owner:darian', signatureReference: 'protected://sig',
+      reconstructionBasis: 'basis', repository: REPOSITORY, createdAt: CREATED_AT,
+      genesisApprovalId: 'approval:genesis', seedApprovalId: 'approval:reseed',
+      catalog: CATALOG,
+    })).rejects.toThrow(/intact integrity chain; re-genesis is refused/);
+
+    // recover on a broken chain routes to re-genesis: a successor digest would
+    // inherit or mask the break.
+    const brokenLayout = await seededLayout();
+    const brokenConfig = readActivationConfig(brokenLayout.environment);
+    const generationPath = join(brokenLayout.config.ledgerRoot, 'generations', '0', 'acceptance.jsonl');
+    await writeFile(generationPath, (await readFile(generationPath, 'utf8')).split('\n').slice(1).join('\n'), 'utf8');
+    await expect(runLedgerRecovery({
+      config: brokenConfig, clock: CLOCK, ownerId: 'owner:test', ownerToken: 'token-route-000003',
+      scope: [{ featureId: 'EL-07', status: 'planned', supersedes: [2] }],
+      issuer: 'owner:darian', signatureReference: 'protected://sig',
+      evidenceReference: 'protected://evidence', evidenceDigest: 'd'.repeat(64),
+      reason: 'wrong ceremony for a broken chain', repository: REPOSITORY, createdAt: CREATED_AT,
+      approvalId: 'approval:recovery', catalog: CATALOG,
+    })).rejects.toThrow(/broken integrity chain.*Re-genesis under EL-REQ-BOOT-007/s);
+  });
+
+  it('activate: the recovery and re-genesis commands are real commands the entrypoint knows', async () => {
+    const { environment } = await layout();
+    const stdout: string[] = [];
+    const stderr: string[] = [];
+    const writeOut = process.stdout.write.bind(process.stdout);
+    const writeErr = process.stderr.write.bind(process.stderr);
+    process.stdout.write = ((chunk: string) => { stdout.push(String(chunk)); return true; }) as typeof process.stdout.write;
+    process.stderr.write = ((chunk: string) => { stderr.push(String(chunk)); return true; }) as typeof process.stderr.write;
+    try {
+      // EL-REQ-APPROVAL-010 turns on exactly this: commands an operator can run,
+      // not exported functions nobody outside the suite can call.
+      expect(await main(['--help'], environment)).toBe(0);
+      const usage = stdout.join('');
+      expect(usage).toContain('print-recovery-request');
+      expect(usage).toContain('recover');
+      expect(usage).toContain('print-genesis-request');
+      expect(usage).toContain('re-genesis');
+      expect(usage).toContain('--supersede');
+      expect(usage).toContain('--genesis-approval-id');
+      expect(usage).toContain('--reconstruction-basis');
+
+      // Refusals name the missing input rather than silently changing nothing.
+      stderr.length = 0;
+      expect(await main(['recover'], environment)).toBe(1);
+      expect(JSON.parse(stderr.join('')).message).toContain('requires at least one --supersede');
+
+      stderr.length = 0;
+      expect(await main(['re-genesis'], environment)).toBe(1);
       expect(JSON.parse(stderr.join('')).message).toContain('requires at least one --set');
     } finally {
       process.stdout.write = writeOut;
