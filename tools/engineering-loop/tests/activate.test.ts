@@ -10,7 +10,9 @@ import {
   inspectActivation,
   invokedAsEntrypoint,
   main,
+  parseAcceptanceChangeArguments,
   parseSeedArguments,
+  parseStatusPair,
   printSeedRequest,
   readActivationConfig,
   resolveActivation,
@@ -23,7 +25,7 @@ import {
   protectedRequestDigest,
   type ProtectedActionRequest,
 } from '../src/policy';
-import { buildSeedRequest, catalogStatusPairs } from '../src/seed';
+import { buildSeedRequest, catalogStatusPairs, seedScopeItem } from '../src/seed';
 import type { RepositoryObservation } from '../src/domain';
 
 const NOW = '2026-07-15T12:00:00.000Z';
@@ -159,7 +161,7 @@ describe('EL-10 controller activation entrypoint', () => {
       .rejects.toThrow(/writable through a symbolic-link alias in the assigned worktree/);
   });
 
-  it('activate: reports ledger generation, ceremony, and resolved status read-only', async () => {
+  it('activate: reports ledger generation, admissible ceremonies, and resolved status read-only', async () => {
     const { config, environment } = await layout();
     const status = await inspectActivation({
       config: readActivationConfig(environment),
@@ -168,7 +170,7 @@ describe('EL-10 controller activation entrypoint', () => {
     });
     expect(status.version).toBe(ACTIVATION_VERSION);
     expect(status.generation).toBe(0);
-    expect(status.ceremony).toBe('seeding');
+    expect(status.ceremonies).toEqual(['seeding']);
     expect(status.recordCount).toBe(0);
     expect(status.integrity).toBe('valid');
     expect(status.acceptedFeatureIds).toEqual([]);
@@ -179,7 +181,7 @@ describe('EL-10 controller activation entrypoint', () => {
       config: readActivationConfig(environment),
       clock: { now: () => NOW }, catalog: CATALOG,
     });
-    expect(again.ceremony).toBe('seeding');
+    expect(again.ceremonies).toEqual(['seeding']);
   });
 
   it('activate: composes the seed request the owner must approve without authorizing it', async () => {
@@ -201,7 +203,7 @@ describe('EL-10 controller activation entrypoint', () => {
     // preconditions, and the target generation. The developer authors the
     // approval; nothing here originates it.
     expect(printed.targetGeneration).toBe(0);
-    expect(printed.ceremony).toBe('seeding');
+    expect(printed.ceremonies).toEqual(['seeding']);
     expect(request.repositoryPrecondition).toEqual(REPOSITORY);
   });
 
@@ -256,7 +258,10 @@ describe('EL-10 controller activation entrypoint', () => {
     const status = await inspectActivation({
       config: parsed, clock: { now: () => NOW }, catalog: CATALOG,
     });
-    expect(status.ceremony).toBe('ledger_recovery');
+    // A populated, validating ledger admits an ordinary status change as well as
+    // a content reconciliation. Reporting only `ledger_recovery` here told an
+    // operator that a corruption ceremony was all a healthy ledger allowed.
+    expect(status.ceremonies).toEqual(['steady_state_acceptance', 'ledger_recovery']);
     expect(status.acceptedFeatureIds).toEqual(['EL-00', 'EL-06']);
     expect(status.statuses).toEqual({ 'EL-00': 'accepted', 'EL-06': 'accepted', 'EL-07': 'blocked', 'EL-10': 'planned' });
     expect(status.notes).toEqual([]);
@@ -352,6 +357,38 @@ describe('EL-10 controller activation entrypoint', () => {
       .toThrow(/full Git commit identity/);
   });
 
+  it('activate: parses repeatable acceptance-change pairs and refuses malformed ones', () => {
+    const base = [
+      '--branch', 'master',
+      '--base', '272a18eceb078650b96800faa4faea7e2ac532ce',
+      '--remote-url', 'https://github.com/OpenCnid/trellis',
+      '--remote-name', 'origin',
+      '--approval-id', 'approval:el11-acceptance-change',
+      '--created-at', CREATED_AT,
+    ];
+    const parsed = parseAcceptanceChangeArguments([...base, '--set', 'EL-10=accepted', '--set', 'EL-07=planned']);
+    expect(parsed.pairs).toEqual([
+      { featureId: 'EL-10', status: 'accepted' },
+      { featureId: 'EL-07', status: 'planned' },
+    ]);
+    expect(parsed.branch).toBe('master');
+
+    // At least one pair is required: the controller never infers a status change,
+    // and an acceptance-change request with no scope would be a request to change
+    // nothing that an approval could still match.
+    expect(() => parseAcceptanceChangeArguments(base)).toThrow(/requires at least one --set/);
+    expect(() => parseAcceptanceChangeArguments([...base, '--set', 'EL-10'])).toThrow(/is malformed/);
+    expect(() => parseAcceptanceChangeArguments([...base, '--set', '=accepted'])).toThrow(/is malformed/);
+    expect(() => parseAcceptanceChangeArguments([...base, '--set', 'EL-10='])).toThrow(/is malformed/);
+    expect(() => parseAcceptanceChangeArguments([...base, '--set', 'EL-10=invented']))
+      .toThrow(/is not one of: planned, active, accepted, blocked, deferred/);
+    expect(() => parseAcceptanceChangeArguments([...base, '--set'])).toThrow(/requires a value/);
+
+    // What the owner types, what the request carries, and what the approval must
+    // match are one grammar: the parsed pair round-trips through the scope item.
+    expect(seedScopeItem(parseStatusPair('EL-10=accepted'))).toBe('EL-10=accepted');
+  });
+
   it('activate: the request timestamp is carried, never regenerated', () => {
     // The request digest covers createdAt. If seed re-composed the request with
     // a fresh clock reading, the digest would drift and the owner's approval —
@@ -411,6 +448,18 @@ describe('EL-10 controller activation entrypoint', () => {
       stdout.length = 0;
       expect(await main(['--help'], environment)).toBe(0);
       expect(stdout.join('')).toContain('Trellis engineering-loop controller activation');
+
+      // Both steady-state commands are real commands the entrypoint knows, not
+      // exported functions an operator has no way to call. EL-REQ-APPROVAL-010
+      // is about exactly this difference.
+      expect(stdout.join('')).toContain('print-acceptance-request');
+      expect(stdout.join('')).toContain('record-acceptance');
+
+      stderr.length = 0;
+      expect(await main(['record-acceptance'], environment)).toBe(1);
+      // Refused for want of a scope, and the refusal names the missing input
+      // rather than silently changing nothing.
+      expect(JSON.parse(stderr.join('')).message).toContain('requires at least one --set');
     } finally {
       process.stdout.write = writeOut;
       process.stderr.write = writeErr;

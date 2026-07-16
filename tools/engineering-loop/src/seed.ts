@@ -12,7 +12,6 @@ import {
   PROTECTED_POLICY_VERSION,
   ProtectedActionRequestSchema,
   authorizeProtectedAction,
-  protectedRequestDigest,
   type ProtectedActionRequest,
   type ProtectedApprovalChannel,
 } from './policy.js';
@@ -20,10 +19,10 @@ import {
   AcceptanceLedger,
   FeatureStatusSchema,
   LedgerRecordSchema,
-  LedgerStateError,
   PROGRAM_ACCEPTANCE_WORKFLOW_ID,
+  buildAcceptanceRecordChain,
   catalogDigestOf,
-  classifyLedgerGeneration,
+  ledgerCeremonyAdmitted,
   ledgerRecordDigest,
   type LedgerRecord,
 } from './acceptance_ledger.js';
@@ -81,7 +80,12 @@ export const CatalogStatusPairSchema = z.strictObject({
 });
 export type CatalogStatusPair = z.infer<typeof CatalogStatusPairSchema>;
 
-const CatalogStatusPairsSchema = z
+/**
+ * Exported for the steady-state path (`EL-REQ-BOOT-008`), which enumerates its
+ * scope under the identical grammar rather than a second one an owner would have
+ * to learn separately.
+ */
+export const CatalogStatusPairsSchema = z
   .array(CatalogStatusPairSchema)
   .min(1)
   .max(MAX_PROTECTED_SCOPE_ITEMS)
@@ -211,14 +215,13 @@ export interface SeedResult {
 }
 
 /**
- * Builds the acceptance records for an authorized seed. `actor` is `human`
- * because the owner's approval is the authority the records rest on; the
- * controller only transcribes the approved scope.
+ * Builds the acceptance records for an authorized seed.
  *
- * No synthetic workflow history is constructed. Reaching `accepted` by walking a
- * fabricated `selected -> preparing -> running -> verifying -> awaiting_review`
- * sequence would attest controller-observed events for runs that never
- * occurred, and SPEC 6.1 forbids it normatively.
+ * The record shape and chaining live in `buildAcceptanceRecordChain`, shared with
+ * the steady-state path (`EL-REQ-BOOT-008`), because SPEC 6.1 holds that seeding
+ * is the ordinary acceptance path applied to an empty generation rather than a
+ * privileged special case. This wrapper only re-types a construction failure into
+ * seeding's own refusal taxonomy.
  */
 function seedRecords(input: {
   pairs: readonly CatalogStatusPair[];
@@ -229,37 +232,14 @@ function seedRecords(input: {
   startSequence: number;
   startPreviousDigest: string;
 }): readonly LedgerRecord[] {
-  const records: LedgerRecord[] = [];
-  let sequence = input.startSequence;
-  let previousDigest = input.startPreviousDigest;
-  for (const pair of input.pairs) {
-    let record: LedgerRecord;
-    try {
-      record = parseBoundary(LedgerRecordSchema, {
-        kind: 'acceptance',
-        id: `acceptance:${pair.featureId}:${sequence}`,
-        schemaVersion: 1,
-        sequence,
-        previousDigest,
-        createdAt: input.createdAt,
-        actor: 'human',
-        approvalId: input.approvalId,
-        requestDigest: input.requestDigest,
-        featureId: pair.featureId,
-        status: pair.status,
-        catalogDigest: input.catalogDigest,
-      }, 'seed acceptance record');
-    } catch (error) {
-      throw new SeedRefusedError(
-        'invalid_record',
-        `Seed record for '${pair.featureId}' is invalid; no record is applied: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-    records.push(record);
-    previousDigest = ledgerRecordDigest(record);
-    sequence++;
+  try {
+    return buildAcceptanceRecordChain(input);
+  } catch (error) {
+    throw new SeedRefusedError(
+      'invalid_record',
+      `Seed record is invalid; no record is applied: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
-  return records;
 }
 
 /**
@@ -270,13 +250,13 @@ function seedRecords(input: {
 export async function seedAcceptanceLedger(input: SeedInput): Promise<SeedResult> {
   const generation = input.generation ?? (await input.ledger.currentGeneration());
   const state = await input.ledger.readGeneration(generation);
-  const ceremony = classifyLedgerGeneration(state);
-  if (ceremony !== 'seeding') {
+  if (!ledgerCeremonyAdmitted(state, 'seeding')) {
+    const broken = state.integrity === 'broken';
     throw new SeedRefusedError(
-      ceremony === 're_genesis' ? 'invalid_record' : 'non_empty_generation',
-      ceremony === 're_genesis'
+      broken ? 'invalid_record' : 'non_empty_generation',
+      broken
         ? `Generation ${generation} integrity is broken; seeding is refused and re-genesis under EL-REQ-BOOT-007 is required.`
-        : `Generation ${generation} already holds ${state.records.length} record(s); seeding is once-only.`
+        : `Generation ${generation} already holds ${state.records.length} record(s); seeding is once-only. An ordinary status change is recorded by the EL-REQ-BOOT-008 steady_state_acceptance ceremony instead.`
     );
   }
 

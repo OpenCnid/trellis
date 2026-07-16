@@ -161,6 +161,28 @@ start. Worked instances of the frame:
     solely by explicit address (hash/id) when a caller deliberately
     asks for history. Reference semantics: the `search_ast_nodes`
     EXISTS join / the stage-2 checker's `gatherHashEvidence` bridge.
+14. **A protected pause refuses the effect it names, and nothing
+    more.** An owner gate on a paid run, a push, a merge, or an
+    acceptance record withholds THAT effect. It is not authorization
+    to stand down unblocked work, to renegotiate the developer's
+    direction outside that effect, or to self-sequence adjacent
+    engineering. Discharge every unprotected preparatory step and
+    specify the request in full; refuse only on a failed provenance or
+    scope predicate, never on the absence of your preferred artifact.
+    Surface a discovered defect with a proposed fix and let the owner
+    sequence it. This norm lives in prose on purpose: it binds an
+    agent in a session, not a kernel, and a conformance test asserting
+    a property of a transcript cannot fail — which is an unenforced
+    invariant wearing a row's clothes.
+15. **Correct is not the same claim as reachable.** A passing suite
+    says the code is right, never that anything can invoke it. Before
+    calling a capability delivered, name its non-test caller — a
+    process entrypoint, a package script — and if there is none, say
+    so plainly. This repo has shipped the same defect three times:
+    `StateStore.open()` with no caller outside tests behind 1,161
+    green tests, a seeder whose request digest nobody could produce,
+    and both acceptance-ledger recovery ceremonies with no entrypoint
+    at all.
 
 ## 5. Working protocol (commands)
 

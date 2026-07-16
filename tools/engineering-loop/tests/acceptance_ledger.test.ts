@@ -11,8 +11,10 @@ import {
   LedgerRecordSchema,
   MAX_LEDGER_RECORDS,
   PROGRAM_ACCEPTANCE_WORKFLOW_ID,
+  SPEC_DISJOINT_CEREMONIES,
+  admissibleLedgerCeremonies,
   catalogProvenanceNotes,
-  classifyLedgerGeneration,
+  ledgerCeremonyAdmitted,
   ledgerRecordDigest,
   parseLedgerGeneration,
   resolveFeatureStatus,
@@ -243,16 +245,45 @@ describe('EL-10 acceptance ledger', () => {
     const ledger = await open(ledgerRoot, worktree);
     try {
       const empty = await ledger.readGeneration(0);
-      expect(classifyLedgerGeneration(empty)).toBe('seeding');
+      expect(admissibleLedgerCeremonies(empty)).toEqual(['seeding']);
 
       const records = chain([['EL-00', 'accepted']]);
       await ledger.appendAll(0, records);
-      expect(classifyLedgerGeneration(await ledger.readGeneration(0))).toBe('ledger_recovery');
+      const populated = await ledger.readGeneration(0);
+      // A healthy populated generation admits two ceremonies, not one. Reporting
+      // `ledger_recovery` alone is what left the ledger write-once: the only
+      // ceremony an owner was told they could run on a working ledger was the one
+      // for corruption.
+      expect(admissibleLedgerCeremonies(populated)).toEqual(['steady_state_acceptance', 'ledger_recovery']);
 
       const brokenState = parseLedgerGeneration(0, serializeLedgerRecord(chain([['EL-00', 'accepted'], ['EL-01', 'accepted']])[1]));
-      expect(classifyLedgerGeneration(brokenState)).toBe('re_genesis');
+      expect(admissibleLedgerCeremonies(brokenState)).toEqual(['re_genesis']);
 
-      expect(LEDGER_CEREMONIES).toEqual(['seeding', 'ledger_recovery', 're_genesis']);
+      expect(LEDGER_CEREMONIES).toEqual(['seeding', 'steady_state_acceptance', 'ledger_recovery', 're_genesis']);
+
+      // Totality: every reachable generation state admits at least one ceremony,
+      // so no state is a dead end with no route out. That property is what the
+      // paired-recovery amendment (9.9) exists to hold.
+      const states = [empty, populated, brokenState];
+      for (const state of states) {
+        expect(admissibleLedgerCeremonies(state).length, JSON.stringify(state.integrity)).toBeGreaterThan(0);
+      }
+
+      // Disjointness, mechanically: the three ceremonies SPEC 6.1 declares keep
+      // predicates no state satisfies two of. `steady_state_acceptance` shares
+      // `ledger_recovery`'s state by design and is told apart by action identity
+      // and record kind, never by a mode flag, so it is excluded here by name
+      // rather than by omission.
+      for (const state of states) {
+        const admitted = admissibleLedgerCeremonies(state)
+          .filter(ceremony => (SPEC_DISJOINT_CEREMONIES as readonly string[]).includes(ceremony));
+        expect(admitted).toHaveLength(1);
+      }
+      expect(SPEC_DISJOINT_CEREMONIES).toEqual(['seeding', 'ledger_recovery', 're_genesis']);
+      expect(ledgerCeremonyAdmitted(populated, 'steady_state_acceptance')).toBe(true);
+      expect(ledgerCeremonyAdmitted(populated, 'seeding')).toBe(false);
+      expect(ledgerCeremonyAdmitted(empty, 'steady_state_acceptance')).toBe(false);
+      expect(ledgerCeremonyAdmitted(brokenState, 'steady_state_acceptance')).toBe(false);
     } finally {
       await ledger.close();
     }

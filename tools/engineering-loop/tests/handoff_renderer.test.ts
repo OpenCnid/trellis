@@ -226,6 +226,46 @@ describe('EL-03 trusted report and deterministic derived views', () => {
     expect(derived.next_feature).toBe('EL-10');
   });
 
+  it('EL-11-A1: next_feature follows the ledger across a steady-state acceptance change', async () => {
+    // The statuses below are the ones an owner-approved acceptance_change
+    // produces, taken from the pairs the steady-state path enumerates rather than
+    // invented here. Both outcomes are correct, and neither is a defect to route
+    // around: a null next feature is a real, meaningful state.
+    const accepted = { ...FEATURE_STATUSES, 'EL-10': 'accepted' } as Record<string, string>;
+
+    // EL-10 accepted, EL-07 still blocked: nothing is selectable, because an
+    // unblock is an owner decision the controller cannot make for itself.
+    const blocked = await deriveTrustedReport({
+      reportId: 'report:session:63', createdAt: NOW, result: 'ready_for_owner_review',
+      snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
+      commandEvidence: [VERIFY_COMMAND], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
+      findings: [], catalog: await catalog(), featureStatuses: accepted,
+    });
+    expect(blocked.next_feature).toBeNull();
+
+    // Once the owner records EL-07 planned in the same ordinary path, it becomes
+    // the next feature: its only dependency, EL-06, is accepted, and it precedes
+    // EL-11 by catalog order.
+    const unblocked = await deriveTrustedReport({
+      reportId: 'report:session:63', createdAt: NOW, result: 'ready_for_owner_review',
+      snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
+      commandEvidence: [VERIFY_COMMAND], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
+      findings: [], catalog: await catalog(), featureStatuses: { ...accepted, 'EL-07': 'planned' },
+    });
+    expect(unblocked.next_feature).toBe('EL-07');
+
+    // EL-11 is selectable on its own terms once recorded planned, which it can
+    // only be because both its dependencies carry a lower catalog order and are
+    // accepted — the reason it needed no `blocked`-status workaround.
+    const eleven = await deriveTrustedReport({
+      reportId: 'report:session:63', createdAt: NOW, result: 'ready_for_owner_review',
+      snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
+      commandEvidence: [VERIFY_COMMAND], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
+      findings: [], catalog: await catalog(), featureStatuses: { ...accepted, 'EL-11': 'planned' },
+    });
+    expect(eleven.next_feature).toBe('EL-11');
+  });
+
   it('refuses unjournaled or runner-reported command claims as verification truth', async () => {
     const unjournaled = { ...SNAPSHOT, evidenceIds: ['evidence:repo:1'] };
     await expect(Promise.resolve().then(async () => deriveTrustedReport({
