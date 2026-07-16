@@ -4,6 +4,95 @@ export interface RequirementEvidence {
   tests: readonly string[];
 }
 
+/**
+ * A producer of authorizing material a principal cannot author by hand
+ * (`EL-REQ-APPROVAL-010`).
+ *
+ * A request digest is sha256 over the canonical form of a whole request. Nobody
+ * computes that at a keyboard, so a protected action whose request digest has no
+ * reachable producer is an authorization path a principal cannot walk — which is
+ * indistinguishable from one that does not exist. EL-10 shipped exactly that and
+ * it was found by inspection; nothing in the gate would have failed had nobody
+ * looked. This table plus `resolveComputedMaterialProducers` is the check that
+ * fails instead.
+ *
+ * `requestBuilder` is the symbol that composes the request the digest covers.
+ * Reachability is derived from the import graph, never declared here: adding a row
+ * to this table cannot make anything reachable.
+ */
+export interface ComputedMaterialProducer {
+  /** The ceremony whose approval needs the material. */
+  ceremony: string;
+  /** The protected action the request carries. */
+  action: string;
+  /** The feature whose requirement owns the ceremony. */
+  owningFeature: string;
+  /** What a principal cannot author by hand. */
+  material: string;
+  /** The symbol that composes the request. */
+  requestBuilder: string;
+  /** The module that defines it, relative to `tools/engineering-loop/src`. */
+  module: string;
+}
+
+export const COMPUTED_MATERIAL_PRODUCERS: readonly ComputedMaterialProducer[] = [
+  {
+    ceremony: 'seeding',
+    action: 'acceptance_change',
+    owningFeature: 'EL-10',
+    material: 'seed request digest',
+    requestBuilder: 'buildSeedRequest',
+    module: 'seed.ts',
+  },
+  {
+    ceremony: 'steady_state_acceptance',
+    action: 'acceptance_change',
+    owningFeature: 'EL-11',
+    material: 'acceptance change request digest',
+    requestBuilder: 'buildAcceptanceChangeRequest',
+    module: 'acceptance_change.ts',
+  },
+  {
+    ceremony: 'ledger_recovery',
+    action: 'ledger_recovery',
+    owningFeature: 'EL-10',
+    material: 'content reconciliation request digest',
+    requestBuilder: 'buildLedgerRecoveryRequest',
+    module: 'ledger_recovery.ts',
+  },
+  {
+    ceremony: 're_genesis',
+    action: 'ledger_recovery',
+    owningFeature: 'EL-10',
+    material: 're-genesis request digest',
+    requestBuilder: 'buildGenesisRequest',
+    module: 'ledger_recovery.ts',
+  },
+] as const;
+
+export const EL11_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
+  {
+    requirement: 'EL-REQ-BOOT-008',
+    source: ['acceptance_change.ts', 'acceptance_ledger.ts'],
+    tests: [
+      'acceptance_change: records an owner-approved status change against a non-empty generation',
+      'acceptance_change: supersedes by replay and leaves the superseded records untouched',
+      'acceptance_change: refusal matrix',
+      'EL-11-A1: next_feature follows the ledger across a steady-state acceptance change',
+    ],
+  },
+  {
+    requirement: 'EL-REQ-APPROVAL-010',
+    source: ['requirements.ts', 'activate.ts'],
+    tests: ['requirements: every computed-material producer resolves a non-test caller'],
+  },
+  {
+    requirement: 'EL-REQ-APPROVAL-012',
+    source: ['acceptance_change.ts', 'activate.ts'],
+    tests: ['requirements: the controller fully specifies a protected request before any approval exists'],
+  },
+] as const;
+
 export const EL02_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
   { requirement: 'EL-REQ-CORE-003', source: ['state_store.ts', 'writer_lock.ts'], tests: ['state_store: protected root'] },
   { requirement: 'EL-REQ-CORE-004', source: ['writer_lock.ts', 'state_store.ts'], tests: ['state_store: concurrent writers'] },

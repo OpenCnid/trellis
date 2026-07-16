@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { AcceptanceLedger, classifyLedgerGeneration, resolveFeatureStatus } from '../src/acceptance_ledger';
+import { AcceptanceLedger, admissibleLedgerCeremonies, resolveFeatureStatus } from '../src/acceptance_ledger';
 import { APPROVAL_CHANNEL_FILE, ApprovalChannelError, FileProtectedApprovalChannel } from '../src/approval_channel';
 import {
   PROTECTED_POLICY_SCHEMA_VERSION,
@@ -281,7 +281,7 @@ describe('EL-10 acceptance seeding', () => {
     const h = await harness([]);
     try {
       await expect(seed(h)).rejects.toThrow(/Protected approval record is missing/);
-      expect(classifyLedgerGeneration(await h.ledger.readGeneration(0))).toBe('seeding');
+      expect(admissibleLedgerCeremonies(await h.ledger.readGeneration(0))).toEqual(['seeding']);
     } finally {
       await h.ledger.close();
     }

@@ -261,17 +261,119 @@ export function parseLedgerGeneration(generation: number, text: string): LedgerG
 }
 
 /**
- * The three ceremony predicates of SPEC 6.1. They are disjoint and total, and
- * are re-derived on every attempt rather than carried as a flag a human must
- * remember to clear.
+ * The ceremonies a generation admits, re-derived on every attempt rather than
+ * carried as a flag a human must remember to clear.
+ *
+ * A generation state is a *necessary* precondition for a ceremony, never a
+ * sufficient one. This returns the set that a state admits, because a healthy
+ * generation admits two: recording new information (`steady_state_acceptance`,
+ * `EL-REQ-BOOT-008`) and correcting wrong information (`ledger_recovery`,
+ * `EL-REQ-BOOT-006`). Naming one ceremony per state was sound only while three
+ * ceremonies happened to need three distinct states; it foreclosed ordinary
+ * progress the moment a fourth existed, because a validating non-empty
+ * generation reported `ledger_recovery` as the only thing an owner could do.
+ *
+ * What separates the two ceremonies a populated generation admits is not the
+ * state — it is the protected action and the record kind. `authorizeProtectedAction`
+ * matches `approval.action` against `request.action` exactly, and the records
+ * differ (`acceptance` versus `reconciliation`, which carries `supersedes`, an
+ * issuer, and evidence). That is why no mode flag is needed to tell them apart,
+ * and a flag is what rots.
+ *
+ * Ceremony and protected action are deliberately not one-to-one, and never were:
+ *
+ * | Ceremony                   | Protected action    | State precondition       |
+ * |----------------------------|---------------------|--------------------------|
+ * | `seeding`                  | `acceptance_change` | empty                    |
+ * | `steady_state_acceptance`  | `acceptance_change` | non-empty, chain valid   |
+ * | `ledger_recovery`          | `ledger_recovery`   | non-empty, chain valid   |
+ * | `re_genesis`               | `ledger_recovery`   | chain broken             |
+ *
+ * The three SPEC 6.1 predicates are unchanged by the addition: `seeding`,
+ * `ledger_recovery`, and `re_genesis` remain pairwise state-disjoint and total
+ * over the state space, which `ledgerCeremonyStatePredicatesDisjoint` proves.
  */
-export const LEDGER_CEREMONIES = ['seeding', 'ledger_recovery', 're_genesis'] as const;
+export const LEDGER_CEREMONIES = [
+  'seeding',
+  'steady_state_acceptance',
+  'ledger_recovery',
+  're_genesis',
+] as const;
 export type LedgerCeremony = (typeof LEDGER_CEREMONIES)[number];
 
-export function classifyLedgerGeneration(state: LedgerGenerationState): LedgerCeremony {
-  if (state.integrity === 'broken') return 're_genesis';
-  if (state.records.length === 0) return 'seeding';
-  return 'ledger_recovery';
+/**
+ * The three ceremonies SPEC 6.1 declares, whose state predicates must stay
+ * disjoint. `steady_state_acceptance` is deliberately excluded: it shares
+ * `ledger_recovery`'s state precondition by design, and is told apart by action
+ * identity rather than by state.
+ */
+export const SPEC_DISJOINT_CEREMONIES = ['seeding', 'ledger_recovery', 're_genesis'] as const;
+
+export function admissibleLedgerCeremonies(state: LedgerGenerationState): readonly LedgerCeremony[] {
+  if (state.integrity === 'broken') return ['re_genesis'];
+  if (state.records.length === 0) return ['seeding'];
+  return ['steady_state_acceptance', 'ledger_recovery'];
+}
+
+export function ledgerCeremonyAdmitted(state: LedgerGenerationState, ceremony: LedgerCeremony): boolean {
+  return admissibleLedgerCeremonies(state).includes(ceremony);
+}
+
+export interface AcceptanceRecordChainInput {
+  pairs: readonly { featureId: string; status: FeatureStatus }[];
+  createdAt: string;
+  approvalId: string;
+  requestDigest: string;
+  catalogDigest: string;
+  startSequence: number;
+  startPreviousDigest: string;
+}
+
+/**
+ * Builds the chained acceptance records for an already-authorized
+ * `(featureId, status)` scope.
+ *
+ * Seeding (`EL-REQ-BOOT-003`) and the steady-state change (`EL-REQ-BOOT-008`)
+ * share this builder because SPEC 6.1 says they are one path: seeding is the
+ * ordinary acceptance path applied to an empty generation, which is why it needs
+ * no privileged code. Two independent constructions of the same record would be
+ * two things free to drift from each other.
+ *
+ * Pure and authorization-free by construction: it takes the approval identity and
+ * request digest a caller already obtained from `authorizeProtectedAction` and
+ * cannot itself authorize anything. `actor` is `human` because the owner's
+ * approval is the authority these records rest on; the controller only
+ * transcribes the approved scope.
+ *
+ * No synthetic workflow history is constructed. Reaching `accepted` by walking a
+ * fabricated `selected -> preparing -> running -> verifying -> awaiting_review`
+ * sequence would attest controller-observed events for runs that never occurred,
+ * and SPEC 6.1 forbids it normatively.
+ */
+export function buildAcceptanceRecordChain(input: AcceptanceRecordChainInput): readonly LedgerRecord[] {
+  const records: LedgerRecord[] = [];
+  let sequence = input.startSequence;
+  let previousDigest = input.startPreviousDigest;
+  for (const pair of input.pairs) {
+    const record = parseBoundary(LedgerRecordSchema, {
+      kind: 'acceptance',
+      id: `acceptance:${pair.featureId}:${sequence}`,
+      schemaVersion: DOMAIN_SCHEMA_VERSION,
+      sequence,
+      previousDigest,
+      createdAt: input.createdAt,
+      actor: 'human',
+      approvalId: input.approvalId,
+      requestDigest: input.requestDigest,
+      featureId: pair.featureId,
+      status: pair.status,
+      catalogDigest: input.catalogDigest,
+    }, `acceptance record for '${pair.featureId}'`);
+    records.push(record);
+    previousDigest = ledgerRecordDigest(record);
+    sequence++;
+  }
+  return records;
 }
 
 export interface ResolvedFeatureStatus {
