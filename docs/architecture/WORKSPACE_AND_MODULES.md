@@ -617,7 +617,9 @@ of every mechanism; paid runs only as small owner-approved behavioral probes.
    (Session 18, July 8, 2026); the paid authoring turn RAN,
    owner-approved, on July 9, 2026** — module #1
    (`modules/workspace-discipline/`, registered as
-   `module:workspace-discipline` over 24 promoted research hashes;
+   `module:workspace-discipline` over 24 promoted research hashes —
+   since re-authored as v2 over 31 hashes, Session 21, per
+   [CODE_MEDIATED_TEXT.md](CODE_MEDIATED_TEXT.md) §6.4;
    record in the roadmap §5 and the module's RESEARCH.md). The turn
    also observed the §10 laundering residual live: the drafting run
    self-cited real-but-unrelated hashes found by whole-database search,

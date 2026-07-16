@@ -1,6 +1,6 @@
 # Trellis Engineering Loop — Normative Service Specification
 
-Status: **RATIFIED for EL-01; implementation not started**
+Status: **RATIFIED for EL-01; EL-02–EL-06, EL-10, and EL-11 implemented (controller activated and ledger seeded July 15, 2026); EL-07–EL-09 not started**
 
 Version: 1
 

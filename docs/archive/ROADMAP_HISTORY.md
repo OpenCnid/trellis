@@ -1,13 +1,15 @@
-# Trellis Roadmap Progress Log — Archive (July 4–12, 2026; T-items through Session 29)
+# Trellis Roadmap Progress Log — Archive (July 4–14, 2026; Sessions 1–58 and the T-items)
 
 Moved verbatim from `TRELLIS_ROADMAP.md` §5 on July 12, 2026 (owner
 direction: the live roadmap keeps only the most recent five sessions).
 Entries below are the dated ledger from the first Phase-1 commit through
-Session 27 (Sessions 1–23 moved July 12, 2026; then one session entry
+Session 58 (Sessions 1–23 moved July 12, 2026; then one session entry
 per PR under the same window rule — Session 24 with the Session 29 PR,
 Session 25 with the Session 30 PR, Session 26 with the Session 31 PR,
 Session 27 with the Session 32 PR, Session 28 with the Session 33 PR,
-Session 29 with the Session 34 PR); nothing was edited in the moves.
+Session 29 with the Session 34 PR, and so on one-per-PR since, most
+recently Session 58 with the Session 63 EL-11 PR); nothing was edited
+in the moves.
 The live ledger continues in `TRELLIS_ROADMAP.md` §5.
 
 ### July 4, 2026 — Phase 1: Foundations & Portability (items 3.1 #1–3, #7)

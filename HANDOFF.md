@@ -8,13 +8,16 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–55 and their same-day follow-ons (July 4–14, 2026; PRs
-#21–#102) are complete, merged, and ARCHIVED: the full dated ledger for
-that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
+Sessions 1–58 and their same-day follow-ons (July 4–14, 2026; PRs
+#21–#102 and the first engineering-loop feature branches) are complete,
+merged, and ARCHIVED: the full dated ledger for that span lives
+verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 55 with the Session 60 EL-06 feature branch — this file keeps
-full narrative only for the most recent five sessions, now 56–60). The
+recently Session 58 with the Session 63 EL-11 PR. The roadmap's live §5
+window is now Sessions 59–63; this digest carries full narrative for
+Sessions 56–60 and 63, with 61–62 compressed into the Session 63
+paragraph, §1.16, and §2). The
 one-paragraph digest, oldest first; §1 below carries everything from
 this span that a new session must actually know:
 
