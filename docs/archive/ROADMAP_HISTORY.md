@@ -6866,3 +6866,82 @@ then explicitly authorized commit, merge, and push to `master`.
    `EL-04` is dependency-unblocked and proposed next: prompt compiler and strict
    role contracts under the mandatory prompt-engineering/hypershot gate. The
    paused TTT T2 tooling objective remains untouched.
+
+### July 14, 2026 — Session 58: EL-04 deterministic prompt compiler owner-ratified and accepted, zero-model and zero-paid
+
+Session 58 executed only engineering-loop feature `EL-04` on
+`implement-el04-prompt-compiler`, based on required master commit
+`197ec194ccc12c30f130df42d415e73fa87c9745`. The owner subsequently accepted
+the feature and merged PR #104 as
+`e1ee564923c9c02f532e08f1a5561d9837a7493a`.
+
+1. **All seven owned requirements implemented and linked:** an independent
+   SPEC §18 audit computed exactly `EL-REQ-PROMPT-001` through
+   `EL-REQ-PROMPT-007`. Each maps one-for-one to concrete source and
+   deterministic tests in `tools/engineering-loop/src/requirements.ts`;
+   required = 7, implemented = 7, verified = 7, outstanding = 0.
+2. **Four invariant role assets and pure compilation:** planner, implementer,
+   read-only checker, and recovery assets place stable authority/trust
+   boundaries before typed downstream data. Assets normalize to UTF-8 without
+   BOM, LF, and one terminal newline; carry explicit versions and SHA-256 pins;
+   and pass static contamination scans. The assembly function imports no file,
+   Git, command, clock, environment, network, state-store, or model effect. It
+   compiles six separately bounded collections in semantic order: invariant
+   policy, validated state, active plan, controller evidence, episode summary,
+   and archive references.
+3. **Strict refusal boundaries:** compiler inputs, compiled packets, and all
+   four advisory role outputs use strict bounded schemas. Unknown fields, role
+   mismatch, malformed or duplicate identities, stale plan linkage, unlinked
+   evidence/effects, sensitive or approval material, and UTF-8 byte overflow
+   refuse. Per-section and total budget boundaries are pinned exactly;
+   overflow produces a canonical refusal and a fresh-episode boundary when the
+   bounded prior episode is the overflowing section. Worker output cannot
+   create controller evidence, satisfy verification, consume approval, invoke
+   an effect, or transition state.
+4. **Protocol and byte evidence:** the requested Prompt-Engineering and
+   Hypershot skills were unavailable in this environment, so the request's
+   authorized direct-file fallback was used. Both protocol files were read
+   completely before any prompt, meta-prompt, schema, or HANDOFF bytes were
+   authored. Semantic tagging, hierarchy/primacy, positive framing,
+   invariant-versus-data separation, attention management, and contamination
+   control are reflected in the assets and tests. Four asset digests, four
+   compiled packet digests, and success/refusal boundaries are snapshot-pinned.
+5. **Acceptance evidence:** baseline was 96 files / 977 tests. The exact
+   focused command `npx vitest run tools/engineering-loop/tests/prompt_contracts.test.ts
+   tools/engineering-loop/tests/prompt_compiler.test.ts
+   tools/engineering-loop/tests/requirements.test.ts` passed **60 tests across
+   3 files**. Final `npm test` passed **1,032 tests across 98 files**; `npm run
+   build` passed; `npm run python:check` printed `Python runtime syntax,
+   imports, rubric, and module assets verified.`; `docker compose config
+   --quiet` exited 0; Draft 2020-12 catalog validation printed **10**; `git
+   diff --check` exited 0. Model calls = 0; paid calls = 0.
+6. **Findings and scope audit:** preflight fetched `origin/master` and verified
+   HEAD, `origin/master`, and `FETCH_HEAD` all equal the required commit before
+   branch creation. The initial focused pin run exposed only the intentionally
+   unset snapshot values, which were replaced with engine-computed digests.
+   The first build exposed three TypeScript-only declaration/refinement errors;
+   they were corrected without widening runtime scope. The first post-closeout
+   focused run then correctly failed one stale catalog assertion that still
+   required EL-04 to be `planned`; the pin was advanced to the proposed
+   `accepted` bootstrap status. The full suite then exposed EL-03's intentional
+   catalog-derived view pins: `next_feature` advanced from EL-04 to EL-05, so
+   the canonical next-feature outcome and engine-computed report/status/handoff
+   digests were updated wittingly while renderer code stayed unchanged. The
+   entire acceptance block was restarted after those edits. The final Git
+   audit also observed shared `master`/`origin/master` advance one descendant
+   commit to `0925c3eef560a808eea10f70e32308e15ba65977` (PR #103: unrelated
+   reasoning-template architecture/module files) after the successful
+   preflight; EL-04 remains based on the explicitly required `197ec194…`, with
+   that commit as merge base and no rebase or merge attempted. The owner must
+   choose reconciliation before landing. All final acceptance passed. The
+   final diff contains no dependency, product
+   `src/`, RLM prompt,
+   existing prompt-pin, database, queue, worker, API, frontend, module, runner,
+   verifier, approval service, scheduler, tracker, automatic Git effect, AI
+   attribution, or EL-05+ implementation.
+7. **Closeout and next:** the catalog changed only EL-04's bootstrap status.
+   Session 53 moved verbatim to the archive so the live ledger remained five.
+   `HANDOFF.md` was regenerated for dependency-unblocked `EL-05` while
+   preserving §0 byte-for-byte and retaining manual handoff authority. The
+   owner accepted EL-04 and merged PR #104; EL-05 then began from that exact
+   commit. The paused TTT T2 tooling objective remains untouched.
