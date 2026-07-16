@@ -1486,7 +1486,7 @@ Repository state at handoff creation:
   **refuses** the drift rather than merely not exercising it. Read status with
   `npm run el:activate -- status`; prose restating it is convenience, never
   authority.
-- **Protected roots:** `D:	rellis-protected\engineering-loop\{ledger,state,channel}`.
+- **Protected roots:** `D:\trellis-protected\engineering-loop\{ledger,state,channel}`.
   **Do not place a protected root under a per-user application-data directory.**
   A containerized host (MSIX here, also Flatpak, Snap, the macOS app sandbox)
   silently redirects `%LOCALAPPDATA%` writes into a private package cache, so the
