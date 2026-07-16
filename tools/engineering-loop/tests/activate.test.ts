@@ -208,7 +208,9 @@ describe('EL-10 controller activation entrypoint', () => {
   it('activate: the entrypoint seeds only with owner-authored channel material', async () => {
     const { environment, config } = await layout();
     const parsed = readActivationConfig(environment);
-    await mkdir(config.approvalChannel, { recursive: true });
+    // Pre-created at 0o700: validateProtectedStateRoot refuses pre-existing
+    // roots that grant group or other permissions on POSIX.
+    await mkdir(config.approvalChannel, { recursive: true, mode: 0o700 });
 
     const seedInput = {
       config: parsed, clock: { now: () => NOW }, ownerId: 'owner:test',

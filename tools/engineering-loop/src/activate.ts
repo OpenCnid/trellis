@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { basename, isAbsolute, resolve } from 'node:path';
+import { isAbsolute, resolve, win32 } from 'node:path';
 import { z } from 'zod';
 import {
   MAX_PATH_LENGTH,
@@ -637,11 +637,12 @@ export async function main(argv: readonly string[], environment: Record<string, 
  * is absent under the ESM-transforming test runner. Comparing the invoked
  * script's basename works under both and is a pure function the suite pins
  * directly, rather than a condition that can only be observed by launching a
- * process.
+ * process. `win32.basename` splits on both separator families, so a
+ * Windows-style argv[1] resolves identically on a POSIX host.
  */
 export function invokedAsEntrypoint(argv1: string | undefined): boolean {
   if (argv1 === undefined || argv1.length === 0) return false;
-  const base = basename(argv1);
+  const base = win32.basename(argv1);
   return base === 'activate.ts' || base === 'activate.js';
 }
 
