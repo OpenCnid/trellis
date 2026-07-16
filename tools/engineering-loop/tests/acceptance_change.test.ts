@@ -88,7 +88,9 @@ async function harness(): Promise<Harness> {
   const worktree = join(base, 'worktree');
   await mkdir(worktree, { recursive: true });
   const channelDirectory = join(base, 'protected', 'channel');
-  await mkdir(channelDirectory, { recursive: true });
+  // validateProtectedStateRoot refuses pre-existing roots that grant group or
+  // other permissions on POSIX, so the fixture must pre-create at 0o700.
+  await mkdir(channelDirectory, { recursive: true, mode: 0o700 });
   await writeFile(join(channelDirectory, APPROVAL_CHANNEL_FILE), '[]', 'utf8');
   const channel = await FileProtectedApprovalChannel.open({ channelDirectory, worktree });
   const ledger = await AcceptanceLedger.open({
