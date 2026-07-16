@@ -65,8 +65,10 @@ engine state the moment it exists).
 - **Judges are capabilities**: every judge is a registered manifest
   (rubric hash, anchor-set hashes, taxonomy version) the invalidation
   sweep can contest (parent §4.4).
-- **Anchors are human/mechanical by default** (AB-4, pending owner
-  ruling on teacher-model labels).
+- **Anchor labels may be model-produced** (AB-4 as amended July 16,
+  2026 by owner ruling); fixtures are byte-pinned once labeled, refresh
+  stays a human ceremony, and the labeler is never given a count-shaped
+  incentive (AB-5 binds the labeler too).
 
 ## 3. The four roles
 
@@ -198,9 +200,16 @@ pool drift, is the watched failure** (R-03).
 1. **Reconcile with the collaborator's four-judge system under
    evaluation** — map their roles onto §3, record deltas, owner rules
    on merges. Until then this record is one side of a two-sided design.
-2. Owner ruling on AB-4 (anchor labeling) — blocks anchor fixture
-   authoring.
-3. Aggregation weights and decay constants — open (RESEARCH_MAP §6.2);
-   the oracle drill pins whatever is ratified.
-4. Authorization boundary: implementing any of §6–§7 is a bounded
-   feature with its own proposal; this document authorizes nothing.
+2. ~~Owner ruling on AB-4 (anchor labeling)~~ **RESOLVED July 16,
+   2026: model labeling permitted** (AB-4 dated amendment) — anchor
+   fixture authoring is unblocked.
+3. Aggregation weights and decay constants — v1 defaults ratified with
+   the drill (`docs/architecture/EPISTEMIC_SUPPORT.md`, v1 arithmetic);
+   further tuning re-enters through drill re-pins.
+4. Authorization boundary: the support-computation oracle drill is
+   authorized and implemented (owner decision #3); every OTHER
+   mechanism in §6–§7 (panel drills, judge registration, sweep
+   integration) remains a separately authorized bounded feature.
+5. Rubric composition machinery: see
+   [`COMPOSABLE_RUBRICS_DESIGN.md`](COMPOSABLE_RUBRICS_DESIGN.md)
+   (owner decision #4) — the rubric side of every role contract.

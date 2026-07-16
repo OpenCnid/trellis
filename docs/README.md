@@ -72,6 +72,12 @@ system-level framing is the root `README.md`.
   — the timeless substrate math: Merkle trees, content addressing, and
   why cryptographic identity solves the Shift Problem that positional
   addressing cannot.
+- **[`EPISTEMIC_SUPPORT.md`](architecture/EPISTEMIC_SUPPORT.md)** — the
+  second belief axis (adopted forward design, July 16, 2026): graded,
+  judge-computed support opinions (b, d, u) orthogonal to the custody
+  tiers; plane geometry, v1 arithmetic and metric grammar (drill-pinned),
+  the judge layer, and the automation ladder. Working documents in
+  `docs/product/epistemic-support/`.
 - `ARCHITECTURE.md`, `SYSTEM_ARCHITECTURE.md`, `TECHNICAL_SPEC.md` —
   **historical (Phase 1 MVP era)**, preserved as the record of the
   original substrate design. Read them for lineage, not current truth.

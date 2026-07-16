@@ -288,10 +288,12 @@ flowchart LR
 
 ## 6. Contradictions and unresolved questions
 
-1. **Model-in-the-anchor** (§4.4) — S1's teacher-labeled anchors vs
-   Trellis's harness-holds-the-pen doctrine. Owner decision required
-   before any anchor set uses model labels. Default in all proposals
-   here: human/mechanical labels only.
+1. **Model-in-the-anchor** (§4.4) — **RESOLVED by owner ruling,
+   July 16, 2026: model labeling permitted** (see AB-4's dated
+   amendment for the rationale and residual guards). The divergence
+   record above is preserved as history; S1's teacher-label approach
+   is now the adopted default for anchor construction, with byte-pinned
+   fixtures and incentive rules unchanged.
 2. **Aggregation function underdetermined** — S1 composes ternary
    verdicts; the proposal stores continuous (b,d,u). The mapping from
    op verdicts + weights + decay to opinion mass is a design choice with
@@ -307,13 +309,14 @@ flowchart LR
 
 | Pri | Artifact | Locator | Substantiates | Needed form | Constraints | Doc key if promoted | Promotion gate | Unknowable without it |
 |---|---|---|---|---|---|---|---|---|
-| 1 | S1 full paper | arXiv:2607.12790 | R-01…R-09 | full text | arXiv license unverified | `web:https://arxiv.org/abs/2607.12790` | operator promotion required | nothing (in session) — needed for *citable* provenance only |
-| 2 | S1 released code | Appendix H says released; **locator missing** | op grammar, lifecycle, selection objective details | code, selected files | unknown license | `repo:double-ratchet:<path>` (if public) | operator | exact op/selection implementations; reproduction fidelity |
+| 1 | S1 full paper | arXiv:2607.12790 | R-01…R-09 | full text | arXiv license unverified | `web:https://arxiv.org/abs/2607.12790` | **OWNER-APPROVED July 16, 2026** — execution pending on a durable deployment (this review container's databases are ephemeral; promotion here would mint provenance that dies with the container). License check remains a pre-step | nothing (in session) — needed for *citable* provenance only |
+| 2 | S1 released code + rubric/outcome data (Appendix H: judge protocols, op packs, round-by-round histories, judge outputs as structured JSON/SQLite) | Appendix H says released; **locator missing** — not named in the paper text available here | op grammar, lifecycle, selection details; the composable-rubrics reconstruction ([`COMPOSABLE_RUBRICS_DESIGN.md`](COMPOSABLE_RUBRICS_DESIGN.md)) | code + rubric data + outcome data | unknown license | `repo:double-ratchet:<path>` once located | operator | **now load-bearing** (owner decision #4, July 16, 2026): the rubric/outcome data is the reconstruction substrate — locating this artifact is the program's top acquisition priority |
 | 3 | Subjective-logic canonical text | **missing** (Jøsang, from background) | R-14 opinion algebra, projection, decay | selected sections | published book/paper — cite only | n/a (cite, don't ingest) | n/a | correctness of the (b,d,u) arithmetic the drill will pin |
 | 4 | Ratchet + library-drift papers | arXiv:2605.22148; ICML 2026 workshop paper (per S1 refs) | R-08, lifecycle lineage | abstracts + selected sections | standard arXiv | `web:https://arxiv.org/abs/2605.22148` | operator | whether skill-loop lessons transfer at all |
 | 5 | Lexideck curriculum source | Patreon (S2 lineage note) | R-15 lineage, protocol completeness | **do not commit**; reference only | paywalled/proprietary — explicit authorization required | n/a | n/a | full curriculum context behind the two skills |
 | 6 | Sister-lab review series | PR #119 (branch) | S5 throughout | already in branch | none | already repo files | ordinary PR review | n/a — awaiting OpenCnid review |
-| 7 | WonderSuite 2.0 (WonderScholar + WonderBuild) | https://github.com/gusthemole/WonderSuite | R-17, R-18, R-19 | full text (public; already fetched) | GPL v3 — cite and excerpt, do not vendor into this MIT repo | `web:https://github.com/gusthemole/WonderSuite` (if provenance-citable form is wanted) | operator promotion required | nothing — in session; promotion needed only for citable provenance |
+| 7 | WonderSuite 2.0 (WonderScholar + WonderBuild) | https://github.com/gusthemole/WonderSuite | R-17, R-18, R-19 | full text (public; already fetched) | GPL v3 — cite and excerpt, do not vendor into this MIT repo | `web:https://github.com/gusthemole/WonderSuite` (if provenance-citable form is wanted) | **OWNER-APPROVED July 16, 2026** (optional tier) — execution pending on a durable deployment | nothing — in session; promotion needed only for citable provenance |
+| 8 | S8 full paper (J-space) | mirror `github.com/OpenCnid/verbalizable-global-workspace-pdf` (checksum-verified); original transformer-circuits.pub/2026/workspace/ | R-20, R-21, R-23, R-24 | full text (in session, mirror) | mirror CITATION.md directs citation to the original | `web:https://transformer-circuits.pub/2026/workspace/` | **OWNER-APPROVED July 16, 2026** — execution pending on a durable deployment; ingest the mirror PDF (or extracted text) through `POST /ingest`, doc key above | nothing — in session; promotion needed only for citable provenance |
 
 ## 8. Relationship to the oracle drill, and the next decision boundary
 
@@ -344,7 +347,7 @@ retired only by a dated entry recording why.
 | AB-1 | S7 and S2/S3 enter as **design vocabulary only** — no prompt-framework mechanism claim may carry enforcement weight | R-15, R-16, R-17 |
 | AB-2 | Any J-lens-style measurement inherits S8's own §9.1 limits: single-token concepts, bag-of-concepts readout, no task-predictivity criterion, unknown scale generality | R-20, R-24 |
 | AB-3 | **Measure at the point of load**: an unmeasured steering/behavior claim may not become load-bearing without a cheap anchored paired measurement first | §4.8 (C2) |
-| AB-4 | Anchor labels are **human or mechanical by default**; teacher-model labeling awaits an explicit owner ruling | §6.1 |
+| AB-4 | ~~Anchor labels are human or mechanical by default; teacher-model labeling awaits an explicit owner ruling~~ **AMENDED July 16, 2026 (owner ruling): model labeling of anchors is PERMITTED.** Owner rationale: the labeler is itself a rough fuzzy classifier, and anchors rely on sparse priming representations' connection to the verbalizable workspace (S8). Residual guards unchanged: anchors stay byte-pinned once labeled, refresh remains a human ceremony with audit stamp, and no labeling task may carry a count-shaped incentive (AB-5 still binds the labeler) | §6.1 (resolved); owner ruling July 16, 2026 |
 | AB-5 | **Writer-blind, always**: no support quantity, judge output, or panel structure is model-visible; no count-shaped incentive in any task or rubric | R-10, R-11 + S1 Goodhart episode |
 | AB-6 | Licensing: S7 GPL v3 and S2/S3 Patreon material are cited, never vendored; S1's arXiv license unverified before any committed copy | §2 inventory |
 | AB-7 | **Two planes ship first**; a new plane requires a governance question no existing plane answers, plus its own drill sections | R-17, parent §2.1 |

@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "note": "Scripted op verdict streams. No op executes anywhere; these rows ARE the oracle's inputs. Rows for support-oracle:008 deliberately carry an extra writer-confidence field, which the computation must ignore structurally. Rows for support-oracle:010 are deliberately listed out of canonical order.",
+  "asOfMs": 2000000,
+  "decayCheckpoints": { "support-oracle:007": [2000000, 3000000] },
+  "events": [
+    { "beliefId": "support-oracle:001", "opId": "op:grounding", "verdict": "clean", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:001", "opId": "op:coherence", "verdict": "clean", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:001", "opId": "op:corroboration", "verdict": "clean", "atMs": 2000000, "weight": 1 },
+
+    { "beliefId": "support-oracle:002", "opId": "op:grounding", "verdict": "drawback", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:002", "opId": "op:corroboration", "verdict": "drawback", "atMs": 2000000, "weight": 1 },
+
+    { "beliefId": "support-oracle:003", "opId": "op:grounding", "verdict": "clean", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:003", "opId": "op:coherence", "verdict": "clean", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:003", "opId": "op:corroboration", "verdict": "drawback", "atMs": 2000000, "weight": 1 },
+
+    { "beliefId": "support-oracle:004", "opId": "op:grounding", "verdict": "clean", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:004", "opId": "op:coherence", "verdict": "abstain", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:004", "opId": "op:corroboration", "verdict": "abstain", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:004", "opId": "op:kind", "verdict": "abstain", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:004", "opId": "op:audit-sample", "verdict": "abstain", "atMs": 2000000, "weight": 1 },
+
+    { "beliefId": "support-oracle:005", "opId": "op:grounding", "verdict": "abstain", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:005", "opId": "op:coherence", "verdict": "abstain", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:005", "opId": "op:corroboration", "verdict": "abstain", "atMs": 2000000, "weight": 1 },
+
+    { "beliefId": "support-oracle:006", "opId": "op:grounding", "verdict": "clean", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:006", "opId": "op:corroboration", "verdict": "drawback", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:006", "opId": "op:coherence", "verdict": "abstain", "atMs": 2000000, "weight": 1 },
+
+    { "beliefId": "support-oracle:007", "opId": "op:grounding", "verdict": "clean", "atMs": 1000000, "weight": 1 },
+    { "beliefId": "support-oracle:007", "opId": "op:coherence", "verdict": "clean", "atMs": 1000000, "weight": 1 },
+
+    { "beliefId": "support-oracle:008", "opId": "op:grounding", "verdict": "clean", "atMs": 2000000, "weight": 1, "confidence": 0.97 },
+    { "beliefId": "support-oracle:008", "opId": "op:coherence", "verdict": "clean", "atMs": 2000000, "weight": 1, "confidence": 0.97 },
+    { "beliefId": "support-oracle:008", "opId": "op:corroboration", "verdict": "drawback", "atMs": 2000000, "weight": 1, "confidence": 0.97 },
+
+    { "beliefId": "support-oracle:009", "opId": "op:grounding", "verdict": "clean", "atMs": 2000000, "weight": 2 },
+    { "beliefId": "support-oracle:009", "opId": "op:corroboration", "verdict": "drawback", "atMs": 2000000, "weight": 0.5 },
+
+    { "beliefId": "support-oracle:010", "opId": "op:corroboration", "verdict": "drawback", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:010", "opId": "op:grounding", "verdict": "clean", "atMs": 2000000, "weight": 1 },
+    { "beliefId": "support-oracle:010", "opId": "op:coherence", "verdict": "clean", "atMs": 2000000, "weight": 1 }
+  ]
+}

@@ -113,16 +113,39 @@ awaiting owner decisions (§6).
   authored; no judges registered; no support fields exist in any
   schema.
 
-## 6. Open decision boundary (owner)
+## 6. Decision record (owner rulings, July 16, 2026) and what remains open
 
-1. Accept/amend/refuse the epistemic-support axis as forward design
-   (would move doctrine into `docs/architecture/`; glossary terms
-   enter only then — do not add them speculatively).
-2. Rule on model-in-the-anchor (AB-4): may anchor labels come from a
-   teacher model, or human/mechanical only?
-3. Authorize (or not) the support-computation oracle drill as the
-   first bounded feature.
-4. Reconcile `FOUR_JUDGE_DESIGN.md` with the collaborator's four-judge
-   system under evaluation.
-5. Promotion of S1/S8 (and optionally S7) for citable provenance —
-   sharing queue, RESEARCH_MAP §7.
+The five decisions originally listed here were ruled on by the owner on
+July 16, 2026:
+
+1. **Epistemic-support axis: ACCEPTED as forward design.** Doctrine
+   graduated to `docs/architecture/EPISTEMIC_SUPPORT.md`; glossary
+   terms added in the same change. The review-series document 06
+   remains as the historical proposal.
+2. **Model-in-the-anchor: model labeling PERMITTED** (AB-4 amended by
+   dated entry with the owner's rationale — the labeler is itself a
+   rough fuzzy classifier; anchors rely on sparse priming
+   representations' connection to the verbalizable workspace).
+   Residual guards unchanged: byte-pinned fixtures, human refresh
+   ceremony, no count-shaped incentives for the labeler.
+3. **Support-computation oracle drill: AUTHORIZED** as the program's
+   first bounded feature (implementation began the same day; see
+   `ORACLE_DRILL_PROPOSAL.md` header for live status and observed
+   results — do not trust this line over that header).
+4. **Composable rubrics: BUILD** — no off-the-shelf software exists;
+   reconstruct from S1's released rubric/outcome data (locator still
+   missing — top acquisition priority, sharing-queue row 2) plus the
+   WonderSuite conceptual-primitives strategy. Design record:
+   [`COMPOSABLE_RUBRICS_DESIGN.md`](COMPOSABLE_RUBRICS_DESIGN.md).
+5. **Promotion of S1/S8 (S7 optional): APPROVED** — execution pending
+   on a durable deployment (this container's databases are ephemeral;
+   promotion here would mint provenance that dies with the container).
+   Statuses and command paths: RESEARCH_MAP §7.
+
+**Still open:**
+- Reconciliation of `FOUR_JUDGE_DESIGN.md` with the collaborator's
+  independently evaluated four-judge system (design §10.1).
+- S1 released-code locator (sharing queue row 2, now load-bearing).
+- Aggregation constants beyond the drilled v1 defaults (architecture
+  record §"v1 arithmetic"; amendable with drill re-pin).
+- Actual execution of the approved promotions on a durable deployment.

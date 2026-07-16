@@ -150,6 +150,26 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   entities; recovery is human: re-review, flip the manifest status back
   to active, re-register. Empty-research manifests register nothing.
 
+## Epistemic support (adopted as forward design July 16, 2026)
+
+- **Epistemic support** — the second belief axis, orthogonal to custody:
+  a graded opinion (belief `b`, disbelief `d`, uncertainty `u`; b+d+u=1)
+  computed sweep-side from judged events, never asserted by the writer
+  and never visible to it; support never mints custody. Canonical
+  record: `docs/architecture/EPISTEMIC_SUPPORT.md`.
+- **Plane (belief geometry)** — a named bundle of related axes owning
+  exactly one governance question (custody: *where from*; support: *how
+  held up*; claim-kind, deferred: *what kind of claim*); a new plane
+  requires a governance question no existing plane answers, plus drills.
+- **Judge op** — a drawback detector over a belief: a single-question
+  check returning `drawback | clean | abstain` with a named class from
+  a closed per-role taxonomy; `clean` means no known drawback found,
+  never certified correctness; abstention feeds uncertainty only.
+- **Adoption bounds register** — the live, dated rule set (AB-1…, in
+  `docs/product/epistemic-support/RESEARCH_MAP.md` §9) bounding what may
+  be built on which evidence class; amended by dated entry, never
+  silent edit.
+
 ## Prompt and protocol conventions
 
 - **Addendum** — validated text composed into the RLM system prompt (Trellis

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "note": "Metric-expression candidates for the validity gate. The calibration array is the anchor-shaped verdict-set battery every candidate is evaluated against; the three planted candidates are vacuous by construction and MUST be refused with the named class.",
+  "calibration": [
+    { "op:grounding": "clean", "op:coherence": "drawback", "op:always-drawback": "drawback", "op:always-clean": "clean" },
+    { "op:grounding": "drawback", "op:coherence": "clean", "op:always-drawback": "drawback", "op:always-clean": "clean" },
+    { "op:grounding": "clean", "op:coherence": "clean", "op:always-drawback": "drawback", "op:always-clean": "clean" },
+    { "op:grounding": "drawback", "op:coherence": "drawback", "op:always-drawback": "drawback", "op:always-clean": "clean" }
+  ],
+  "validCandidates": [
+    { "name": "any-of-two", "expr": { "op": "any", "children": [ { "op": "leaf", "opId": "op:grounding" }, { "op": "leaf", "opId": "op:coherence" } ] } },
+    { "name": "all-of-two", "expr": { "op": "all", "children": [ { "op": "leaf", "opId": "op:grounding" }, { "op": "leaf", "opId": "op:coherence" } ] } },
+    { "name": "two-of-three", "expr": { "op": "kofk", "k": 2, "children": [ { "op": "leaf", "opId": "op:grounding" }, { "op": "leaf", "opId": "op:coherence" }, { "op": "leaf", "opId": "op:always-drawback" } ] } }
+  ],
+  "vacuousCandidates": [
+    { "name": "planted-all-drawback", "expectClass": "all_drawback", "expr": { "op": "any", "children": [ { "op": "leaf", "opId": "op:always-drawback" } ] } },
+    { "name": "planted-all-clean", "expectClass": "all_clean", "expr": { "op": "all", "children": [ { "op": "leaf", "opId": "op:always-clean" } ] } },
+    { "name": "planted-all-abstain", "expectClass": "all_abstain", "expr": { "op": "leaf", "opId": "op:never-opines" } }
+  ]
+}

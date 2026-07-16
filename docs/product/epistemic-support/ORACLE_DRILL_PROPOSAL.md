@@ -1,9 +1,31 @@
 # Support-Computation Oracle Drill
 
-**Status: PROPOSED — UNRUN.** Nothing below has been implemented or
-executed; no result exists; nothing here may be cited as evidence. This
-is a docs-only proposal (July 16, 2026) for a bounded feature the owner
-may authorize, amend, or refuse.
+**Status: AUTHORIZED (owner decision #3) and IMPLEMENTED, July 16,
+2026.** First runs were observed the same day in the sister-lab review
+container (not a production environment; this is an implementation
+observation, not a benchmark — nothing here belongs in
+`docs/benchmarks/` until run under OpenCnid's own conditions):
+
+- default mode: 7 sections green, 106 checks, exit 0
+  (`[manifest]` 5, `[static-imports]` 30, `[arithmetic]` 40,
+  `[abstain-routing]` 13, `[decay]` 9, `[validity-gate]` 7,
+  `[confidence-exclusion]` 2);
+- `--negative-control`: broken oracle detected and named
+  (`support-oracle:003`, field `b`), exit 3 (nonzero, healthy);
+- `--inject corrupt-expected`: in-memory corruption detected and
+  named (`support-oracle:001`), exit 0 (pass-by-detection);
+- `TRELLIS_EXP_*` refusal: exit 2 before any section;
+- unit pins: `src/core/graph/support.test.ts`, 11/11 green inside
+  `npm test` (the four failing suite files in that container run are
+  pre-existing engineering-loop environment artifacts — identical
+  failures on the unmodified baseline — unrelated to this feature);
+- `npm run build`: clean.
+
+The specification below is preserved as written when the drill was a
+proposal; the implementation follows it. Deviations: none of substance
+(the `[static-imports]` section runs as its own numbered section rather
+than inside `[manifest]`, and negative-control's healthy exit code is
+documented as 3).
 
 ---
 
@@ -150,7 +172,7 @@ green; exit nonzero with named findings otherwise.
 
 ## 7. Intended implementation files and the non-test entrypoint
 
-| Artifact | Path (proposed; none exist today) |
+| Artifact | Path (implemented July 16, 2026) |
 |---|---|
 | Computation module (pure) | `src/core/graph/support.ts` |
 | Metric-expression loader + validity gate | `src/core/graph/support_metrics.ts` |
