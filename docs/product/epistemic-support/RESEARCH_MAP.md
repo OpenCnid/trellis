@@ -43,7 +43,8 @@ engineering-loop feature.
 | S4 | Trellis recorded measurements | OpenCnid | committed reports: `PROVENANCE_CITATION_AB_REPORT.md`, `POISONING_DRILL_REPORT.md`, `UPDATE_DRILL_REPORT.md`, `EFFECTIVE_CONTEXT_PROBE_REPORT.md` + result JSONs | Primary (for Trellis claims) | Yes (repo) | Committed, master | Public (MIT repo) |
 | S5 | Sister-lab review series | sister lab | `docs/review/00–06`, branch `claude/sister-lab-repo-review-5fuu19`, PR #119 | Secondary synthesis | Yes (repo, branch) | On branch, **pending OpenCnid review** | Public branch |
 | S6 | Subjective logic (opinion = belief/disbelief/uncertainty) | A. Jøsang (attribution from model background) | canonical citation **missing from session** — no artifact available | Background theory | No (memory only) | Absent | Published academic work; cite, do not ingest |
-| S7 | WonderSuite 2.0 — specifically WonderScholar 2.0 ("Topological Research Framework") and WonderBuild 2.0 ("Adaptive Knowledge Construction Framework") | gusthemole / Lexideck Technologies (same lineage as S2/S3) | https://github.com/gusthemole/WonderSuite, `WonderScholar.txt` + `WonderBuild.txt`; version 2.0; retrieval date July 16, 2026 | Secondary (conceptual framework, prompt-layer, unmeasured) | Full text (fetched raw files) | Absent | Public, **GPL v3** — cite concepts and short excerpts; do not vendor GPL text into this MIT repo |
+| S7 | WonderSuite 2.0 — specifically WonderScholar 2.0 ("Topological Research Framework") and WonderBuild 2.0 ("Adaptive Knowledge Construction Framework") | gusthemole / Lexideck Technologies (same lineage as S2/S3) | https://github.com/gusthemole/WonderSuite, `WonderScholar.txt` + `WonderBuild.txt`; version 2.0; repo history March 2, 2025 → January 7, 2026 (verified via commit log); retrieval date July 16, 2026 | Secondary (conceptual framework, prompt-layer, unmeasured) | Full text (fetched raw files) | Absent | Public, **GPL v3** — cite concepts and short excerpts; do not vendor GPL text into this MIT repo |
+| S8 | "Verbalizable Representations Form a Global Workspace in Language Models" (the "J-space" / Jacobian-lens paper) | Anthropic (interpretability team; individual authors **not recovered in session**) | https://transformer-circuits.pub/2026/workspace/, published July 6, 2026 | Primary (mechanistic interpretability) — **primary text unavailable in session** (host blocked by network policy); all claims below are **coverage-derived** from multiple secondary reports and must be verified against the primary before canonical adoption | Secondary coverage only | Absent | Public research publication; cite |
 
 Missing metadata is marked, not invented. S6 in particular must not be
 cited in any canonical Trellis document until a real artifact is
@@ -78,6 +79,9 @@ worktree), **INF** inference, **HYP** hypothesis, **OQ** open question.
 | R-17 | S7, WonderScholar "Dimensional Axes of Research Space" + WonderBuild "Dimensional Axes of Knowledge Space" | Axes come bundled into a small number of **named dimensions (planes)**, each a coherent group of related spectra, rather than proliferating as loose scalar fields — five named planes bound ~30 spectra in each framework | SS (conceptual framework; no measurement) | The custody × support two-axis model in the parent record | `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md` §2 | Refines — supplies the geometry for growing beyond two axes without sprawl |
 | R-18 | S7, WonderScholar "Navigational Protocol" step 2, "Coherence Calibration" | A position in a multidimensional space must pass **coherence checks** — not every coordinate combination is valid; consistency across dimensions is itself verified | SS | Cross-plane invariants (e.g., Tier-3 standing ⇒ no support computed; `u≈1` ⇒ no authority corroboration recorded) — currently implicit only | gap (no named mechanism) | Suggests a new enforceable mechanism: coherence checks as tooling with pins |
 | R-19 | S7, WonderScholar "Epistemological Dimension" + "Analytical Dimension" spectra (Empirical↔Rational, Universal↔Contextual, Deterministic↔Probabilistic) | Some belief properties are **bipolar positions, not unipolar qualities**: where a claim sits (kind/scope/modality) is orthogonal to how well it has held up | SS | Resolves the theory-vs-law framing cleanly: "evolution is a theory" is a *claim-kind position* (theoretical, universal, probabilistic), not a support deficiency; also routes op-pool selection (R-05 detectability: empirical-pole claims admit mechanical ops) | `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md` §2, §4.6 | Suggests a third, deferred plane (claim-kind) with a fixed small vocabulary |
+| R-20 | S8 (coverage-derived) | LLMs maintain a sparse, low-occupancy, **verbalizable** internal workspace (~6–10% of activation variance; on the order of ≤25 meaningfully active directions at a time) that is causally dominant for inference/composition tasks — suppression collapses reasoning while shallow classification and recall survive | PF-external, **unverified against primary** | Background support for the fuzzy-classifier premise and for small fixed axis vocabularies (a workspace holding ~25 concepts favors few named planes) | `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md` §2.1 | Inherited background; no Trellis mechanism branches on it |
+| R-21 | S8 (coverage-derived): the language-swap experiment — J-space representation swapped Spanish→French; the model *reports* French while *continuing* fluent Spanish; causally strong representations also exist outside J-space that steer behavior without being reportable | **Verbalizable report and behavior dissociate**: steering the reportable workspace does not reliably steer behavior, and behavior is partly driven from outside it | PF-external, unverified against primary | Mechanistic convergence with Trellis's own measured doctrine: prompt protocols moved reported/targeted behaviors while failing pooled criteria (Session 28); laundering occurred while the model verbalized the correct answer (R-11). The dissociation is a candidate *mechanism* for "tooling shape enforces; prompts reinforce" | `AGENTS.md` §4 rule 8; `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md` | Cuts **against** treating prompt-level steering as settled by S8 — the paper supports the workspace's existence and its limits simultaneously |
+| R-22 | Collaborator testimony + S7 commit history + S8 | The "cognitive hyperplane" decomposition (basis of WonderSuite, S7) anticipated the J-space finding: repo history (March 2025 → January 2026) **documentably predates** the paper (July 6, 2026); the inference was drawn from the 2023–24 monosemantic-features work; ~2 years of anecdotal contract-work reliability is reported | Testimony + verified artifact dates; match quality ("almost verbatim") **unverifiable without the primary text**; anecdotal reliability undocumented | Priority/attribution record for the plane-geometry lineage (R-17…R-19) | S7 inventory row | Attribution recorded; adds no mechanism claim beyond R-20/R-21 |
 
 ### 3b. Design consequences
 
@@ -102,6 +106,9 @@ worktree), **INF** inference, **HYP** hypothesis, **OQ** open question.
 | R-17 | Absent | none | Adopt the plane geometry: axes ship only as members of a named plane with a governance question; two planes now, any new plane requires a driving question no existing plane answers (collaborator guidance: allow multiple planes, do not overcomplicate) | Plane bundles proving no more legible than loose fields in operator use |
 | R-18 | Absent | none | Name cross-plane coherence invariants and enforce them in the computation/loader path; each invariant gets a drill section (extends the oracle drill's acceptance table when implemented) | A valid governance state that the declared invariants wrongly refuse |
 | R-19 | Absent | none | Record the claim-kind plane as **named-but-deferred**: three spectra maximum (grounding, scope, modality), judged never writer-authoritative, entering only when a support-metric family needs claim-kind routing for op selection | Claim-kind positions failing to predict which op families produce non-abstaining verdicts |
+| R-20 | n/a (background) | none | **Accept as inherited background** (see §4.9): no Trellis test needed while no mechanism branches on it; cite S8 primary once obtainable | Primary text contradicting the coverage; or replication failures of the causal-dominance result |
+| R-21 | Converges with enforced doctrine | Session 28 record; citation A/B | Treat as the candidate mechanistic explanation of the tooling-over-prompt doctrine; strengthens, never weakens, the rule that support-layer behavior guarantees live in engine code | The dissociation failing to replicate, plus a paired Trellis measurement showing prompt-frame steering reliably carrying behavior under incentive pressure |
+| R-22 | n/a (attribution) | S7 commit log (external) | Record priority honestly; make no reliability claim from the anecdotal evidence | Primary S8 text showing the correspondence is loose rather than close |
 
 ## 4. Cross-row synthesis
 
@@ -195,7 +202,44 @@ S7 is adopted as design vocabulary only: two planes ship first; a third
 plane enters only behind a driving governance question and its own
 drill sections.
 
-**4.8 Reachability, stated up front.** [E] `AGENTS.md` §4 rule 15:
+**4.8 The test-or-accept adjudication (added July 16, 2026).** The
+collaborator asked directly: does the plane-geometry lineage need
+empirical proof in Trellis, or may the fuzzy-classifier premise be
+accepted structurally? Adjudicated by splitting the question into three
+claims with different standings:
+
+- **C1 — representation level** ("the model is at bottom a fuzzy
+  classifier with a sparse, verbalizable, causally dominant workspace").
+  [E] S8 provides primary mechanistic evidence (R-20), converging with
+  the 2023–24 monosemantic-features line. **Accepted as inherited
+  background; no Trellis test needed.** Trellis does not re-prove
+  interpretability results, it cites them — pending verification
+  against the primary text, which is currently unreachable in-session.
+- **C2 — intervention level** ("dimensional-decomposition prompts
+  reliably steer behavior via that workspace"). [E] S8 itself reports
+  the report/behavior dissociation (R-21), and [E] Trellis measured the
+  same shape twice (Session 28; the laundering A/B, where the model
+  verbalized the truth and did otherwise). **Not settled by S8 — the
+  paper supports the workspace and its limits simultaneously.** No test
+  is required *today* only because nothing load-bearing branches on C2;
+  the standing rule is **measure at the point of load**: if any judge
+  op, authoring mode, or metric ever depends on prompt-frame steering
+  for its guarantees, it gets a cheap anchored paired measurement first
+  (the `est`-suite pattern), not an inheritance.
+- **C3 — system level** ("the epistemic-planes design works"). [I] Does
+  not depend on C1 or C2: the planes are engine-side data structures
+  computed and enforced by code; the geometry was adopted as vocabulary
+  (R-17…R-19). Its tests are the drills already specified — arithmetic
+  and enforcement, not psychology.
+
+Net: "probably redundant" is **half-right** — redundant as a
+prerequisite, wrong as a permanent waiver. And C1, accepted, actively
+*strengthens* the support design: a fuzzy classifier's per-utterance
+verdicts are noisy channel outputs, which is precisely why support is
+computed from multiple judged events with explicit uncertainty (b, d, u)
+rather than trusted per-utterance.
+
+**4.9 Reachability, stated up front.** [E] `AGENTS.md` §4 rule 15:
 correct is not the same claim as reachable; this repo shipped callerless
 capabilities three times. [I] The support layer's minimal reachable
 spine is: a support computation module, a `support_sweep` job name on
@@ -280,6 +324,11 @@ this document authorizes nothing.
   measurements of any kind; it is adopted here strictly as design
   vocabulary (plane geometry, coherence calibration, position-vs-quality),
   never as a mechanism claim.
+- Every S8 (J-space) claim in this map is coverage-derived: the primary
+  text at transformer-circuits.pub was unreachable under this session's
+  network policy, and secondary reports may compress or distort. R-20
+  and R-21 must be re-verified against the primary before any canonical
+  Trellis document cites them as findings.
 - This map was authored from session context by the sister lab. It has
   no provenance standing, has not been reviewed by OpenCnid, and may
   misread doctrine; `code > glossary > prose > session inference`
