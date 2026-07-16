@@ -264,7 +264,9 @@ rubric blamed the task's required format — win rate stuck at 0.12 — until a
 task-aware rubric stating the format contract separated real quality from
 convention-blindness, 0.515 → 0.770).
 
-Both directions transfer as standing rules for any Trellis support layer:
+Both directions transfer as standing rules for any Trellis support layer
+(elaborated into a full panel architecture in
+[`docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md`](../product/epistemic-support/FOUR_JUDGE_DESIGN.md)):
 
 1. **The gate judge and the audit judge must be independent** — different
    role, ideally different model, and the audit sits outside every loop that

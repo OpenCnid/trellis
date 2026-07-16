@@ -13,6 +13,12 @@ This series is review material only: it adds `docs/review/` and deliberately mod
 | 5 | `05_FUTURE_IMPLICATIONS.md` | **Future implications** — what this means for agent-systems research | 4,933 | The durable contribution is method, not results: harness-as-experimental-subject, memory-as-epistemic-liability, self-improvement-as-chain-of-custody. Closes with 3 bets to make now, 2 to wait on, 1 to avoid. |
 | 6 | `06_EPISTEMIC_SUPPORT_PROPOSAL.md` | **Design-record proposal** — an epistemic-support axis (graded, judged belief standing) orthogonal to the custody tiers | — | Adds a subjective-logic support opinion computed by anchor-disciplined drawback-detector metrics (guided by arXiv:2607.12790), judges registered as capabilities under the invalidation sweep, an authority registry for verifiable claims, and a human-gated automation ladder. Proposal for OpenCnid review, not implementation. |
 
+**Follow-on program:** the epistemic-support design work that grew out
+of paper 5 and document 06 now lives as its own program under
+[`docs/product/epistemic-support/`](../product/epistemic-support/PROGRAM_CONTEXT.md)
+(evidence register, four-judge design, judge contract templates, oracle
+drill — all proposals).
+
 ## Cross-cutting synthesis
 
 - **The single most valuable transferable finding** (papers 1, 5): provenance laundering is incentive-driven — a count-shaped incentive flipped it 0%→100% in an agent that knew the right answer; prompt discipline and readership gates did not stop it; only semantic entailment gating held 0% everywhere. Generalized rule: never attach an incentive to a countable proxy without a semantic gate behind it.

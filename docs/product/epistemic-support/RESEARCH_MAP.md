@@ -18,6 +18,17 @@ Companion artifact: [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md)
 
 ---
 
+**Register summary (as of July 16, 2026):** 8 sources (S1–S8), 24
+claims (R-01…R-24), 11 adoption bounds (AB-1…AB-11, §9). By evidence
+class: 13 primary findings (9 from S1; 4 from S8, primary-verified),
+5 repo observations, 4 secondary syntheses, 1 attribution record
+(verified artifact dates), 1 background-theory hypothesis awaiting its
+source (R-14/S6). Companion artifacts: the parent design record
+(`docs/review/06_…`), [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md),
+[`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md),
+[`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md), and the
+program orientation [`PROGRAM_CONTEXT.md`](PROGRAM_CONTEXT.md).
+
 ## 1. Scope and non-goals
 
 **Scope.** Map the research corpus studied in the originating session —
@@ -321,7 +332,28 @@ model-in-the-anchor divergence (§6.1); (3) authorize the drill's
 implementation as a bounded feature (code, fixtures, package script) —
 this document authorizes nothing.
 
-## 9. Honest limitations
+## 9. Adoption bounds register (live — amend by dated entry, never silent edit)
+
+The binding rules for what may be built on which evidence. "We're
+learning as we're going" is the operating condition; these bounds are
+how learning stays safe. Each bound names its origin; a bound is
+retired only by a dated entry recording why.
+
+| ID | Bound | Origin |
+|---|---|---|
+| AB-1 | S7 and S2/S3 enter as **design vocabulary only** — no prompt-framework mechanism claim may carry enforcement weight | R-15, R-16, R-17 |
+| AB-2 | Any J-lens-style measurement inherits S8's own §9.1 limits: single-token concepts, bag-of-concepts readout, no task-predictivity criterion, unknown scale generality | R-20, R-24 |
+| AB-3 | **Measure at the point of load**: an unmeasured steering/behavior claim may not become load-bearing without a cheap anchored paired measurement first | §4.8 (C2) |
+| AB-4 | Anchor labels are **human or mechanical by default**; teacher-model labeling awaits an explicit owner ruling | §6.1 |
+| AB-5 | **Writer-blind, always**: no support quantity, judge output, or panel structure is model-visible; no count-shaped incentive in any task or rubric | R-10, R-11 + S1 Goodhart episode |
+| AB-6 | Licensing: S7 GPL v3 and S2/S3 Patreon material are cited, never vendored; S1's arXiv license unverified before any committed copy | §2 inventory |
+| AB-7 | **Two planes ship first**; a new plane requires a governance question no existing plane answers, plus its own drill sections | R-17, parent §2.1 |
+| AB-8 | No evolution/search machinery in first editions — hand-authored op pools and judge configurations under anchor discipline | R-02, R-03, §4.5 |
+| AB-9 | **Gate/audit separation**: the audit judge never gates, sits outside all loops, and defaults to a different model family | R-06, parent §4.5 |
+| AB-10 | Session context and un-promoted sources have **no provenance standing**; promotion precedes any `sourceNodeIds` citation | repo doctrine; §2 |
+| AB-11 | Corroboration and judging read **live blocks only** (superseded versions are archive, not search space) | `AGENTS.md` rule 13, parent §5 |
+
+## 10. Honest limitations
 
 - Every S1 number is n=3 seeds, one solver model family, three task
   families; every Trellis number is n=1–3 as recorded in its report.

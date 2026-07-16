@@ -136,14 +136,15 @@ way it was; the system-level framing has since moved on (root
 Active research/planning tracks also live here, one directory per
 program (the `engineering-loop/` pattern):
 
-- **[`epistemic-support/RESEARCH_MAP.md`](product/epistemic-support/RESEARCH_MAP.md)**
-  — claim-level map of external evaluator-evolution research
-  (arXiv:2607.12790) onto Trellis mechanisms, with the sharing queue
-  and open contradictions. RESEARCH SYNTHESIS — PROPOSAL; nothing
-  implemented or measured.
-- **[`epistemic-support/ORACLE_DRILL_PROPOSAL.md`](product/epistemic-support/ORACLE_DRILL_PROPOSAL.md)**
-  — the support-computation oracle drill specification. PROPOSED —
-  UNRUN. Parent design record: `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`.
+- **[`epistemic-support/`](product/epistemic-support/PROGRAM_CONTEXT.md)**
+  — the epistemic-support program (all PROPOSED; nothing implemented,
+  measured, or accepted): `PROGRAM_CONTEXT.md` is the entry point and
+  orientation for fresh sessions; `RESEARCH_MAP.md` the evidence
+  register (8 sources, 24 claims, adoption-bounds register);
+  `FOUR_JUDGE_DESIGN.md` + `JUDGE_CONTRACT_TEMPLATE.md` the judged-
+  input architecture and its prompt-facing frames;
+  `ORACLE_DRILL_PROPOSAL.md` the first drill (PROPOSED — UNRUN).
+  Parent design record: `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`.
 
 ### 6. Progress-log archive (`/archive` — historical)
 
