@@ -54,10 +54,11 @@ config surface:
   endpoint rides the `openai` arm; the `openai`/`vllm` enum is not
   widened.
 - `MODEL_BACKEND_SEAM.md` §3.3 case 3 ("custom endpoint, real key
-  needed, a hosted service") is exactly Gemini's shape: name the key
-  variable through `TRELLIS_RLM_API_KEY_ENV`, resolve it fail-fast, pass
-  `api_key=os.environ[<name>]` at construction. No new credential
-  handling.
+  needed, a hosted open-model service") is exactly Gemini's shape: name
+  the key variable through `TRELLIS_RLM_API_KEY_ENV`, resolve it
+  fail-fast, pass `api_key=os.environ[<name>]` at construction. No new
+  credential handling. Extending this case to a proprietary hosted
+  endpoint is a policy extension, not a mechanism change.
 - No new dependency. The arm rides the existing `openai` SDK through a
   `base_url`; it adds no SDK and no version bump, so the dependency
   ceremony the repo attaches to new dependencies does not apply.
@@ -95,9 +96,11 @@ The seam must be built before anything is served through it. Per
   no-landings, each a distinct editing-execution failure, and the owner
   chose to close that failure class by tooling shape (an
   engine-resolved-anchor insert in the guarded editing toolkit) rather
-  than by more task text. That tooling work is the active engineering
-  program; T2 is preserved paused (roadmap Appendix A) and resumes after
-  it.
+  than by more task text. The active engineering program is the
+  engineering-session loop (owner direction, July 14, 2026, `HANDOFF.md`);
+  the paused tooling-shape objective is preserved in `HANDOFF.md` Appendix A
+  and resumes only after an explicit owner re-prioritization ahead of this
+  arm.
 - T3 (rewire the two `trellis_agent.py` construction sites, the checker
   client per §5, and the two telemetry fields per §7) and T4 (the
   zero-LLM fixture-endpoint drill) are not built.
@@ -111,7 +114,7 @@ re-sequence the T-series and does not compete with the active program.
 ## 5. The one caveat that fails first: the `usage` contract
 
 rlms's `_track_cost` raises if a completion response carries no `usage`
-object (`MODEL_BACKEND_SEAM.md` §6 last row, §13.1 caveat 1). This is
+object (`MODEL_BACKEND_SEAM.md` §6 last row; `TEST_TIME_TRAINING.md` §13.1 caveat 1). This is
 the reason T4's fixture stub and R3a's first assertion exist. For the
 Gemini endpoint specifically:
 
@@ -124,10 +127,13 @@ Gemini endpoint specifically:
   rather than only in the final chunk, and `stream_options:
   {include_usage: true}` governs streaming usage. This does not touch
   the non-streaming path rlms uses.
-- Documentation is not a live check. Reading the docs lowers the risk;
-  it does not retire it. The T4 fixture drill and R3a's first live
-  assertion against the exact endpoint variant and model id remain the
-  gate, unchanged.
+- The `usage` contract is three-field-shaped: `prompt_tokens`,
+  `completion_tokens`, and `total_tokens` are read unconditionally after
+  the `None` check. T4's stub and R3a's first assertion should verify
+  shape, not just presence. Documentation is not a live check. Reading
+  the docs lowers the risk; it does not retire it. The T4 fixture drill
+  and R3a's first live assertion against the exact endpoint variant and
+  model id remain the gate, unchanged.
 
 ## 6. The comparison run, when the seam is ready (R3b shape, reused)
 
@@ -140,10 +146,12 @@ hosted model drives the house REPL protocol, answers by reference, and
 holds the citation contract at an acceptable violation rate at all. The
 delta between arms is the datum this want is after; partial is expected.
 
-Arm assignment is verified per run from telemetry in both directions
-(the §7 `rlm_backend` echo exists for this). If the comparison run
-enables the experimental checker, the checker follows the seam (§5) and
-its backend is recorded with the run.
+Arm assignment is verified per run from telemetry in both directions;
+the discriminating echoes are `rlm_base_url_set` and the `model_usage`
+model-name key (both arms resolve `rlm_backend` to `openai`, so that
+echo alone cannot distinguish them). If the comparison run enables the
+experimental checker, the checker follows the seam (§5) and its backend
+is recorded with the run.
 
 ## 7. What this proposal does NOT touch
 
@@ -156,9 +164,9 @@ its backend is recorded with the run.
 - The `openai`/`vllm` enum is not widened; a hosted Gemini endpoint is
   the `openai` arm plus a base URL.
 - No new dependency, no gate, no default, no pin, no prompt byte. This
-  record introduces no prompt frame, so no frame authoring under the
-  prompt-engineering or hypershot-protocol skills is owed at any later
-  step derived from it.
+  record introduces no prompt frame; downstream sessions that author
+  task text owe the prompt-engineering and hypershot-protocol skills on
+  their own.
 - The T-series is not re-sequenced. R3's open-sparse-checkpoint arm
   (row 13's actual Phase 2) is unchanged; this arm is additional, not a
   replacement.
@@ -169,7 +177,8 @@ its backend is recorded with the run.
    this record exists for. Leaning: yes, as an additional arm, because
    it reuses the seam and R3b whole and prices per-token under the
    standing ≤$5/run cap (`MODEL_BACKEND_SEAM.md` §9 already contemplates
-   a hosted per-token endpoint under that cap).
+   a hosted open-model endpoint under that cap). Extending to a
+   proprietary model is a policy extension, not a mechanism change.
 2. **Which endpoint variant.** AI Studio
    (`generativelanguage.googleapis.com/v1beta/openai/`) versus Vertex AI.
    Leaning: AI Studio for the simplest hosted per-token access; the
