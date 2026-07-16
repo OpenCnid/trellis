@@ -204,6 +204,7 @@ Initiates an asynchronous Trellis RLM Agent execution to resolve physical contra
 
 **Responses:**
 - `200` — SSE stream begins.
+- `400` — missing `query` parameter.
 - `401` — missing/invalid API key (when configured).
 - `429` — concurrency cap or queue-depth limit reached; retry later.
 - `503` — the job queue is unreachable.
@@ -215,7 +216,7 @@ curl -N -X GET "http://localhost:3000/api/rlm-stream?query=Find%20the%20contradi
 
 **Example Stream Output:**
 ```text
-data: {"type": "stdout", "data": "Let's explore the graph...\n"}
+data: {"type": "stdout", "content": "Let's explore the graph...\n"}
 
 data: {"type": "done", "code": 0}
 ```

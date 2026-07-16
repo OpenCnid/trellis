@@ -15,11 +15,14 @@ Trellis borrows the mathematical foundation of **Git** and **IPFS**: the Merkle 
 ### The Hashing Function
 Let $N$ be an AST Node. The unique Identifier $ID(N)$ is a cryptographic hash (SHA-256) defined recursively as:
 
-$$ ID(N) = HASH( Type(N) + Content(N) + \sum_{i=1}^{k} ID(Child_i) ) $$
+$$ ID(N) = HASH( Type(N) + Content(N) + Metadata(N) + \sum_{i=1}^{k} ID(Child_i) ) $$
 
 Where:
 * $Type(N)$ is the structural type (e.g., "heading", "paragraph").
 * $Content(N)$ is the raw text belonging exclusively to that node.
+* $Metadata(N)$ is the node's canonically serialized structural
+  metadata (for PDF nodes: page number and bounding box; empty for
+  nodes that carry none).
 * The sum represents the concatenated hashes of all $k$ child nodes.
 
 ### $O(1)$ Cache Invalidation (The Shift Solution)

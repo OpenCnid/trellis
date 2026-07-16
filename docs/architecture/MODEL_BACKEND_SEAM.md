@@ -1,6 +1,8 @@
 # The model-backend seam (R2b design record)
 
-**Status:** DESIGN RECORD — ratified shape, zero implementation.
+**Status:** DESIGN RECORD — ratified shape; T1 (the §3 config surface +
+`rlm_backend.test.ts`, consumer-less until T2) LANDED Session 50
+(July 13, 2026, PR #95); T2–T4 not implemented.
 Authored Session 47 (July 13, 2026) as TTT-track rung R2b
 (`TEST_TIME_TRAINING.md` §12.6 Phase 0 step 2, the spec-before-pen
 rule). This record is the artifact the T-series task texts quote
@@ -26,7 +28,7 @@ from that census. No census correction was needed this session.
 
 The root RLM completion backend is hardcoded:
 `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}` at both
-`trellis_agent.py` construction sites (line 329 author mode, line 532
+`trellis_agent.py` construction sites (line 353 author mode, line 589
 research mode), with transport and API key resolved from ambient
 environment by the openai SDK. The TTT track's Phase 2 (R3: an open
 sparse checkpoint behind an OpenAI-compatible endpoint) is impossible
@@ -54,8 +56,8 @@ They are separable decisions and this record keeps them separated.
 
 ### 2.1 Root RLM completion — the seam this record designs
 
-The two `trellis_agent.py` construction sites (329/532) plus the
-experimental checker client (87/101 — disposition in §5). Moves via
+The two `trellis_agent.py` construction sites (353/589) plus the
+experimental checker client (97/111 — disposition in §5). Moves via
 the T-series: T1 gives it a validated config surface, T2 carries that
 surface across the process boundary, T3 rewires the construction
 sites, T4 proves the switch and the default against a fixture
@@ -218,7 +220,7 @@ bounded, not denied.
 
 ## 5. The checker client — FOLLOWS the seam (T3 scope)
 
-`make_entailment_check` (`trellis_agent.py:87,101`) constructs a
+`make_entailment_check` (`trellis_agent.py:97,111`) constructs a
 direct `openai.OpenAI()` with a hardcoded model literal, only under
 `TRELLIS_CITATION_ENTAIL=1` (experimental). Decision: **it follows
 the seam.** When the validated config provides a base URL/key/model,

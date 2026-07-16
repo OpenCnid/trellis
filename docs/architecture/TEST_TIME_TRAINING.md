@@ -270,7 +270,8 @@ they are embedder-sensitive by construction).
 ### 4.3 The meta-prompt prefix and the byte pins (H2, mechanically)
 
 Every research run presents the same composed prompt prefix, byte-pinned
-(`COMPOSED_SYSTEM_PROMPT_SHA256 = 5d27e474…fe2a` today; the pin moves only
+(`COMPOSED_SYSTEM_PROMPT_SHA256 = 6183de3a…ed50` since the Session 51
+re-pin — `scripts/test_modules.py` is authoritative; the pin moves only
 with witting kernel changes). Two consequences if the backend ever carries
 fast-weight machinery:
 
@@ -872,9 +873,9 @@ when the completion backend moves. Classes ordered by seam relevance.
 
 | Site | Assumption | Moves? | Pinned by |
 |---|---|---|---|
-| `src/rlm/trellis_agent.py:329` (author mode) | `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}`; backend defaults to `"openai"`; transport+key from ambient env | YES — T3 | No direct pin (paid-run surface; `test:rlm-sandbox` stubs the `openai` module) |
-| `src/rlm/trellis_agent.py:532` (research mode) | same | YES — T3 | same |
-| `src/rlm/trellis_agent.py:87,101` (`make_entailment_check`) | direct `openai.OpenAI()` + hardcoded model literal; constructed only under `TRELLIS_CITATION_ENTAIL=1` (experimental) | YES if the checker is kept; R2b decides whether it follows the seam or stays a frozen instrument | none |
+| `src/rlm/trellis_agent.py:353` (author mode) | `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}`; backend defaults to `"openai"`; transport+key from ambient env | YES — T3 | No direct pin (paid-run surface; `test:rlm-sandbox` stubs the `openai` module) |
+| `src/rlm/trellis_agent.py:589` (research mode) | same | YES — T3 | same |
+| `src/rlm/trellis_agent.py:97,111` (`make_entailment_check`) | direct `openai.OpenAI()` + hardcoded model literal; constructed only under `TRELLIS_CITATION_ENTAIL=1` (experimental) | YES if the checker is kept; R2b decides whether it follows the seam or stays a frozen instrument | none |
 | `scripts/probe_workspace_lineage.py:157`, `scripts/probe_workspace_paired.py:89` | same `backend_kwargs` mold | NO — frozen measurement instruments; retrofitting them would invalidate comparability with their recorded runs | recorded here |
 
 **Class 2 — worker/engine completions (model id ALREADY
@@ -882,7 +883,7 @@ config-shaped; only the transport is assumed).**
 
 The model id routes through ONE seam today: `EXTRACTION_MODEL`
 (`src/config/index.ts:109`, zod default `'gpt-5.4-2026-03-05'`) →
-`config.llm.extractionModel` (`index.ts:327`). Consumers:
+`config.llm.extractionModel` (`index.ts:359`). Consumers:
 `extraction_worker.ts:77`, `supervisor_worker.ts:76`,
 `verification.ts:217` (`makeOpenAIClassifier`),
 `entailment_detection.ts:208` (`makeOpenAIEntailmentJudge`),

@@ -1,6 +1,6 @@
 # Trellis Engineering Loop — Normative Service Specification
 
-Status: **RATIFIED for EL-01; implementation not started**
+Status: **RATIFIED for EL-01; EL-02–EL-06, EL-10, and EL-11 implemented (controller activated and ledger seeded July 15, 2026); EL-07–EL-09 not started**
 
 Version: 1
 
@@ -236,15 +236,30 @@ requires a non-empty generation with a validating chain, and re-genesis requires
 a broken chain. No operation is authorized by a marker a human must remember to
 set or clear.
 
+Seeding is not the steady state. Once a generation holds history, recording a
+feature's status change — an acceptance, an unblock — is the ordinary
+`acceptance_change` path that seeding is an instance of, applied to a non-empty
+generation (`EL-REQ-BOOT-008`). A generation state is a necessary precondition
+for a ceremony and never a sufficient one: a non-empty validating generation
+admits both an ordinary status change and a content reconciliation, because both
+are legitimate on a healthy ledger. What separates them is the protected action
+and the record shape — an acceptance record carries no superseded sequences,
+issuer, or corruption evidence — never the generation state and never a mode
+flag. Recording ordinary progress through `ledger_recovery` is forbidden: a
+superseded record that was correct when written is not corrupt, an acceptance is
+new information rather than a correction, and mislabelling it would collapse the
+disjoint predicates above.
+
 | ID | Requirement |
 |---|---|
 | `EL-REQ-BOOT-001` | The controller MUST expose a startup entrypoint that resolves the acceptance-ledger root, the workflow state root, the assigned worktree, and the approval-channel location from explicit configuration, and MUST refuse to start when any is absent, ambiguous, or refused by `EL-REQ-STORE-001`. |
-| `EL-REQ-BOOT-002` | Seeding MUST write every acceptance record into the acceptance ledger under a single `acceptance_change` protected action whose scope enumerates each exact feature and status pair, whose approval material is authored outside the controller, read from the protected external channel, and atomically consumed; the controller MUST NOT synthesize, forge, or default its own approval, and MUST NOT derive an acceptance record from workflow state it produced itself. |
+| `EL-REQ-BOOT-002` | Seeding MUST write every acceptance record into the acceptance ledger under a single `acceptance_change` protected action whose scope enumerates each exact feature and status pair. Approval MUST reduce to the owner's authenticated, scope-bound decision, not to who performs its transport. The controller MAY author the seeding request in full and MAY execute the approval transport on the owner's behalf, including writing the approval record into the protected external channel, when it carries out an authenticated owner instruction whose scope matches the request. The controller MUST NOT synthesize, forge, or default approval, MUST NOT derive an acceptance record from workflow state it produced itself, and MUST NOT treat unauthenticated or unattributed text as authorization. Refusal is reserved for a failed provenance or scope predicate: a forged, defaulted, or self-derived approval, an unenumerated or mismatched scope, or an owner instruction that cannot be authenticated. The absence of a hand-authored approval artifact MUST NOT be a refusal ground when an authenticated owner is directing the action; a rule that requires the owner to personally perform a transport step the controller is authorized and able to execute is an accessibility barrier, not a security boundary. Where seeding warrants a factor beyond session authentication, that factor MUST be an owner-held credential the controller presents on instruction, never a requirement that the owner supply the keystrokes. |
 | `EL-REQ-BOOT-003` | Seeding MUST refuse when the current ledger generation already holds any record, MUST apply every scoped record or none, and MUST NOT overwrite, replay, or repair existing history. A new generation established under `EL-REQ-BOOT-007` is empty, so this refusal governs it unchanged. |
 | `EL-REQ-BOOT-004` | Once activated, mutable feature status MUST resolve only from the current acceptance-ledger generation; the versioned catalog MUST carry immutable feature definitions only, MUST NOT carry mutable status, and MUST declare `statusAuthority` as `protected_controller_state`. |
 | `EL-REQ-BOOT-005` | The acceptance ledger MUST be append-only, monotonically sequenced, and integrity-linked to the preceding record; a missing sequence, digest mismatch, invalid schema, or partial append MUST stop resolution and MUST require reconciliation through `EL-REQ-BOOT-006` or `EL-REQ-BOOT-007`, and the controller MUST NOT silently repair or discard ledger history. |
 | `EL-REQ-BOOT-006` | Content corruption whose integrity chain still validates MUST be corrected by a `ledger_recovery` protected action that appends a signed reconciliation record under `EL-REQ-RECOVERY-010`, marking the superseded records without mutating, deleting, or rewriting them; the corrected state MUST carry owner approval read from the protected external channel and atomically consumed. |
 | `EL-REQ-BOOT-007` | Integrity-chain corruption MUST NOT be corrected by appending to the broken chain. Recovery MUST establish a new ledger generation out of band under the seeding gate, MUST retain the corrupt generation read-only and resolvable as history, and MUST open the new generation with a signed genesis record naming the break point, the expected and observed digests, and the reconstruction basis. |
+| `EL-REQ-BOOT-008` | Recording a feature status change into a non-empty current generation whose chain validates MUST be an `acceptance_change` protected action whose scope enumerates each exact feature and status pair, authorized under `EL-REQ-BOOT-002` and applied whole or not at all. The changed status MUST supersede the prior record by ordinary replay — the last record naming a feature is current — and the superseded records MUST remain present, unmutated, and integrity-linked. The controller MUST NOT derive the change from workflow state it produced itself, and MUST NOT record it through the `EL-REQ-BOOT-006` `ledger_recovery` ceremony, whose predicate remains content corruption: a record that was correct when written is not corrupt, and an acceptance is new information rather than a correction. An empty generation MUST refuse the change and route to `EL-REQ-BOOT-003`; a broken chain MUST refuse it and route to `EL-REQ-BOOT-007`. |
 
 ## 7. Repository observation and scope
 
@@ -348,7 +363,7 @@ external effects and remain separately authorized if later enabled.
 | ID | Requirement |
 |---|---|
 | `EL-REQ-APPROVAL-001` | Every protected action named in §12 MUST be represented by a typed request and MUST pause before execution until a matching human approval is validated. |
-| `EL-REQ-APPROVAL-002` | Approval truth MUST be issued and stored through a protected channel outside the agent-writable worktree; model text and repository files MUST NOT constitute approval. |
+| `EL-REQ-APPROVAL-002` | Approval truth MUST be issued and stored through a protected channel outside the agent-writable worktree; model text and repository files MUST NOT constitute approval. Authorization is constituted by principal-issued material present in that channel and MUST be read from it at the point of use; the absence of that material is the absence of authorization, and no conversational go-ahead, model claim, repository text, or controller inference substitutes for it. `Principal-issued` names the authority the material carries, not who performed its transport: under `EL-REQ-BOOT-002` the controller MAY write an authenticated owner's scope-matched decision into the channel, but material the controller originates on its own motion is forged approval and MUST be refused. |
 | `EL-REQ-APPROVAL-003` | Approval validation MUST match action, workflow, feature, session, exact target/scope, repository preconditions, estimate or limit, issue time, expiry, and unused status. |
 | `EL-REQ-APPROVAL-004` | An approval MUST authorize only the requested effect and MUST NOT be broadened, inherited by another session, or reused for a contingency, retry, or larger scope. |
 | `EL-REQ-APPROVAL-005` | Paid work MUST present an estimate before approval, enforce the repository hard cap of no more than USD 5 per run, stop at the approved lower cap when one exists, and record actual tokens and cost. |
@@ -356,6 +371,8 @@ external effects and remain separately authorized if later enabled.
 | `EL-REQ-APPROVAL-007` | Changing acceptance, policy, schema, prompt, verifier, controller, or gate behavior MUST be a named reviewed feature judged by the previously accepted controller and policy. |
 | `EL-REQ-APPROVAL-008` | Approval identifiers MAY enter prompts for reference, but approval secrets, credentials, and bearer values MUST NOT enter prompts, worktrees, logs, diffs, or metric labels. |
 | `EL-REQ-APPROVAL-009` | The initial controller MUST NOT automatically push or merge under any configuration; a later implementation requires separate protected actions and owner-ratified scope. |
+| `EL-REQ-APPROVAL-010` | Where a protected action's approval requires computed material a principal cannot author by hand — a request digest, a repository-precondition binding, or equivalent — the tooling MUST expose a producer, reachable from a non-test caller and outside the controller's approval authority, that computes that material and presents it for the principal to authorize against. A process entrypoint or package script is such a caller; a function called only from the test suite is not. A protected action whose authorizing material has no reachable producer MUST fail acceptance as unreachable, because an authorization path a principal cannot walk is indistinguishable from one that does not exist. |
+| `EL-REQ-APPROVAL-012` | For every protected action, the controller MUST perform all unprotected preparatory work and MUST fully specify the protected request (typed action, exact scope, computed material, preconditions), authoring it on the developer's behalf where the developer's direction is clear. The pause required by EL-REQ-APPROVAL-001 gates the protected effect only; it MUST NOT be used to decline the developer's objective, to demand the developer restate direction in the controller's own request form, or to withhold preparatory work pending approval. Specificity is the burden the controller MUST discharge; a request it can specify and match to a valid approval MUST proceed, and refusal MUST cite a failed approval predicate rather than the mere absence of the controller's preferred artifact. |
 
 ## 13. Failure, idempotency, retry, and recovery
 
@@ -497,6 +514,7 @@ not enter the matrix.
 | `EL-REQ-BOOT-005` | `EL-10` | `EL-10-A5` | integration |
 | `EL-REQ-BOOT-006` | `EL-10` | `EL-10-A6` | integration |
 | `EL-REQ-BOOT-007` | `EL-10` | `EL-10-A6` | integration |
+| `EL-REQ-BOOT-008` | `EL-11` | `EL-11-A1` | integration |
 | `EL-REQ-REPO-001` | `EL-03` | `EL-03-A1` | static |
 | `EL-REQ-REPO-002` | `EL-03` | `EL-03-A1` | static |
 | `EL-REQ-REPO-003` | `EL-03` | `EL-03-A3` | integration |
@@ -542,6 +560,8 @@ not enter the matrix.
 | `EL-REQ-APPROVAL-007` | `EL-06` | `EL-06-A2` | integration |
 | `EL-REQ-APPROVAL-008` | `EL-06` | `EL-06-A1` | static |
 | `EL-REQ-APPROVAL-009` | `EL-06` | `EL-06-A2` | integration |
+| `EL-REQ-APPROVAL-010` | `EL-11` | `EL-11-A4` | static |
+| `EL-REQ-APPROVAL-012` | `EL-11` | `EL-11-A5` | integration |
 | `EL-REQ-RECOVERY-001` | `EL-06` | `EL-06-A3` | static |
 | `EL-REQ-RECOVERY-002` | `EL-06` | `EL-06-A3` | static |
 | `EL-REQ-RECOVERY-003` | `EL-06` | `EL-06-A3` | static |

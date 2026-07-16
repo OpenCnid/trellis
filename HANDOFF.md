@@ -8,13 +8,16 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–55 and their same-day follow-ons (July 4–14, 2026; PRs
-#21–#102) are complete, merged, and ARCHIVED: the full dated ledger for
-that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
+Sessions 1–58 and their same-day follow-ons (July 4–14, 2026; PRs
+#21–#102 and the first engineering-loop feature branches) are complete,
+merged, and ARCHIVED: the full dated ledger for that span lives
+verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 55 with the Session 60 EL-06 feature branch — this file keeps
-full narrative only for the most recent five sessions, now 56–60). The
+recently Session 58 with the Session 63 EL-11 PR. The roadmap's live §5
+window is now Sessions 59–63; this digest carries full narrative for
+Sessions 56–60 and 63, with 61–62 compressed into the Session 63
+paragraph, §1.16, and §2). The
 one-paragraph digest, oldest first; §1 below carries everything from
 this span that a new session must actually know:
 
@@ -872,16 +875,37 @@ Session 55 moved verbatim to the archive; the live window is 56–60. Manual
 accepted the closeout and explicitly authorized commit, merge, and push to
 `master`.
 
-Your objective is **Session 61: engineering-loop `EL-07` — bounded pilot,
-repeated evaluation, and a manual-to-generated handoff migration verdict.**
-EL-06 owner acceptance dependency-unblocks EL-07. Start no model trial, paid
-call, or migration until its separate protected gates are satisfied. Manual
-`HANDOFF.md` remains authoritative throughout comparison unless the owner
-records an adopt verdict.
+**Session 63 (July 16, 2026, `implement-el11-approval-reachability`) implemented
+engineering-loop `EL-11` and opened PR #114, zero-model and zero-paid; owner
+acceptance is not recorded.** Sessions 61 and 62 had activated the controller and
+seeded the ledger (see §1.16 and §2); EL-11 closed the write-once defect they
+left. The steady-state `acceptance_change` path landed (`recordAcceptanceChange`,
+`EL-REQ-BOOT-008`): an owner can now record a status change into a populated
+generation, superseding by ordinary replay while the superseded records survive.
+The classifier became `admissibleLedgerCeremonies`, returning the set a state
+admits — a healthy populated ledger admits both an ordinary change and a content
+reconciliation, told apart by protected action and record kind, never by a flag.
+The reachable-producer requirement (`EL-REQ-APPROVAL-010`) and its static check
+landed with `print-acceptance-request` / `record-acceptance`; `EL-01-A2` was
+mechanized (`analyzeConformanceLinkage`); `EL-REQ-APPROVAL-012` got its §18 row and
+the `APPROVAL-002` provenance clause was amended in text. 116 declared / 116
+mapped, EL-06 and EL-10 row-pins intact; catalog 12 features; `npm test` 1,239
+across 110. **EL-11 also found that both EL-10 recovery ceremonies have no non-test
+caller** — under the new `EL-REQ-APPROVAL-010` that is EL-10 failing acceptance as
+unreachable, reported and pinned rather than routed around, and it is the next
+objective. PR #114 is open against `master`, not merged; the acceptance ledger is
+byte-identical to preflight.
+
+Your objective is **Session 64: engineering-loop — make EL-10's two
+acceptance-ledger recovery ceremonies reachable, so an owner can run them and EL-10
+can be accepted.** `recoverLedgerContent` and `reGenesisLedger` are correct and
+tested and have no caller outside `tests/`; under `EL-REQ-APPROVAL-010` that fails
+EL-10 acceptance as unreachable, which blocks EL-07. §3 carries the objective.
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
-`EL-06` are owner-accepted. `EL-07` is dependency-unblocked.
+`EL-06` are owner-accepted; `EL-10` and `EL-11` are implemented with owner
+acceptance not recorded for either; `EL-07` is blocked pending an owner unblock.
 The merged Session 54 tooling-shape objective is preserved in Appendix A and
 remains paused unless the owner re-prioritizes it.
 
@@ -1372,96 +1396,130 @@ immutable, content-addressed physical location in source material.
    - The fixture MCP server (`scripts/fixture_mcp_server.py`) is the
      only MCP server acceptance ever configures.
 
-16. **Engineering-session loop (owner-prioritized July 14, 2026).** The
-    manual `HANDOFF.md` cycle is an explicit multi-session program. Its
-    bounded feature DAG and bootstrap protocol live in
-    `docs/product/engineering-loop/ROADMAP.md` with the machine twin
-    `features.json`; `tools/engineering-loop/SPEC.md` is normative. The
-    controller remains out of process, one-writer, and protected outside the
-    worktree. EL-02 supplies strict domain validation, exhaustive transition
-    authority, locking, event-first snapshots/replay, and fake idempotent
-    effects. EL-03 now supplies controller-computed repository identity and
-    complete changed paths, segment-safe scope and divergence refusal, bounded
-    shell-free command evidence, protected digest-addressed retained bytes,
-    trusted strict reports, and pure byte-pinned status/handoff previews. Its
-    12 requirements passed deterministic acceptance and were owner-ratified.
-    EL-04 supplies four invariant role assets, strict compiler/input/output
-    contracts, pure deterministic assembly over six typed downstream
-    collections, explicit UTF-8 byte budgets, digest/version/snapshot pins, and
-    contamination/authority refusal. Its exact seven requirements passed
-    deterministic acceptance and were owner-ratified in merged PR #104. EL-05
-    now supplies the adapter-neutral runner boundary, pinned Codex app-server
-    adapter, stable correlations, bounded ordered redacted lifecycle
-    observations, exactly-one terminal reports, and pure episode rotation. Its
-    exact 15 requirements passed deterministic acceptance and were owner-
-    ratified on July 15, 2026. EL-06 now supplies immutable acceptance
-    definitions, controller-observed per-command verification, exact external
-    approval policy, exhaustive bounded recovery, fresh least-privilege
-    checker execution, redaction, and retention/tombstones. Its exact 36
-    requirements passed deterministic acceptance and were owner-ratified on
-    July 15, 2026. Manual `HANDOFF.md` stays
-    authoritative throughout EL-07 unless the owner records an adopt verdict.
+16. **Engineering-session loop (owner-prioritized July 14, 2026).** The manual
+    `HANDOFF.md` cycle is an explicit multi-session program. Its bounded feature
+    DAG and bootstrap protocol live in `docs/product/engineering-loop/ROADMAP.md`
+    with the machine twin `features.json`; `tools/engineering-loop/SPEC.md` is
+    normative. The controller is out of process, one-writer, and protected
+    outside the worktree. EL-02 supplies strict domain validation, exhaustive
+    transition authority, locking, event-first snapshots/replay, and fake
+    idempotent effects. EL-03 supplies controller-computed repository identity,
+    complete changed paths, scope and divergence refusal, bounded shell-free
+    command evidence, and pure byte-pinned status/handoff previews. EL-04
+    supplies invariant role assets and strict prompt contracts. EL-05 supplies
+    the adapter-neutral runner boundary and pinned Codex adapter. EL-06 supplies
+    immutable acceptance definitions, controller-observed verification, exact
+    external approval policy, bounded recovery, and a fresh least-privilege
+    checker.
+
+    **EL-10 activated the controller (Session 62).** It runs as a real process:
+    `npm run el:activate` resolves the acceptance-ledger root, workflow state
+    root, worktree, and approval channel from explicit configuration, refuses
+    contained/aliased/symlink-reachable roots, and reports any path that resolves
+    somewhere other than configured. The **acceptance ledger**
+    (`acceptance_ledger.ts`) is program-scoped in its own protected root,
+    append-only, monotonically sequenced, integrity-linked, `actor` pinned to
+    `human` — a new artifact because `StateSnapshotSchema` is single-feature and
+    nothing in workflow state could express which features are accepted. Status
+    resolves from it and from nowhere else: the catalog carries immutable
+    definitions only, and `feature.schema.json` refuses `bootstrapStatus` and
+    pins `statusAuthority` as a `const`. Seeding is one owner-approved
+    `acceptance_change` over enumerated `(feature, status)` pairs, once-only,
+    all-or-nothing, with consumption derived from replay. Two **recovery
+    ceremonies** have disjoint predicates re-derived every run: content
+    corruption on a validating chain appends a signed reconciliation;
+    integrity-chain corruption recovers only by out-of-band re-genesis, because a
+    successor's `previousDigest` would inherit or mask the break. Building a
+    synthetic workflow history to reach `accepted` is forbidden — it would forge
+    controller-attested events as the trust store's first entry.
+
+    **The lesson that generalizes:** 1,161 passing tests established that the
+    kernel was correct, never that it was reachable, and no test could fail
+    because none asserted a non-test caller existed. `statusAuthority` rotted four
+    features past its stated end for the same reason: prose, no requirement, no
+    row, no failing test. Prefer a predicate the check re-derives every run over a
+    flag someone must remember to clear, and falsify every new guard — revert the
+    fix and watch it go red — before trusting it.
+
+    **EL-11 gave the ledger its steady-state write path and closed the gate's
+    mapping and reachability gaps (Session 63).** The ledger shipped write-once —
+    seeding refuses a non-empty generation and the only other gated writes were
+    the two corruption ceremonies — so no status could ever change.
+    `recordAcceptanceChange` (`acceptance_change.ts`, `EL-REQ-BOOT-008`) appends an
+    owner-approved `acceptance_change` to a non-empty validating generation,
+    superseding by ordinary replay while the superseded records stay present and
+    integrity-linked; it shares `buildAcceptanceRecordChain` with seeding because
+    SPEC §6.1 holds that seeding is that path applied to an empty ledger.
+    `classifyLedgerGeneration` became `admissibleLedgerCeremonies`, returning the
+    SET of ceremonies a state admits: a healthy populated ledger admits both an
+    ordinary change and a content reconciliation, separated by protected action and
+    record kind, never by state and never by a mode flag — the three SPEC §6.1
+    predicates stay disjoint and total. `print-acceptance-request` /
+    `record-acceptance` make the path reachable, per `EL-REQ-APPROVAL-010`: a
+    protected action whose computed material has no reachable producer fails
+    acceptance as unreachable. Two static checks in `conformance.ts` mechanize
+    invariants that had only been prose — `analyzeConformanceLinkage` (`EL-01-A2`:
+    every declared requirement carries a §18 row) and `analyzeProducerReachability`
+    (every computed-material producer resolves a non-test caller, derived from the
+    import graph). The second **pins a live defect**: both EL-10 recovery ceremonies
+    have no non-test caller, so EL-10 fails acceptance as unreachable until they are
+    wired — the next objective.
 
 ## 2. Current baseline
 
 Repository state at handoff creation:
 
-- **Program and Git:** `origin/master` is
-  `9d50b0e9013176b8c21f42bd1f429c9adf295803`, the owner-accepted EL-06 commit.
-  Session 61 was assigned `EL-07`; **its preflight refused, and no EL-07 work
-  was performed.** Session 61 instead raised, ratified, and specified `EL-10`.
-  Its changes to `SPEC.md`, `features.json`, product `ROADMAP.md`,
-  `handoff_renderer.test.ts`, and the new EL-10 record may be uncommitted
-  pending owner Git authorization; observe actual Git state rather than assuming
-  either way.
-- **Why EL-07 was refused (the finding that created EL-10):** the preflight
-  requires protected controller acceptance and states that repository prose is
-  not acceptance. **No protected controller state has ever existed.**
-  `StateStore.open()` (`state_store.ts:249`) takes a caller-supplied `stateRoot`
-  with no default and no environment variable; every caller is a test using a
-  temp directory; no CLI, entrypoint, `package.json` bin, npm script, or `src/`
-  importer exists; no state root exists on disk. EL-02 through EL-06 built a
-  correct, well-tested, entirely inert library. **1,161 passing tests establish
-  that the kernel is correct, not that it is reachable.** Separately,
-  `statusAuthority` still reads `bootstrap_git_until_el_02` — the migration
-  product-roadmap §1 scheduled for the end of EL-02 never happened, because it
-  lived in prose with no `EL-REQ-*`, no conformance row, and no test that could
-  fail.
-- **Conformance:** SPEC has **111** mandatory requirements mapped 111/111
-  (was 106; `EL-10` added `EL-REQ-BOOT-001` through `EL-REQ-BOOT-007` in §6.1).
-  `EL-10` owns exactly those seven SPEC §18 rows; recompute the set from §18
-  before design. Its catalog carries six immutable acceptance bindings,
-  `EL-10-A1` through `EL-10-A6`. `EL-06` remains 36/36/36 with zero outstanding.
-- **Acceptance baseline:** `npm test` passes **1,161 tests across 105 files** —
-  unchanged from the EL-06 baseline, because Session 61 changed assertions and
-  pins without adding or removing a test. The focused engineering-loop command
-  passes **285 tests across 18 files**. Draft 2020-12 catalog validation now
-  reports **11 features**. Build, Python, Compose, SPEC linkage, and diff checks
-  pass.
-- **Catalog shape, and the mechanism behind it:** `EL-10` carries `order: 10`
-  but **executes before `EL-07`**, which is `blocked`. The owner declined a
-  renumber, and the catalog audit forbids the obvious alternative: dependencies
-  must have a lower `order` than their dependent (`requirements.test.ts:204`)
-  and `order` must equal array index (`:190`), so a forward `EL-07 → EL-10` edge
-  is inexpressible. The prerequisite is therefore carried by EL-07's `blocked`
-  status plus prose, not a dependency edge. `computeNextFeature()` filters to
-  `planned` candidates, so `next_feature` resolves to `EL-10`. Unblocking EL-07
-  after EL-10 is accepted is a **manual owner act**, and `next_feature` correctly
-  resolves to `null` in that interval.
-- **EL-06 authority boundary (unchanged):** only immutable controller-observed
-  command results can pass deterministic verification. Approval truth comes only
-  from an injected protected external channel. Human review is required for
-  acceptance. Recovery is pure and bounded; unknown effects block. Checker work
-  is fresh, read-only, credential/network/effect-free, and advisory.
-- **Environment:** fresh `npm ci` installed 317 packages with 0 vulnerabilities.
-  Local Node v20.19.2 emits four Babel Node 22.18+ engine warnings; CI uses Node
-  22 and local acceptance passed. No model completion, paid call, real protected
-  effect, or deterministic-test remote call occurred in EL-06 or Session 61.
-- **Authority:** manual `HANDOFF.md` remains authoritative. Renderer previews,
-  prompt-role outputs, runner observations, conversation history, and model
-  summaries are advisory only. They cannot create controller evidence, approval,
-  verification, effects, acceptance, or transitions. `EL-10` records no adopt
-  verdict and does not change handoff authority.
+- **Program and Git:** at handoff creation `origin/master` is
+  `272a18eceb078650b96800faa4faea7e2ac532ce` (PR #113, the EL-11 scope commit)
+  and EL-11 itself is PR #114, committed on branch
+  `implement-el11-approval-reachability` (`e7cd809`) and pending owner merge. By
+  the time this session runs, expect EL-11 merged; observe actual Git state
+  rather than assuming either way.
+- **The controller runs.** `npm run el:activate` and
+  `tsx tools/engineering-loop/src/activate.ts` are real non-test callers, with
+  `check`, `status`, `print-seed-request`, and `seed` commands. This closes the
+  finding that created EL-10: EL-02 through EL-06 were a correct, thoroughly
+  tested, entirely **inert** library, and 1,161 passing tests spoke only to
+  correctness, never to reachability.
+- **Status lives in the acceptance ledger, not in Git.** The owner affirmed the
+  eleven `(feature, status)` pairs and the activation run seeded generation 0
+  against clean `master`: eleven records, chain valid, approval consumed,
+  re-seeding refused. `statusAuthority` is `protected_controller_state` and
+  `bootstrapStatus` has left the catalog and `feature.schema.json`, which now
+  **refuses** the drift rather than merely not exercising it. Read status with
+  `npm run el:activate -- status`; prose restating it is convenience, never
+  authority.
+- **Protected roots:** `D:\trellis-protected\engineering-loop\{ledger,state,channel}`.
+  **Do not place a protected root under a per-user application-data directory.**
+  A containerized host (MSIX here, also Flatpak, Snap, the macOS app sandbox)
+  silently redirects `%LOCALAPPDATA%` writes into a private package cache, so the
+  same configuration names a different directory for a contained process than for
+  your shell — the owner would issue approval into a channel the controller never
+  reads and both sides would see a coherent, empty, disagreeing ledger.
+  `check` and `status` report any such redirect under `redirects`; compare it
+  against what you configured.
+- **Conformance:** SPEC declares **116** requirements and maps **116**, zero
+  unmapped — EL-11 gave `EL-REQ-APPROVAL-012` its row and mechanized `EL-01-A2`.
+  `EL-10` owns exactly the seven `EL-REQ-BOOT-*` rows; `EL-06` stays 36; `EL-11`
+  owns three (`EL-REQ-BOOT-008`, `EL-REQ-APPROVAL-010`, `EL-REQ-APPROVAL-012`).
+- **Acceptance baseline:** `npm test` passes **1,239 tests across 110 files**; the
+  focused engineering-loop command passes **363 tests across 23 files**. Draft
+  2020-12 catalog validation reports **12 features**. Build, Python, Compose, and
+  diff checks pass. The full suite is **flaky under file parallelism on Windows**
+  (`ENOTEMPTY`/timeout on temp-dir cleanup); verified pre-existing by stashing all
+  work and running clean `HEAD`, which fails 2–5 per run including untouched
+  files. Use `--no-file-parallelism` and say which you ran.
+- **EL-10 and EL-11 acceptance is not recorded.** Both are implemented; neither
+  is accepted. `next_feature` resolves to `EL-10` until the owner records
+  acceptance, and to `null` in the interval before EL-07 is unblocked — both
+  correct, neither a defect. EL-11's reachability check pins a live blocker on
+  EL-10 acceptance: both EL-10 recovery ceremonies have no non-test caller, so
+  under `EL-REQ-APPROVAL-010` EL-10 fails acceptance as unreachable until they are
+  wired — this session's objective.
+- **Authority:** manual `HANDOFF.md` remains authoritative. Approval reduces to
+  the owner's authenticated, scope-bound decision, not to who performs its
+  transport; the controller may author the request and execute the transport, and
+  may never originate the approval.
 
 Fresh worktrees do not contain `node_modules`. Start with:
 
@@ -1477,17 +1535,33 @@ docker compose config --quiet
 
 Work on one feature branch and target `master`.
 
-## 3. Session 62 problem statement
+## 3. Session 64 problem statement
 
 <feature_objective>
 
-**Engineering-loop `EL-10`: implement controller activation and the
-status-authority migration — a program-scoped acceptance ledger, a real
-protected approval channel, a startup entrypoint, owner-approved seeding, and
-the move of mutable feature status out of the versioned catalog.**
+**Engineering-loop: make EL-10's two acceptance-ledger recovery ceremonies
+reachable, so an owner can run them and EL-10 can be accepted.**
 
-Paid work is forbidden for the whole of EL-10. This feature is deterministic
-throughout.
+`recoverLedgerContent` and `reGenesisLedger` are implemented, tested, and
+correct, and have no caller outside `tests/`. There is no command, no
+`package.json` script, and no process entrypoint that invokes either, and
+`ledger_recovery.ts` is not imported by `activate.ts` at all. An owner facing a
+corrupt ledger has only the hand-edit of the protected file that the paired
+ceremonies exist to eliminate, and cannot author matching approval material for a
+request digest no producer computes.
+
+EL-11 added `EL-REQ-APPROVAL-010`: a protected action whose authorizing material
+has no reachable producer MUST fail acceptance as unreachable. Both ceremonies are
+protected actions with computed material and no reachable producer, so under that
+requirement **EL-10 currently fails acceptance as unreachable.** Closing this is
+the precondition for recording EL-10 accepted, which is the precondition for
+EL-07.
+
+In priority order: the `print-recovery-request` / `recover` command pair (content
+reconciliation, `EL-REQ-BOOT-006`), then the `print-genesis-request` /
+`re-genesis` command pair (`EL-REQ-BOOT-007`), then flip the reachability pin from
+two-unreachable to zero, falsified. Paid work is forbidden for the whole feature.
+This is deterministic throughout.
 
 </feature_objective>
 
@@ -1497,43 +1571,75 @@ Role: principal systems engineer.
 
 Authority order: code > glossary > prose.
 
-Controller-observed repository state, commands, protected approvals, and durable
-evidence outrank runner, checker, grader, model, conversation, transcript,
-renderer, and repository-prose reports.
+Controller-observed state, commands, and durable evidence outrank runner, checker,
+model, conversation, transcript, renderer, and repository-prose reports.
 
 Human authority owns objectives, architecture, acceptance, protected approvals,
 paid work, staging, commit, push, merge, and changes to accepted controller
-policy. **Human authority alone authors approval material.** A controller that
-could author its own approval would make the acceptance ledger worthless; this
-is the single invariant EL-10 exists to establish.
+policy.
 
-Runner, checker, grader, and model output is bounded advisory data only. It
-cannot create or satisfy verification evidence, consume approval, authorize
-effects, accept a feature, or transition controller state.
+**Approval reduces to the owner's authenticated, scope-bound decision, not to who
+performs its transport** (`EL-REQ-BOOT-002`). The controller MAY author a protected
+request in full and MAY execute the approval transport on an authenticated owner
+instruction whose scope matches. It MUST NOT synthesize, forge, or default
+approval, MUST NOT derive acceptance from workflow state it produced itself, and
+MUST NOT treat unauthenticated text as authorization. Refusal cites a failed
+provenance or scope predicate, never the absence of a preferred artifact.
 
-Manual `HANDOFF.md` remains authoritative. EL-10 records no adopt verdict and
-changes no handoff authority.
+Manual `HANDOFF.md` remains authoritative. This feature records no adopt verdict
+and changes no handoff authority.
 
 </invariant_authority>
 
 <response_hypershot priority="highest">
 
-Feature: EL-10
-Phase: (PREFLIGHT|DESIGN_CHECKPOINT|LEDGER|CHANNEL|ENTRYPOINT|SEEDER|AWAITING_OWNER_ACTIVATION|MIGRATION|CLOSEOUT)
-Result: (READY_FOR_OWNER_REVIEW|AWAITING_OWNER_ACTIVATION|BLOCKED)
+Feature: EL-10 recovery-ceremony reachability
+Phase: (PREFLIGHT|DESIGN_CHECKPOINT|COMMANDS|REACHABILITY|TESTS|CLOSEOUT)
+Result: (READY_FOR_OWNER_REVIEW|BLOCKED)
 Summary: {Evidence_Based_Outcome_Stating_Only_What_Engine_Observation_Supports}
-Requirements: {Required_Count}/{Implemented_Count}/{Deterministically_Verified_Count}/{Outstanding_Count}
-Catalog bindings: {Required_Count}/{Satisfied_Count}/{Outstanding_Count}
-Ledger: {Root_Resolution_Record_Count_Sequence_Chain_And_Integrity_State}
-Approvals: {Read_Validated_Consumed_Refused_Counts_By_Refusal_Class}
-Refusal matrix: {Condition_Count_Covered_Count_Passing_Count_Uncovered_Count}
+Commands: {Ceremony_To_Command_Pair_Mapping_Implemented_And_Verified}
+Reachability: {Producer_To_Non_Test_Caller_Before_And_After_With_The_Pin_State}
+Falsification: [{New_Or_Flipped_Check_And_The_Observed_Red_That_Proves_It_Can_Fail}]
 Verification: [{Exact_Command_And_Engine_Observed_Result}]
 Authority findings: {Controller_Human_And_Advisory_Report_Separation}
 Git findings: {Worktree_Branch_HEAD_Origin_Master_Changed_Paths_Staged_Committed_State}
 Audit findings: [{Bounded_Finding_And_Disposition}]
+Outstanding owner acts: [{Act_And_Why_Only_The_Owner_Can_Perform_It}]
 Next: {Exact_Next_Gate_And_Explicit_Owner_Actions}
 
 </response_hypershot>
+
+<why_this_feature_exists>
+
+Read this before the design; without it the requirements look like plumbing.
+
+**A trust anchor with no runnable recovery is unrecoverable by its own tooling
+once corrupt.** Record §9.9 added the two ceremonies precisely because seeding
+refuses a non-empty ledger and repair is forbidden, so a corrupt generation had no
+path back but hand-editing the protected file — the untrusted-side write the whole
+design exists to prevent. EL-10 closed that deadlock **in the library** and left
+it open **in practice**: the ceremonies exist and pass their tests, and nothing
+can call them.
+
+This is the same defect the program has now shipped four times. `statusAuthority`
+read a stale value for four features because it lived in prose with no failing
+test. The EL-07 preflight refused because `StateStore.open()` had no caller outside
+tests. The steady-state write path was never built because §9.6 carried no
+requirement. And the recovery ceremonies were built but never wired, because
+"correct" and "reachable" are independent claims and 1,161 — then 1,239 — passing
+tests spoke only to the first. EL-11 turned that independence into a check
+(`analyzeProducerReachability`) that currently **pins the two unreachable
+ceremonies as a known defect**. This feature flips that pin to zero by building
+the missing producers, which is the honest way to clear it: not by weakening the
+check, but by making the thing it demands true.
+
+**Do not weaken the check to pass.** The pin naming the two unreachable ceremonies
+is evidence, not an obstacle. Reachability is re-derived from the import graph
+every run, so wiring either ceremony to an entrypoint turns the pin's expectation
+red in the same commit that fixes it — recompute it wittingly, to the empty set,
+with the reason recorded inline.
+
+</why_this_feature_exists>
 
 <preflight_gate priority="highest">
 
@@ -1541,236 +1647,147 @@ Complete every item before an implementation edit. Report `BLOCKED` with exact
 evidence if any item is absent or contradictory.
 
 1. Read `AGENTS.md` and `HANDOFF.md` completely.
-2. Observe the assigned worktree path, branch, HEAD, status, remotes, upstream,
-   and recent commits.
-3. Fetch `origin/master` with pruning.
-4. Require `origin/master` to equal
-   `9d50b0e9013176b8c21f42bd1f429c9adf295803`.
-5. Confirm EL-06 owner acceptance across `features.json`, product `ROADMAP.md`,
-   `TRELLIS_ROADMAP.md`, `HANDOFF.md`, and merged Git history.
-6. Observe whether Session 61's EL-10 ratification changes
-   (`SPEC.md` §6.1, `features.json` `EL-10` and `EL-07` `blocked`, product
-   `ROADMAP.md`, `handoff_renderer.test.ts` pins,
-   `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md`) are committed, uncommitted, or
-   absent. Reconcile before editing; do not assume.
-7. Confirm `EL-10` is `planned`, its one dependency `EL-06` is `accepted`, and
-   the derived `next_feature` resolves to `EL-10`.
-8. Confirm the worktree is clean of unrelated changes.
-9. Create or switch to `implement-el10-controller-activation` from the required
-   `origin/master` commit only after every preceding check passes. Do not base it
-   on a stale local `master`.
-
-**Do not run this feature's own preflight against protected controller state.**
-No protected controller state exists — that absence is precisely what EL-10
-builds. Requiring it here would be circular.
+2. Observe the assigned worktree path, branch, HEAD, status, remotes, upstream, and
+   recent commits. Fetch `origin/master` with pruning. Expect EL-11 (PR #114)
+   merged; if it is not, the reachability check and `acceptance_change.ts` this
+   feature builds on are absent — report `BLOCKED` rather than reintroducing them.
+3. Confirm the acceptance ledger resolves: `npm run el:activate -- status` against
+   the configured protected roots reports generation 0, eleven records, integrity
+   `valid`, and `ceremonies` `["steady_state_acceptance","ledger_recovery"]`. If
+   your sandbox cannot see the protected roots, the ledger is absent by design
+   (§9.7, machine-local); report its observed state either way and build against
+   temporary fixtures, which construct their own ledgers.
+4. Run `npx vitest run tools/engineering-loop/tests/requirements.test.ts` and
+   confirm the reachability test currently pins exactly
+   `['ledger_recovery', 're_genesis']` as unreachable. That is the defect you close.
+5. Confirm the worktree is clean of unrelated changes.
+6. Create or switch to `implement-el10-recovery-reachability` from the required
+   `origin/master` commit only after every preceding check passes.
 
 </preflight_gate>
-
-<immutable_feature_bindings>
-
-SPEC §6.1 assigns exactly seven requirements to `EL-10`. Recompute this set from
-SPEC §18 before design and require exactly:
-
-- `EL-REQ-BOOT-001`: a startup entrypoint resolves the acceptance-ledger root,
-  workflow state root, assigned worktree, and approval-channel location from
-  explicit configuration, and refuses to start when any is absent, ambiguous, or
-  refused by `EL-REQ-STORE-001`.
-- `EL-REQ-BOOT-002`: seeding writes every acceptance record under a single
-  `acceptance_change` protected action whose scope enumerates each exact feature
-  and status pair, whose approval material is authored outside the controller,
-  read from the protected external channel, and atomically consumed; the
-  controller never synthesizes, forges, or defaults its own approval, and never
-  derives an acceptance record from workflow state it produced itself.
-- `EL-REQ-BOOT-003`: seeding refuses a non-empty ledger, applies every scoped
-  record or none, and never overwrites, replays, or repairs existing history.
-- `EL-REQ-BOOT-004`: mutable feature status resolves only from the acceptance
-  ledger; the catalog carries immutable feature definitions only and declares
-  `statusAuthority` as `protected_controller_state`.
-- `EL-REQ-BOOT-005`: the ledger is append-only, monotonically sequenced, and
-  integrity-linked; a missing sequence, digest mismatch, invalid schema, or
-  partial append stops resolution and routes to `EL-REQ-BOOT-006` or
-  `EL-REQ-BOOT-007` without silent repair.
-- `EL-REQ-BOOT-006`: content corruption on a validating chain is corrected by a
-  `ledger_recovery` protected action appending a signed reconciliation under
-  `EL-REQ-RECOVERY-010`, owner-approved and atomically consumed.
-- `EL-REQ-BOOT-007`: integrity-chain corruption is never corrected by appending
-  to the broken chain; recovery establishes a new generation out of band under
-  the seeding gate, retains the corrupt generation read-only, and opens the new
-  one with a signed genesis record naming the break point, the expected and
-  observed digests, and the reconstruction basis.
-
-Catalog acceptance bindings `EL-10-A1` through `EL-10-A6` are immutable.
-Implementation evidence maps one-to-one without rewriting their meaning.
-
-`BOOT-006` and `BOOT-007` were added July 15, 2026 after external review found
-the original §6.1 deadlocked: seeding refused a non-empty ledger, `BOOT-005`
-forbade repair, and a corrupted ledger had no path back except untrusted-side
-file surgery. Record §9.9 carries the reasoning, including why append-superseding
-alone does not reach the case `BOOT-005` actually stops on.
-
-</immutable_feature_bindings>
-
-<authority_boundary>
-
-All EL-10 work is zero-completion and zero-paid. This prompt authorizes no paid
-call, no protected effect, no commit, no push, no merge, and no PR.
-
-**Activation is an owner-operated step in the middle of this feature.** The
-machinery lands first; the owner then authors approval material and the
-activation run seeds the ledger; only then may `bootstrapStatus` leave the
-catalog. Present the approval material format for owner authoring before the
-activation run, and return `AWAITING_OWNER_ACTIVATION` rather than improvising a
-substitute.
-
-</authority_boundary>
 
 ## 4. Required design
 
 <design_invariants priority="highest">
 
-The design is already ratified. `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md` §9 is
-**normative** and was owner-approved on July 15, 2026. Build against it. Its §9.8
-carries three open questions for this session; resolve them explicitly at the
-design checkpoint rather than silently.
-
-Present the design checkpoint before the first implementation edit.
+Present a concise design checkpoint before the first implementation edit. Two
+design forks deserve your judgement rather than a default, and both are named in
+the required design below: whether the recovery work completes EL-10 or is raised
+as its own named feature, and how the CLI expresses re-genesis's two approvals.
 
 </design_invariants>
 
 <required_design>
 
-1. **Acceptance ledger** (record §9.2, §9.3). A program-scoped protected
-   artifact in its own root:
+1. **The content-reconciliation command pair, first.** Add
+   `print-recovery-request` and `recover` to `activate.ts`, mirroring
+   `print-acceptance-request` / `record-acceptance`. `print-recovery-request`
+   observes the repository, composes the exact `ledger_recovery` request through
+   `buildLedgerRecoveryRequest`, and prints its digest for the owner to author
+   approval against — reading no channel, so preparatory work is never withheld
+   (`EL-REQ-APPROVAL-012`). `recover` executes `recoverLedgerContent` against
+   owner-authored channel material. The reconciliation scope is the owner's:
+   repeatable `--supersede <featureId>=<status>:<sequence[,sequence...]>`, plus the
+   owner-supplied `--issuer`, `--signature-ref`, `--evidence-ref`,
+   `--evidence-digest`, and `--reason`. Canonicalize any ordered scope exactly as
+   EL-11's `canonicalStatusPairs` does, so a reordered argument list yields the
+   same digest rather than a false mismatch — that trap is real and was fixed once
+   already.
 
-   ```text
-   <ledgerRoot>/
-     .writer.lock        # WriterLock, unchanged, sentinel workflow ID
-     acceptance.jsonl    # the ledger
-   ```
+2. **The re-genesis command pair.** Add `print-genesis-request` and `re-genesis`
+   for `reGenesisLedger`. This ceremony takes the reconstruction `(featureId,
+   status)` pairs from the owner's reconstruction basis, never from controller-held
+   state, plus `--reconstruction-basis`. **Resolve the two-approval question at the
+   checkpoint:** `reGenesisLedger` consumes a `genesisApprovalId` and a separate
+   `seedApprovalId`. Decide whether the CLI takes two `--approval-id` flags by
+   role, and whether one owner approval can cover both or the design genuinely
+   needs two channel records; state the predicate you choose and pin it. Re-genesis
+   applies only to a broken chain, which a normal run never reaches, so its
+   integration test constructs a corrupt generation as a fixture.
 
-   Reuse `WriterLock` unchanged: it is scoped by path
-   (`join(root, '.writer.lock')`), with the workflow ID only identifying the
-   holder inside the record. Validate the root with the existing
-   `validateProtectedStateRoot()`.
+3. **Flip the reachability pin, and prove the flip.** In
+   `requirements.test.ts`, the assertion that
+   `report.unreachable` is `['ledger_recovery', 're_genesis']` becomes the empty
+   set. Falsify it: with the new commands in place, revert one command's request
+   composition, watch the pin go red naming that ceremony, restore. The pure
+   `analyzeProducerReachability` already derives this from the import graph; you are
+   changing what the graph contains, not the check.
 
-   Keep the change strictly additive. Preserve `domain.ts`, `state_store.ts`,
-   `writer_lock.ts`, and EL-02's 132-pair transition matrix.
+4. **Decide the framing, and record it.** EL-10 is not accepted, so making its
+   ceremonies reachable completes EL-10 rather than amending accepted work, and
+   needs no new `EL-REQ-*` — it satisfies the existing `EL-REQ-APPROVAL-010` and
+   `EL-REQ-BOOT-006`/`007`. If instead you raise it as a named feature (`EL-12`),
+   `EL-REQ-APPROVAL-007` governs and the catalog gains a row. Recommend one at the
+   checkpoint with reasoning; do not default silently.
 
-2. **Record schema** (record §9.3). Strict, bounded, versioned: `id`,
-   `schemaVersion`, `sequence`, `previousDigest`, `createdAt`, `featureId`,
-   `status`, `catalogDigest`, `approvalId`, `requestDigest`, `actor`. Mirror the
-   catalog's existing status enum so migration moves a value rather than
-   redefining it. Pin `actor` to `human`: no other authority can produce an
-   acceptance record. Link `previousDigest` with `sha256Canonical()` from
-   `events.ts`, following `EL-REQ-STORE-003`.
+5. **Optional, only if it stays in scope: close the orphaned-twin drift.**
+   `printSeedRequest` and `runActivationSeed` are exported and called only by
+   tests; `main()` inlines parallel seed logic, so the composition the tests pin is
+   not the one an operator runs, and the two can drift. Collapsing `main()`'s seed
+   and acceptance-change branches onto those functions removes the divergence. This
+   is adjacent cleanup — do it only if it does not expand the change; otherwise
+   surface it as a finding.
 
-3. **Resolution** (record §9.4). Replay in sequence, verify the digest chain,
-   take the last record per `featureId` as current. Accepted IDs are those whose
-   current status is `accepted`. This feeds the `acceptedFeatureIds` parameter
-   that `kernel.ts:66` and `handoff_renderer.ts:142` already accept — **those
-   signatures do not change.** The migration supplies a real producer where
-   callers previously supplied fixtures. Tests continue supplying fixture status
-   directly; the renderer's job is deterministic rendering given status, not
-   knowing the truth.
-
-   Record `catalogDigest` for provenance, not enforcement: the catalog changes
-   legitimately, so a mismatch is normal and is reported in the derived view
-   rather than refused or silently ignored.
-
-4. **Approval channel.** A concrete `ProtectedApprovalChannel`
-   (`policy.ts:168`) reading owner-authored material from `protected_external`.
-   `createProtectedApprovalRecord()` and `authorizeProtectedAction()` already
-   exist and are tested; consume them rather than reimplementing. `acceptance_change`
-   is already in `PROTECTED_ACTIONS` (`policy.ts:47`); add no new protected
-   action.
-
-5. **Entrypoint.** A real non-test caller resolving all four configured
-   locations. Refuse contained, aliased, and symlink-reachable roots.
-
-6. **Seeding** (record §9.5). One `acceptance_change` whose scope enumerates
-   every `(featureId, status)` pair — eleven at activation, within
-   `MAX_PROTECTED_SCOPE_ITEMS` (64). All records append or none. Cover every
-   refusal in record §9.5's table with a test: non-empty ledger, no approval,
-   scope mismatch, digest mismatch, already-consumed approval, expired approval,
-   any invalid record.
-
-7. **Forbidden shortcut.** Reconstructing a synthetic workflow history to reach
-   `accepted` is forbidden by SPEC §6.1. It would fabricate controller-attested
-   events for runs that never occurred — forged provenance as the trust store's
-   first entry. If the ledger design appears to require it, stop and report.
-
-8. **Migration** (record §4.1 item 5), **after** the owner's activation run:
-   `statusAuthority` to `protected_controller_state`; `bootstrapStatus` removed
-   from `feature.schema.json` and every entry; status reads in
-   `computeNextFeature()` and the renderer's `CatalogSchema` resolved from the
-   ledger; `requirements.test.ts:230` tightened to assert the exact value; the
-   catalog audit's status assertions (`requirements.test.ts:217`–`229`) moved to
-   fixture-based ledger tests.
-
-   Performing this before activation leaves the repository with no status source
-   and CI unable to compute `next_feature`. Order matters.
-
-9. **Requirement linkage.** Add `EL10_REQUIREMENT_EVIDENCE` to `requirements.ts`
-   with concrete source and deterministic named tests, and an EL-10 linkage test
-   matching the existing per-feature pattern in `requirements.test.ts`.
-
-10. Preserve EL-02 through EL-06 replay, authority, repository, prompt, runner,
-    verification, approval, recovery, checker, redaction, and retention
-    invariants.
+6. Preserve EL-02 through EL-11 invariants: replay, authority, repository, prompt,
+   runner, verification, approval, recovery, checker, redaction, retention, ledger
+   integrity, activation, the steady-state write path, and the conformance and
+   reachability checks. The three SPEC §6.1 ceremony predicates stay disjoint and
+   total; `ledger_recovery` keeps its predicate (content corruption on a validating
+   chain) and never becomes a general-purpose write.
 
 </required_design>
 
 ## 5. File-level starting points
 
-Expected new modules under `tools/engineering-loop/src/`, with final names
-selected at the design checkpoint:
-
-- `acceptance_ledger.ts` — schema, append, resolution, integrity refusals
-- `approval_channel.ts` — concrete `ProtectedApprovalChannel`
-- `activate.ts` — startup entrypoint
-- `seed.ts` — one-time approval-gated seeding
-
-Read before designing:
-
-- `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md`, especially §4.4, §4.6, and §9
-- `tools/engineering-loop/SPEC.md` §6, §6.1, §12, §16, §18
-- `src/state_store.ts` (`validateProtectedStateRoot`, `StateStore.open`)
-- `src/writer_lock.ts` (path scoping)
-- `src/policy.ts` (`PROTECTED_ACTIONS`, `ProtectedApprovalChannel`,
-  `authorizeProtectedAction`, `createProtectedApprovalRecord`)
-- `src/domain.ts` (`StateSnapshotSchema` — note it is single-feature)
-- `src/handoff_renderer.ts` (`computeNextFeature`, `CatalogSchema`)
-- `src/events.ts` (`canonicalJson`, `sha256Canonical`)
-- `tests/policy.test.ts` (the test-local `class Channel` at `:93` — the only
-  existing channel implementation)
-- `tests/requirements.test.ts` (the catalog audit and its `order` constraints)
+- `tools/engineering-loop/src/activate.ts` — the entrypoint. Model the new command
+  pairs on `print-acceptance-request` / `record-acceptance` and
+  `print-seed-request` / `seed`; reuse `observeSeedRepository`,
+  `parseAcceptanceChangeArguments`'s repeatable-flag shape, and the JSON output
+  convention. `main()`'s `known` command list gains the four new commands.
+- `tools/engineering-loop/src/ledger_recovery.ts` — `recoverLedgerContent`,
+  `reGenesisLedger`, `buildLedgerRecoveryRequest`, `buildGenesisRequest`,
+  `reconciliationScopeItem`, and their input types: the functions to make
+  reachable, unchanged in behavior.
+- `tools/engineering-loop/src/requirements.ts` — `COMPUTED_MATERIAL_PRODUCERS`
+  already lists both recovery ceremonies; no row changes, only the graph they are
+  measured against.
+- `tools/engineering-loop/src/conformance.ts` — `analyzeProducerReachability` is
+  the pure check; do not change it, change what it observes.
+- `tools/engineering-loop/tests/requirements.test.ts` — the reachability test and
+  its `reachability()` gatherer; flip the pinned unreachable set here.
+- `tools/engineering-loop/tests/activate.test.ts` and a recovery-command test
+  (new or in `ledger_recovery.test.ts`) — cover argument parsing, the compose
+  commands with an empty channel, and the execute commands end to end on a fixture
+  ledger.
 
 Add no dependency. Import no Trellis product runtime. Preserve product `src/`,
-scripts, databases, queues, workers, APIs, frontend, modules, RLM prompt bytes,
-and package manifests.
+scripts, databases, queues, workers, APIs, frontend, modules, and RLM prompt bytes.
 
 ## 6. Test strategy and acceptance
 
 <acceptance>
 
-Deterministic acceptance for EL-10:
+Deterministic acceptance:
 
-- Seven independently computed requirements map one-to-one with zero unaccounted
-  IDs.
-- The ledger is strict, versioned, bounded, canonical, and integrity-linked.
-- Every refusal in record §9.5's table has a passing test.
-- Ledger integrity refusals cover missing sequence, digest mismatch, invalid
-  schema, and truncated final line, with no silent repair.
-- Seeding is all-or-nothing; a partial append is a stop.
-- The entrypoint refuses contained, aliased, and symlink-reachable roots.
-- No synthetic workflow history is constructed.
-- EL-02 through EL-06 behavior remains green.
-- Zero model completions, zero paid work, zero real protected effects.
-
-Final EL-10 acceptance additionally requires the owner's activation run and the
-completed migration. **Landing the machinery does not satisfy `EL-10-A3`**: the
-catalog cannot lose `bootstrapStatus` until the ledger holds status, and the
-ledger cannot hold status until the owner authors approval material.
+- `print-recovery-request` and `print-genesis-request` compose their exact
+  requests and print a `[0-9a-f]{64}` digest with an empty channel, proving
+  preparatory work precedes approval; reordered scope arguments yield an identical
+  digest.
+- `recover` performs an owner-approved content reconciliation on a non-empty
+  validating fixture generation, superseding by replay while the superseded records
+  survive; it refuses an empty generation and a broken chain, each routing to the
+  correct ceremony.
+- `re-genesis` opens a new generation on a corrupt fixture generation under the
+  seeding gate, retains the corrupt generation read-only, and refuses an intact
+  chain.
+- `analyzeProducerReachability` over the real tree reports **zero** unreachable
+  producers; every ceremony resolves a non-test caller, `activate.ts` among them.
+- The reachability pin is proven to fail: reverting one new command's composition
+  turns it red naming that ceremony.
+- EL-02 through EL-11 behavior remains green; the acceptance ledger is untouched
+  and still resolves eleven records at generation 0; SPEC stays 116 declared / 116
+  mapped; EL-06 and EL-10 row-pins hold.
+- Zero model completions, zero paid calls, zero real protected effects.
 
 </acceptance>
 
@@ -1785,29 +1802,44 @@ npm run build
 npm run python:check
 docker compose config --quiet
 python -c "import json,jsonschema; c=json.load(open('docs/product/engineering-loop/features.json', encoding='utf-8')); s=json.load(open('docs/product/engineering-loop/feature.schema.json', encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s); jsonschema.validate(c, s); print(len(c['features']))"
+npm run el:activate -- status
 git diff --check
 git status --short --branch
 ```
 
-Baseline to compare against: **1,161 tests across 105 files**; engineering-loop
-focused **285 tests across 18 files**; catalog **11 features**; SPEC matrix
-**113 rows**.
-
-Renderer pins move when `next_feature` or catalog-derived bytes change. **Render
-the bytes and confirm the change is exactly what you intend before repinning.**
-Do not paste digests from test output unverified — a pin accepted without
-reading its bytes is a pin that proves nothing.
+Baseline to compare against: **1,239 tests across 110 files**; engineering-loop
+focused **363 across 23**; catalog **12 features**; SPEC **116 declared / 116
+mapped**. The full suite is flaky under file parallelism on Windows
+(`ENOTEMPTY`/timeout on temp-dir cleanup); use `--no-file-parallelism` for a clean
+reading and say which you ran.
 
 </verification_block>
 
 ## 7. Guardrails
 
-1. **EL-06 acceptance is a hard preflight.** Observe worktree, branch, HEAD,
-   status, remotes, recent commits, protected controller state, catalog, and
-   both roadmaps. Fetch `origin/master`. If owner acceptance or any dependency
-   binding is absent or contradictory, make no EL-07 edit and run no trial.
-2. **One bounded feature.** Implement exactly EL-07 and its independently
-   computed three requirements/four acceptance bindings. Preserve Appendix A.
+1. **Read status from the ledger, not from prose.** Observe worktree, branch,
+   HEAD, status, remotes, recent commits, catalog, both roadmaps, and the
+   acceptance ledger via `npm run el:activate -- status`. Fetch `origin/master`.
+   The ledger is now the status authority; `features.json` carries immutable
+   definitions only. If any binding is absent or contradictory, make no edit.
+2. **One bounded feature.** Implement exactly the recovery-ceremony reachability
+   objective in §3–§6 and its independently computed requirements. Preserve Appendix A.
+2a. **A protected pause refuses the effect it names, and nothing more.** It is
+   not authorization to stand down unblocked work, to renegotiate the developer's
+   direction outside that effect, or to self-sequence adjacent engineering. A
+   defect discovered to block a protected effect is surfaced with a proposed fix
+   for the owner to sequence. This is a behavioral norm and lives here as prose
+   on purpose: SPEC governs a TypeScript kernel, the kernel does not stand down,
+   and a conformance row whose test asserts a property of a transcript cannot
+   fail — which is the `statusAuthority` disease in better clothes.
+2b. **Approval is the owner's authenticated, scope-bound decision, not their
+   keystrokes.** The controller authors the request in full and may execute the
+   approval transport on an authenticated owner instruction whose scope matches.
+   It never originates the approval, never treats unattributed text as
+   authorization, and never refuses a fully specified request merely because the
+   owner did not hand-author the artifact. Requiring the owner to personally
+   perform a transport step the controller can execute is an accessibility
+   barrier, not a security boundary.
 3. **Freeze before observing.** Tasks, fixtures, arms, repetitions, metrics,
    thresholds, grader rules, budgets, exclusions, and stop conditions become
    immutable before the first trial. Changes require a new protected plan and
@@ -1847,8 +1879,17 @@ reading its bytes is a pin that proves nothing.
 
 Do **not**:
 
-- start EL-07 before owner-accepted EL-06 is proven across protected state,
-  catalog, roadmaps, Git, and a clean assigned worktree;
+- start this feature before EL-11 is merged and the acceptance ledger is proven
+  to resolve (generation 0, eleven records, integrity `valid`, ceremonies
+  `steady_state_acceptance`+`ledger_recovery`) across protected state, catalog,
+  roadmaps, Git, and a clean assigned worktree;
+- unblock `EL-07`, record EL-10's acceptance, or write any acceptance record: each
+  is an owner act through the `acceptance_change` path, and `next_feature`
+  resolving to `EL-10` now or `null` after EL-10 is accepted is correct, not a
+  defect to route around;
+- place a protected root under a per-user application-data directory, or ignore a
+  reported `redirects` entry: a containerized host silently splits the ledger in
+  two;
 - change the frozen plan, thresholds, task fixtures, trial arms, repetitions,
   exclusions, or grader rules after observing results; preserve superseded
   plans and results instead;

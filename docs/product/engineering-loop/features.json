@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "program": "trellis-engineering-loop",
-  "statusAuthority": "bootstrap_git_until_el_02",
+  "statusAuthority": "protected_controller_state",
   "features": [
     {
       "id": "EL-00",
@@ -38,16 +38,19 @@
           "requirement": "No runtime code, prompt, model call, or paid work is introduced."
         }
       ],
-      "gates": ["human_review"],
-      "paidWork": "forbidden",
-      "bootstrapStatus": "accepted"
+      "gates": [
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     },
     {
       "id": "EL-01",
       "order": 1,
       "title": "Architecture record and normative service specification",
       "outcome": "A ratified architecture record explains the selected boundary and a normative specification defines conformance without implementing the controller.",
-      "dependencies": ["EL-00"],
+      "dependencies": [
+        "EL-00"
+      ],
       "artifacts": [
         "docs/architecture/ENGINEERING_LOOP.md",
         "tools/engineering-loop/SPEC.md"
@@ -74,16 +77,20 @@
           "requirement": "No runtime implementation or production prompt is added."
         }
       ],
-      "gates": ["owner_ratification", "human_review"],
-      "paidWork": "forbidden",
-      "bootstrapStatus": "accepted"
+      "gates": [
+        "owner_ratification",
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     },
     {
       "id": "EL-02",
       "order": 2,
       "title": "Deterministic control kernel",
       "outcome": "Typed code owns workflow truth through validated transitions, durable snapshots, append-only events, locking, and a fake runner.",
-      "dependencies": ["EL-01"],
+      "dependencies": [
+        "EL-01"
+      ],
       "artifacts": [
         "tools/engineering-loop/src",
         "tools/engineering-loop/tests"
@@ -110,16 +117,19 @@
           "requirement": "All acceptance uses fake time, repository, and agent runner with zero model calls."
         }
       ],
-      "gates": ["human_review"],
-      "paidWork": "forbidden",
-      "bootstrapStatus": "accepted"
+      "gates": [
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     },
     {
       "id": "EL-03",
       "order": 3,
       "title": "Repository observer and deterministic handoff renderer",
       "outcome": "Git and command observations replace model claims about repository state and render a deterministic handoff preview.",
-      "dependencies": ["EL-02"],
+      "dependencies": [
+        "EL-02"
+      ],
       "artifacts": [
         "tools/engineering-loop/src/repo_observer.ts",
         "tools/engineering-loop/src/handoff_renderer.ts"
@@ -146,16 +156,20 @@
           "requirement": "Manual HANDOFF.md remains authoritative pending the EL-07 migration verdict."
         }
       ],
-      "gates": ["human_review"],
-      "paidWork": "forbidden",
-      "bootstrapStatus": "accepted"
+      "gates": [
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     },
     {
       "id": "EL-04",
       "order": 4,
       "title": "Prompt compiler and prompt contracts",
       "outcome": "Role-specific prompt packets are compiled from invariant hypershot frames and typed task data under explicit context budgets.",
-      "dependencies": ["EL-01", "EL-02"],
+      "dependencies": [
+        "EL-01",
+        "EL-02"
+      ],
       "artifacts": [
         "tools/engineering-loop/src/prompt_compiler.ts",
         "tools/engineering-loop/prompts"
@@ -182,16 +196,21 @@
           "requirement": "Planner, implementer, checker, and recovery outputs cross strict schemas."
         }
       ],
-      "gates": ["prompt_change", "human_review"],
-      "paidWork": "forbidden",
-      "bootstrapStatus": "accepted"
+      "gates": [
+        "prompt_change",
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     },
     {
       "id": "EL-05",
       "order": 5,
       "title": "Codex app-server runner and episode rotation",
       "outcome": "The controller can start, observe, interrupt, and resume bounded Codex episodes without treating conversation history as workflow truth.",
-      "dependencies": ["EL-02", "EL-04"],
+      "dependencies": [
+        "EL-02",
+        "EL-04"
+      ],
       "artifacts": [
         "tools/engineering-loop/src/runners/runner.ts",
         "tools/engineering-loop/src/runners/codex_app_server_runner.ts"
@@ -218,16 +237,21 @@
           "requirement": "Real integration smoke testing requires no paid model completion."
         }
       ],
-      "gates": ["human_review"],
-      "paidWork": "forbidden",
-      "bootstrapStatus": "accepted"
+      "gates": [
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     },
     {
       "id": "EL-06",
       "order": 6,
       "title": "Verification, protected gates, recovery, and checker",
       "outcome": "Only independent evidence and explicit authority can advance implementation toward completion.",
-      "dependencies": ["EL-03", "EL-04", "EL-05"],
+      "dependencies": [
+        "EL-03",
+        "EL-04",
+        "EL-05"
+      ],
       "artifacts": [
         "tools/engineering-loop/src/verifier.ts",
         "tools/engineering-loop/src/policy.ts",
@@ -255,16 +279,20 @@
           "requirement": "Unknown external side-effect outcomes stop and the independent checker is read-only."
         }
       ],
-      "gates": ["owner_ratification", "human_review"],
-      "paidWork": "forbidden",
-      "bootstrapStatus": "accepted"
+      "gates": [
+        "owner_ratification",
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     },
     {
       "id": "EL-07",
       "order": 7,
       "title": "Bounded pilot, repeated evaluation, and handoff migration verdict",
       "outcome": "Measured evidence determines whether the controller replaces the manual session workflow.",
-      "dependencies": ["EL-06"],
+      "dependencies": [
+        "EL-06"
+      ],
       "artifacts": [
         "docs/benchmarks/ENGINEERING_LOOP_REPORT.md",
         "HANDOFF.md"
@@ -291,16 +319,21 @@
           "requirement": "The owner records an adopt, revise, or reject verdict before HANDOFF.md authority changes."
         }
       ],
-      "gates": ["paid_run", "owner_ratification", "human_review"],
-      "paidWork": "owner_gated",
-      "bootstrapStatus": "blocked"
+      "gates": [
+        "paid_run",
+        "owner_ratification",
+        "human_review"
+      ],
+      "paidWork": "owner_gated"
     },
     {
       "id": "EL-08",
       "order": 8,
       "title": "Optional scheduling and scale expansion",
       "outcome": "Evidence determines whether tracker polling, scheduling, concurrency, multi-machine durability, or extraction into a standalone project is justified.",
-      "dependencies": ["EL-07"],
+      "dependencies": [
+        "EL-07"
+      ],
       "artifacts": [],
       "acceptance": [
         {
@@ -309,16 +342,19 @@
           "requirement": "A new owner-approved proposal identifies a measured limitation of the single-controller implementation."
         }
       ],
-      "gates": ["owner_ratification"],
-      "paidWork": "separately_proposed",
-      "bootstrapStatus": "deferred"
+      "gates": [
+        "owner_ratification"
+      ],
+      "paidWork": "separately_proposed"
     },
     {
       "id": "EL-09",
       "order": 9,
       "title": "Optional verified ingestion of completed run reports",
       "outcome": "Sanitized completed-run evidence may enter Trellis for retrospective research without becoming part of the live control path.",
-      "dependencies": ["EL-07"],
+      "dependencies": [
+        "EL-07"
+      ],
       "artifacts": [],
       "acceptance": [
         {
@@ -327,16 +363,19 @@
           "requirement": "A new owner-approved design specifies sanitization, source bytes, provenance, retention, and the prohibition on circular control dependencies."
         }
       ],
-      "gates": ["owner_ratification"],
-      "paidWork": "separately_proposed",
-      "bootstrapStatus": "deferred"
+      "gates": [
+        "owner_ratification"
+      ],
+      "paidWork": "separately_proposed"
     },
     {
       "id": "EL-10",
       "order": 10,
       "title": "Controller activation and status-authority migration",
       "outcome": "The controller runs as a real process, owns mutable status in protected state, and the catalog retains immutable feature definitions only.",
-      "dependencies": ["EL-06"],
+      "dependencies": [
+        "EL-06"
+      ],
       "artifacts": [
         "tools/engineering-loop/src/acceptance_ledger.ts",
         "tools/engineering-loop/src/approval_channel.ts",
@@ -375,9 +414,60 @@
           "requirement": "Both recovery ceremonies exist and their predicates are disjoint: content corruption on a validating chain recovers by owner-approved append-superseding, and integrity-chain corruption recovers only by out-of-band re-genesis retaining the corrupt generation read-only."
         }
       ],
-      "gates": ["owner_ratification", "human_review"],
-      "paidWork": "forbidden",
-      "bootstrapStatus": "planned"
+      "gates": [
+        "owner_ratification",
+        "human_review"
+      ],
+      "paidWork": "forbidden"
+    },
+    {
+      "id": "EL-11",
+      "order": 11,
+      "title": "Acceptance-ledger steady-state write path and approval-gate mapping",
+      "outcome": "The owner can record an ordinary status change into a populated ledger, and every declared requirement carries a conformance row and authorizing material a principal can reach.",
+      "dependencies": [
+        "EL-06",
+        "EL-10"
+      ],
+      "artifacts": [
+        "tools/engineering-loop/src/acceptance_change.ts",
+        "tools/engineering-loop/src/acceptance_ledger.ts",
+        "tools/engineering-loop/src/activate.ts",
+        "tools/engineering-loop/src/requirements.ts",
+        "tools/engineering-loop/SPEC.md"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-11-A1",
+          "kind": "integration",
+          "requirement": "An owner-approved acceptance_change appends a status change to a non-empty validating generation, superseding by replay while the superseded records remain present and unmutated; empty and broken generations refuse and route to their own ceremonies."
+        },
+        {
+          "id": "EL-11-A2",
+          "kind": "static",
+          "requirement": "The ceremony predicates are disjoint and total: every generation state admits at least one ceremony, no state admits two of seeding, ledger_recovery, and re-genesis, and ledger_recovery never becomes a general-purpose write."
+        },
+        {
+          "id": "EL-11-A3",
+          "kind": "static",
+          "requirement": "Every requirement declared in a SPEC section table carries a conformance-matrix row and every row has declaring text, proven by a check that fails when either side is missing."
+        },
+        {
+          "id": "EL-11-A4",
+          "kind": "static",
+          "requirement": "Every producer of computed authorizing material resolves to a caller outside the test suite, counting process entrypoints and package scripts; a producer with only test callers fails."
+        },
+        {
+          "id": "EL-11-A5",
+          "kind": "integration",
+          "requirement": "The controller fully specifies every protected request it can execute and composes it with no approval present, so preparatory work is never withheld pending approval and refusal cites a failed approval predicate."
+        }
+      ],
+      "gates": [
+        "owner_ratification",
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     }
   ]
 }

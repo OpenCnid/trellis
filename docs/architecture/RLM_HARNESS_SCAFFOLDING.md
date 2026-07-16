@@ -1,8 +1,9 @@
 # RLM harness scaffolding: task-context isolation, UPSUM, staged helpers
 
 **Status:** DESIGN RECORD — owner-directed July 13, 2026 (same day as
-the Session 48 T1 verdict), zero implementation. Ratified direction,
-increments owner-gated per run. This record is the document-first
+the Session 48 T1 verdict). S1 and S3 IMPLEMENTED Session 50 (PR #95);
+UPSUM IMPLEMENTED as the §7 S2a refinement, Session 51 (PR #98).
+Further increments owner-gated per run. This record is the document-first
 artifact for a scaffolding layer between the operator's task text and
 the RLM's behavior; it exists because Session 48 produced the first
 in-house measurement of the gap it closes.

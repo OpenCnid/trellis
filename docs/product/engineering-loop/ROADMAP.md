@@ -1,15 +1,28 @@
 # Trellis Engineering Loop Roadmap
 
-Status: **EL-06 owner-accepted; EL-10 ratified and next; EL-07 blocked on EL-10**
+Status: **EL-10 implemented and activated and EL-11 implemented, owner acceptance not yet recorded for either; EL-00 through EL-06 accepted in the ledger; EL-07 blocked pending an owner unblock**
 
 Owner direction: July 15, 2026
 
 Program ID: `trellis-engineering-loop`
 
-Current feature: `EL-10` (controller activation and status-authority migration,
-ratified July 15, 2026 after the EL-07 preflight found no protected controller
-state). `EL-07` is `blocked` until `EL-10` is accepted and the owner records an
-unblock.
+Current feature: `EL-10` (controller activation and status-authority migration),
+pending owner acceptance. Implemented and activated July 15, 2026: the
+controller runs, the activation run seeded eleven owner-approved records, and
+`statusAuthority` is `protected_controller_state`. `EL-11` (the acceptance
+ledger's steady-state write path and the approval-gate mapping) is implemented
+as of July 16, 2026 (Session 63, PR #114); owner acceptance is recorded for
+neither. EL-11's reachable-producer check (`EL-REQ-APPROVAL-010`) found that
+EL-10's two recovery ceremonies have no non-test caller, so EL-10 fails
+acceptance as unreachable until they are wired — the proposed next objective.
+`EL-07` stays `blocked` until the owner records an unblock in the ledger; until
+then `next_feature` resolving to `EL-10`, and to `null` once EL-10 is accepted,
+is correct rather than a defect.
+
+**Status now lives in the acceptance ledger, not this file and not
+`features.json`.** The catalog carries immutable feature definitions only. Any
+status stated in prose here is a convenience restatement of the ledger and is
+never authority; read it with `npm run el:activate -- status`.
 
 This roadmap decomposes the engineering-session loop into bounded features that
 can be completed across fresh context windows. It is deliberately smaller than
@@ -39,7 +52,7 @@ feature definitions only.
 **This transition was originally scheduled for the end of `EL-02` and did not
 happen.** EL-02 built the state machinery and proved it under test, but nothing
 was ever stood up to own status, so "temporarily" ran through `EL-06` —
-`statusAuthority` still reads `bootstrap_git_until_el_02`. The cause is recorded
+`statusAuthority` still read `bootstrap_git_until_el_02`. The cause is recorded
 here as a standing lesson: the transition was stated in this paragraph and
 nowhere else. It had no `EL-REQ-*`, no conformance row, and no test that could
 fail, so nothing caught four features of drift. `EL-10` both performs the
@@ -87,7 +100,8 @@ At session close:
 
 1. Run the feature's acceptance checks.
 2. Record exact commands and observed counts in the root roadmap ledger.
-3. Update bootstrap status or, after `EL-02`, reference controller evidence.
+3. Reference controller evidence; status lives in the acceptance ledger
+   (`npm run el:activate -- status`), never in the catalog or prose.
 4. Regenerate `HANDOFF.md` with the next unblocked feature.
 5. Keep historical detail in Git and the ledger, not in the next prompt.
 
@@ -477,25 +491,29 @@ the engineering-loop subset; it does not create a competing historical log.
 
 ## 8. Current next step
 
-`EL-00` through `EL-06` are owner-accepted. The next feature is **`EL-10`**:
-controller activation and status-authority migration, ratified July 15, 2026 and
-zero-paid throughout. Its design record's §9 is normative and owner-approved; the
-implementing session builds against it rather than redesigning.
+`EL-00` through `EL-06` are owner-accepted. **`EL-10`** — controller activation
+and status-authority migration, ratified July 15, 2026 and zero-paid
+throughout — is implemented and activated: the ledger, channel, entrypoint, and
+seeder landed with deterministic tests; the owner authored the approval material
+outside the controller (`EL-REQ-BOOT-002`, a step that cannot be self-served)
+and the activation run seeded generation 0 (eleven records, chain valid,
+approval consumed); `bootstrapStatus` left the catalog and status resolves from
+the ledger. **`EL-11`** — the acceptance ledger's steady-state write path and
+the approval-gate mapping — landed July 16, 2026 (Session 63, PR #114):
+`recordAcceptanceChange` (`EL-REQ-BOOT-008`), the reachable-producer requirement
+`EL-REQ-APPROVAL-010` with its static check, the `EL-REQ-APPROVAL-012`
+conformance row, and the `EL-01-A2` mechanization.
+
+What remains is owner action, not build: recording acceptance for EL-10 and
+EL-11 in the ledger. EL-11's reachability check pins a live blocker on the
+former — both EL-10 recovery ceremonies have no non-test caller, so EL-10 fails
+acceptance as unreachable under `EL-REQ-APPROVAL-010` until they are wired to
+real `activate.ts` commands (the proposed next objective).
 
 `EL-07` is `blocked` until `EL-10` is accepted **and** the owner records an
 explicit unblock. Until then `next_feature` resolves to `EL-10`, and after
 EL-10's acceptance it resolves to `null` in the interval before the unblock — a
 correct and existing state, not a defect.
 
-EL-10 completes in three ordered steps, the middle of which is not the
-controller's to perform:
-
-1. Land the ledger, channel, entrypoint, and seeder with deterministic tests.
-2. The owner authors approval material and the activation run seeds the ledger.
-   This step cannot be self-served: `EL-REQ-BOOT-002` requires approval authored
-   outside the controller, and a controller that could author its own approval
-   would make the ledger worthless.
-3. Remove `bootstrapStatus` from the catalog and resolve status from the ledger.
-
-Manual `HANDOFF.md` remains authoritative throughout EL-10 and EL-07 unless the
-owner later records an adopt verdict.
+Manual `HANDOFF.md` remains authoritative throughout EL-10, EL-11, and EL-07
+unless the owner later records an adopt verdict.

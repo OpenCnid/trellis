@@ -177,6 +177,20 @@ async function catalog(): Promise<unknown> {
   return JSON.parse(await readFile('docs/product/engineering-loop/features.json', 'utf8'));
 }
 
+/**
+ * Status as the acceptance ledger resolves it, supplied here as a fixture.
+ *
+ * The renderer's job is deterministic rendering given status, not knowing the
+ * truth, so the suite states status directly rather than reading protected
+ * state. Post-migration the catalog carries none, so this fixture is now the
+ * only status source the renderer sees.
+ */
+const FEATURE_STATUSES = {
+  'EL-00': 'accepted', 'EL-01': 'accepted', 'EL-02': 'accepted', 'EL-03': 'accepted',
+  'EL-04': 'accepted', 'EL-05': 'accepted', 'EL-06': 'accepted', 'EL-07': 'blocked',
+  'EL-08': 'deferred', 'EL-09': 'deferred', 'EL-10': 'planned',
+} as const;
+
 async function report() {
   return deriveTrustedReport({
     reportId: 'report:session:57',
@@ -189,7 +203,7 @@ async function report() {
     requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
     findings: [{ source: 'controller', code: 'zero-paid', message: 'Zero model and paid calls observed.' }],
     catalog: await catalog(),
-    acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+    featureStatuses: FEATURE_STATUSES,
   });
 }
 
@@ -212,13 +226,53 @@ describe('EL-03 trusted report and deterministic derived views', () => {
     expect(derived.next_feature).toBe('EL-10');
   });
 
+  it('EL-11-A1: next_feature follows the ledger across a steady-state acceptance change', async () => {
+    // The statuses below are the ones an owner-approved acceptance_change
+    // produces, taken from the pairs the steady-state path enumerates rather than
+    // invented here. Both outcomes are correct, and neither is a defect to route
+    // around: a null next feature is a real, meaningful state.
+    const accepted = { ...FEATURE_STATUSES, 'EL-10': 'accepted' } as Record<string, string>;
+
+    // EL-10 accepted, EL-07 still blocked: nothing is selectable, because an
+    // unblock is an owner decision the controller cannot make for itself.
+    const blocked = await deriveTrustedReport({
+      reportId: 'report:session:63', createdAt: NOW, result: 'ready_for_owner_review',
+      snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
+      commandEvidence: [VERIFY_COMMAND], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
+      findings: [], catalog: await catalog(), featureStatuses: accepted,
+    });
+    expect(blocked.next_feature).toBeNull();
+
+    // Once the owner records EL-07 planned in the same ordinary path, it becomes
+    // the next feature: its only dependency, EL-06, is accepted, and it precedes
+    // EL-11 by catalog order.
+    const unblocked = await deriveTrustedReport({
+      reportId: 'report:session:63', createdAt: NOW, result: 'ready_for_owner_review',
+      snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
+      commandEvidence: [VERIFY_COMMAND], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
+      findings: [], catalog: await catalog(), featureStatuses: { ...accepted, 'EL-07': 'planned' },
+    });
+    expect(unblocked.next_feature).toBe('EL-07');
+
+    // EL-11 is selectable on its own terms once recorded planned, which it can
+    // only be because both its dependencies carry a lower catalog order and are
+    // accepted — the reason it needed no `blocked`-status workaround.
+    const eleven = await deriveTrustedReport({
+      reportId: 'report:session:63', createdAt: NOW, result: 'ready_for_owner_review',
+      snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
+      commandEvidence: [VERIFY_COMMAND], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
+      findings: [], catalog: await catalog(), featureStatuses: { ...accepted, 'EL-11': 'planned' },
+    });
+    expect(eleven.next_feature).toBe('EL-11');
+  });
+
   it('refuses unjournaled or runner-reported command claims as verification truth', async () => {
     const unjournaled = { ...SNAPSHOT, evidenceIds: ['evidence:repo:1'] };
     await expect(Promise.resolve().then(async () => deriveTrustedReport({
       reportId: 'report:unjournaled', createdAt: NOW, result: 'blocked',
       snapshot: unjournaled, feature: FEATURE, repository: REPOSITORY,
       commandEvidence: [VERIFY_COMMAND], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
-      findings: [], catalog: await catalog(), acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+      findings: [], catalog: await catalog(), featureStatuses: FEATURE_STATUSES,
     }))).rejects.toThrow(/not journal-linked/);
 
     await expect(Promise.resolve().then(async () => deriveTrustedReport({
@@ -229,7 +283,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
         evidence: { ...VERIFY_COMMAND.evidence, origin: 'runner_reported' },
       }],
       requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
-      findings: [], catalog: await catalog(), acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+      findings: [], catalog: await catalog(), featureStatuses: FEATURE_STATUSES,
     }))).rejects.toThrow();
   });
 
@@ -258,7 +312,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
         reportId: 'report:refused-command', createdAt: NOW, result: 'ready_for_owner_review',
         snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
         commandEvidence: [result], requirementEvidence: EL03_REQUIREMENT_EVIDENCE,
-        findings: [], catalog: await catalog(), acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+        findings: [], catalog: await catalog(), featureStatuses: FEATURE_STATUSES,
       }))).rejects.toThrow(/requires successful/);
     }
   });
@@ -271,7 +325,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
       reportId: 'report:outstanding', createdAt: NOW, result: 'blocked',
       snapshot: SNAPSHOT, feature: FEATURE, repository: REPOSITORY,
       commandEvidence: [VERIFY_COMMAND], requirementEvidence: incomplete,
-      findings: [], catalog: await catalog(), acceptedFeatureIds: ['EL-00', 'EL-01', 'EL-02'],
+      findings: [], catalog: await catalog(), featureStatuses: FEATURE_STATUSES,
     });
     expect(derived.normative_requirements).toEqual({
       required: 12,

@@ -112,11 +112,17 @@ async function authorize(protectedRequest: ProtectedActionRequest, record = appr
 
 describe('EL-06 protected action and approval policy', () => {
   it('covers every SPEC protected action with a strict typed request that pauses for external approval', () => {
+    // EL-10 added `ledger_recovery` (SPEC 6.1, EL-REQ-BOOT-006). Extending this
+    // list is itself a `policy_change` and lands under EL-10's
+    // owner_ratification and human_review gates, per EL-REQ-APPROVAL-007. The
+    // action is distinct from `acceptance_change` so that the three ledger
+    // ceremony predicates stay disjoint and mechanically checkable without a
+    // mode flag.
     expect(PROTECTED_ACTIONS).toEqual([
       'paid_model_or_service_call', 'destructive_filesystem', 'destructive_database', 'destructive_queue',
-      'destructive_external_system', 'push', 'merge', 'acceptance_change', 'controller_change', 'policy_change',
-      'schema_change', 'prompt_change', 'verifier_change', 'gate_change', 'renderer_change', 'handoff_migration',
-      'pull_request_create', 'tracker_write',
+      'destructive_external_system', 'push', 'merge', 'acceptance_change', 'ledger_recovery', 'controller_change',
+      'policy_change', 'schema_change', 'prompt_change', 'verifier_change', 'gate_change', 'renderer_change',
+      'handoff_migration', 'pull_request_create', 'tracker_write',
     ]);
     for (const action of PROTECTED_ACTIONS) expect(request(action).action).toBe(action);
   });
