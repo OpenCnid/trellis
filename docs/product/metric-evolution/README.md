@@ -17,3 +17,14 @@ re-prioritizes anything by existing.
 Reading order for review: R1 (defines the birth-gate discipline the others
 cite) → R3 → R4 → R2 (touches the paused track, so it is the one with a
 sequencing dependency on an owner reprioritization).
+
+Each proposal also carries DORMANT execution packaging — an `R{n}_ROADMAP.md`
+(session decomposition, dependencies, failure handling, close-out frame) and
+an `R{n}_HANDOFF.md` (the Appendix-A-mold work order: pre-flight, file-level
+plan, the proposal's §6 criterion quoted verbatim plus session mechanics,
+guardrails, exclusions). The packaging executes nothing by existing:
+activation is an explicit owner sequencing decision, R2's pair carries a
+double gate (Appendix A re-prioritization AND amendment ratification), and
+the live root `HANDOFF.md` wins wherever a packaging document conflicts with
+it. The handoffs pin July 16, 2026 repository observations and instruct any
+future session to STOP and re-derive if those states have moved.
