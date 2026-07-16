@@ -419,6 +419,55 @@
         "human_review"
       ],
       "paidWork": "forbidden"
+    },
+    {
+      "id": "EL-11",
+      "order": 11,
+      "title": "Acceptance-ledger steady-state write path and approval-gate mapping",
+      "outcome": "The owner can record an ordinary status change into a populated ledger, and every declared requirement carries a conformance row and authorizing material a principal can reach.",
+      "dependencies": [
+        "EL-06",
+        "EL-10"
+      ],
+      "artifacts": [
+        "tools/engineering-loop/src/acceptance_change.ts",
+        "tools/engineering-loop/src/acceptance_ledger.ts",
+        "tools/engineering-loop/src/activate.ts",
+        "tools/engineering-loop/src/requirements.ts",
+        "tools/engineering-loop/SPEC.md"
+      ],
+      "acceptance": [
+        {
+          "id": "EL-11-A1",
+          "kind": "integration",
+          "requirement": "An owner-approved acceptance_change appends a status change to a non-empty validating generation, superseding by replay while the superseded records remain present and unmutated; empty and broken generations refuse and route to their own ceremonies."
+        },
+        {
+          "id": "EL-11-A2",
+          "kind": "static",
+          "requirement": "The ceremony predicates are disjoint and total: every generation state admits at least one ceremony, no state admits two of seeding, ledger_recovery, and re-genesis, and ledger_recovery never becomes a general-purpose write."
+        },
+        {
+          "id": "EL-11-A3",
+          "kind": "static",
+          "requirement": "Every requirement declared in a SPEC section table carries a conformance-matrix row and every row has declaring text, proven by a check that fails when either side is missing."
+        },
+        {
+          "id": "EL-11-A4",
+          "kind": "static",
+          "requirement": "Every producer of computed authorizing material resolves to a caller outside the test suite, counting process entrypoints and package scripts; a producer with only test callers fails."
+        },
+        {
+          "id": "EL-11-A5",
+          "kind": "integration",
+          "requirement": "The controller fully specifies every protected request it can execute and composes it with no approval present, so preparatory work is never withheld pending approval and refusal cites a failed approval predicate."
+        }
+      ],
+      "gates": [
+        "owner_ratification",
+        "human_review"
+      ],
+      "paidWork": "forbidden"
     }
   ]
 }

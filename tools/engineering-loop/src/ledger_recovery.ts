@@ -22,7 +22,7 @@ import {
   MAX_LEDGER_GENERATIONS,
   PROGRAM_ACCEPTANCE_WORKFLOW_ID,
   catalogDigestOf,
-  classifyLedgerGeneration,
+  ledgerCeremonyAdmitted,
   ledgerRecordDigest,
   type LedgerBreach,
   type LedgerRecord,
@@ -138,10 +138,9 @@ export interface LedgerRecoveryResult {
 export async function recoverLedgerContent(input: LedgerRecoveryInput): Promise<LedgerRecoveryResult> {
   const generation = await input.ledger.currentGeneration();
   const state = await input.ledger.readGeneration(generation);
-  const ceremony = classifyLedgerGeneration(state);
-  if (ceremony !== 'ledger_recovery') {
+  if (!ledgerCeremonyAdmitted(state, 'ledger_recovery')) {
     throw new LedgerRecoveryRefusedError(
-      ceremony === 're_genesis'
+      state.integrity === 'broken'
         ? `Generation ${generation} has a broken integrity chain; append-superseding is refused because a successor digest would inherit or mask the break. Re-genesis under EL-REQ-BOOT-007 is the only route.`
         : `Generation ${generation} is empty; there is no content to reconcile. Seeding under EL-REQ-BOOT-003 applies instead.`
     );
@@ -325,13 +324,12 @@ export function buildGenesisRequest(input: {
 export async function reGenesisLedger(input: ReGenesisInput): Promise<ReGenesisResult> {
   const corruptGeneration = await input.ledger.currentGeneration();
   const state = await input.ledger.readGeneration(corruptGeneration);
-  const ceremony = classifyLedgerGeneration(state);
-  if (ceremony !== 're_genesis') {
+  if (!ledgerCeremonyAdmitted(state, 're_genesis')) {
     throw new LedgerRecoveryRefusedError(
       `Generation ${corruptGeneration} has an intact integrity chain; re-genesis is refused. ${
-        ceremony === 'seeding'
+        state.records.length === 0
           ? 'The generation is empty, so seeding under EL-REQ-BOOT-003 applies.'
-          : 'Content corruption on a validating chain is corrected by ledger_recovery under EL-REQ-BOOT-006.'
+          : 'A status change is recorded by steady_state_acceptance under EL-REQ-BOOT-008, and content corruption on a validating chain is corrected by ledger_recovery under EL-REQ-BOOT-006.'
       }`
     );
   }

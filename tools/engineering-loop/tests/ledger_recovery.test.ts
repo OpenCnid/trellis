@@ -4,14 +4,17 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   AcceptanceLedger,
+  AcceptanceRecordSchema,
   LEDGER_CEREMONIES,
-  classifyLedgerGeneration,
+  ReconciliationRecordSchema,
+  admissibleLedgerCeremonies,
   ledgerRecordDigest,
   parseLedgerGeneration,
   resolveFeatureStatus,
   serializeLedgerRecord,
   type LedgerRecord,
 } from '../src/acceptance_ledger';
+import { buildAcceptanceChangeRequest } from '../src/acceptance_change';
 import { APPROVAL_CHANNEL_FILE, FileProtectedApprovalChannel } from '../src/approval_channel';
 import {
   PROTECTED_ACTIONS,
@@ -166,18 +169,63 @@ describe('EL-10 ledger recovery ceremonies', () => {
     const h = await harness();
     try {
       // Empty and validating: seeding only.
-      expect(classifyLedgerGeneration(await h.ledger.readGeneration(0))).toBe('seeding');
+      expect(admissibleLedgerCeremonies(await h.ledger.readGeneration(0))).toEqual(['seeding']);
       await seeded(h);
-      // Non-empty and validating: append-superseding only.
-      expect(classifyLedgerGeneration(await h.ledger.readGeneration(0))).toBe('ledger_recovery');
+      // Non-empty and validating: recording new information, or correcting wrong
+      // information. Both are legitimate on this same state, which is why the
+      // classifier reports a set; what tells them apart is the protected action
+      // and the record kind, never the state and never a flag.
+      expect(admissibleLedgerCeremonies(await h.ledger.readGeneration(0)))
+        .toEqual(['steady_state_acceptance', 'ledger_recovery']);
 
       // Broken chain: re-genesis only.
       const state = await h.ledger.readGeneration(0);
       const broken = parseLedgerGeneration(0, serializeLedgerRecord(state.records[1]));
-      expect(classifyLedgerGeneration(broken)).toBe('re_genesis');
+      expect(admissibleLedgerCeremonies(broken)).toEqual(['re_genesis']);
 
-      expect(LEDGER_CEREMONIES).toHaveLength(3);
-      expect(new Set(LEDGER_CEREMONIES).size).toBe(3);
+      expect(LEDGER_CEREMONIES).toHaveLength(4);
+      expect(new Set(LEDGER_CEREMONIES).size).toBe(4);
+    } finally {
+      await h.ledger.close();
+    }
+  });
+
+  it('ledger_recovery: is not a general-purpose write for ordinary progress', async () => {
+    // The corruption ceremony would mechanically work for an ordinary status
+    // change — append a reconciliation superseding EL-10=planned — and it would
+    // be false: that record was correct when written, so accepting EL-10 is new
+    // information rather than a correction. What keeps the two apart is that this
+    // ceremony demands corruption evidence a legitimate acceptance has none of,
+    // and refuses a `supersedes` naming a record that does not exist.
+    const h = await harness();
+    try {
+      await seeded(h);
+      await expect(recoverLedgerContent({
+        ...recoveryInput(h),
+        scope: [{ featureId: 'EL-07', status: 'planned', supersedes: [999] }],
+        reason: 'ordinary progress, which is not what this ceremony is for',
+      })).rejects.toThrow(/names sequence 999, which is absent from generation 0/);
+
+      // And the two ceremonies carry distinct protected actions, so an approval
+      // authored for one can never authorize the other: `authorizeProtectedAction`
+      // compares `approval.action` to `request.action` exactly.
+      expect(buildLedgerRecoveryRequest({
+        scope: RECOVERY_SCOPE,
+        repository: REPOSITORY, createdAt: CREATED_AT, approvalId: 'approval:recovery',
+      }).action).toBe('ledger_recovery');
+      expect(buildAcceptanceChangeRequest({
+        pairs: [{ featureId: 'EL-07', status: 'planned' }],
+        repository: REPOSITORY, createdAt: CREATED_AT, approvalId: 'approval:recovery',
+      }).action).toBe('acceptance_change');
+
+      // The reconciliation record carries corruption evidence a legitimate
+      // acceptance has none of. That asymmetry, not a flag, is what keeps an
+      // ordinary status change from being recorded as a correction.
+      const reconciliation = ReconciliationRecordSchema.keyof().options;
+      for (const field of ['supersedes', 'issuer', 'signatureReference', 'evidenceDigest', 'reason']) {
+        expect(reconciliation).toContain(field);
+        expect(AcceptanceRecordSchema.keyof().options).not.toContain(field);
+      }
     } finally {
       await h.ledger.close();
     }
@@ -274,7 +322,7 @@ describe('EL-10 ledger recovery ceremonies', () => {
       const state = await h.ledger.readGeneration(0);
       const corruptBytes = state.records.slice(1).map(serializeLedgerRecord).join('');
       await writeFile(h.ledger.generationPath(0), corruptBytes, 'utf8');
-      expect(classifyLedgerGeneration(await h.ledger.readGeneration(0))).toBe('re_genesis');
+      expect(admissibleLedgerCeremonies(await h.ledger.readGeneration(0))).toEqual(['re_genesis']);
 
       const breach = (await h.ledger.readGeneration(0)).breach;
       const genesisRequest = buildGenesisRequest({

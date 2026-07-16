@@ -4,6 +4,7 @@ import { z } from 'zod';
 import {
   MAX_PATH_LENGTH,
   RepositoryObservationSchema,
+  StableIdSchema,
   parseBoundary,
   type RepositoryObservation,
 } from './domain.js';
@@ -13,15 +14,29 @@ import { BoundedCommandExecutor, ProtectedArtifactStore } from './command_eviden
 import { RepositoryObserver } from './repo_observer.js';
 import {
   AcceptanceLedger,
+  FeatureStatusSchema,
   PROGRAM_ACCEPTANCE_WORKFLOW_ID,
+  admissibleLedgerCeremonies,
   catalogDigestOf,
   catalogProvenanceNotes,
-  classifyLedgerGeneration,
   resolveFeatureStatus,
   type LedgerCeremony,
 } from './acceptance_ledger.js';
 import { FileProtectedApprovalChannel } from './approval_channel.js';
-import { SEED_SESSION_ID, buildSeedRequest, catalogStatusPairs, seedAcceptanceLedger } from './seed.js';
+import {
+  SEED_SCOPE_SEPARATOR,
+  SEED_SESSION_ID,
+  buildSeedRequest,
+  catalogStatusPairs,
+  seedAcceptanceLedger,
+  type CatalogStatusPair,
+} from './seed.js';
+import {
+  ACCEPTANCE_CHANGE_FEATURE_ID,
+  ACCEPTANCE_CHANGE_SESSION_ID,
+  buildAcceptanceChangeRequest,
+  recordAcceptanceChange,
+} from './acceptance_change.js';
 import { protectedRequestDigest } from './policy.js';
 
 /**
@@ -167,7 +182,15 @@ export interface ActivationStatus {
   approvalChannel: string;
   redirects: readonly { role: string; configured: string; resolved: string }[];
   generation: number;
-  ceremony: LedgerCeremony;
+  /**
+   * Every ceremony this generation admits, not one.
+   *
+   * A healthy populated ledger admits two — recording new information and
+   * correcting wrong information — and reporting only `ledger_recovery` told an
+   * operator that a corruption ceremony was the sole thing available on a ledger
+   * that was working perfectly.
+   */
+  ceremonies: readonly LedgerCeremony[];
   recordCount: number;
   integrity: 'valid' | 'broken';
   breach: unknown;
@@ -240,6 +263,66 @@ export function parseSeedArguments(
 }
 
 /**
+ * One `--set EL-10=accepted` item, parsed into the pair the scope grammar names.
+ *
+ * The separator is `SEED_SCOPE_SEPARATOR`, so what an owner types on the command
+ * line, what the request's `exactScope` carries, and what the approval material
+ * must match are one grammar rather than three that can drift.
+ */
+export function parseStatusPair(text: string): CatalogStatusPair {
+  const separator = text.indexOf(SEED_SCOPE_SEPARATOR);
+  if (separator <= 0 || separator === text.length - 1) {
+    throw new ActivationConfigError(
+      `Status pair '${text}' is malformed; the form is <featureId>${SEED_SCOPE_SEPARATOR}<status>, for example EL-10${SEED_SCOPE_SEPARATOR}accepted`
+    );
+  }
+  const featureId = text.slice(0, separator);
+  const status = text.slice(separator + 1);
+  const parsed = FeatureStatusSchema.safeParse(status);
+  if (!parsed.success) {
+    throw new ActivationConfigError(
+      `Status '${status}' in pair '${text}' is not one of: ${FeatureStatusSchema.options.join(', ')}`
+    );
+  }
+  return { featureId: parseBoundary(StableIdSchema, featureId, 'status pair feature identity'), status: parsed.data };
+}
+
+export interface AcceptanceChangeArguments extends SeedArguments {
+  pairs: readonly CatalogStatusPair[];
+}
+
+/**
+ * `parseSeedArguments` plus a repeatable `--set`. Seeding reads its pairs from a
+ * status document; a steady-state change cannot, because status no longer lives
+ * in any document the controller holds — it lives in the ledger, and the change
+ * itself is the owner's decision. So the pairs are stated explicitly on the
+ * command line and are never defaulted.
+ */
+export function parseAcceptanceChangeArguments(
+  argv: readonly string[],
+  defaults: Partial<SeedArguments> = {}
+): AcceptanceChangeArguments {
+  const seedArgv: string[] = [];
+  const pairs: CatalogStatusPair[] = [];
+  for (let index = 0; index < argv.length; index += 2) {
+    const flag = argv[index];
+    const value = argv[index + 1];
+    if (flag === '--set') {
+      if (value === undefined) throw new ActivationConfigError(`Acceptance change argument '--set' requires a value`);
+      pairs.push(parseStatusPair(value));
+      continue;
+    }
+    seedArgv.push(flag, ...(value === undefined ? [] : [value]));
+  }
+  if (pairs.length === 0) {
+    throw new ActivationConfigError(
+      'An acceptance change requires at least one --set <featureId>=<status>; the controller never infers a status change.'
+    );
+  }
+  return { ...parseSeedArguments(seedArgv, defaults), pairs };
+}
+
+/**
  * Observes the repository through the accepted EL-03 observer rather than
  * reading Git directly. `EL-REQ-REPO-001` requires branch, base, and dirty state
  * to be computed rather than model-authored, and a second definition of
@@ -254,6 +337,10 @@ export async function observeSeedRepository(input: {
   resolved: ResolvedActivation;
   args: SeedArguments;
   clock: { now(): string };
+  /** Default to activation's identities; the steady-state path passes its own. */
+  observationId?: string;
+  featureId?: string;
+  sessionId?: string;
 }): Promise<{ observation: RepositoryObservation; commandCount: number }> {
   const artifacts = await ProtectedArtifactStore.open({
     protectedRoot: input.resolved.stateRoot,
@@ -261,10 +348,10 @@ export async function observeSeedRepository(input: {
   });
   const observer = new RepositoryObserver(new BoundedCommandExecutor({ clock: input.clock, artifacts }));
   const result = await observer.observe({
-    observationId: 'repository-observation:el10-activation',
+    observationId: input.observationId ?? 'repository-observation:el10-activation',
     workflowId: PROGRAM_ACCEPTANCE_WORKFLOW_ID,
-    featureId: 'EL-10',
-    sessionId: SEED_SESSION_ID,
+    featureId: input.featureId ?? 'EL-10',
+    sessionId: input.sessionId ?? SEED_SESSION_ID,
     assignedWorktree: input.resolved.worktree,
     expectedBranch: input.args.branch,
     baseCommit: input.args.baseCommit,
@@ -313,7 +400,6 @@ export async function inspectActivation(input: {
   });
   try {
     const state = await ledger.readCurrentGeneration();
-    const ceremony = classifyLedgerGeneration(state);
     const base = {
       version: ACTIVATION_VERSION,
       ledgerRoot: resolved.ledgerRoot,
@@ -322,7 +408,7 @@ export async function inspectActivation(input: {
       approvalChannel: resolved.approvalChannel,
       redirects: resolved.redirects,
       generation: state.generation,
-      ceremony,
+      ceremonies: admissibleLedgerCeremonies(state),
       recordCount: state.records.length,
       integrity: state.integrity,
       breach: state.breach,
@@ -362,7 +448,7 @@ export async function printSeedRequest(input: {
   requestDigest: string;
   catalogDigest: string;
   targetGeneration: number;
-  ceremony: LedgerCeremony;
+  ceremonies: readonly LedgerCeremony[];
 }> {
   const resolved = await resolveActivation(input.config);
   const catalog = input.catalog ?? (await readCatalog(resolved.worktree));
@@ -387,8 +473,110 @@ export async function printSeedRequest(input: {
     requestDigest: protectedRequestDigest(request),
     catalogDigest: catalogDigestOf(catalog),
     targetGeneration: state.generation,
-    ceremony: classifyLedgerGeneration(state),
+    ceremonies: admissibleLedgerCeremonies(state),
   };
+}
+
+/**
+ * Composes the exact steady-state acceptance request and prints its digest for
+ * the owner to author approval material against.
+ *
+ * This is the reachable producer `EL-REQ-APPROVAL-010` requires. The owner cannot
+ * hand-compute a request digest — it is sha256 over the canonical form of the
+ * whole request material — so a protected action whose authorizing material has
+ * no reachable producer is an authorization path nobody can walk. EL-10 shipped
+ * exactly that and it was caught by inspection rather than by a gate; the
+ * requirement and its static check exist so the next one fails loudly.
+ *
+ * It reads no approval and touches no channel (`EL-REQ-APPROVAL-012`): every
+ * unprotected preparatory step completes before any approval exists.
+ */
+export async function printAcceptanceChangeRequest(input: {
+  config: ActivationConfig;
+  pairs: readonly CatalogStatusPair[];
+  repository: RepositoryObservation;
+  createdAt: string;
+  approvalId: string;
+  clock?: { now(): string };
+}): Promise<{
+  request: unknown;
+  requestDigest: string;
+  catalogDigest: string;
+  targetGeneration: number;
+  ceremonies: readonly LedgerCeremony[];
+}> {
+  const resolved = await resolveActivation(input.config);
+  const catalog = await readCatalog(resolved.worktree);
+  const request = buildAcceptanceChangeRequest({
+    pairs: input.pairs,
+    repository: input.repository,
+    createdAt: input.createdAt,
+    approvalId: input.approvalId,
+  });
+  const ledger = await AcceptanceLedger.openReadOnly({
+    ledgerRoot: resolved.ledgerRoot,
+    worktree: resolved.worktree,
+    clock: input.clock ?? { now: () => new Date().toISOString() },
+  });
+  try {
+    const state = await ledger.readCurrentGeneration();
+    return {
+      request,
+      requestDigest: protectedRequestDigest(request),
+      catalogDigest: catalogDigestOf(catalog),
+      targetGeneration: state.generation,
+      ceremonies: admissibleLedgerCeremonies(state),
+    };
+  } finally {
+    await ledger.close();
+  }
+}
+
+export interface AcceptanceChangeRunInput {
+  config: ActivationConfig;
+  clock: { now(): string };
+  ownerId: string;
+  ownerToken: string;
+  pairs: readonly CatalogStatusPair[];
+  repository: RepositoryObservation;
+  createdAt: string;
+  approvalId: string;
+  catalog?: unknown;
+}
+
+/**
+ * Executes a steady-state acceptance change against owner-authored approval
+ * material (`EL-REQ-BOOT-008`). The controller composes and transports; the
+ * channel is the only source of authorization.
+ */
+export async function runAcceptanceChange(input: AcceptanceChangeRunInput) {
+  const resolved = await resolveActivation(input.config);
+  const catalog = input.catalog ?? (await readCatalog(resolved.worktree));
+  const channel = await FileProtectedApprovalChannel.open({
+    channelDirectory: resolved.approvalChannel,
+    worktree: resolved.worktree,
+  });
+  const ledger = await AcceptanceLedger.open({
+    ledgerRoot: resolved.ledgerRoot,
+    worktree: resolved.worktree,
+    clock: input.clock,
+    ownerId: input.ownerId,
+    ownerToken: input.ownerToken,
+  });
+  try {
+    return await recordAcceptanceChange({
+      ledger,
+      channel,
+      catalog,
+      pairs: input.pairs,
+      repository: input.repository,
+      now: input.clock.now(),
+      createdAt: input.createdAt,
+      approvalId: input.approvalId,
+    });
+  } finally {
+    await ledger.close();
+  }
 }
 
 export interface ActivationSeedInput {
@@ -463,11 +651,20 @@ Usage:
   tsx tools/engineering-loop/src/activate.ts <command>
 
 Commands:
-  check                Resolve and validate every configured protected location.
-  status               Report ledger generation, ceremony, and resolved status.
-  print-seed-request   Compose the exact seed request and print its digest, for
-                       the owner to author approval material against.
-  seed                 Execute seeding against owner-authored approval material.
+  check                     Resolve and validate every configured protected location.
+  status                    Report ledger generation, admissible ceremonies, and
+                            resolved status.
+  print-seed-request        Compose the exact seed request and print its digest,
+                            for the owner to author approval material against.
+  seed                      Execute seeding against owner-authored approval
+                            material. Seeding applies to an empty generation only.
+  print-acceptance-request  Compose the exact steady-state acceptance-change
+                            request and print its digest, for the owner to author
+                            approval material against.
+  record-acceptance         Execute a steady-state acceptance change against
+                            owner-authored approval material. This is how a
+                            feature becomes accepted or unblocked once the ledger
+                            holds history.
 
 Seeding arguments (print-seed-request, seed):
   --branch <name>      Expected branch; the observer refuses a mismatch.
@@ -479,6 +676,13 @@ Seeding arguments (print-seed-request, seed):
                        value print-seed-request emitted, because the request
                        digest covers it and a new timestamp invalidates the
                        owner's approval.
+
+Acceptance-change arguments (print-acceptance-request, record-acceptance):
+  every seeding argument above, plus
+  --set <id>=<status>  Repeatable. One exact (feature, status) pair, for example
+                       --set EL-10=accepted --set EL-07=planned. Status is one of
+                       planned, active, accepted, blocked, deferred. At least one
+                       is required: the controller never infers a status change.
 
 Required environment (no defaults; absent configuration refuses to start):
   ${ACTIVATION_ENVIRONMENT_KEYS.ledgerRoot}        Acceptance-ledger protected root
@@ -502,10 +706,16 @@ Every root must sit outside every worktree. A root inside, aliasing into, or
 reachable by symbolic link from the assigned worktree is refused, because an
 agent that can write the worktree could otherwise forge its own acceptance.
 
-The controller composes the seed request; it never supplies the authorization.
-Seeding reads owner-authored approval material from the protected channel and
+The controller composes the request; it never supplies the authorization. Every
+write reads owner-authored approval material from the protected channel and
 refuses without it. There is no flag, environment variable, or configuration
 that substitutes for that material.
+
+Which write applies is re-derived from the ledger every run, never from a flag:
+an empty generation admits seeding, a populated validating generation admits a
+steady-state acceptance change (record-acceptance) and content reconciliation,
+and a broken chain admits only out-of-band re-genesis. 'status' reports the set
+under 'ceremonies'.
 `;
 
 /**
@@ -518,7 +728,7 @@ export async function main(argv: readonly string[], environment: Record<string, 
     process.stdout.write(USAGE);
     return 0;
   }
-  const known = ['check', 'status', 'print-seed-request', 'seed'];
+  const known = ['check', 'status', 'print-seed-request', 'seed', 'print-acceptance-request', 'record-acceptance'];
   if (!known.includes(command)) {
     process.stderr.write(`Unknown command '${command}'.\n\n${USAGE}`);
     return 2;
@@ -527,6 +737,71 @@ export async function main(argv: readonly string[], environment: Record<string, 
     const config = readActivationConfig(environment);
     const clock = { now: () => new Date().toISOString() };
     const ownerId = environment.USER ?? environment.USERNAME ?? 'operator';
+
+    if (command === 'print-acceptance-request' || command === 'record-acceptance') {
+      const args = parseAcceptanceChangeArguments(
+        argv.slice(1),
+        command === 'print-acceptance-request' ? { createdAt: clock.now() } : {}
+      );
+      const resolved = await resolveActivation(config);
+      const catalog = await readCatalog(resolved.worktree);
+      const { observation, commandCount } = await observeSeedRepository({
+        resolved,
+        args,
+        clock,
+        observationId: 'repository-observation:el11-acceptance-change',
+        featureId: ACCEPTANCE_CHANGE_FEATURE_ID,
+        sessionId: ACCEPTANCE_CHANGE_SESSION_ID,
+      });
+
+      if (command === 'print-acceptance-request') {
+        const printed = await printAcceptanceChangeRequest({
+          config,
+          pairs: args.pairs,
+          repository: observation,
+          createdAt: args.createdAt,
+          approvalId: args.approvalId,
+          clock,
+        });
+        process.stdout.write(`${canonicalJson({
+          version: ACTIVATION_VERSION,
+          result: 'acceptance_change_request_composed',
+          note: 'Author approval material matching requestDigest and repositoryPrecondition exactly, place it in the protected channel, then run record-acceptance with the identical --created-at and --set arguments.',
+          createdAt: args.createdAt,
+          requestDigest: printed.requestDigest,
+          catalogDigest: printed.catalogDigest,
+          targetGeneration: printed.targetGeneration,
+          ceremonies: printed.ceremonies,
+          repositoryObservationCommands: commandCount,
+          request: printed.request,
+        })}\n`);
+        return 0;
+      }
+
+      const result = await runAcceptanceChange({
+        config,
+        clock,
+        ownerId,
+        ownerToken: `acceptance-change-${process.pid}-${Date.now()}`,
+        pairs: args.pairs,
+        repository: observation,
+        createdAt: args.createdAt,
+        approvalId: args.approvalId,
+        catalog,
+      });
+      process.stdout.write(`${canonicalJson({
+        version: ACTIVATION_VERSION,
+        result: 'acceptance_recorded',
+        generation: result.generation,
+        appendedRecordCount: result.appended.length,
+        generationRecordCount: result.records.length,
+        approvalId: result.approvalId,
+        consumptionId: result.consumptionId,
+        requestDigest: result.requestDigest,
+        scope: result.scope,
+      })}\n`);
+      return 0;
+    }
 
     if (command === 'print-seed-request' || command === 'seed') {
       const args = parseSeedArguments(
@@ -559,7 +834,7 @@ export async function main(argv: readonly string[], environment: Record<string, 
           requestDigest,
           catalogDigest: catalogDigestOf(catalog),
           targetGeneration: state.generation,
-          ceremony: classifyLedgerGeneration(state),
+          ceremonies: admissibleLedgerCeremonies(state),
           repositoryObservationCommands: commandCount,
           request,
         })}\n`);
