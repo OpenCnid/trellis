@@ -342,7 +342,9 @@ drill before any paid run:
 
 - **Support-computation oracle drill:** seeded beliefs + scripted op verdicts
   → assert exact (b, d, u) arithmetic, decay behavior, and abstain → u
-  routing. No LLM.
+  routing. No LLM. *Drafted as a concrete specification (PROPOSED —
+  UNRUN): [`docs/product/epistemic-support/ORACLE_DRILL_PROPOSAL.md`](../product/epistemic-support/ORACLE_DRILL_PROPOSAL.md);
+  claim-level research map: [`docs/product/epistemic-support/RESEARCH_MAP.md`](../product/epistemic-support/RESEARCH_MAP.md).*
 - **Validity-gate drill:** plant an all-pass metric candidate; assert it is
   unselectable (the paper's naive-collapse detector as a pin).
 - **Poisoning-drill extension:** re-run the existing poison drill; assert

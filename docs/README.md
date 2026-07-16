@@ -133,6 +133,18 @@ and the validation strategy. They record why the substrate was built the
 way it was; the system-level framing has since moved on (root
 `README.md`, "What Trellis is").
 
+Active research/planning tracks also live here, one directory per
+program (the `engineering-loop/` pattern):
+
+- **[`epistemic-support/RESEARCH_MAP.md`](product/epistemic-support/RESEARCH_MAP.md)**
+  — claim-level map of external evaluator-evolution research
+  (arXiv:2607.12790) onto Trellis mechanisms, with the sharing queue
+  and open contradictions. RESEARCH SYNTHESIS — PROPOSAL; nothing
+  implemented or measured.
+- **[`epistemic-support/ORACLE_DRILL_PROPOSAL.md`](product/epistemic-support/ORACLE_DRILL_PROPOSAL.md)**
+  — the support-computation oracle drill specification. PROPOSED —
+  UNRUN. Parent design record: `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`.
+
 ### 6. Progress-log archive (`/archive` — historical)
 
 - **`archive/ROADMAP_HISTORY.md`** — the dated engineering ledger from

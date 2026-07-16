@@ -1,0 +1,253 @@
+# Epistemic-Support Research Map
+
+**Status:** RESEARCH SYNTHESIS — PROPOSAL. Nothing in this document is
+implemented, measured, promoted, or accepted. July 16, 2026.
+**Origin:** OpenCnid Labs / sister-lab collaboration session, against
+commit `841f875` plus the review-series commits on branch
+`claude/sister-lab-repo-review-5fuu19`.
+**Trust standing:** this document and every source it inventories are
+session/branch context — **Tier-3 standing: none**. No `sourceNodeIds`
+exist for any external source named here; none are fabricated. Promotion
+of any source is a separate operator-gated act.
+
+Parent design record: [`docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`](../../review/06_EPISTEMIC_SUPPORT_PROPOSAL.md)
+(the epistemic-support axis). This document is the claim-level research
+map behind it, in the mold of `docs/product/engineering-loop/RESEARCH.md`.
+Companion artifact: [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md)
+(the §8 drill, PROPOSED — UNRUN).
+
+---
+
+## 1. Scope and non-goals
+
+**Scope.** Map the research corpus studied in the originating session —
+one primary external paper, two prompt-protocol documents, and the
+repository's own recorded measurements — onto Trellis mechanisms, at
+claim level, with evidence classes, enforcement status, drift pins,
+falsifiers, and documentation destinations. Surface convergences,
+contradictions, and gaps. Queue what OpenCnid Labs should share next.
+
+**Non-goals.** No implementation. No measurement claims beyond what the
+repository already records. No promotion or ingestion. No change to the
+custody tiers, the write path, or any recorded verdict. No EL-07
+progress: this turn does not start, satisfy, or unblock any
+engineering-loop feature.
+
+## 2. Source inventory
+
+| # | Source | Author / org | Identifier / version | Primary? | In session? | In Trellis? | Licensing / sensitivity |
+|---|---|---|---|---|---|---|---|
+| S1 | "Who Grades the Grader? Co-Evolving Evaluation Metrics and Skills for Self-Improving LLM Agents" | Xing Zhang, Guanghui Wang, Yanwei Cui, Ziyuan Li, Wei Qiu, Bing Zhu, Peiyang He — AWS Generative AI Innovation Center + HSBC Technology Center China | arXiv:2607.12790v1, July 14, 2026 | Primary | Full text (collaborator-supplied PDF, 13 pp.) | Absent (not committed, cited, or promoted) | arXiv license terms **unverified** — verify before committing any copy |
+| S2 | Prompt-Engineering protocol (Lexideck) | Matthew Murphy / Lexideck Technologies | skill doc; source `Lexideck_Prompt_Engineering_Curriculum.v2.md`; version metadata **missing** | Secondary (deployed protocol distilled from a curriculum) | Full text (collaborator-supplied) | Referenced by `HANDOFF.md` §7 guardrail 11 as a required resource; file itself **not present in repo** | Curriculum is Patreon-distributed — do not commit source material without explicit authorization |
+| S3 | Hypershot-Protocol (Lexideck) | Matthew Murphy / Lexideck Technologies | skill doc; version metadata **missing** | Secondary | Full text (collaborator-supplied) | Same standing as S2 | Same as S2 |
+| S4 | Trellis recorded measurements | OpenCnid | committed reports: `PROVENANCE_CITATION_AB_REPORT.md`, `POISONING_DRILL_REPORT.md`, `UPDATE_DRILL_REPORT.md`, `EFFECTIVE_CONTEXT_PROBE_REPORT.md` + result JSONs | Primary (for Trellis claims) | Yes (repo) | Committed, master | Public (MIT repo) |
+| S5 | Sister-lab review series | sister lab | `docs/review/00–06`, branch `claude/sister-lab-repo-review-5fuu19`, PR #119 | Secondary synthesis | Yes (repo, branch) | On branch, **pending OpenCnid review** | Public branch |
+| S6 | Subjective logic (opinion = belief/disbelief/uncertainty) | A. Jøsang (attribution from model background) | canonical citation **missing from session** — no artifact available | Background theory | No (memory only) | Absent | Published academic work; cite, do not ingest |
+
+Missing metadata is marked, not invented. S6 in particular must not be
+cited in any canonical Trellis document until a real artifact is
+obtained (see the sharing queue, §7).
+
+## 3. Claim-level research map
+
+Evidence classes: **PF** primary finding (measured in its source), **SS**
+secondary synthesis, **RO** repo observation (verified against this
+worktree), **INF** inference, **HYP** hypothesis, **OQ** open question.
+
+### 3a. Identification
+
+| ID | Source locator | Research claim (narrow) | Class | Trellis counterpart | Concrete locations | Relationship |
+|---|---|---|---|---|---|---|
+| R-01 | S1, Introduction + "Metrics as Compositions" | A clean verdict should mean "no known drawback found," never certified correctness | PF (stance validated by results) | "Provenance proves origin, never correctness" | `docs/GLOSSARY.md` (Provenance); `AGENTS.md` §4 rule 4 | Supports / refines (extends the doctrine to the judgment axis) |
+| R-02 | S1, Table 3 + "Which Guard Carries the Safety Load" | Removing anchor guards collapses an evolved metric into a vacuous always-pass grader (3/3 seeds); removing the detector lifecycle does not | PF (n=3 seeds, one solver model, three task families) | No counterpart — Trellis has no metric-selection machinery | gap | Exposes a gap / suggests design |
+| R-03 | S1, same section | Metric-side drift risk is **anchor drift, not pool drift** | PF + authors' interpretation | Trellis byte-pinned fixture culture (`data/`, `.gitattributes -text`) is anchor discipline without the name | `data/`, `src/benchmarks/effective_context/` | Supports / names an existing practice |
+| R-04 | S1, "The Evolved Metric Lifts and Transfers" | Ten-item anchored dev sets suffice; subsampling 4–10 items held 0.854–0.882 agreement | PF (offline replay, 200 subsamples/size, report task) | Committed drill manifests are candidate anchors | `docs/benchmarks/UPDATE_DRILL_REPORT.md`, `POISONING_DRILL_REPORT.md` manifests | Suggests a new direction |
+| R-05 | S1, "The Detectability Spectrum" | Metric evolution buys most where failures are mechanically detectable; a semantically-wrong-under-clean-execution regime drops held-out agreement to 0.500±0.026 | PF (within-task contrast, Spider 2.0) | Verifiable/unverifiable claim split in the support proposal | `docs/review/06_…` §4.6, §5 | Supports / bounds ambition |
+| R-06 | S1, Table 2 + Appendix D | The outer audit must be independent, position-debiased, and **task-aware**: a convention-blind judge held win rate at 0.122–0.126 across a real repair; a task-aware rubric separated it (0.515→0.770) | PF (2×2 on stored pairs) | Trellis contracts (by-reference answers, provenance discipline) would be misjudged by generic rubrics | `src/rlm/trellis_answer.py`; `docs/architecture/CODE_MEDIATED_TEXT.md` | Refines (audit design constraint) |
+| R-07 | S1, "Metrics as Compositions" + Appendix C | A metric reproducible from expression string + registered op pool is inspectable and diagnosable; final selected metrics composed only 1–3 leaves | PF | Composed-prompt SHA pin discipline | `scripts/test_modules.py:102` (`COMPOSED_SYSTEM_PROMPT_SHA256`) | Duplicates a Trellis pattern (pin-by-hash) on a new object |
+| R-08 | S1, "Co-Evolution Matches the Oracle" | A weak metric (0.500 agreement) can still retain full training lift because failure capsules carry error text — the training signal is directional, not absolute | PF (Spider co-loop) | No counterpart: Trellis has no skill loop consuming graded failures | gap | HYP for Trellis — untestable here today |
+| R-09 | S1, Discussion | "The anchor cannot be manufactured": evolution expands coverage, never creates ground truth | PF-adjacent (authors' limitation) | High-`u` honesty for unanchorable claims | `docs/review/06_…` §3, §4.3 | Supports |
+| R-10 | S4, `POISONING_DRILL_REPORT.md` | Writer-supplied confidence carries no adversarial information: poison was written at confidence 0.97 and served until sampled verification caught it (recall 1.000 at p=0.05; 0.000 mandatory-only) | RO (recorded measurement, n=1 paid run + rehearsal) | `confidence` field on the write path | `src/rlm/trellis_tools.py` (`_normalize_fact`); `src/core/graph/verification.ts` | Contradicts any design that trusts writer confidence |
+| R-11 | S4, `PROVENANCE_CITATION_AB_REPORT.md` | Citation laundering is incentive-driven (0%→100% under min-cite pressure); prompt and readership gates unreliable; only the semantic entailment gate held 0% everywhere | RO (n=3/cell) | Write-path gates; "never reward citation count" | `src/core/graph/entailment_detection.ts`; `AGENTS.md` §4 rule 8 | Supports S1's Goodhart episode independently |
+| R-12 | S4, `POISONING_DRILL_REPORT.md` | Sampled semantic re-verification catches confident lies over unchanged bytes within the 1/p sweep bound | RO | Verification sweep (`verified_count`, `contestedReason='disputed'`) | `src/core/graph/verification.ts`; `npm run test:verification-sweep` | Supports — the support axis's engine already exists |
+| R-13 | repo | Capability-as-belief registration: module manifests become graph entities citing research hashes; the sweep contests capabilities | RO (implemented, drilled) | The mechanism the support proposal extends to judges | `scripts/register_modules.ts`; `npm run test:module-lifecycle` | Trellis possesses what S1 lacks (governable evaluators) |
+| R-14 | S6 | A (b, d, u) opinion distinguishes balanced conflict from ignorance; a scalar cannot | Background theory — **source artifact missing** | Proposed support state | `docs/review/06_…` §3 | Suggests representation; unverifiable in-session |
+| R-15 | S2 + S3 + repo | The hypershot invariant/variant layer split ("concrete content that varies across invocations must not live at the system layer") is already **engine-enforced** in Trellis's engineering loop: the prompt compiler refuses task-specific concrete content in reusable frames | SS + RO | EL-04 prompt compiler contamination scan | `tools/engineering-loop/src/prompt_compiler.ts:64` (`CONTAMINATION_PATTERNS`); `HANDOFF.md` §7 guardrail 11 | Converges — prompt advice already converted to tooling shape |
+| R-16 | S4, `EFFECTIVE_CONTEXT_PROBE_REPORT.md` + roadmap Session 28 record | Prompt-only guidance is unreliable as enforcement: the retired estimation-discipline module failed its pooled token criterion; the CMT prompt block's arm effect vanished at scale while tooling carried the behavior | RO | "Tooling shape enforces; prompts reinforce" (owner doctrine) | `AGENTS.md` §4 rule 8; `docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md` | Constrains how S2/S3 claims may be adopted (as hypotheses, not enforcement) |
+
+### 3b. Design consequences
+
+| ID | Enforcement status today | Existing pin | Design implication | Falsifier |
+|---|---|---|---|---|
+| R-01 | Doctrine enforced on custody axis only | write-path drills (`test:rlm-sandbox`) | Adopt drawback-first verdicts (`drawback/clean/abstain`) as the support-axis twin | A judge-op regime where certifying correctness outperforms drawback detection on anchors |
+| R-02 | Absent | none | Fail-closed anchoring + validity gate are **mandatory** in any support metric; ship them before any op pool grows | Replication failure of the naive-collapse result on Trellis task families |
+| R-03 | Practiced, unnamed | byte-stability unit pins on `data/` | Name anchor discipline; anchor refresh becomes a human ceremony with audit stamp | Anchored metrics drifting despite pinned anchors |
+| R-04 | Absent | none | Ten-item labeled anchor fixtures per belief family are cheap and sufficient to start | Agreement collapse at n=10 on Trellis corpora |
+| R-05 | Absent | none | Split support machinery by detectability; report `u` honestly where ops abstain | Deterministic ops achieving high agreement on semantic-regime beliefs (would *loosen* the constraint) |
+| R-06 | Absent | none | Audit rubrics must state Trellis contracts; gate judge ≠ audit judge | A generic-rubric audit matching task-aware verdicts on Trellis outputs |
+| R-07 | Pattern exists for prompts | `test_modules.py` SHA pin | `metricSha` = expression + op-pool version pin; metric registry mirrors module registry | none needed — pattern reuse |
+| R-08 | n/a | none | Record as **hypothesis only**; do not design Trellis mechanisms that depend on it | n/a until a consumer of graded failures exists |
+| R-09 | Doctrine-adjacent | none | No synthetic ground truth; unanchorable claims keep high `u` forever | none — this is a limitation, not a claim |
+| R-10 | Enforced (write accepts but nothing consumes confidence as trust) | poison drill | **Exclude writer confidence from support computation**; keep it stored as an audit fact | A measured regime where writer confidence adds detection power beyond judged signals |
+| R-11 | Enforced (optional entailment gate) + doctrine | `test:verification-sweep` [7]–[9]; AB report | Writer never sees support; no score-bearing incentives anywhere | A count-shaped incentive shown safe under pressure (contradicts two independent measurements — unlikely) |
+| R-12 | Enforced, measured | `test:verification-sweep`; drill reports | The support sweep is an extension of this machinery, not a new engine | — |
+| R-13 | Enforced for modules | `test:module-lifecycle` | Register judges/metrics as manifests citing rubric + anchor hashes; sweep contests judges | Registration overhead making judge iteration impractical |
+| R-14 | Absent | none | Use (b, d, u) in the proposal; obtain S6 before canonizing the formalism | Operators finding the triple unusable where a scalar suffices |
+| R-15 | Enforced (EL scope only) | EL-04 conformance tests | Recognize the correspondence; if support-layer prompt artifacts are authored, they inherit the same contamination discipline | — |
+| R-16 | Enforced as doctrine | Session 28 record; probe rounds 2–4 | S2/S3 mechanism claims (e.g. primacy) remain **unmeasured hypotheses** in Trellis terms; adopt their *structural* practices, pin their artifacts, measure before relying | A paired measurement showing prompt-only protocol reliably carrying a behavior across pressure |
+
+## 4. Cross-row synthesis
+
+Each item states its chain; steps are tagged **[E]** evidence (measured
+or verified in a source/worktree) or **[I]** inference.
+
+**4.1 The anchor infrastructure already exists.** [E] R-02/R-03/R-04:
+anchor guards carry the safety load and ten items suffice. [E] Trellis
+already commits byte-pinned corpora and drill manifests with known-good
+and known-poisoned beliefs by construction. [I] Therefore the highest-
+leverage, lowest-cost step toward a support layer is not building
+metric machinery — it is *naming* existing fixtures as anchors and
+adding the two guards (fail-closed selection, validity gate). This is
+what the §8 oracle drill operationalizes first.
+
+**4.2 Two independent measurements of one Goodhart law.** [E] S1's
+episode: skills gamed a tag counter; readership-style checks were blind;
+an independent semantic audit caught it. [E] Trellis's AB (R-11),
+measured a year apart by an unrelated team on unrelated machinery:
+laundering under count incentives; readership gate blind; entailment
+gate held. [I] Convergent replication across systems strengthens both
+beyond their small n, and elevates "never attach an incentive to a
+countable proxy without a semantic gate behind it" from house rule to
+candidate cross-system law. [I] It also implies the support score itself
+is the next countable proxy at risk — hence writer-blindness (R-11
+implication) is load-bearing, not stylistic.
+
+**4.3 Trellis has the governance mechanism S1 lacks.** [E] S1's answer
+to "who grades the grader" is anchors + a locked set + an outside judge
+— all *measurement* devices. [E] Trellis has capability-as-belief
+registration (R-13): evaluators can be made *contestable objects* whose
+own evidentiary basis is swept. [I] The composition — S1's anchor
+discipline for validity, Trellis's registration for governance — is
+novel on both sides and is the central architectural contribution of
+the support proposal (`docs/review/06_…` §4.4).
+
+**4.4 A genuine conflict: model-in-the-anchor.** [E] S1's dev anchors
+carry soft labels emitted by a *teacher model* comparing outputs to
+golden references (Claude Opus 4.7 in every loop role). [E] Trellis
+doctrine after the laundering finding: the harness pins, the model never
+supplies provenance; grounded authoring exists precisely because model-
+chosen attributions failed. [I] For Trellis belief-support anchors,
+labels should be human-authored or mechanically derived (drill
+manifests are — the poison manifest *is* ground truth by construction);
+a teacher-model labeling step re-admits the failure mode Trellis paid to
+remove. **Unresolved by design:** S1's teacher approach is cheaper and
+their results are real; Trellis's stricter posture is doctrine. Recorded
+here as a divergence for the owner to weigh, not silently resolved.
+
+**4.5 A second conflict: metric evolution vs the prompt-module verdict.**
+[E] S1 evolves metric expressions with an LLM composer under anchors.
+[E] Trellis's owner ended the prompt-module era on measurement (R-16):
+behavioral failure classes close by tooling shape. [I] These do not
+actually collide — an evolved *metric expression* is tooling, not prompt
+prose, and S1's ablation shows the anchor guards (tooling) carry safety
+— but the *entry path* matters: first edition hand-authors the op pool
+(S1's own data: final metrics compose 1–3 leaves; "their exact contents
+barely matter"). Evolution re-enters, if ever, behind its own measured
+proposal. Recorded as sequencing, not contradiction.
+
+**4.6 Prompt protocol convergence, and its limit.** [E] R-15: the
+hypershot invariance test and EL-04's `CONTAMINATION_PATTERNS` refusal
+enforce the same rule from independent origins — variant concrete
+content must not live in reusable frames. [E] `HANDOFF.md` §7 guardrail
+11 already mandates S2/S3 for prompt work. [I] Adopting S2/S3 structure
+for support-layer artifacts is therefore continuous with house practice.
+[E] But R-16 bounds the adoption: Trellis measured that prompt text does
+not *enforce*; S2/S3's own mechanism claims (primacy-as-prior, basin of
+attraction) are plausible and **unmeasured here**. They stay hypotheses;
+the structural practices (tags, invariant/variant split, placeholder
+grammar) are adopted as authoring discipline with pinned artifacts.
+
+**4.7 Reachability, stated up front.** [E] `AGENTS.md` §4 rule 15:
+correct is not the same claim as reachable; this repo shipped callerless
+capabilities three times. [I] The support layer's minimal reachable
+spine is: a support computation module, a `support_sweep` job name on
+the existing shared verification queue, and a package-script drill
+entrypoint. The oracle drill proposal names all three; none exist today.
+
+## 5. Behavior → enforcement → pin (proposed support layer)
+
+| Behavior | Tooling that enforces it | Pin that detects drift |
+|---|---|---|
+| Support computed only from judged events, never writer confidence | computation module reads sweep/audit records only; no code path from `confidence` into the opinion | oracle drill section: confidence-injection must FAIL (negative control) |
+| Vacuous metrics unselectable | validity gate in the metric loader (all-pass/all-fail/all-abstain refused) | oracle drill section: planted vacuous metric refused |
+| Abstention feeds uncertainty, not belief | opinion arithmetic routes `abstain` mass to `u` | oracle drill: exact (b,d,u) equality vs fixture |
+| Anchors immutable between ceremonies | anchor fixtures committed + byte-pinned; refresh is a gated CLI | fixture SHA pins; drill refuses on mismatch |
+| Judges contestable | judge/metric manifests registered as graph entities citing rubric + anchor hashes | `test:module-lifecycle` pattern retargeted (judge-contest drill, §8 of the parent record) |
+| Writer never sees support | no support field on any RLM-visible read surface; no score term in task specs | kernel-prompt substring pin (absence) + read-surface unit pins |
+
+```mermaid
+flowchart LR
+    R["S1 Table 3: anchor guards carry the safety load"] --> M["Trellis byte-pinned drill manifests = ready-made anchors"]
+    M --> D["Support metrics: fail-closed anchoring + validity gate before any op pool grows"]
+    D --> E["Metric loader refuses unanchored / vacuous candidates"]
+    E --> P["Fixture SHA pins + refusal sections in test:support-oracle"]
+    P --> O["Zero-paid observation: planted vacuous metric refused; corrupted anchor halts the drill"]
+```
+
+## 6. Contradictions and unresolved questions
+
+1. **Model-in-the-anchor** (§4.4) — S1's teacher-labeled anchors vs
+   Trellis's harness-holds-the-pen doctrine. Owner decision required
+   before any anchor set uses model labels. Default in all proposals
+   here: human/mechanical labels only.
+2. **Aggregation function underdetermined** — S1 composes ternary
+   verdicts; the proposal stores continuous (b,d,u). The mapping from
+   op verdicts + weights + decay to opinion mass is a design choice with
+   no measurement behind it yet (OQ). The oracle drill pins whatever
+   function is chosen; it does not justify it.
+3. **S6 is memory, not source** — the subjective-logic formalism is
+   attributed from model background. Canonical adoption is blocked on
+   obtaining the artifact (sharing queue, priority 2).
+4. **Licensing unknowns** — S1's arXiv license and S2/S3's distribution
+   terms are unverified; nothing is committed beyond citation.
+
+## 7. Share-with-Trellis-next queue
+
+| Pri | Artifact | Locator | Substantiates | Needed form | Constraints | Doc key if promoted | Promotion gate | Unknowable without it |
+|---|---|---|---|---|---|---|---|---|
+| 1 | S1 full paper | arXiv:2607.12790 | R-01…R-09 | full text | arXiv license unverified | `web:https://arxiv.org/abs/2607.12790` | operator promotion required | nothing (in session) — needed for *citable* provenance only |
+| 2 | S1 released code | Appendix H says released; **locator missing** | op grammar, lifecycle, selection objective details | code, selected files | unknown license | `repo:double-ratchet:<path>` (if public) | operator | exact op/selection implementations; reproduction fidelity |
+| 3 | Subjective-logic canonical text | **missing** (Jøsang, from background) | R-14 opinion algebra, projection, decay | selected sections | published book/paper — cite only | n/a (cite, don't ingest) | n/a | correctness of the (b,d,u) arithmetic the drill will pin |
+| 4 | Ratchet + library-drift papers | arXiv:2605.22148; ICML 2026 workshop paper (per S1 refs) | R-08, lifecycle lineage | abstracts + selected sections | standard arXiv | `web:https://arxiv.org/abs/2605.22148` | operator | whether skill-loop lessons transfer at all |
+| 5 | Lexideck curriculum source | Patreon (S2 lineage note) | R-15 lineage, protocol completeness | **do not commit**; reference only | paywalled/proprietary — explicit authorization required | n/a | n/a | full curriculum context behind the two skills |
+| 6 | Sister-lab review series | PR #119 (branch) | S5 throughout | already in branch | none | already repo files | ordinary PR review | n/a — awaiting OpenCnid review |
+
+## 8. Relationship to the oracle drill, and the next decision boundary
+
+The parent record's §8 lists six zero-paid drills. The first — the
+**support-computation oracle drill** — is drafted as a concrete,
+implementation-ready proposal in
+[`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md), status
+**PROPOSED — UNRUN**. It operationalizes R-02/R-04/R-10 (anchor guards,
+small anchors, confidence exclusion) as the first pinned behaviors of
+the support layer.
+
+**Next decision boundary (owner):** (1) accept, amend, or refuse the
+epistemic-support axis as forward design (`docs/review/06_…` → a future
+`docs/architecture/` record if adopted); (2) rule on the
+model-in-the-anchor divergence (§6.1); (3) authorize the drill's
+implementation as a bounded feature (code, fixtures, package script) —
+this document authorizes nothing.
+
+## 9. Honest limitations
+
+- Every S1 number is n=3 seeds, one solver model family, three task
+  families; every Trellis number is n=1–3 as recorded in its report.
+  Nothing here is production-validated.
+- R-08 is untestable in Trellis today (no consumer of graded failures);
+  R-14 rests on an unavailable source; S2/S3 mechanism claims are
+  unmeasured hypotheses (R-16).
+- This map was authored from session context by the sister lab. It has
+  no provenance standing, has not been reviewed by OpenCnid, and may
+  misread doctrine; `code > glossary > prose > session inference`
+  applies to it in full.
