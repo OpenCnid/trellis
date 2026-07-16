@@ -6947,3 +6947,84 @@ the feature and merged PR #104 as
    preserving §0 byte-for-byte and retaining manual handoff authority. The
    owner accepted EL-04 and merged PR #104; EL-05 then began from that exact
    commit. The paused TTT T2 tooling objective remains untouched.
+
+### July 14–15, 2026 — Session 59: EL-05 adapter-neutral Codex runner and episode rotation owner-ratified and accepted, zero-model and zero-paid
+
+Session 59 executed only engineering-loop feature `EL-05` on
+`implement-el05-codex-runner`, based on required master commit
+`e1ee564923c9c02f532e08f1a5561d9837a7493a` (merged PR #104 / accepted
+EL-04). On July 15, 2026, the owner reviewed and ratified the complete EL-05
+closeout and explicitly authorized commit, merge, and push through the
+feature-branch pull-request path.
+
+1. **All 15 owned requirements implemented and linked:** an independent SPEC
+   §18 audit computed exactly `EL-REQ-RUNNER-001`–`003`, `005`–`008`,
+   `EL-REQ-EPISODE-001`–`003`, `005`–`008`, and `EL-REQ-OBS-001`. Each maps
+   one-for-one to concrete source and deterministic tests in
+   `tools/engineering-loop/src/requirements.ts`; required = 15, implemented =
+   15, verified = 15, outstanding = 0.
+2. **Stable runner and authority boundary:** `AgentRunner` is a strict,
+   bounded, versioned, adapter-neutral contract for start, resume, interrupt,
+   observe, and dispose. Requests, results, events, and reports carry the
+   applicable workflow, feature, session, episode, request, runner, thread,
+   and turn correlations. `FakeRunner` is the full zero-effect conformance
+   oracle. Runner reports remain advisory: only controller code can validate
+   persistence, produce evidence, or transition state.
+3. **Pinned Codex boundary and refusal behavior:** the sole wire adapter pins
+   adapter version `trellis-codex-app-server-runner:v1`, protocol
+   `codex-app-server-jsonl:v2@0.144.2`, executable `codex-cli 0.144.2`, and
+   stable v2 schema SHA-256
+   `4d236168d44edcfb8df0244c90bd58b4fb8f85e443e29144d70bc564403ea8af`.
+   It translates only at the adapter boundary and deterministically refuses
+   unknown, malformed, incompatible, over-bound, missing-ID, duplicate, and
+   out-of-order messages before widening the controller schema.
+4. **Bounded observations and episode continuity:** injected transport, clock,
+   timers, and cancellation keep deterministic tests process/network/model
+   free. Explicit byte, event, pending-request, metadata, observation,
+   interruption, and shutdown limits have deterministic overflow outcomes.
+   Configured sensitive values are redacted before return; no raw environment,
+   approval, secret, or wire transcript becomes durable. Every attempted
+   episode terminates exactly once. The pure policy resumes only when every
+   session/feature/role/phase/definition/repository/prompt/budget/adapter binding
+   is identical and current; each named semantic, repository, recovery,
+   checker, protocol, or context boundary creates a fresh episode/thread or
+   stops. Conversation and runner memory never become durable truth.
+5. **Protocol inspection and explicit smoke:** official OpenAI app-server
+   documentation and the installed local executable were inspected before the
+   pin was selected. Windows denied direct execution from the packaged app
+   path, so the same installed binary was copied to a writable inspection path;
+   its SHA-256 is
+   `2caacad1f7b8b3e9b2527b9bff9630cfbb30ec25d8d8c018c9d55a2bec348032`.
+   The explicit local smoke reported executable `codex-cli 0.144.2`, the pinned
+   protocol/schema digest, outbound methods exactly `initialize`,
+   `initialized`, thread requests 0, turn requests 0, and `disposed=true`. It
+   started no thread, prompt, model turn, network completion, or paid work.
+6. **Acceptance evidence and observed defect:** baseline was 98 files / 1,032
+   tests. The exact focused command `npx vitest run
+   tools/engineering-loop/tests/runner.test.ts
+   tools/engineering-loop/tests/codex_app_server_runner.test.ts
+   tools/engineering-loop/tests/episode_policy.test.ts
+   tools/engineering-loop/tests/requirements.test.ts` passed **69 tests across
+   4 files**. Final `npm test` passed **1,094 tests across 101 files**; `npm run
+   build` passed; `npm run python:check` passed; `docker compose config --quiet`
+   exited 0; Draft 2020-12 catalog validation printed **10**; and `git diff
+   --check` exited 0. The first full suite correctly exposed Windows
+   `core.autocrlf` materializing CRLF in four EL-04 byte-pinned prompt assets.
+   A scoped `tools/engineering-loop/prompts/.gitattributes` LF rule and
+   worktree-local `core.autocrlf=false` restored repository bytes; no prompt
+   content or pin changed. The final authority audit also found and pinned four
+   boundary gaps before acceptance: prompt digests are now recomputed from
+   bytes, injected runner results are runtime-validated with stable
+   correlations, malformed UTF-8 refuses, and an unknown interrupt
+   acknowledgement cannot emit a second interrupt request. Stderr is drained
+   without retention and post-spawn process errors become typed disconnects.
+   Model completions = 0; paid calls = 0.
+7. **Scope and closeout:** the final implementation diff adds no dependency,
+   product runtime import, verifier/checker execution, approval service,
+   protected effect, scheduler, tracker, daemon, API, database, queue, worker,
+   frontend, module, automatic Git effect, AI attribution, or EL-06+
+   implementation. The catalog records only EL-05's accepted bootstrap status. Session
+   54 moved verbatim to the archive, and `HANDOFF.md` was regenerated for
+   dependency-unblocked EL-06 while preserving §0 byte-for-byte and retaining
+   manual handoff authority. The owner's EL-05 acceptance dependency-unblocks
+   EL-06.

@@ -443,23 +443,21 @@ describe('EL-02 normative linkage', () => {
     const seeding = report.producers.find(producer => producer.ceremony === 'seeding');
     expect(seeding?.reachable, 'seeding producer').toBe(true);
 
-    // OPEN DEFECT, pinned rather than hidden. Both EL-10 recovery ceremonies are
-    // implemented and tested and have no caller outside tests/, so an owner facing
-    // a corrupt ledger still has no route but hand-editing the protected file —
-    // the untrusted-side write the ceremonies exist to eliminate. Under
-    // EL-REQ-APPROVAL-010 that is EL-10 failing acceptance as unreachable, and it
-    // is the owner's to sequence; EL-11 reports it rather than building EL-10's
-    // CLI unbidden.
-    //
-    // This pin is not an exemption a human must remember to clear: reachability is
-    // re-derived from the import graph every run, and wiring either ceremony to an
-    // entrypoint turns this assertion red in the same commit that fixes it, which
-    // is when it should be recomputed wittingly.
-    expect(report.unreachable.map(producer => producer.ceremony).sort())
-      .toEqual(['ledger_recovery', 're_genesis']);
-    for (const producer of report.unreachable) {
-      expect(producer.owningFeature, `${producer.ceremony} is EL-10's to fix`).toBe('EL-10');
-      expect(producer.callers).toEqual([]);
+    // DEFECT CLOSED, recomputed wittingly (Session 64). This pin previously
+    // recorded EL-11's finding that both EL-10 recovery ceremonies had no caller
+    // outside tests/ — the unreachable set was exactly
+    // ['ledger_recovery', 're_genesis']. Wiring the `print-recovery-request` /
+    // `recover` and `print-genesis-request` / `re-genesis` command pairs into
+    // `activate.ts` turned that assertion red in the same commit that fixed it,
+    // exactly as the pin was designed to do: reachability is re-derived from the
+    // import graph every run, so the empty set below is a computed fact, not a
+    // cleared flag. The check itself is unchanged; what changed is what the
+    // graph contains.
+    expect(report.unreachable).toEqual([]);
+    for (const ceremony of ['ledger_recovery', 're_genesis']) {
+      const producer = report.producers.find(item => item.ceremony === ceremony);
+      expect(producer?.reachable, `${ceremony} producer`).toBe(true);
+      expect(producer?.callers, `${ceremony} non-test caller`).toContain('activate.ts');
     }
   });
 

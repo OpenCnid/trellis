@@ -27,7 +27,8 @@ import {
   type LedgerBreach,
   type LedgerRecord,
 } from './acceptance_ledger.js';
-import { SEED_SESSION_ID, seedAcceptanceLedger, type SeedResult } from './seed.js';
+import { SEED_SESSION_ID, seedAcceptanceLedger, type CatalogStatusPair, type SeedResult } from './seed.js';
+import { canonicalStatusPairs } from './acceptance_change.js';
 
 /**
  * The two recovery ceremonies of SPEC 6.1 (EL-REQ-BOOT-006 and
@@ -67,6 +68,34 @@ export function reconciliationScopeItem(item: ReconciliationScopeItem): string {
   return `${item.featureId}=${item.status}:supersedes=${[...item.supersedes].sort((a, b) => a - b).join(',')}`;
 }
 
+/**
+ * The reconciliation scope in a canonical order, which is what makes the request
+ * digest reproducible.
+ *
+ * `exactScope` order is digest-bearing while approval matching compares scope
+ * sorted, so an owner who printed a request with two `--supersede` items and
+ * recorded it with the items transposed would pass the scope check, fail the
+ * digest check, and be refused for a mismatch that never happened — the exact
+ * defect `canonicalStatusPairs` closed for the steady-state path. `supersedes`
+ * inside each item is already canonical (`reconciliationScopeItem` sorts it), so
+ * the item order is the remaining exposure.
+ *
+ * Duplicate feature identities are refused rather than sorted: a stable sort
+ * keyed on `featureId` leaves two items naming the same feature in input order,
+ * which would silently reopen the transposition hole — and two reconciliations
+ * of one feature in one request are ambiguous under last-record-wins replay
+ * anyway.
+ */
+export function canonicalReconciliationScope(
+  items: readonly ReconciliationScopeItem[]
+): readonly ReconciliationScopeItem[] {
+  const parsed = items.map(item => parseBoundary(ReconciliationScopeItemSchema, item, 'reconciliation scope item'));
+  if (new Set(parsed.map(item => item.featureId)).size !== parsed.length) {
+    throw new LedgerRecoveryRefusedError('Reconciliation scope must name each feature exactly once');
+  }
+  return [...parsed].sort((left, right) => left.featureId.localeCompare(right.featureId, 'en'));
+}
+
 export interface LedgerRecoveryRequestInput {
   scope: readonly ReconciliationScopeItem[];
   repository: RepositoryObservation;
@@ -78,7 +107,7 @@ export interface LedgerRecoveryRequestInput {
 }
 
 export function buildLedgerRecoveryRequest(input: LedgerRecoveryRequestInput): ProtectedActionRequest {
-  const scope = input.scope.map(item => reconciliationScopeItem(parseBoundary(ReconciliationScopeItemSchema, item, 'reconciliation scope item')));
+  const scope = canonicalReconciliationScope(input.scope).map(reconciliationScopeItem);
   return parseBoundary(ProtectedActionRequestSchema, {
     id: input.requestId ?? 'request:el10-ledger-recovery',
     schemaVersion: PROTECTED_POLICY_SCHEMA_VERSION,
@@ -146,8 +175,12 @@ export async function recoverLedgerContent(input: LedgerRecoveryInput): Promise<
     );
   }
 
+  // The canonical order once, used for the request scope and the appended
+  // records alike, so an auditor reading the approval against the ledger sees
+  // one ordering rather than two.
+  const scope = canonicalReconciliationScope(input.scope);
   const known = new Set(state.records.map(record => record.sequence));
-  for (const item of input.scope) {
+  for (const item of scope) {
     for (const sequence of item.supersedes) {
       if (!known.has(sequence)) {
         throw new LedgerRecoveryRefusedError(
@@ -158,7 +191,7 @@ export async function recoverLedgerContent(input: LedgerRecoveryInput): Promise<
   }
 
   const request = buildLedgerRecoveryRequest({
-    scope: input.scope,
+    scope,
     repository: input.repository,
     createdAt: input.createdAt,
     approvalId: input.approvalId,
@@ -201,7 +234,7 @@ export async function recoverLedgerContent(input: LedgerRecoveryInput): Promise<
   const records: LedgerRecord[] = [];
   let sequence = state.records.length;
   let previousDigest = ledgerRecordDigest(state.records[state.records.length - 1]);
-  for (const item of input.scope) {
+  for (const item of scope) {
     const record = parseBoundary(LedgerRecordSchema, {
       kind: 'reconciliation',
       id: `reconciliation:${item.featureId}:${sequence}`,
@@ -254,6 +287,20 @@ export interface ReGenesisInput {
   seedRequestId?: string;
   seedOperationId?: string;
   sessionId?: string;
+  /**
+   * The `(featureId, status)` pairs of the owner's reconstruction basis.
+   *
+   * Left absent, the seed layer falls back to reading `catalog` as a status
+   * document — which is how activation bootstrapped, and which the live
+   * post-migration catalog refuses because `bootstrapStatus` no longer exists.
+   * `SeedInput.pairs` said "a re-genesis caller supplies the pairs from the
+   * owner's reconstruction basis instead" while this input had no field to
+   * supply them through: prose describing required behavior with no way to
+   * exercise it, the same defect shape this program keeps finding. Canonically
+   * ordered before composition because scope order is digest-bearing and these
+   * pairs arrive from an owner's command line.
+   */
+  pairs?: readonly CatalogStatusPair[];
 }
 
 export interface ReGenesisResult {
@@ -396,6 +443,7 @@ export async function reGenesisLedger(input: ReGenesisInput): Promise<ReGenesisR
     operationId: input.seedOperationId,
     sessionId: input.sessionId,
     generation: newGeneration,
+    pairs: input.pairs === undefined ? undefined : canonicalStatusPairs(input.pairs),
     leadingRecords: [genesis],
   });
 
