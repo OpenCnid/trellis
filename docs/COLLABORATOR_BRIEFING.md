@@ -387,7 +387,8 @@ premise: **deterministic verification outranks model claims.** The controller
 observes the repository, compiles role prompts, drives a bounded agent episode,
 runs acceptance itself, and holds the result in protected state *outside the
 worktree the agent can write* — so that an agent cannot forge the record of its
-own success. Ten bounded features, `EL-00` through `EL-09`.
+own success. Ten bounded features at ratification, `EL-00` through `EL-09`;
+`EL-10` and `EL-11` joined the catalog July 15–16, 2026 (twelve today).
 
 **Where it got to.** Six features accepted in six sessions: the control kernel
 (schemas, an exhaustive 132-pair transition matrix, an integrity-linked journal,
@@ -487,8 +488,8 @@ place to leave the evidence chain unestablished.
 Reading, in dependency order:
 [`docs/architecture/ENGINEERING_LOOP.md`](architecture/ENGINEERING_LOOP.md) (why
 the boundary is where it is),
-[`tools/engineering-loop/SPEC.md`](../tools/engineering-loop/SPEC.md) (111
-mandatory requirements; §6.1 is the new activation section), and
+[`tools/engineering-loop/SPEC.md`](../tools/engineering-loop/SPEC.md) (116
+mandatory requirements, all mapped in §18; §6.1 is the activation section), and
 [`docs/product/engineering-loop/EL10_CONTROLLER_ACTIVATION_PROPOSAL.md`](product/engineering-loop/EL10_CONTROLLER_ACTIVATION_PROPOSAL.md)
 (the finding, the evidence, and §9's ledger design — its §4.6 records a scope
 claim we got wrong mid-session rather than quietly deleting it).
@@ -537,7 +538,7 @@ vs. null, closed vs. residual):
 | 3 | `docs/architecture/GROUNDED_AUTHORING.md` | the authoring mode and the four grounding properties (§12.2 records the eval's impact) |
 | 4 | `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md` | the full eval: data, corrections, lessons (§9) |
 | 4b | `docs/architecture/CODE_MEDIATED_TEXT.md` | the core pillar your line-editing exchange produced: never counts, never copies |
-| 5 | `TRELLIS_ROADMAP.md` §5 | the dated progress ledger, most recent first |
+| 5 | `TRELLIS_ROADMAP.md` §5 | the dated progress ledger — the most recent five sessions, oldest first; older entries move verbatim to `docs/archive/ROADMAP_HISTORY.md` |
 | 6 | `HANDOFF.md` | the living session-to-session state (regenerated every session; §1 is the maintained mental model) |
 
 *Everything above is reproducible: the eval scripts

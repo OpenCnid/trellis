@@ -61,7 +61,7 @@ today).
 | `src/core/observability/` | pino logging + per-process Prometheus registries (bounded labels only) |
 | `src/config/` | Env validation (Zod), module/MCP-server loaders (Node twins of the Python validators) |
 | `src/workers/` | BullMQ consumers; pure job-parsing/prompt-selection modules beside each worker (`extraction_job.ts` holds both extraction prompts) |
-| `src/rlm/` | The Python RLM harness: `trellis_agent.py` (kernel prompt + composition), `trellis_tools.py` (DB tools), `trellis_answer.py`, `trellis_workspace.py`, `trellis_textedit.py`, `trellis_modules.py`, `trellis_mcp.py`, `trellis_blocks.py` (stdlib-only, parity-pinned) |
+| `src/rlm/` | The Python RLM harness: `trellis_agent.py` (kernel prompt + composition), `trellis_tools.py` (DB tools), `trellis_answer.py`, `trellis_workspace.py`, `trellis_textedit.py`, `trellis_modules.py`, `trellis_mcp.py`, `trellis_scaffold.py` (task wrapper, UPSUM, staged helpers), `trellis_blocks.py` (stdlib-only, parity-pinned) |
 | `src/benchmarks/` | Probe machinery: effective-context suites, est suite truths, OOLONG scoring |
 | `src/frontend/` | Next.js dev-only UI — has its own `AGENTS.md`; deferred, don't touch unasked |
 | `modules/` | Protocol modules: `module.json` manifest + brace-free addendum text |

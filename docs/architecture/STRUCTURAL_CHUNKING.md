@@ -1,9 +1,10 @@
 # Structural Chunking: the code-substrate granularity upgrade (design record — roadmap §4 row 12)
 
-Status: **SELECTED — the owner chose this row as the NEXT session
-objective (July 13, 2026, same day as recording; Session 38).**
-Nothing is implemented yet; the machinery lands zero-paid first and
-the pilot stays owner-gated per §7. The previously queued objective
+Status: **IMPLEMENTED through increment 2 — selected by the owner July 13,
+2026 (same day as recording; Session 38); increments 1–2 landed zero-paid
+in Sessions 38 and 40 (§9 is the status ledger; §11 records the Session-40
+`search_ast_nodes` liveness filter).** The paid extraction pilot stays
+owner-gated per §7. The previously queued objective
 (the comment-class diff gate + the increment-2 retry) is DEFERRED one
 session, not dropped — it follows as Session 39 by the same owner
 decision. Document-first, per house pattern.
