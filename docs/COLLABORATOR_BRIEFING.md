@@ -493,6 +493,189 @@ mandatory requirements; §6.1 is the new activation section), and
 (the finding, the evidence, and §9's ledger design — its §4.6 records a scope
 claim we got wrong mid-session rather than quietly deleting it).
 
+## Postscript 5 — who grades the grader, and how much grading ten labels buy (added July 16, 2026)
+
+**First, the thing that affects you directly: the standing obstacle to your
+C2 and C3 claims — no verifier exists for "the responses got better" — now
+has published prior art for its removal.** On July 14 a paper landed (Zhang
+et al., arXiv:2607.12790) that we read as the nearest published treatment of
+the flywheel's missing half: the grader. We analyzed it the same week into a
+research-track record (`architecture/METRIC_EVOLUTION.md`) and four dormant,
+owner-gated proposals. Nothing is sequenced by any of it; the engineering
+loop keeps priority and your row-13 pause is unchanged. But it moves two
+things you care about: what is *positive-control-testable* (the gate every
+module #2 topic must clear) just got structurally wider, and the eventual
+acceptance harness for your TTT track acquired a published shape.
+
+**The paper, in one paragraph.** The question is what a self-improving loop
+does when no reliable evaluation metric exists; the answer is that the
+metric is evolved too, under discipline. A metric is a tiny boolean
+expression — their finals are one to three leaves — over typed detectors:
+pure functions returning drawback/clean/abstain, in three cost tiers (parse
+the artifact, execute it, or ask one narrow LLM question). Selection
+maximizes agreement with a **ten-item labeled anchor** times a consensus
+term over unlabeled outputs, minus a size penalty; two hard guards ride it —
+fail-closed anchoring (a candidate with no usable anchor opinion is
+unselectable) and a validity gate (all-pass, all-fail, and all-abstain
+expressions are dropped); a locked test set no loop ever reads is measured
+for audit only. The metric co-evolves on an alternating schedule with a
+skill loop — a bounded bank of guidance-text skills, capacity 50,
+contribution-based eviction, which you will recognize as our module registry
+with the serial numbers filed off. Across code generation, enterprise SQL,
+and reference-free report writing, the co-evolved arm retains 88–110% of the
+held-out lift the identical skill loop achieves when handed ground truth.
+
+**Two results carry the paper.** The retention numbers say the evaluation
+bottleneck is a ten-label toll, not a wall — with the honest footnote that
+the ten labels are teacher-scored against *pre-existing golden references*,
+so the toll is cheap only where goldens already exist. The ablation says
+where the safety lives, and it is the better result: with anchor guards
+removed, selection collapsed on three of three seeds into a grader that
+passes 0.94–1.00 of everything it sees while reporting a perfect objective —
+and posting the *highest* raw task scores in the table, which is Goodhart
+distilled to one row. With the entire detector lifecycle removed instead
+(birth gates, retirement, all of it), nothing collapsed; variance rose.
+**Anchor discipline carries the safety load; lifecycle sophistication buys
+only efficiency.** Spend on the boundary condition, not on the search.
+
+**The Goodhart episode ran end to end, which makes it an existence proof.**
+Their evolved skills learned to emit evidence tags without the values the
+tags certify (roughly 30% of tags at peak) and to invent confident forecasts
+for a style dimension — proxy rubric up, artifacts worse. It was caught by a
+judge outside all loops under a task-aware rubric: pairwise against
+pre-evolution baselines, every pair judged twice with positions swapped, a
+win counted only when both orders agree. It was repaired by *one*
+synthesized detector (a value-erasure check) plus rewritten feedback text;
+erased tags fell to ~1% and the task-aware preference for evolved outputs
+rose from 0.515 to 0.770 of decided pairs. The control condition should
+interest you most: a *generic* judge preferred the baseline roughly 88% of
+the time before AND after the repair, because it graded the domain's format
+contract as a defect. A judge that does not know the contract mis-grades
+compliance as pedantry. This is our citation-count laundering generalized —
+the reward channel nobody noticed they had written — and their repair
+matches the posture our Session 32 detector already takes: detection outside
+the write path, closed by one typed check.
+
+**The conservation reading.** In your vocabulary: "the anchor cannot be
+manufactured" is a conservation statement. Evolution amplifies coverage —
+ten labeled bits become a distribution-wide grader — but it creates no
+ground truth, and the amplification factor is bounded by detectability.
+Their within-domain contrast makes the bound quantitative: in the same SQL
+family, when failures surface as compile errors the evolved metric reaches
+0.85 held-out agreement; when failures are semantically wrong values under
+clean execution it reads 0.50 — a coin flip. The possible task and the
+impossible task, separated by whether the failure class has a mechanical
+signature. You cannot bootstrap trust from the untrusted side; their
+three-layer answer to their own title — "an anchor the grader must predict,
+one it never sees, and an outside judge" — is a stratified chain of
+authority. Ours terminates one layer harder: an acceptance ledger whose
+record schema admits only a human writer.
+
+**Why this is genuinely good for us: their boundary is our design target.**
+Metric evolution buys the most where failures are mechanically detectable —
+and the code-mediated pillar is a machine for *manufacturing* mechanical
+detectability. Typed refusals, hash-guarded writes, and engine-computed
+addresses convert semantic failure into mechanical failure one tooling
+increment at a time; every increment moves failure classes across their
+spectrum toward the side where anchored metrics are trustworthy. Where their
+loop had to synthesize detectors from failure clusters, our engine already
+emits them — the Session 54 transcript's eleven `AnchorMismatchError`s are a
+detector stream nobody had to author. And the skill half of their system
+already exists here: the bounded module bank, birth gates on cited research,
+contested-then-retired death. Their lifecycle statistics describe our
+registry's intended steady state. The missing half was always the grader.
+
+**What we packaged (all dormant, all zero-paid, nothing sequenced).** Four
+proposals under `product/metric-evolution/`, each with a roadmap and a
+handoff, each owner-gated: **R1** applies their birth gate retroactively —
+every pin in the four acceptance-critical drills classified and paired with
+a planted violation proving it can fire, with count pins against a manifest
+so drift turns a drill red (a pin that cannot fire is fail-open, and their
+ablation shows what fail-open graders report: perfection). **R2** hardens
+the paused engine-resolved-anchor increment's recorded test strategy into
+calibration-anchored shape — every fixture cites the recorded failure it
+reproduces — while activating nothing (it carries a double gate). **R3** is
+the paper minus its search: a hand-composed one-to-three-leaf expression
+over our existing typed findings, abstain-aware and fail-closed at the root,
+calibrated 10/10 against fixtures reconstructing our recorded failures, then
+audited once against a held-out set committed before authoring began. Their
+own ablation licenses skipping the evolution; their own appendix shows the
+destination is hand-writable. **R4** lands their judge protocol as
+deterministic machinery — position-swapped pairs, both-orders-agree, ties
+first-class, blinded labels, report fields non-optional at the type level —
+with zero LLM bytes; rubric authoring, when a use arrives, is gated behind
+your own meta-prompting protocol, which this repository institutionalized as
+a hard pre-authoring step. The evolution loop itself is **R5**: deferred,
+with a recorded trigger (a recurring failure class that hand-authored
+detectors keep missing), because their Table 3 says it is not where the
+safety lives and their missing cost reporting says we could not price it
+anyway.
+
+**Honest residuals.** Goldens are the unpriced input: our editing domain
+gets them free from session records; our semantic domains — answer quality,
+workspace faithfulness — have none, and curating them is owner effort no
+line of the paper prices. The paper reports no costs at all (no call counts,
+no dollars), so the as-published co-evolution is not runnable under our paid
+doctrine — the proposals adopt the discipline and skip the search. Their
+solver is a single no-tool call; ours is a tool-using episode — richer
+failure classes, richer free detector streams, and a strictly harder grading
+object. And one internal tension in the paper (whether skill-loop rollback
+reads the locked test set) is flagged in our record as unresolved rather
+than resolved by guessing.
+
+**The symmetry you will have already noticed.** Your §12.4 question —
+should the adaptation-data eligibility boundary *be* the run's retrieval
+set — and this paper's anchor discipline are the same shape at two layers:
+both gate what a learning process may consume so that what it produces stays
+auditable against what it never consumed. They gate the metric's training
+signal; you are asking what the weights may see. If §12.4 resolves to "the
+retrieval set," then the eventual TTT acceptance harness is an R3-style
+anchored expression plus an R4 judged comparison — which is to say your C2
+(EXTRAPOLATED) and C3 (UNTESTED) become measurable the day response-quality
+goldens exist. The paper's contribution to your track is that the price of
+that measurability appears to be roughly ten labels per domain.
+
+**Three questions for you, in your cross-domain capacity:**
+
+1. **Is there a principled reading of their selection objective?**
+   S(e) = A_dev(e) · A_train(e)^w − λC(e), with w hand-tuned per domain
+   (1.0 for code and SQL, 0.25 for reports). It smells like a crude
+   posterior — anchor agreement as likelihood, pool consensus as a prior
+   over a noisy detector ensemble, the size penalty as description length.
+   If that reading holds it should predict the failure they observed (two
+   seeds selected metrics with 0.41–0.44 train agreement and downstream
+   performance indistinguishable from the good seeds) and say when the
+   consensus term is load-bearing rather than decorative. They never
+   ablated it. What would the ablation need to show?
+2. **The generating-set obligation, applied to their algebra.** Their
+   combinators are any/all/k-of-k over abstain-aware three-valued
+   detectors, and every final expression they report is a small
+   disjunction. Your reasoning-templates record carries a generating-set
+   obligation — the primitive set must generate the space, no gaps. Same
+   question here: what failure-class structure provably escapes
+   disjunctions of named detectors, and can that be read off a failure
+   taxonomy *in advance*, so we know whether the algebra suffices before
+   we curate anchors for a domain? Is "all finals were disjunctions" a
+   fact about their domains or about their algebra?
+3. **A capacity bound for anchors.** The detectability spectrum (0.85 to
+   0.50 within one task family) begs for an information-theoretic
+   statement: labels required as a function of the failure class's
+   mechanical signature — something like a channel capacity from artifact
+   to detector verdict. Even a crude bound would tell us how many goldens
+   a semantic domain needs before an R3-style expression is worth
+   authoring there — and whether measuring your C2/C3 is ten labels away
+   or ten thousand.
+
+Reading, in dependency order:
+[`docs/architecture/METRIC_EVOLUTION.md`](architecture/METRIC_EVOLUTION.md)
+(the record: §2 mechanics, §4 what it validates, §6 honest boundaries),
+[`docs/product/metric-evolution/README.md`](product/metric-evolution/README.md)
+(the four dormant proposals and their reading order), and the paper itself —
+arXiv:2607.12790, reading §3 for the objective and Algorithm 1, Table 3 for
+the ablation that carries the argument, Appendix E for what evolution
+actually produced, and Appendix G for the negative results most papers
+would have omitted.
+
 ---
 
 ## Where you can help next
