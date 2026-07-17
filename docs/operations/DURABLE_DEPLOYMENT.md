@@ -1,8 +1,10 @@
 # Durable Deployment — Proposal for Owner Review
 
-**Status: PROPOSED — decision document, requested by the owner
-July 17, 2026.** Nothing here is built or scheduled; §6 is the
-decision being asked.
+**Status: DECIDED — Option A (owner ruling, July 17, 2026).** The
+stack runs on the owner's machine, locally, now: Docker Compose with
+named volumes, backup sidecars, and the restore drill per §3/§5. The
+build itself remains a bounded feature for an ordinary session; §5 is
+its acceptance. §§1–4 below are preserved as the decision record.
 
 ## 1. What "durable deployment" means
 

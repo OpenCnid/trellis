@@ -1681,6 +1681,18 @@ pre-registration rule for any probe run). The four-judge objective
 below is PRESERVED as the following session's work — displaced, not
 dropped.
 
+**Pre-registered expectation (July 17, 2026, owner-flagged as an
+important finding — written down BEFORE the paper is read, so the
+reading can confirm or refute it honestly):** the phase transitions
+the paper finds are expected to be *condensation thresholds wearing
+another domain's clothes, collapsing onto the same layer* — the
+S13 pattern (structure crystallizes when it can fund its own
+existence; thresholds are sharp, not smooth) recurring in a new
+domain, per owner finding 5 (the collapse recognition) and law L7.
+If the paper's transitions do NOT fit the condensation shape, that
+is the informative outcome and must be recorded as such, not
+reconciled by force (R-30: never force gluing).
+
 <feature_objective>
 
 **Epistemic-support program: reconcile the four-judge designs and pin
