@@ -1664,9 +1664,11 @@ Two deliverables, in order:
   blindness profile), and the verdict (adopt / merge / diverge-
   recorded) with each divergence carrying its falsifier. Owner
   ratification is a recorded decision, not an inference. License
-  boundary: the S9 clone is REFERENCE ONLY — reconstruct designs and
-  cite paths; copy no code or prose into Trellis until the fork carries
-  a license artifact (register §7 row 9).
+  boundary (updated July 16, late session): the fork now carries an MIT
+  LICENSE (Copyright (c) 2026 Chenyang Yang, added via fork PR #1;
+  upstream still carries none — register §7 row 9 has the dated
+  record). Bounded vendoring WITH ATTRIBUTION is permitted; prefer
+  reconstruction over copying, and attribute anything copied.
 - **Drill shape:** a sibling script `scripts/test_judge_panel.ts` with
   package script `test:judge-panel` (the non-test entrypoint, rule 15),
   in the `test_support_oracle.ts` mold: fixture manifest SHA refusal
@@ -1708,8 +1710,9 @@ Two deliverables, in order:
   `b9d3611`, OUTSIDE the Trellis worktree): `src/optimize/proposer.py`
   + `memory.py` (meta-agent + search memory), `docs/adaptation.md`
   (failure-mode→strategy guide), `tasks/*/prompts/`,
-  `src/task_evals/`. Reference only; no LICENSE file exists in the
-  fork as of that commit.
+  `src/task_evals/`. MIT LICENSE present in the fork as of `2bb5e54`
+  (Copyright (c) 2026 Chenyang Yang; upstream carries none — see the
+  register's dated record); vendor minimally, with attribution.
 - `docs/product/epistemic-support/RESEARCH_MAP.md` §9 (adoption
   bounds; amend only by dated entry).
 
@@ -1778,12 +1781,12 @@ Do **not**:
   claim-kind plane;
 - build any automated harness-adaptation/optimizer machinery (S9's
   loop enters, if ever, behind AB-8 and its own proposal);
-- vendor S9's released code or prose into Trellis: the OpenCnid fork
-  (`OpenCnid/migration-analysis`, cloned for reference at
-  `/workspace/migration-analysis`) is owner-approved for
-  reference/reconstruction use, but carries **no license artifact**
-  as of `b9d3611` (the owner's CMU-MIT understanding is recorded,
-  unverified in-repo) — copying anything in waits for a LICENSE file;
+- vendor S9 code or prose beyond the license's terms: the fork now
+  carries an MIT LICENSE (dated record in register §7 row 9; upstream
+  still carries none) — copying is permitted ONLY with the MIT
+  attribution notice preserved, reconstruction stays preferred, and
+  nothing enters a Trellis kernel or prompt surface without its own
+  review;
 - execute the approved S1/S8 promotions here (they await a durable
   deployment; this container's databases are ephemeral);
 - modify the write path, custody tiers, kernel prompts, extraction

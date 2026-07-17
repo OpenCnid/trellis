@@ -80,10 +80,14 @@ see the decision record (§6).
   have been read in full. None is promoted; citing any as
   `sourceNodeIds` requires operator promotion first (AB-10). S9's
   released code is ACQUIRED: the OpenCnid fork
-  `github.com/OpenCnid/migration-analysis` is cloned (reference only,
-  outside the Trellis worktree at `/workspace/migration-analysis`;
-  **no license artifact in the fork** — vendoring blocked, register §7
-  row 9). S1's released-code locator remains missing.
+  `github.com/OpenCnid/migration-analysis` is cloned (outside the
+  Trellis worktree at `/workspace/migration-analysis`; MIT LICENSE
+  added to the fork July 16 — Copyright (c) 2026 Chenyang Yang;
+  upstream carries none; bounded vendoring with attribution unblocked,
+  register §7 row 9 has the dated record). S1's released-code locator
+  remains missing. Note: clones die with containers — a fresh session
+  re-adds the repo (`add_repo OpenCnid/migration-analysis`) and
+  re-clones.
 - **Why the map is unusually insistent about incentives:** two
   independent measurements (Trellis's citation A/B, R-11; S1's
   Goodhart episode) plus a mechanistic frame (S8's report/behavior
@@ -167,9 +171,10 @@ July 16, 2026:
   artifacts (S1 mirror; the S9 replication-package fork cloned at
   `/workspace/migration-analysis`), then ratify — design §10.1 as
   amended.
-- The S9 fork's **license artifact** (no LICENSE file at `b9d3611`;
-  owner understands it as CMU MIT) — blocks vendoring, not reference
-  use. S1's released-code locator also remains missing (row 2).
+- ~~The S9 fork's license artifact~~ RESOLVED July 16 (MIT LICENSE in
+  the fork; residual: upstream carries none — an upstream grant record
+  would close the chain). S1's released-code locator remains missing
+  (row 2).
 - Aggregation constants beyond the drilled v1 defaults (architecture
   record §"v1 arithmetic"; amendable with drill re-pin).
 - Actual execution of the approved promotions on a durable deployment.
