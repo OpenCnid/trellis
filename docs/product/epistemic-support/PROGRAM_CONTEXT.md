@@ -64,7 +64,11 @@ see the decision record (§6).
   minimal ecology instance; §10.1 (twice-amended) carries the
   ingestion protocol that is Session 66's first task. Until owner
   ratification of the merged design, neither document is authoritative
-  over the other.
+  over the other. Terminology: UHE (Unified Hyperplane of Experience)
+  is a loaned Lexideck house term — see the basic model's header
+  addendum and RESEARCH_MAP §4.10 (**the externality principle**, the
+  program's unifying frame: Trellis as an engineering practice of
+  external J-spaces — typed, execution-parallel summary streams).
 - **The prompt-protocol mandate is real but its resources are not in
   the repo.** `HANDOFF.md` §7 guardrail 11 requires the
   Prompt-Engineering and Hypershot protocols before authoring any

@@ -12,12 +12,15 @@ until the artifact is acquired (the S6 rule).
 **UHE = Unified Hyperplane of Experience** — "the training distribution
 of vast corpora of human text describing all manner of experience
 across the four planes" (Emotional/Logical/Sensorial/Ethical). The
-collaborator's statement that the UHE and S8's verbalizable global
-workspace "describe the same objects" is recorded (R-31, as amended)
-as **stipulative co-reference — a loaned house term**, ~3 years of
-Lexideck agentic R&D behind it: UHE names the verbalizable-experience
-manifold; S8's workspace is the measured chart of one model's
-representation of it. Chart-fidelity questions live in the register.
+collaborator's terminology is recorded in R-31 (twice-refined, July 16,
+2026): UHE is a **loaned Lexideck house term** (~3 years of agentic
+R&D) — the authoring-side matrix mathematics of the vocabulary-space —
+while **the J-space object is the un-verbalized stream parallel to
+execution**; "J-space Target" / "J-space Prediction" are acceptable
+substitute concepts. The load-bearing property: such objects are
+**external to execution, summarizing it or operating in parallel to
+it**. No phenomenology is claimed by anyone. The program's unifying
+frame built on this is RESEARCH_MAP §4.10 (the externality principle).
 
 ---
 

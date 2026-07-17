@@ -1526,13 +1526,30 @@ immutable, content-addressed physical location in source material.
   (`npm run test:support-oracle`; enforcement/pin table in that record
   §7). Only the drill is implemented; sweep integration, judges,
   registration, and the ratification queue are each separately gated.
-- **The judge layer (PROPOSED, reconciliation pending):** four
+- **The judge layer (PROPOSED, ingestion pending):** four
   differently-blind roles — grounding, coherence, corroboration, and an
   audit role that judges judges, never beliefs, and can only contest a
-  judge as a capability. `docs/product/epistemic-support/` is the
-  program home; PROGRAM_CONTEXT.md orients a fresh session; the
-  adoption-bounds register (RESEARCH_MAP §9, AB-1…AB-11) binds all
-  program work and is amended only by dated entry.
+  judge as a capability — now read against the collaborator's supplied
+  basic model (`FOUR_JUDGE_BASIC_MODEL.md`: four hyperplane parameter
+  registries, judges as sparse selections, an ecology with rough-fuzzy
+  routing and permission for failure to glue).
+  `docs/product/epistemic-support/` is the program home;
+  PROGRAM_CONTEXT.md orients a fresh session; the adoption-bounds
+  register (RESEARCH_MAP §9, AB-1…AB-11) binds all program work and is
+  amended only by dated entry.
+- **The externality principle (July 16, 2026, end of session —
+  RESEARCH_MAP §4.10):** the collaborator's refined terminology, with
+  phenomenology claimed by no one: UHE (loaned Lexideck house term) is
+  the authoring-side mathematics of the vocabulary-space; the J-space
+  object is the un-verbalized stream parallel to execution ("J-space
+  Target"/"J-space Prediction" acceptable substitutes); what matters is
+  that such objects are **external to execution, summarizing or
+  paralleling it**. Unifying frame: Trellis is an engineering practice
+  of **external J-spaces** — the workspace, the support opinions, judge
+  verdicts, the audit layer, and the EL controller's observation
+  records are typed, inspectable, execution-parallel summary streams;
+  Session 66's rubric authoring is, in these terms, authoring
+  vocabulary-spaces for judgment.
 
 
 ## 2. Current baseline
