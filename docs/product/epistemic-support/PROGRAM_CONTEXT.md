@@ -15,9 +15,12 @@ support* — a subjective-logic opinion (b, d, u) computed sweep-side by
 judged events — orthogonal to the existing custody tiers, which remain
 untouched. Custody answers *where did this come from*; support answers
 *how has it held up*; a third, deferred plane (claim-kind) answers
-*what kind of claim is it*. **Nothing in this program is implemented,
-measured, promoted, or accepted.** Every artifact is a proposal
-awaiting owner decisions (§6).
+*what kind of claim is it*. Standing as of July 16, 2026: the axis is
+**ADOPTED forward design** (`docs/architecture/EPISTEMIC_SUPPORT.md`),
+the support-computation oracle drill is **implemented and observed
+green**, and everything else (judges, sweep, registration, ratification
+queue, rubrics) remains proposal awaiting its own bounded feature —
+see the decision record (§6).
 
 ## 2. Reading order (program-local)
 
@@ -25,11 +28,13 @@ awaiting owner decisions (§6).
    — the parent design record: the two-axis doctrine, the support
    state, the judge layer, the authority registry, the automation
    ladder, drills, exclusions. §2.1 is the plane geometry.
-2. [`RESEARCH_MAP.md`](RESEARCH_MAP.md) — the evidence register: 8
-   sources (S1–S8), 24 claims (R-01…R-24) with evidence classes and
-   falsifiers, the cross-row syntheses (§4), the contradictions (§6),
-   the sharing queue (§7), and the **adoption bounds register** —
-   the live rules bounding what may be built on which evidence.
+2. [`RESEARCH_MAP.md`](RESEARCH_MAP.md) — the evidence register:
+   sources, claims with evidence classes and falsifiers (its
+   register-summary header carries the current counts — trust it over
+   any prose restatement), the cross-row syntheses (§4), the
+   contradictions (§6), the sharing queue (§7), and the **adoption
+   bounds register** — the live rules bounding what may be built on
+   which evidence.
 3. [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md) — the judged-input
    architecture: four differently-blind roles (grounding, coherence,
    corroboration, audit), engine-side composition, judges as
@@ -37,8 +42,9 @@ awaiting owner decisions (§6).
 4. [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md) — the
    prompt-facing hypershot frames and rubric-authoring rules.
 5. [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md) — the first
-   drill (PROPOSED — UNRUN): pins the support arithmetic before any
-   judge or sweep exists.
+   drill (implemented July 16, 2026; its header carries the observed
+   runs): pins the support arithmetic before any judge or sweep
+   exists. `npm run test:support-oracle`.
 6. The review series ([`docs/review/00_INDEX.md`](../../review/00_INDEX.md))
    for how this program emerged from an external repo review.
 
@@ -53,8 +59,11 @@ awaiting owner decisions (§6).
 - **The collaborator has an independent four-judge system under
   evaluation that is NOT specified anywhere in this repo.**
   `FOUR_JUDGE_DESIGN.md` was architected from the evidence register
-  alone; its §10.1 reconciliation item is real and unresolved. Do not
-  treat that design as agreed.
+  alone. Owner direction (July 16, 2026, recorded in its amended
+  §10.1): the next session COMPLETES the role definitions by
+  reconstruction from the acquired artifacts rather than waiting;
+  externally supplied definitions reconcile against the completed set.
+  Until ratification, do not treat the design as agreed.
 - **The prompt-protocol mandate is real but its resources are not in
   the repo.** `HANDOFF.md` §7 guardrail 11 requires the
   Prompt-Engineering and Hypershot protocols before authoring any
@@ -70,9 +79,11 @@ awaiting owner decisions (§6).
   (S8), and `better-harnesses-smaller-models-pdf` (S9) — and all three
   have been read in full. None is promoted; citing any as
   `sourceNodeIds` requires operator promotion first (AB-10). S9's
-  released code locator is `github.com/malusamayo/migration-analysis`
-  (paper footnote 1; acquisition not yet owner-approved); S1's
-  released-code locator remains missing.
+  released code is ACQUIRED: the OpenCnid fork
+  `github.com/OpenCnid/migration-analysis` is cloned (reference only,
+  outside the Trellis worktree at `/workspace/migration-analysis`;
+  **no license artifact in the fork** — vendoring blocked, register §7
+  row 9). S1's released-code locator remains missing.
 - **Why the map is unusually insistent about incentives:** two
   independent measurements (Trellis's citation A/B, R-11; S1's
   Goodhart episode) plus a mechanistic frame (S8's report/behavior
@@ -109,13 +120,17 @@ awaiting owner decisions (§6).
 ## 5. State of the world (as of July 16, 2026)
 
 - Branch: `claude/sister-lab-repo-review-5fuu19`, PR #119 (open,
-  unreviewed). All program artifacts live in this directory plus
-  `docs/review/06_…`.
-- Trellis `master` at `841f875` (EL-11); the engineering-loop program
-  (unrelated to this one) holds the active session objective.
-- Owner decisions pending: §6 below. No drills implemented; no fixtures
-  authored; no judges registered; no support fields exist in any
-  schema.
+  unreviewed). Program artifacts live in this directory,
+  `docs/review/06_…`, and `docs/architecture/EPISTEMIC_SUPPORT.md`.
+- Trellis `master` at `841f875` (EL-11). Root `HANDOFF.md` was
+  regenerated July 16 per its §0: the active objective is Session 66
+  (four-judge role-definition completion + panel drills); the
+  engineering-loop Session 64 objective is preserved as its Appendix B.
+- Implemented so far: the support-oracle drill (modules, fixtures,
+  entrypoint, 11 unit pins). Not implemented: judges, `support_sweep`,
+  registration, ratification queue, rubrics, claim-kind plane. No
+  support fields exist in any production schema; no judges are
+  registered.
 
 ## 6. Decision record (owner rulings, July 16, 2026) and what remains open
 
