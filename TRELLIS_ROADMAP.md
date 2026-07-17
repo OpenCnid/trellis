@@ -1560,3 +1560,18 @@ entry) updated. Everything on this branch awaits owner ratification
 at merge review; DDD binds — no code, schema, prompt, or
 controller-state bytes changed. §5 window management is deferred to
 the next OpenCnid session, per the Session 65 convention.
+
+**Postscript (July 17, 2026, same day).** A third pass extended the
+queue to the substrate proper (`ac32ee8`: the quarantine sweep's
+full-graph scan, the post-COMMIT enqueue gap, ANN post-filtering
+recall decay, O(document) read-back verification), and PR #121 was
+opened carrying the branch. On the owner's precedence question, a
+consistency pass (same lesson as PR #119's): the entry body above
+names "C1–C14" as of its moment — the queue's row list is stated
+once, in `IEG_TEACHINGS.md` §5, and every living document now points
+there instead of restating counts (`docs/README.md`,
+`PROGRAM_CONTEXT.md` reading order and §6). §5 of the teachings
+record also gains the explicit precedence note: the queue is an
+inventory, never a work order; `HANDOFF.md` §3 remains the sole
+objective authority (Session 66 stands; EL-07 stays Appendix B);
+sequencing C-items is an owner ruling at or after ratification.

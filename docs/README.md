@@ -160,8 +160,9 @@ program (the `engineering-loop/` pattern):
   register's S13 rows (the collaborator's UIT-IEG framework,
   registered at his request — R-32…R-38, synthesis §4.11; design
   vocabulary only per AB-1): the six laws, the understanding ladder,
-  and the PROPOSED change queue C1–C14 spanning the support plane,
-  the hash authority, and the engine's audit-era Tier-1 debts.
+  and the PROPOSED change queue spanning the support plane, the hash
+  authority, the engine's audit-era Tier-1 debts, and the substrate
+  pipeline (its §5 table is authoritative for the rows).
 
 ### 6. Progress-log archive (`/archive` — historical)
 

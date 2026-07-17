@@ -53,7 +53,8 @@ see the decision record (§6).
 6. [`IEG_TEACHINGS.md`](IEG_TEACHINGS.md) — teaching record from the
    July 17, 2026 S13 dialogue sessions: the six laws, the owner's
    findings, the understanding ladder with its two un-learnings, and
-   the PROPOSED change queue C1–C6 for existing code. Docs only;
+   the PROPOSED change queue for existing code (its §5 table is
+   authoritative for the rows — counts are not restated here). Docs only;
    the register's §4.11 and rows R-32…R-38 are authoritative over it.
 
 ## 3. Context you cannot infer from the artifacts alone
@@ -232,3 +233,11 @@ each is future-session work, deliberately NOT in PR #119):**
   re-derivation of the module it checks (common-mode risk); schedule
   an independent re-derivation of the expected values from
   `EPISTEMIC_SUPPORT.md` §3 by a different author/session.
+
+*(Relationship to the broader queue, July 17, 2026: the PROPOSED
+change queue in [`IEG_TEACHINGS.md`](IEG_TEACHINGS.md) §5 spans the
+support plane, the hash authority, the engine, and the substrate; the
+items above predate it and keep their standing there **by reference**
+— C2(b) points here rather than duplicating. Neither queue is a work
+order: the active objective is always `HANDOFF.md` §3, and sequencing
+is an owner ruling — see the precedence note at the head of that §5.)*

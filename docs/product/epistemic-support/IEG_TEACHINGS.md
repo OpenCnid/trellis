@@ -163,6 +163,23 @@ What the dialogue implies for what is already built — each item names
 its law, its register row, and its reachability spine. None is
 authorized by this document.
 
+**Precedence (added July 17, 2026, on the owner's question).** This
+queue is an inventory, not a work order, and it displaces nothing.
+The active session objective remains whatever `HANDOFF.md` §3 names
+(currently Session 66 — four-judge ingestion + panel drills, the
+owner's July 16 re-sequencing), per the standing rule that a session
+never selects its own objective; the engineering-loop track's next
+objective stays preserved in HANDOFF Appendix B. `PROGRAM_CONTEXT.md`
+§6's follow-up queue (CI wiring plus the four code-hardening items
+from the PR #119 merge review) predates this table and keeps its
+standing — C2(b) cross-references it rather than duplicating it.
+Sequencing any C-item into a session is an owner ruling at or after
+ratification; the recommended first spend is C16. One counting rule,
+learned at the PR #119 consistency pass and re-learned on this table
+the same day it was written: **other documents point at this table;
+they never restate its row count** — a stated count rots the day the
+next row lands.
+
 | # | Change | Law / row | Spine (non-test caller) | Status |
 |---|--------|-----------|-------------------------|--------|
 | C1 | **Exchange-indexed churn decay** for support opinions: decay driven by sweeps-since-last-verdict (exchange count) alongside or instead of `halfLifeMs`. Requires a dated amendment to `EPISTEMIC_SUPPORT.md` §3 with a same-commit drill re-pin | L5; R-34 as amended | the future `support_sweep` consumer | PROPOSED |
