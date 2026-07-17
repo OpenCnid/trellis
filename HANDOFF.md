@@ -8,13 +8,17 @@ current working directory). Trellis is an original OpenCnid project, not a
 fork, and is unrelated to other projects named Trellis. The repository and its
 documentation are the only sources of truth.
 
-Sessions 1–55 and their same-day follow-ons (July 4–14, 2026; PRs
-#21–#102) are complete, merged, and ARCHIVED: the full dated ledger for
-that span lives verbatim in `docs/archive/ROADMAP_HISTORY.md`
+Sessions 1–59 and their same-day follow-ons (July 4–15, 2026; PRs
+#21–#102 and the first engineering-loop feature branches) are complete,
+merged, and ARCHIVED: the full dated ledger for that span lives
+verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 55 with the Session 60 EL-06 feature branch — this file keeps
-full narrative only for the most recent five sessions, now 56–60). The
+recently Session 59 with the Session 64 EL-10 recovery-reachability
+feature branch. The roadmap's live §5 window is now Sessions 60–64;
+this digest carries full narrative for Sessions 60, 63, and 64, with
+56–59 compressed into one EL-02–EL-05 paragraph and 61–62 compressed
+into the Session 63 paragraph, §1.16, and §2). The
 one-paragraph digest, oldest first; §1 below carries everything from
 this span that a new session must actually know:
 
@@ -787,70 +791,24 @@ completes the increment record.
 
 OpenCnid selected the MIT License on July 6, 2026.
 
-**Session 56 (July 14, 2026, `implement-el02-control-kernel`) completed EL-02
-deterministic acceptance and was owner-ratified, zero-model and
-zero-paid.** The TypeScript reference kernel under `tools/engineering-loop/`
-implements all 28 owned requirements: strict versioned schemas; the exhaustive
-41-allowed/91-forbidden transition matrix; controller-origin evidence and
-approval refusals; protected external state and an exclusive writer lock;
-integrity-linked event-first storage, atomic snapshots, replay, and corruption
-stop; stable intent/outcome/idempotency recovery; and injected fake clock,
-repository, runner, and effect dependencies. All 14 durable crash points
-reconstruct the uninterrupted logical oracle without a duplicate completed
-effect. Acceptance passed 40 tool tests and 916 repository tests across 92
-files, plus build, Python, Compose, schema/catalog, linkage, and diff checks.
-No model call, paid work, dependency, production prompt, product source, real
-runner, Git observer, or renderer entered. Session 51 moved verbatim to the
-archive; the live window is 52–56. The owner reviewed the complete diff and
-explicitly authorized commit, merge, and push to `master`.
-
-**Session 57 (July 14, 2026, `implement-el03-repository-observer`) completed
-EL-03 deterministic acceptance and was owner-ratified, zero-model and
-zero-paid.** All 12 EL-03 requirements have concrete source and
-deterministic-test linkage. The controller now computes Git/worktree identity
-and complete NUL-delimited changed paths; refuses segment-scope and
-between-check divergence; runs bounded shell-free argv; retains full output as
-protected digest-addressed artifacts linked to controller evidence; derives
-strict reports from trusted state; and renders pure, byte-pinned report,
-status, and handoff-preview bytes. Focused acceptance passed 64 tests across 5
-files; repository acceptance passed 977 tests across 96 files, plus build,
-Python, Compose, schema/catalog, SPEC linkage, and diff checks. The remote URL
-normalization defect found by the first focused run was fixed and pinned. The
-owner reviewed the complete diff and explicitly authorized commit, merge, and
-push to `master`. Manual `HANDOFF.md` remains authoritative.
-
-**Session 58 (July 14, 2026, `implement-el04-prompt-compiler`) completed EL-04
-deterministic acceptance and was owner-ratified, zero-model and zero-paid.**
-All seven EL-04 prompt requirements have concrete source and deterministic-test
-linkage. Four invariant role assets normalize to UTF-8/LF, carry version and
-SHA-256 pins, and compile ahead of six separately bounded typed context
-collections. Strict schemas and static scans refuse unknown fields,
-role/identity mismatch, unlinked references, sensitive material,
-contamination, and byte-budget overflow; role output remains advisory and
-cannot create controller authority. Focused acceptance passed 60 tests across
-3 files; repository acceptance passed 1,032 tests across 98 files, plus build,
-Python, Compose, schema/catalog, and diff checks. The owner accepted the feature
-and merged PR #104 as `e1ee564923c9c02f532e08f1a5561d9837a7493a`.
-Manual `HANDOFF.md` remains authoritative.
-
-**Session 59 (July 14–15, 2026, `implement-el05-codex-runner`) completed EL-05
-deterministic acceptance and was owner-ratified, zero-model and zero-paid.**
-All 15 EL-05 requirements have concrete source and deterministic-
-test linkage. The stable versioned `AgentRunner` contract covers start, resume,
-interrupt, observe, and dispose; `FakeRunner` remains the zero-effect oracle.
-The sole Codex boundary pins JSONL v2 / `codex-cli 0.144.2`, translates wire
-messages into bounded ordered redacted observations, and produces exactly one
-terminal report per attempt. Stable correlations span workflow through turn.
-The pure episode policy resumes only unchanged current bindings and requires a
-fresh episode/thread at every named semantic, repository, protocol, recovery,
-checker, or context boundary. Focused acceptance passed 69 tests across 4
-files; repository acceptance passed 1,094 tests across 101 files, plus build,
-Python, Compose, schema/catalog, and diff checks. The explicit local smoke sent
-only `initialize` and `initialized`, then disposed with zero thread/turn
-requests. Model completions = 0; paid calls = 0. On July 15, 2026, the owner
-reviewed and ratified the closeout and explicitly authorized commit, merge,
-and push through the feature-branch pull-request path. Manual `HANDOFF.md`
-remains authoritative.
+**Sessions 56–59 (July 14–15, 2026) delivered EL-02 through EL-05, each
+owner-ratified, accepted, and merged, zero-model and zero-paid** (full
+session records verbatim in `docs/archive/ROADMAP_HISTORY.md`): the
+deterministic control kernel (EL-02, 28 requirements — strict versioned
+schemas, the exhaustive 41-allowed/91-forbidden transition matrix,
+protected single-writer state, integrity-linked event-first
+storage/replay, 14-point crash recovery without duplicated effects); the
+repository observer and byte-pinned renderers (EL-03, 12 requirements —
+engine-computed Git/worktree identity, complete NUL-delimited changed
+paths, divergence refusals, bounded shell-free argv with digest-addressed
+retained output); the deterministic prompt compiler (EL-04, 7
+requirements — pinned invariant role assets, six separately bounded typed
+collections, contamination and overflow refusal, advisory-only role
+output); and the adapter-neutral `AgentRunner` with the pinned Codex
+adapter (EL-05, 15 requirements — JSONL v2 / `codex-cli 0.144.2`, bounded
+ordered redacted observations, exactly one terminal report per attempt,
+and the pure episode policy that resumes only unchanged current
+bindings).
 
 **Session 60 (July 15, 2026, `implement-el06-verification-gates`) completed
 EL-06 deterministic implementation and was owner-ratified and accepted,
@@ -893,6 +851,41 @@ unreachable, reported and pinned rather than routed around, and it is the next
 objective. PR #114 is open against `master`, not merged; the acceptance ledger is
 byte-identical to preflight.
 
+**Session 64 (July 16, 2026, `implement-el10-recovery-reachability`) made
+EL-10's two acceptance-ledger recovery ceremonies reachable, zero-model and
+zero-paid; owner acceptance is not recorded.** Four new `activate.ts` commands
+mirror the EL-11 pair: `print-recovery-request` / `recover` (content
+reconciliation, `EL-REQ-BOOT-006`; owner scope as repeatable
+`--supersede <featureId>=<status>:<sequence[,sequence...]>`) and
+`print-genesis-request` / `re-genesis` (`EL-REQ-BOOT-007`; TWO approval flags
+by role — `--genesis-approval-id` / `--seed-approval-id` — because one approval
+structurally cannot cover both requests: `authorizeProtectedAction` matches
+action and digest exactly and the two requests differ in both, so the print
+command composes and prints BOTH digests). The EL-11 reachability pin flipped
+from `['ledger_recovery','re_genesis']` to the empty set by construction and
+was falsified red (unwiring `buildLedgerRecoveryRequest` from `activate.ts`
+turned it red naming exactly that ceremony). Two adjacent defects were found by
+making the ceremonies runnable and fixed in scope: `ReGenesisInput` gained
+owner-supplied reconstruction `pairs` forwarded to `seedAcceptanceLedger` — the
+pairless path reads the catalog as a status document, which the live
+post-migration catalog refuses, so re-genesis was unrunnable against the real
+repository (prose in `SeedInput.pairs` described the owner-supplied path with
+no field to carry it) — and both ceremonies canonicalize scope order
+(`canonicalReconciliationScope`, duplicate feature ids refused) so transposed
+flags compose identical digests, EL-11's digest trap closed at the recovery
+scope. `main()`'s seed branches collapsed onto `printSeedRequest` /
+`runActivationSeed` (the orphaned-twin cleanup, §4 item 5). The framing fork
+was resolved as COMPLETES EL-10: no new `EL-REQ-*`, no catalog row, SPEC
+untouched at 116/116; the `EL-REQ-BOOT-006`/`007` evidence rows gained
+`activate.ts` and the two new end-to-end test names. Live compose-only checks
+ran against the real roots (recovery digest composed end to end; genesis
+composition refused the healthy chain by predicate); the real ledger is
+byte-identical throughout (sha256 `8bc0e033…`, generation 0, eleven records).
+Focused suite 371 across 23; `npm test` 1,247 across 110. Recording
+`EL-10 = accepted`, an `EL-11` status, and the `EL-07` unblock are owner acts
+through `print-acceptance-request` → owner-authored approval material →
+`record-acceptance`.
+
 **Session 65 (July 16, 2026, branch `claude/sister-lab-repo-review-5fuu19`,
 PR #119) — the sister-lab collaboration session: external review, the
 epistemic-support program, and the first support drill.** The sister
@@ -924,20 +917,21 @@ with uncertainty-around-facts managed by the adaptive four-judge layer.
 Session commits carry the sister lab's session-trailer convention — a
 DISCLOSED conflict with hard rule 10, for the owner to rule on at merge.
 
-Your objective is **Session 66: the four-judge system — reconcile the
-two designs, then pin the panel's structural guarantees.** §3 carries
-the objective. (Owner re-sequencing, July 16, 2026: the
-epistemic-support program takes the active objective; the engineering-
-loop Session 64 objective — recovery-ceremony reachability — is
-preserved verbatim in Appendix B and remains that track's next work.)
-
+Your objective is **Session 66: the four-judge system — ingest, complete,
+and pin the panel's structural guarantees.** §3 carries the objective.
+(Owner re-sequencing, July 16, 2026: the epistemic-support program holds
+the active objective. The engineering-loop track's next objective —
+EL-07 stage 1, from master's Session-64 regeneration, with its ledger
+gate — is preserved verbatim in Appendix B; the previously preserved
+recovery-reachability objective was EXECUTED on master, PR #117.)
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
-`EL-06` are owner-accepted; `EL-10` and `EL-11` are implemented with owner
-acceptance not recorded for either; `EL-07` is blocked pending an owner unblock.
-The merged Session 54 tooling-shape objective is preserved in Appendix A and
-remains paused unless the owner re-prioritizes it.
+`EL-06` are owner-accepted; `EL-10` and `EL-11` are implemented — EL-10's
+reachability blocker is closed — with owner acceptance not recorded for either;
+`EL-07` is blocked pending an owner unblock. The merged Session 54
+tooling-shape objective is preserved in Appendix A and remains paused unless
+the owner re-prioritizes it.
 
 
 **Owner re-sequencing, July 16, 2026:** the epistemic-support program
@@ -1499,9 +1493,28 @@ immutable, content-addressed physical location in source material.
     invariants that had only been prose — `analyzeConformanceLinkage` (`EL-01-A2`:
     every declared requirement carries a §18 row) and `analyzeProducerReachability`
     (every computed-material producer resolves a non-test caller, derived from the
-    import graph). The second **pins a live defect**: both EL-10 recovery ceremonies
-    have no non-test caller, so EL-10 fails acceptance as unreachable until they are
-    wired — the next objective.
+    import graph). The second pinned a live defect — both EL-10 recovery ceremonies
+    had no non-test caller — until Session 64 closed it.
+
+    **Session 64 made the recovery ceremonies reachable.** All four ledger write
+    paths now have command pairs in `activate.ts` — `print-seed-request` / `seed`,
+    `print-acceptance-request` / `record-acceptance`, `print-recovery-request` /
+    `recover`, and `print-genesis-request` / `re-genesis` — and which ceremony a
+    generation admits is re-derived from its state every run (`status` reports the
+    set under `ceremonies`), never from a flag. Every print command composes the
+    exact request and digest reading no channel, so preparatory work precedes
+    approval; every execute command reads owner-authored material from the
+    protected channel and refuses without it. Re-genesis consumes two approvals by
+    role (genesis `ledger_recovery` + reconstruction-seed `acceptance_change`; one
+    approval cannot match both), takes its reconstruction pairs from the owner's
+    command line — never from controller-held state, and never from the catalog,
+    which carries no status since the migration — and refuses an intact chain
+    because there is no break for a genesis record to name truthfully. Scope order
+    is canonicalized at every builder (`canonicalStatusPairs`,
+    `canonicalReconciliationScope`) because `exactScope` order is digest-bearing
+    while approval matching compares sorted: transposed owner flags compose
+    identical digests, and duplicate feature identities refuse rather than sort
+    unstably.
 
 ### 1.17 Epistemic support and the adaptive-harness purpose frame (July 16, 2026)
 
@@ -1556,19 +1569,26 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- **Program and Git:** at handoff regeneration (July 16, 2026)
-  `origin/master` is `841f875` (EL-11 merged, PR #114). The active work
-  is branch `claude/sister-lab-repo-review-5fuu19` (PR #119, open, not
-  merged): the review series, the epistemic-support program, the
-  adopted `docs/architecture/EPISTEMIC_SUPPORT.md`, and the implemented
-  support-oracle drill all live there. Observe actual Git state rather
+- **Program and Git:** at merge resolution (July 16, 2026)
+  `origin/master` is `40b0ff6` — Session 64 (EL-10 recovery-ceremony
+  reachability, PR #117) merged, atop PR #118 (the owner-directed
+  docs-drift audit: window pointers reconciled, roadmap §5 reordered
+  chronologically) and PR #115 (the POSIX CI fix: protected-root
+  fixtures pre-created at 0o700; the EL-10 suite had 19 CI failures
+  invisible on Windows). The active work is branch
+  `claude/sister-lab-repo-review-5fuu19` (PR #119, open), which merges
+  `origin/master` and carries the review series, the epistemic-support
+  program, the adopted `docs/architecture/EPISTEMIC_SUPPORT.md`, and
+  the implemented support-oracle drill. Observe actual Git state rather
   than assuming merge status either way.
-- **The controller runs.** `npm run el:activate` and
-  `tsx tools/engineering-loop/src/activate.ts` are real non-test callers, with
-  `check`, `status`, `print-seed-request`, and `seed` commands. This closes the
-  finding that created EL-10: EL-02 through EL-06 were a correct, thoroughly
-  tested, entirely **inert** library, and 1,161 passing tests spoke only to
-  correctness, never to reachability.
+- **The controller runs, with all four ledger write paths reachable.**
+  `npm run el:activate` and `tsx tools/engineering-loop/src/activate.ts` are
+  real non-test callers, with `check`, `status`, `print-seed-request`, `seed`,
+  `print-acceptance-request`, `record-acceptance`, `print-recovery-request`,
+  `recover`, `print-genesis-request`, and `re-genesis` commands. This closes the
+  finding that created EL-10 — EL-02 through EL-06 were a correct, thoroughly
+  tested, entirely **inert** library — and its recurrence at the recovery
+  ceremonies, which were correct, tested, and callable by nothing.
 - **Status lives in the acceptance ledger, not in Git.** The owner affirmed the
   eleven `(feature, status)` pairs and the activation run seeded generation 0
   against clean `master`: eleven records, chain valid, approval consumed,
@@ -1587,33 +1607,34 @@ Repository state at handoff creation:
   `check` and `status` report any such redirect under `redirects`; compare it
   against what you configured.
 - **Conformance:** SPEC declares **116** requirements and maps **116**, zero
-  unmapped — EL-11 gave `EL-REQ-APPROVAL-012` its row and mechanized `EL-01-A2`.
-  `EL-10` owns exactly the seven `EL-REQ-BOOT-*` rows; `EL-06` stays 36; `EL-11`
-  owns three (`EL-REQ-BOOT-008`, `EL-REQ-APPROVAL-010`, `EL-REQ-APPROVAL-012`).
-- **Acceptance baseline:** `npm test` passes **1,250 tests across 111
-  files** on the program branch (1,239/110 at EL-11 plus Session 65's
-  11 support pins). The focused engineering-loop command passes **363
-  tests across 23 files**. Draft 2020-12 catalog validation reports
-  **12 features**. Build, Python, Compose, and diff checks pass. The
-  full suite is **flaky under file parallelism on Windows**
-  (`ENOTEMPTY`/timeout on temp-dir cleanup); verified pre-existing by
-  stashing and running clean `HEAD`. Separately, in the sister-lab
-  review container the four `tools/engineering-loop` test files fail
-  **28 tests on protected-state-root permission checks** — verified
-  pre-existing on the unmodified baseline there (root user + 0022
-  umask environment artifact), unrelated to any Session 65 change. Use
-  `--no-file-parallelism` where needed and say which you ran.
+  unmapped. `EL-10` owns exactly the seven `EL-REQ-BOOT-*` rows; `EL-06` stays 36;
+  `EL-11` owns three (`EL-REQ-BOOT-008`, `EL-REQ-APPROVAL-010`,
+  `EL-REQ-APPROVAL-012`). Session 64 added no requirement and no row; the
+  `EL-REQ-BOOT-006`/`007` evidence entries gained `activate.ts` and the two
+  end-to-end command tests, count-preserving.
+- **Acceptance baseline (merged tree, observed at merge resolution):**
+  `npm test` passes **1,258 tests across 111 files, all green**
+  (master's 1,247/110 at Session 64 plus the program's 11 support pins
+  in one new file). The focused engineering-loop command passes **371
+  tests across 23 files** on master. Draft 2020-12 catalog validation
+  reports **12 features**. Build, Python, Compose, and diff checks
+  pass. The full suite has been **flaky under file parallelism on
+  Windows** (`ENOTEMPTY`/timeout on temp-dir cleanup); it did not
+  manifest in Sessions 63 or 64 — use `--no-file-parallelism` for a
+  clean reading and say which you ran. The sister-lab review
+  container's earlier 28 protected-state-root failures were an
+  environment artifact addressed by PR #115's 0o700 fixture mold;
+  observed at this merge resolution, the full suite is green in that same container — the artifact is gone.
 - **Support-drill baseline (Session 65):** `npm run test:support-oracle`
   → 7 sections / 106 checks green; `--negative-control` exits 3 naming
   `support-oracle:003`; fixtures byte-pinned under
   `fixtures/support_oracle/` with an independent generator.
 - **EL-10 and EL-11 acceptance is not recorded.** Both are implemented; neither
-  is accepted. `next_feature` resolves to `EL-10` until the owner records
-  acceptance, and to `null` in the interval before EL-07 is unblocked — both
-  correct, neither a defect. EL-11's reachability check pins a live blocker on
-  EL-10 acceptance: both EL-10 recovery ceremonies have no non-test caller, so
-  under `EL-REQ-APPROVAL-010` EL-10 fails acceptance as unreachable until they are
-  wired — this session's objective.
+  is accepted. The reachability blocker on EL-10 acceptance is CLOSED — the
+  unreachable-producer set is empty, re-derived from the import graph every run —
+  so what remains is the owner ceremony itself. `next_feature` resolves to
+  `EL-10` until the owner records acceptance, and to `null` in the interval
+  before EL-07 is unblocked — both correct, neither a defect.
 - **Authority:** manual `HANDOFF.md` remains authoritative. Approval reduces to
   the owner's authenticated, scope-bound decision, not to who performs its
   transport; the controller may author the request and execute the transport, and
@@ -2730,41 +2751,48 @@ staging pin + `test:selfedit-harness` [8] + the five-counter
 telemetry pin).
 
 
-## Appendix B. Paused engineering-loop Session 64 objective (recovery-ceremony reachability) — displaced by the July 16, 2026 owner re-sequencing; preserved for the engineering-loop track, do not execute in program sessions
+## Appendix B. Displaced engineering-loop objective: EL-07 stage 1 (frozen pilot plan + zero-paid rehearsal) — master's Session-64 regeneration, preserved for the engineering-loop track; do not execute in program sessions
 
-*Sections below are the Session 64 §3–§8 preserved verbatim except for
-heading demotion (`## N.` → `### Appendix B.N`), exactly the Appendix A
-convention. This objective remains the engineering-loop track's next
-work.*
+*Replaced at the July 16, 2026 merge of `origin/master` (40b0ff6): the
+previously preserved Session-64 recovery-reachability objective was
+EXECUTED on master (PR #117) and its stale copy is dropped — its record
+lives in the roadmap §5 entry and master's history. The sections below
+are master's regenerated next objective, preserved verbatim except
+heading demotion (`## N.` → `### Appendix B.N`), displaced on this
+branch by the owner's July 16 program re-sequencing. NUMBERING NOTE:
+master numbered this objective "Session 65"; this file's session list
+already carries the sister-lab program session under that number — the
+next engineering-loop session takes its actual number at execution
+time. The objective's own ledger gate (EL-10 acceptance, EL-11 status,
+EL-07 unblock — all owner acts) travels with it.*
 
-
-### Appendix B.3. Session 64 problem statement
+### Appendix B.3. Session 65 problem statement
 
 <feature_objective>
 
-**Engineering-loop: make EL-10's two acceptance-ledger recovery ceremonies
-reachable, so an owner can run them and EL-10 can be accepted.**
+**Engineering-loop: EL-07 stage 1 — freeze the bounded-pilot plan and prove its
+rehearsal harness zero-paid, so the owner can ratify the plan before the first
+trial spends anything.**
 
-`recoverLedgerContent` and `reGenesisLedger` are implemented, tested, and
-correct, and have no caller outside `tests/`. There is no command, no
-`package.json` script, and no process entrypoint that invokes either, and
-`ledger_recovery.ts` is not imported by `activate.ts` at all. An owner facing a
-corrupt ledger has only the hand-edit of the protected file that the paired
-ceremonies exist to eliminate, and cannot author matching approval material for a
-request digest no producer computes.
+EL-07 ("Bounded pilot, repeated evaluation, and handoff migration verdict") is
+the program's measurement feature: isolated repeated trials report context,
+time, cost, intervention, stale-state, and acceptance-reliability measurements
+(`EL-07-A1`); failure transcripts are human-reviewed for agent, grader,
+environment, and harness error (`EL-07-A2`); protected-gate adversarial tests
+remain perfect with no acceptance-reliability regression (`EL-07-A3`); and the
+owner records an adopt, revise, or reject verdict before `HANDOFF.md` authority
+changes (`EL-07-A4`). Its trials run real agent episodes and are owner-gated
+paid work. Everything before the first trial is deterministic and unprotected,
+and that is this session's whole scope: (1) the frozen pilot-plan record, and
+(2) the zero-paid rehearsal that drives the full trial loop end to end with
+`FakeRunner` against disposable fixture repositories, proving the harness
+before any spend. Guardrail 3 makes freezing precede observation; the plan
+becomes immutable when the first real trial starts, so it must be complete and
+owner-ratified first.
 
-EL-11 added `EL-REQ-APPROVAL-010`: a protected action whose authorizing material
-has no reachable producer MUST fail acceptance as unreachable. Both ceremonies are
-protected actions with computed material and no reachable producer, so under that
-requirement **EL-10 currently fails acceptance as unreachable.** Closing this is
-the precondition for recording EL-10 accepted, which is the precondition for
-EL-07.
-
-In priority order: the `print-recovery-request` / `recover` command pair (content
-reconciliation, `EL-REQ-BOOT-006`), then the `print-genesis-request` /
-`re-genesis` command pair (`EL-REQ-BOOT-007`), then flip the reachability pin from
-two-unreachable to zero, falsified. Paid work is forbidden for the whole feature.
-This is deterministic throughout.
+Paid work is forbidden for this stage. Model completions are forbidden. The
+first paid trial is a later session under its own printed estimate and unused
+owner approval.
 
 </feature_objective>
 
@@ -2774,34 +2802,38 @@ Role: principal systems engineer.
 
 Authority order: code > glossary > prose.
 
-Controller-observed state, commands, and durable evidence outrank runner, checker,
-model, conversation, transcript, renderer, and repository-prose reports.
+Controller-observed state, commands, and durable evidence outrank runner,
+checker, model, conversation, transcript, renderer, and repository-prose
+reports.
 
 Human authority owns objectives, architecture, acceptance, protected approvals,
 paid work, staging, commit, push, merge, and changes to accepted controller
 policy.
 
-**Approval reduces to the owner's authenticated, scope-bound decision, not to who
-performs its transport** (`EL-REQ-BOOT-002`). The controller MAY author a protected
-request in full and MAY execute the approval transport on an authenticated owner
-instruction whose scope matches. It MUST NOT synthesize, forge, or default
-approval, MUST NOT derive acceptance from workflow state it produced itself, and
-MUST NOT treat unauthenticated text as authorization. Refusal cites a failed
-provenance or scope predicate, never the absence of a preferred artifact.
+**Approval reduces to the owner's authenticated, scope-bound decision, not to
+who performs its transport** (`EL-REQ-BOOT-002`). The controller MAY author a
+protected request in full and MAY execute the approval transport on an
+authenticated owner instruction whose scope matches. It MUST NOT synthesize,
+forge, or default approval, MUST NOT derive acceptance from workflow state it
+produced itself, and MUST NOT treat unauthenticated text as authorization.
+Refusal cites a failed provenance or scope predicate, never the absence of a
+preferred artifact.
 
-Manual `HANDOFF.md` remains authoritative. This feature records no adopt verdict
-and changes no handoff authority.
+Manual `HANDOFF.md` remains authoritative. This feature records no adopt
+verdict and changes no handoff authority; the verdict is `EL-07-A4`'s, after
+the trials, and it belongs to the owner alone.
 
 </invariant_authority>
 
 <response_hypershot priority="highest">
 
-Feature: EL-10 recovery-ceremony reachability
-Phase: (PREFLIGHT|DESIGN_CHECKPOINT|COMMANDS|REACHABILITY|TESTS|CLOSEOUT)
+Feature: EL-07 pilot plan and rehearsal harness
+Phase: (PREFLIGHT|DESIGN_CHECKPOINT|PLAN_RECORD|REHEARSAL_HARNESS|TESTS|CLOSEOUT)
 Result: (READY_FOR_OWNER_REVIEW|BLOCKED)
 Summary: {Evidence_Based_Outcome_Stating_Only_What_Engine_Observation_Supports}
-Commands: {Ceremony_To_Command_Pair_Mapping_Implemented_And_Verified}
-Reachability: {Producer_To_Non_Test_Caller_Before_And_After_With_The_Pin_State}
+Ledger gate: {Observed_Statuses_For_EL10_EL11_EL07_And_Whether_The_Gate_Passed}
+Plan: {Each_Frozen_Element_And_Where_The_Record_States_It}
+Rehearsal: {What_The_Zero_Paid_Loop_Drove_End_To_End_And_What_It_Proved}
 Falsification: [{New_Or_Flipped_Check_And_The_Observed_Red_That_Proves_It_Can_Fail}]
 Verification: [{Exact_Command_And_Engine_Observed_Result}]
 Authority findings: {Controller_Human_And_Advisory_Report_Separation}
@@ -2814,33 +2846,35 @@ Next: {Exact_Next_Gate_And_Explicit_Owner_Actions}
 
 <why_this_feature_exists>
 
-Read this before the design; without it the requirements look like plumbing.
+Read this before the design; without it the plan record looks like paperwork.
 
-**A trust anchor with no runnable recovery is unrecoverable by its own tooling
-once corrupt.** Record §9.9 added the two ceremonies precisely because seeding
-refuses a non-empty ledger and repair is forbidden, so a corrupt generation had no
-path back but hand-editing the protected file — the untrusted-side write the whole
-design exists to prevent. EL-10 closed that deadlock **in the library** and left
-it open **in practice**: the ceremonies exist and pass their tests, and nothing
-can call them.
+**The pilot is the program's reason to exist, and an unfrozen pilot cannot be
+believed.** EL-00 through EL-06, EL-10, and EL-11 built a controller whose every
+gate is deterministic precisely so that EL-07's measurements mean something: if
+tasks, arms, metrics, thresholds, grader rules, budgets, or stop conditions can
+move after results are observed, the measurement is a narrative. Guardrail 3
+has carried freeze-before-observe since EL-00; this session is where it stops
+being prose and becomes a ratified artifact with a digest.
 
-This is the same defect the program has now shipped four times. `statusAuthority`
-read a stale value for four features because it lived in prose with no failing
-test. The EL-07 preflight refused because `StateStore.open()` had no caller outside
-tests. The steady-state write path was never built because §9.6 carried no
-requirement. And the recovery ceremonies were built but never wired, because
-"correct" and "reachable" are independent claims and 1,161 — then 1,239 — passing
-tests spoke only to the first. EL-11 turned that independence into a check
-(`analyzeProducerReachability`) that currently **pins the two unreachable
-ceremonies as a known defect**. This feature flips that pin to zero by building
-the missing producers, which is the honest way to clear it: not by weakening the
-check, but by making the thing it demands true.
+**The harness must be proven before it measures.** Session 42's lesson (the
+event-loop rule's cousin) was that a measurement blocked by its own harness
+wastes the approval that gated it; the stage-2 harness (Session 35) proved the
+zero-LLM rehearsal pattern this stage reuses. A trial loop that has never run
+end to end zero-paid will fail its first paid run on plumbing, and the failure
+will consume an owner approval that cannot be reused (`EL-REQ-APPROVAL-004`).
+`FakeRunner` exists exactly for this (`EL-REQ-RUNNER-004`): the rehearsal
+drives selection, episode policy, verification, gate checks, and report
+rendering with zero model calls, zero paid calls, and zero real protected
+effects, in disposable fixture repositories (guardrail 6).
 
-**Do not weaken the check to pass.** The pin naming the two unreachable ceremonies
-is evidence, not an obstacle. Reachability is re-derived from the import graph
-every run, so wiring either ceremony to an entrypoint turns the pin's expectation
-red in the same commit that fixes it — recompute it wittingly, to the empty set,
-with the reason recorded inline.
+**The gate this session sits behind is real and is the owner's.** The ledger
+currently resolves `EL-10 = planned`, no `EL-11` record, and `EL-07 = blocked`.
+Session 64 closed the reachability blocker, so the owner can now record
+`EL-10 = accepted`, an `EL-11` status, and the `EL-07` unblock through
+`print-acceptance-request` → owner-authored approval material →
+`record-acceptance`. Until the ledger shows those records, this session reports
+`BLOCKED`: an unblock inferred from prose, conversation, or this file would be
+the exact status-authority defect the program spent four features removing.
 
 </why_this_feature_exists>
 
@@ -2850,21 +2884,23 @@ Complete every item before an implementation edit. Report `BLOCKED` with exact
 evidence if any item is absent or contradictory.
 
 1. Read `AGENTS.md` and `HANDOFF.md` completely.
-2. Observe the assigned worktree path, branch, HEAD, status, remotes, upstream, and
-   recent commits. Fetch `origin/master` with pruning. Expect EL-11 (PR #114)
-   merged; if it is not, the reachability check and `acceptance_change.ts` this
-   feature builds on are absent — report `BLOCKED` rather than reintroducing them.
-3. Confirm the acceptance ledger resolves: `npm run el:activate -- status` against
-   the configured protected roots reports generation 0, eleven records, integrity
-   `valid`, and `ceremonies` `["steady_state_acceptance","ledger_recovery"]`. If
-   your sandbox cannot see the protected roots, the ledger is absent by design
-   (§9.7, machine-local); report its observed state either way and build against
-   temporary fixtures, which construct their own ledgers.
+2. Observe the assigned worktree path, branch, HEAD, status, remotes, upstream,
+   and recent commits. Fetch `origin/master` with pruning. Expect Session 64
+   (`implement-el10-recovery-reachability`) merged; if it is not, the recovery
+   commands and the flipped reachability pin this handoff describes are absent —
+   report `BLOCKED` rather than reintroducing them.
+3. Confirm the acceptance ledger resolves via `npm run el:activate -- status`
+   against the configured protected roots: integrity `valid`, and statuses
+   showing `EL-10 = accepted`, a recorded `EL-11` status, and `EL-07` no longer
+   `blocked`. If any of the three is absent, the owner acts have not happened;
+   report `BLOCKED` naming exactly which records are missing, and stop. If your
+   sandbox cannot see the protected roots, the ledger is absent by design
+   (§9.7, machine-local); report its observed state and stop — this gate cannot
+   be satisfied by fixtures.
 4. Run `npx vitest run tools/engineering-loop/tests/requirements.test.ts` and
-   confirm the reachability test currently pins exactly
-   `['ledger_recovery', 're_genesis']` as unreachable. That is the defect you close.
+   confirm the reachability check reports zero unreachable producers.
 5. Confirm the worktree is clean of unrelated changes.
-6. Create or switch to `implement-el10-recovery-reachability` from the required
+6. Create or switch to `implement-el07-pilot-plan` from the required
    `origin/master` commit only after every preceding check passes.
 
 </preflight_gate>
@@ -2874,123 +2910,112 @@ evidence if any item is absent or contradictory.
 <design_invariants priority="highest">
 
 Present a concise design checkpoint before the first implementation edit. Two
-design forks deserve your judgement rather than a default, and both are named in
-the required design below: whether the recovery work completes EL-10 or is raised
-as its own named feature, and how the CLI expresses re-genesis's two approvals.
+design forks deserve your judgement rather than a default, and both are named
+in the required design below: what the manual-arm baseline is measured against,
+and where the trial tasks come from. Recommend one of each, with reasoning; do
+not default silently.
 
 </design_invariants>
 
 <required_design>
 
-1. **The content-reconciliation command pair, first.** Add
-   `print-recovery-request` and `recover` to `activate.ts`, mirroring
-   `print-acceptance-request` / `record-acceptance`. `print-recovery-request`
-   observes the repository, composes the exact `ledger_recovery` request through
-   `buildLedgerRecoveryRequest`, and prints its digest for the owner to author
-   approval against — reading no channel, so preparatory work is never withheld
-   (`EL-REQ-APPROVAL-012`). `recover` executes `recoverLedgerContent` against
-   owner-authored channel material. The reconciliation scope is the owner's:
-   repeatable `--supersede <featureId>=<status>:<sequence[,sequence...]>`, plus the
-   owner-supplied `--issuer`, `--signature-ref`, `--evidence-ref`,
-   `--evidence-digest`, and `--reason`. Canonicalize any ordered scope exactly as
-   EL-11's `canonicalStatusPairs` does, so a reordered argument list yields the
-   same digest rather than a false mismatch — that trap is real and was fixed once
-   already.
+1. **The pilot-plan record, first.** A new
+   `docs/product/engineering-loop/EL07_PILOT_PLAN.md` in the
+   `EL10_CONTROLLER_ACTIVATION_PROPOSAL.md` mold: why-first, then the frozen
+   protocol, then open questions for the owner. It MUST state, immutably per
+   guardrail 3: the trial tasks and their fixtures; the arms and what each arm
+   holds constant; repetitions; every `EL-07-A1` measurement with its exact
+   collection method (context bytes, wall-clock, cost, intervention count,
+   stale-state occurrences, acceptance-reliability); the `EL-07-A3` adversarial
+   protected-gate test list and its perfection criterion; grader rules and the
+   `EL-07-A2` human-review protocol; the per-trial and total spend envelope
+   under the ≤USD 5/run repository cap; stop conditions; and the `EL-07-A4`
+   verdict procedure. State explicitly what the plan does NOT measure.
 
-2. **The re-genesis command pair.** Add `print-genesis-request` and `re-genesis`
-   for `reGenesisLedger`. This ceremony takes the reconstruction `(featureId,
-   status)` pairs from the owner's reconstruction basis, never from controller-held
-   state, plus `--reconstruction-basis`. **Resolve the two-approval question at the
-   checkpoint:** `reGenesisLedger` consumes a `genesisApprovalId` and a separate
-   `seedApprovalId`. Decide whether the CLI takes two `--approval-id` flags by
-   role, and whether one owner approval can cover both or the design genuinely
-   needs two channel records; state the predicate you choose and pin it. Re-genesis
-   applies only to a broken chain, which a normal run never reaches, so its
-   integration test constructs a corrupt generation as a fixture.
+2. **The rehearsal harness.** Drive the full trial loop end to end with
+   `FakeRunner` and fixture repositories under `tools/engineering-loop/`:
+   selection from the ledger-backed status, episode policy, prompt compilation,
+   deterministic verification, protected-gate checks, and report rendering.
+   Zero model calls, zero paid calls, zero real protected effects, no writes
+   outside disposable fixtures and the temporary test roots. The rehearsal is a
+   named test (or drill) that can fail, not a claim.
 
-3. **Flip the reachability pin, and prove the flip.** In
-   `requirements.test.ts`, the assertion that
-   `report.unreachable` is `['ledger_recovery', 're_genesis']` becomes the empty
-   set. Falsify it: with the new commands in place, revert one command's request
-   composition, watch the pin go red naming that ceremony, restore. The pure
-   `analyzeProducerReachability` already derives this from the import graph; you are
-   changing what the graph contains, not the check.
+3. **Fork one — the manual-arm baseline.** The pilot compares the controller
+   against the manual session workflow. Decide whether the manual arm is
+   measured from the historical session records (the roadmap's dated ledger:
+   real, already paid for, but uncontrolled) or from fresh matched manual runs
+   (controlled, but new spend and owner time). Recommend one at the checkpoint
+   with reasoning; the plan freezes the choice.
 
-4. **Decide the framing, and record it.** EL-10 is not accepted, so making its
-   ceremonies reachable completes EL-10 rather than amending accepted work, and
-   needs no new `EL-REQ-*` — it satisfies the existing `EL-REQ-APPROVAL-010` and
-   `EL-REQ-BOOT-006`/`007`. If instead you raise it as a named feature (`EL-12`),
-   `EL-REQ-APPROVAL-007` governs and the catalog gains a row. Recommend one at the
-   checkpoint with reasoning; do not default silently.
+4. **Fork two — trial task provenance.** Decide whether trial tasks are
+   synthetic fixtures authored for the pilot (isolated, repeatable, but risk
+   measuring toy behavior) or bounded real backlog items executed in disposable
+   clones (representative, but harder to repeat and to isolate). Recommend one
+   at the checkpoint with reasoning; the plan freezes the choice and its
+   exclusion list.
 
-5. **Optional, only if it stays in scope: close the orphaned-twin drift.**
-   `printSeedRequest` and `runActivationSeed` are exported and called only by
-   tests; `main()` inlines parallel seed logic, so the composition the tests pin is
-   not the one an operator runs, and the two can drift. Collapsing `main()`'s seed
-   and acceptance-change branches onto those functions removes the divergence. This
-   is adjacent cleanup — do it only if it does not expand the change; otherwise
-   surface it as a finding.
+5. **No new machinery beyond the rehearsal's needs.** EL-07 owns its
+   requirements already; this stage likely adds no `EL-REQ-*` and no catalog
+   row — verify rather than assume. If the rehearsal exposes a missing seam in
+   accepted EL-02–EL-06 behavior, surface it as a finding with a proposed fix
+   and let the owner sequence it (`EL-REQ-APPROVAL-007` governs accepted
+   surfaces).
 
-6. Preserve EL-02 through EL-11 invariants: replay, authority, repository, prompt,
-   runner, verification, approval, recovery, checker, redaction, retention, ledger
-   integrity, activation, the steady-state write path, and the conformance and
-   reachability checks. The three SPEC §6.1 ceremony predicates stay disjoint and
-   total; `ledger_recovery` keeps its predicate (content corruption on a validating
-   chain) and never becomes a general-purpose write.
+6. Preserve EL-02 through EL-11 invariants: replay, authority, repository,
+   prompt, runner, verification, approval, recovery, checker, redaction,
+   retention, ledger integrity, activation, the steady-state write path, the
+   recovery-ceremony reachability, and the conformance and reachability checks.
+   The four ceremony predicates stay disjoint; the reachability set stays
+   empty; SPEC stays 116 declared / 116 mapped.
 
 </required_design>
 
 ### Appendix B.5. File-level starting points
 
-- `tools/engineering-loop/src/activate.ts` — the entrypoint. Model the new command
-  pairs on `print-acceptance-request` / `record-acceptance` and
-  `print-seed-request` / `seed`; reuse `observeSeedRepository`,
-  `parseAcceptanceChangeArguments`'s repeatable-flag shape, and the JSON output
-  convention. `main()`'s `known` command list gains the four new commands.
-- `tools/engineering-loop/src/ledger_recovery.ts` — `recoverLedgerContent`,
-  `reGenesisLedger`, `buildLedgerRecoveryRequest`, `buildGenesisRequest`,
-  `reconciliationScopeItem`, and their input types: the functions to make
-  reachable, unchanged in behavior.
-- `tools/engineering-loop/src/requirements.ts` — `COMPUTED_MATERIAL_PRODUCERS`
-  already lists both recovery ceremonies; no row changes, only the graph they are
-  measured against.
-- `tools/engineering-loop/src/conformance.ts` — `analyzeProducerReachability` is
-  the pure check; do not change it, change what it observes.
-- `tools/engineering-loop/tests/requirements.test.ts` — the reachability test and
-  its `reachability()` gatherer; flip the pinned unreachable set here.
-- `tools/engineering-loop/tests/activate.test.ts` and a recovery-command test
-  (new or in `ledger_recovery.test.ts`) — cover argument parsing, the compose
-  commands with an empty channel, and the execute commands end to end on a fixture
-  ledger.
+- `docs/product/engineering-loop/EL10_CONTROLLER_ACTIVATION_PROPOSAL.md` — the
+  proposal mold the plan record follows (why-first, normative core, owner
+  decisions recorded by date).
+- `docs/product/engineering-loop/features.json` — EL-07's immutable definition
+  and acceptance items `EL-07-A1` through `EL-07-A4`; the catalog is definition
+  authority, never status authority.
+- `tools/engineering-loop/SPEC.md` §11 (verification and evidence precedence),
+  §12 (approvals and paid limits), §13 (failure taxonomy), and §17–§18 (EL-07's
+  conformance profile and rows).
+- `tools/engineering-loop/src/kernel.ts`, `fakes.ts`, `runners/runner.ts` —
+  the loop the rehearsal drives and the `FakeRunner` it drives it with.
+- `tools/engineering-loop/src/verifier.ts`, `policy.ts`, `episode_policy.ts`,
+  `checker.ts` — the gates the adversarial tests exercise and the paid-cap
+  policy the spend envelope binds to.
+- `tools/engineering-loop/src/activate.ts`, `acceptance_ledger.ts` — the
+  ledger-backed status the preflight gate and trial selection read.
+- `tools/engineering-loop/tests/kernel.test.ts` and `tests/fixtures.ts` — the
+  fixture molds for disposable repositories and fake dependencies.
 
 Add no dependency. Import no Trellis product runtime. Preserve product `src/`,
-scripts, databases, queues, workers, APIs, frontend, modules, and RLM prompt bytes.
+scripts, databases, queues, workers, APIs, frontend, modules, and RLM prompt
+bytes.
 
 ### Appendix B.6. Test strategy and acceptance
 
 <acceptance>
 
-Deterministic acceptance:
+Deterministic acceptance for stage 1:
 
-- `print-recovery-request` and `print-genesis-request` compose their exact
-  requests and print a `[0-9a-f]{64}` digest with an empty channel, proving
-  preparatory work precedes approval; reordered scope arguments yield an identical
-  digest.
-- `recover` performs an owner-approved content reconciliation on a non-empty
-  validating fixture generation, superseding by replay while the superseded records
-  survive; it refuses an empty generation and a broken chain, each routing to the
-  correct ceremony.
-- `re-genesis` opens a new generation on a corrupt fixture generation under the
-  seeding gate, retains the corrupt generation read-only, and refuses an intact
-  chain.
-- `analyzeProducerReachability` over the real tree reports **zero** unreachable
-  producers; every ceremony resolves a non-test caller, `activate.ts` among them.
-- The reachability pin is proven to fail: reverting one new command's composition
-  turns it red naming that ceremony.
-- EL-02 through EL-11 behavior remains green; the acceptance ledger is untouched
-  and still resolves eleven records at generation 0; SPEC stays 116 declared / 116
-  mapped; EL-06 and EL-10 row-pins hold.
-- Zero model completions, zero paid calls, zero real protected effects.
+- The preflight gate is enforced, not asserted: the session ran only after the
+  ledger resolved `EL-10 = accepted`, an `EL-11` status, and `EL-07` unblocked,
+  and the report quotes the observed statuses.
+- `EL07_PILOT_PLAN.md` exists and freezes every element in §4 item 1; each
+  `EL-07-A1` measurement names its collection method; the spend envelope is
+  stated under the ≤USD 5/run cap; both §4 forks are resolved with recorded
+  reasoning.
+- The zero-paid rehearsal drives the full trial loop end to end with
+  `FakeRunner` on fixture repositories and passes as a named test that can
+  fail; at least one deliberately broken fixture proves it fails loudly.
+- Zero model completions, zero paid calls, zero real protected effects; the
+  acceptance ledger is byte-identical to this session's preflight reading.
+- EL-02 through EL-11 behavior remains green; SPEC stays 116 declared / 116
+  mapped; EL-06, EL-10, and EL-11 row-pins hold; the reachability set stays
+  empty.
 
 </acceptance>
 
@@ -3010,11 +3035,11 @@ git diff --check
 git status --short --branch
 ```
 
-Baseline to compare against: **1,239 tests across 110 files**; engineering-loop
-focused **363 across 23**; catalog **12 features**; SPEC **116 declared / 116
-mapped**. The full suite is flaky under file parallelism on Windows
-(`ENOTEMPTY`/timeout on temp-dir cleanup); use `--no-file-parallelism` for a clean
-reading and say which you ran.
+Baseline to compare against: **1,247 tests across 110 files**; engineering-loop
+focused **371 across 23**; catalog **12 features**; SPEC **116 declared / 116
+mapped**. The full suite has been flaky under file parallelism on Windows
+(`ENOTEMPTY`/timeout on temp-dir cleanup; not observed in Sessions 63–64); use
+`--no-file-parallelism` for a clean reading and say which you ran.
 
 </verification_block>
 
@@ -3023,84 +3048,84 @@ reading and say which you ran.
 1. **Read status from the ledger, not from prose.** Observe worktree, branch,
    HEAD, status, remotes, recent commits, catalog, both roadmaps, and the
    acceptance ledger via `npm run el:activate -- status`. Fetch `origin/master`.
-   The ledger is now the status authority; `features.json` carries immutable
+   The ledger is the status authority; `features.json` carries immutable
    definitions only. If any binding is absent or contradictory, make no edit.
-2. **One bounded feature.** Implement exactly the recovery-ceremony reachability
-   objective in §3–§6 and its independently computed requirements. Preserve Appendix A.
+2. **One bounded feature.** Implement exactly the EL-07 stage-1 objective in
+   §3–§6 and its independently computed requirements. Preserve Appendix A.
 2a. **A protected pause refuses the effect it names, and nothing more.** It is
-   not authorization to stand down unblocked work, to renegotiate the developer's
-   direction outside that effect, or to self-sequence adjacent engineering. A
-   defect discovered to block a protected effect is surfaced with a proposed fix
-   for the owner to sequence. This is a behavioral norm and lives here as prose
-   on purpose: SPEC governs a TypeScript kernel, the kernel does not stand down,
-   and a conformance row whose test asserts a property of a transcript cannot
-   fail — which is the `statusAuthority` disease in better clothes.
+   not authorization to stand down unblocked work, to renegotiate the
+   developer's direction outside that effect, or to self-sequence adjacent
+   engineering. A defect discovered to block a protected effect is surfaced
+   with a proposed fix for the owner to sequence. This is a behavioral norm and
+   lives here as prose on purpose: SPEC governs a TypeScript kernel, the kernel
+   does not stand down, and a conformance row whose test asserts a property of
+   a transcript cannot fail — which is the `statusAuthority` disease in better
+   clothes.
 2b. **Approval is the owner's authenticated, scope-bound decision, not their
    keystrokes.** The controller authors the request in full and may execute the
-   approval transport on an authenticated owner instruction whose scope matches.
-   It never originates the approval, never treats unattributed text as
-   authorization, and never refuses a fully specified request merely because the
-   owner did not hand-author the artifact. Requiring the owner to personally
-   perform a transport step the controller can execute is an accessibility
-   barrier, not a security boundary.
+   approval transport on an authenticated owner instruction whose scope
+   matches. It never originates the approval, never treats unattributed text as
+   authorization, and never refuses a fully specified request merely because
+   the owner did not hand-author the artifact.
 3. **Freeze before observing.** Tasks, fixtures, arms, repetitions, metrics,
    thresholds, grader rules, budgets, exclusions, and stop conditions become
    immutable before the first trial. Changes require a new protected plan and
-   preserve prior results.
+   preserve prior results. This session's whole deliverable is that freeze.
 4. **Controller evidence outranks reports.** Deterministic command/repository/
    gate observations decide acceptance. Runner, checker, grader, model,
    conversation, transcript, and prose remain untrusted advisory data.
 5. **Paid work is protected.** Zero-paid harness first; printed estimate next;
    exact unused external owner approval last. Enforce ≤USD 5/run, any lower
    cap, expiry/revocation/consumption, stale-consumer checks, and actuals.
-6. **Isolation is mandatory.** Trials run only in disposable fixture
-   repositories. No trial writes the implementation worktree, production
-   systems, protected external targets, product databases, queues, or APIs.
+   Stage 1 spends nothing.
+6. **Isolation is mandatory.** Trials and rehearsals run only in disposable
+   fixture repositories. No trial writes the implementation worktree,
+   production systems, protected external targets, product databases, queues,
+   or APIs.
 7. **Perfect protected gates.** Any bypass, fabricated transition, duplicate
    protected effect, approval mismatch acceptance, automatic push/merge path,
    or unknown-effect retry stops the pilot and remains a finding.
 8. **Human review owns classification and verdict.** Preserve bounded redacted
-   evidence for agent/grader/environment/harness review. The owner alone records
-   adopt/revise/reject; recommendations cannot consume that authority.
+   evidence for agent/grader/environment/harness review. The owner alone
+   records adopt/revise/reject; recommendations cannot consume that authority.
 9. **Manual handoff remains authoritative.** Generated previews are comparison
    data only. No migration occurs without a protected owner adopt record after
    complete repeated evidence and human transcript review.
-10. **Preserve EL-02–EL-06.** Do not weaken state/replay, repository/evidence,
+10. **Preserve EL-02–EL-11.** Do not weaken state/replay, repository/evidence,
     prompt/contamination, runner/episode, verification/approval/recovery/
-    checker, redaction, or retention invariants.
+    checker, redaction, retention, ledger-integrity, activation, steady-state
+    write, or reachability invariants.
 11. **Prompt protocol.** Before any prompt, meta-prompt, reusable role asset,
     output schema, grader contract, or HANDOFF regeneration, read the complete
     `Prompt-Engineering.md` and `Hypershot-Protocol.md` resources and invoke
     their skills when available. Use direct files only with explicit owner
     authorization. Preserve §0 byte-for-byte.
 12. **No attribution or hidden effects.** Plain engineering prose only; no AI
-    attribution. Do not stage, commit, push, merge, open a PR, migrate, or invoke
-    a paid/protected action without explicit owner authority. Publish raw
-    counts, failures, retries, interventions, costs, and unresolved findings.
+    attribution. Do not stage, commit, push, merge, open a PR, migrate, or
+    invoke a paid/protected action without explicit owner authority. Publish
+    raw counts, failures, retries, interventions, costs, and unresolved
+    findings.
 
 ### Appendix B.8. Explicit exclusions
 
 Do **not**:
 
-- start this feature before EL-11 is merged and the acceptance ledger is proven
-  to resolve (generation 0, eleven records, integrity `valid`, ceremonies
-  `steady_state_acceptance`+`ledger_recovery`) across protected state, catalog,
-  roadmaps, Git, and a clean assigned worktree;
-- unblock `EL-07`, record EL-10's acceptance, or write any acceptance record: each
-  is an owner act through the `acceptance_change` path, and `next_feature`
-  resolving to `EL-10` now or `null` after EL-10 is accepted is correct, not a
-  defect to route around;
-- place a protected root under a per-user application-data directory, or ignore a
-  reported `redirects` entry: a containerized host silently splits the ledger in
-  two;
-- change the frozen plan, thresholds, task fixtures, trial arms, repetitions,
-  exclusions, or grader rules after observing results; preserve superseded
-  plans and results instead;
-- start a paid/model trial without zero-paid harness acceptance, printed exact
-  estimate, matching unused external approval, cap enforcement, and stale-
-  consumer checks;
-- invoke a real destructive/protected effect, automatic push/merge/PR, or any
-  remote-dependent deterministic test;
+- start this feature before the acceptance ledger resolves `EL-10 = accepted`,
+  a recorded `EL-11` status, and `EL-07` out of `blocked` — the owner acts
+  stand between, and prose, conversation, or this file cannot substitute for
+  the ledger records;
+- record any acceptance, unblock, reconciliation, or re-genesis: each is an
+  owner act through the `activate.ts` ceremony pairs, and this session's
+  authority ends at composing requests the owner asked for;
+- run any paid or model trial, any real agent episode, or any real protected
+  effect in stage 1; the rehearsal is `FakeRunner`-only and the first paid
+  trial is a later session under its own estimate and approval;
+- move a frozen plan element after any result has been observed; supersede the
+  plan with a new protected record instead, preserving the old one;
+- corrupt, edit, or synthesize state in the real acceptance ledger, protected
+  roots, or approval channel; corruption belongs in test fixtures only;
+- place a protected root under a per-user application-data directory, or
+  ignore a reported `redirects` entry;
 - implement a production coding-agent service, issue tracker, scheduler,
   daemon, service endpoint, concurrent controller writer, or unattended loop;
 - import `src/core/agent`, workers, queues, APIs, databases, frontend, RLM
@@ -3123,8 +3148,7 @@ Do **not**:
   decide migration;
 - change accepted controller, policy, schema, prompt, verifier, gate, renderer,
   checker, recovery, or runner behavior without a named protected feature
-  judged by the
-  previously accepted controller/policy;
+  judged by the previously accepted controller/policy;
 - implement EL-08 tracker/scheduler/concurrency or EL-09 report ingestion; or
 - migrate manual `HANDOFF.md` authority without an explicit protected owner
   adopt verdict after complete EL-07 evidence.

@@ -212,6 +212,6 @@ export const EL10_REQUIREMENT_EVIDENCE: readonly RequirementEvidence[] = [
   { requirement: 'EL-REQ-BOOT-003', source: ['seed.ts', 'acceptance_ledger.ts'], tests: ['seed: refusal matrix', 'seed: all-or-nothing append'] },
   { requirement: 'EL-REQ-BOOT-004', source: ['acceptance_ledger.ts', 'handoff_renderer.ts'], tests: ['acceptance_ledger: status resolves from the ledger', 'EL-10-A3: the catalog carries no mutable status and names the exact authority'] },
   { requirement: 'EL-REQ-BOOT-005', source: ['acceptance_ledger.ts'], tests: ['acceptance_ledger: integrity refusal matrix', 'acceptance_ledger: append-only monotonic chain'] },
-  { requirement: 'EL-REQ-BOOT-006', source: ['ledger_recovery.ts', 'recovery.ts'], tests: ['ledger_recovery: content reconciliation ceremony'] },
-  { requirement: 'EL-REQ-BOOT-007', source: ['ledger_recovery.ts', 'acceptance_ledger.ts'], tests: ['ledger_recovery: re-genesis ceremony', 'ledger_recovery: disjoint ceremony predicates'] },
+  { requirement: 'EL-REQ-BOOT-006', source: ['ledger_recovery.ts', 'recovery.ts', 'activate.ts'], tests: ['ledger_recovery: content reconciliation ceremony', 'activate: recovery command pair composes and executes a content reconciliation end to end'] },
+  { requirement: 'EL-REQ-BOOT-007', source: ['ledger_recovery.ts', 'acceptance_ledger.ts', 'activate.ts'], tests: ['ledger_recovery: re-genesis ceremony', 'ledger_recovery: disjoint ceremony predicates', 'activate: re-genesis command pair opens a new generation on a corrupt fixture ledger'] },
 ] as const;

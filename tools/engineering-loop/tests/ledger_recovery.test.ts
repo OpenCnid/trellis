@@ -28,10 +28,12 @@ import {
   LedgerRecoveryRefusedError,
   buildGenesisRequest,
   buildLedgerRecoveryRequest,
+  canonicalReconciliationScope,
   recoverLedgerContent,
   reGenesisLedger,
   reconciliationScopeItem,
 } from '../src/ledger_recovery';
+import { canonicalStatusPairs } from '../src/acceptance_change';
 import { buildSeedRequest, catalogStatusPairs, seedAcceptanceLedger } from '../src/seed';
 import type { RepositoryObservation } from '../src/domain';
 
@@ -76,7 +78,9 @@ async function harness(): Promise<Harness> {
   const worktree = join(base, 'worktree');
   await mkdir(worktree, { recursive: true });
   const channelDirectory = join(base, 'protected', 'channel');
-  await mkdir(channelDirectory, { recursive: true });
+  // validateProtectedStateRoot refuses pre-existing roots that grant group or
+  // other permissions on POSIX, so the fixture must pre-create at 0o700.
+  await mkdir(channelDirectory, { recursive: true, mode: 0o700 });
   await writeFile(join(channelDirectory, APPROVAL_CHANNEL_FILE), '[]', 'utf8');
   const channel = await FileProtectedApprovalChannel.open({ channelDirectory, worktree });
   const ledger = await AcceptanceLedger.open({
@@ -432,6 +436,121 @@ describe('EL-10 ledger recovery ceremonies', () => {
       })).rejects.toThrow(/has an intact integrity chain; re-genesis is refused/);
     } finally {
       await h.ledger.close();
+    }
+  });
+
+  it('ledger_recovery: a transposed reconciliation scope composes the identical request digest', () => {
+    // exactScope order is digest-bearing while approval matching compares scope
+    // sorted — EL-11's scope-order defect, found only by running the real CLI.
+    // The recovery scope arrives from repeatable owner flags, so it has the same
+    // exposure and gets the same canonical-order fix.
+    const itemA = { featureId: 'EL-00', status: 'accepted' as const, supersedes: [1] };
+    const itemB = { featureId: 'EL-07', status: 'planned' as const, supersedes: [2] };
+    const base = { repository: REPOSITORY, createdAt: CREATED_AT, approvalId: 'approval:recovery' };
+    const forward = buildLedgerRecoveryRequest({ ...base, scope: [itemA, itemB] });
+    const reversed = buildLedgerRecoveryRequest({ ...base, scope: [itemB, itemA] });
+    expect(protectedRequestDigest(forward)).toBe(protectedRequestDigest(reversed));
+    expect(forward.exactScope).toEqual(['EL-00=accepted:supersedes=1', 'EL-07=planned:supersedes=2']);
+    expect(reversed.exactScope).toEqual(forward.exactScope);
+
+    // The sequences inside one item were already canonical; pinned so they stay so.
+    const inner = buildLedgerRecoveryRequest({
+      ...base,
+      scope: [{ featureId: 'EL-07', status: 'planned', supersedes: [5, 2] }],
+    });
+    expect(inner.exactScope).toEqual(['EL-07=planned:supersedes=2,5']);
+
+    // Duplicate feature identities refuse: a stable sort keyed on featureId
+    // leaves duplicates in input order, which would silently reopen the
+    // transposition hole, and two corrections of one feature are ambiguous
+    // under last-record-wins replay anyway.
+    expect(() => canonicalReconciliationScope([itemA, { ...itemA, status: 'planned' as const }]))
+      .toThrow(/must name each feature exactly once/);
+
+    // A different decision still digests differently: canonical ordering
+    // removes false mismatches, never real ones.
+    expect(protectedRequestDigest(buildLedgerRecoveryRequest({ ...base, scope: [itemA] })))
+      .not.toBe(protectedRequestDigest(forward));
+  });
+
+  it('ledger_recovery: re-genesis reconstructs from owner-supplied pairs when the catalog carries no status', async () => {
+    // The live catalog carries no bootstrapStatus since the EL-10/EL-11
+    // migration, so reading it as a status document refuses — which means a
+    // re-genesis that can only derive pairs from the catalog is unrunnable
+    // against the real repository. SeedInput.pairs documented the owner-supplied
+    // path while ReGenesisInput had no field to carry it: prose describing
+    // required behavior with nothing that could fail. Both directions are pinned
+    // here.
+    const MIGRATED_CATALOG = {
+      schemaVersion: 1,
+      program: 'trellis-engineering-loop',
+      features: [{ id: 'EL-00' }, { id: 'EL-06' }, { id: 'EL-07' }],
+    };
+    const pairs = [
+      { featureId: 'EL-06', status: 'accepted' as const },
+      { featureId: 'EL-00', status: 'accepted' as const },
+    ];
+
+    const h = await harness();
+    try {
+      await seeded(h);
+      const state = await h.ledger.readGeneration(0);
+      await writeFile(h.ledger.generationPath(0), state.records.slice(1).map(serializeLedgerRecord).join(''), 'utf8');
+      const breach = (await h.ledger.readGeneration(0)).breach!;
+
+      const genesisRequest = buildGenesisRequest({
+        corruptGeneration: 0, newGeneration: 1, breach,
+        repository: REPOSITORY, createdAt: CREATED_AT, approvalId: 'approval:genesis',
+      });
+      // The owner's approval matches the canonical pair order, which is what the
+      // executed seed request carries no matter how the flags were typed.
+      const seedRequest = buildSeedRequest({
+        pairs: canonicalStatusPairs(pairs), repository: REPOSITORY,
+        createdAt: CREATED_AT, approvalId: 'approval:reseed',
+      });
+      await writeApprovals(h, [ownerApproval(genesisRequest), ownerApproval(seedRequest)]);
+
+      const result = await reGenesisLedger({
+        ledger: h.ledger, channel: h.channel, catalog: MIGRATED_CATALOG, repository: REPOSITORY,
+        issuer: 'owner:darian', signatureReference: 'protected://sig',
+        reconstructionBasis: 'Reconstructed from the merged ratification record.',
+        now: NOW, createdAt: CREATED_AT,
+        genesisApprovalId: 'approval:genesis', seedApprovalId: 'approval:reseed',
+        pairs,
+      });
+      expect(result.newGeneration).toBe(1);
+      const fresh = await h.ledger.readGeneration(1);
+      expect(fresh.integrity).toBe('valid');
+      expect(fresh.records).toHaveLength(3);
+      expect(fresh.records.slice(1).map(record => record.kind === 'acceptance' && record.featureId))
+        .toEqual(['EL-00', 'EL-06']);
+      expect(resolveFeatureStatus(fresh).acceptedFeatureIds).toEqual(['EL-00', 'EL-06']);
+    } finally {
+      await h.ledger.close();
+    }
+
+    // And without the pairs, the migrated catalog refuses as a status document:
+    // the exact shape a real post-migration re-genesis would have hit.
+    const h2 = await harness();
+    try {
+      await seeded(h2);
+      const state = await h2.ledger.readGeneration(0);
+      await writeFile(h2.ledger.generationPath(0), state.records.slice(1).map(serializeLedgerRecord).join(''), 'utf8');
+      const breach = (await h2.ledger.readGeneration(0)).breach!;
+      const genesisRequest = buildGenesisRequest({
+        corruptGeneration: 0, newGeneration: 1, breach,
+        repository: REPOSITORY, createdAt: CREATED_AT, approvalId: 'approval:genesis',
+      });
+      await writeApprovals(h2, [ownerApproval(genesisRequest)]);
+      await expect(reGenesisLedger({
+        ledger: h2.ledger, channel: h2.channel, catalog: MIGRATED_CATALOG, repository: REPOSITORY,
+        issuer: 'owner:darian', signatureReference: 'protected://sig',
+        reconstructionBasis: 'basis',
+        now: NOW, createdAt: CREATED_AT,
+        genesisApprovalId: 'approval:genesis', seedApprovalId: 'approval:reseed',
+      })).rejects.toThrow(/seed status document/);
+    } finally {
+      await h2.ledger.close();
     }
   });
 

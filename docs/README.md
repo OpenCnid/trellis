@@ -63,11 +63,12 @@ system-level framing is the root `README.md`.
   code-mediated-text pillar applied to retrieval spend, closing the
   failure class the retired module #2 nudged.
 - **[`STRUCTURAL_CHUNKING.md`](architecture/STRUCTURAL_CHUNKING.md)**
-  — the code-substrate granularity upgrade (roadmap §4 row 12,
-  CANDIDATE, owner-gated, nothing implemented): cAST-style
-  size-budgeted syntax-aligned chunking over a generic tree seam,
-  `web-tree-sitter` as the scaling engine, typed gap blocks as
-  extraction-spend control; five-part pilot criterion pre-stated.
+  — the code-substrate granularity upgrade (roadmap §4 row 12;
+  increments 1–2 implemented, Sessions 38–40, with the paid extraction
+  pilot owner-gated per its §7): cAST-style size-budgeted
+  syntax-aligned chunking over a generic tree seam, `web-tree-sitter`
+  as the scaling engine, typed gap blocks as extraction-spend control;
+  five-part pilot criterion pre-stated.
 - **[`MATHEMATICAL_FOUNDATIONS.md`](architecture/MATHEMATICAL_FOUNDATIONS.md)**
   — the timeless substrate math: Merkle trees, content addressing, and
   why cryptographic identity solves the Shift Problem that positional
@@ -155,10 +156,10 @@ program (the `engineering-loop/` pattern):
 ### 6. Progress-log archive (`/archive` — historical)
 
 - **`archive/ROADMAP_HISTORY.md`** — the dated engineering ledger from
-  July 4, 2026 (the first Phase-1 commit) through Session 23, moved
-  verbatim out of `TRELLIS_ROADMAP.md` §5 on July 12, 2026. The live
-  roadmap keeps only the most recent five sessions; older entries land
-  here unedited.
+  July 4, 2026 (the first Phase-1 commit) onward: Sessions 1–23 moved
+  verbatim out of `TRELLIS_ROADMAP.md` §5 on July 12, 2026, then one
+  session per PR as the window advances. The live roadmap keeps only
+  the most recent five sessions; older entries land here unedited.
 
 ---
 *For immediate tactical setup (Docker, env vars, running the code, API

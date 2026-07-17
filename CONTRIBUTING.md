@@ -22,7 +22,7 @@ The Physical Layer is defined by the Merkle-tree hashing algorithm.
 - The ID is the absolute, cryptographically secure coordinate of that specific piece of text. If you alter the text without recalculating the SHA-256 hash, the provenance bridge will collapse.
 
 ## 3. Distributed Identity & Queue Discipline
-Trellis scales by distributing paragraph extraction across thousands of `bullmq` workers. 
+Trellis scales by distributing paragraph extraction across parallel `bullmq` workers. 
 - **Global Deterministic IDs:** LLMs will hallucinate local identifiers (e.g., `e1`, `e2`) during extraction. These are useless across a distributed queue. The extraction worker currently converts these local IDs into a global SHA-256 hash of the normalized entity name before touching the database. Do not revert to using the LLM's ID directly.
 - **Adding New Workers:** If you add a new BullMQ queue/worker (e.g., for generating vector embeddings or summarizing nodes), ensure that it gracefully handles `UPSERT` / `MERGE` operations. Do not assume synchronous execution.
 

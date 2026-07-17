@@ -57,7 +57,7 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   land it with research provenance through the sculpted pathway, verify it
   over its life, compose it forever: the RLM authoring its own userspace
   extensions so the execution substrate compounds like the belief base
-  (machinery shipped; 2 modules live (estimation-discipline v1, workspace-discipline v2); see WORKSPACE_AND_MODULES.md §2, §9).
+  (machinery shipped; 2 modules active (spatial-flywheel v1, workspace-discipline v2), estimation-discipline retired, reasoning-templates contested; see WORKSPACE_AND_MODULES.md §2, §9).
 
 ## Tiers and working state
 
@@ -134,8 +134,9 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   research `sourceNodeIds`, brace-free addendum, optional namespaced tools,
   bounds, acceptance drills, status) composed sparsely into runs from an
   operator-registered space.
-- **Module #0** — the spatial-flywheel protocol currently hardcoded in
+- **Module #0** — the spatial-flywheel protocol formerly hardcoded in
   `TRELLIS_ADDENDUM` ([trellis_agent.py](../src/rlm/trellis_agent.py)),
+  now loaded from `modules/spatial-flywheel/` as the default selection —
   extracted into the first registry module with a byte-identical
   composed-prompt pin: the loader's acceptance test, adding zero new
   capability.

@@ -122,8 +122,9 @@ Anything between the two — e.g. per-claim dataflow narrowing ("cite
 only from the variables your code touched near this claim") — buys
 little: the model authors the claim text either way, so the semantic
 gap survives any narrowing, while the narrowing itself adds kernel
-complexity and new refusal surfaces to teach. Rejected on the §4.5
-data-not-objects grounds: keep the mechanical layer a plain set.
+complexity and new refusal surfaces to teach. Rejected on the
+WORKSPACE_AND_MODULES.md §4.5 data-not-objects grounds: keep the
+mechanical layer a plain set.
 
 One further factorization decision falls out of the answer-channel
 precedent ([trellis_answer.py](../../src/rlm/trellis_answer.py): the
@@ -375,7 +376,9 @@ provenance violation today).
 ## 6. Kernel prompt expectations
 
 Slice (b) moves **nothing**: no prompt bytes, both composed-prompt pins
-(`5d27e474…fe2a` default / `45987904…0b56` omit-arm) unmoved. Slice (d)
+(the values then current, `5d27e474…fe2a` default / `45987904…0b56`
+omit-arm; later witting kernel changes re-pinned both —
+`scripts/test_modules.py` is authoritative) unmoved. Slice (d)
 should also move nothing — the gate teaches through its typed refusal
 message, the same channel every existing provenance violation uses; the
 kernel prompt's existing provenance rules already say "cite the AST
@@ -473,7 +476,8 @@ the section they amend.)*
      with the typed reason `unsupported_citation` and appends the hash
      to `unsupportedHashes` (+ `entailmentFlaggedAt`). Provenance fields
      (`sourceNodeIds` / `orphanedSourceIds`) are never mutated by either
-     verdict; no per-pair node class was added (§4.5 data-not-objects:
+     verdict; no per-pair node class was added (WORKSPACE_AND_MODULES.md
+     §4.5 data-not-objects:
      two list properties on the edge, not a new graph shape).
   2. **Judged at most once.** Selection excludes BOTH stamp kinds, so
      every judge completion buys new information and a recovered edge
