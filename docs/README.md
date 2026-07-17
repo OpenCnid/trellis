@@ -73,6 +73,12 @@ system-level framing is the root `README.md`.
   — the timeless substrate math: Merkle trees, content addressing, and
   why cryptographic identity solves the Shift Problem that positional
   addressing cannot.
+- **[`EPISTEMIC_SUPPORT.md`](architecture/EPISTEMIC_SUPPORT.md)** — the
+  second belief axis (adopted forward design, July 16, 2026): graded,
+  judge-computed support opinions (b, d, u) orthogonal to the custody
+  tiers; plane geometry, v1 arithmetic and metric grammar (drill-pinned),
+  the judge layer, and the automation ladder. Working documents in
+  `docs/product/epistemic-support/`.
 - `ARCHITECTURE.md`, `SYSTEM_ARCHITECTURE.md`, `TECHNICAL_SPEC.md` —
   **historical (Phase 1 MVP era)**, preserved as the record of the
   original substrate design. Read them for lineage, not current truth.
@@ -133,6 +139,23 @@ the invalidation loop and the verification layer, the benchmark specs,
 and the validation strategy. They record why the substrate was built the
 way it was; the system-level framing has since moved on (root
 `README.md`, "What Trellis is").
+
+Active research/planning tracks also live here, one directory per
+program (the `engineering-loop/` pattern):
+
+- **[`epistemic-support/`](product/epistemic-support/PROGRAM_CONTEXT.md)**
+  — the epistemic-support program (doctrine ADOPTED July 16, 2026 —
+  `docs/architecture/EPISTEMIC_SUPPORT.md`; the oracle drill is
+  IMPLEMENTED, `npm run test:support-oracle`; everything else —
+  judges, sweep, registration, ratification queue — remains PROPOSED
+  behind its own bounded feature): `PROGRAM_CONTEXT.md` is the entry
+  point, orientation, and owner decision record; `RESEARCH_MAP.md` the
+  evidence register (its own header carries the authoritative
+  source/claim counts; adoption-bounds register in §9);
+  `FOUR_JUDGE_DESIGN.md` + `FOUR_JUDGE_BASIC_MODEL.md` +
+  `JUDGE_CONTRACT_TEMPLATE.md` the judged-input architecture and its
+  prompt-facing frames; `ORACLE_DRILL_PROPOSAL.md` the first drill's
+  record (implemented; its header carries the observed runs).
 
 ### 6. Progress-log archive (`/archive` — historical)
 

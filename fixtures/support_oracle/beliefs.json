@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "note": "Synthetic, token-scoped belief records for the support-computation oracle drill. Nothing here exists in any database; ids are drill-scoped; any claim text is invented fixture content with no provenance standing.",
+  "beliefs": [
+    { "beliefId": "support-oracle:001", "claim": "fixture claim: all-clean history" },
+    { "beliefId": "support-oracle:002", "claim": "fixture claim: all-drawback history" },
+    { "beliefId": "support-oracle:003", "claim": "fixture claim: mixed history" },
+    { "beliefId": "support-oracle:004", "claim": "fixture claim: abstain-heavy history" },
+    { "beliefId": "support-oracle:005", "claim": "fixture claim: all-abstain history" },
+    { "beliefId": "support-oracle:006", "claim": "fixture claim: op disagreement" },
+    { "beliefId": "support-oracle:007", "claim": "fixture claim: decay across a verdict-free gap" },
+    { "beliefId": "support-oracle:008", "claim": "fixture claim: writer-confidence bearing rows", "confidence": 0.97 },
+    { "beliefId": "support-oracle:009", "claim": "fixture claim: weighted evidence" },
+    { "beliefId": "support-oracle:010", "claim": "fixture claim: scrambled input order" }
+  ]
+}

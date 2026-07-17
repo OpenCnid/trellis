@@ -67,7 +67,8 @@
     "drill:scale": "tsx scripts/scale_provenance_drill.ts",
     "drill:reset": "tsx scripts/reset_update_drill.ts",
     "drill:poison-cache": "tsx scripts/poison_oolong_cache.ts",
-    "drill:poison": "tsx src/benchmarks/poison_drill_runner.ts"
+    "drill:poison": "tsx src/benchmarks/poison_drill_runner.ts",
+    "test:support-oracle": "tsx scripts/test_support_oracle.ts"
   },
   "keywords": [],
   "author": "",

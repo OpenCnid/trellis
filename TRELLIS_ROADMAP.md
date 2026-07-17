@@ -262,7 +262,7 @@ Session 53 with the Session 58 EL-04 feature branch, Session 54 with the
 Session 59 EL-05 feature branch, Session 58 with the Session 63 EL-11 PR
 (Sessions 55–57 having moved with the intervening EL PRs), and Session 59
 with the Session 64 EL-10 recovery-reachability feature branch. The live
-ledger below keeps the most recent five sessions: 60–64.)*
+ledger below keeps the most recent five OpenCnid sessions: 60–64, plus the July 16 sister-lab Session 65 entry at its chronological position — window management for it is deferred to the next OpenCnid session.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -1462,3 +1462,71 @@ PR #115 (POSIX CI fix) — and the new `writeChannel` fixture adopted the
 0o700 pre-creation mold #115 established, closing the same latent POSIX
 refusal in code #115 could not have seen. The full verification block was
 re-run green after the rebase.
+
+### July 16, 2026 — Session 65: sister-lab review series, the epistemic-support program, and the support-computation oracle drill (branch `claude/sister-lab-repo-review-5fuu19`, PR #119, zero-model and zero-paid)
+
+The sister lab's external review landed as `docs/review/00–06` (five
+papers + index + the epistemic-support proposal). The program was then
+built out under owner rulings issued the same day: (1) the
+epistemic-support axis ACCEPTED as forward design —
+`docs/architecture/EPISTEMIC_SUPPORT.md` (custody × support plane
+geometry, normative v1 (b, d, u) arithmetic and metric grammar,
+automation ladder) plus four glossary terms; (2) AB-4 amended by dated
+entry (model labeling of anchors permitted); (3) the oracle drill
+AUTHORIZED and implemented; (4) composable rubrics designed
+(`docs/product/epistemic-support/COMPOSABLE_RUBRICS_DESIGN.md`);
+(5) S1/S8 promotions approved, execution pending a durable deployment.
+Program documents: `PROGRAM_CONTEXT.md` (fresh-session orientation),
+`RESEARCH_MAP.md` (S1–S12, R-01…R-31 at session close — the register's
+own header is authoritative for counts; adoption bounds
+AB-1…AB-11; S1/S8/S9 all primary-verified against checksum-matched
+OpenCnid mirrors), `FOUR_JUDGE_DESIGN.md` (+ its unresolved §10.1
+reconciliation flag), `JUDGE_CONTRACT_TEMPLATE.md`,
+`ORACLE_DRILL_PROPOSAL.md`. Implementation: pure modules
+`src/core/graph/support.ts` + `support_metrics.ts`; byte-pinned
+fixtures under `fixtures/support_oracle/` with an independent
+generator; entrypoint `npm run test:support-oracle`. Exact commands and
+counts: `npm run test:support-oracle` → 7 sections / 106 checks, exit 0;
+`-- --negative-control` → detected and named `support-oracle:003` field
+`b`, exit 3; `-- --inject corrupt-expected` → detected
+`support-oracle:001`, exit 0; `TRELLIS_EXP_OMIT_CMT=1` → refused,
+exit 2; `npx vitest run src/core/graph/support.test.ts` → 11/11;
+`npm test` → 1,250 across 111 **observed pre-merge against the
+`841f875` base** (1,239/110 + 11 new pins; post-merge tree: 1,258
+across 111 — HANDOFF §2 carries the go-forward baseline; in the
+review container the four `tools/engineering-loop` files failed 28 tests
+on protected-state-root permission checks — verified identical on the
+unmodified baseline there, an environment artifact PR #115's mold
+resolved after the merge);
+`npm run build` → clean. Defects found: one unit-test calibration set
+made `any` vacuous and the validity gate correctly refused it (test
+fixed, gate unchanged); `npm ci` requires
+`REDISMS_DISABLE_POSTINSTALL=1` in proxy-restricted containers
+(redis-memory-server binary download blocked). `HANDOFF.md` regenerated
+per its §0: Session 66 objective is the four-judge ingestion +
+panel drills (owner re-sequencing, July 16; after the master merge,
+Appendix B preserves the EL track's next objective, EL-07 stage 1). Session commits
+carry the sister-lab session-trailer convention — a disclosed conflict
+with hard rule 10 for the owner to rule on at merge.
+
+**Merge-review postscript (July 16, 2026, owner review of PR #119).**
+The owner confirmed rulings 1–5 (recorded in `PROGRAM_CONTEXT.md` §6),
+the Session-66 re-sequencing, and the AB-4 amendment, and directed:
+(a) removal of `docs/review/00–06` — a direction pivot; the program
+documents are the carried-forward record and the papers' text survives
+in PR #119 branch history; (b) a consistency pass (register-count
+restatements replaced with pointers to the register header; stale
+master SHA and the Session-66 baseline corrected); (c) the drill's
+fixture-manifest check made a true pre-flight refusal (exit 2 before
+any section, `--section` runs included, matching its documented
+contract); (d) `.gitattributes` `-text` pins for
+`fixtures/support_oracle/*.json` after the drill was observed REFUSING
+on a Windows checkout (`core.autocrlf=true` rewrote the byte-pinned
+fixtures to CRLF — the `data/frankenstein.txt` hazard, same fix);
+(e) hard rule 10 resolved by squash merge (trailers do not reach
+`master`); (f) CI wiring for the drill plus four code-hardening items
+deferred to the program's follow-up queue (`PROGRAM_CONTEXT.md` §6).
+Post-fix verification on the owner's platform: drill 7 sections / 106
+checks green; `--negative-control` exit 3 naming `support-oracle:003`;
+`--inject corrupt-expected` detected; tampered-fixture refusal exit 2;
+vitest support pins 11/11.

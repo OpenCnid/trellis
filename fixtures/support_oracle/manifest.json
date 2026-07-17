@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "files": {
+    "beliefs.json": "ef394dece49987ded7fb744f8d237b41ff444eace5a01e046810e93972b5155e",
+    "verdicts.json": "0219166d12b4d98255df870efe48134d55f8d1a3b17a78cd88eb27a6a44b342b",
+    "metrics.json": "9d1249632fc9338dce00e0b53030a8bc3311d4025964b08a3cec4ca5ebf5dfec",
+    "expected_opinions.json": "9ef01fc97a27958bc5352a6fd7a15594276c99d5de1f309b8084a82016e262ff",
+    "expected_opinions_broken.json": "ae76d7d925aaf76fa4875da8928d28f1406207195ab64c4f207f416760b7e357"
+  }
+}

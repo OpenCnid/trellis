@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "params": {
+    "priorWeight": 2,
+    "baseRate": 0.5,
+    "halfLifeMs": 1000000
+  },
+  "asOfMs": 2000000,
+  "beliefs": {
+    "support-oracle:001": {
+      "b": 0.6,
+      "d": 0,
+      "u": 0.4,
+      "projected": 0.8,
+      "events": {
+        "clean": 3,
+        "drawback": 0,
+        "abstain": 0
+      }
+    },
+    "support-oracle:002": {
+      "b": 0,
+      "d": 0.5,
+      "u": 0.5,
+      "projected": 0.25,
+      "events": {
+        "clean": 0,
+        "drawback": 2,
+        "abstain": 0
+      }
+    },
+    "support-oracle:003": {
+      "b": 0.4,
+      "d": 0.2,
+      "u": 0.4,
+      "projected": 0.6000000000000001,
+      "events": {
+        "clean": 2,
+        "drawback": 1,
+        "abstain": 0
+      }
+    },
+    "support-oracle:004": {
+      "b": 0.3333333333333333,
+      "d": 0,
+      "u": 0.6666666666666666,
+      "projected": 0.6666666666666666,
+      "events": {
+        "clean": 1,
+        "drawback": 0,
+        "abstain": 4
+      }
+    },
+    "support-oracle:005": {
+      "b": 0,
+      "d": 0,
+      "u": 1,
+      "projected": 0.5,
+      "events": {
+        "clean": 0,
+        "drawback": 0,
+        "abstain": 3
+      }
+    },
+    "support-oracle:006": {
+      "b": 0.25,
+      "d": 0.25,
+      "u": 0.5,
+      "projected": 0.5,
+      "events": {
+        "clean": 1,
+        "drawback": 1,
+        "abstain": 1
+      }
+    },
+    "support-oracle:007": {
+      "b": 0.3333333333333333,
+      "d": 0,
+      "u": 0.6666666666666666,
+      "projected": 0.6666666666666666,
+      "events": {
+        "clean": 2,
+        "drawback": 0,
+        "abstain": 0
+      }
+    },
+    "support-oracle:008": {
+      "b": 0.4,
+      "d": 0.2,
+      "u": 0.4,
+      "projected": 0.6000000000000001,
+      "events": {
+        "clean": 2,
+        "drawback": 1,
+        "abstain": 0
+      }
+    },
+    "support-oracle:009": {
+      "b": 0.4444444444444444,
+      "d": 0.1111111111111111,
+      "u": 0.4444444444444444,
+      "projected": 0.6666666666666666,
+      "events": {
+        "clean": 1,
+        "drawback": 1,
+        "abstain": 0
+      }
+    },
+    "support-oracle:010": {
+      "b": 0.4,
+      "d": 0.2,
+      "u": 0.4,
+      "projected": 0.6000000000000001,
+      "events": {
+        "clean": 2,
+        "drawback": 1,
+        "abstain": 0
+      }
+    }
+  },
+  "decay": {
+    "support-oracle:007": {
+      "at": [
+        2000000,
+        3000000
+      ],
+      "opinions": [
+        {
+          "b": 0.3333333333333333,
+          "d": 0,
+          "u": 0.6666666666666666,
+          "projected": 0.6666666666666666,
+          "events": {
+            "clean": 2,
+            "drawback": 0,
+            "abstain": 0
+          }
+        },
+        {
+          "b": 0.2,
+          "d": 0,
+          "u": 0.8,
+          "projected": 0.6000000000000001,
+          "events": {
+            "clean": 2,
+            "drawback": 0,
+            "abstain": 0
+          }
+        }
+      ]
+    }
+  }
+}
