@@ -510,6 +510,16 @@ flowchart LR
    obtaining the artifact (sharing queue, priority 2).
 4. **Licensing unknowns** — S1's arXiv license and S2/S3's distribution
    terms are unverified; nothing is committed beyond citation.
+5. **Dated note (July 17, 2026):** S8's instrument is now publicly
+   deployed — Neuronpedia's interactive Jacobian Lens
+   (`neuronpedia.org/qwen3.6-27b/jlens`; Qwen3.6-27B and Gemma 3
+   12B, with steer/swap interventions). Two register consequences:
+   the AB-2 scale/architecture-generality question (S8 §9.1) is now
+   testable on open-weights models by anyone, and R-31's designated
+   experiment — the registry-separability probe — is publicly
+   runnable. Owner observation adopted the same day (the lens
+   exposes *salience*): recorded with its exhibits and bounds in
+   `IEG_TEACHINGS.md` §3, finding 6's dated addendum.
 
 ## 7. Share-with-Trellis-next queue
 

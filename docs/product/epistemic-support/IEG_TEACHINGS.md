@@ -177,6 +177,33 @@ space partitions into a cell dense enough to fund a condensate.
    tokenizer, and controlling it is controlling what future sessions
    can see. Its enforcement homes already exist: canonical terms with
    `code > glossary > prose` authority, and dated-entry amendment.
+   *Dated addendum (July 17, 2026 — the owner's reading of the public
+   J-Lens).* The instrument for this finding now exists in public:
+   Neuronpedia's interactive Jacobian Lens (Gurnee et al.;
+   Qwen3.6-27B and Gemma 3 12B, neuronpedia.org/qwen3.6-27b/jlens).
+   The owner's reading is adopted: **the J-Lens exposes salience** —
+   its readout is a ranked table of which nameable concepts are
+   present in the workspace at a position, its STEER/SWAP controls
+   are salience *writes*, and its demo set is the five properties of
+   a salience buffer (verbal report, directed modulation, multi-hop,
+   general broadcast, selective mediation). Sharpest exhibit: in the
+   multi-hop demo ("how many legs do the animals that spin webs
+   have?" → "Eight", empty think block), the top-ranked readout item
+   is `␣spiders` — the un-verbalized intermediate hop, present in
+   neither input nor output: the "un-verbalized stream parallel to
+   execution" (R-31), on screen. The lens reads concepts across
+   surface forms (spider / Spider / 蜘蛛 / 蛛 rank together), so
+   salience is concept-level and names are its handles — vocabulary
+   is the address space, salience is the state, the lens is the
+   debugger. Its blind spot proves the finding in the negative: what
+   cannot be named in a token cannot be read; the unnamed is
+   invisible even to the instrument. Harness corollary: context
+   engineering is external salience writing; AB-5's writer-blindness
+   is salience hygiene; prompt injection is an adversarial salience
+   write. AB-2 still binds (bag-of-concepts, no binding structure,
+   per-model charts) — and with the lens public on open-weights
+   models, S8's scale-generality question and R-31's
+   registry-separability probe are now publicly runnable.
 
 ## 4. The understanding ladder (teaching form)
 
