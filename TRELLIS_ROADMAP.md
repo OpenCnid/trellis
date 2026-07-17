@@ -1591,3 +1591,56 @@ eight-rule authoring canon, each rule naming a practice already
 enforced somewhere in the repo). Pointer documents were de-counted
 again ("the six laws" → "the laws") — the counting rule now cites its
 own third enactment. The entry body above stays as written.
+
+### July 17, 2026 — Owner-directed: the chain-of-density orientation ladder (branch `d/uhe-mechanistic-interpretability-1a10e7`, docs-only, zero-model and zero-paid)
+
+The owner named a real defect: the repository and its documentation
+are dense enough that a cold human or LLM reader has no graduated
+on-ramp. Chain-of-density summarization was researched (Adams et al.
+2023, arXiv:2309.04269 — iteratively fold missing salient entities
+into a fixed-length summary; human raters prefer near-human density)
+and adapted as `docs/ORIENTATION.md`: five conceptually complete
+layers (D0 one sentence → D4 the concept-first index, the transpose of
+`AGENTS.md` §2), a stated reading contract (each layer true alone; a
+deeper layer adds, never corrects), fixed per-layer budgets, and a
+maintenance discipline (new machinery enters at D4 first; densify,
+never elongate; counts stay out — the file is invariant-only and
+points volatile state at `HANDOFF.md` and the acceptance ledger).
+Authored under Guardrail 15 (both prompt protocols invoked before
+bytes) and the `IEG_TEACHINGS.md` §6 agent-first canon;
+`docs/README.md` orientation list updated in the same pass. The
+file's postscript records the owner's second provocation — CoD as an
+internal chain-of-custody method for summarization seams (UPSUM,
+handoff regeneration) — typed PROPOSED and unratified, with its
+honest residual (entity salience is sampled, not engine-decidable)
+and the drill shape any build must clear first. Context read this
+session but deliberately NOT registered anywhere: the Anthropic
+functional-emotions paper (transformer-circuits.pub, April 2026),
+discussed with the owner as assessment only per their "not a module,
+not even a request for one yet" framing — a register entry is an
+epistemic-support-program action awaiting an owner request. §5 window
+management is deferred to the next OpenCnid session, per the
+Session 65 convention. Everything on this branch awaits owner
+ratification at merge review.
+
+**Postscript (July 17, 2026, later the same day).** The emotions-paper
+discussion continued and the owner directed that its learnings be
+solidified into the documentation itself as a future project.
+`docs/architecture/RESIDUAL_STREAM_SIDECAR.md` landed (same branch,
+PR #123): a future-project record in the `TEST_TIME_TRAINING.md`
+research-initiation mold — status OUT OF SCOPE, binds nothing, no
+roadmap row, no spend. It records the thesis (functional-affect
+read/write sidecar as an RLM-harness engineering target), the evidence
+anchor with cross-family transfer typed EXTRAPOLATED, the owner-agreed
+bounds (kernel-owned actuator; intervention never erases detection;
+fire rate as harness-health metric — fewer desperate regimes, not
+quieter ones), the mixture-candidate ladder (valence-orthogonal
+projection AGREED as first candidate, the rest hypothesis), the
+percolative-Ising controller frame typed as design vocabulary with
+falsifiers (hysteresis-sweep order discriminator; feedback-controlled
+dosing near criticality), the prerequisite sequence (hosted A/B →
+row-13 local model → sidecar), and a §10 claims-and-standings table
+maintained by dated entry. `docs/README.md` §2 gains the pointer with
+the future-project category stated. UHE/J-space linkage enters under
+AB-1 (design vocabulary only); the Landauer tell is typed CONJECTURE
+and not load-bearing.
