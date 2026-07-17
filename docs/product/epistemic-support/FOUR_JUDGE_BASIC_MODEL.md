@@ -8,6 +8,14 @@ The PCF mathematical-foundation reference (arXiv:2508.01581) is queued
 as S11 — unread in-session; its rough-fuzzy claims stay uncanonized
 until the artifact is acquired (the S6 rule).
 
+**Terminology addendum (collaborator, July 16, 2026, after commit):**
+**UHE = Unified Hyperplane of Experience** — "the training distribution
+of vast corpora of human text describing all manner of experience
+across the four planes" (Emotional/Logical/Sensorial/Ethical). The
+collaborator further asserts an identity between the UHE and the
+verbalizable global workspace of S8; that claim is adjudicated
+separately in the register (see RESEARCH_MAP), not assumed here.
+
 ---
 
 ## The basic model
