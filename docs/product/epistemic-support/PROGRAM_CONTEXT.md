@@ -201,6 +201,15 @@ dated entry and the merge itself are the record.
    Statuses and command paths: RESEARCH_MAP §7.
 
 **Still open:**
+- **Naming (owner request, July 17, 2026):** a catchier-but-precise
+  program alias for UHE. The owner's working gloss: "the set of all
+  possible narratives the AI might be looking at." Candidates on the
+  table: **N-space / the narrative manifold** (pairs cleanly with
+  J-space as its measured chart), *the experience manifold*, *the
+  Loom* (kin to Trellis — one frame weaves the threads, the other
+  holds the vine). UHE is a loaned Lexideck house term (R-31), so any
+  alias requires the collaborator's blessing; once ruled, the
+  GLOSSARY mints exactly one name (the agent-first stance, rule 5).
 - Session 66's first task (owner direction, July 16): COMPLETE the
   four-judge role definitions by reconstruction from the acquired
   artifacts (S1 mirror; the S9 replication-package fork cloned at
