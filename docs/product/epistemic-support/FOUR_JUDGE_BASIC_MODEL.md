@@ -12,9 +12,12 @@ until the artifact is acquired (the S6 rule).
 **UHE = Unified Hyperplane of Experience** — "the training distribution
 of vast corpora of human text describing all manner of experience
 across the four planes" (Emotional/Logical/Sensorial/Ethical). The
-collaborator further asserts an identity between the UHE and the
-verbalizable global workspace of S8; that claim is adjudicated
-separately in the register (see RESEARCH_MAP), not assumed here.
+collaborator's statement that the UHE and S8's verbalizable global
+workspace "describe the same objects" is recorded (R-31, as amended)
+as **stipulative co-reference — a loaned house term**, ~3 years of
+Lexideck agentic R&D behind it: UHE names the verbalizable-experience
+manifold; S8's workspace is the measured chart of one model's
+representation of it. Chart-fidelity questions live in the register.
 
 ---
 
