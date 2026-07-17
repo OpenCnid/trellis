@@ -1622,3 +1622,25 @@ epistemic-support-program action awaiting an owner request. §5 window
 management is deferred to the next OpenCnid session, per the
 Session 65 convention. Everything on this branch awaits owner
 ratification at merge review.
+
+**Postscript (July 17, 2026, later the same day).** The emotions-paper
+discussion continued and the owner directed that its learnings be
+solidified into the documentation itself as a future project.
+`docs/architecture/RESIDUAL_STREAM_SIDECAR.md` landed (same branch,
+PR #123): a future-project record in the `TEST_TIME_TRAINING.md`
+research-initiation mold — status OUT OF SCOPE, binds nothing, no
+roadmap row, no spend. It records the thesis (functional-affect
+read/write sidecar as an RLM-harness engineering target), the evidence
+anchor with cross-family transfer typed EXTRAPOLATED, the owner-agreed
+bounds (kernel-owned actuator; intervention never erases detection;
+fire rate as harness-health metric — fewer desperate regimes, not
+quieter ones), the mixture-candidate ladder (valence-orthogonal
+projection AGREED as first candidate, the rest hypothesis), the
+percolative-Ising controller frame typed as design vocabulary with
+falsifiers (hysteresis-sweep order discriminator; feedback-controlled
+dosing near criticality), the prerequisite sequence (hosted A/B →
+row-13 local model → sidecar), and a §10 claims-and-standings table
+maintained by dated entry. `docs/README.md` §2 gains the pointer with
+the future-project category stated. UHE/J-space linkage enters under
+AB-1 (design vocabulary only); the Landauer tell is typed CONJECTURE
+and not load-bearing.

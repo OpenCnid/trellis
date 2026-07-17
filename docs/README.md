@@ -85,6 +85,15 @@ system-level framing is the root `README.md`.
   tiers; plane geometry, v1 arithmetic and metric grammar (drill-pinned),
   the judge layer, and the automation ladder. Working documents in
   `docs/product/epistemic-support/`.
+- **[`RESIDUAL_STREAM_SIDECAR.md`](architecture/RESIDUAL_STREAM_SIDECAR.md)**
+  — **future project, out of scope** (recorded July 17, 2026): the
+  functional-affect instrumentation-and-control record — the evidence
+  anchor (Anthropic's emotion-concepts paper), the owner-agreed bounds
+  on any read/write sidecar, the mixture-candidate ladder, the
+  percolative-Ising controller frame with typed caveats, and the
+  prerequisite sequence (hosted A/B → local model → sidecar). Binds
+  nothing until the owner sequences it; its §10 claims table carries
+  the standings.
 - `ARCHITECTURE.md`, `SYSTEM_ARCHITECTURE.md`, `TECHNICAL_SPEC.md` —
   **historical (Phase 1 MVP era)**, preserved as the record of the
   original substrate design. Read them for lineage, not current truth.
