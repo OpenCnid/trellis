@@ -4,13 +4,19 @@
 accepted. July 16, 2026. Document-driven design: this record leads; any
 implementation follows it as a separately authorized bounded feature.
 
-**Reconciliation flag (read first).** The collaborator is independently
-evaluating a four-judge system of their own. This record was architected
-from the program's evidence base (RESEARCH_MAP R-01…R-24) *without*
-sight of that system. Reconciling the two — adopting, merging, or
-correcting role definitions — is the first open item in §10. Where they
-disagree, neither wins by default; the disagreement is recorded and the
-owner rules.
+**Reconciliation flag (read first — updated July 16, 2026, late
+session).** This record was architected from the program's evidence
+base *without* sight of the collaborator's system. **The collaborator's
+design has now been supplied and committed verbatim as
+[`FOUR_JUDGE_BASIC_MODEL.md`](FOUR_JUDGE_BASIC_MODEL.md)** (register
+S10, claims R-28…R-30). Its central reframe: the "four" are
+**hyperplane parameter registries**, not four judges; a judge is a
+sparse selection from them; the working system is an **ecology**. This
+record's four roles read, under that frame, as a *minimal ecology
+instance for belief-support* — the layers compose rather than compete.
+Ingestion and reconciliation are Session 66's first task (§10.1);
+until owner ratification, neither design is authoritative over the
+other.
 
 Program context: [`PROGRAM_CONTEXT.md`](PROGRAM_CONTEXT.md). Parent
 design record: [`docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`](../../review/06_EPISTEMIC_SUPPORT_PROPOSAL.md).
@@ -197,16 +203,29 @@ pool drift, is the watched failure** (R-03).
 
 ## 10. Open items and decision boundary
 
-1. **Complete the role definitions, then reconcile** *(amended by
-   owner direction, July 16, 2026 — supersedes the wait-for-
-   collaborator posture)*: the next session COMPLETES the four role
-   definitions by reconstruction from the acquired artifacts (S1's
-   judge protocols and 2×2 rubrics; the S9 replication package's
-   optimizer/adaptation materials in the OpenCnid
-   `migration-analysis` fork; §3's blindness profiles), records them
-   as dated amendments here, and obtains owner ratification. Any
-   externally supplied definitions reconcile against the completed
-   set by the same adopt/merge/diverge-recorded protocol.
+1. **Ingest the supplied basic model, then complete** *(second
+   amendment, July 16, 2026 late session — the awaited definitions
+   ARRIVED as `FOUR_JUDGE_BASIC_MODEL.md`)*: Session 66's first task
+   is now three-part. (a) **Map the layers**: express this record's
+   four roles as sparse selections from the S10 registries (a role's
+   blindness profile = the registry parameters it does NOT select +
+   its `abstention_boundary`), against S10's ecology — preliminary
+   mapping to verify, not assume: J1 Grounding ≈ Epistemic
+   Reliability ∩ Belief-to-Fact (Logical: evidence quality,
+   falsification; claim modes fact/inference); J2 Coherence ≈ Formal
+   Coherence; J3 Corroboration ≈ Epistemic Reliability (source
+   dependence, Sensorial: observation quality); J4 Audit ≈
+   Adversarial + Coverage Meta-Judge (two functions this record had
+   fused). (b) **Complete the definitions** in S10's YAML schema with
+   rubric content reconstructed from the S1/S9 artifacts, citing
+   sources per field. (c) **Adopt the two structural imports** into
+   the composition design before the drills pin it: the hard
+   compatibility gate (R-29) and the no-global-section outcome (R-30
+   — overlap-test failure produces a typed conflict record +
+   u-dominant opinion, never a silent blend). Record everything as
+   dated amendments; the owner ratifies. Non-epistemic registries
+   (Emotional/Sensorial-beyond-observation/Ethical) stay gated behind
+   the claim-kind plane's driving-question rule (AB-7).
 2. ~~Owner ruling on AB-4 (anchor labeling)~~ **RESOLVED July 16,
    2026: model labeling permitted** (AB-4 dated amendment) — anchor
    fixture authoring is unblocked.

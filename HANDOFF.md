@@ -1636,24 +1636,31 @@ rule 8 and rule 15 warn about.
 
 Two deliverables, in order:
 
-1. **Complete the four-judge role definitions (owner direction,
-   July 16, 2026 — the session's FIRST task).** Do not wait for
-   externally supplied definitions: COMPLETE them by reconstruction
-   from the acquired artifacts — the S1 paper's judge protocols and 2×2
-   rubrics (mirror `OpenCnid/who-grades-the-grader-pdf`), the S9
-   replication package's optimizer and adaptation materials (clone at
-   `/workspace/migration-analysis`: `src/optimize/proposer.py`,
-   `docs/adaptation.md`, per-task `tasks/*/prompts/`,
-   `src/task_evals/`), and FOUR_JUDGE_DESIGN §3 — then record the
-   completed definitions as dated amendments (never a silent rewrite)
-   and obtain owner ratification. Any collaborator-supplied definitions
-   that arrive reconcile against the completed set the same way.
+1. **Ingest the collaborator's basic model and complete the role
+   definitions (owner direction, July 16, 2026, amended late session —
+   the FIRST task).** The awaited definitions ARRIVED and are committed
+   verbatim: `docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md`
+   (register S10; claims R-28…R-30). Execute FOUR_JUDGE_DESIGN §10.1
+   item 1 as amended: (a) map the four roles onto the S10
+   registries/ecology (blindness = unselected parameters +
+   abstention_boundary); (b) complete each definition in S10's YAML
+   schema with rubric content reconstructed from the S1 protocols/2×2
+   rubrics and the S9 fork's materials, citing sources per field —
+   derive, never invent; (c) adopt the hard compatibility gate (R-29)
+   and the no-global-section outcome (R-30) into the composition
+   design BEFORE the drills pin it. Dated amendments only; owner
+   ratification is the gate. Non-epistemic registries stay behind
+   AB-7; the PCF reference (S11, arXiv:2508.01581) is acquired via the
+   mirror pattern before its math is canonized.
 2. **The three panel drills** (FOUR_JUDGE_DESIGN §7, all zero-paid,
    scripted verdicts only, no model calls anywhere): the
-   panel-composition oracle extension, the blindness drill
-   (context-assembly refusals fire before any model-call boundary),
-   and the judge-contest drill (a scripted audit finding contests the
-   judge entity; composition refuses it; recovery is human).
+   panel-composition oracle extension — now including a
+   **no-global-section section** (planted incompatible verdicts on
+   shared parameters must produce the typed conflict record, never a
+   blended opinion) — the blindness drill (context-assembly refusals
+   fire before any model-call boundary), and the judge-contest drill
+   (a scripted audit finding contests the judge entity; composition
+   refuses it; recovery is human).
 
 ## 4. Required design
 
@@ -1695,9 +1702,12 @@ Two deliverables, in order:
 
 ## 5. File-level starting points
 
+- `docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md` — the
+  collaborator's supplied design (registries, YAML judge schema,
+  ecology, routing stack, gluing rules): the ingestion source.
 - `docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` §3 (roles),
   §6 (enforcement→pin table this session implements), §7 (drills),
-  §10.1 (reconciliation).
+  §10.1 as twice-amended (the ingestion protocol).
 - `docs/product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md` (verdict
   schema and taxonomies the fixtures instantiate).
 - `docs/architecture/EPISTEMIC_SUPPORT.md` §5, §7.

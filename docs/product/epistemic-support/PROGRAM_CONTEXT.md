@@ -56,14 +56,15 @@ see the decision record (§6).
   frameworks (WonderSuite, S7; the Lexideck prompt protocols, S2/S3)
   supplied the plane geometry and authoring discipline. Session
   reasoning is Tier-3; only the committed documents carry forward.
-- **The collaborator has an independent four-judge system under
-  evaluation that is NOT specified anywhere in this repo.**
-  `FOUR_JUDGE_DESIGN.md` was architected from the evidence register
-  alone. Owner direction (July 16, 2026, recorded in its amended
-  §10.1): the next session COMPLETES the role definitions by
-  reconstruction from the acquired artifacts rather than waiting;
-  externally supplied definitions reconcile against the completed set.
-  Until ratification, do not treat the design as agreed.
+- **The collaborator's four-judge design IS now in the repo**:
+  supplied July 16 (late session) and committed verbatim as
+  `FOUR_JUDGE_BASIC_MODEL.md` (S10). Its reframe: four *hyperplane
+  registries*, not four judges; judges are sparse selections; the
+  system is an ecology. `FOUR_JUDGE_DESIGN.md`'s four roles are a
+  minimal ecology instance; §10.1 (twice-amended) carries the
+  ingestion protocol that is Session 66's first task. Until owner
+  ratification of the merged design, neither document is authoritative
+  over the other.
 - **The prompt-protocol mandate is real but its resources are not in
   the repo.** `HANDOFF.md` §7 guardrail 11 requires the
   Prompt-Engineering and Hypershot protocols before authoring any
