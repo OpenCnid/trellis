@@ -1,18 +1,19 @@
 # Epistemic Support — Design Record (Adopted Forward Design)
 
-**Status: ADOPTED as forward design by owner ruling, July 16, 2026.**
+**Status: ADOPTED as forward design by owner ruling, July 16, 2026;
+confirmed by the owner on PR #119 at merge review the same day.**
 Implementation is incremental and separately gated per feature; as of
 adoption, exactly one bounded feature is authorized and implemented:
 the support-computation oracle drill (`npm run test:support-oracle`).
 Nothing else is built. This record is doctrine for what gets built and
 how; the program's working documents live in
 [`docs/product/epistemic-support/`](../product/epistemic-support/PROGRAM_CONTEXT.md),
-and its evidence register (8 sources, 24 claims, adoption bounds
-AB-1…AB-11) is
+and its evidence register (whose own header carries the authoritative
+source/claim counts; adoption bounds AB-1…AB-11 in §9) is
 [`RESEARCH_MAP.md`](../product/epistemic-support/RESEARCH_MAP.md).
-Historical origin: the sister-lab proposal
-`docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`, accepted with the
-rulings recorded in
+Historical origin: the sister-lab proposal (review-series document 06,
+removed at owner direction at merge review — its text survives in
+PR #119 branch history), accepted with the rulings recorded in
 [`PROGRAM_CONTEXT.md`](../product/epistemic-support/PROGRAM_CONTEXT.md) §6.
 
 ## 1. Doctrine

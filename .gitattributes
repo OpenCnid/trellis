@@ -4,3 +4,7 @@
 # and silently move every ground-truth answer).
 data/frankenstein.txt -text
 data/synthetic_chronicle.txt -text
+# Support-oracle fixtures are SHA-256-pinned by their own manifest; eol
+# conversion on Windows checkouts rewrites the bytes and the drill
+# correctly REFUSES (observed July 16, 2026 — same hazard as above).
+fixtures/support_oracle/*.json -text

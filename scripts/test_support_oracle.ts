@@ -67,12 +67,28 @@ const readJson = (name: string) => JSON.parse(readFileSync(join(FIXTURES, name),
 const sha256 = (name: string) =>
   createHash('sha256').update(readFileSync(join(FIXTURES, name))).digest('hex');
 
+// ---------- fixture integrity: a pre-flight refusal, not a section ----------
+// Runs before any fixture is parsed and before any section, in every mode
+// (--section included): tampered or eol-rewritten fixture bytes refuse the
+// whole drill with exit 2. The passing result is reported below as the
+// [manifest] section so section/check counts stay stable.
+let manifestChecks = 0;
+{
+  const manifest = readJson('manifest.json');
+  for (const [file, expectedSha] of Object.entries(manifest.files as Record<string, string>)) {
+    manifestChecks += 1;
+    const observed = sha256(file);
+    if (observed !== expectedSha) {
+      console.error(`REFUSED: fixture integrity failure: ${file} sha ${observed} != pinned ${expectedSha}`);
+      process.exit(2);
+    }
+  }
+}
+
 const sections: SectionResult[] = [];
-let manifestOk = false;
 
 function section(name: string, checks: () => { checks: number; findings: Finding[] }): void {
   if (onlySection && onlySection !== name) return;
-  if (!manifestOk && name !== 'manifest') return; // integrity halts everything
   try {
     const { checks: n, findings } = checks();
     const status = findings.length === 0 ? 'ok' : 'failed';
@@ -154,20 +170,9 @@ const asEvents = (rows: Array<Record<string, unknown>>): SupportEvent[] =>
   rows as unknown as SupportEvent[]; // extra fields (e.g. confidence) ride along and MUST be ignored
 
 // ---------- sections ----------
-section('manifest', () => {
-  const manifest = readJson('manifest.json');
-  let checks = 0;
-  for (const [file, expectedSha] of Object.entries(manifest.files as Record<string, string>)) {
-    checks += 1;
-    const observed = sha256(file);
-    if (observed !== expectedSha) {
-      throw new Error(`fixture integrity failure: ${file} sha ${observed} != pinned ${expectedSha}`);
-    }
-  }
-  manifestOk = true;
-  return { checks, findings: [] };
-});
-if (onlySection && onlySection !== 'manifest') manifestOk = true; // focused runs still verify via default path in CI
+// Integrity itself was verified in the pre-flight above (refusal path:
+// exit 2); this section reports the verified pin count.
+section('manifest', () => ({ checks: manifestChecks, findings: [] }));
 
 section('static-imports', staticImportCheck);
 

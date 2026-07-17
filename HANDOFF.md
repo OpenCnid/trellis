@@ -889,16 +889,21 @@ through `print-acceptance-request` → owner-authored approval material →
 **Session 65 (July 16, 2026, branch `claude/sister-lab-repo-review-5fuu19`,
 PR #119) — the sister-lab collaboration session: external review, the
 epistemic-support program, and the first support drill.** The sister
-lab's five-paper review series landed under `docs/review/`. The
+lab's five-paper review series seeded the session (removed at owner
+direction at merge review, July 16, 2026 — direction pivot; the papers'
+text survives in PR #119 branch history, and the carried-forward record
+is the program itself). The
 epistemic-support program was proposed, owner-ruled, and partially
 implemented: `docs/architecture/EPISTEMIC_SUPPORT.md` is ADOPTED forward
-design (owner ruling July 16) — a second belief axis, orthogonal to
+design (owner ruling July 16, confirmed by the owner on PR #119 at
+merge review) — a second belief axis, orthogonal to
 custody: (b, d, u) opinions computed sweep-side from judged events,
 writer-blind, support never minting custody; plane geometry bounded
 (custody / support / deferred claim-kind); normative v1 arithmetic and
 metric grammar drill-pinned. Working documents:
 `docs/product/epistemic-support/` (PROGRAM_CONTEXT.md is the entry;
-research map with 9 sources / 27 claims / adoption bounds AB-1…AB-11;
+the research map's own header carries the authoritative source/claim
+counts — trust it over any prose restatement; adoption bounds AB-1…AB-11;
 FOUR_JUDGE_DESIGN.md; JUDGE_CONTRACT_TEMPLATE.md;
 COMPOSABLE_RUBRICS_DESIGN.md; ORACLE_DRILL_PROPOSAL.md). The
 support-computation oracle drill was AUTHORIZED and IMPLEMENTED
@@ -1577,10 +1582,11 @@ Repository state at handoff creation:
   fixtures pre-created at 0o700; the EL-10 suite had 19 CI failures
   invisible on Windows). The active work is branch
   `claude/sister-lab-repo-review-5fuu19` (PR #119, open), which merges
-  `origin/master` and carries the review series, the epistemic-support
-  program, the adopted `docs/architecture/EPISTEMIC_SUPPORT.md`, and
-  the implemented support-oracle drill. Observe actual Git state rather
-  than assuming merge status either way.
+  `origin/master` and carries the epistemic-support program, the
+  adopted `docs/architecture/EPISTEMIC_SUPPORT.md`, and the implemented
+  support-oracle drill (the seeding review series was removed at owner
+  direction at merge review; PR #119 history retains it). Observe
+  actual Git state rather than assuming merge status either way.
 - **The controller runs, with all four ledger write paths reachable.**
   `npm run el:activate` and `tsx tools/engineering-loop/src/activate.ts` are
   real non-test callers, with `check`, `status`, `print-seed-request`, `seed`,
@@ -1768,7 +1774,7 @@ Two deliverables, in order:
 
 Offline (no Docker, no API key):
 
-    npm test            # baseline 1,250 across 111 files + this session's pins
+    npm test            # baseline 1,258 across 111 files (merged tree, §2) + this session's pins
     npm run build
     npm run python:check
     npm run test:support-oracle            # stays green, 7 sections / 106 checks

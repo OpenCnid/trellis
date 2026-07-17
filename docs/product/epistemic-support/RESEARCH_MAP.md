@@ -10,11 +10,24 @@ session/branch context — **Tier-3 standing: none**. No `sourceNodeIds`
 exist for any external source named here; none are fabricated. Promotion
 of any source is a separate operator-gated act.
 
-Parent design record: [`docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`](../../review/06_EPISTEMIC_SUPPORT_PROPOSAL.md)
-(the epistemic-support axis). This document is the claim-level research
-map behind it, in the mold of `docs/product/engineering-loop/RESEARCH.md`.
+Parent design record: the adopted doctrine
+[`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md).
+This document is the claim-level research map behind it, in the mold
+of `docs/product/engineering-loop/RESEARCH.md`.
 Companion artifact: [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md)
 (the §8 drill — implemented and observed green July 16, 2026; see its header).
+
+**Dated entry (July 16, 2026, PR #119 merge review):** the review
+series `docs/review/00–06` — including the original parent proposal
+`06_EPISTEMIC_SUPPORT_PROPOSAL.md` — was **removed at owner direction**
+(direction pivot); its text survives in PR #119 branch history. Every
+`docs/review/…` locator in this register (the S5 row, the R-05/R-09/
+R-14/R-17/R-19/R-20 "where used" cells, queue row 6, §8) is therefore
+**historical**: the claims and their evidence classes stand; the
+carried-forward design record is `docs/architecture/EPISTEMIC_SUPPORT.md`.
+In the same review the owner confirmed rulings 1–5, the Session-66
+re-sequencing, and the AB-4 amendment (ratification record:
+`PROGRAM_CONTEXT.md` §6).
 
 ---
 
@@ -25,8 +38,8 @@ S9 — S1, S8, and S9 all primary-verified against checksum-matched
 mirrors), 5 repo observations, 7 secondary syntheses (R-28…R-30 are
 the collaborator's supplied design framework, unmeasured), 1
 attribution record, 1 background-theory hypothesis awaiting its source
-(R-14/S6); S11 (PCF) is a locator-only entry pending acquisition. Companion artifacts: the parent design record
-(`docs/review/06_…`), [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md),
+(R-14/S6); S11 (PCF) is a locator-only entry pending acquisition. Companion artifacts: the adopted doctrine record
+(`docs/architecture/EPISTEMIC_SUPPORT.md`), [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md),
 [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md),
 [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md), and the
 program orientation [`PROGRAM_CONTEXT.md`](PROGRAM_CONTEXT.md).
@@ -372,16 +385,23 @@ The parent record's §8 lists six zero-paid drills. The first — the
 **support-computation oracle drill** — is drafted as a concrete,
 implementation-ready proposal in
 [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md), status
-**PROPOSED — UNRUN**. It operationalizes R-02/R-04/R-10 (anchor guards,
+**PROPOSED — UNRUN** as originally written. It operationalizes
+R-02/R-04/R-10 (anchor guards,
 small anchors, confidence exclusion) as the first pinned behaviors of
 the support layer.
 
 **Next decision boundary (owner):** (1) accept, amend, or refuse the
-epistemic-support axis as forward design (`docs/review/06_…` → a future
-`docs/architecture/` record if adopted); (2) rule on the
+epistemic-support axis as forward design; (2) rule on the
 model-in-the-anchor divergence (§6.1); (3) authorize the drill's
 implementation as a bounded feature (code, fixtures, package script) —
 this document authorizes nothing.
+
+*Dated resolution (July 16, 2026): all three were ruled the same day —
+(1) adopted as `docs/architecture/EPISTEMIC_SUPPORT.md`, (2) AB-4
+amended (model labeling permitted), (3) the drill authorized,
+implemented, and observed green — and the owner confirmed all three at
+PR #119 merge review (`PROGRAM_CONTEXT.md` §6 ratification record).
+The paragraph above is preserved as the pre-ruling state of the map.*
 
 ## 9. Adoption bounds register (live — amend by dated entry, never silent edit)
 

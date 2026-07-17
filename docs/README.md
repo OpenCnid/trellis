@@ -144,14 +144,18 @@ Active research/planning tracks also live here, one directory per
 program (the `engineering-loop/` pattern):
 
 - **[`epistemic-support/`](product/epistemic-support/PROGRAM_CONTEXT.md)**
-  — the epistemic-support program (all PROPOSED; nothing implemented,
-  measured, or accepted): `PROGRAM_CONTEXT.md` is the entry point and
-  orientation for fresh sessions; `RESEARCH_MAP.md` the evidence
-  register (8 sources, 24 claims, adoption-bounds register);
-  `FOUR_JUDGE_DESIGN.md` + `JUDGE_CONTRACT_TEMPLATE.md` the judged-
-  input architecture and its prompt-facing frames;
-  `ORACLE_DRILL_PROPOSAL.md` the first drill (PROPOSED — UNRUN).
-  Parent design record: `docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`.
+  — the epistemic-support program (doctrine ADOPTED July 16, 2026 —
+  `docs/architecture/EPISTEMIC_SUPPORT.md`; the oracle drill is
+  IMPLEMENTED, `npm run test:support-oracle`; everything else —
+  judges, sweep, registration, ratification queue — remains PROPOSED
+  behind its own bounded feature): `PROGRAM_CONTEXT.md` is the entry
+  point, orientation, and owner decision record; `RESEARCH_MAP.md` the
+  evidence register (its own header carries the authoritative
+  source/claim counts; adoption-bounds register in §9);
+  `FOUR_JUDGE_DESIGN.md` + `FOUR_JUDGE_BASIC_MODEL.md` +
+  `JUDGE_CONTRACT_TEMPLATE.md` the judged-input architecture and its
+  prompt-facing frames; `ORACLE_DRILL_PROPOSAL.md` the first drill's
+  record (implemented; its header carries the observed runs).
 
 ### 6. Progress-log archive (`/archive` — historical)
 

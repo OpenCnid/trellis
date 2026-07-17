@@ -24,10 +24,13 @@ see the decision record (§6).
 
 ## 2. Reading order (program-local)
 
-1. [`docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`](../../review/06_EPISTEMIC_SUPPORT_PROPOSAL.md)
-   — the parent design record: the two-axis doctrine, the support
-   state, the judge layer, the authority registry, the automation
-   ladder, drills, exclusions. §2.1 is the plane geometry.
+1. [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)
+   — the adopted doctrine record: the two-axis doctrine, the support
+   state, plane geometry, the v1 arithmetic and metric grammar, the
+   judge layer, the automation ladder, enforcement homes, exclusions.
+   (The parent proposal it graduated from — review-series document 06 —
+   was removed at owner direction at merge review, July 16, 2026; its
+   text survives in PR #119 branch history.)
 2. [`RESEARCH_MAP.md`](RESEARCH_MAP.md) — the evidence register:
    sources, claims with evidence classes and falsifiers (its
    register-summary header carries the current counts — trust it over
@@ -45,8 +48,8 @@ see the decision record (§6).
    drill (implemented July 16, 2026; its header carries the observed
    runs): pins the support arithmetic before any judge or sweep
    exists. `npm run test:support-oracle`.
-6. The review series ([`docs/review/00_INDEX.md`](../../review/00_INDEX.md))
-   for how this program emerged from an external repo review.
+   (The external review series that seeded this program was removed at
+   owner direction at merge review; PR #119 branch history retains it.)
 
 ## 3. Context you cannot infer from the artifacts alone
 
@@ -121,20 +124,23 @@ see the decision record (§6).
 6. **Update `RESEARCH_MAP.md` when evidence changes state** (e.g.,
    coverage-derived → primary-verified happened once already; the
    upgrade pattern is in the S8 row and R-20/R-21 history).
-7. Commits on this branch carry the sister-lab session's trailer
-   convention, which conflicts with `AGENTS.md` rule 10; the conflict
-   is disclosed in PR #119 discussion — flag, don't hide, and let the
-   owner rule at merge time.
+7. The sister-lab session's commits carried an AI-attribution trailer
+   convention conflicting with `AGENTS.md` rule 10; the conflict was
+   disclosed and the owner resolved it at merge review (July 16, 2026)
+   by squash merge — the trailers never reach `master`, and rule 10
+   stands unchanged for all future program work.
 
 ## 5. State of the world (as of July 16, 2026)
 
-- Branch: `claude/sister-lab-repo-review-5fuu19`, PR #119 (open,
-  unreviewed). Program artifacts live in this directory,
-  `docs/review/06_…`, and `docs/architecture/EPISTEMIC_SUPPORT.md`.
-- Trellis `master` at `841f875` (EL-11). Root `HANDOFF.md` was
+- Branch: `claude/sister-lab-repo-review-5fuu19`, PR #119 (owner
+  review completed July 16, 2026). Program artifacts live in this
+  directory and `docs/architecture/EPISTEMIC_SUPPORT.md`.
+- Trellis `master` at `40b0ff6` (Session 64 / PR #117, merged into
+  this branch). Root `HANDOFF.md` was
   regenerated July 16 per its §0: the active objective is Session 66
   (four-judge role-definition completion + panel drills); the
-  engineering-loop Session 64 objective is preserved as its Appendix B.
+  engineering-loop track's next objective (EL-07 stage 1, from
+  master's Session-64 regeneration) is preserved as its Appendix B.
 - Implemented so far: the support-oracle drill (modules, fixtures,
   entrypoint, 11 unit pins). Not implemented: judges, `support_sweep`,
   registration, ratification queue, rubrics, claim-kind plane. No
@@ -144,12 +150,19 @@ see the decision record (§6).
 ## 6. Decision record (owner rulings, July 16, 2026) and what remains open
 
 The five decisions originally listed here were ruled on by the owner on
-July 16, 2026:
+July 16, 2026.
+
+**Ratification record (July 16, 2026, PR #119 merge review):** the
+owner (Cnid) confirmed rulings 1–5 below, the Session-66
+re-sequencing, and the AB-4 amendment, in the merge-review session.
+The rulings are no longer prose claims awaiting verification; this
+dated entry and the merge itself are the record.
 
 1. **Epistemic-support axis: ACCEPTED as forward design.** Doctrine
    graduated to `docs/architecture/EPISTEMIC_SUPPORT.md`; glossary
-   terms added in the same change. The review-series document 06
-   remains as the historical proposal.
+   terms added in the same change. (The review-series document 06 it
+   graduated from was removed at owner direction at merge review —
+   direction pivot; its text survives in PR #119 branch history.)
 2. **Model-in-the-anchor: model labeling PERMITTED** (AB-4 amended by
    dated entry with the owner's rationale — the labeler is itself a
    rough fuzzy classifier; anchors rely on sparse priming
@@ -183,3 +196,23 @@ July 16, 2026:
 - Aggregation constants beyond the drilled v1 defaults (architecture
   record §"v1 arithmetic"; amendable with drill re-pin).
 - Actual execution of the approved promotions on a durable deployment.
+
+**Follow-up queue (owner-directed at merge review, July 16, 2026 —
+each is future-session work, deliberately NOT in PR #119):**
+- Wire `npm run test:support-oracle` into CI (plus a
+  `--negative-control` step asserting exit 3) once the CI surface for
+  the program is built; until then the drill's enforcement home is
+  manual-run only — a known correct-but-unreachable gap.
+- `computeSupportOpinion` accepts a mixed-belief event list and
+  silently merges it into one opinion; add a typed refusal when
+  events disagree on `beliefId`.
+- `evaluateMetric` cannot distinguish an unknown/never-registered
+  `opId` from a genuine abstention (both read as `abstain`); refuse
+  unknown ops against a declared op pool so a wiring bug cannot pose
+  as epistemic humility.
+- The zero-paid static-import pin misses `node:`-prefixed builtins
+  and import-free global `fetch`; close both holes.
+- `fixtures/support_oracle/generate_expected.ts` is a same-author
+  re-derivation of the module it checks (common-mode risk); schedule
+  an independent re-derivation of the expected values from
+  `EPISTEMIC_SUPPORT.md` §3 by a different author/session.

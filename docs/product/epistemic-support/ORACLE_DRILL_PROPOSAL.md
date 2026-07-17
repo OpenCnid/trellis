@@ -27,13 +27,43 @@ proposal; the implementation follows it. Deviations: none of substance
 than inside `[manifest]`, and negative-control's healthy exit code is
 documented as 3).
 
+**Dated amendment (July 16, 2026, PR #119 merge review — two fixes
+after first run on the owner's Windows platform):**
+
+1. **Fixture line endings.** On a Windows checkout with
+   `core.autocrlf=true`, git rewrote the byte-pinned fixture JSONs to
+   CRLF and the manifest check correctly REFUSED (`beliefs.json` SHA
+   mismatch) — the drill could not run at all on the owner's machine.
+   Fix: `.gitattributes` `-text` pins for
+   `fixtures/support_oracle/*.json` (the same hazard and fix the repo
+   already records for `data/frankenstein.txt`). The refusal firing on
+   genuinely different bytes is the manifest section working as
+   designed; the defect was shipping fixtures without the eol pin.
+2. **Manifest refusal exit code.** The header contract says a fixture
+   manifest SHA mismatch is a refusal "before any section, exit 2";
+   the first implementation ran it as a failable section (exit 1) and
+   let `--section` runs skip it entirely. The check is now a true
+   pre-flight refusal: it runs before any section, in every mode
+   including `--section`, and exits 2 on mismatch; the passing result
+   is still reported as `[manifest]` so section/check counts are
+   unchanged (7 / 106).
+
+Post-fix runs observed on the owner's platform (Windows, merged tree):
+default 7 sections / 106 checks exit 0; `--negative-control` exit 3
+naming `support-oracle:003`; `--inject corrupt-expected` detected,
+exit 0; tampered-fixture refusal exit 2 before any section; unit pins
+11/11.
+
 ---
 
 ## 1. Source and claim operationalized
 
-**§8 source (exact):**
-[`docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`](../../review/06_EPISTEMIC_SUPPORT_PROPOSAL.md),
-section **"8. Drills and acceptance (zero-paid first)"**, first item:
+**§8 source (exact):** the original epistemic-support proposal
+(review-series document 06, removed at owner direction at PR #119
+merge review — text in PR #119 branch history; its drills section
+carried forward into `docs/architecture/EPISTEMIC_SUPPORT.md` §7),
+section **"8. Drills and acceptance (zero-paid first)"**, first item,
+quoted verbatim:
 
 > *Support-computation oracle drill: seeded beliefs + scripted op
 > verdicts → assert exact (b, d, u) arithmetic, decay behavior, and

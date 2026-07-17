@@ -19,7 +19,9 @@ until owner ratification, neither design is authoritative over the
 other.
 
 Program context: [`PROGRAM_CONTEXT.md`](PROGRAM_CONTEXT.md). Parent
-design record: [`docs/review/06_EPISTEMIC_SUPPORT_PROPOSAL.md`](../../review/06_EPISTEMIC_SUPPORT_PROPOSAL.md).
+design record: [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)
+(the original review-series proposal it graduated from was removed at
+owner direction at PR #119 merge review; branch history retains it).
 Evidence register: [`RESEARCH_MAP.md`](RESEARCH_MAP.md). Prompt-facing
 contracts: [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md).
 Adoption bounds (binding on this design): RESEARCH_MAP §"Adoption
