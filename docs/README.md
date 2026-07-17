@@ -20,6 +20,12 @@ system-level framing is the root `README.md`.
 - **Root `README.md`** — what Trellis is (a Recursive Language Model
   runtime over a provenance-enforced substrate), the five commitments,
   and the full operator manual.
+- **[`ORIENTATION.md`](ORIENTATION.md)** — the chain-of-density
+  orientation ladder: the whole system summarized five times at
+  increasing density (D0 one sentence → D4 the concept-first index),
+  each layer conceptually complete and safe to stop at. The on-ramp
+  when the primary documents feel dense; subordinate to the glossary
+  and code.
 - **[`GLOSSARY.md`](GLOSSARY.md)** — canonical one-line definitions for
   every term that carries architectural load. If prose conflicts with
   this file, the prose has a defect; if this file conflicts with code,
