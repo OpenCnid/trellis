@@ -159,7 +159,7 @@ program (the `engineering-loop/` pattern):
   `IEG_TEACHINGS.md` the July 17, 2026 teaching record behind the
   register's S13 rows (the collaborator's UIT-IEG framework,
   registered at his request — R-32…R-38, synthesis §4.11; design
-  vocabulary only per AB-1): the six laws, the understanding ladder,
+  vocabulary only per AB-1): the laws, the understanding ladder,
   and the PROPOSED change queue spanning the support plane, the hash
   authority, the engine's audit-era Tier-1 debts, and the substrate
   pipeline (its §5 table is authoritative for the rows).

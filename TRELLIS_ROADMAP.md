@@ -1575,3 +1575,19 @@ record also gains the explicit precedence note: the queue is an
 inventory, never a work order; `HANDOFF.md` §3 remains the sole
 objective authority (Session 66 stands; EL-07 stays Appendix B);
 sequencing C-items is an owner ruling at or after ratification.
+
+**Second postscript (July 17, 2026, later the same day).** The
+teaching record grew by dated entry: **L7** (partition is the
+founding act — cells need names, cuts follow semantic cleavage,
+distinctions are cheap to keep and costly to erase, partition of
+sight is the precondition for evidence, summaries crossing cuts are
+lossy sections); owner findings **5** (the collapse recognition — the
+engineering loop is Trellis run on the corpus called "building
+Trellis") and **6** (vocabulary control is sight and authority; the
+GLOSSARY as the system's conceptual tokenizer); and **§6, the
+agent-first documentation stance** (owner directive: future
+collaborators are mostly agents; every document is a prompt; the
+eight-rule authoring canon, each rule naming a practice already
+enforced somewhere in the repo). Pointer documents were de-counted
+again ("the six laws" → "the laws") — the counting rule now cites its
+own third enactment. The entry body above stays as written.

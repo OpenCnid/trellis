@@ -51,7 +51,7 @@ see the decision record (§6).
    (The external review series that seeded this program was removed at
    owner direction at merge review; PR #119 branch history retains it.)
 6. [`IEG_TEACHINGS.md`](IEG_TEACHINGS.md) — teaching record from the
-   July 17, 2026 S13 dialogue sessions: the six laws, the owner's
+   July 17, 2026 S13 dialogue sessions: the laws, the owner's
    findings, the understanding ladder with its two un-learnings, and
    the PROPOSED change queue for existing code (its §5 table is
    authoritative for the rows — counts are not restated here). Docs only;

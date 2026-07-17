@@ -34,12 +34,14 @@ historical, not logical: the collaborator built the lens first, and
 the Trellis-side vocabulary (planes, gluing, registries) arrived
 already shaped by it.
 
-## 2. The six laws
+## 2. The laws
 
 Each law states the shared shape, then its two instantiations, then
 where Trellis enforces it today. These are teachings, not new rules —
 every one of them re-derives standing house doctrine; the value is
-that one statement now covers both worlds.
+that one statement now covers both worlds. (This section is the
+authoritative list; other documents point here and do not restate how
+many laws there are — the count has already grown once.)
 
 **L1 — Nothing crosses a relation for free.**
 Physics: erasing a bit costs at least k·T·ln 2 (Landauer, measured
@@ -101,6 +103,32 @@ Checks are promoted by **wiring their output into a decision** —
 never by declaring the check itself to be an audience (that would
 violate L3).
 
+**L7 — Partition is the founding act; boundaries are where everything
+lives.** *(added July 17, 2026, from the partition dialogue.)*
+Cutting data creates boundaries; boundaries create exchange; exchange
+is where cost, evidence, and time live (the cold-atom experiment is
+the literal demonstration: partition a system, count the crossings,
+and a clock appears). Five consequences, each already enforced
+somewhere in the house: (i) **cells need names** — provenance
+requires partition; you can cite a cell, never a smear, and hash
+granularity is the resolution of accountability; (ii) **cuts must
+follow semantic cleavage** — the boundary-blind incident (7/30 block
+misses, fixed structurally to 0/36) is what a partition through the
+middle of a thought costs; (iii) **distinctions are cheap to keep and
+costly to erase** — Landauer charges the merge, not the cut, and
+append-only quarantine-never-delete is monotone partition refinement:
+the substrate never pays the erasure bill; (iv) **partition of sight
+is the precondition for evidence** — corroboration counts only across
+disjoint sources, and the judges' blindness profiles are engineered
+partitions that make agreement informative; (v) **a summary crossing
+a cut is a lossy section** (raw evidence beats summaries, R-27) —
+glue lossy sections wittingly or not at all. The ML-side instances
+that ground the law: tokenization bounds the verbalizable alphabet
+(S8's single-token limit, held per AB-2); the train/test split is the
+sacred partition and leakage its cardinal sin (S1's locked held-out
+set is that partition, revered); the R-36 knee asks whether the task
+space partitions into a cell dense enough to fund a condensate.
+
 ## 3. The owner's findings (dated, attributed)
 
 1. **Self-ingestion closes the practice (July 16–17).** "If the
@@ -127,6 +155,28 @@ violate L3).
    geometry within a parameter-mapped harness-space. Typed
    posited-and-fitting in §4.11: a productive posit with three-way
    convergent fit (S9, S10, S13) and no derivation.
+5. **The collapse recognition (July 17).** "Everything we've been
+   building collapses on top of the same layer at different viewpoints
+   topologically." Confirmed in the small the same day: the
+   engineering loop *is* Trellis run on the corpus called "building
+   Trellis" — sessions are blocks, `HANDOFF.md` is the root hash,
+   ratification is promotion, and a consistency pass is an
+   invalidation sweep over prose. The owner's access note stands with
+   it: seeing the collapse requires decent fluency in more than one
+   domain, and software-engineering / computer-science vocabulary is
+   the cheapest ticket in.
+6. **Vocabulary control is sight and authority (July 17).** The
+   owner's own word for it: *salience*. What has a name can be
+   attended to, cited, and governed; what lacks one is invisible even
+   when present — anchor discipline was practiced unnamed in this
+   repo until R-03 named it, and only then became refreshable by
+   ceremony. The mechanistic rhyme (held as vocabulary per AB-2):
+   S8's measured workspace reads single-token-nameable concepts —
+   naming a thing compresses it to an addressable token. The GLOSSARY
+   is therefore not a convenience; it is the system's conceptual
+   tokenizer, and controlling it is controlling what future sessions
+   can see. Its enforcement homes already exist: canonical terms with
+   `code > glossary > prose` authority, and dated-entry amendment.
 
 ## 4. The understanding ladder (teaching form)
 
@@ -228,7 +278,48 @@ scaling bug to engineer away — under L3 and the past-hypothesis
 reading (R-32 lineage), the owner is the system's inherited boundary
 condition, and a boundary condition cannot be derived from inside.
 
-## 6. Closing
+## 6. The documentation stance: agents first (owner directive, July 17, 2026)
+
+Future collaborators here are mostly agents, and they will do the
+majority of the work. Therefore **every document in this repository
+is a prompt**: it will be read by a session that arrives with zero
+context, cannot ask the author anything, and will act on exactly what
+the bytes say. The canon below invents nothing — each rule names a
+practice this repo already enforces somewhere — but it is stated
+once, for authors, with the agent as the design reader:
+
+1. **Self-contained entry points.** The reader starts cold
+   (`HANDOFF.md` §0's rule; `PROGRAM_CONTEXT.md`'s "you are probably
+   an agent" opener). If understanding a document requires a
+   conversation that no longer exists, the document is broken.
+2. **Standing before content.** Status headers first; an
+   "authoritative wherever they disagree" clause resolves conflicts
+   in advance, because the agent reading two documents cannot
+   arbitrate between them and must not guess.
+3. **Pointers, never restated counts** — the twice-learned lesson,
+   learned a third time in this very section's authoring when "the
+   six laws" appeared in three pointer documents the day L7 landed.
+4. **Dated entries, never silent edits.** Ledgers append
+   (postscripts); living documents update; history is refined, never
+   erased (L7.iii applied to prose).
+5. **Names are load-bearing — coin sparingly, define canonically,
+   use exactly.** Vocabulary control is sight (owner finding 6): an
+   agent can attend to what is named and is blind to what is not.
+   One name per concept; the GLOSSARY is the single mint.
+6. **Claims carry evidence classes and falsifiers** (the register
+   mold). An agent inheriting an unclassed claim inherits it as
+   truth; the class is what lets it inherit doubt at the right dose.
+7. **Reusable frames stay contamination-free** (the invariant/variant
+   split; the prompt protocols; EL-04's scanner is the enforcement
+   home). Session-specific facts in a reusable frame are poison an
+   agent cannot distinguish from doctrine.
+8. **Write for the reader who cannot ask.** Every ambiguity becomes
+   the next session's misread, silently propagated with full
+   confidence. The cost of precision is paid once by the author; the
+   cost of ambiguity is paid by every reader forever — the flywheel
+   economics of prose.
+
+## 7. Closing
 
 The register holds the claims. This record holds the teaching. The
 code holds the proof — and §5 is the list of proofs still owed.
