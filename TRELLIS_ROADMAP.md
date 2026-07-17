@@ -260,7 +260,50 @@ EL-02 feature branch, Session 52 with the Session 57 EL-03 feature branch,
 Session 53 with the Session 58 EL-04 feature branch, Session 54 with the
 Session 59 EL-05 feature branch, and Session 58 with the Session 63 EL-11 PR
 (Sessions 55–57 having moved with the intervening EL PRs). The live ledger below keeps the most recent five
-sessions: 59–63.)*
+OpenCnid sessions: 59–63, plus the July 16 sister-lab Session 65 entry
+(window management for it is deferred to the next OpenCnid session).)*
+
+### July 16, 2026 — Session 65: sister-lab review series, the epistemic-support program, and the support-computation oracle drill (branch `claude/sister-lab-repo-review-5fuu19`, PR #119, zero-model and zero-paid)
+
+The sister lab's external review landed as `docs/review/00–06` (five
+papers + index + the epistemic-support proposal). The program was then
+built out under owner rulings issued the same day: (1) the
+epistemic-support axis ACCEPTED as forward design —
+`docs/architecture/EPISTEMIC_SUPPORT.md` (custody × support plane
+geometry, normative v1 (b, d, u) arithmetic and metric grammar,
+automation ladder) plus four glossary terms; (2) AB-4 amended by dated
+entry (model labeling of anchors permitted); (3) the oracle drill
+AUTHORIZED and implemented; (4) composable rubrics designed
+(`docs/product/epistemic-support/COMPOSABLE_RUBRICS_DESIGN.md`);
+(5) S1/S8 promotions approved, execution pending a durable deployment.
+Program documents: `PROGRAM_CONTEXT.md` (fresh-session orientation),
+`RESEARCH_MAP.md` (9 sources, 27 claims R-01…R-27, adoption bounds
+AB-1…AB-11; S1/S8/S9 all primary-verified against checksum-matched
+OpenCnid mirrors), `FOUR_JUDGE_DESIGN.md` (+ its unresolved §10.1
+reconciliation flag), `JUDGE_CONTRACT_TEMPLATE.md`,
+`ORACLE_DRILL_PROPOSAL.md`. Implementation: pure modules
+`src/core/graph/support.ts` + `support_metrics.ts`; byte-pinned
+fixtures under `fixtures/support_oracle/` with an independent
+generator; entrypoint `npm run test:support-oracle`. Exact commands and
+counts: `npm run test:support-oracle` → 7 sections / 106 checks, exit 0;
+`-- --negative-control` → detected and named `support-oracle:003` field
+`b`, exit 3; `-- --inject corrupt-expected` → detected
+`support-oracle:001`, exit 0; `TRELLIS_EXP_OMIT_CMT=1` → refused,
+exit 2; `npx vitest run src/core/graph/support.test.ts` → 11/11;
+`npm test` → 1,250 across 111 (baseline 1,239/110 + 11 new pins; in the
+review container the four `tools/engineering-loop` files fail 28 tests
+on protected-state-root permission checks — verified identical on the
+unmodified baseline there, an environment artifact, not a regression);
+`npm run build` → clean. Defects found: one unit-test calibration set
+made `any` vacuous and the validity gate correctly refused it (test
+fixed, gate unchanged); `npm ci` requires
+`REDISMS_DISABLE_POSTINSTALL=1` in proxy-restricted containers
+(redis-memory-server binary download blocked). `HANDOFF.md` regenerated
+per its §0: Session 66 objective is the four-judge reconciliation +
+panel drills; the engineering-loop Session 64 objective is preserved
+verbatim as Appendix B (owner re-sequencing, July 16). Session commits
+carry the sister-lab session-trailer convention — a disclosed conflict
+with hard rule 10 for the owner to rule on at merge.
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 

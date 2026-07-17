@@ -893,11 +893,44 @@ unreachable, reported and pinned rather than routed around, and it is the next
 objective. PR #114 is open against `master`, not merged; the acceptance ledger is
 byte-identical to preflight.
 
-Your objective is **Session 64: engineering-loop — make EL-10's two
-acceptance-ledger recovery ceremonies reachable, so an owner can run them and EL-10
-can be accepted.** `recoverLedgerContent` and `reGenesisLedger` are correct and
-tested and have no caller outside `tests/`; under `EL-REQ-APPROVAL-010` that fails
-EL-10 acceptance as unreachable, which blocks EL-07. §3 carries the objective.
+**Session 65 (July 16, 2026, branch `claude/sister-lab-repo-review-5fuu19`,
+PR #119) — the sister-lab collaboration session: external review, the
+epistemic-support program, and the first support drill.** The sister
+lab's five-paper review series landed under `docs/review/`. The
+epistemic-support program was proposed, owner-ruled, and partially
+implemented: `docs/architecture/EPISTEMIC_SUPPORT.md` is ADOPTED forward
+design (owner ruling July 16) — a second belief axis, orthogonal to
+custody: (b, d, u) opinions computed sweep-side from judged events,
+writer-blind, support never minting custody; plane geometry bounded
+(custody / support / deferred claim-kind); normative v1 arithmetic and
+metric grammar drill-pinned. Working documents:
+`docs/product/epistemic-support/` (PROGRAM_CONTEXT.md is the entry;
+research map with 9 sources / 27 claims / adoption bounds AB-1…AB-11;
+FOUR_JUDGE_DESIGN.md; JUDGE_CONTRACT_TEMPLATE.md;
+COMPOSABLE_RUBRICS_DESIGN.md; ORACLE_DRILL_PROPOSAL.md). The
+support-computation oracle drill was AUTHORIZED and IMPLEMENTED
+(`npm run test:support-oracle`: 7 sections / 106 checks green;
+`--negative-control` exits 3 on detecting the committed broken oracle;
+`--inject corrupt-expected` passes by detection; pure modules
+`src/core/graph/support.ts` + `support_metrics.ts`; 11 vitest pins;
+fixtures byte-pinned with an independent generator). AB-4 was AMENDED by
+owner ruling (model labeling of anchors permitted; fixtures pinned once
+labeled; refresh stays a human ceremony). Three primary papers were
+mirrored under OpenCnid repos, checksum-verified, and read in full: S1
+`who-grades-the-grader-pdf`, S8 `verbalizable-global-workspace-pdf`, S9
+`better-harnesses-smaller-models-pdf`. Purpose framing (owner
+direction): Trellis = RLM depth × the best, most adaptive harness (S9),
+with uncertainty-around-facts managed by the adaptive four-judge layer.
+Session commits carry the sister lab's session-trailer convention — a
+DISCLOSED conflict with hard rule 10, for the owner to rule on at merge.
+
+Your objective is **Session 66: the four-judge system — reconcile the
+two designs, then pin the panel's structural guarantees.** §3 carries
+the objective. (Owner re-sequencing, July 16, 2026: the
+epistemic-support program takes the active objective; the engineering-
+loop Session 64 objective — recovery-ceremony reachability — is
+preserved verbatim in Appendix B and remains that track's next work.)
+
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
@@ -905,6 +938,14 @@ prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
 acceptance not recorded for either; `EL-07` is blocked pending an owner unblock.
 The merged Session 54 tooling-shape objective is preserved in Appendix A and
 remains paused unless the owner re-prioritizes it.
+
+
+**Owner re-sequencing, July 16, 2026:** the epistemic-support program
+(this handoff's §3) takes the active session objective ahead of the
+engineering-loop track. EL-10/EL-11 acceptance and the Session-64
+reachability objective (Appendix B) remain the engineering-loop track's
+next work, unchanged in content; nothing in the program touches
+controller state or claims EL progress.
 
 ---
 
@@ -1462,16 +1503,49 @@ immutable, content-addressed physical location in source material.
     have no non-test caller, so EL-10 fails acceptance as unreachable until they are
     wired — the next objective.
 
+### 1.17 Epistemic support and the adaptive-harness purpose frame (July 16, 2026)
+
+- **The purpose frame (owner-designated):** Trellis's aim is to combine
+  the depth of an RLM with the best, most adaptive harness
+  (arXiv:2607.08938 — S9 in the program register, primary-verified:
+  task difficulty shared across instances lifts from the model into the
+  harness; adaptations are discoverable automatically from failure
+  trajectories; 16/21 task–SLM pairs improved, best SLM at 89.7% of LLM
+  performance for 4% of cost; adaptation pays most on repetitive
+  workflows, Spearman ρ = −0.96). Trellis's existing doctrines are the
+  trust half of that thesis — tooling shape (hard rule 8),
+  externalization (CODE_MEDIATED_TEXT), capability-as-belief — and the
+  epistemic-support program adds the managed-uncertainty half.
+- **Epistemic support (ADOPTED forward design):**
+  `docs/architecture/EPISTEMIC_SUPPORT.md`. A second belief axis,
+  orthogonal to custody: (b, d, u) opinions computed sweep-side from
+  judged drawback-detector events; abstention feeds uncertainty only;
+  writer confidence structurally excluded; support never mints custody;
+  the writer never sees it. v1 arithmetic and the metric grammar with
+  its fail-closed validity gate are normative and drill-pinned
+  (`npm run test:support-oracle`; enforcement/pin table in that record
+  §7). Only the drill is implemented; sweep integration, judges,
+  registration, and the ratification queue are each separately gated.
+- **The judge layer (PROPOSED, reconciliation pending):** four
+  differently-blind roles — grounding, coherence, corroboration, and an
+  audit role that judges judges, never beliefs, and can only contest a
+  judge as a capability. `docs/product/epistemic-support/` is the
+  program home; PROGRAM_CONTEXT.md orients a fresh session; the
+  adoption-bounds register (RESEARCH_MAP §9, AB-1…AB-11) binds all
+  program work and is amended only by dated entry.
+
+
 ## 2. Current baseline
 
 Repository state at handoff creation:
 
-- **Program and Git:** at handoff creation `origin/master` is
-  `272a18eceb078650b96800faa4faea7e2ac532ce` (PR #113, the EL-11 scope commit)
-  and EL-11 itself is PR #114, committed on branch
-  `implement-el11-approval-reachability` (`e7cd809`) and pending owner merge. By
-  the time this session runs, expect EL-11 merged; observe actual Git state
-  rather than assuming either way.
+- **Program and Git:** at handoff regeneration (July 16, 2026)
+  `origin/master` is `841f875` (EL-11 merged, PR #114). The active work
+  is branch `claude/sister-lab-repo-review-5fuu19` (PR #119, open, not
+  merged): the review series, the epistemic-support program, the
+  adopted `docs/architecture/EPISTEMIC_SUPPORT.md`, and the implemented
+  support-oracle drill all live there. Observe actual Git state rather
+  than assuming merge status either way.
 - **The controller runs.** `npm run el:activate` and
   `tsx tools/engineering-loop/src/activate.ts` are real non-test callers, with
   `check`, `status`, `print-seed-request`, and `seed` commands. This closes the
@@ -1499,13 +1573,23 @@ Repository state at handoff creation:
   unmapped — EL-11 gave `EL-REQ-APPROVAL-012` its row and mechanized `EL-01-A2`.
   `EL-10` owns exactly the seven `EL-REQ-BOOT-*` rows; `EL-06` stays 36; `EL-11`
   owns three (`EL-REQ-BOOT-008`, `EL-REQ-APPROVAL-010`, `EL-REQ-APPROVAL-012`).
-- **Acceptance baseline:** `npm test` passes **1,239 tests across 110 files**; the
-  focused engineering-loop command passes **363 tests across 23 files**. Draft
-  2020-12 catalog validation reports **12 features**. Build, Python, Compose, and
-  diff checks pass. The full suite is **flaky under file parallelism on Windows**
-  (`ENOTEMPTY`/timeout on temp-dir cleanup); verified pre-existing by stashing all
-  work and running clean `HEAD`, which fails 2–5 per run including untouched
-  files. Use `--no-file-parallelism` and say which you ran.
+- **Acceptance baseline:** `npm test` passes **1,250 tests across 111
+  files** on the program branch (1,239/110 at EL-11 plus Session 65's
+  11 support pins). The focused engineering-loop command passes **363
+  tests across 23 files**. Draft 2020-12 catalog validation reports
+  **12 features**. Build, Python, Compose, and diff checks pass. The
+  full suite is **flaky under file parallelism on Windows**
+  (`ENOTEMPTY`/timeout on temp-dir cleanup); verified pre-existing by
+  stashing and running clean `HEAD`. Separately, in the sister-lab
+  review container the four `tools/engineering-loop` test files fail
+  **28 tests on protected-state-root permission checks** — verified
+  pre-existing on the unmodified baseline there (root user + 0022
+  umask environment artifact), unrelated to any Session 65 change. Use
+  `--no-file-parallelism` where needed and say which you ran.
+- **Support-drill baseline (Session 65):** `npm run test:support-oracle`
+  → 7 sections / 106 checks green; `--negative-control` exits 3 naming
+  `support-oracle:003`; fixtures byte-pinned under
+  `fixtures/support_oracle/` with an independent generator.
 - **EL-10 and EL-11 acceptance is not recorded.** Both are implemented; neither
   is accepted. `next_feature` resolves to `EL-10` until the owner records
   acceptance, and to `null` in the interval before EL-07 is unblocked — both
@@ -1532,396 +1616,166 @@ docker compose config --quiet
 
 Work on one feature branch and target `master`.
 
-## 3. Session 64 problem statement
+## 3. Session 66 problem statement
 
 <feature_objective>
 
-**Engineering-loop: make EL-10's two acceptance-ledger recovery ceremonies
-reachable, so an owner can run them and EL-10 can be accepted.**
-
-`recoverLedgerContent` and `reGenesisLedger` are implemented, tested, and
-correct, and have no caller outside `tests/`. There is no command, no
-`package.json` script, and no process entrypoint that invokes either, and
-`ledger_recovery.ts` is not imported by `activate.ts` at all. An owner facing a
-corrupt ledger has only the hand-edit of the protected file that the paired
-ceremonies exist to eliminate, and cannot author matching approval material for a
-request digest no producer computes.
-
-EL-11 added `EL-REQ-APPROVAL-010`: a protected action whose authorizing material
-has no reachable producer MUST fail acceptance as unreachable. Both ceremonies are
-protected actions with computed material and no reachable producer, so under that
-requirement **EL-10 currently fails acceptance as unreachable.** Closing this is
-the precondition for recording EL-10 accepted, which is the precondition for
-EL-07.
-
-In priority order: the `print-recovery-request` / `recover` command pair (content
-reconciliation, `EL-REQ-BOOT-006`), then the `print-genesis-request` /
-`re-genesis` command pair (`EL-REQ-BOOT-007`), then flip the reachability pin from
-two-unreachable to zero, falsified. Paid work is forbidden for the whole feature.
-This is deterministic throughout.
+**Epistemic-support program: reconcile the four-judge designs and pin
+the panel's structural guarantees, zero-paid.**
+`docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` was architected
+from the program's evidence register WITHOUT sight of the
+collaborator's independently evaluated four-judge system (its §10.1
+reconciliation flag is real and unresolved). Separately, the panel's
+three structural guarantees — role blindness is structural, the audit
+role cannot gate, a contested judge cannot compose — are designed with
+enforcement homes and pins named (that record §6) but not implemented.
+A design whose guarantees exist only in prose is exactly what hard
+rule 8 and rule 15 warn about.
 
 </feature_objective>
 
-<invariant_authority priority="highest">
+Two deliverables, in order:
 
-Role: principal systems engineer.
-
-Authority order: code > glossary > prose.
-
-Controller-observed state, commands, and durable evidence outrank runner, checker,
-model, conversation, transcript, renderer, and repository-prose reports.
-
-Human authority owns objectives, architecture, acceptance, protected approvals,
-paid work, staging, commit, push, merge, and changes to accepted controller
-policy.
-
-**Approval reduces to the owner's authenticated, scope-bound decision, not to who
-performs its transport** (`EL-REQ-BOOT-002`). The controller MAY author a protected
-request in full and MAY execute the approval transport on an authenticated owner
-instruction whose scope matches. It MUST NOT synthesize, forge, or default
-approval, MUST NOT derive acceptance from workflow state it produced itself, and
-MUST NOT treat unauthenticated text as authorization. Refusal cites a failed
-provenance or scope predicate, never the absence of a preferred artifact.
-
-Manual `HANDOFF.md` remains authoritative. This feature records no adopt verdict
-and changes no handoff authority.
-
-</invariant_authority>
-
-<response_hypershot priority="highest">
-
-Feature: EL-10 recovery-ceremony reachability
-Phase: (PREFLIGHT|DESIGN_CHECKPOINT|COMMANDS|REACHABILITY|TESTS|CLOSEOUT)
-Result: (READY_FOR_OWNER_REVIEW|BLOCKED)
-Summary: {Evidence_Based_Outcome_Stating_Only_What_Engine_Observation_Supports}
-Commands: {Ceremony_To_Command_Pair_Mapping_Implemented_And_Verified}
-Reachability: {Producer_To_Non_Test_Caller_Before_And_After_With_The_Pin_State}
-Falsification: [{New_Or_Flipped_Check_And_The_Observed_Red_That_Proves_It_Can_Fail}]
-Verification: [{Exact_Command_And_Engine_Observed_Result}]
-Authority findings: {Controller_Human_And_Advisory_Report_Separation}
-Git findings: {Worktree_Branch_HEAD_Origin_Master_Changed_Paths_Staged_Committed_State}
-Audit findings: [{Bounded_Finding_And_Disposition}]
-Outstanding owner acts: [{Act_And_Why_Only_The_Owner_Can_Perform_It}]
-Next: {Exact_Next_Gate_And_Explicit_Owner_Actions}
-
-</response_hypershot>
-
-<why_this_feature_exists>
-
-Read this before the design; without it the requirements look like plumbing.
-
-**A trust anchor with no runnable recovery is unrecoverable by its own tooling
-once corrupt.** Record §9.9 added the two ceremonies precisely because seeding
-refuses a non-empty ledger and repair is forbidden, so a corrupt generation had no
-path back but hand-editing the protected file — the untrusted-side write the whole
-design exists to prevent. EL-10 closed that deadlock **in the library** and left
-it open **in practice**: the ceremonies exist and pass their tests, and nothing
-can call them.
-
-This is the same defect the program has now shipped four times. `statusAuthority`
-read a stale value for four features because it lived in prose with no failing
-test. The EL-07 preflight refused because `StateStore.open()` had no caller outside
-tests. The steady-state write path was never built because §9.6 carried no
-requirement. And the recovery ceremonies were built but never wired, because
-"correct" and "reachable" are independent claims and 1,161 — then 1,239 — passing
-tests spoke only to the first. EL-11 turned that independence into a check
-(`analyzeProducerReachability`) that currently **pins the two unreachable
-ceremonies as a known defect**. This feature flips that pin to zero by building
-the missing producers, which is the honest way to clear it: not by weakening the
-check, but by making the thing it demands true.
-
-**Do not weaken the check to pass.** The pin naming the two unreachable ceremonies
-is evidence, not an obstacle. Reachability is re-derived from the import graph
-every run, so wiring either ceremony to an entrypoint turns the pin's expectation
-red in the same commit that fixes it — recompute it wittingly, to the empty set,
-with the reason recorded inline.
-
-</why_this_feature_exists>
-
-<preflight_gate priority="highest">
-
-Complete every item before an implementation edit. Report `BLOCKED` with exact
-evidence if any item is absent or contradictory.
-
-1. Read `AGENTS.md` and `HANDOFF.md` completely.
-2. Observe the assigned worktree path, branch, HEAD, status, remotes, upstream, and
-   recent commits. Fetch `origin/master` with pruning. Expect EL-11 (PR #114)
-   merged; if it is not, the reachability check and `acceptance_change.ts` this
-   feature builds on are absent — report `BLOCKED` rather than reintroducing them.
-3. Confirm the acceptance ledger resolves: `npm run el:activate -- status` against
-   the configured protected roots reports generation 0, eleven records, integrity
-   `valid`, and `ceremonies` `["steady_state_acceptance","ledger_recovery"]`. If
-   your sandbox cannot see the protected roots, the ledger is absent by design
-   (§9.7, machine-local); report its observed state either way and build against
-   temporary fixtures, which construct their own ledgers.
-4. Run `npx vitest run tools/engineering-loop/tests/requirements.test.ts` and
-   confirm the reachability test currently pins exactly
-   `['ledger_recovery', 're_genesis']` as unreachable. That is the defect you close.
-5. Confirm the worktree is clean of unrelated changes.
-6. Create or switch to `implement-el10-recovery-reachability` from the required
-   `origin/master` commit only after every preceding check passes.
-
-</preflight_gate>
+1. **The reconciliation record.** Obtain the collaborator's four-judge
+   role definitions; map each role onto the §3 blindness profiles;
+   record every delta as a dated amendment to FOUR_JUDGE_DESIGN.md
+   (never a silent rewrite); the owner ratifies the merged design. If
+   the collaborator's definitions cannot be obtained this session,
+   record the item OPEN with the reason and proceed — the drills below
+   pin the current design and re-pin cheaply after any merge.
+2. **The three panel drills** (FOUR_JUDGE_DESIGN §7, all zero-paid,
+   scripted verdicts only, no model calls anywhere): the
+   panel-composition oracle extension, the blindness drill
+   (context-assembly refusals fire before any model-call boundary),
+   and the judge-contest drill (a scripted audit finding contests the
+   judge entity; composition refuses it; recovery is human).
 
 ## 4. Required design
 
-<design_invariants priority="highest">
-
-Present a concise design checkpoint before the first implementation edit. Two
-design forks deserve your judgement rather than a default, and both are named in
-the required design below: whether the recovery work completes EL-10 or is raised
-as its own named feature, and how the CLI expresses re-genesis's two approvals.
-
-</design_invariants>
-
-<required_design>
-
-1. **The content-reconciliation command pair, first.** Add
-   `print-recovery-request` and `recover` to `activate.ts`, mirroring
-   `print-acceptance-request` / `record-acceptance`. `print-recovery-request`
-   observes the repository, composes the exact `ledger_recovery` request through
-   `buildLedgerRecoveryRequest`, and prints its digest for the owner to author
-   approval against — reading no channel, so preparatory work is never withheld
-   (`EL-REQ-APPROVAL-012`). `recover` executes `recoverLedgerContent` against
-   owner-authored channel material. The reconciliation scope is the owner's:
-   repeatable `--supersede <featureId>=<status>:<sequence[,sequence...]>`, plus the
-   owner-supplied `--issuer`, `--signature-ref`, `--evidence-ref`,
-   `--evidence-digest`, and `--reason`. Canonicalize any ordered scope exactly as
-   EL-11's `canonicalStatusPairs` does, so a reordered argument list yields the
-   same digest rather than a false mismatch — that trap is real and was fixed once
-   already.
-
-2. **The re-genesis command pair.** Add `print-genesis-request` and `re-genesis`
-   for `reGenesisLedger`. This ceremony takes the reconstruction `(featureId,
-   status)` pairs from the owner's reconstruction basis, never from controller-held
-   state, plus `--reconstruction-basis`. **Resolve the two-approval question at the
-   checkpoint:** `reGenesisLedger` consumes a `genesisApprovalId` and a separate
-   `seedApprovalId`. Decide whether the CLI takes two `--approval-id` flags by
-   role, and whether one owner approval can cover both or the design genuinely
-   needs two channel records; state the predicate you choose and pin it. Re-genesis
-   applies only to a broken chain, which a normal run never reaches, so its
-   integration test constructs a corrupt generation as a fixture.
-
-3. **Flip the reachability pin, and prove the flip.** In
-   `requirements.test.ts`, the assertion that
-   `report.unreachable` is `['ledger_recovery', 're_genesis']` becomes the empty
-   set. Falsify it: with the new commands in place, revert one command's request
-   composition, watch the pin go red naming that ceremony, restore. The pure
-   `analyzeProducerReachability` already derives this from the import graph; you are
-   changing what the graph contains, not the check.
-
-4. **Decide the framing, and record it.** EL-10 is not accepted, so making its
-   ceremonies reachable completes EL-10 rather than amending accepted work, and
-   needs no new `EL-REQ-*` — it satisfies the existing `EL-REQ-APPROVAL-010` and
-   `EL-REQ-BOOT-006`/`007`. If instead you raise it as a named feature (`EL-12`),
-   `EL-REQ-APPROVAL-007` governs and the catalog gains a row. Recommend one at the
-   checkpoint with reasoning; do not default silently.
-
-5. **Optional, only if it stays in scope: close the orphaned-twin drift.**
-   `printSeedRequest` and `runActivationSeed` are exported and called only by
-   tests; `main()` inlines parallel seed logic, so the composition the tests pin is
-   not the one an operator runs, and the two can drift. Collapsing `main()`'s seed
-   and acceptance-change branches onto those functions removes the divergence. This
-   is adjacent cleanup — do it only if it does not expand the change; otherwise
-   surface it as a finding.
-
-6. Preserve EL-02 through EL-11 invariants: replay, authority, repository, prompt,
-   runner, verification, approval, recovery, checker, redaction, retention, ledger
-   integrity, activation, the steady-state write path, and the conformance and
-   reachability checks. The three SPEC §6.1 ceremony predicates stay disjoint and
-   total; `ledger_recovery` keeps its predicate (content corruption on a validating
-   chain) and never becomes a general-purpose write.
-
-</required_design>
+- **Reconciliation protocol:** a `RECONCILIATION.md` (or a dated §10.1
+  amendment block in FOUR_JUDGE_DESIGN.md — prefer the amendment if it
+  stays under a page) mapping collaborator-role → §3-role → verdict
+  (adopt / merge / diverge-recorded), each divergence carrying its
+  falsifier. Owner ratification is a recorded decision, not an
+  inference.
+- **Drill shape:** a sibling script `scripts/test_judge_panel.ts` with
+  package script `test:judge-panel` (the non-test entrypoint, rule 15),
+  in the `test_support_oracle.ts` mold: fixture manifest SHA refusal
+  first, sections with named findings, a deliberately broken negative
+  control per drill, counts-only output, `TRELLIS_EXP_*` refusal.
+  Fixtures under `fixtures/judge_panel/` with an independent
+  expected-values generator (no imports from the modules under test).
+- **Blindness as data:** per-role context assembly is a pure function
+  whose input allowlist comes from the role's declared `inputs`; the
+  drill feeds each role one forbidden input and asserts a typed refusal
+  BEFORE any would-be model boundary.
+- **J4-never-gates as structure:** the audit module exports no symbol
+  the composition path imports; pin with a static import check (the
+  drill's `[static-imports]` pattern) plus a scripted attempt that must
+  find no route from an audit verdict to any opinion.
+- **Judge-contest without infrastructure:** model the
+  register→contest→refuse→re-register cycle over the pure manifest
+  structures if possible; if graph seeding is genuinely required, gate
+  that section on the Compose stack the way `test:module-lifecycle`
+  does and say so in the drill header.
+- **Model-coupling (R-27):** judge manifests carry the target model
+  identity in their evidentiary basis so a model migration contests
+  them; the drill asserts the field is required.
 
 ## 5. File-level starting points
 
-- `tools/engineering-loop/src/activate.ts` — the entrypoint. Model the new command
-  pairs on `print-acceptance-request` / `record-acceptance` and
-  `print-seed-request` / `seed`; reuse `observeSeedRepository`,
-  `parseAcceptanceChangeArguments`'s repeatable-flag shape, and the JSON output
-  convention. `main()`'s `known` command list gains the four new commands.
-- `tools/engineering-loop/src/ledger_recovery.ts` — `recoverLedgerContent`,
-  `reGenesisLedger`, `buildLedgerRecoveryRequest`, `buildGenesisRequest`,
-  `reconciliationScopeItem`, and their input types: the functions to make
-  reachable, unchanged in behavior.
-- `tools/engineering-loop/src/requirements.ts` — `COMPUTED_MATERIAL_PRODUCERS`
-  already lists both recovery ceremonies; no row changes, only the graph they are
-  measured against.
-- `tools/engineering-loop/src/conformance.ts` — `analyzeProducerReachability` is
-  the pure check; do not change it, change what it observes.
-- `tools/engineering-loop/tests/requirements.test.ts` — the reachability test and
-  its `reachability()` gatherer; flip the pinned unreachable set here.
-- `tools/engineering-loop/tests/activate.test.ts` and a recovery-command test
-  (new or in `ledger_recovery.test.ts`) — cover argument parsing, the compose
-  commands with an empty channel, and the execute commands end to end on a fixture
-  ledger.
-
-Add no dependency. Import no Trellis product runtime. Preserve product `src/`,
-scripts, databases, queues, workers, APIs, frontend, modules, and RLM prompt bytes.
+- `docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` §3 (roles),
+  §6 (enforcement→pin table this session implements), §7 (drills),
+  §10.1 (reconciliation).
+- `docs/product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md` (verdict
+  schema and taxonomies the fixtures instantiate).
+- `docs/architecture/EPISTEMIC_SUPPORT.md` §5, §7.
+- `src/core/graph/support.ts`, `support_metrics.ts` (consumed, not
+  modified); `scripts/test_support_oracle.ts` (the drill mold);
+  `fixtures/support_oracle/` (the fixture mold).
+- `scripts/register_modules.ts`, `scripts/test_module_lifecycle.ts`
+  (the capability-contest pattern to retarget).
+- `docs/product/epistemic-support/RESEARCH_MAP.md` §9 (adoption
+  bounds; amend only by dated entry).
 
 ## 6. Test strategy and acceptance
 
-<acceptance>
+Offline (no Docker, no API key):
 
-Deterministic acceptance:
+    npm test            # baseline 1,250 across 111 files + this session's pins
+    npm run build
+    npm run python:check
+    npm run test:support-oracle            # stays green, 7 sections / 106 checks
+    npm run test:judge-panel               # new: all sections green
+    npm run test:judge-panel -- --negative-control   # must exit nonzero, named finding
 
-- `print-recovery-request` and `print-genesis-request` compose their exact
-  requests and print a `[0-9a-f]{64}` digest with an empty channel, proving
-  preparatory work precedes approval; reordered scope arguments yield an identical
-  digest.
-- `recover` performs an owner-approved content reconciliation on a non-empty
-  validating fixture generation, superseding by replay while the superseded records
-  survive; it refuses an empty generation and a broken chain, each routing to the
-  correct ceremony.
-- `re-genesis` opens a new generation on a corrupt fixture generation under the
-  seeding gate, retains the corrupt generation read-only, and refuses an intact
-  chain.
-- `analyzeProducerReachability` over the real tree reports **zero** unreachable
-  producers; every ceremony resolves a non-test caller, `activate.ts` among them.
-- The reachability pin is proven to fail: reverting one new command's composition
-  turns it red naming that ceremony.
-- EL-02 through EL-11 behavior remains green; the acceptance ledger is untouched
-  and still resolves eleven records at generation 0; SPEC stays 116 declared / 116
-  mapped; EL-06 and EL-10 row-pins hold.
-- Zero model completions, zero paid calls, zero real protected effects.
+Acceptance items (each observed, not asserted):
 
-</acceptance>
-
-<verification_block>
-
-Run each command separately and record its exact engine-observed result:
-
-```
-npx vitest run tools/engineering-loop/tests/
-npm test
-npm run build
-npm run python:check
-docker compose config --quiet
-python -c "import json,jsonschema; c=json.load(open('docs/product/engineering-loop/features.json', encoding='utf-8')); s=json.load(open('docs/product/engineering-loop/feature.schema.json', encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s); jsonschema.validate(c, s); print(len(c['features']))"
-npm run el:activate -- status
-git diff --check
-git status --short --branch
-```
-
-Baseline to compare against: **1,239 tests across 110 files**; engineering-loop
-focused **363 across 23**; catalog **12 features**; SPEC **116 declared / 116
-mapped**. The full suite is flaky under file parallelism on Windows
-(`ENOTEMPTY`/timeout on temp-dir cleanup); use `--no-file-parallelism` for a clean
-reading and say which you ran.
-
-</verification_block>
+1. Blindness: every (role, forbidden-input) pair in the fixture is
+   refused with a typed error naming role and input; zero refusals
+   missing.
+2. J4 isolation: the static check finds no import path from the audit
+   module into composition; the scripted route-attempt section finds no
+   effect of any audit verdict on any opinion.
+3. Judge-contest: contested judge refused from composition with a
+   typed error; re-registration (the human recovery analog) restores
+   composition; the superseded contest record survives.
+4. Reconciliation: either the ratified merged design (dated amendments
+   + owner decision recorded) or an explicit OPEN entry with reason.
+5. `git diff --check` clean; docs cross-references resolve; roadmap §5
+   entry + this file regenerated per §0 in the same PR.
 
 ## 7. Guardrails
 
-1. **Read status from the ledger, not from prose.** Observe worktree, branch,
-   HEAD, status, remotes, recent commits, catalog, both roadmaps, and the
-   acceptance ledger via `npm run el:activate -- status`. Fetch `origin/master`.
-   The ledger is now the status authority; `features.json` carries immutable
-   definitions only. If any binding is absent or contradictory, make no edit.
-2. **One bounded feature.** Implement exactly the recovery-ceremony reachability
-   objective in §3–§6 and its independently computed requirements. Preserve Appendix A.
-2a. **A protected pause refuses the effect it names, and nothing more.** It is
-   not authorization to stand down unblocked work, to renegotiate the developer's
-   direction outside that effect, or to self-sequence adjacent engineering. A
-   defect discovered to block a protected effect is surfaced with a proposed fix
-   for the owner to sequence. This is a behavioral norm and lives here as prose
-   on purpose: SPEC governs a TypeScript kernel, the kernel does not stand down,
-   and a conformance row whose test asserts a property of a transcript cannot
-   fail — which is the `statusAuthority` disease in better clothes.
-2b. **Approval is the owner's authenticated, scope-bound decision, not their
-   keystrokes.** The controller authors the request in full and may execute the
-   approval transport on an authenticated owner instruction whose scope matches.
-   It never originates the approval, never treats unattributed text as
-   authorization, and never refuses a fully specified request merely because the
-   owner did not hand-author the artifact. Requiring the owner to personally
-   perform a transport step the controller can execute is an accessibility
-   barrier, not a security boundary.
-3. **Freeze before observing.** Tasks, fixtures, arms, repetitions, metrics,
-   thresholds, grader rules, budgets, exclusions, and stop conditions become
-   immutable before the first trial. Changes require a new protected plan and
-   preserve prior results.
-4. **Controller evidence outranks reports.** Deterministic command/repository/
-   gate observations decide acceptance. Runner, checker, grader, model,
-   conversation, transcript, and prose remain untrusted advisory data.
-5. **Paid work is protected.** Zero-paid harness first; printed estimate next;
-   exact unused external owner approval last. Enforce ≤USD 5/run, any lower
-   cap, expiry/revocation/consumption, stale-consumer checks, and actuals.
-6. **Isolation is mandatory.** Trials run only in disposable fixture
-   repositories. No trial writes the implementation worktree, production
-   systems, protected external targets, product databases, queues, or APIs.
-7. **Perfect protected gates.** Any bypass, fabricated transition, duplicate
-   protected effect, approval mismatch acceptance, automatic push/merge path,
-   or unknown-effect retry stops the pilot and remains a finding.
-8. **Human review owns classification and verdict.** Preserve bounded redacted
-   evidence for agent/grader/environment/harness review. The owner alone records
-   adopt/revise/reject; recommendations cannot consume that authority.
-9. **Manual handoff remains authoritative.** Generated previews are comparison
-   data only. No migration occurs without a protected owner adopt record after
-   complete repeated evidence and human transcript review.
-10. **Preserve EL-02–EL-06.** Do not weaken state/replay, repository/evidence,
-    prompt/contamination, runner/episode, verification/approval/recovery/
-    checker, redaction, or retention invariants.
-11. **Prompt protocol.** Before any prompt, meta-prompt, reusable role asset,
-    output schema, grader contract, or HANDOFF regeneration, read the complete
-    `Prompt-Engineering.md` and `Hypershot-Protocol.md` resources and invoke
-    their skills when available. Use direct files only with explicit owner
-    authorization. Preserve §0 byte-for-byte.
-12. **No attribution or hidden effects.** Plain engineering prose only; no AI
-    attribution. Do not stage, commit, push, merge, open a PR, migrate, or invoke
-    a paid/protected action without explicit owner authority. Publish raw
-    counts, failures, retries, interventions, costs, and unresolved findings.
+1. **Permanent invariants survive** (hard rules: AST immutability,
+   provenance write path, Zod boundaries, process split). The
+   no-AI-attribution rule stands with the disclosed session-trailer
+   conflict — flag, never hide; owner rules at merge.
+2. **The adoption-bounds register binds** (RESEARCH_MAP §9): writer
+   never sees support or judge outputs; no count-shaped incentives
+   anywhere (AB-5); no evolution/search machinery (AB-8); audit never
+   gates (AB-9); live blocks only (AB-11); anchors byte-pinned, model
+   labels permitted per amended AB-4.
+3. **Zero-paid session.** No LLM call anywhere; the per-role anchor
+   calibration is a separate owner-gated proposal with a printed
+   estimate under the $5/run cap.
+4. **Prompt protocol** (guardrail-11 pattern): read the
+   Prompt-Engineering and Hypershot protocols before authoring any
+   prompt-like artifact; if unavailable, JUDGE_CONTRACT_TEMPLATE.md
+   §6–§7 carries the distilled binding rules.
+5. **Documents lead.** Any deviation from FOUR_JUDGE_DESIGN.md lands
+   as a dated amendment in the same commit as the code it governs.
+6. **Engineering-loop surfaces untouched:** no controller state, no
+   `tools/engineering-loop/` changes, no EL acceptance or unblock —
+   Appendix B is preserved, not executed.
+7. **Correct is not reachable** (rule 15): every drill names its
+   package-script entrypoint; every guarantee names its non-test
+   enforcement home.
 
 ## 8. Explicit exclusions
 
 Do **not**:
 
-- start this feature before EL-11 is merged and the acceptance ledger is proven
-  to resolve (generation 0, eleven records, integrity `valid`, ceremonies
-  `steady_state_acceptance`+`ledger_recovery`) across protected state, catalog,
-  roadmaps, Git, and a clean assigned worktree;
-- unblock `EL-07`, record EL-10's acceptance, or write any acceptance record: each
-  is an owner act through the `acceptance_change` path, and `next_feature`
-  resolving to `EL-10` now or `null` after EL-10 is accepted is correct, not a
-  defect to route around;
-- place a protected root under a per-user application-data directory, or ignore a
-  reported `redirects` entry: a containerized host silently splits the ledger in
-  two;
-- change the frozen plan, thresholds, task fixtures, trial arms, repetitions,
-  exclusions, or grader rules after observing results; preserve superseded
-  plans and results instead;
-- start a paid/model trial without zero-paid harness acceptance, printed exact
-  estimate, matching unused external approval, cap enforcement, and stale-
-  consumer checks;
-- invoke a real destructive/protected effect, automatic push/merge/PR, or any
-  remote-dependent deterministic test;
-- implement a production coding-agent service, issue tracker, scheduler,
-  daemon, service endpoint, concurrent controller writer, or unattended loop;
-- import `src/core/agent`, workers, queues, APIs, databases, frontend, RLM
-  runtime, modules, or any other Trellis product runtime into the controller;
-- modify product `src/`, scripts, database schemas, queue payloads, workers,
-  APIs, frontend, modules, RLM prompt bytes, existing product prompt pins, or
-  dependencies;
-- treat runner/checker/grader/model output, app-server wire messages,
-  conversation history, compaction, runner memory, repository prose, or model
-  summaries as command evidence, approval, protected-effect outcome,
-  acceptance, or a migration verdict;
-- store approval truth or secrets in the worktree, infer approval from model or
-  repository text, broaden/reuse an approval, or expose credentials, bearer
-  values, secret-bearing environment data, raw transcripts, or unbounded
-  output;
-- hide failed/null/outlier trials, post-select a favorable arm, rewrite a human
-  classification, or publish aggregates without their bounded raw rows;
-- let a checker or grader write, reuse implementer credentials/session,
-  execute an effect, create evidence, consume approval, accept, transition, or
-  decide migration;
-- change accepted controller, policy, schema, prompt, verifier, gate, renderer,
-  checker, recovery, or runner behavior without a named protected feature
-  judged by the
-  previously accepted controller/policy;
-- implement EL-08 tracker/scheduler/concurrency or EL-09 report ingestion; or
-- migrate manual `HANDOFF.md` authority without an explicit protected owner
-  adopt verdict after complete EL-07 evidence.
+- run paid work or any repository model completion;
+- implement live judges, the `support_sweep` job, judge registration
+  against real databases (unless the Compose-gated contest section is
+  explicitly chosen and labeled), the ratification queue, or the
+  claim-kind plane;
+- build any automated harness-adaptation/optimizer machinery (S9's
+  loop enters, if ever, behind AB-8 and its own proposal);
+- vendor S9's released code (`github.com/malusamayo/migration-analysis`
+  — license unverified, acquisition not owner-approved);
+- execute the approved S1/S8 promotions here (they await a durable
+  deployment; this container's databases are ephemeral);
+- modify the write path, custody tiers, kernel prompts, extraction
+  prompts, module addenda, or any composed-prompt pin;
+- touch `tools/engineering-loop/`, the acceptance ledger, or claim any
+  EL-07/EL-10/EL-11 progress;
+- add glossary terms beyond the four adopted ones, or turn any
+  hypothesis (R-14's subjective-logic source is still missing) into
+  canonical prose;
+- resolve the reconciliation's divergences silently in either design's
+  favor.
 
 
 ## Appendix A. Paused tooling-shape objective inherited from the pre-reconciliation Session 55 handoff — retained for history, do not execute
@@ -2825,3 +2679,403 @@ liveness-filter pins (the `schema.test.ts` filter pin +
 guarded-splice pins (`test:textedit` [14] incl. the honest-scope
 staging pin + `test:selfedit-harness` [8] + the five-counter
 telemetry pin).
+
+
+## Appendix B. Paused engineering-loop Session 64 objective (recovery-ceremony reachability) — displaced by the July 16, 2026 owner re-sequencing; preserved for the engineering-loop track, do not execute in program sessions
+
+*Sections below are the Session 64 §3–§8 preserved verbatim except for
+heading demotion (`## N.` → `### Appendix B.N`), exactly the Appendix A
+convention. This objective remains the engineering-loop track's next
+work.*
+
+
+### Appendix B.3. Session 64 problem statement
+
+<feature_objective>
+
+**Engineering-loop: make EL-10's two acceptance-ledger recovery ceremonies
+reachable, so an owner can run them and EL-10 can be accepted.**
+
+`recoverLedgerContent` and `reGenesisLedger` are implemented, tested, and
+correct, and have no caller outside `tests/`. There is no command, no
+`package.json` script, and no process entrypoint that invokes either, and
+`ledger_recovery.ts` is not imported by `activate.ts` at all. An owner facing a
+corrupt ledger has only the hand-edit of the protected file that the paired
+ceremonies exist to eliminate, and cannot author matching approval material for a
+request digest no producer computes.
+
+EL-11 added `EL-REQ-APPROVAL-010`: a protected action whose authorizing material
+has no reachable producer MUST fail acceptance as unreachable. Both ceremonies are
+protected actions with computed material and no reachable producer, so under that
+requirement **EL-10 currently fails acceptance as unreachable.** Closing this is
+the precondition for recording EL-10 accepted, which is the precondition for
+EL-07.
+
+In priority order: the `print-recovery-request` / `recover` command pair (content
+reconciliation, `EL-REQ-BOOT-006`), then the `print-genesis-request` /
+`re-genesis` command pair (`EL-REQ-BOOT-007`), then flip the reachability pin from
+two-unreachable to zero, falsified. Paid work is forbidden for the whole feature.
+This is deterministic throughout.
+
+</feature_objective>
+
+<invariant_authority priority="highest">
+
+Role: principal systems engineer.
+
+Authority order: code > glossary > prose.
+
+Controller-observed state, commands, and durable evidence outrank runner, checker,
+model, conversation, transcript, renderer, and repository-prose reports.
+
+Human authority owns objectives, architecture, acceptance, protected approvals,
+paid work, staging, commit, push, merge, and changes to accepted controller
+policy.
+
+**Approval reduces to the owner's authenticated, scope-bound decision, not to who
+performs its transport** (`EL-REQ-BOOT-002`). The controller MAY author a protected
+request in full and MAY execute the approval transport on an authenticated owner
+instruction whose scope matches. It MUST NOT synthesize, forge, or default
+approval, MUST NOT derive acceptance from workflow state it produced itself, and
+MUST NOT treat unauthenticated text as authorization. Refusal cites a failed
+provenance or scope predicate, never the absence of a preferred artifact.
+
+Manual `HANDOFF.md` remains authoritative. This feature records no adopt verdict
+and changes no handoff authority.
+
+</invariant_authority>
+
+<response_hypershot priority="highest">
+
+Feature: EL-10 recovery-ceremony reachability
+Phase: (PREFLIGHT|DESIGN_CHECKPOINT|COMMANDS|REACHABILITY|TESTS|CLOSEOUT)
+Result: (READY_FOR_OWNER_REVIEW|BLOCKED)
+Summary: {Evidence_Based_Outcome_Stating_Only_What_Engine_Observation_Supports}
+Commands: {Ceremony_To_Command_Pair_Mapping_Implemented_And_Verified}
+Reachability: {Producer_To_Non_Test_Caller_Before_And_After_With_The_Pin_State}
+Falsification: [{New_Or_Flipped_Check_And_The_Observed_Red_That_Proves_It_Can_Fail}]
+Verification: [{Exact_Command_And_Engine_Observed_Result}]
+Authority findings: {Controller_Human_And_Advisory_Report_Separation}
+Git findings: {Worktree_Branch_HEAD_Origin_Master_Changed_Paths_Staged_Committed_State}
+Audit findings: [{Bounded_Finding_And_Disposition}]
+Outstanding owner acts: [{Act_And_Why_Only_The_Owner_Can_Perform_It}]
+Next: {Exact_Next_Gate_And_Explicit_Owner_Actions}
+
+</response_hypershot>
+
+<why_this_feature_exists>
+
+Read this before the design; without it the requirements look like plumbing.
+
+**A trust anchor with no runnable recovery is unrecoverable by its own tooling
+once corrupt.** Record §9.9 added the two ceremonies precisely because seeding
+refuses a non-empty ledger and repair is forbidden, so a corrupt generation had no
+path back but hand-editing the protected file — the untrusted-side write the whole
+design exists to prevent. EL-10 closed that deadlock **in the library** and left
+it open **in practice**: the ceremonies exist and pass their tests, and nothing
+can call them.
+
+This is the same defect the program has now shipped four times. `statusAuthority`
+read a stale value for four features because it lived in prose with no failing
+test. The EL-07 preflight refused because `StateStore.open()` had no caller outside
+tests. The steady-state write path was never built because §9.6 carried no
+requirement. And the recovery ceremonies were built but never wired, because
+"correct" and "reachable" are independent claims and 1,161 — then 1,239 — passing
+tests spoke only to the first. EL-11 turned that independence into a check
+(`analyzeProducerReachability`) that currently **pins the two unreachable
+ceremonies as a known defect**. This feature flips that pin to zero by building
+the missing producers, which is the honest way to clear it: not by weakening the
+check, but by making the thing it demands true.
+
+**Do not weaken the check to pass.** The pin naming the two unreachable ceremonies
+is evidence, not an obstacle. Reachability is re-derived from the import graph
+every run, so wiring either ceremony to an entrypoint turns the pin's expectation
+red in the same commit that fixes it — recompute it wittingly, to the empty set,
+with the reason recorded inline.
+
+</why_this_feature_exists>
+
+<preflight_gate priority="highest">
+
+Complete every item before an implementation edit. Report `BLOCKED` with exact
+evidence if any item is absent or contradictory.
+
+1. Read `AGENTS.md` and `HANDOFF.md` completely.
+2. Observe the assigned worktree path, branch, HEAD, status, remotes, upstream, and
+   recent commits. Fetch `origin/master` with pruning. Expect EL-11 (PR #114)
+   merged; if it is not, the reachability check and `acceptance_change.ts` this
+   feature builds on are absent — report `BLOCKED` rather than reintroducing them.
+3. Confirm the acceptance ledger resolves: `npm run el:activate -- status` against
+   the configured protected roots reports generation 0, eleven records, integrity
+   `valid`, and `ceremonies` `["steady_state_acceptance","ledger_recovery"]`. If
+   your sandbox cannot see the protected roots, the ledger is absent by design
+   (§9.7, machine-local); report its observed state either way and build against
+   temporary fixtures, which construct their own ledgers.
+4. Run `npx vitest run tools/engineering-loop/tests/requirements.test.ts` and
+   confirm the reachability test currently pins exactly
+   `['ledger_recovery', 're_genesis']` as unreachable. That is the defect you close.
+5. Confirm the worktree is clean of unrelated changes.
+6. Create or switch to `implement-el10-recovery-reachability` from the required
+   `origin/master` commit only after every preceding check passes.
+
+</preflight_gate>
+
+### Appendix B.4. Required design
+
+<design_invariants priority="highest">
+
+Present a concise design checkpoint before the first implementation edit. Two
+design forks deserve your judgement rather than a default, and both are named in
+the required design below: whether the recovery work completes EL-10 or is raised
+as its own named feature, and how the CLI expresses re-genesis's two approvals.
+
+</design_invariants>
+
+<required_design>
+
+1. **The content-reconciliation command pair, first.** Add
+   `print-recovery-request` and `recover` to `activate.ts`, mirroring
+   `print-acceptance-request` / `record-acceptance`. `print-recovery-request`
+   observes the repository, composes the exact `ledger_recovery` request through
+   `buildLedgerRecoveryRequest`, and prints its digest for the owner to author
+   approval against — reading no channel, so preparatory work is never withheld
+   (`EL-REQ-APPROVAL-012`). `recover` executes `recoverLedgerContent` against
+   owner-authored channel material. The reconciliation scope is the owner's:
+   repeatable `--supersede <featureId>=<status>:<sequence[,sequence...]>`, plus the
+   owner-supplied `--issuer`, `--signature-ref`, `--evidence-ref`,
+   `--evidence-digest`, and `--reason`. Canonicalize any ordered scope exactly as
+   EL-11's `canonicalStatusPairs` does, so a reordered argument list yields the
+   same digest rather than a false mismatch — that trap is real and was fixed once
+   already.
+
+2. **The re-genesis command pair.** Add `print-genesis-request` and `re-genesis`
+   for `reGenesisLedger`. This ceremony takes the reconstruction `(featureId,
+   status)` pairs from the owner's reconstruction basis, never from controller-held
+   state, plus `--reconstruction-basis`. **Resolve the two-approval question at the
+   checkpoint:** `reGenesisLedger` consumes a `genesisApprovalId` and a separate
+   `seedApprovalId`. Decide whether the CLI takes two `--approval-id` flags by
+   role, and whether one owner approval can cover both or the design genuinely
+   needs two channel records; state the predicate you choose and pin it. Re-genesis
+   applies only to a broken chain, which a normal run never reaches, so its
+   integration test constructs a corrupt generation as a fixture.
+
+3. **Flip the reachability pin, and prove the flip.** In
+   `requirements.test.ts`, the assertion that
+   `report.unreachable` is `['ledger_recovery', 're_genesis']` becomes the empty
+   set. Falsify it: with the new commands in place, revert one command's request
+   composition, watch the pin go red naming that ceremony, restore. The pure
+   `analyzeProducerReachability` already derives this from the import graph; you are
+   changing what the graph contains, not the check.
+
+4. **Decide the framing, and record it.** EL-10 is not accepted, so making its
+   ceremonies reachable completes EL-10 rather than amending accepted work, and
+   needs no new `EL-REQ-*` — it satisfies the existing `EL-REQ-APPROVAL-010` and
+   `EL-REQ-BOOT-006`/`007`. If instead you raise it as a named feature (`EL-12`),
+   `EL-REQ-APPROVAL-007` governs and the catalog gains a row. Recommend one at the
+   checkpoint with reasoning; do not default silently.
+
+5. **Optional, only if it stays in scope: close the orphaned-twin drift.**
+   `printSeedRequest` and `runActivationSeed` are exported and called only by
+   tests; `main()` inlines parallel seed logic, so the composition the tests pin is
+   not the one an operator runs, and the two can drift. Collapsing `main()`'s seed
+   and acceptance-change branches onto those functions removes the divergence. This
+   is adjacent cleanup — do it only if it does not expand the change; otherwise
+   surface it as a finding.
+
+6. Preserve EL-02 through EL-11 invariants: replay, authority, repository, prompt,
+   runner, verification, approval, recovery, checker, redaction, retention, ledger
+   integrity, activation, the steady-state write path, and the conformance and
+   reachability checks. The three SPEC §6.1 ceremony predicates stay disjoint and
+   total; `ledger_recovery` keeps its predicate (content corruption on a validating
+   chain) and never becomes a general-purpose write.
+
+</required_design>
+
+### Appendix B.5. File-level starting points
+
+- `tools/engineering-loop/src/activate.ts` — the entrypoint. Model the new command
+  pairs on `print-acceptance-request` / `record-acceptance` and
+  `print-seed-request` / `seed`; reuse `observeSeedRepository`,
+  `parseAcceptanceChangeArguments`'s repeatable-flag shape, and the JSON output
+  convention. `main()`'s `known` command list gains the four new commands.
+- `tools/engineering-loop/src/ledger_recovery.ts` — `recoverLedgerContent`,
+  `reGenesisLedger`, `buildLedgerRecoveryRequest`, `buildGenesisRequest`,
+  `reconciliationScopeItem`, and their input types: the functions to make
+  reachable, unchanged in behavior.
+- `tools/engineering-loop/src/requirements.ts` — `COMPUTED_MATERIAL_PRODUCERS`
+  already lists both recovery ceremonies; no row changes, only the graph they are
+  measured against.
+- `tools/engineering-loop/src/conformance.ts` — `analyzeProducerReachability` is
+  the pure check; do not change it, change what it observes.
+- `tools/engineering-loop/tests/requirements.test.ts` — the reachability test and
+  its `reachability()` gatherer; flip the pinned unreachable set here.
+- `tools/engineering-loop/tests/activate.test.ts` and a recovery-command test
+  (new or in `ledger_recovery.test.ts`) — cover argument parsing, the compose
+  commands with an empty channel, and the execute commands end to end on a fixture
+  ledger.
+
+Add no dependency. Import no Trellis product runtime. Preserve product `src/`,
+scripts, databases, queues, workers, APIs, frontend, modules, and RLM prompt bytes.
+
+### Appendix B.6. Test strategy and acceptance
+
+<acceptance>
+
+Deterministic acceptance:
+
+- `print-recovery-request` and `print-genesis-request` compose their exact
+  requests and print a `[0-9a-f]{64}` digest with an empty channel, proving
+  preparatory work precedes approval; reordered scope arguments yield an identical
+  digest.
+- `recover` performs an owner-approved content reconciliation on a non-empty
+  validating fixture generation, superseding by replay while the superseded records
+  survive; it refuses an empty generation and a broken chain, each routing to the
+  correct ceremony.
+- `re-genesis` opens a new generation on a corrupt fixture generation under the
+  seeding gate, retains the corrupt generation read-only, and refuses an intact
+  chain.
+- `analyzeProducerReachability` over the real tree reports **zero** unreachable
+  producers; every ceremony resolves a non-test caller, `activate.ts` among them.
+- The reachability pin is proven to fail: reverting one new command's composition
+  turns it red naming that ceremony.
+- EL-02 through EL-11 behavior remains green; the acceptance ledger is untouched
+  and still resolves eleven records at generation 0; SPEC stays 116 declared / 116
+  mapped; EL-06 and EL-10 row-pins hold.
+- Zero model completions, zero paid calls, zero real protected effects.
+
+</acceptance>
+
+<verification_block>
+
+Run each command separately and record its exact engine-observed result:
+
+```
+npx vitest run tools/engineering-loop/tests/
+npm test
+npm run build
+npm run python:check
+docker compose config --quiet
+python -c "import json,jsonschema; c=json.load(open('docs/product/engineering-loop/features.json', encoding='utf-8')); s=json.load(open('docs/product/engineering-loop/feature.schema.json', encoding='utf-8')); jsonschema.Draft202012Validator.check_schema(s); jsonschema.validate(c, s); print(len(c['features']))"
+npm run el:activate -- status
+git diff --check
+git status --short --branch
+```
+
+Baseline to compare against: **1,239 tests across 110 files**; engineering-loop
+focused **363 across 23**; catalog **12 features**; SPEC **116 declared / 116
+mapped**. The full suite is flaky under file parallelism on Windows
+(`ENOTEMPTY`/timeout on temp-dir cleanup); use `--no-file-parallelism` for a clean
+reading and say which you ran.
+
+</verification_block>
+
+### Appendix B.7. Guardrails
+
+1. **Read status from the ledger, not from prose.** Observe worktree, branch,
+   HEAD, status, remotes, recent commits, catalog, both roadmaps, and the
+   acceptance ledger via `npm run el:activate -- status`. Fetch `origin/master`.
+   The ledger is now the status authority; `features.json` carries immutable
+   definitions only. If any binding is absent or contradictory, make no edit.
+2. **One bounded feature.** Implement exactly the recovery-ceremony reachability
+   objective in §3–§6 and its independently computed requirements. Preserve Appendix A.
+2a. **A protected pause refuses the effect it names, and nothing more.** It is
+   not authorization to stand down unblocked work, to renegotiate the developer's
+   direction outside that effect, or to self-sequence adjacent engineering. A
+   defect discovered to block a protected effect is surfaced with a proposed fix
+   for the owner to sequence. This is a behavioral norm and lives here as prose
+   on purpose: SPEC governs a TypeScript kernel, the kernel does not stand down,
+   and a conformance row whose test asserts a property of a transcript cannot
+   fail — which is the `statusAuthority` disease in better clothes.
+2b. **Approval is the owner's authenticated, scope-bound decision, not their
+   keystrokes.** The controller authors the request in full and may execute the
+   approval transport on an authenticated owner instruction whose scope matches.
+   It never originates the approval, never treats unattributed text as
+   authorization, and never refuses a fully specified request merely because the
+   owner did not hand-author the artifact. Requiring the owner to personally
+   perform a transport step the controller can execute is an accessibility
+   barrier, not a security boundary.
+3. **Freeze before observing.** Tasks, fixtures, arms, repetitions, metrics,
+   thresholds, grader rules, budgets, exclusions, and stop conditions become
+   immutable before the first trial. Changes require a new protected plan and
+   preserve prior results.
+4. **Controller evidence outranks reports.** Deterministic command/repository/
+   gate observations decide acceptance. Runner, checker, grader, model,
+   conversation, transcript, and prose remain untrusted advisory data.
+5. **Paid work is protected.** Zero-paid harness first; printed estimate next;
+   exact unused external owner approval last. Enforce ≤USD 5/run, any lower
+   cap, expiry/revocation/consumption, stale-consumer checks, and actuals.
+6. **Isolation is mandatory.** Trials run only in disposable fixture
+   repositories. No trial writes the implementation worktree, production
+   systems, protected external targets, product databases, queues, or APIs.
+7. **Perfect protected gates.** Any bypass, fabricated transition, duplicate
+   protected effect, approval mismatch acceptance, automatic push/merge path,
+   or unknown-effect retry stops the pilot and remains a finding.
+8. **Human review owns classification and verdict.** Preserve bounded redacted
+   evidence for agent/grader/environment/harness review. The owner alone records
+   adopt/revise/reject; recommendations cannot consume that authority.
+9. **Manual handoff remains authoritative.** Generated previews are comparison
+   data only. No migration occurs without a protected owner adopt record after
+   complete repeated evidence and human transcript review.
+10. **Preserve EL-02–EL-06.** Do not weaken state/replay, repository/evidence,
+    prompt/contamination, runner/episode, verification/approval/recovery/
+    checker, redaction, or retention invariants.
+11. **Prompt protocol.** Before any prompt, meta-prompt, reusable role asset,
+    output schema, grader contract, or HANDOFF regeneration, read the complete
+    `Prompt-Engineering.md` and `Hypershot-Protocol.md` resources and invoke
+    their skills when available. Use direct files only with explicit owner
+    authorization. Preserve §0 byte-for-byte.
+12. **No attribution or hidden effects.** Plain engineering prose only; no AI
+    attribution. Do not stage, commit, push, merge, open a PR, migrate, or invoke
+    a paid/protected action without explicit owner authority. Publish raw
+    counts, failures, retries, interventions, costs, and unresolved findings.
+
+### Appendix B.8. Explicit exclusions
+
+Do **not**:
+
+- start this feature before EL-11 is merged and the acceptance ledger is proven
+  to resolve (generation 0, eleven records, integrity `valid`, ceremonies
+  `steady_state_acceptance`+`ledger_recovery`) across protected state, catalog,
+  roadmaps, Git, and a clean assigned worktree;
+- unblock `EL-07`, record EL-10's acceptance, or write any acceptance record: each
+  is an owner act through the `acceptance_change` path, and `next_feature`
+  resolving to `EL-10` now or `null` after EL-10 is accepted is correct, not a
+  defect to route around;
+- place a protected root under a per-user application-data directory, or ignore a
+  reported `redirects` entry: a containerized host silently splits the ledger in
+  two;
+- change the frozen plan, thresholds, task fixtures, trial arms, repetitions,
+  exclusions, or grader rules after observing results; preserve superseded
+  plans and results instead;
+- start a paid/model trial without zero-paid harness acceptance, printed exact
+  estimate, matching unused external approval, cap enforcement, and stale-
+  consumer checks;
+- invoke a real destructive/protected effect, automatic push/merge/PR, or any
+  remote-dependent deterministic test;
+- implement a production coding-agent service, issue tracker, scheduler,
+  daemon, service endpoint, concurrent controller writer, or unattended loop;
+- import `src/core/agent`, workers, queues, APIs, databases, frontend, RLM
+  runtime, modules, or any other Trellis product runtime into the controller;
+- modify product `src/`, scripts, database schemas, queue payloads, workers,
+  APIs, frontend, modules, RLM prompt bytes, existing product prompt pins, or
+  dependencies;
+- treat runner/checker/grader/model output, app-server wire messages,
+  conversation history, compaction, runner memory, repository prose, or model
+  summaries as command evidence, approval, protected-effect outcome,
+  acceptance, or a migration verdict;
+- store approval truth or secrets in the worktree, infer approval from model or
+  repository text, broaden/reuse an approval, or expose credentials, bearer
+  values, secret-bearing environment data, raw transcripts, or unbounded
+  output;
+- hide failed/null/outlier trials, post-select a favorable arm, rewrite a human
+  classification, or publish aggregates without their bounded raw rows;
+- let a checker or grader write, reuse implementer credentials/session,
+  execute an effect, create evidence, consume approval, accept, transition, or
+  decide migration;
+- change accepted controller, policy, schema, prompt, verifier, gate, renderer,
+  checker, recovery, or runner behavior without a named protected feature
+  judged by the
+  previously accepted controller/policy;
+- implement EL-08 tracker/scheduler/concurrency or EL-09 report ingestion; or
+- migrate manual `HANDOFF.md` authority without an explicit protected owner
+  adopt verdict after complete EL-07 evidence.

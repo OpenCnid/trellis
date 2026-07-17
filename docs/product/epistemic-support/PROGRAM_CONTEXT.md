@@ -64,11 +64,15 @@ awaiting owner decisions (§6).
   operational rules survive in `JUDGE_CONTRACT_TEMPLATE.md` §6–§7 and
   the layer rule at its head.
 - **Network reality:** this environment's proxy blocks most hosts
-  (arxiv.org, transformer-circuits.pub) but allows github.com. The S8
-  primary was obtained via the checksum-verified mirror
-  `github.com/OpenCnid/verbalizable-global-workspace-pdf`; the S1 PDF
-  arrived as a chat upload. Neither is promoted; citing either as
-  `sourceNodeIds` requires operator promotion first (AB-10).
+  (arxiv.org, transformer-circuits.pub) but allows github.com. All
+  three primary papers now have checksum-verified OpenCnid mirrors —
+  `who-grades-the-grader-pdf` (S1), `verbalizable-global-workspace-pdf`
+  (S8), and `better-harnesses-smaller-models-pdf` (S9) — and all three
+  have been read in full. None is promoted; citing any as
+  `sourceNodeIds` requires operator promotion first (AB-10). S9's
+  released code locator is `github.com/malusamayo/migration-analysis`
+  (paper footnote 1; acquisition not yet owner-approved); S1's
+  released-code locator remains missing.
 - **Why the map is unusually insistent about incentives:** two
   independent measurements (Trellis's citation A/B, R-11; S1's
   Goodhart episode) plus a mechanistic frame (S8's report/behavior
