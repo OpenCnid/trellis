@@ -197,9 +197,16 @@ pool drift, is the watched failure** (R-03).
 
 ## 10. Open items and decision boundary
 
-1. **Reconcile with the collaborator's four-judge system under
-   evaluation** — map their roles onto §3, record deltas, owner rules
-   on merges. Until then this record is one side of a two-sided design.
+1. **Complete the role definitions, then reconcile** *(amended by
+   owner direction, July 16, 2026 — supersedes the wait-for-
+   collaborator posture)*: the next session COMPLETES the four role
+   definitions by reconstruction from the acquired artifacts (S1's
+   judge protocols and 2×2 rubrics; the S9 replication package's
+   optimizer/adaptation materials in the OpenCnid
+   `migration-analysis` fork; §3's blindness profiles), records them
+   as dated amendments here, and obtains owner ratification. Any
+   externally supplied definitions reconcile against the completed
+   set by the same adopt/merge/diverge-recorded protocol.
 2. ~~Owner ruling on AB-4 (anchor labeling)~~ **RESOLVED July 16,
    2026: model labeling permitted** (AB-4 dated amendment) — anchor
    fixture authoring is unblocked.

@@ -147,9 +147,14 @@ July 16, 2026:
    Statuses and command paths: RESEARCH_MAP §7.
 
 **Still open:**
-- Reconciliation of `FOUR_JUDGE_DESIGN.md` with the collaborator's
-  independently evaluated four-judge system (design §10.1).
-- S1 released-code locator (sharing queue row 2, now load-bearing).
+- Session 66's first task (owner direction, July 16): COMPLETE the
+  four-judge role definitions by reconstruction from the acquired
+  artifacts (S1 mirror; the S9 replication-package fork cloned at
+  `/workspace/migration-analysis`), then ratify — design §10.1 as
+  amended.
+- The S9 fork's **license artifact** (no LICENSE file at `b9d3611`;
+  owner understands it as CMU MIT) — blocks vendoring, not reference
+  use. S1's released-code locator also remains missing (row 2).
 - Aggregation constants beyond the drilled v1 defaults (architecture
   record §"v1 arithmetic"; amendable with drill re-pin).
 - Actual execution of the approved promotions on a durable deployment.

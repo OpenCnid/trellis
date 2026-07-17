@@ -1636,13 +1636,18 @@ rule 8 and rule 15 warn about.
 
 Two deliverables, in order:
 
-1. **The reconciliation record.** Obtain the collaborator's four-judge
-   role definitions; map each role onto the §3 blindness profiles;
-   record every delta as a dated amendment to FOUR_JUDGE_DESIGN.md
-   (never a silent rewrite); the owner ratifies the merged design. If
-   the collaborator's definitions cannot be obtained this session,
-   record the item OPEN with the reason and proceed — the drills below
-   pin the current design and re-pin cheaply after any merge.
+1. **Complete the four-judge role definitions (owner direction,
+   July 16, 2026 — the session's FIRST task).** Do not wait for
+   externally supplied definitions: COMPLETE them by reconstruction
+   from the acquired artifacts — the S1 paper's judge protocols and 2×2
+   rubrics (mirror `OpenCnid/who-grades-the-grader-pdf`), the S9
+   replication package's optimizer and adaptation materials (clone at
+   `/workspace/migration-analysis`: `src/optimize/proposer.py`,
+   `docs/adaptation.md`, per-task `tasks/*/prompts/`,
+   `src/task_evals/`), and FOUR_JUDGE_DESIGN §3 — then record the
+   completed definitions as dated amendments (never a silent rewrite)
+   and obtain owner ratification. Any collaborator-supplied definitions
+   that arrive reconcile against the completed set the same way.
 2. **The three panel drills** (FOUR_JUDGE_DESIGN §7, all zero-paid,
    scripted verdicts only, no model calls anywhere): the
    panel-composition oracle extension, the blindness drill
@@ -1652,12 +1657,16 @@ Two deliverables, in order:
 
 ## 4. Required design
 
-- **Reconciliation protocol:** a `RECONCILIATION.md` (or a dated §10.1
-  amendment block in FOUR_JUDGE_DESIGN.md — prefer the amendment if it
-  stays under a page) mapping collaborator-role → §3-role → verdict
-  (adopt / merge / diverge-recorded), each divergence carrying its
-  falsifier. Owner ratification is a recorded decision, not an
-  inference.
+- **Completion protocol:** a dated §10.1 amendment block in
+  FOUR_JUDGE_DESIGN.md (or `RECONCILIATION.md` if it outgrows a page)
+  that, per role, states the completed definition, its reconstruction
+  sources (S1 protocol/rubric passages; S9 artifact paths; the §3
+  blindness profile), and the verdict (adopt / merge / diverge-
+  recorded) with each divergence carrying its falsifier. Owner
+  ratification is a recorded decision, not an inference. License
+  boundary: the S9 clone is REFERENCE ONLY — reconstruct designs and
+  cite paths; copy no code or prose into Trellis until the fork carries
+  a license artifact (register §7 row 9).
 - **Drill shape:** a sibling script `scripts/test_judge_panel.ts` with
   package script `test:judge-panel` (the non-test entrypoint, rule 15),
   in the `test_support_oracle.ts` mold: fixture manifest SHA refusal
@@ -1695,6 +1704,12 @@ Two deliverables, in order:
   `fixtures/support_oracle/` (the fixture mold).
 - `scripts/register_modules.ts`, `scripts/test_module_lifecycle.ts`
   (the capability-contest pattern to retarget).
+- `/workspace/migration-analysis` (OpenCnid fork, shallow clone at
+  `b9d3611`, OUTSIDE the Trellis worktree): `src/optimize/proposer.py`
+  + `memory.py` (meta-agent + search memory), `docs/adaptation.md`
+  (failure-mode→strategy guide), `tasks/*/prompts/`,
+  `src/task_evals/`. Reference only; no LICENSE file exists in the
+  fork as of that commit.
 - `docs/product/epistemic-support/RESEARCH_MAP.md` §9 (adoption
   bounds; amend only by dated entry).
 
@@ -1763,8 +1778,12 @@ Do **not**:
   claim-kind plane;
 - build any automated harness-adaptation/optimizer machinery (S9's
   loop enters, if ever, behind AB-8 and its own proposal);
-- vendor S9's released code (`github.com/malusamayo/migration-analysis`
-  — license unverified, acquisition not owner-approved);
+- vendor S9's released code or prose into Trellis: the OpenCnid fork
+  (`OpenCnid/migration-analysis`, cloned for reference at
+  `/workspace/migration-analysis`) is owner-approved for
+  reference/reconstruction use, but carries **no license artifact**
+  as of `b9d3611` (the owner's CMU-MIT understanding is recorded,
+  unverified in-repo) — copying anything in waits for a LICENSE file;
 - execute the approved S1/S8 promotions here (they await a durable
   deployment; this container's databases are ephemeral);
 - modify the write path, custody tiers, kernel prompts, extraction
