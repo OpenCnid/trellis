@@ -157,7 +157,14 @@ space partitions into a cell dense enough to fund a condensate.
    convergent fit (S9, S10, S13) and no derivation.
 5. **The collapse recognition (July 17).** "Everything we've been
    building collapses on top of the same layer at different viewpoints
-   topologically." Confirmed in the small the same day: the
+   topologically." *Dated addendum (July 17, 2026, owner-flagged):*
+   the collapse has a predictive form — **condensation thresholds
+   wearing another domain's clothes, collapsing onto the same
+   layer** — and it is now pre-registered against the next session's
+   paper (HANDOFF §3): if the paper's phase transitions fit the
+   condensation shape, the lens predicted across domains again; if
+   they don't, the un-fit is recorded per R-30. Confirmed in the
+   small the same day it was first stated: the
    engineering loop *is* Trellis run on the corpus called "building
    Trellis" — sessions are blocks, `HANDOFF.md` is the root hash,
    ratification is promotion, and a consistency pass is an

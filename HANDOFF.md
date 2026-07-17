@@ -1662,6 +1662,37 @@ Work on one feature branch and target `master`.
 
 ## 3. Session 66 problem statement
 
+**Owner re-sequencing (July 17, 2026, post-PR #121 merge — read
+first).** The NEXT session's objective is a research deep-dive,
+displacing the four-judge objective below by owner direction: **study
+the owner-supplied research paper and its data, to understand the
+connection between the J-space and the phase transitions the paper
+finds.** The paper arrives at session start — do not guess its
+identity; ask for the artifact (candidate referents already in the
+register: S8's verbalizable workspace, S13's condensation cascade).
+Ground rules from the principals: follow the paper; improvise open
+questions only with specificity, and only if needed ("we might not
+need any" — the collaborator); attribution rule: Matthew Murphy owns
+the idea, Cnid owns the code. Orientation for J-space standing:
+`docs/product/epistemic-support/RESEARCH_MAP.md` (S8, S13, R-31,
+§4.11), `IEG_TEACHINGS.md` finding 6 (the J-Lens salience reading;
+the public instrument is sharing-queue row 11, with the
+pre-registration rule for any probe run). The four-judge objective
+below is PRESERVED as the following session's work — displaced, not
+dropped.
+
+**Pre-registered expectation (July 17, 2026, owner-flagged as an
+important finding — written down BEFORE the paper is read, so the
+reading can confirm or refute it honestly):** the phase transitions
+the paper finds are expected to be *condensation thresholds wearing
+another domain's clothes, collapsing onto the same layer* — the
+S13 pattern (structure crystallizes when it can fund its own
+existence; thresholds are sharp, not smooth) recurring in a new
+domain, per owner finding 5 (the collapse recognition) and law L7.
+If the paper's transitions do NOT fit the condensation shape, that
+is the informative outcome and must be recorded as such, not
+reconciled by force (R-30: never force gluing).
+
 <feature_objective>
 
 **Epistemic-support program: reconcile the four-judge designs and pin
