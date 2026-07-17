@@ -210,6 +210,19 @@ dated entry and the merge itself are the record.
   holds the vine). UHE is a loaned Lexideck house term (R-31), so any
   alias requires the collaborator's blessing; once ruled, the
   GLOSSARY mints exactly one name (the agent-first stance, rule 5).
+  **RESOLVED July 17, 2026 (collaborator ruling): the exploration was
+  exploratory — UHE stands as-is; no alias minted.** Candidates above
+  are preserved as history. Attribution rule recorded the same day
+  (collaborator, verbatim): "Matthew Murphy owns the idea, and Cnid
+  owns the code."
+- **Paid queue: ON HOLD (owner ruling, July 17, 2026).** The queue
+  stays recorded and important — the v2 anti-shortcut run, the
+  baseline head-to-head, the R-36 knee scoping — but nothing executes
+  until the owner re-opens it by dated note.
+- **Durable deployment: decision document delivered** —
+  [`docs/operations/DURABLE_DEPLOYMENT.md`](../../operations/DURABLE_DEPLOYMENT.md)
+  (owner-requested July 17, 2026); awaiting the owner's A/B/C ruling.
+  Until then the approved S1/S8/S7 promotions remain pending.
 - Session 66's first task (owner direction, July 16): COMPLETE the
   four-judge role definitions by reconstruction from the acquired
   artifacts (S1 mirror; the S9 replication-package fork cloned at

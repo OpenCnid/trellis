@@ -1662,6 +1662,25 @@ Work on one feature branch and target `master`.
 
 ## 3. Session 66 problem statement
 
+**Owner re-sequencing (July 17, 2026, post-PR #121 merge — read
+first).** The NEXT session's objective is a research deep-dive,
+displacing the four-judge objective below by owner direction: **study
+the owner-supplied research paper and its data, to understand the
+connection between the J-space and the phase transitions the paper
+finds.** The paper arrives at session start — do not guess its
+identity; ask for the artifact (candidate referents already in the
+register: S8's verbalizable workspace, S13's condensation cascade).
+Ground rules from the principals: follow the paper; improvise open
+questions only with specificity, and only if needed ("we might not
+need any" — the collaborator); attribution rule: Matthew Murphy owns
+the idea, Cnid owns the code. Orientation for J-space standing:
+`docs/product/epistemic-support/RESEARCH_MAP.md` (S8, S13, R-31,
+§4.11), `IEG_TEACHINGS.md` finding 6 (the J-Lens salience reading;
+the public instrument is sharing-queue row 11, with the
+pre-registration rule for any probe run). The four-judge objective
+below is PRESERVED as the following session's work — displaced, not
+dropped.
+
 <feature_objective>
 
 **Epistemic-support program: reconcile the four-judge designs and pin
