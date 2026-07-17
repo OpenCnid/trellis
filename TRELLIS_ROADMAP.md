@@ -1530,3 +1530,64 @@ Post-fix verification on the owner's platform: drill 7 sections / 106
 checks green; `--negative-control` exit 3 naming `support-oracle:003`;
 `--inject corrupt-expected` detected; tampered-fixture refusal exit 2;
 vitest support pins 11/11.
+
+### July 17, 2026 — S13 registration, the typed IEG synthesis, and the teaching record (branch `d/sister-lab-repo-review-01bcf2`, docs-only, zero-model and zero-paid)
+
+At the collaborator's request (owner-relayed), his master framework —
+UIT-IEGv5.1, "Unified Informatic Topology and Informatic Exchange
+Geometry" (52 pp., unpublished draft, read in full; artifact never
+committed, the S2/S3 rule) — entered the evidence register as S13.
+Commits: `93d4eaf` (S13 + R-32…R-35; AB-1 amended by dated entry —
+design vocabulary only); `bb3efc6` (typed synthesis §4.11: the R-35
+harness-space thesis typed POSITED-AND-FITTING, the three-way cost
+equivocation named, ~14 correspondences swept with 8 surviving and 6
+refused un-glued per R-30; protrusions R-36 condensate-knee and R-37
+floor-meets-ceiling admission diagnostic; R-38 licensed-projection
+vocabulary; R-34 precision — v1 support decay is wall-clock);
+`d65e190`/`4afcbe2`/`465953b` (`IEG_TEACHINGS.md`: the six laws, the
+understanding ladder with its two un-learnings, and the PROPOSED
+change queue C1–C14 — support-plane funding debts C1–C6;
+hash-authority C7 injective-preimage v2 with C8 folded in, C9
+orphan→added lineage annotations, C10 identity/annotation preimage
+split; engine Tier-1 adoptions C11–C14 from the removed audit series,
+each re-verified live at cited lines: the dead `TRELLIS_RLM_*` seam,
+the unversioned embedding space, write-path credentials as convention
+rather than boundary, and the silent-zero rlms telemetry). Front-door
+documentation updated in the same pass: root `README.md` gains the
+second-axis paragraph and `test:support-oracle` in the verification
+list; `docs/README.md` program bullet and `docs/GLOSSARY.md` (IEG
+entry) updated. Everything on this branch awaits owner ratification
+at merge review; DDD binds — no code, schema, prompt, or
+controller-state bytes changed. §5 window management is deferred to
+the next OpenCnid session, per the Session 65 convention.
+
+**Postscript (July 17, 2026, same day).** A third pass extended the
+queue to the substrate proper (`ac32ee8`: the quarantine sweep's
+full-graph scan, the post-COMMIT enqueue gap, ANN post-filtering
+recall decay, O(document) read-back verification), and PR #121 was
+opened carrying the branch. On the owner's precedence question, a
+consistency pass (same lesson as PR #119's): the entry body above
+names "C1–C14" as of its moment — the queue's row list is stated
+once, in `IEG_TEACHINGS.md` §5, and every living document now points
+there instead of restating counts (`docs/README.md`,
+`PROGRAM_CONTEXT.md` reading order and §6). §5 of the teachings
+record also gains the explicit precedence note: the queue is an
+inventory, never a work order; `HANDOFF.md` §3 remains the sole
+objective authority (Session 66 stands; EL-07 stays Appendix B);
+sequencing C-items is an owner ruling at or after ratification.
+
+**Second postscript (July 17, 2026, later the same day).** The
+teaching record grew by dated entry: **L7** (partition is the
+founding act — cells need names, cuts follow semantic cleavage,
+distinctions are cheap to keep and costly to erase, partition of
+sight is the precondition for evidence, summaries crossing cuts are
+lossy sections); owner findings **5** (the collapse recognition — the
+engineering loop is Trellis run on the corpus called "building
+Trellis") and **6** (vocabulary control is sight and authority; the
+GLOSSARY as the system's conceptual tokenizer); and **§6, the
+agent-first documentation stance** (owner directive: future
+collaborators are mostly agents; every document is a prompt; the
+eight-rule authoring canon, each rule naming a practice already
+enforced somewhere in the repo). Pointer documents were de-counted
+again ("the six laws" → "the laws") — the counting rule now cites its
+own third enactment. The entry body above stays as written.

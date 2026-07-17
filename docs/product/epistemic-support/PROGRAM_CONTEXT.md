@@ -50,6 +50,12 @@ see the decision record (§6).
    exists. `npm run test:support-oracle`.
    (The external review series that seeded this program was removed at
    owner direction at merge review; PR #119 branch history retains it.)
+6. [`IEG_TEACHINGS.md`](IEG_TEACHINGS.md) — teaching record from the
+   July 17, 2026 S13 dialogue sessions: the laws, the owner's
+   findings, the understanding ladder with its two un-learnings, and
+   the PROPOSED change queue for existing code (its §5 table is
+   authoritative for the rows — counts are not restated here). Docs only;
+   the register's §4.11 and rows R-32…R-38 are authoritative over it.
 
 ## 3. Context you cannot infer from the artifacts alone
 
@@ -96,6 +102,17 @@ see the decision record (§6).
   remains missing. Note: clones die with containers — a fresh session
   re-adds the repo (`add_repo OpenCnid/migration-analysis`) and
   re-clones.
+- **Dated addition (July 17, 2026):** the collaborator supplied his
+  master framework — UIT-IEGv5.1, "Unified Informatic Topology and
+  Informatic Exchange Geometry" (register S13, rows R-32…R-35) — with
+  the note that "everything in my work is really downstream of this
+  lens": the S10 gluing rules, the rough-fuzzy routing, and R-31's
+  UHE "matrix mathematics" (U-Space, z = x + a(εi)) all originate
+  there. He also supplied a purpose-frame direction, recorded as
+  hypothesis R-35: optimal harness engineering as informatic exchange
+  geometry over a parameter-mapped harness-space. The artifact is an
+  **unpublished draft**: reference only, never committed (AB-1 as
+  amended; sharing-queue row 10); its physics claims are coverage-only.
 - **Why the map is unusually insistent about incentives:** two
   independent measurements (Trellis's citation A/B, R-11; S1's
   Goodhart episode) plus a mechanistic frame (S8's report/behavior
@@ -184,6 +201,15 @@ dated entry and the merge itself are the record.
    Statuses and command paths: RESEARCH_MAP §7.
 
 **Still open:**
+- **Naming (owner request, July 17, 2026):** a catchier-but-precise
+  program alias for UHE. The owner's working gloss: "the set of all
+  possible narratives the AI might be looking at." Candidates on the
+  table: **N-space / the narrative manifold** (pairs cleanly with
+  J-space as its measured chart), *the experience manifold*, *the
+  Loom* (kin to Trellis — one frame weaves the threads, the other
+  holds the vine). UHE is a loaned Lexideck house term (R-31), so any
+  alias requires the collaborator's blessing; once ruled, the
+  GLOSSARY mints exactly one name (the agent-first stance, rule 5).
 - Session 66's first task (owner direction, July 16): COMPLETE the
   four-judge role definitions by reconstruction from the acquired
   artifacts (S1 mirror; the S9 replication-package fork cloned at
@@ -216,3 +242,11 @@ each is future-session work, deliberately NOT in PR #119):**
   re-derivation of the module it checks (common-mode risk); schedule
   an independent re-derivation of the expected values from
   `EPISTEMIC_SUPPORT.md` §3 by a different author/session.
+
+*(Relationship to the broader queue, July 17, 2026: the PROPOSED
+change queue in [`IEG_TEACHINGS.md`](IEG_TEACHINGS.md) §5 spans the
+support plane, the hash authority, the engine, and the substrate; the
+items above predate it and keep their standing there **by reference**
+— C2(b) points here rather than duplicating. Neither queue is a work
+order: the active objective is always `HANDOFF.md` §3, and sequencing
+is an owner ruling — see the precedence note at the head of that §5.)*

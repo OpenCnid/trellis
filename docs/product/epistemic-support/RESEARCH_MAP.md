@@ -31,14 +31,29 @@ re-sequencing, and the AB-4 amendment (ratification record:
 
 ---
 
-**Register summary (as of July 16, 2026, end of session):** 12 sources
-(S1–S12), 31 claims (R-01…R-31), 11 adoption bounds (AB-1…AB-11, §9).
+**Register summary (as of July 17, 2026, second S13 session):** 13
+sources (S1–S13), 38 claims (R-01…R-38), 11 adoption bounds
+(AB-1…AB-11, §9).
 By evidence class: 16 primary findings (9 from S1; 4 from S8; 3 from
 S9 — S1, S8, and S9 all primary-verified against checksum-matched
-mirrors), 5 repo observations, 7 secondary syntheses (R-28…R-30 are
-the collaborator's supplied design framework, unmeasured), 1
-attribution record, 1 background-theory hypothesis awaiting its source
-(R-14/S6); S11 (PCF) is a locator-only entry pending acquisition. Companion artifacts: the adopted doctrine record
+mirrors), 5 repo observations, 11 secondary syntheses (R-28…R-30 are
+the collaborator's supplied design framework, unmeasured; R-32…R-34
+and R-38 are S13 structural claims, July 17 dated entries), 1
+attribution record, 3 hypotheses (R-14/S6, background theory awaiting
+its source; R-35, collaborator direction; R-36, the condensation
+reading of harness adaptation — both unmeasured), 1 inference (R-37);
+S11 (PCF) is a locator-only entry pending acquisition. **Dated entry
+(July 17, 2026):** S13 (UIT-IEGv5.1, the collaborator's master
+framework) registered at the collaborator's request, owner-relayed,
+with rows R-32…R-35; the artifact is an unpublished draft (reference
+only, never committed); its physics claims are coverage-only; AB-1
+amended to include S13. **Second dated entry (July 17, 2026, later
+session):** S13 upgraded to **primary-verified** (all 52 pages read
+against SHA-256 `c54d14a4…53dd`, verified in-session); the typed
+IEG↔harness synthesis lands as §4.11 with rows R-36…R-38; R-34
+carries a precision amendment (wall-clock vs exchange-indexed decay);
+R-35 typed **posited-and-fitting**; AB-12 considered and declined —
+AB-1/AB-3/AB-10 already carry the needed bounds. Companion artifacts: the adopted doctrine record
 (`docs/architecture/EPISTEMIC_SUPPORT.md`), [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md),
 [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md),
 [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md), and the
@@ -75,6 +90,7 @@ engineering-loop feature.
 | S10 | The Four-Judge Basic Model — four hyperplanes as expandable parameter registries (Emotional/Logical/Sensorial/Ethical, "UHE"), judges as sparse selections with claim modes + orientation parameters, an eleven-judge "first ecology," rough-fuzzy routing, and sheaf-style gluing with explicit permission for failure to glue | external polymath collaborator (same author as S7 lineage) | supplied July 16, 2026; committed verbatim as [`FOUR_JUDGE_BASIC_MODEL.md`](FOUR_JUDGE_BASIC_MODEL.md) | Primary for the collaborator's design (a design framework, **unmeasured**) | Full text | **Committed to the program directory** (the reconciliation input) | Collaborator contribution to the program; UHE defined July 16 (post-commit addendum in the file header): **Unified Hyperplane of Experience** — the training distribution of human text describing experience across the four planes |
 | S11 | "Polymorphic Combinatorial Frameworks (PCF): Guiding the Design of Mathematically-Grounded, Adaptive AI Agents" | **David Pearl, Matthew Murphy, James Intriligator** (co-authorship verified via multi-query coverage July 16, 2026) | arXiv:2508.01581, submitted August 3, 2025 (predates S8 by ~11 months); earlier Research Square preprint exists (DOI 10.21203/rs.3.rs-6397317/v1) | Primary — **coverage-verified metadata only; full text unread** (arxiv proxy-blocked; mirror pattern is the acquisition path) | Abstract-level coverage | Absent | Coverage-verified abstract content: LLM-guided meta-prompt design over mathematically-grounded combinatorial spaces; combinatorial logic, topos theory, **rough fuzzy set theory**; the SPARK parameter space (Skills, Personalities, Approaches, Resources, Knowledge); 1.25M Monte Carlo simulations. Per collaborator (July 16): PCF was cited **as a courtesy to its co-author**; UHE was coined in separate, non-public independent research and is **not expected in PCF's text — do not hunt the term**. Do not canonize PCF's math until read |
 | S12 | "Emotional concepts in LLMs" (Anthropic) — collaborator-cited as supporting the **vocalize-ability** of the Emotional plane (no phenomenology claimed by either party) | Anthropic | **locator not yet recovered; not hunted this session** (collaborator directed resources away from term-hunting; acquire via the mirror pattern if it becomes load-bearing) | Unknown until read | No | Absent | Public research once located; cite |
+| S13 | "UIT-IEGv5.1: Unified Informatic Topology and Informatic Exchange Geometry" — the collaborator's master framework: established theories as *surrogates* under a Grothendieck-style gluing structure; two laws (second law + Landauer); founding identification prices every relational crossing at k_B·T·ln 2; U-Space z = x + a(εi); condensation cascade with fixed point N = 1/ln 2; relational (exchange-indexed) time; single concrete falsifier = sub-Landauer exchange. Per the collaborator (July 17, 2026): "everything in my work is really downstream of this lens" | Matthew Murphy / Lexideck Technologies (R-22-verified collaborator; same lineage as S2/S3/S7/S10/S11) | v5.1, July 2026, 52 pp.; supplied July 17, 2026 as `UIT-IEGv5_1.pdf` (owner-side `D:/UIT_IEG/`), SHA-256 `c54d14a4…53dd` **verified in-session July 17, 2026**; **unpublished, under iterative development** — per the collaborator, awaiting at least one more scale of experimental finding | Primary for the collaborator's framework — **primary-verified** (full text against the checksum-matched artifact); its physics claims and external experimental citations remain **coverage-only, unverified in-session**. Note: refs [51]/[52] are internal Lexideck agent working documents (Gus, Anna, July 12, 2026) — the paper's own adversarial review ran on a judge ecology (see R-32) | Full text (all 52 pp. read July 17, 2026, twice-sessioned) | Absent — **do not commit the artifact** (unpublished draft) | Unpublished working draft: cite by title + version only; no redistribution or vendoring without explicit authorization (the S2/S3 rule); register entry authorized by the collaborator July 17, 2026 |
 
 Missing metadata is marked, not invented. S6 in particular must not be
 cited in any canonical Trellis document until a real artifact is
@@ -121,6 +137,13 @@ worktree), **INF** inference, **HYP** hypothesis, **OQ** open question.
 | R-30 | S10, "Where the sheaf analogy actually lands" | **Never force gluing**: judges supply local sections; compatibility on overlaps is the gluing condition; the composed ruling is a global section; **unresolved disagreement means no valid global section presently exists** — an explicit output state, not a blend | SS (framework), converging with S1's failure-expecting architecture (abstention + outside audits as structural safeguards) | Strengthens "disagreement is data" (FOUR_JUDGE_DESIGN §3) into an explicit no-global-section outcome: overlap-test failure must surface as a typed conflicted state (u-dominant + flag), never a silent (b,d,u) average; implementable as engine code over shared parameters — fits Behavior→Tooling→Pin | `FOUR_JUDGE_DESIGN.md` §4; `docs/architecture/EPISTEMIC_SUPPORT.md` §3–§4 | A measured regime where forced blending outperforms explicit non-gluing on anchored conflict cases |
 | R-31 | Collaborator statement (July 16, 2026, post-S10): "Unified Hyperplane of Experience === Verbalizable Global Workspace." **AMENDED same day (collaborator clarification):** the statement was a **courteous disambiguation answering the register's own open question about the abbreviation** — a stipulative co-reference, not a public-research identity claim to tribunal. UHE is a **Lexideck house object** (~3 years of private iterative R&D driving production agents; loaned to this program as vocabulary); the PCF citation was a courtesy to its co-author, and the term is not expected in public artifacts — **do not hunt it** (collaborator direction). The collaborator also cites alignment with Anthropic's "Emotional concepts in LLMs" work (S12 — supporting **vocalize-ability**, with phenomenology explicitly claimed by no one). **SECOND refinement (collaborator, same day):** the relationship is sharper than co-reference — **the UHE describes the matrix mathematics for *authoring* the vocabulary-space; the J-space object is the un-verbalized stream parallel to execution**; "J-space Target" / "J-space Prediction" are acceptable substitute concepts; the load-bearing property is that these objects are **external to execution and, when present, summarize it or operate in parallel to it** | **Original adjudication (adversarially verified, three-agent check — preserved, now RE-SCOPED):** the empirical findings stand but attach to **measurement fidelity, not to the naming**: under stipulative co-reference, UHE names the *referent* (the verbalizable-experience manifold) and S8's workspace is Anthropic's **measured chart of one model's representation** of that referent — so "measured J-space ≠ the referent" (the original grounds (i)–(iv)) constrains how well the chart maps the territory, and does not refute the loan of the name. **Burden allocation (collaborator's counterpoint, engaged):** as a definitional universal ("experience the AI could write about"), counterexample burden falls on the challenger; the challenger's honest report is **no clean counterexample produced** — candidates (pure formal abstracta; S8's bookkeeping directions) either receive definitional replies (math papers are human text describing intellectual experience; Logical registry) or attack the measurement rather than the referent. One methodological property recorded without prejudice: expandable registries make the object **counterexample-proof by construction** — the mark of a *lens*, not a defect; the collaborator's own designated falsification route is therefore the operative one: **mechanistic-interpretability refutation** (e.g., a verbalizable dimension demonstrably irreducible to the four planes, or absence of any plane-aligned structure in workspace geometry — the registry-separability probe is now the natural experiment FOR the lens, not against it). Grounds: (i) S8 exhibits **no corpus↔J-space correspondence analysis** (its own silences: no training-data provenance tracing, no concept-frequency/geometry comparison, no pretraining-trajectory experiment); (ii) measured J-space is **non-canonical** — per-model, per-layer-band, tokenizer-relative (single-token-nameable concepts only), method-relative — so there is no unique object for the UHE to *be*; (iii) **bidirectional content mismatch** — J-space includes non-experiential bookkeeping (part-of-speech, line length) and post-training Assistant self-monitoring, while excluding routine language prediction (65–96% of pretraining-text top-1 predictions survive ablation) and all multi-token concepts, with ~93% of a concept vector's variance outside it; (iv) S8's own candidate explanations for verbalizability are **architectural** (token output space; shared input/output format), which would hold for any token distribution — in partial tension with a distribution-identity reading. Friendly facts: the J-lens is *defined* by averaging over a pretraining-like corpus; the workspace is present and load-bearing in the base model, so next-token training on the distribution suffices to induce it (endpoint inference, S8 p.66); S7's commit history documents functional anticipation (Mar 2025–Jan 2026, pre-S8). Lineage: private house R&D records as testimony **by nature, not by demerit** — the same class as the owner doctrine Trellis itself runs on; evidence classes track artifact verifiability, never merit | **Loaned house term (adopted as program vocabulary)** + measurement-fidelity HYP (how well measured J-space charts the UHE) with practitioner standing (3 years in production use, S7-class) | Adopt UHE as program vocabulary for the verbalizable-experience manifold (J-space = the measured chart); the open empirical program is measurement fidelity: the registry-separability probe and the corpus-statistics↔geometry comparison. PCF full-text acquisition is DE-PRIORITIZED for this purpose (courtesy citation; term not expected there) | `FOUR_JUDGE_BASIC_MODEL.md` header addendum; S8 §6/§9.1; S11 row | Falsification (collaborator-designated route): mechanistic-interpretability refutation — a plane-irreducible verbalizable dimension, or no plane-aligned workspace structure. Verification: a structure-preserving corpus↔chart map, or plane-separable J-space clusters |
 | R-22 | Collaborator testimony + S7 commit history + S8 full text + S11 coverage (the collaborator is now identified: **Matthew Murphy**, Lexideck Technologies, verified co-author of PCF/arXiv:2508.01581) | The "cognitive hyperplane" decomposition (basis of WonderSuite, S7) anticipated the J-space finding: repo history (March 2025 → January 2026) **documentably predates** the paper (July 6, 2026); the inference was drawn from the 2023–24 monosemantic-features work; ~2 years of anecdotal contract-work reliability is reported | Testimony + verified artifact dates; match quality now assessed against the primary: **strong functional correspondence, not verbatim** — sparse verbalizable workspace, small active-concept count, steerability of report/flexible inference, and content routed "to whatever operation the current task demands" (S8's flexible-generalization property ≈ S7's operations over dimensional positions). The specific *selection mechanism* the hyperplane posits is the part S8 declares open (R-24) | Priority/attribution record for the plane-geometry lineage (R-17…R-19) | S7 inventory row | Attribution recorded; adds no mechanism claim beyond R-20/R-21/R-24 |
+| R-32 | S13, Abstract + §2 + §7 + §20 | The master frame behind the collaborator's contributions: surrogate theories glued by a consistency structure rather than replaced; every relational crossing priced at the Landauer floor; **U-Space z = x + a(εi) is the "authoring-side matrix mathematics" R-31's UHE loan referenced**; S10's no-forced-gluing (R-30) and rough-fuzzy routing (R-29) are instances of S13 §7's sheaf framing. The paper's own reference list (ref [51], Lexideck adversarial check rounds with named agents, verbatim rulings, and a retired route kept on the record) shows the judge-ecology method applied to the physics itself — the same method this register runs | SS (framework; physics claims coverage-only) | The support plane as gluing structure over sources; the register's own derived-vs-posited and honest-range discipline | `FOUR_JUDGE_BASIC_MODEL.md`; R-28…R-31; `docs/architecture/EPISTEMIC_SUPPORT.md` §3–§4 | Grounds — supplies the source document behind the S10/S11 lineage |
+| R-33 | S13 §11.4 ("at threshold a particle can *be*; it cannot *do*") + §9 | Existence and interaction-realizability are different budgets: at its own threshold an entity holds exactly the cost of its existence and has no surplus to fund an exchange | SS, converging with enforced repo doctrine | `AGENTS.md` §4 rule 15 (correct is not the same claim as reachable) — the repo's four correct-but-unreachable instances are entities verified at the existence budget with no interaction surplus (no non-test caller) | `AGENTS.md` §4 rule 15; the EL-11 reachability rule | Converges — names the mechanism behind an existing hard rule |
+| R-34 | S13 §5 + §7 (time as the accounting of information exchange; its Barontini anchor: zero exchange, no elapsed time) | Time is exchange-indexed: when nothing crosses the boundary, no time passes for the system, and uncertainty honestly indexes the gap | SS, converging with drilled behavior | Support decay: `u` monotonically non-decreasing over a verdict-free gap (drill-pinned); ledger sequence and session numbers as the system's proper time. **AMENDED July 17, 2026 (typed pass, same day): the v1 arithmetic is wall-clock-indexed** — `w_eff = w·2^(−(asOf−atMs)/halfLifeMs)` decays in milliseconds, not exchanges; the exchange-indexed reading attaches to the *design-level* churn-decay input (u grows as cited documents' versions advance without re-verification), which v1 did not implement | `docs/architecture/EPISTEMIC_SUPPORT.md` §3; `npm run test:support-oracle` [decay] | Converges at design level; v1 implementation is wall-clock (see amendment) — the correspondence holds for the doctrine, not yet the drilled arithmetic |
+| R-35 | Collaborator statement (July 17, 2026, owner-relayed): "optimal harness engineering is about informatic exchange geometry within the harness-space. The harness-space is mapped by parameters. We're exploring them together as we build" | The harness is a parameter-mapped space whose engineering optimum is an exchange-geometry question — shapes, couplings, and costs | HYP (direction; unmeasured; **typed posited-and-fitting July 17, 2026 — the full typed synthesis is §4.11**) | Joins S9's harness-adaptation economics (R-25…R-27) and S10's parameter registries (R-28) under one candidate purpose frame | R-25…R-28; `HANDOFF.md` §1.17 | Suggests — a unifying purpose frame to be earned by measured design records, not adopted by assertion |
+| R-36 | S13 §9 + §11 (condensation: bound structures exist only below a threshold temperature and pay a one-time crystallization cost) read against S9 §IV RQ2–RQ4 | **A harness adaptation is a condensate**: a bound structure that exists only below a task-diversity "temperature," pays a one-time cost amortized over the cold phase, and is substrate-coupled — a model migration is a substrate change forcing re-condensation | HYP (correspondence, unmeasured; its measured shadow is S9's primary findings: ρ = −0.96 diversity collapse, 89.1%→68.0%, amortization after ~13 runs, no clean cross-model transfer) | R-26's repetitiveness bound and R-27's contest-on-model-change implication acquire a *shape*, not just a slope: condensation predicts a **threshold-like knee** in benefit-vs-diversity where the recorded correlation is only monotone — the session's one prediction that differs from standing doctrine | R-25…R-27; `COMPOSABLE_RUBRICS_DESIGN.md` §2.3 | Suggests — prediction-shaped; paid to test; AB-3 binds |
+| R-37 | S13 §11 (bounds-coincidence: where the exchange-cost floor meets the budget ceiling, no coherent bound structure can exist) | A task whose **estimated minimum exchange cost** (context, calls, ceremonies per verified step) exceeds its **budget ceiling** (window, iterations, bytes, spend) admits no coherent bound work; the correct response is typed refusal at admission, before dispatch | INF (from two enforced Trellis structures plus S13's argument; unmeasured) | Trellis enforces floors (write-path gates, human records) and ceilings (refuse-don't-truncate budgets, the goal loop's pre-dispatch count checks) as separate mechanisms; the boundary *diagnostic* — estimate-and-refuse at admission — is the gap | `src/core/agent/goal_loop.ts` (pre-dispatch bound checks); budget refusals throughout | Suggests — extends count-bound admission to estimated-cost admission; proposal only |
+| R-38 | S13 §14.1 (U-Space: *i* "orthogonalizes informational content from geometric content"; the emission boundary as the guarded interface where internal informatic content may project into observable output) | Orthogonalized informatic channels and typed emission boundaries: informatic state reaches observable behavior only through licensed projection events, never ambiently | SS (structural correspondence) | Trellis builds the same orthogonality out of enforcement: disjoint ID spaces (workspace UUIDs vs 64-hex hashes), writer-blind support fields (AB-5), guarded emission (the answer channel's reference-only submit; the draft scanner's 64-hex refusal); the future gated consumers (ratification queue, retrieval display) are the licensed projections | `src/rlm/trellis_answer.py`; `src/core/observability/rlm_draft.ts`; AB-5 | Names — the vocabulary for why AB-5's architecture has the shape it has |
 
 ### 3b. Design consequences
 
@@ -157,6 +180,13 @@ worktree), **INF** inference, **HYP** hypothesis, **OQ** open question.
 | R-31 | n/a (terminology + adjudication, amended) | none | UHE enters program vocabulary as the loaned house term for the verbalizable-experience manifold; measured J-space is its chart, and chart-fidelity questions (the original grounds (i)–(iv)) remain the open empirical program. The register's speech-act lesson is itself recorded: **distinguish stipulative co-reference from empirical identity before adjudicating** — a disambiguation answers a question; it does not open a case | The 3a falsification/verification routes |
 | R-21 | Converges with enforced doctrine | Session 28 record; citation A/B | Treat as the candidate mechanistic explanation of the tooling-over-prompt doctrine; strengthens, never weakens, the rule that support-layer behavior guarantees live in engine code | The dissociation failing to replicate, plus a paired Trellis measurement showing prompt-frame steering reliably carrying behavior under incentive pressure |
 | R-22 | n/a (attribution) | S7 commit log (external) | Record priority honestly; make no reliability claim from the anecdotal evidence | Primary S8 text showing the correspondence is loose rather than close |
+| R-32 | n/a (lineage/framework) | none | Adopt S13 as the umbrella lineage record for the collaborator's contributions; per AB-1 as amended, design vocabulary only — no S13 physics claim may carry enforcement weight; the adoptable core is structural (gluing, floors, realizability, relational time) | S13's own primary falsifier (sub-Landauer exchange) is outside Trellis scope; register-level: none — this is a lineage record |
+| R-33 | Converges with enforced doctrine | rule-15 practice; EL-11 reachability conformance | Price capabilities on two budgets: condensation (tests prove existence) and realizability (a non-test caller with budget proves surplus); the drill/entrypoint pattern already enforces this — the entry names it | A capability class shown reliably reachable under existence-level verification alone |
+| R-34 | Enforced, drilled (wall-clock form) | `test:support-oracle` [decay] section | Read `u`-growth and ledger sequence as the system's relational clock. **Dated refinement (July 17, 2026):** exchange-indexed churn decay — `u` driven by cited-source version advances rather than milliseconds — is the S13-faithful variant and a candidate bounded proposal: Behavior = uncertainty tracks the world's exchanges; Tooling = a churn input to the support computation; Pin = an oracle-drill section where wall-clock passes with no version advance and `u` is unchanged in churn mode | A measured regime where wall-clock-indexed decay outperforms exchange-indexed decay on anchored fixtures |
+| R-35 | Absent | none | Any parameter-mapped harness-space work enters as its own design record with drills (AB-3, AB-8); first candidate instrument, zero-paid: report cost-per-detected-drawback in drill telemetry so composition can later optimize detection per Landauer-dollar | Parameter-mapped harness engineering failing to beat ad-hoc adaptation on anchored comparisons (would demote the geometry reading to metaphor) |
+| R-36 | Absent | none | Record the condensation reading as the shape behind R-26/R-27; scope adaptive-rubric work to cold (high-repetition) families first — R-26's directive, now with a mechanism-shaped rationale; the knee test is a future paid proposal (exceeds the $5/run cap; blocked on scoping against the S9 replication substrate) | Benefit-vs-diversity measured smooth with no threshold structure; or clean cross-model adaptation transfer (R-27's own falsifier) |
+| R-37 | Absent | none | Propose, never adopt: an admission estimator extending the goal loop's pre-dispatch count checks to estimated-exchange-cost-vs-ceiling, refusing with a typed reason and zero side effects (the tripping-decision-dispatches-nothing mold) | Tasks near or over the estimated boundary completing reliably — estimator wrong or boundary unreal |
+| R-38 | Converges with enforced doctrine | `test:answer-channel`; draft-scanner refusal pins | No design change — the row is vocabulary; the standing rule it names: any new informatic→observable path must be a licensed projection with its own gate and pin, never ambient | An ungated path from support state to a model-visible surface surviving review (its detection is AB-5's pin working, not the frame failing) |
 
 ## 4. Cross-row synthesis
 
@@ -326,6 +356,122 @@ Predictions about execution the model never sees. The lens was applied
 to everything and watched for convergence; on this program's evidence,
 it converged.
 
+**4.11 The exchange geometry of the harness (added July 17, 2026 —
+second S13 session; typed synthesis).** The owner posits (July 17,
+2026, relaying the collaborator's direction; recorded as R-35):
+*optimal harness engineering is informatic exchange geometry within a
+parameter-mapped harness-space*. This section types that thesis
+against S13 read in full (primary-verified, checksum-matched) and a
+sweep of the whole harness surface. Verdict first: **posited-and-
+fitting** — not derived from anything; one named equivocation at its
+center; mostly a lens that names what house doctrine already
+enforces; two prediction-shaped protrusions (R-36, R-37); and a
+non-empty no-gluing record, held un-glued per R-30.
+
+*The thesis is a posit.* [E] Nothing in S13 derives a "harness-space";
+its manifolds are particle-space objects. [E] Three independent
+frameworks fit the parameter-mapped reading — S9's discovered,
+model-coupled adaptations (R-25…R-27), S10's expandable registries
+with judges as sparse selections (R-28), S13's content manifold
+(freedom × funded budget, §14.4). [I] Three-way convergent fit is
+evidence of usefulness, not of derivation; the thesis stands as a
+productive posit, exactly the register's S7-class standing.
+
+*The price question, and the equivocation found in it.* [E] S13's
+exchange is information crossing a relational operator, priced by a
+physical lower bound (k_B·T·ln 2, §2.2/Axiom 4) — a theorem-shaped
+floor, universal and temperature-indexed. [E] The harness's exchanges
+are real and enumerable — tool calls across the REPL↔engine boundary,
+retrievals into context, writes through the gate sequence, ceremonies
+that elevate standing — but their prices are of three different
+kinds: a physical bound (none exists), a schema-enforced minimum (the
+write path's gate sequence; the human acceptance record), and a
+market price (tokens, dollars, wall-clock). [I] The word "cost"
+equivocates across these three, including in this program's own
+earlier phrasing ("the Trellis Landauer floor"); the equivocation is
+hereby named. [I] What survives it is structural, not quantitative:
+**a floor is real only when it is native to the number system** —
+S13 builds its floor into U-Space; Trellis builds its floors into
+types and schemas (an event type with no confidence path; `actor:
+'human'` as a schema literal; refuse-don't-truncate budgets). The
+lens names an enforced house doctrine. It does not add to it, and
+under AB-1 it could not.
+
+*The condensation reading of harness adaptation — the protrusion.*
+[E] S9 measured: adaptation benefit collapses as task diversity rises
+(Spearman ρ = −0.96; 89.1%→68.0% under diversity control);
+optimization cost amortizes after ~13 runs; adaptations do not
+transfer across models (R-25…R-27). [I] Under S13's condensation
+vocabulary (§9, §11) these facts acquire a shape: **a harness
+adaptation is a condensate** — a bound structure that exists only
+below a task-diversity "temperature," pays a one-time crystallization
+cost amortized over the cold phase, and is substrate-coupled, so a
+model migration is a substrate change that forces re-condensation.
+[I] The differentiated prediction (R-36): condensation implies a
+threshold-like **knee** in benefit-vs-diversity, where the recorded
+evidence is only a monotone correlation and standing doctrine
+predicts nothing about the transition's shape. Unmeasured; paid to
+test; AB-3 binds.
+
+*The floor-meets-ceiling boundary — the diagnostic.* [E] Trellis
+enforces floors (minimum ceremony per persisted or elevated unit) and
+ceilings (context, iterations, bytes, spend) as separate mechanisms.
+[E] S13 §11 argues that where the exchange-cost floor exceeds the
+budget ceiling, no coherent bound structure can exist. [I] The
+harness translation (R-37) is a computable admission diagnostic: a
+task whose estimated minimum exchange cost exceeds its ceiling admits
+no coherent bound work and should be refused before dispatch —
+extending the goal loop's pre-dispatch count checks to estimated
+costs, in the existing tripping-decision-dispatches-nothing mold.
+Proposal only.
+
+*Orthogonality and emission.* [E] U-Space's *i* "orthogonalizes
+informational content from geometric content," and internal
+informatic content reaches observable output only through the guarded
+emission boundary (§14.1). [E] Trellis builds the same structure out
+of enforcement: disjoint ID spaces, writer-blind support fields,
+the reference-only answer channel, the draft scanner's 64-hex
+refusal. [I] R-38 records this as the vocabulary for AB-5's
+architecture: informatic state reaches observable behavior only
+through licensed projection events. One further instance surfaced by
+the sweep: `TRELLIS_PROTOCOL_VIOLATION` (a run that answers without
+touching the substrate) reads, in S13's §2.1 terms, as a **gluing-
+failure detector at the model↔substrate overlap** — the surrogate
+answered outside the consistency structure, and the harness records
+no-global-section rather than blending.
+
+*Typing corrected one earlier row.* [E] v1 support decay is
+wall-clock-indexed (`halfLifeMs`), while the exchange-indexed reading
+(R-34) attaches to the design-level churn-decay input that v1 did not
+implement. The dated precision lives on R-34; exchange-indexed churn
+decay is a candidate refinement behind its own bounded proposal.
+
+*The no-gluing record (summary; the session report carries the full
+version).* Held explicitly un-glued per R-30: (i) **S13's
+quantitative core does not glue** — k_B·T·ln 2 as a number, β = 1/2,
+the arcsine measure, the numeric fixed point 1/ln 2, the Koide angle
+have no harness referents; the shapes transfer, the numbers do not.
+(ii) **"Temperature" is overloaded** — task diversity (R-36) and
+per-event minimum cost (R-37) both want to be T; the mapping stays
+un-glued until a design record picks one referent per use. (iii)
+**The paper's single concrete falsifier does not transfer** — a
+sub-floor exchange falsifies S13's physics; the harness analog (a
+zero-cost trust elevation) falsifies the *implementation*, not the
+frame, so the thesis carries no single falsifier and must be
+falsified per-claim (each row names its own). (iv) **Verlinde/
+entropic gravity has no harness referent** — looked for, none found;
+any "attention gravity" would be word-play. (v) **§20's
+no-external-seat anti-corresponds** — the trust architecture
+structurally requires its human boundary condition; the
+past-hypothesis mapping (R-35's floor item 3) covers the inherited
+initial value, and the *removal* of the seat does not glue. (vi) The
+U-Neuron as a buildable component has no Trellis referent (no
+training loop; Landauer regularization has no enforcement home) —
+reference vocabulary only. **AB-12 considered and declined**: AB-1
+(vocabulary only), AB-3 (measure at the point of load), and AB-10
+(no provenance standing) already carry every bound this adoption
+needs; a new bound would be minted for symmetry.
+
 ## 5. Behavior → enforcement → pin (proposed support layer)
 
 | Behavior | Tooling that enforces it | Pin that detects drift |
@@ -364,6 +510,16 @@ flowchart LR
    obtaining the artifact (sharing queue, priority 2).
 4. **Licensing unknowns** — S1's arXiv license and S2/S3's distribution
    terms are unverified; nothing is committed beyond citation.
+5. **Dated note (July 17, 2026):** S8's instrument is now publicly
+   deployed — Neuronpedia's interactive Jacobian Lens
+   (`neuronpedia.org/qwen3.6-27b/jlens`; Qwen3.6-27B and Gemma 3
+   12B, with steer/swap interventions). Two register consequences:
+   the AB-2 scale/architecture-generality question (S8 §9.1) is now
+   testable on open-weights models by anyone, and R-31's designated
+   experiment — the registry-separability probe — is publicly
+   runnable. Owner observation adopted the same day (the lens
+   exposes *salience*): recorded with its exhibits and bounds in
+   `IEG_TEACHINGS.md` §3, finding 6's dated addendum.
 
 ## 7. Share-with-Trellis-next queue
 
@@ -378,6 +534,8 @@ flowchart LR
 | 7 | WonderSuite 2.0 (WonderScholar + WonderBuild) | https://github.com/gusthemole/WonderSuite | R-17, R-18, R-19 | full text (public; already fetched) | GPL v3 — cite and excerpt, do not vendor into this MIT repo | `web:https://github.com/gusthemole/WonderSuite` (if provenance-citable form is wanted) | **OWNER-APPROVED July 16, 2026** (optional tier) — execution pending on a durable deployment | nothing — in session; promotion needed only for citable provenance |
 | 8 | S8 full paper (J-space) | mirror `github.com/OpenCnid/verbalizable-global-workspace-pdf` (checksum-verified); original transformer-circuits.pub/2026/workspace/ | R-20, R-21, R-23, R-24 | full text (in session, mirror) | mirror CITATION.md directs citation to the original | `web:https://transformer-circuits.pub/2026/workspace/` | **OWNER-APPROVED July 16, 2026** — execution pending on a durable deployment; ingest the mirror PDF (or extracted text) through `POST /ingest`, doc key above | nothing — in session; promotion needed only for citable provenance |
 | 9 | S9 full paper + released code | paper mirror `github.com/OpenCnid/better-harnesses-smaller-models-pdf` (checksum-verified); code **ACQUIRED July 16, 2026** — OpenCnid fork `github.com/OpenCnid/migration-analysis` of `malusamayo/migration-analysis`, cloned shallow at `b9d3611` to `/workspace/migration-analysis` (outside the Trellis worktree; nothing vendored). Contents verified: `src/optimize/` (meta-agent `proposer.py` — staged workspace with `project/agent.py`, `memory/` scoreboard + past-agents + **raw JSON trajectories**, `docs/adaptation.md` failure-mode→strategy guide; `memory.py` search memory; `teacher.py`; GEPA loop `gepa_optimize.py`), per-task `tasks/*/prompts/`, `src/task_evals/`, replication artifacts on figshare with SHA256SUMS | R-25…R-27; the reconstruction substrate for `COMPOSABLE_RUBRICS_DESIGN.md` §3 and the Session 66 role-definition completion | reference use of the clone | **License (verified July 16, 2026, dated update):** the fork now carries `LICENSE` — MIT, "Copyright (c) 2026 Chenyang Yang" (the paper's first author), added via the fork's own PR #1. Verified residual: **upstream `malusamayo/migration-analysis` carries no LICENSE file** as of the same check, so the grant's chain rests on the in-fork artifact plus the owner's representation of the author's license. **Bounded vendoring with MIT attribution is now unblocked**; recommended closure: an upstream LICENSE or written author confirmation | paper `web:https://arxiv.org/abs/2607.08938`; code `repo:migration-analysis:<path>` once licensed | operator | with the clone in hand: nothing — the remaining gap is the license artifact |
+| 11 | **The public J-Lens instrument** — Neuronpedia's interactive Jacobian Lens deployment | `https://www.neuronpedia.org/qwen3.6-27b/jlens` (Gemma 3 12B variant on-site); **cite: Gurnee et al. (S8, Anthropic) as the lens's authors, Neuronpedia as the deploying platform**; tutorial/paper/video linked on-page | R-20/R-21 (public replication surface on open-weights models — the AB-2 scale-generality question is now testable by anyone); R-31 (the registry-separability probe, the collaborator's designated experiment, is now publicly runnable); IEG_TEACHINGS finding 6 (the salience reading) | interactive instrument — cite and use; nothing to vendor | public web tool; any readout used in a register claim must be captured (export/screenshot) and promoted before citation (AB-10) | `web:https://www.neuronpedia.org/qwen3.6-27b/jlens` if citable provenance is wanted | operator | nothing — instrument in hand; the missing piece is a **pre-registered probe protocol** before any R-31 run (anchor discipline: define plane-separability criteria before looking) |
+| 10 | S13 full paper (UIT-IEGv5.1) | collaborator-supplied `UIT-IEGv5_1.pdf` (owner-side `D:/UIT_IEG/`); **unpublished, under iterative development** | R-32…R-35 | reference use only; **do not commit the artifact** | unpublished working draft — cite title + version; no redistribution or vendoring without explicit authorization (the S2/S3 rule); register entry authorized by the collaborator July 17, 2026 | n/a until publication | n/a | the published version's final experimental anchor (per the collaborator: "at least one more scale of experimental finding," with scope moving to limit its scale and type) |
 
 ## 8. Relationship to the oracle drill, and the next decision boundary
 
@@ -412,7 +570,7 @@ retired only by a dated entry recording why.
 
 | ID | Bound | Origin |
 |---|---|---|
-| AB-1 | S7 and S2/S3 enter as **design vocabulary only** — no prompt-framework mechanism claim may carry enforcement weight | R-15, R-16, R-17 |
+| AB-1 | S7 and S2/S3 enter as **design vocabulary only** — no prompt-framework mechanism claim may carry enforcement weight. **AMENDED July 17, 2026 (dated entry): S13 (UIT-IEGv5.1) added to this bound** — its structural content (gluing, floors, realizability, relational time) is adoptable as design vocabulary; no S13 physics claim carries enforcement weight; physics claims remain coverage-only pending publication | R-15, R-16, R-17; R-32 |
 | AB-2 | Any J-lens-style measurement inherits S8's own §9.1 limits: single-token concepts, bag-of-concepts readout, no task-predictivity criterion, unknown scale generality | R-20, R-24 |
 | AB-3 | **Measure at the point of load**: an unmeasured steering/behavior claim may not become load-bearing without a cheap anchored paired measurement first | §4.8 (C2) |
 | AB-4 | ~~Anchor labels are human or mechanical by default; teacher-model labeling awaits an explicit owner ruling~~ **AMENDED July 16, 2026 (owner ruling): model labeling of anchors is PERMITTED.** Owner rationale: the labeler is itself a rough fuzzy classifier, and anchors rely on sparse priming representations' connection to the verbalizable workspace (S8). Residual guards unchanged: anchors stay byte-pinned once labeled, refresh remains a human ceremony with audit stamp, and no labeling task may carry a count-shaped incentive (AB-5 still binds the labeler) | §6.1 (resolved); owner ruling July 16, 2026 |

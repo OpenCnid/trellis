@@ -109,6 +109,20 @@ Five commitments, layered in the order the system grew them:
    guards, refusal on stale writes — with prompt text as reinforcement
    only.
 
+**The second axis (epistemic support).** Custody answers *where did
+this come from*; a second, orthogonal axis — adopted as forward design
+July 16, 2026 — answers *how has it held up*: a graded opinion (belief
+`b`, disbelief `d`, uncertainty `u`; b+d+u = 1) computed sweep-side
+from judged events, never asserted by the writer and never visible to
+it. Support never mints custody; custody never implies support; a
+freshly written belief starts at maximal uncertainty. Doctrine:
+[EPISTEMIC_SUPPORT](docs/architecture/EPISTEMIC_SUPPORT.md); program
+documents: [docs/product/epistemic-support/](docs/product/epistemic-support/PROGRAM_CONTEXT.md).
+The first bounded feature — the support-computation oracle drill,
+`npm run test:support-oracle` — is implemented and pinned; judges, the
+support sweep, and the ratification queue remain proposals behind
+their own gated features.
+
 **Where the humans are.** Every trust elevation is a human running a
 gated CLI: promotion (`npm run promote`), module registration
 (`npm run modules:register`), authoring approval (`--confirm-paid`),
@@ -840,6 +854,7 @@ npm run test:rlm-workspace
 npm run test:modules
 npm run test:textedit
 npm run test:a2a
+npm run test:support-oracle
 ```
 
 See [API_REFERENCE.md](API_REFERENCE.md) for endpoint contracts,
