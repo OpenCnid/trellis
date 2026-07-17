@@ -158,6 +158,15 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   computed sweep-side from judged events, never asserted by the writer
   and never visible to it; support never mints custody. Canonical
   record: `docs/architecture/EPISTEMIC_SUPPORT.md`.
+- **Informatic exchange geometry (IEG)** — the collaborator's frame
+  (register S13, UIT-IEGv5.1): modeling as information crossing
+  relational operators, priced by a floor and bounded by a ceiling.
+  Relation to Trellis: two metrics on one topology — structure
+  transfers (floors, budgets, funded existence, honest gluing,
+  exchange-indexed time); numbers do not. Enters as design vocabulary
+  only (adoption bound AB-1). Records:
+  `docs/product/epistemic-support/RESEARCH_MAP.md` §4.11 and
+  `docs/product/epistemic-support/IEG_TEACHINGS.md`.
 - **Plane (belief geometry)** — a named bundle of related axes owning
   exactly one governance question (custody: *where from*; support: *how
   held up*; claim-kind, deferred: *what kind of claim*); a new plane

@@ -155,7 +155,13 @@ program (the `engineering-loop/` pattern):
   `FOUR_JUDGE_DESIGN.md` + `FOUR_JUDGE_BASIC_MODEL.md` +
   `JUDGE_CONTRACT_TEMPLATE.md` the judged-input architecture and its
   prompt-facing frames; `ORACLE_DRILL_PROPOSAL.md` the first drill's
-  record (implemented; its header carries the observed runs).
+  record (implemented; its header carries the observed runs);
+  `IEG_TEACHINGS.md` the July 17, 2026 teaching record behind the
+  register's S13 rows (the collaborator's UIT-IEG framework,
+  registered at his request — R-32…R-38, synthesis §4.11; design
+  vocabulary only per AB-1): the six laws, the understanding ladder,
+  and the PROPOSED change queue C1–C14 spanning the support plane,
+  the hash authority, and the engine's audit-era Tier-1 debts.
 
 ### 6. Progress-log archive (`/archive` — historical)
 
