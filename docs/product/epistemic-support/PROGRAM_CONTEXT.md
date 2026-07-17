@@ -96,6 +96,17 @@ see the decision record (§6).
   remains missing. Note: clones die with containers — a fresh session
   re-adds the repo (`add_repo OpenCnid/migration-analysis`) and
   re-clones.
+- **Dated addition (July 17, 2026):** the collaborator supplied his
+  master framework — UIT-IEGv5.1, "Unified Informatic Topology and
+  Informatic Exchange Geometry" (register S13, rows R-32…R-35) — with
+  the note that "everything in my work is really downstream of this
+  lens": the S10 gluing rules, the rough-fuzzy routing, and R-31's
+  UHE "matrix mathematics" (U-Space, z = x + a(εi)) all originate
+  there. He also supplied a purpose-frame direction, recorded as
+  hypothesis R-35: optimal harness engineering as informatic exchange
+  geometry over a parameter-mapped harness-space. The artifact is an
+  **unpublished draft**: reference only, never committed (AB-1 as
+  amended; sharing-queue row 10); its physics claims are coverage-only.
 - **Why the map is unusually insistent about incentives:** two
   independent measurements (Trellis's citation A/B, R-11; S1's
   Goodhart episode) plus a mechanistic frame (S8's report/behavior
