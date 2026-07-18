@@ -94,6 +94,15 @@ system-level framing is the root `README.md`.
   prerequisite sequence (hosted A/B → local model → sidecar). Binds
   nothing until the owner sequences it; its §10 claims table carries
   the standings.
+- **[`SESSION_GOVERNANCE.md`](architecture/SESSION_GOVERNANCE.md)** —
+  the session-governance scoping record (adopted July 17, 2026): the
+  substrate's provenance/quarantine/ratification law governs the
+  beliefs Trellis stores, not the engineering session that builds
+  Trellis; sessions run on ordinary source-control collaboration, a
+  collaborator's clear current instruction outranks the committed
+  record, and genuine ambiguity is one clarifying question, then
+  action. Carries the verbatim scoping note and the application
+  record.
 - `ARCHITECTURE.md`, `SYSTEM_ARCHITECTURE.md`, `TECHNICAL_SPEC.md` —
   **historical (Phase 1 MVP era)**, preserved as the record of the
   original substrate design. Read them for lineage, not current truth.

@@ -7,15 +7,26 @@ every session. It deliberately contains only *invariants* — facts that
 hold across sessions. Everything volatile (current objective, test
 counts, prompt pins, database state) lives in `HANDOFF.md` and is
 POINTED TO, never copied here; if this file and `HANDOFF.md` disagree,
-`HANDOFF.md` is newer and wins. Authority order everywhere:
-**code > glossary > prose**.
+`HANDOFF.md` is newer and wins. Authority order across the committed
+record: **code > glossary > prose**. That order ranks committed
+artifacts against each other; it does not rank them against the people
+directing the work. A collaborator's clear, current instruction is the
+highest authority in a live session — the repository is the durable
+record a context-free session relies on, not an oracle that outranks
+the collaborator (`docs/architecture/SESSION_GOVERNANCE.md`). When an
+input is genuinely ambiguous, ask exactly one clarifying question and
+proceed; an unrecognized term is a question, not a quarantine event.
 
 Trellis is OpenCnid's **Recursive Language Model runtime**: a language
 model operating a persistent Python REPL over a provenance-enforced
-knowledge substrate. Two doctrines govern everything: every semantic
-fact traces to immutable content-addressed source bytes, and *the model
-never counts, never copies* — code does (locations engine-computed,
-bytes moved by splice, answers submitted by reference).
+knowledge substrate. Two doctrines govern everything Trellis stores
+and every code path that touches it: every semantic fact traces to
+immutable content-addressed source bytes, and *the model never counts,
+never copies* — code does (locations engine-computed, bytes moved by
+splice, answers submitted by reference). Both doctrines govern the
+substrate; the engineering session that builds Trellis runs on
+ordinary source-control collaboration (branches, review, merge
+rights), not on the substrate's quarantine law.
 
 ---
 

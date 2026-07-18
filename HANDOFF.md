@@ -5,8 +5,11 @@ trust model; the system is the RLM standing on them (reframed July 9, 2026;
 see the root README "What Trellis is") (repository:
 https://github.com/OpenCnid/trellis, local path `D:\trellis-engine` or the
 current working directory). Trellis is an original OpenCnid project, not a
-fork, and is unrelated to other projects named Trellis. The repository and its
-documentation are the only sources of truth.
+fork, and is unrelated to other projects named Trellis. For a session starting
+with zero prior context, the repository and its documentation are the only
+durable record it can rely on — a record, not an oracle: a collaborator's
+clear, current instruction in the live session outranks code, glossary, and
+prose (`docs/architecture/SESSION_GOVERNANCE.md`, scoped July 17, 2026).
 
 Sessions 1–59 and their same-day follow-ons (July 4–15, 2026; PRs
 #21–#102 and the first engineering-loop feature branches) are complete,
@@ -993,8 +996,14 @@ controller state or claims EL progress.
 
 This file is both the prompt that starts a session and the final deliverable
 that session must produce. Trellis itself caches derived insights so repeat
-queries get cheaper; this file does the same for engineering sessions. The
-loop:
+queries get cheaper; this file amortizes context the same way for engineering
+sessions. The analogy is economic, not governmental (scoped July 17, 2026 —
+`docs/architecture/SESSION_GOVERNANCE.md`): the session is not a belief inside
+the substrate, and the provenance/quarantine/ratification law governs the data
+Trellis stores, not the collaboration that builds it. A collaborator's clear,
+current instruction is the session's highest authority; genuine ambiguity is
+resolved by one clarifying question, then action — never by a quarantine
+proceeding. The loop:
 
 1. **Execute.** Study the repository and `TRELLIS_ROADMAP.md`, present the
    design for the objective in §3–§4 below, implement it, and pass every
