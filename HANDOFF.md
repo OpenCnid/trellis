@@ -919,7 +919,17 @@ owner ruling (model labeling of anchors permitted; fixtures pinned once
 labeled; refresh stays a human ceremony). Three primary papers were
 mirrored under OpenCnid repos, checksum-verified, and read in full: S1
 `who-grades-the-grader-pdf`, S8 `verbalizable-global-workspace-pdf`, S9
-`better-harnesses-smaller-models-pdf`. Purpose framing (owner
+`better-harnesses-smaller-models-pdf`. **[Amended July 18, 2026 (owner
+ruling): the mirror era is over — the OpenCnid collection hosts no
+papers. S1's repo is now `who-grades-the-grader` and S9's is
+`better-harnesses-smaller-models` (renamed; both are now
+locator-verified five-tier note repos; PDFs removed from HEAD, bytes
+retrievable from git history under the recorded SHA-256 hashes). S8's
+mirror was renamed `verbalizable-global-workspace` and is slated for
+deletion; S8's durable pointers are the canonical page
+(transformer-circuits.pub/2026/workspace/) and the note repo
+`global-workspace-in-llms`. The July 16 mirrored-read events stand as
+history.]** Purpose framing (owner
 direction): Trellis = RLM depth × the best, most adaptive harness (S9),
 with uncertainty-around-facts managed by the adaptive four-judge layer.
 Session commits carry the sister lab's session-trailer convention — a

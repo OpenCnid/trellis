@@ -94,7 +94,15 @@ see the decision record (§6).
   three primary papers now have checksum-verified OpenCnid mirrors —
   `who-grades-the-grader-pdf` (S1), `verbalizable-global-workspace-pdf`
   (S8), and `better-harnesses-smaller-models-pdf` (S9) — and all three
-  have been read in full. None is promoted; citing any as
+  have been read in full. **[Amended July 18, 2026: the mirrors were
+  retired by owner ruling — S1 is now the note repo
+  `who-grades-the-grader`, S9 is `better-harnesses-smaller-models`
+  (PDFs in git history only; recorded hashes still verify the
+  historical bytes), and S8's renamed signpost
+  (`verbalizable-global-workspace`) is slated for deletion, with the
+  note repo `global-workspace-in-llms` as the durable pointer. In a
+  proxy-blocked environment, the historical commits of the S1/S9 repos
+  remain a github.com-reachable path to the exact studied bytes.]** None is promoted; citing any as
   `sourceNodeIds` requires operator promotion first (AB-10). S9's
   released code is ACQUIRED: the OpenCnid fork
   `github.com/OpenCnid/migration-analysis` is cloned (outside the
