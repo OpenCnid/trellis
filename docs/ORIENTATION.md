@@ -15,7 +15,12 @@ This file is one system summarized five times at increasing information
 density, adapting **chain-of-density** summarization (Adams et al. 2023,
 [arXiv:2309.04269](https://arxiv.org/abs/2309.04269): iteratively fold
 missing salient entities into a summary of fixed length; human raters
-prefer summaries densified to roughly human-written density). Three rules
+prefer summaries densified to roughly human-written density). The
+method's canonical home — the lab's methodology, synthesis prompt, and
+note on the paper itself — is
+[OpenCnid/chain-of-density](https://github.com/OpenCnid/chain-of-density);
+the wider notes collection it anchors is recorded in
+[`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md). Three rules
 make the ladder safe to stop on at any rung:
 
 1. **Each density is conceptually complete.** What D0 tells you is true

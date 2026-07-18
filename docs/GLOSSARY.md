@@ -20,7 +20,9 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   [FLYWHEEL_EXPLAINER.md](benchmarks/FLYWHEEL_EXPLAINER.md)): a language model
   given a Python REPL that treats context as data in the persistent namespace
   and calls itself (`llm_query`) as a subroutine over slices — never
-  "Representation Learning" or "Running Language Model."
+  "Representation Learning" or "Running Language Model." The paper (Zhang,
+  Kraska & Khattab, arXiv:2512.24601) and the lab's locator-verified note:
+  [OpenCnid/recursive-language-models](https://github.com/OpenCnid/recursive-language-models).
 - **REPL namespace** — the persistent variable space (`self.locals`) that
   survives across all REPL turns of one `rlm.completion()` call; the RLM's
   working memory substrate, as distinct from conversation scrollback.

@@ -102,7 +102,9 @@ see the decision record (§6).
   (`verbalizable-global-workspace`) is slated for deletion, with the
   note repo `global-workspace-in-llms` as the durable pointer. In a
   proxy-blocked environment, the historical commits of the S1/S9 repos
-  remain a github.com-reachable path to the exact studied bytes.]** None is promoted; citing any as
+  remain a github.com-reachable path to the exact studied bytes. The
+  full note-repo inventory, machine face, and PROPOSED ingestion
+  contract are recorded in `docs/RESEARCH_NOTES_COLLECTION.md`.]** None is promoted; citing any as
   `sourceNodeIds` requires operator promotion first (AB-10). S9's
   released code is ACQUIRED: the OpenCnid fork
   `github.com/OpenCnid/migration-analysis` is cloned (outside the

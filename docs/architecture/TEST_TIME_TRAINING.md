@@ -502,7 +502,7 @@ the roadmap §5 entry — unchanged ceremony). Hosted open-model endpoints
 
 | # | work | why it matters here |
 |---|---|---|
-| 1 | Zhang, Kraska & Khattab, *Recursive Language Models*, arXiv:2512.24601 | the formulation Trellis implements; TTT would live UNDER this |
+| 1 | Zhang, Kraska & Khattab, *Recursive Language Models*, arXiv:2512.24601 | the formulation Trellis implements; TTT would live UNDER this; locator-verified note: [OpenCnid/recursive-language-models](https://github.com/OpenCnid/recursive-language-models) |
 | 2 | Sun et al., *Learning to (Learn at Test Time)*, arXiv:2407.04620 | Family A's modern statement (TTT-Linear/TTT-MLP) |
 | 3 | Behrouz et al., *Titans*, arXiv:2501.00663 (+ *ATLAS*, arXiv:2505.23735) | fast-weight long-term memory at 2M+ context |
 | 4 | Ba et al., arXiv:1610.06258; Schlag et al., arXiv:2102.11174 | the FastWeights lineage; attention ≈ fast-weight programming |

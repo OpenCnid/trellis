@@ -53,7 +53,12 @@ the engineering case.
 
 Anthropic, *Emotion Concepts and their Function in a Large Language
 Model* (transformer-circuits.pub/2026/emotions, April 2, 2026; Sonnet
-4.5). The findings this record actually leans on:
+4.5). *(Dated pointer, July 18, 2026: the lab's locator-verified
+five-tier note on this paper lives at
+[OpenCnid/emotion-concepts-in-llms](https://github.com/OpenCnid/emotion-concepts-in-llms)
+— a reading aid with locators into the arXiv v1 rendering; this
+record's §2 distillation and §10 claim standings remain the authority
+for Trellis.)* The findings this record actually leans on:
 
 1. Emotion concepts are **linear directions** in the residual stream,
    extractable with ordinary probing machinery, activating on implicit
