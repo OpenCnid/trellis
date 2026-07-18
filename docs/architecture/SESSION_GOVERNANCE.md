@@ -137,4 +137,89 @@ reviewer. It does not flip any existing gate's behavior: the zero-paid
 gate, merge rights, promotion and registration ceremonies, and the
 acceptance-ledger owner acts all stand exactly as specified until each
 is individually re-specified under this principle (per §1.6, which
-this record honors).
+this record honors). The distinction that keeps this principle
+compatible with the rest of the record: approval *mechanics*
+(composing requests, digests, transport) are automated freely — the
+engineering loop already does exactly this — while each gate's
+*terminal signature* changes hands only by that gate's own dated
+owner re-specification.
+
+### July 17, 2026 — second application (owner and collaborator, live session — consolidated onto the Session 66 PR)
+
+The first application merged as PR #126 and was then rolled back by
+owner direction the same day, to consolidate the intake onto the
+Session 66 PR (#124) together with the extensions below — a
+merge-revert-reland recorded in that PR's history, nothing hidden.
+The owner and the collaborator then ruled on the remaining questions
+in a live session; this entry transcribes those rulings. Its
+authority is the §1.5.2 rule itself: the principals' live word,
+recorded the same day.
+
+1. **The primacy-slot finding.** A whole-project search found the
+   authority-claim sense of "source of truth" occurring exactly ONCE —
+   the old `HANDOFF.md` opening line — against six ordinary
+   DRY-engineering uses and one line stating the correct doctrine:
+   `docs/benchmarks/CRITIQUE_AND_FUTURE.md` ("an append-only belief
+   ledger, not a source of truth ... guarantees are provenance and
+   consistency; non-guarantee is validity"). The damage came from
+   position, not repetition: one sentence in the primacy slot of the
+   file every session loads first. The repo knew better six inches
+   away. **Primacy-slot discipline (adopted):** the opening paragraphs
+   of session-loaded files (`AGENTS.md`, `HANDOFF.md`, this file) are
+   doctrine whether intended or not — they are reviewed deliberately,
+   kept short, and carry only sentences meant as law.
+2. **Lessons bind the loader, not the archive (owner ruling).**
+   Recording a lesson must function as UNBLOCKING development, never
+   as absolution. A lesson that lands only in an archive, register
+   row, or teaching record is storage, not learning: the R-31 lesson
+   ("a disambiguation answers a question; it does not open a case")
+   was recorded and then not operated on by the very next sessions.
+   From here on, an accepted lesson lands at a loaded surface — this
+   file, the `AGENTS.md`/`HANDOFF.md` openings, or agent memory — in
+   the same change that records it, and the recording states which
+   feature or behavior it unblocks.
+3. **Ratification is an accountability terminus, never a truth oracle
+   (owner ruling, verbatim in spirit: there is no such thing as a
+   truth oracle).** No code, gate, or ceremony certifies truth —
+   epistemology is not solved and is not solvable in code (every
+   justification chain ends in regress, circularity, or a stopping
+   point someone answers for). What the gates provide is an
+   accountable person taking responsibility for an axiom. Code
+   implements epistemic HYGIENE, not truth: checkable custody,
+   detectable drift, calibrated humility (`u` never reaches zero),
+   conflict distinguishable from ignorance, and refusal to glue what
+   does not glue. In the IEG frame: hygiene is the accounting of
+   exchanges — what crossed which boundary, from whom, at what cost —
+   with the open residue routed to the principals, who are where the
+   system's un-closeable questions terminate.
+4. **The gate-funding rule (adopted, IEG condensation reading).**
+   Every session-side gate or ceremony names the measured failure or
+   dated owner decision that funds its existence (the zero-paid gate:
+   spend; merge rights: authority; stored-belief ceremonies: the
+   laundering and poisoning measurements). A gate no measured failure
+   or owner decision funds is ceremony, and is retired by dated entry
+   here. Structure persists only while it can fund its existence;
+   ceremony decays.
+5. **The willpower principle (owner ruling).** The finite resource
+   ceremonies spend is not agent time but HUMAN WILLPOWER — every
+   loop a principal must shepherd closed that should never have
+   opened. The harness optimizes for its conservation: proceedings
+   are reserved for what §2's untouched-gates list protects, and
+   knowledge transfer authored by the principals is never routed
+   through a contested-belief shape.
+6. **The trust grounding (owner ruling).** The owner vouches for the
+   collaborator (Matthew Murphy — whose authored protocols are
+   literally part of the session harness). Adversarial posture toward
+   a principal's inputs ends: terms mean what their author says,
+   accepted in one turn; artifact bookkeeping (checksums, versions,
+   evidence classes on published claims) continues because it keeps
+   ideas attributable — it attaches to artifacts, never to a
+   principal's meaning or intent.
+7. **The operating-layer promotion (collaborator direction,
+   accepted).** "Given what's in the archive, we can promote most of
+   it to the operating layer and start building together again":
+   archived lessons, teachings, and register findings are promotable
+   to loaded surfaces under rule 2's mechanism — promote what the
+   next session must OPERATE ON; archive what it need only be able to
+   FIND. The working mode going forward is code-the-shape, then test
+   and iterate together.

@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "params": {
+    "priorWeight": 2,
+    "baseRate": 0.5,
+    "halfLifeMs": 1000000
+  },
+  "asOfMs": 2000000,
+  "scenarios": {
+    "happy-mixed": {
+      "opinion": {
+        "b": 0.2857142857142857,
+        "d": 0.14285714285714285,
+        "u": 0.5714285714285714,
+        "projected": 0.5714285714285714,
+        "events": {
+          "clean": 2,
+          "drawback": 1,
+          "abstain": 0
+        }
+      },
+      "conflicts": [],
+      "disagreements": [],
+      "exclusions": [],
+      "counts": {
+        "verdictsConsumed": 3,
+        "verdictsWithheld": 0,
+        "jurisdictionAbstains": 0
+      }
+    },
+    "all-abstain-evidence": {
+      "opinion": {
+        "b": 0,
+        "d": 0,
+        "u": 1,
+        "projected": 0.5,
+        "events": {
+          "clean": 0,
+          "drawback": 0,
+          "abstain": 3
+        }
+      },
+      "conflicts": [],
+      "disagreements": [],
+      "exclusions": [],
+      "counts": {
+        "verdictsConsumed": 3,
+        "verdictsWithheld": 0,
+        "jurisdictionAbstains": 0
+      }
+    },
+    "cross-role-disagreement": {
+      "opinion": {
+        "b": 0.14285714285714285,
+        "d": 0.2857142857142857,
+        "u": 0.5714285714285714,
+        "projected": 0.42857142857142855,
+        "events": {
+          "clean": 1,
+          "drawback": 1,
+          "abstain": 1
+        }
+      },
+      "conflicts": [],
+      "disagreements": [
+        {
+          "registryEntry": "logical.falsification",
+          "judgeIds": [
+            "judge-panel:j1a",
+            "judge-panel:j3a"
+          ]
+        }
+      ],
+      "exclusions": [],
+      "counts": {
+        "verdictsConsumed": 3,
+        "verdictsWithheld": 0,
+        "jurisdictionAbstains": 0
+      }
+    },
+    "no-global-section": {
+      "opinion": {
+        "b": 0.3333333333333333,
+        "d": 0,
+        "u": 0.6666666666666666,
+        "projected": 0.6666666666666666,
+        "events": {
+          "clean": 2,
+          "drawback": 0,
+          "abstain": 0
+        }
+      },
+      "conflicts": [
+        {
+          "parameter": "logical.falsification/cited",
+          "judgeIds": [
+            "judge-panel:j1a",
+            "judge-panel:j1b"
+          ]
+        }
+      ],
+      "disagreements": [],
+      "exclusions": [],
+      "counts": {
+        "verdictsConsumed": 2,
+        "verdictsWithheld": 2,
+        "jurisdictionAbstains": 0
+      },
+      "blendCounterfactual": {
+        "b": 0.375,
+        "d": 0.125,
+        "u": 0.5,
+        "projected": 0.625,
+        "events": {
+          "clean": 3,
+          "drawback": 1,
+          "abstain": 0
+        }
+      }
+    },
+    "exclusion": {
+      "opinion": {
+        "b": 0.3333333333333333,
+        "d": 0,
+        "u": 0.6666666666666666,
+        "projected": 0.6666666666666666,
+        "events": {
+          "clean": 2,
+          "drawback": 0,
+          "abstain": 0
+        }
+      },
+      "conflicts": [],
+      "disagreements": [],
+      "exclusions": [
+        {
+          "judgeId": "judge-panel:j3a",
+          "assumption": "independent_evidence_pool_available"
+        }
+      ],
+      "counts": {
+        "verdictsConsumed": 2,
+        "verdictsWithheld": 0,
+        "jurisdictionAbstains": 0
+      }
+    },
+    "jurisdiction-abstain": {
+      "opinion": {
+        "b": 0.3333333333333333,
+        "d": 0,
+        "u": 0.6666666666666666,
+        "projected": 0.6666666666666666,
+        "events": {
+          "clean": 2,
+          "drawback": 0,
+          "abstain": 1
+        }
+      },
+      "conflicts": [],
+      "disagreements": [],
+      "exclusions": [],
+      "counts": {
+        "verdictsConsumed": 3,
+        "verdictsWithheld": 0,
+        "jurisdictionAbstains": 1
+      }
+    }
+  }
+}

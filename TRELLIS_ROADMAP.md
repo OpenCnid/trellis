@@ -260,9 +260,12 @@ follow-ons) with the Session 55 EL-01 PR, Session 51 with the Session 56
 EL-02 feature branch, Session 52 with the Session 57 EL-03 feature branch,
 Session 53 with the Session 58 EL-04 feature branch, Session 54 with the
 Session 59 EL-05 feature branch, Session 58 with the Session 63 EL-11 PR
-(Sessions 55–57 having moved with the intervening EL PRs), and Session 59
-with the Session 64 EL-10 recovery-reachability feature branch. The live
-ledger below keeps the most recent five OpenCnid sessions: 60–64, plus the July 16 sister-lab Session 65 entry at its chronological position — window management for it is deferred to the next OpenCnid session.)*
+(Sessions 55–57 having moved with the intervening EL PRs), Session 59
+with the Session 64 EL-10 recovery-reachability feature branch, and
+Session 60 with the Session 66 judge-panel PR. The live
+ledger below keeps the most recent OpenCnid sessions: 61–64, the July 16
+sister-lab Session 65 entry at its chronological position, and
+Session 66.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -799,96 +802,6 @@ the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
 
 
-### July 15, 2026 — Session 60: EL-06 deterministic verification and protected gates owner-ratified and accepted, zero-model and zero-paid
-
-Session 60 executed only engineering-loop feature `EL-06` on
-`implement-el06-verification-gates`, based on required merged master commit
-`27bb7abbf9399c064bc578a2f12328eacb52c1a2` (PR #105 / owner-accepted EL-05).
-After reviewing the complete closeout, the owner accepted EL-06 and explicitly
-authorized commit, merge, and push to `master`.
-
-1. **All 36 owned requirements implemented and linked:** an independent SPEC
-   §18 audit computed exactly `EL-REQ-DATA-003`, `005`; `STATE-005`, `007`,
-   `010`; `EPISODE-004`; `VERIFY-001`–`007`; `APPROVAL-001`–`009`;
-   `RECOVERY-001`–`003`, `007`, `009`, `010`; `OBS-002`, `004`, `006`,
-   `007`; and `SEC-002`–`005`. Each maps one-for-one to concrete source and
-   deterministic tests in `tools/engineering-loop/src/requirements.ts`;
-   required = 36, implemented = 36, verified = 36, outstanding = 0.
-2. **Controller verification and terminal gates:** `verifier.ts` binds an
-   immutable active acceptance definition to workflow, feature, session,
-   repository, scope, dependencies, requirements, retention, protected
-   preconditions, and separately executed commands. Each command observation
-   must exactly match argv, cwd, sorted non-secret environment, timeout,
-   repository before/after, exit/signal, cancellation/timeout, digest-linked
-   retained output, and engine counts. Missing, stale, contradictory,
-   incomplete, or unverifiable evidence stops advancement. Runner, checker,
-   model, conversation, and repository-prose claims remain advisory. EL-06
-   kernel transitions to `awaiting_review` or `accepted` require the matching
-   verifier gate; acceptance additionally requires protected human review,
-   consumed required approvals, satisfied dependencies/scope/preconditions,
-   and no unresolved unknown effect.
-3. **Protected policy and recovery:** `policy.ts` represents every SPEC §12
-   action as a strict request and validates exact unused approval truth only
-   through an injected protected external channel. Issuer, action, workflow,
-   feature, session, request digest, target/scope, repository, estimate/limit,
-   issue/expiry/revocation, and consumption bind exactly. Widening,
-   inheritance, contingency, retry reuse, mismatch, expiry, revocation, and
-   prior consumption refuse. Atomic decision material consumes the approval;
-   paid policy enforces the USD 5 repository cap, any lower approval cap, and
-   token/cost actuals while invoking no paid action. Push and merge expose no
-   controller execution path. `recovery.ts` classifies the full SPEC taxonomy
-   before action, permits finite automatic retry only for typed transient
-   no-effect or proven identical-idempotent operations, accounts bounded
-   implementation recovery separately, stops on exhaustion, blocks unknown
-   effects with named reconciliation, and appends rather than rewrites signed
-   human reconciliation history.
-4. **Fresh checker, secrecy, and retention:** `checker.ts` compiles only a
-   fresh start request with a distinct episode/thread/runner, read-only access
-   to its exact working directory, and no writable root, credential, network,
-   external effect, controller-evidence, approval, acceptance, or transition
-   capability. It strictly validates lifecycle ordering, terminal uniqueness,
-   correlations, byte/schema/enum/identifier/reference bounds, and advisory
-   checker output. Policy boundaries redact configured secrets and bearer
-   values before persistence or prompt reuse; metric labels are coarse enums;
-   workflows carry a retention declaration and expiry/deletion leaves a
-   non-sensitive tombstone preserving the terminal record identity.
-5. **Deterministic evidence:** baseline was 101 files / 1,094 tests. The exact
-   focused command `npx vitest run tools/engineering-loop/tests/verifier.test.ts
-   tools/engineering-loop/tests/policy.test.ts
-   tools/engineering-loop/tests/recovery.test.ts
-   tools/engineering-loop/tests/checker.test.ts
-   tools/engineering-loop/tests/requirements.test.ts` passed **76 tests across
-   5 files**. `npm test` passed **1,161 tests across 105 files**; `npm run
-   build` passed; `npm run python:check` passed; `docker compose config
-   --quiet` exited 0; Draft 2020-12 catalog/schema validation printed **10**;
-   and `git diff --check` exited 0 with only expected Windows LF→CRLF notices.
-   Tests used injected fake commands, approvals, clock, runner, repository,
-   effects, and deterministic data; remote-dependent tests, model completions,
-   paid calls, and real protected effects = 0.
-6. **Audit findings:** the first focused run exposed two fixture defects (a
-   tombstone call omitted required preservation fields and a bearer fixture
-   was shorter than the established credential pattern); both tests were
-   corrected. The subsequent authority audit found and pinned a missing
-   `cancelled` recovery class, SPEC-inaccurate environmental/harness defaults,
-   stale-definition reporting, approval issue-time ordering, unique verifier
-   finding identities, complete checker-start lifecycle proof, coarse metric
-   labels, and least-privilege read roots. Focused TypeScript/tests and the full
-   suite passed after these corrections. The required post-closeout full run
-   then caught three EL-03 derived-view pins changed by EL-06 moving from
-   `planned` to `active`: `next_feature` was correctly null while owner review
-   remained pending. After owner acceptance changed EL-06 to `accepted`, the
-   deterministic view correctly advanced to `EL-07`; report/status/handoff
-   SHA-256 pins were recomputed from those final bytes. No product-runtime import,
-   dependency, production prompt/pin, API, worker, database, queue, tracker,
-   scheduler, daemon, concurrent writer, automatic Git effect, or EL-07
-   implementation entered the diff.
-7. **Closeout and next gate:** the catalog records only EL-06's owner-accepted
-   status change. Session 55 moved
-   verbatim to `docs/archive/ROADMAP_HISTORY.md`, leaving live Sessions 56–60.
-   `HANDOFF.md` is prepared for EL-07 preflight while preserving §0 byte-for-
-   byte and retaining manual handoff authority. Owner acceptance dependency-
-   unblocks EL-07; its paid trials and any handoff migration remain separately
-   gated.
 ### July 15, 2026 — Session 61: EL-07 preflight refused; EL-10 controller activation ratified and specified, zero-model and zero-paid
 
 Session 61 was assigned engineering-loop feature `EL-07`. **The preflight gate
@@ -1645,37 +1558,132 @@ the future-project category stated. UHE/J-space linkage enters under
 AB-1 (design vocabulary only); the Landauer tell is typed CONJECTURE
 and not load-bearing.
 
-### July 17, 2026 — Owner-directed: session-governance scoping — the substrate's provenance law governs stored beliefs, not the engineering session (branch `d/substrate-provenance-governance-38998e`, docs-only, zero-model and zero-paid)
+### July 17, 2026 — Session 66: four-judge reconciliation + the three panel drills (zero-model and zero-paid)
 
-An external scoping note arrived (PROPOSED, July 17) naming a real
-governance defect: the session-contract files applied the substrate's
-provenance/quarantine/ratification doctrine to the engineering session
-itself, so a live collaborator's clear instruction ranked below
-committed prose and a terminology clarification (UHE) was processed as
-a contested-belief proceeding across sessions. The owner directed its
-application. `docs/architecture/SESSION_GOVERNANCE.md` landed carrying
-the note verbatim plus the dated application record. Three governance
-surfaces amended in the note's sense (the authority order is scoped,
-not abolished): `AGENTS.md`'s opening — "authority order everywhere"
-became "across the committed record," with the collaborator's clear,
-current instruction named the session's highest authority and the
-one-question ambiguity rule stated; `HANDOFF.md`'s opening — "only
-sources of truth" narrowed to "only durable record" (a record, not an
-oracle); `HANDOFF.md` §0 — the cache analogy typed economic, not
-governmental (the session is not a belief inside the substrate), the
-owner-directed amendment setting §0's new preserve-verbatim baseline.
-Mirrors: `docs/ORIENTATION.md`'s governance row scoped and
-`docs/README.md` §2 pointer added; the owner-side session bootstrap
-prompt amended in the same pass. Deliberately untouched, with reasons
-in the record: HANDOFF Appendix B's frozen `<invariant_authority>`
-block (frozen plans are superseded, never edited), `docs/archive/**`,
-`IEG_TEACHINGS.md` finding 5 (a teaching record, corrected not
-rewritten), `GLOSSARY.md` (already correct — provenance "proves
-origin, never correctness" is the very distinction enforced), and
-every remaining `code > glossary > prose` mirror that ranks committed
-artifacts only. §1.5.3's automatable-gates principle is adopted for
-future gate specs and flips no existing gate (zero-paid, merges,
-promotions, ledger ceremonies all stand). Authored under Guardrail 15
-(both prompt protocols invoked before bytes). §5 window management
-deferred per the Session 65 convention. Everything on this branch
-awaits owner ratification at merge review.
+Session 66 executed the preserved four-judge objective by owner
+direction: `FOUR_JUDGE_DESIGN.md` §10.1 item 1 (a)/(b)/(c) plus the §7
+drills 1–3. Zero model completions, zero paid calls, no database, no
+engineering-loop surface touched. Both prompt protocols were invoked
+before authoring the role definitions (guardrail 15 / session
+guardrail 4). The S9 fork was re-cloned for the reconstruction
+(`github.com/OpenCnid/migration-analysis` at fork commit `2bb5e54`,
+placed at `D:\OpenCnid\migration-analysis`, outside the worktree).
+
+1. **The reconciliation record**
+   (`docs/product/epistemic-support/RECONCILIATION.md`, new): the layer
+   mapping (S10 framework / four-role minimal ecology instance;
+   blindness = unselected qualified parameters + abstention boundary;
+   the Epistemic Reliability ecology judge verified to SPLIT across
+   J1/J3 along the blindness boundary — a recorded refinement of the
+   §10.1 preliminary mapping; J4 = Adversarial + Coverage Meta-Judge
+   FUSED, divergence recorded with falsifier); the four completed
+   definitions in S10's YAML schema with per-field `# src:` citations
+   (S1 via register rows + the committed contract frames — S1's
+   released code is still unlocated; the S9 fork's
+   `docs/adaptation.md` five failure classes ground J4's
+   `convention_blind`; three recorded schema extensions: `taxonomy`
+   with a qualified-parameter map, `inputs`, `required_assumptions`);
+   and the §3 composition design adopting R-29 (hard
+   compatibility/applicability gates, typed counted exclusions, weights
+   NOT adopted per AB-3) and R-30 (no-global-section: conflicted
+   verdicts withheld from evidence accumulation — u-dominant, never a
+   blend). The genuine divergence between the parents — §3's
+   "J1-clean + J3-drawback feeds d and flags" vs R-30's u-dominance —
+   is resolved EXPLICITLY as different boundaries (cross-role
+   disagreement composes as data; same-jurisdiction overlap refuses to
+   glue), with a falsifier (RECONCILIATION §3.3). The `abstainReason
+   (jurisdiction | evidence)` verdict-schema refinement is adopted into
+   JUDGE_CONTRACT_TEMPLATE §1 by dated amendment. **Ratification is
+   OPEN (RECONCILIATION §7): every §4 verdict is a proposal until the
+   owner's dated entry lands.** Dated amendments: FOUR_JUDGE_DESIGN
+   header/§4/§7/§10.1; RESEARCH_MAP header (third dated entry).
+2. **The enforcement modules** (pure, zero-infra):
+   `src/core/graph/judge_panel.ts` — role definitions as data, Zod
+   verdict/manifest schemas (closed taxonomies; `targetModelIdentity`
+   REQUIRED per R-27), the judge registry
+   (register → contest → human re-registration; superseded contest
+   records survive), allowlist context assembly
+   (`BlindnessViolationError` naming role + input), and `composePanel`
+   in the §3.4 order feeding the UNMODIFIED drilled v1 arithmetic —
+   and `src/core/graph/judge_audit.ts` (position-debias rule,
+   `buildContestRequest` refusing ties), fully standalone: the audit
+   module imports NO repository module and `judge_panel` imports
+   nothing from it (AB-9, drill-pinned in both directions).
+3. **The drill** (`npm run test:judge-panel`,
+   `scripts/test_judge_panel.ts`, fixtures under
+   `fixtures/judge_panel/` with an independent spec-derived generator
+   and `.gitattributes -text` pins): first run green, **10 sections /
+   182 checks** — `[manifest]` 9 (pre-flight refusal exit 2, observed
+   on a tampered fixture), `[static-imports]` 35 (zero-paid banned
+   imports incl. `node:`-prefixed and bare `fetch`; AB-9 both
+   directions), `[mapping]` 20 (cross-role qualified selections
+   pairwise DISJOINT — the property licensing composition),
+   `[schema]` 15, `[blindness]` 19 (13 forbidden pairs refused typed,
+   2 missing-required fail closed), `[composition]` 54 (six scripted
+   scenarios vs the independent oracle), `[gates]` 6,
+   `[no-global-section]` 10 (typed conflict record; withheld 2;
+   u = 2/3 > blend 4/7; never equal to the blend),
+   `[audit-isolation]` 9 (J4 verdict refused; debias protocol; route
+   attempt finds zero effect), `[judge-contest]` 5 (contest → typed
+   refusal naming the judge → human re-registration restores → history
+   survives superseded). `--negative-control` exits 3 with ALL THREE
+   planted breaks detected and named (broken oracle `happy-mixed` b;
+   unrefusable blindness pair `J2_COHERENCE/claimKind`; tie finding
+   cannot contest); `--inject corrupt-expected` passes by detection
+   (exit 0); `TRELLIS_EXP_*` refusal exit 2 before any section.
+4. **Unit pins:** `src/core/graph/judge_panel.test.ts`, 17 tests green
+   inside `npm test` (roles disjoint, schemas, registry lifecycle,
+   blindness, composition arithmetic, gates, no-global-section
+   u-dominance, cross-role disagreement record, debias protocol, tie
+   never contests).
+5. **Acceptance observed:** `npm test -- --no-file-parallelism`
+   baseline **1,258 / 111** re-observed green before any change, then
+   **1,275 / 112** with the session's pins (zero existing tests
+   changed); `npm run build` green; `npm run python:check` green;
+   `npm run test:support-oracle` UNCHANGED at 7 sections / 106 checks;
+   `git diff --check` clean.
+6. **Bookkeeping:** Session 60 moved verbatim to
+   `docs/archive/ROADMAP_HISTORY.md` (window rule); this entry added;
+   `HANDOFF.md` regenerated per §0 in the same PR — §3 carries the
+   owner-directed research deep-dive (the J-space / phase-transition
+   paper study, displaced by this session, preserved with its
+   pre-registered expectation), and the RECONCILIATION ratification is
+   recorded as the pending owner act.
+
+
+### July 17, 2026 — Session-governance intake, consolidated onto the Session 66 PR (docs-only, zero-model and zero-paid)
+
+The external scoping note ("Substrate Provenance Law vs the
+Engineering Session", PROPOSED July 17) named a real governance
+defect: the session-contract files applied the substrate's
+provenance/quarantine/ratification doctrine to the engineering
+session itself, so a live principal's clear instruction ranked below
+committed prose and a terminology clarification (UHE) was processed
+as a contested-belief proceeding across sessions. A separate session
+applied it as PR #126 (merged as `6259766`); the owner then directed
+its rollback and consolidation onto PR #124 — executed as
+merge → revert → re-land in this branch's history, nothing hidden.
+The re-land restores PR #126's surfaces verbatim (the
+`docs/architecture/SESSION_GOVERNANCE.md` record carrying the note;
+the scoped `AGENTS.md` authority order; the `HANDOFF.md` opening
+narrowed to "durable record, not an oracle"; the §0 cache analogy
+typed economic-not-governmental; the `ORIENTATION.md`/`docs/README.md`
+mirrors; the deliberately-untouched list with reasons) and EXTENDS the
+record with a second dated application entry transcribing the
+principals' live rulings: the primacy-slot finding (the
+authority-claim sense of "source of truth" occurred exactly once in
+the whole project — position, not repetition, did the damage; the
+correct doctrine already sat in `CRITIQUE_AND_FUTURE.md`) and the
+primacy-slot discipline; lessons bind the LOADER, not the archive
+(recording functions as unblocking, never absolution); ratification
+as accountability terminus, never a truth oracle (hygiene, not truth,
+is what code implements — the IEG exchange-accounting frame); the
+gate-funding rule (every session-side gate names the measured failure
+or owner decision that funds it, or retires by dated entry); the
+willpower principle (the finite resource ceremonies spend is human
+willpower); the trust grounding (owner vouches for the collaborator;
+artifact bookkeeping attaches to artifacts, never to a principal's
+meaning); and the collaborator's operating-layer promotion direction,
+accepted — promote what the next session must operate on, archive
+what it need only find. Agent-side memory updated in the same pass.
+Everything rides PR #124 and awaits owner merge.

@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "asOfMs": 2000000,
+  "params": { "priorWeight": 2, "baseRate": 0.5, "halfLifeMs": 1000000 },
+  "note": "Scripted verdict streams. Every event sits one half-life before asOf, so decay is exercised in every composition. Scenarios with expect 'compose' have oracle rows in expected_compositions.json; 'refuse:*' scenarios assert the named typed refusal.",
+  "scenarios": [
+    {
+      "name": "happy-mixed",
+      "caseId": "case-fact",
+      "expect": "compose",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j2a", "role": "J2_COHERENCE", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j3a", "role": "J3_CORROBORATION", "beliefId": "judge-panel:belief-001", "verdict": "drawback", "drawback": "uncorroborated", "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "all-abstain-evidence",
+      "caseId": "case-fact",
+      "expect": "compose",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "abstain", "drawback": null, "abstainReason": "evidence", "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j2a", "role": "J2_COHERENCE", "beliefId": "judge-panel:belief-001", "verdict": "abstain", "drawback": null, "abstainReason": "evidence", "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j3a", "role": "J3_CORROBORATION", "beliefId": "judge-panel:belief-001", "verdict": "abstain", "drawback": null, "abstainReason": "evidence", "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "cross-role-disagreement",
+      "caseId": "case-fact",
+      "expect": "compose",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j2a", "role": "J2_COHERENCE", "beliefId": "judge-panel:belief-001", "verdict": "abstain", "drawback": null, "abstainReason": "evidence", "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j3a", "role": "J3_CORROBORATION", "beliefId": "judge-panel:belief-001", "verdict": "drawback", "drawback": "authority_contradicted", "atMs": 1000000, "weight": 2 }
+      ]
+    },
+    {
+      "name": "no-global-section",
+      "caseId": "case-fact",
+      "expect": "compose",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "drawback", "drawback": "contradicted_by_cited_bytes", "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j1b", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j2a", "role": "J2_COHERENCE", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j3a", "role": "J3_CORROBORATION", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "exclusion",
+      "caseId": "case-no-independent-evidence",
+      "expect": "compose",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-002", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j2a", "role": "J2_COHERENCE", "beliefId": "judge-panel:belief-002", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "jurisdiction-abstain",
+      "caseId": "case-prediction",
+      "expect": "compose",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-004", "verdict": "abstain", "drawback": null, "abstainReason": "jurisdiction", "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j2a", "role": "J2_COHERENCE", "beliefId": "judge-panel:belief-004", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j3a", "role": "J3_CORROBORATION", "beliefId": "judge-panel:belief-004", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "refuse-j4-verdict",
+      "caseId": "case-fact",
+      "expect": "refuse:AuditVerdictInCompositionError",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j4a", "role": "J4_AUDIT", "beliefId": "judge-panel:belief-001", "verdict": "drawback", "drawback": "systematic_drift", "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "refuse-excluded-verdict",
+      "caseId": "case-no-independent-evidence",
+      "expect": "refuse:CompositionRefusedError",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-002", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j3a", "role": "J3_CORROBORATION", "beliefId": "judge-panel:belief-002", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "refuse-inapplicable-nonabstain",
+      "caseId": "case-prediction",
+      "expect": "refuse:CompositionRefusedError",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-004", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "refuse-mixed-belief",
+      "caseId": "case-fact",
+      "expect": "refuse:CompositionRefusedError",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-002", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "refuse-unregistered",
+      "caseId": "case-fact",
+      "expect": "refuse:CompositionRefusedError",
+      "verdicts": [
+        { "judgeId": "judge-panel:ghost", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "atMs": 1000000, "weight": 1 }
+      ]
+    },
+    {
+      "name": "refuse-all-jurisdiction",
+      "caseId": "case-value-mode",
+      "expect": "refuse:CompositionRefusedError",
+      "verdicts": [
+        { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-003", "verdict": "abstain", "drawback": null, "abstainReason": "jurisdiction", "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j2a", "role": "J2_COHERENCE", "beliefId": "judge-panel:belief-003", "verdict": "abstain", "drawback": null, "abstainReason": "jurisdiction", "atMs": 1000000, "weight": 1 },
+        { "judgeId": "judge-panel:j3a", "role": "J3_CORROBORATION", "beliefId": "judge-panel:belief-003", "verdict": "abstain", "drawback": null, "abstainReason": "jurisdiction", "atMs": 1000000, "weight": 1 }
+      ]
+    }
+  ],
+  "invalidVerdicts": [
+    {
+      "name": "unknown-class",
+      "verdict": { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "drawback", "drawback": "vibes_off", "atMs": 1000000, "weight": 1 }
+    },
+    {
+      "name": "wrong-role-class",
+      "verdict": { "judgeId": "judge-panel:j2a", "role": "J2_COHERENCE", "beliefId": "judge-panel:belief-001", "verdict": "drawback", "drawback": "unsupported_citation", "atMs": 1000000, "weight": 1 }
+    },
+    {
+      "name": "drawback-null-class",
+      "verdict": { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "drawback", "drawback": null, "atMs": 1000000, "weight": 1 }
+    },
+    {
+      "name": "abstain-no-reason",
+      "verdict": { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "abstain", "drawback": null, "atMs": 1000000, "weight": 1 }
+    },
+    {
+      "name": "clean-with-class",
+      "verdict": { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": "unsupported_citation", "atMs": 1000000, "weight": 1 }
+    },
+    {
+      "name": "clean-with-reason",
+      "verdict": { "judgeId": "judge-panel:j1a", "role": "J1_GROUNDING", "beliefId": "judge-panel:belief-001", "verdict": "clean", "drawback": null, "abstainReason": "evidence", "atMs": 1000000, "weight": 1 }
+    }
+  ]
+}

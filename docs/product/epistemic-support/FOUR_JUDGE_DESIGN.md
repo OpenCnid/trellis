@@ -18,6 +18,18 @@ Ingestion and reconciliation are Session 66's first task (§10.1);
 until owner ratification, neither design is authoritative over the
 other.
 
+**Third amendment (July 17, 2026, Session 66): §10.1 item 1 is
+EXECUTED.** The reconciliation record —
+[`RECONCILIATION.md`](RECONCILIATION.md) — carries the layer mapping,
+the four completed role definitions in S10's YAML schema with
+per-field sources, the adopted composition design (R-29 hard
+compatibility gate; R-30 no-global-section), the per-role verdicts
+with falsifiers, and the enforcement/pin table. The panel drills of §7
+items 1–3 are implemented in the same PR
+(`npm run test:judge-panel`). **Ratification remains OPEN**
+(RECONCILIATION §7): the verdicts are proposals until the owner's
+dated entry lands, and the two designs stay co-equal until then.
+
 Program context: [`PROGRAM_CONTEXT.md`](PROGRAM_CONTEXT.md). Parent
 design record: [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)
 (the original review-series proposal it graduated from was removed at
@@ -114,6 +126,18 @@ with per-role weight keys resolved by the computation module, and every
 abstain routed to `u`. The expression string + role taxonomy versions
 are hash-pinned (`metricSha`, parent §4.2).
 
+**Dated amendment (July 17, 2026, Session 66):** the composition
+adopts the two S10 structural imports per §10.1 item 1(c), specified
+in [`RECONCILIATION.md`](RECONCILIATION.md) §3 and pinned by
+`npm run test:judge-panel`: the hard compatibility/applicability gates
+(R-29 — typed counted exclusions, never a similarity score, fail-closed
+when nothing survives) and the no-global-section outcome (R-30 —
+qualified-parameter overlap conflicts emit a typed conflict record and
+withhold the conflicted verdicts from evidence accumulation, u-dominant,
+never a blend). The §3 "disagreement is data" rule and R-30 resolve to
+different boundaries (cross-role vs same-jurisdiction) —
+RECONCILIATION §3.3 carries the explicit resolution and its falsifier.
+
 **J4 composes differently by design.** Its verdicts never touch a
 belief's opinion. A J4 `systematic-drift` finding against a judge
 contests **the judge** — the capability entity — through the ordinary
@@ -161,7 +185,16 @@ pool drift, is the watched failure** (R-03).
 | Position bias neutralized in J4 | judge twice with positions swapped; a win counts only on agreement | protocol unit pin on the pairing harness |
 | Writer never sees any of it | no judge/support fields on RLM-visible read surfaces | kernel-prompt substring absence pin + read-surface unit pins |
 
-## 7. Drills (zero-paid first; all PROPOSED — UNRUN)
+## 7. Drills (zero-paid first)
+
+**Dated amendment (July 17, 2026, Session 66): items 1–3 are
+IMPLEMENTED** as `npm run test:judge-panel`
+(`scripts/test_judge_panel.ts`, fixtures under `fixtures/judge_panel/`
+with an independent expected-values generator; the
+`test:support-oracle` mold). Item 1 gained the no-global-section
+section RECONCILIATION §3.2 specifies. Item 4 remains a separate
+owner-gated paid proposal, unrun. The original proposal text below is
+preserved as written.
 
 1. **Panel-composition oracle drill** — extends
    [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md): scripted

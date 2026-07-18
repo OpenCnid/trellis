@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "files": {
+    "judges.json": "403bc5bf14dbc4f2c9b93b293c69116233b4a723fcef8a67ba93b5a5c48288ce",
+    "cases.json": "54fda1eb61ae351c5e7312a7a4129101320beacaaeaf5593192f68eb6c8a85a5",
+    "verdicts.json": "f5f35b7486365a89bd1853c59db97815eb7738c6295f3ebc8d8a89f88bc5380b",
+    "blindness.json": "0ae26cd5200e8d810eb3424a8319341bfd467a3cece12c0d0cbcea78a7c70bb6",
+    "blindness_broken.json": "6e7e655307bf53525637a0ac2f6a476a458b602a8fc2766d6e4f6419d30f7085",
+    "contest.json": "db8154aaf1e688f84c5de1215d2ac733cc0dc0ee8ca877f1b7279fd0b98e0c18",
+    "contest_broken.json": "7ecc144bece89009a30698fa21efd98698e790d702e77a9212b8c53310612455",
+    "expected_compositions.json": "088d2833bee88a41f366d4cb920434f8d4ec2cb032f54f20f144f1226bee9b04",
+    "expected_compositions_broken.json": "6e7af51eb296a8d0a08f29a4aa0fb1c331d194bcbd1a1ad39137587cfe8ee7c7"
+  }
+}
