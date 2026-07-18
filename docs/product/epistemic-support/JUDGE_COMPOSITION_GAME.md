@@ -91,6 +91,18 @@ one-way valence, one steered prompt. The collaborator's design claim
 was thereby demonstrated, not assumed: **impartiality comes from the
 judges' isolated clean contexts, not from the composer's prompting.**
 
+**A structural note surfaced by the roster correction (promoted to
+this record at the collaborator's request, July 18, 2026):** the trap
+was tighter than the paragraphs above suggest. The dealer of the hand,
+the claimant whose theory was judged, and the authorizer of the live
+run were the same invested human — the owner. Role concentration is
+the adversarial case for any promotion system: every pressure that
+could bend a panel pointed the same way, and the clean-context panel
+returned its drawbacks anyway, while the composer's layer — the one
+the concentration could actually reach — is exactly where the audit
+found the bias. One run, one case; the design point stands at that
+weight and no more.
+
 The collaborator's diagnosis of the filing failure, recorded verbatim
 in intent: a common AI mechanism — the model modifies a user's claim
 believing it adds or subtracts rigor for the purpose, committing
