@@ -925,14 +925,18 @@ DISCLOSED conflict with hard rule 10, for the owner to rule on at merge.
 Your objective is **one of the two parallel engineering tracks in §3**
 (owner re-sequencing, July 17, 2026, evening): Track A — the
 Appendix A tooling-shape increment, ACTIVATED — or Track B — the
-Appendix B EL-07 stage 1, ledger-gated. The program objectives (the
-research deep-dive on the owner-supplied paper, then the four-judge
-work it had displaced) are preserved in Appendix C, displaced not
-dropped. (Historical chain: July 16 — the epistemic-support program
-took the active objective, EL-07 stage 1 preserved in Appendix B, the
+Appendix B EL-07 stage 1, ledger-gated. The four-judge program
+objective is preserved in Appendix C, displaced not dropped; the
+paper deep-dive that had displaced it is CONSUMED (identity confirmed
+July 17, late session: the functional-emotions paper, studied in the
+PR #123 session — record `docs/architecture/RESIDUAL_STREAM_SIDECAR.md`;
+the pre-registered expectation's verdict stands OPEN, owner-owed).
+(Historical chain: July 16 — the epistemic-support program took the
+active objective, EL-07 stage 1 preserved in Appendix B, the
 recovery-reachability objective EXECUTED on master, PR #117; July 17
 morning — the paper deep-dive displaced the four-judge objective;
-July 17 evening — this dual-track ruling.)
+July 17 evening — this dual-track ruling; July 17 late session — the
+deep-dive reconciled as consumed, Appendix C standing update.)
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
@@ -1706,12 +1710,15 @@ PARALLEL ENGINEERING TRACKS, equal standing, either order:
 
 A session executes ONE track, named by the owner at session start; if
 none is named, Track A is the default while Track B's ledger gate is
-unmet. The two displaced program objectives — the research deep-dive
-on the owner-supplied paper (with its pre-registered expectation) and
-the four-judge reconciliation + panel drills — are PRESERVED verbatim
-in Appendix C, displaced not dropped: the deep-dive re-enters when
-the paper artifact arrives; the four-judge objective stays behind it
-(the July 17 morning ordering, unchanged between themselves).
+unmet. The displaced program objectives are in Appendix C with their
+standing recorded there: the research deep-dive is CONSUMED (owner
+confirmation, July 17, 2026, late session — the paper was the
+Anthropic functional-emotions paper, studied in the PR #123 session;
+the study record is `docs/architecture/RESIDUAL_STREAM_SIDECAR.md`;
+the pre-registered expectation's confirm/refute verdict stands OPEN,
+owner-owed — the sidecar record's §10 carries the row), and the
+four-judge reconciliation + panel drills remain the ONE queued
+program objective, preserved verbatim, displaced not dropped.
 
 **Why the re-sequencing (the finding that changed prioritization).**
 The July 17 IEG dialogue produced the teaching record and change
@@ -1833,9 +1840,10 @@ Do **not**:
 - touch the four-judge documents, the support modules, or the
   approved promotions (they await the durable deployment) in either
   track;
-- resolve the displaced program objectives' open questions (the
-  §10.1 reconciliation, the paper's identity) — they re-enter with
-  their own sessions per Appendix C;
+- resolve the preserved program objective's open questions (the
+  §10.1 reconciliation) or the OPEN pre-registered-expectation
+  verdict (owner-owed; `RESIDUAL_STREAM_SIDECAR.md` §10) — they
+  re-enter with their own sessions per Appendix C;
 - convert any IEG law into a constraint, comment, or code identifier
   (the §4.11 equivocation is the standing reason).
 
@@ -3319,10 +3327,30 @@ paper) with its pre-registered expectation, and the four-judge
 reconciliation + panel-drill objective with its full section set.
 Internal references (to "§3", "§4 forks", "Appendix B",
 "Session 66") read against the July 16 regeneration's numbering and
-state. Re-entry order between the two objectives is unchanged: the
-deep-dive when the paper artifact arrives, the four-judge objective
-behind it; each re-enters through an owner-named session per the §0
-loop, with its own gates traveling with it.*
+state. Re-entry: see the standing update below — the deep-dive is
+consumed; the four-judge objective re-enters through an owner-named
+session per the §0 loop, its gates traveling with it.*
+
+**Standing update (July 17, 2026, late session — owner rulings).**
+The research deep-dive in C.3 is CONSUMED, not pending: the
+owner-supplied paper was the Anthropic functional-emotions paper
+(*Emotion Concepts and their Function in a Large Language Model*,
+transformer-circuits.pub/2026/emotions), read and discussed with the
+owner in the PR #123 session and solidified into
+`docs/architecture/RESIDUAL_STREAM_SIDECAR.md`. That session framed
+the discussion as assessment-only and never re-pointed §3 — a §0
+step-5 miss, found when the owner asked at review of this file which
+paper the preserved deep-dive referred to. Two rulings recorded:
+(1) identity CONFIRMED — the deep-dive does not re-enter; the
+four-judge objective (C.3's tail through C.8) is the ONE queued
+program objective. (2) The pre-registered expectation in C.3 (the
+paper's phase transitions are condensation thresholds wearing
+another domain's clothes) was NEVER evaluated on the record; its
+confirm/refute verdict is OPEN and OWNER-OWED — recorded as
+unevaluated rather than force-glued (R-30: an un-fit is the
+informative outcome), with the owed-verdict row in the sidecar
+record's §10. C.3's deep-dive paragraphs below stay verbatim as the
+displaced record.
 
 ### Appendix C.3. Program problem statement (numbered "Session 66" at the July 16 regeneration)
 

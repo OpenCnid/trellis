@@ -262,5 +262,12 @@ proving wiring before any paid or GPU work, as everywhere else.
 | Behavioral transition is percolation-like | HYPOTHESIS | Hysteresis sweep (§7 caveats) |
 | Fire rate declining ⇒ harness health improving | AGREED metric definition | Longitudinal telemetry across harness versions |
 | Wellbeing alignment as lowest-Landauer-cost tell | CONJECTURE | None stated; not load-bearing |
+| The paper's behavioral transitions are condensation thresholds (pre-registered before reading, July 17, 2026, then-HANDOFF §3 — owner-flagged) | OPEN — confirm/refute verdict OWED (owner ruling, July 17, 2026, late session: recorded unevaluated rather than force-glued; R-30 binds — an un-fit is the informative outcome) | An honest reading of the paper's transition findings against the condensation shape (sharp self-funding threshold, S13); smooth or non-threshold structure records un-fit |
 
-Maintained by dated entry, never silent edit.
+Maintained by dated entry, never silent edit. *(Dated entry, July 17,
+2026, late session: the OPEN row above was added when the owner
+confirmed this record's anchor paper WAS the deep-dive paper the
+July 17 morning re-sequencing named — consumed in this record's
+session without re-pointing HANDOFF §3; the reconciliation record is
+the HANDOFF Appendix C standing update and the roadmap §5 postscript
+of the dual-track re-sequencing session.)*

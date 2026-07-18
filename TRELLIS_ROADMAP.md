@@ -1684,3 +1684,25 @@ as design vocabulary; no gate, default, pin, or criterion moves; no
 code byte. §5 window management deferred to the next OpenCnid
 session, per the Session 65 convention. Everything on this branch
 awaits owner ratification at merge review.
+
+**Postscript (July 17, 2026, later the same session).** At review of
+the regenerated HANDOFF the owner asked which paper the preserved
+deep-dive referred to, and the reconciliation found a real drift: the
+PR #122 §3 objective (deep-dive the owner-supplied paper connecting
+J-space and its phase transitions, with the pre-registered
+condensation expectation) was consumed de facto by the PR #123
+session — the paper was the Anthropic functional-emotions paper,
+read, discussed with the owner, and solidified into
+`docs/architecture/RESIDUAL_STREAM_SIDECAR.md` — but that session
+framed the discussion as assessment-only and never re-pointed §3 (a
+§0 step-5 miss), so the stale objective rode into this session's
+Appendix C preservation. Two owner rulings recorded: (1) identity
+CONFIRMED — the deep-dive is CONSUMED and does not re-enter; the
+four-judge objective is the ONE queued program objective in
+Appendix C. (2) The pre-registered expectation was NEVER evaluated
+on the record; its confirm/refute verdict is OPEN and OWNER-OWED —
+recorded as unevaluated rather than force-glued (R-30), with the
+owed-verdict row added to the sidecar record's §10 by dated entry.
+Same-PR deltas: HANDOFF §3/§8, the session-list paragraph, the
+Appendix C standing update; `RESIDUAL_STREAM_SIDECAR.md` §10;
+`PROGRAM_CONTEXT.md` §5.

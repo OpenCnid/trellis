@@ -161,9 +161,14 @@ see the decision record (§6).
   *(Updated July 17, 2026, evening: the owner re-sequenced to two
   parallel engineering tracks — `HANDOFF.md` §3. The TTT tooling
   increment is its Appendix A as activated; EL-07 stage 1 is its
-  Appendix B with the B.0 owner ceremony recipe; the program
-  objectives — the paper deep-dive and the four-judge work — are
-  preserved in its Appendix C, displaced not dropped.)*
+  Appendix B with the B.0 owner ceremony recipe; the four-judge
+  objective is preserved in its Appendix C, displaced not dropped.
+  Late-session reconciliation: the paper deep-dive that had displaced
+  the four-judge work is CONSUMED — the paper was the Anthropic
+  functional-emotions paper, studied in the PR #123 session, record
+  `docs/architecture/RESIDUAL_STREAM_SIDECAR.md`; the pre-registered
+  expectation's confirm/refute verdict stands OPEN, owner-owed, as a
+  §10 row there.)*
 - Implemented so far: the support-oracle drill (modules, fixtures,
   entrypoint, 11 unit pins). Not implemented: judges, `support_sweep`,
   registration, ratification queue, rubrics, claim-kind plane. No
