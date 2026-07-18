@@ -46,6 +46,16 @@ an unknown class is a refused completion, not a new category.
 never supplies it (the pen stays with the harness; same rule as
 grounded authoring's citation pinning).
 
+**Dated amendment (July 17, 2026, Session 66, per the R-29 adoption in
+[`RECONCILIATION.md`](RECONCILIATION.md) §2):** abstain verdicts carry
+one additional invariant-vocabulary field,
+`"abstainReason": "(jurisdiction | evidence)"` — S10's exterior-region
+abstention (the case lies outside the judge's jurisdiction)
+distinguished from evidential abstention (in jurisdiction, evidence
+insufficient). Both reach the opinion identically (absence of evidence
+routes to `u`); the reason is telemetry and audit material, never
+arithmetic. Non-abstain verdicts omit the field.
+
 ## 2. J1 — Grounding contract
 
 ```xml

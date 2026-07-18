@@ -70,9 +70,12 @@ see the decision record (§6).
   `FOUR_JUDGE_BASIC_MODEL.md` (S10). Its reframe: four *hyperplane
   registries*, not four judges; judges are sparse selections; the
   system is an ecology. `FOUR_JUDGE_DESIGN.md`'s four roles are a
-  minimal ecology instance; §10.1 (twice-amended) carries the
-  ingestion protocol that is Session 66's first task. Until owner
-  ratification of the merged design, neither document is authoritative
+  minimal ecology instance; §10.1 (twice-amended) carried the
+  ingestion protocol that Session 66 EXECUTED (July 17, 2026):
+  [`RECONCILIATION.md`](RECONCILIATION.md) holds the completed
+  definitions and composition design, and `npm run test:judge-panel`
+  pins the structural guarantees. Until owner ratification
+  (RECONCILIATION §7, OPEN), neither document is authoritative
   over the other. Terminology: UHE (Unified Hyperplane of Experience)
   is a loaned Lexideck house term — see the basic model's header
   addendum and RESEARCH_MAP §4.10 (**the externality principle**, the
@@ -159,8 +162,13 @@ see the decision record (§6).
   engineering-loop track's next objective (EL-07 stage 1, from
   master's Session-64 regeneration) is preserved as its Appendix B.
 - Implemented so far: the support-oracle drill (modules, fixtures,
-  entrypoint, 11 unit pins). Not implemented: judges, `support_sweep`,
-  registration, ratification queue, rubrics, claim-kind plane. No
+  entrypoint, 11 unit pins) and — Session 66, July 17, 2026 — the
+  judge-panel structural modules and drill
+  (`src/core/graph/judge_panel.ts` / `judge_audit.ts`,
+  `npm run test:judge-panel`, 10 sections / 182 checks, 17 unit pins;
+  reachability = the drill and pins only). Not implemented: live
+  judges, `support_sweep`, registration against real databases,
+  ratification queue, rubric instantiation, claim-kind plane. No
   support fields exist in any production schema; no judges are
   registered.
 
@@ -225,11 +233,13 @@ dated entry and the merge itself are the record.
   carries the record. The build (backup sidecars + restore drill +
   runbook section) is a bounded feature for an ordinary session; the
   approved S1/S8/S7 promotions execute once it stands.
-- Session 66's first task (owner direction, July 16): COMPLETE the
+- ~~Session 66's first task (owner direction, July 16): COMPLETE the
   four-judge role definitions by reconstruction from the acquired
-  artifacts (S1 mirror; the S9 replication-package fork cloned at
-  `/workspace/migration-analysis`), then ratify — design §10.1 as
-  amended.
+  artifacts, then ratify — design §10.1 as amended.~~ **EXECUTED
+  July 17, 2026 (Session 66):** definitions completed and drills
+  pinned ([`RECONCILIATION.md`](RECONCILIATION.md); the S9 fork
+  re-cloned to `D:\OpenCnid\migration-analysis`). The RATIFY half
+  remains the open owner act (RECONCILIATION §7).
 - ~~The S9 fork's license artifact~~ RESOLVED July 16 (MIT LICENSE in
   the fork; residual: upstream carries none — an upstream grant record
   would close the chain). S1's released-code locator remains missing

@@ -53,7 +53,17 @@ against SHA-256 `c54d14a4…53dd`, verified in-session); the typed
 IEG↔harness synthesis lands as §4.11 with rows R-36…R-38; R-34
 carries a precision amendment (wall-clock vs exchange-indexed decay);
 R-35 typed **posited-and-fitting**; AB-12 considered and declined —
-AB-1/AB-3/AB-10 already carry the needed bounds. Companion artifacts: the adopted doctrine record
+AB-1/AB-3/AB-10 already carry the needed bounds. **Third dated entry
+(July 17, 2026, Session 66):** the §10.1 reconciliation is EXECUTED —
+[`RECONCILIATION.md`](RECONCILIATION.md) completes the four role
+definitions from S10 with per-field sources and adopts R-29 (hard
+compatibility gate) and R-30 (no-global-section) into the composition
+design; their 3b "Absent" enforcement cells are superseded by that
+record's §5 table (enforcement home `src/core/graph/judge_panel.ts`,
+pin `npm run test:judge-panel`), pending owner ratification
+(RECONCILIATION §7 — verdicts are proposals until the dated entry
+lands). The S9 fork was re-cloned for the reconstruction
+(`D:\OpenCnid\migration-analysis`, fork commit `2bb5e54`). Companion artifacts: the adopted doctrine record
 (`docs/architecture/EPISTEMIC_SUPPORT.md`), [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md),
 [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md),
 [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md), and the

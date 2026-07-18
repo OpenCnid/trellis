@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "note": "Judged cases for the R-29 gates. Only an explicit false negates an assumption (S10: conflict, not absence, excludes).",
+  "cases": {
+    "case-fact": {
+      "beliefId": "judge-panel:belief-001",
+      "claimMode": "fact",
+      "assumptions": {
+        "cited_bytes_available": true,
+        "history_available": true,
+        "independent_evidence_pool_available": true
+      }
+    },
+    "case-no-independent-evidence": {
+      "beliefId": "judge-panel:belief-002",
+      "claimMode": "fact",
+      "assumptions": {
+        "cited_bytes_available": true,
+        "history_available": true,
+        "independent_evidence_pool_available": false
+      }
+    },
+    "case-value-mode": {
+      "beliefId": "judge-panel:belief-003",
+      "claimMode": "value",
+      "assumptions": {
+        "cited_bytes_available": true,
+        "history_available": true,
+        "independent_evidence_pool_available": true
+      }
+    },
+    "case-prediction": {
+      "beliefId": "judge-panel:belief-004",
+      "claimMode": "prediction",
+      "assumptions": {
+        "cited_bytes_available": true,
+        "history_available": true,
+        "independent_evidence_pool_available": true
+      }
+    }
+  }
+}

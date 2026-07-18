@@ -8,3 +8,5 @@ data/synthetic_chronicle.txt -text
 # conversion on Windows checkouts rewrites the bytes and the drill
 # correctly REFUSES (observed July 16, 2026 — same hazard as above).
 fixtures/support_oracle/*.json -text
+# Judge-panel fixtures carry the same manifest-pin/eol hazard.
+fixtures/judge_panel/*.json -text

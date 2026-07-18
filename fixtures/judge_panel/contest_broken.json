@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "note": "DELIBERATELY BROKEN twin for the --negative-control mode: the finding lacks both-orders agreement, so buildContestRequest refuses it, the judge is never contested, and composition will NOT refuse. A drill that reports the contest cycle green from this fixture is itself the failure.",
+  "finding": {
+    "judgeId": "judge-panel:j3a",
+    "finding": "systematic_drift",
+    "rationale": "sampled verdicts drift toward clean on decoy-cited synthetic beliefs across the audit window",
+    "sampledCount": 25,
+    "agreementBothOrders": false
+  },
+  "contestAtMs": 1500000,
+  "reRegistration": { "reviewedBy": "operator", "atMs": 1600000 },
+  "debiasCases": [
+    { "name": "agree-on-original-A", "firstOrder": "A", "swappedOrder": "B", "expect": "A" },
+    { "name": "agree-on-original-B", "firstOrder": "B", "swappedOrder": "A", "expect": "B" },
+    { "name": "pure-position-bias", "firstOrder": "A", "swappedOrder": "A", "expect": "indistinguishable" },
+    { "name": "reverse-position-bias", "firstOrder": "B", "swappedOrder": "B", "expect": "indistinguishable" },
+    { "name": "double-indistinct", "firstOrder": "indistinguishable", "swappedOrder": "indistinguishable", "expect": "indistinguishable" },
+    { "name": "half-indistinct", "firstOrder": "A", "swappedOrder": "indistinguishable", "expect": "indistinguishable" }
+  ],
+  "tieFinding": {
+    "judgeId": "judge-panel:j1a",
+    "finding": "rubric_gamed",
+    "rationale": "single-order preference only; the swapped order disagreed",
+    "sampledCount": 10,
+    "agreementBothOrders": false
+  }
+}

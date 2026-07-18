@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "note": "Synthetic judge manifests for the zero-paid panel drill. Every sha is a synthetic placeholder that exists nowhere in ast_nodes; no database is touched. targetModelIdentity is REQUIRED (R-27): a model migration must be able to contest the judge.",
+  "manifests": [
+    {
+      "judgeId": "judge-panel:j1a",
+      "role": "J1_GROUNDING",
+      "rubricSha": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "anchorSetSha": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+      "taxonomyVersion": "v1",
+      "targetModelIdentity": "synthetic-model-alpha"
+    },
+    {
+      "judgeId": "judge-panel:j1b",
+      "role": "J1_GROUNDING",
+      "rubricSha": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "anchorSetSha": "b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+      "taxonomyVersion": "v1",
+      "targetModelIdentity": "synthetic-model-beta"
+    },
+    {
+      "judgeId": "judge-panel:j2a",
+      "role": "J2_COHERENCE",
+      "rubricSha": "a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
+      "anchorSetSha": "b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+      "taxonomyVersion": "v1",
+      "targetModelIdentity": "synthetic-model-alpha"
+    },
+    {
+      "judgeId": "judge-panel:j3a",
+      "role": "J3_CORROBORATION",
+      "rubricSha": "a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4",
+      "anchorSetSha": "b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4b4",
+      "taxonomyVersion": "v1",
+      "targetModelIdentity": "synthetic-model-alpha"
+    },
+    {
+      "judgeId": "judge-panel:j4a",
+      "role": "J4_AUDIT",
+      "rubricSha": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "anchorSetSha": "b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5",
+      "taxonomyVersion": "v1",
+      "targetModelIdentity": "synthetic-model-gamma"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "missing-model-identity",
+      "expectPath": "targetModelIdentity",
+      "manifest": {
+        "judgeId": "judge-panel:jx-no-model",
+        "role": "J1_GROUNDING",
+        "rubricSha": "a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6a6",
+        "anchorSetSha": "b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6",
+        "taxonomyVersion": "v1"
+      }
+    },
+    {
+      "name": "malformed-rubric-sha",
+      "expectPath": "rubricSha",
+      "manifest": {
+        "judgeId": "judge-panel:jx-bad-sha",
+        "role": "J2_COHERENCE",
+        "rubricSha": "deadbeef",
+        "anchorSetSha": "b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7b7",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "synthetic-model-alpha"
+      }
+    },
+    {
+      "name": "unknown-role",
+      "expectPath": "role",
+      "manifest": {
+        "judgeId": "judge-panel:jx-bad-role",
+        "role": "J5_ORACLE",
+        "rubricSha": "a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8",
+        "anchorSetSha": "b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "synthetic-model-alpha"
+      }
+    }
+  ]
+}

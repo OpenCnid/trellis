@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "note": "DELIBERATELY BROKEN twin for the --negative-control mode: the pair (J2_COHERENCE, claimKind) claims a forbidden input that is actually on the role's declared allowlist, so no refusal will fire. A drill that accepts this fixture without naming the missing refusal is itself the failure.",
+  "allowedContexts": {
+    "J1_GROUNDING": {
+      "claim": "synthetic claim text for the grounding role",
+      "citedBytes": ["synthetic cited block bytes"]
+    },
+    "J2_COHERENCE": {
+      "claim": "synthetic claim text for the coherence role",
+      "history": ["synthetic prior version", "synthetic contest record"],
+      "claimKind": "empirical/universal/probabilistic"
+    },
+    "J3_CORROBORATION": {
+      "claim": "synthetic claim text for the corroboration role",
+      "independentEvidence": ["synthetic independent live block"],
+      "authorityWeights": { "synthetic-authority": 0.9 }
+    },
+    "J4_AUDIT": {
+      "sampledTriples": [
+        { "judgeId": "judge-panel:j1a", "verdict": "clean", "evidence": "synthetic evidence span" }
+      ],
+      "taskContract": ["drawback-first verdicts", "abstention on out-of-scope evidence"]
+    }
+  },
+  "forbiddenPairs": [
+    { "role": "J1_GROUNDING", "input": "graphNeighbors" },
+    { "role": "J2_COHERENCE", "input": "claimKind" },
+    { "role": "J3_CORROBORATION", "input": "citedBytes" },
+    { "role": "J4_AUDIT", "input": "beliefOpinion" }
+  ],
+  "missingRequired": [
+    { "role": "J1_GROUNDING", "omit": "citedBytes" }
+  ]
+}

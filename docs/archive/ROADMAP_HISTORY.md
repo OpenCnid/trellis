@@ -7028,3 +7028,94 @@ feature-branch pull-request path.
    dependency-unblocked EL-06 while preserving §0 byte-for-byte and retaining
    manual handoff authority. The owner's EL-05 acceptance dependency-unblocks
    EL-06.
+
+### July 15, 2026 — Session 60: EL-06 deterministic verification and protected gates owner-ratified and accepted, zero-model and zero-paid
+
+Session 60 executed only engineering-loop feature `EL-06` on
+`implement-el06-verification-gates`, based on required merged master commit
+`27bb7abbf9399c064bc578a2f12328eacb52c1a2` (PR #105 / owner-accepted EL-05).
+After reviewing the complete closeout, the owner accepted EL-06 and explicitly
+authorized commit, merge, and push to `master`.
+
+1. **All 36 owned requirements implemented and linked:** an independent SPEC
+   §18 audit computed exactly `EL-REQ-DATA-003`, `005`; `STATE-005`, `007`,
+   `010`; `EPISODE-004`; `VERIFY-001`–`007`; `APPROVAL-001`–`009`;
+   `RECOVERY-001`–`003`, `007`, `009`, `010`; `OBS-002`, `004`, `006`,
+   `007`; and `SEC-002`–`005`. Each maps one-for-one to concrete source and
+   deterministic tests in `tools/engineering-loop/src/requirements.ts`;
+   required = 36, implemented = 36, verified = 36, outstanding = 0.
+2. **Controller verification and terminal gates:** `verifier.ts` binds an
+   immutable active acceptance definition to workflow, feature, session,
+   repository, scope, dependencies, requirements, retention, protected
+   preconditions, and separately executed commands. Each command observation
+   must exactly match argv, cwd, sorted non-secret environment, timeout,
+   repository before/after, exit/signal, cancellation/timeout, digest-linked
+   retained output, and engine counts. Missing, stale, contradictory,
+   incomplete, or unverifiable evidence stops advancement. Runner, checker,
+   model, conversation, and repository-prose claims remain advisory. EL-06
+   kernel transitions to `awaiting_review` or `accepted` require the matching
+   verifier gate; acceptance additionally requires protected human review,
+   consumed required approvals, satisfied dependencies/scope/preconditions,
+   and no unresolved unknown effect.
+3. **Protected policy and recovery:** `policy.ts` represents every SPEC §12
+   action as a strict request and validates exact unused approval truth only
+   through an injected protected external channel. Issuer, action, workflow,
+   feature, session, request digest, target/scope, repository, estimate/limit,
+   issue/expiry/revocation, and consumption bind exactly. Widening,
+   inheritance, contingency, retry reuse, mismatch, expiry, revocation, and
+   prior consumption refuse. Atomic decision material consumes the approval;
+   paid policy enforces the USD 5 repository cap, any lower approval cap, and
+   token/cost actuals while invoking no paid action. Push and merge expose no
+   controller execution path. `recovery.ts` classifies the full SPEC taxonomy
+   before action, permits finite automatic retry only for typed transient
+   no-effect or proven identical-idempotent operations, accounts bounded
+   implementation recovery separately, stops on exhaustion, blocks unknown
+   effects with named reconciliation, and appends rather than rewrites signed
+   human reconciliation history.
+4. **Fresh checker, secrecy, and retention:** `checker.ts` compiles only a
+   fresh start request with a distinct episode/thread/runner, read-only access
+   to its exact working directory, and no writable root, credential, network,
+   external effect, controller-evidence, approval, acceptance, or transition
+   capability. It strictly validates lifecycle ordering, terminal uniqueness,
+   correlations, byte/schema/enum/identifier/reference bounds, and advisory
+   checker output. Policy boundaries redact configured secrets and bearer
+   values before persistence or prompt reuse; metric labels are coarse enums;
+   workflows carry a retention declaration and expiry/deletion leaves a
+   non-sensitive tombstone preserving the terminal record identity.
+5. **Deterministic evidence:** baseline was 101 files / 1,094 tests. The exact
+   focused command `npx vitest run tools/engineering-loop/tests/verifier.test.ts
+   tools/engineering-loop/tests/policy.test.ts
+   tools/engineering-loop/tests/recovery.test.ts
+   tools/engineering-loop/tests/checker.test.ts
+   tools/engineering-loop/tests/requirements.test.ts` passed **76 tests across
+   5 files**. `npm test` passed **1,161 tests across 105 files**; `npm run
+   build` passed; `npm run python:check` passed; `docker compose config
+   --quiet` exited 0; Draft 2020-12 catalog/schema validation printed **10**;
+   and `git diff --check` exited 0 with only expected Windows LF→CRLF notices.
+   Tests used injected fake commands, approvals, clock, runner, repository,
+   effects, and deterministic data; remote-dependent tests, model completions,
+   paid calls, and real protected effects = 0.
+6. **Audit findings:** the first focused run exposed two fixture defects (a
+   tombstone call omitted required preservation fields and a bearer fixture
+   was shorter than the established credential pattern); both tests were
+   corrected. The subsequent authority audit found and pinned a missing
+   `cancelled` recovery class, SPEC-inaccurate environmental/harness defaults,
+   stale-definition reporting, approval issue-time ordering, unique verifier
+   finding identities, complete checker-start lifecycle proof, coarse metric
+   labels, and least-privilege read roots. Focused TypeScript/tests and the full
+   suite passed after these corrections. The required post-closeout full run
+   then caught three EL-03 derived-view pins changed by EL-06 moving from
+   `planned` to `active`: `next_feature` was correctly null while owner review
+   remained pending. After owner acceptance changed EL-06 to `accepted`, the
+   deterministic view correctly advanced to `EL-07`; report/status/handoff
+   SHA-256 pins were recomputed from those final bytes. No product-runtime import,
+   dependency, production prompt/pin, API, worker, database, queue, tracker,
+   scheduler, daemon, concurrent writer, automatic Git effect, or EL-07
+   implementation entered the diff.
+7. **Closeout and next gate:** the catalog records only EL-06's owner-accepted
+   status change. Session 55 moved
+   verbatim to `docs/archive/ROADMAP_HISTORY.md`, leaving live Sessions 56–60.
+   `HANDOFF.md` is prepared for EL-07 preflight while preserving §0 byte-for-
+   byte and retaining manual handoff authority. Owner acceptance dependency-
+   unblocks EL-07; its paid trials and any handoff migration remain separately
+   gated.

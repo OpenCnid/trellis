@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "note": "Blindness-drill fixture: per-role allowed contexts (assemble cleanly) and the (role, forbidden-input) pairs that MUST refuse with a typed error naming role and input, before any would-be model boundary. All content is synthetic drill data.",
+  "allowedContexts": {
+    "J1_GROUNDING": {
+      "claim": "synthetic claim text for the grounding role",
+      "citedBytes": ["synthetic cited block bytes"]
+    },
+    "J2_COHERENCE": {
+      "claim": "synthetic claim text for the coherence role",
+      "history": ["synthetic prior version", "synthetic contest record"],
+      "claimKind": "empirical/universal/probabilistic"
+    },
+    "J3_CORROBORATION": {
+      "claim": "synthetic claim text for the corroboration role",
+      "independentEvidence": ["synthetic independent live block"],
+      "authorityWeights": { "synthetic-authority": 0.9 }
+    },
+    "J4_AUDIT": {
+      "sampledTriples": [
+        { "judgeId": "judge-panel:j1a", "verdict": "clean", "evidence": "synthetic evidence span" }
+      ],
+      "taskContract": ["drawback-first verdicts", "abstention on out-of-scope evidence"]
+    }
+  },
+  "forbiddenPairs": [
+    { "role": "J1_GROUNDING", "input": "graphNeighbors" },
+    { "role": "J1_GROUNDING", "input": "independentEvidence" },
+    { "role": "J1_GROUNDING", "input": "history" },
+    { "role": "J1_GROUNDING", "input": "beliefOpinion" },
+    { "role": "J2_COHERENCE", "input": "citedBytes" },
+    { "role": "J2_COHERENCE", "input": "independentEvidence" },
+    { "role": "J2_COHERENCE", "input": "graphNeighbors" },
+    { "role": "J3_CORROBORATION", "input": "citedBytes" },
+    { "role": "J3_CORROBORATION", "input": "history" },
+    { "role": "J3_CORROBORATION", "input": "graphNeighbors" },
+    { "role": "J4_AUDIT", "input": "beliefOpinion" },
+    { "role": "J4_AUDIT", "input": "compositionState" },
+    { "role": "J4_AUDIT", "input": "claim" }
+  ],
+  "missingRequired": [
+    { "role": "J1_GROUNDING", "omit": "citedBytes" },
+    { "role": "J3_CORROBORATION", "omit": "independentEvidence" }
+  ]
+}
