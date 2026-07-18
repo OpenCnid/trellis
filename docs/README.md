@@ -38,6 +38,13 @@ system-level framing is the root `README.md`.
   three-altitude briefing for a technically fluent outsider: where the
   work is right now, the system it lives inside, and the mechanisms one
   level down.
+- **[`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md)** —
+  the pointer record for the OpenCnid research-notes collection (one
+  GitHub repo per studied paper: five-tier chain-of-density notes,
+  locator-verified, machine-readable pins in `index.json`, no hosted
+  PDFs), the authority ordering that keeps notes from masquerading as
+  primary evidence, and the PROPOSED ingestion/staleness contract for
+  consuming the collection.
 
 ### 2. Doctrine and forward design (`/architecture` — living)
 
