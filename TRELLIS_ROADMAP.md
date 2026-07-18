@@ -1650,3 +1650,40 @@ placed at `D:\OpenCnid\migration-analysis`, outside the worktree).
    pre-registered expectation), and the RECONCILIATION ratification is
    recorded as the pending owner act.
 
+
+### July 17, 2026 — Session-governance intake, consolidated onto the Session 66 PR (docs-only, zero-model and zero-paid)
+
+The external scoping note ("Substrate Provenance Law vs the
+Engineering Session", PROPOSED July 17) named a real governance
+defect: the session-contract files applied the substrate's
+provenance/quarantine/ratification doctrine to the engineering
+session itself, so a live principal's clear instruction ranked below
+committed prose and a terminology clarification (UHE) was processed
+as a contested-belief proceeding across sessions. A separate session
+applied it as PR #126 (merged as `6259766`); the owner then directed
+its rollback and consolidation onto PR #124 — executed as
+merge → revert → re-land in this branch's history, nothing hidden.
+The re-land restores PR #126's surfaces verbatim (the
+`docs/architecture/SESSION_GOVERNANCE.md` record carrying the note;
+the scoped `AGENTS.md` authority order; the `HANDOFF.md` opening
+narrowed to "durable record, not an oracle"; the §0 cache analogy
+typed economic-not-governmental; the `ORIENTATION.md`/`docs/README.md`
+mirrors; the deliberately-untouched list with reasons) and EXTENDS the
+record with a second dated application entry transcribing the
+principals' live rulings: the primacy-slot finding (the
+authority-claim sense of "source of truth" occurred exactly once in
+the whole project — position, not repetition, did the damage; the
+correct doctrine already sat in `CRITIQUE_AND_FUTURE.md`) and the
+primacy-slot discipline; lessons bind the LOADER, not the archive
+(recording functions as unblocking, never absolution); ratification
+as accountability terminus, never a truth oracle (hygiene, not truth,
+is what code implements — the IEG exchange-accounting frame); the
+gate-funding rule (every session-side gate names the measured failure
+or owner decision that funds it, or retires by dated entry); the
+willpower principle (the finite resource ceremonies spend is human
+willpower); the trust grounding (owner vouches for the collaborator;
+artifact bookkeeping attaches to artifacts, never to a principal's
+meaning); and the collaborator's operating-layer promotion direction,
+accepted — promote what the next session must operate on, archive
+what it need only find. Agent-side memory updated in the same pass.
+Everything rides PR #124 and awaits owner merge.
