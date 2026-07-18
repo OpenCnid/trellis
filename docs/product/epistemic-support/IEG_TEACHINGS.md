@@ -249,16 +249,31 @@ authorized by this document.
 
 **Precedence (added July 17, 2026, on the owner's question).** This
 queue is an inventory, not a work order, and it displaces nothing.
-The active session objective remains whatever `HANDOFF.md` §3 names
-(currently Session 66 — four-judge ingestion + panel drills, the
-owner's July 16 re-sequencing), per the standing rule that a session
-never selects its own objective; the engineering-loop track's next
-objective stays preserved in HANDOFF Appendix B. `PROGRAM_CONTEXT.md`
+The active session objective remains whatever `HANDOFF.md` §3 names,
+per the standing rule that a session never selects its own objective
+(a parenthetical here restating §3's then-current content was removed
+July 17, 2026 — volatile state rots exactly like restated counts; §3
+is the pointer); the engineering-loop track's objective stays
+preserved in HANDOFF Appendix B. `PROGRAM_CONTEXT.md`
 §6's follow-up queue (CI wiring plus the four code-hardening items
 from the PR #119 merge review) predates this table and keeps its
 standing — C2(b) cross-references it rather than duplicating it.
 Sequencing any C-item into a session is an owner ruling at or after
-ratification; the recommended first spend is C16. One counting rule,
+ratification; the recommended first spend is C16.
+
+**Sequencing ruling (July 17, 2026, evening — the dual-track
+re-sequencing, `HANDOFF.md` §3):** C11's core (the T2/T3 backend-seam
+wiring) is SEQUENCED — it rides the reactivated TTT T-series
+(`TEST_TIME_TRAINING.md` §14), with T2 held minimal as specced; C11's
+model-registry and `DERIVED_INSIGHT` model-stamp extensions are named
+successor increments after T4, each its own bounded feature. C5 is
+OFFERED to EL-07 stage 1's design checkpoint as a candidate telemetry
+shape (adoption is a checkpoint decision recorded in the frozen pilot
+plan, `HANDOFF.md` Appendix B.0). Everything else in the table keeps
+its PROPOSED standing; C16 remains the recommended first spend among
+the unsequenced items.
+
+One counting rule,
 learned at the PR #119 consistency pass and re-learned on this table
 the same day it was written: **other documents point at this table;
 they never restate its row count** — a stated count rots the day the
@@ -283,7 +298,7 @@ the cited lines on this tree; C10 is a new finding from re-reading
 the hash authority.)*
 
 | C10 | **Identity/annotation field split in the preimage** (`parser.ts`): `bounding_box` (float layout coordinates) and `page_number` participate in identity via `JSON.stringify(metadata)`, so a PDF re-extraction with jittered coordinates re-mints ids for byte-identical text — over-firing orphans and forfeiting the Merkle discount on exactly the corpus class that pays most for it. Fix: split identity-bearing fields (*what it is*) from annotation fields (*where it was seen*); annotations leave the preimage and become node columns. Must batch with C7's versioned event — same phase transition | L1 (identity commits to information, never to its projection coordinates) | C7's design record + migration event | PROPOSED (batch with C7) |
-| C11 | **Wire the backend seam; put model identity into evidence.** Verified live July 17: the four `TRELLIS_RLM_*` keys still carry "No consumer reads these values yet" (`config/index.ts:135–146`); `gpt-5.4-2026-03-05` hardcoded at `trellis_agent.py:111/353/589` and in runners. Complete the documented T2/T3 wiring; one model registry with named roles (extraction, entailment judge, RLM root); stamp model identity on `DERIVED_INSIGHT` edges so a model migration can contest model-coupled beliefs — R-27's implication made engine-native | L2 (validated-but-unconsumed config keys are unfunded organs); R-27 | `buildAgentEnv` + agent env reads; edge stamp consumed by the sweep | PROPOSED (inherits audit T1.1) |
+| C11 | **Wire the backend seam; put model identity into evidence.** Verified live July 17: the four `TRELLIS_RLM_*` keys still carry "No consumer reads these values yet" (`config/index.ts:135–146`); `gpt-5.4-2026-03-05` hardcoded at `trellis_agent.py:111/353/589` and in runners. Complete the documented T2/T3 wiring; one model registry with named roles (extraction, entailment judge, RLM root); stamp model identity on `DERIVED_INSIGHT` edges so a model migration can contest model-coupled beliefs — R-27's implication made engine-native | L2 (validated-but-unconsumed config keys are unfunded organs); R-27 | `buildAgentEnv` + agent env reads; edge stamp consumed by the sweep | PROPOSED (inherits audit T1.1); core SEQUENCED July 17, 2026 via the TTT T-series — see the precedence note |
 | C12 | **Version the embedding space.** Verified live July 17: `text-embedding-3-small` hardcoded at `extraction_worker.ts:30`, `server.ts:265`, `trellis_tools.py:806`; the schema pins `vector(1536)` with no record of which model produced any stored vector. Swapping models silently yields a mixed index — old vectors, new queries, incompatible spaces, zero errors. Fix: one config pair, an `embedding_model` stamp per vector, and a fail-closed startup refusal to search across spaces, with a documented re-embed path | L4 (vectors from different spaces must not glue — refuse, never blend) | startup refusal + re-embed script | PROPOSED (inherits audit T1.2) |
 | C13 | **Make the write path a boundary, not a convention.** Verified live July 17: `rlm_job.ts:174–175` forwards `NEO4J_PASSWORD` and the password-bearing `PG_DSN` into the process that executes model-written code; generated code can open its own driver and write with valid-looking provenance, bypassing every gate (`run_cypher`'s regex is honestly labeled "NOT the security boundary"). Fix: read-only DB principals for the REPL; `write_derived_insight` routes through a privileged writer (a small RPC, or at minimum a writer credential absent from the REPL environment) | L1 — a floor is real only when native to the permission system; a floor enforceable only against a cooperative model is a prose floor | the writer service/credential + a sandbox-drill extension proving the bypass now fails | PROPOSED (inherits audit T1.3) |
 | C14 | **Canary the exchange ledger.** Verified live July 17: `trellis_agent.py:63–77` monkeypatches `rlms==0.1.3` private handlers to count sub-calls; a future rlms reroute reads silently as zero, corrupting every downstream cost claim. Fix: a canary run known to make one sub-call asserting `subcall_count > 0` and `iterations !== null`, plus a contract test that the patched attributes exist and fire | L5 (telemetry is the exchange ledger; a clock that can silently stop is worse than no clock) | canary wired beside `test:rlm-sandbox` | PROPOSED (inherits audit T1.4; stub-runnable zero-paid) |

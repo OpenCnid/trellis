@@ -1007,3 +1007,54 @@ proposal skeleton) is R2b's deliverable, human-authored
 spec-before-pen per §12.6. The embedder stays a non-goal (§4.2). The
 probe scripts and experiment instruments named frozen above stay
 frozen.
+
+## 14. The IEG convergence and the July 17 re-sequencing (added July 17, 2026)
+
+**Status frame:** docs-only. The register
+(`docs/product/epistemic-support/RESEARCH_MAP.md` rows R-32…R-38,
+§4.11) is authoritative over this section, and
+`docs/product/epistemic-support/IEG_TEACHINGS.md` over its
+restatements here; AB-1 as amended binds — S13 content enters as
+design vocabulary only. Nothing in this section moves a gate, changes
+a default, or adds a criterion; each item names where the standing
+enforcement already lives.
+
+1. **The track's standing.** The owner's July 17 (evening)
+   re-sequencing (`HANDOFF.md` §3) activates the paused tooling-shape
+   increment — the engine-resolved-anchor guarded insert, `HANDOFF.md`
+   Appendix A as amended by its A.0 — as parallel Track A. The
+   T-series resumes behind it exactly as §12.6 ratified: tooling
+   increment → measured T2 re-attempt (its own paid proposal) → T3 →
+   T4 → Phase 2.
+2. **The change-queue convergence (C11/C12/C14).** `IEG_TEACHINGS.md`
+   §5's C11 core — "the four `TRELLIS_RLM_*` keys still carry 'No
+   consumer reads these values yet'" — is this record's T2/T3 wiring,
+   independently re-derived from the L2 reading
+   (validated-but-unconsumed config keys are unfunded organs). Owner
+   ruling, July 17, 2026: **T2 stays MINIMAL as specced**; C11's
+   model-registry and `DERIVED_INSIGHT` model-stamp extensions are
+   named successor increments after T4, each its own bounded
+   proposal. C12 is the §4.2 embedder-coupling boundary restated as
+   its own queue item (the rule here is unchanged and remains the
+   spec its enforcement home implements); C14 names the §13
+   monkeypatch counters as an exchange ledger needing a canary —
+   adjacent to the T-series, entering only through its own feature.
+3. **The laws as vocabulary for this record's standing content.**
+   L1/L7 name what `CODE_MEDIATED_TEXT.md` already enforces and what
+   the tooling increment extends (engine-computed cuts; unique
+   anchors as named cells); L2/R-33 name the two-budget acceptance
+   this record already practices (§6's measurement doctrine; "no
+   behavior claim until the paired re-attempt"). The three T2
+   no-landings (`REPOSITORY_INGESTION_REPORT.md` §5i.6–§5i.8) read as
+   model-computed coordinates placed where engine-computed ones
+   belonged — the boundary-blindness class, closable by tooling
+   shape.
+4. **The criterion-discipline rhyme (R-36).** The register's
+   condensation reading (sharp thresholds vs smooth curves as a
+   pre-registered question) and §12.7 item 1's criterion sharpening
+   (score reasoning- and protocol-shaped items) are the same
+   discipline: pre-state the shape a result must take before
+   observing it. Recorded as a rhyme; no R3/R4 criterion moves.
+5. **Vocabulary guard (un-learning #2).** "Cost" in this record is a
+   market price at the API meter; no S13 number, constant, or floor
+   transfers here, and no law is quoted in code.

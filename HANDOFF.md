@@ -922,13 +922,17 @@ with uncertainty-around-facts managed by the adaptive four-judge layer.
 Session commits carry the sister lab's session-trailer convention — a
 DISCLOSED conflict with hard rule 10, for the owner to rule on at merge.
 
-Your objective is **Session 66: the four-judge system — ingest, complete,
-and pin the panel's structural guarantees.** §3 carries the objective.
-(Owner re-sequencing, July 16, 2026: the epistemic-support program holds
-the active objective. The engineering-loop track's next objective —
-EL-07 stage 1, from master's Session-64 regeneration, with its ledger
-gate — is preserved verbatim in Appendix B; the previously preserved
-recovery-reachability objective was EXECUTED on master, PR #117.)
+Your objective is **one of the two parallel engineering tracks in §3**
+(owner re-sequencing, July 17, 2026, evening): Track A — the
+Appendix A tooling-shape increment, ACTIVATED — or Track B — the
+Appendix B EL-07 stage 1, ledger-gated. The program objectives (the
+research deep-dive on the owner-supplied paper, then the four-judge
+work it had displaced) are preserved in Appendix C, displaced not
+dropped. (Historical chain: July 16 — the epistemic-support program
+took the active objective, EL-07 stage 1 preserved in Appendix B, the
+recovery-reachability objective EXECUTED on master, PR #117; July 17
+morning — the paper deep-dive displaced the four-judge objective;
+July 17 evening — this dual-track ruling.)
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
@@ -940,11 +944,20 @@ the owner re-prioritizes it.
 
 
 **Owner re-sequencing, July 16, 2026:** the epistemic-support program
-(this handoff's §3) takes the active session objective ahead of the
+(then this handoff's §3) took the active session objective ahead of the
 engineering-loop track. EL-10/EL-11 acceptance and the Session-64
 reachability objective (Appendix B) remain the engineering-loop track's
 next work, unchanged in content; nothing in the program touches
 controller state or claims EL progress.
+
+**Owner re-sequencing, July 17, 2026 (evening — current):** the
+paragraphs above are historical sequencing records. The standing
+ruling is the DUAL TRACK in §3: Track A (the Appendix A tooling-shape
+increment, ACTIVATED) and Track B (the Appendix B EL-07 stage 1,
+ledger-gated) in parallel, either order; the program objectives are
+preserved in Appendix C. The IEG integration of both tracks lives in
+A.0/B.0, `docs/architecture/TEST_TIME_TRAINING.md` §14, and
+`docs/architecture/ENGINEERING_LOOP.md` §15.
 
 ---
 
@@ -1587,6 +1600,18 @@ Repository state at handoff creation:
   support-oracle drill (the seeding review series was removed at owner
   direction at merge review; PR #119 history retains it). Observe
   actual Git state rather than assuming merge status either way.
+- **Dated update (July 17, 2026, evening):** `origin/master` is now
+  `a239342` — PR #119 merged (squash, `2da290b`), followed by the
+  July 17 docs merges: PR #121 (S13 registration, the typed
+  synthesis, the teaching record, the C1–C18 change queue), PR #122
+  (durable deployment DECIDED Option A; the morning re-sequencing
+  with its pre-registered expectation; the July 17 rulings), and
+  PR #123 (the chain-of-density orientation ladder + the
+  residual-stream sidecar future-project record). The active work is
+  branch `d/ttt-el-updates-20e608` (the dual-track re-sequencing
+  session, docs-only). The test counts recorded above were observed
+  at the July 16 merge resolution; the July 17 merges are docs-only,
+  but observe actual counts rather than assuming.
 - **The controller runs, with all four ledger write paths reachable.**
   `npm run el:activate` and `tsx tools/engineering-loop/src/activate.ts` are
   real non-test callers, with `check`, `status`, `print-seed-request`, `seed`,
@@ -1660,238 +1685,170 @@ docker compose config --quiet
 
 Work on one feature branch and target `master`.
 
-## 3. Session 66 problem statement
+## 3. Next-session problem statement — two parallel engineering tracks (owner re-sequencing, July 17, 2026, evening)
 
-**Owner re-sequencing (July 17, 2026, post-PR #121 merge — read
-first).** The NEXT session's objective is a research deep-dive,
-displacing the four-judge objective below by owner direction: **study
-the owner-supplied research paper and its data, to understand the
-connection between the J-space and the phase transitions the paper
-finds.** The paper arrives at session start — do not guess its
-identity; ask for the artifact (candidate referents already in the
-register: S8's verbalizable workspace, S13's condensation cascade).
-Ground rules from the principals: follow the paper; improvise open
-questions only with specificity, and only if needed ("we might not
-need any" — the collaborator); attribution rule: Matthew Murphy owns
-the idea, Cnid owns the code. Orientation for J-space standing:
-`docs/product/epistemic-support/RESEARCH_MAP.md` (S8, S13, R-31,
-§4.11), `IEG_TEACHINGS.md` finding 6 (the J-Lens salience reading;
-the public instrument is sharing-queue row 11, with the
-pre-registration rule for any probe run). The four-judge objective
-below is PRESERVED as the following session's work — displaced, not
-dropped.
+**The ruling (read first).** On July 17, 2026 (evening — the second
+re-sequencing that day), the owner ruled that the next work is TWO
+PARALLEL ENGINEERING TRACKS, equal standing, either order:
 
-**Pre-registered expectation (July 17, 2026, owner-flagged as an
-important finding — written down BEFORE the paper is read, so the
-reading can confirm or refute it honestly):** the phase transitions
-the paper finds are expected to be *condensation thresholds wearing
-another domain's clothes, collapsing onto the same layer* — the
-S13 pattern (structure crystallizes when it can fund its own
-existence; thresholds are sharp, not smooth) recurring in a new
-domain, per owner finding 5 (the collapse recognition) and law L7.
-If the paper's transitions do NOT fit the condensation shape, that
-is the informative outcome and must be recorded as such, not
-reconciled by force (R-30: never force gluing).
+- **Track A — the TTT tooling-shape increment** (the
+  engine-resolved-anchor guarded insert): Appendix A, ACTIVATED by
+  this ruling — A.0 carries the activation record, the stale-facts
+  key, and the IEG integration. Zero-paid, no gate; executable
+  immediately.
+- **Track B — the engineering-loop close-out, EL-07 stage 1** (frozen
+  pilot plan + zero-paid rehearsal): Appendix B, equal standing —
+  B.0 carries the standing record, the owner ceremony recipe, and the
+  IEG integration. Structurally gated: the session reports `BLOCKED`
+  until the acceptance ledger itself shows the three owner records
+  (`EL-10 = accepted`, a recorded `EL-11` status, `EL-07` out of
+  `blocked`).
 
-<feature_objective>
+A session executes ONE track, named by the owner at session start; if
+none is named, Track A is the default while Track B's ledger gate is
+unmet. The two displaced program objectives — the research deep-dive
+on the owner-supplied paper (with its pre-registered expectation) and
+the four-judge reconciliation + panel drills — are PRESERVED verbatim
+in Appendix C, displaced not dropped: the deep-dive re-enters when
+the paper artifact arrives; the four-judge objective stays behind it
+(the July 17 morning ordering, unchanged between themselves).
 
-**Epistemic-support program: reconcile the four-judge designs and pin
-the panel's structural guarantees, zero-paid.**
-`docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` was architected
-from the program's evidence register WITHOUT sight of the
-collaborator's independently evaluated four-judge system (its §10.1
-reconciliation flag is real and unresolved). Separately, the panel's
-three structural guarantees — role blindness is structural, the audit
-role cannot gate, a contested judge cannot compose — are designed with
-enforcement homes and pins named (that record §6) but not implemented.
-A design whose guarantees exist only in prose is exactly what hard
-rule 8 and rule 15 warn about.
+**Why the re-sequencing (the finding that changed prioritization).**
+The July 17 IEG dialogue produced the teaching record and change
+queue (`docs/product/epistemic-support/IEG_TEACHINGS.md`; register
+rows R-32…R-38 and §4.11 authoritative; AB-1 as amended — design
+vocabulary only), and with them a convergence: change-queue item
+C11's core ("wire the backend seam; the four `TRELLIS_RLM_*` keys
+still carry 'No consumer reads these values yet'") IS the TTT
+track's paused T2/T3 wiring, and the engineering loop is itself the
+system the laws describe (owner finding 5: sessions are blocks,
+`HANDOFF.md` the root hash, ratification promotion). Both preserved
+objectives were therefore updated in place to work with the IEG
+frame — the integration lives in A.0/B.0 here, in
+`docs/architecture/TEST_TIME_TRAINING.md` §14, and in
+`docs/architecture/ENGINEERING_LOOP.md` §15 — and re-activated as
+the parallel tracks above. Two same-day owner rulings travel with
+the tracks and are recorded in the `IEG_TEACHINGS.md` §5 precedence
+note: **T2 stays minimal as specced** (C11's model-registry +
+`DERIVED_INSIGHT` model-stamp extensions are named successor
+increments after T4, each its own bounded proposal), and **C5 is
+offered to EL-07 stage 1's design checkpoint** as a candidate
+telemetry shape (adopting it is a checkpoint decision recorded in
+the frozen plan, never silent scope growth).
 
-</feature_objective>
-
-Two deliverables, in order:
-
-1. **Ingest the collaborator's basic model and complete the role
-   definitions (owner direction, July 16, 2026, amended late session —
-   the FIRST task).** The awaited definitions ARRIVED and are committed
-   verbatim: `docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md`
-   (register S10; claims R-28…R-30). Execute FOUR_JUDGE_DESIGN §10.1
-   item 1 as amended: (a) map the four roles onto the S10
-   registries/ecology (blindness = unselected parameters +
-   abstention_boundary); (b) complete each definition in S10's YAML
-   schema with rubric content reconstructed from the S1 protocols/2×2
-   rubrics and the S9 fork's materials, citing sources per field —
-   derive, never invent; (c) adopt the hard compatibility gate (R-29)
-   and the no-global-section outcome (R-30) into the composition
-   design BEFORE the drills pin it. Dated amendments only; owner
-   ratification is the gate. Non-epistemic registries stay behind
-   AB-7; the PCF reference (S11, arXiv:2508.01581) is acquired via the
-   mirror pattern before its math is canonized.
-2. **The three panel drills** (FOUR_JUDGE_DESIGN §7, all zero-paid,
-   scripted verdicts only, no model calls anywhere): the
-   panel-composition oracle extension — now including a
-   **no-global-section section** (planted incompatible verdicts on
-   shared parameters must produce the typed conflict record, never a
-   blended opinion) — the blindness drill (context-assembly refusals
-   fire before any model-call boundary), and the judge-contest drill
-   (a scripted audit finding contests the judge entity; composition
-   refuses it; recovery is human).
+NUMBERING NOTE: the next engineering session takes its actual number
+at execution time (the Appendix B note's standing rule); this file
+no longer pins a session number to either track.
 
 ## 4. Required design
 
-- **Completion protocol:** a dated §10.1 amendment block in
-  FOUR_JUDGE_DESIGN.md (or `RECONCILIATION.md` if it outgrows a page)
-  that, per role, states the completed definition, its reconstruction
-  sources (S1 protocol/rubric passages; S9 artifact paths; the §3
-  blindness profile), and the verdict (adopt / merge / diverge-
-  recorded) with each divergence carrying its falsifier. Owner
-  ratification is a recorded decision, not an inference. License
-  boundary (updated July 16, late session): the fork now carries an MIT
-  LICENSE (Copyright (c) 2026 Chenyang Yang, added via fork PR #1;
-  upstream still carries none — register §7 row 9 has the dated
-  record). Bounded vendoring WITH ATTRIBUTION is permitted; prefer
-  reconstruction over copying, and attribute anything copied.
-- **Drill shape:** a sibling script `scripts/test_judge_panel.ts` with
-  package script `test:judge-panel` (the non-test entrypoint, rule 15),
-  in the `test_support_oracle.ts` mold: fixture manifest SHA refusal
-  first, sections with named findings, a deliberately broken negative
-  control per drill, counts-only output, `TRELLIS_EXP_*` refusal.
-  Fixtures under `fixtures/judge_panel/` with an independent
-  expected-values generator (no imports from the modules under test).
-- **Blindness as data:** per-role context assembly is a pure function
-  whose input allowlist comes from the role's declared `inputs`; the
-  drill feeds each role one forbidden input and asserts a typed refusal
-  BEFORE any would-be model boundary.
-- **J4-never-gates as structure:** the audit module exports no symbol
-  the composition path imports; pin with a static import check (the
-  drill's `[static-imports]` pattern) plus a scripted attempt that must
-  find no route from an audit verdict to any opinion.
-- **Judge-contest without infrastructure:** model the
-  register→contest→refuse→re-register cycle over the pure manifest
-  structures if possible; if graph seeding is genuinely required, gate
-  that section on the Compose stack the way `test:module-lifecycle`
-  does and say so in the drill header.
-- **Model-coupling (R-27):** judge manifests carry the target model
-  identity in their evidentiary basis so a model migration contests
-  them; the drill asserts the field is required.
+Per track, in the appendix that carries it:
+
+- **Track A:** Appendix A.1 (the required design as paused, executed
+  as amended by A.0's stale-facts key) — design record FIRST in
+  `STRUCTURAL_SPLICE.md`, the additive guarded method, the
+  Guardrail-15 addendum authoring, both composed-prompt pins
+  recomputed in the same commit.
+- **Track B:** Appendix B.4 — the frozen pilot-plan record, the
+  `FakeRunner` rehearsal, the two named design forks resolved at the
+  checkpoint (manual-arm baseline; trial-task provenance), plus
+  B.0's checkpoint option (C5's cost-per-detected-drawback telemetry
+  shape).
+
+Shared rules, both tracks: zero-paid throughout (Track A's T2
+re-attempt and Track B's first trial are LATER owner-gated proposals
+with printed estimates); IEG laws enter as design vocabulary only
+(AB-1 as amended) — a design-record sentence that would convert a
+law into a new constraint must instead name the existing enforcement
+home or propose its own bounded feature; documents lead (dated
+amendments in the same commit as any code they govern).
 
 ## 5. File-level starting points
 
-- `docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md` — the
-  collaborator's supplied design (registries, YAML judge schema,
-  ecology, routing stack, gluing rules): the ingestion source.
-- `docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` §3 (roles),
-  §6 (enforcement→pin table this session implements), §7 (drills),
-  §10.1 as twice-amended (the ingestion protocol).
-- `docs/product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md` (verdict
-  schema and taxonomies the fixtures instantiate).
-- `docs/architecture/EPISTEMIC_SUPPORT.md` §5, §7.
-- `src/core/graph/support.ts`, `support_metrics.ts` (consumed, not
-  modified); `scripts/test_support_oracle.ts` (the drill mold);
-  `fixtures/support_oracle/` (the fixture mold).
-- `scripts/register_modules.ts`, `scripts/test_module_lifecycle.ts`
-  (the capability-contest pattern to retarget).
-- `/workspace/migration-analysis` (OpenCnid fork, shallow clone at
-  `b9d3611`, OUTSIDE the Trellis worktree): `src/optimize/proposer.py`
-  + `memory.py` (meta-agent + search memory), `docs/adaptation.md`
-  (failure-mode→strategy guide), `tasks/*/prompts/`,
-  `src/task_evals/`. MIT LICENSE present in the fork as of `2bb5e54`
-  (Copyright (c) 2026 Chenyang Yang; upstream carries none — see the
-  register's dated record); vendor minimally, with attribution.
-- `docs/product/epistemic-support/RESEARCH_MAP.md` §9 (adoption
-  bounds; amend only by dated entry).
+- Track A: Appendix A.2 (the Session 41/54 surfaces) — plus
+  `docs/architecture/TEST_TIME_TRAINING.md` §14 (the IEG
+  convergence: the C11/C12/C14 mapping and the minimal-T2 ruling).
+- Track B: Appendix B.5 (the controller surfaces) — plus
+  `docs/architecture/ENGINEERING_LOOP.md` §15 (the IEG reading of
+  the loop) and B.0's ceremony recipe.
+- Both: `docs/product/epistemic-support/IEG_TEACHINGS.md` (the laws,
+  the owner findings, the §5 change queue with its precedence note —
+  an inventory, not a work order) and `RESEARCH_MAP.md` rows
+  R-32…R-38 + §4.11 (authoritative over every restatement).
 
 ## 6. Test strategy and acceptance
 
-Offline (no Docker, no API key):
-
-    npm test            # baseline 1,258 across 111 files (merged tree, §2) + this session's pins
-    npm run build
-    npm run python:check
-    npm run test:support-oracle            # stays green, 7 sections / 106 checks
-    npm run test:judge-panel               # new: all sections green
-    npm run test:judge-panel -- --negative-control   # must exit nonzero, named finding
-
-Acceptance items (each observed, not asserted):
-
-1. Blindness: every (role, forbidden-input) pair in the fixture is
-   refused with a typed error naming role and input; zero refusals
-   missing.
-2. J4 isolation: the static check finds no import path from the audit
-   module into composition; the scripted route-attempt section finds no
-   effect of any audit verdict on any opinion.
-3. Judge-contest: contested judge refused from composition with a
-   typed error; re-registration (the human recovery analog) restores
-   composition; the superseded contest record survives.
-4. Reconciliation: either the ratified merged design (dated amendments
-   + owner decision recorded) or an explicit OPEN entry with reason.
-5. `git diff --check` clean; docs cross-references resolve; roadmap §5
-   entry + this file regenerated per §0 in the same PR.
+- Track A: Appendix A.3, with baselines read from §2 (A.0's
+  stale-facts key supersedes A.3's Session-54 counts) — the full
+  standing drill block runs, because non-markdown bytes move.
+- Track B: Appendix B.6 — the preflight ledger gate enforced, not
+  asserted; the rehearsal is a named test that can fail.
+- The re-sequencing session that produced this file was docs-only:
+  its acceptance is `git diff --check` clean, cross-references
+  resolving, and the roadmap §5 entry + this file regenerated per §0
+  in the same PR.
 
 ## 7. Guardrails
 
 1. **Permanent invariants survive** (hard rules: AST immutability,
-   provenance write path, Zod boundaries, process split). The
-   no-AI-attribution rule stands with the disclosed session-trailer
-   conflict — flag, never hide; owner rules at merge.
-2. **The adoption-bounds register binds** (RESEARCH_MAP §9): writer
-   never sees support or judge outputs; no count-shaped incentives
-   anywhere (AB-5); no evolution/search machinery (AB-8); audit never
-   gates (AB-9); live blocks only (AB-11); anchors byte-pinned, model
-   labels permitted per amended AB-4.
-3. **Zero-paid session.** No LLM call anywhere; the per-role anchor
-   calibration is a separate owner-gated proposal with a printed
-   estimate under the $5/run cap.
-4. **Prompt protocol** (guardrail-11 pattern): read the
-   Prompt-Engineering and Hypershot protocols before authoring any
-   prompt-like artifact; if unavailable, JUDGE_CONTRACT_TEMPLATE.md
-   §6–§7 carries the distilled binding rules.
-5. **Documents lead.** Any deviation from FOUR_JUDGE_DESIGN.md lands
-   as a dated amendment in the same commit as the code it governs.
-6. **Engineering-loop surfaces untouched:** no controller state, no
-   `tools/engineering-loop/` changes, no EL acceptance or unblock —
-   Appendix B is preserved, not executed.
-7. **Correct is not reachable** (rule 15): every drill names its
-   package-script entrypoint; every guarantee names its non-test
-   enforcement home.
+   provenance write path, Zod boundaries, process split,
+   no-AI-attribution). Track A additionally binds Appendix A.4's
+   full guardrail list; Track B binds Appendix B.7's.
+2. **The ledger is the status authority.** No EL status is read from
+   prose; Track B's gate is satisfied only by ledger records the
+   owner created through the B.0 ceremonies.
+3. **Zero-paid.** No LLM call in either track's session; every paid
+   step is a separate owner-gated proposal under the ≤$5/run cap.
+4. **Prompt protocol (Guardrail 15).** Both prompt skills are
+   invoked before authoring any prompt-like artifact — Track A's
+   addendum edit and every HANDOFF regeneration included.
+5. **IEG vocabulary discipline.** Laws and C-items are design
+   vocabulary and inventory (AB-1 as amended; the §5 precedence
+   note); no C-item is implemented in either track beyond what
+   A.0/B.0 name (T2/T3 as C11's core; C5 as a Track-B checkpoint
+   option). Un-learning #2 stands: no number transfers between
+   instantiations.
+6. **Program surfaces untouched.** The four-judge documents, the
+   support modules, and the epistemic-support program surfaces are
+   not modified by either track; Appendix C is preserved, not
+   executed.
+7. **Correct is not reachable** (rule 15 / L2): every new mechanism
+   names its non-test enforcement home; Track A makes no behavior
+   claim before the measured T2 re-attempt; Track B's plan freezes a
+   collection method per measurement.
 
 ## 8. Explicit exclusions
 
 Do **not**:
 
-- run paid work or any repository model completion;
-- implement live judges, the `support_sweep` job, judge registration
-  against real databases (unless the Compose-gated contest section is
-  explicitly chosen and labeled), the ratification queue, or the
-  claim-kind plane;
-- build any automated harness-adaptation/optimizer machinery (S9's
-  loop enters, if ever, behind AB-8 and its own proposal);
-- vendor S9 code or prose beyond the license's terms: the fork now
-  carries an MIT LICENSE (dated record in register §7 row 9; upstream
-  still carries none) — copying is permitted ONLY with the MIT
-  attribution notice preserved, reconstruction stays preferred, and
-  nothing enters a Trellis kernel or prompt surface without its own
-  review;
-- execute the approved S1/S8 promotions here (they await a durable
-  deployment; this container's databases are ephemeral);
-- modify the write path, custody tiers, kernel prompts, extraction
-  prompts, module addenda, or any composed-prompt pin;
-- touch `tools/engineering-loop/`, the acceptance ledger, or claim any
-  EL-07/EL-10/EL-11 progress;
-- add glossary terms beyond the four adopted ones, or turn any
-  hypothesis (R-14's subjective-logic source is still missing) into
-  canonical prose;
-- resolve the reconciliation's divergences silently in either design's
-  favor.
+- run paid work or any repository model completion in either track's
+  session;
+- start Track B before the acceptance ledger resolves the three
+  owner records (Appendix B.8's full exclusion list binds);
+- implement any C-item beyond the two tracks' named scopes — C11's
+  registry/edge-stamp extensions, C12, C14, C16, and the rest of the
+  queue each await their own bounded feature;
+- edit `splice`, the existing guarded family, or any pinned drill in
+  Track A beyond the additive method A.1 names;
+- touch the four-judge documents, the support modules, or the
+  approved promotions (they await the durable deployment) in either
+  track;
+- resolve the displaced program objectives' open questions (the
+  §10.1 reconciliation, the paper's identity) — they re-enter with
+  their own sessions per Appendix C;
+- convert any IEG law into a constraint, comment, or code identifier
+  (the §4.11 equivocation is the standing reason).
 
 
-## Appendix A. Paused tooling-shape objective inherited from the pre-reconciliation Session 55 handoff — retained for history, do not execute
+## Appendix A. Track A (ACTIVE, July 17, 2026): the TTT tooling-shape increment — the engine-resolved-anchor guarded insert (inherited from the Session 55 handoff; activation and deltas in A.0)
 
-This objective is preserved from the merged Session 54 handoff. It is not
-active while the owner-prioritized engineering-loop program proceeds. The
-imperative text below is historical and requires a new owner
-reprioritization before execution.
-
+This objective is preserved from the merged Session 54 handoff and was
+paused while the owner-prioritized engineering-loop program proceeded.
+**It is no longer paused:** the owner's July 17, 2026 (evening)
+re-sequencing (§3) activates it as Track A of the dual track. A.0
+below is the activation record and carries the deltas; A.1–A.5 are
+preserved as authored at the Session 54 pause (their "Paused" headings
+are historical labels) and execute as amended by A.0.
 
 **The TOOLING-SHAPE increment for the guarded editing family: an
 ENGINE-RESOLVED-ANCHOR guarded insert in `src/rlm/trellis_textedit.py`,
@@ -1995,6 +1952,76 @@ must act on:
   pin recompute), so it needs no per-run spend approval; it lands a
   human PR to `master` like any code change. The T2 re-attempt is the
   owner-gated paid step, proposed separately with an estimate.
+
+### Appendix A.0. Activation record, stale-facts key, and the IEG integration (July 17, 2026)
+
+**Activation.** The previously required "new owner reprioritization"
+is this dated record: Track A is executable immediately — zero-paid,
+no gate, one feature branch, one PR to `master`. The paid T2
+re-attempt remains a SEPARATE later owner-approved proposal with a
+printed estimate (unchanged).
+
+**Stale-facts key (read before executing A.1–A.5; §2 outranks).**
+
+- Every `npm test` expectation of "876/87" in A.1/A.3 is the
+  Session-54 baseline. Read the current baseline from §2 (1,258
+  across 111 at the July 16 merge resolution; the July 17 merges are
+  docs-only) and observe actual counts; the acceptance shape is
+  unchanged — the suite GROWS by this increment's pins with zero
+  existing tests changed.
+- A.1's pre-flight "confirm the Session 54 PR merged" is long
+  satisfied (`origin/master` at `a239342` as of this record); the
+  standing pre-flight is §2's command block.
+- A.3's close-out note about the Sessions 51–55 roadmap window is
+  superseded by the §0 window rule applied to the roadmap's CURRENT
+  state (the live §5 window holds Sessions 60–64 plus the Session 65
+  sister-lab entry as of this record).
+- Composed-prompt pin SHAs read as the CURRENT values in
+  `scripts/test_modules.py`; both pins are recomputed in the same
+  commit as the addendum edit, exactly as A.1 specifies.
+
+**The IEG integration (July 17, 2026).** Authority chain:
+`docs/product/epistemic-support/RESEARCH_MAP.md` rows R-32…R-38 and
+§4.11 over `IEG_TEACHINGS.md` over this summary; AB-1 as amended
+binds — the laws are design vocabulary and carry no enforcement
+weight; every item below names an enforcement home that already
+exists or a separately gated proposal.
+
+- **What the increment is, in the laws' vocabulary.** A unique anchor
+  is a named partition cell (L7.i); the ENGINE computes the cut — the
+  insertion address and the frame's terminator — so the model never
+  pays the counting cost (L1 at the text plane). The enforcement home
+  is unchanged: `CODE_MEDIATED_TEXT.md` doctrine and the Session 41
+  guarded family's pins. The three T2 no-landings (§5i.6–§5i.8) read
+  as boundary-blindness incidents in miniature (L7.ii): each failure
+  put a model-computed coordinate where an engine-computed one
+  belonged.
+- **The acceptance shape, named by L2/R-33.** The increment's pins
+  fund existence; ONLY the measured T2 re-attempt funds action. A.3
+  already forbids any RLM behavior claim this session; R-33 is the
+  register row that names why (two budgets: condensation and
+  realizability). Report the tool's contract, then measure.
+- **The C-queue convergence (owner ruling, July 17, 2026).** The
+  T2/T3 wiring IS change-queue item C11's core (the four
+  `TRELLIS_RLM_*` keys live with zero consumers since T1 landed).
+  Ruled: **T2 stays minimal as specced** — the frozen v3.x contract,
+  nothing added; three no-landings argue for less scope, not more.
+  C11's extensions (one model registry with named roles;
+  model-identity stamps on `DERIVED_INSIGHT` edges so a model
+  migration can contest model-coupled beliefs) are NAMED SUCCESSOR
+  increments after T4, each its own bounded owner-gated proposal.
+  C12 (embedding-space versioning) stays its own C-item — the
+  `TEST_TIME_TRAINING.md` §4.2 embedder-coupling rule is unchanged.
+  C14 (the telemetry canary) is adjacent: the T-series' subcall
+  counters are exactly the monkeypatched exchange ledger C14 names;
+  its canary enters only through C14's own bounded feature, not this
+  increment.
+- **Vocabulary discipline (un-learning #2).** No number transfers
+  between the physics and engineering instantiations; no law is
+  quoted in a code comment or identifier. The laws are named here for
+  design sight (owner finding 6: what has a name can be attended to),
+  not as new constraints.
+
 
 ### Appendix A.1. Paused required design
 
@@ -2788,7 +2815,7 @@ staging pin + `test:selfedit-harness` [8] + the five-counter
 telemetry pin).
 
 
-## Appendix B. Displaced engineering-loop objective: EL-07 stage 1 (frozen pilot plan + zero-paid rehearsal) — master's Session-64 regeneration, preserved for the engineering-loop track; do not execute in program sessions
+## Appendix B. Track B (ACTIVE, ledger-gated, July 17, 2026): the engineering-loop close-out — EL-07 stage 1 (frozen pilot plan + zero-paid rehearsal); standing, ceremony recipe, and deltas in B.0
 
 *Replaced at the July 16, 2026 merge of `origin/master` (40b0ff6): the
 previously preserved Session-64 recovery-reachability objective was
@@ -2802,6 +2829,99 @@ already carries the sister-lab program session under that number — the
 next engineering-loop session takes its actual number at execution
 time. The objective's own ledger gate (EL-10 acceptance, EL-11 status,
 EL-07 unblock — all owner acts) travels with it.*
+
+*Updated July 17, 2026 (evening): the former header's "do not execute
+in program sessions" is historical — the owner's dual-track
+re-sequencing (§3) gives this objective equal standing as Track B,
+executable in either order with Track A. B.0 below carries the
+standing record, the owner ceremony recipe, and the IEG integration;
+B.3–B.8 are preserved verbatim and execute as authored. The ledger
+gate is unchanged and cannot be satisfied by this file.*
+
+### Appendix B.0. Track standing, the owner ceremony recipe, and the IEG integration (July 17, 2026)
+
+**Standing.** Track B of the dual track (§3): equal standing with
+Track A, either order. The B.3 preflight gate travels unchanged — the
+session reports `BLOCKED` until the acceptance ledger ITSELF resolves
+`EL-10 = accepted`, a recorded `EL-11` status, and `EL-07` out of
+`blocked`. Prose, conversation, and this record cannot substitute.
+
+**The owner ceremony recipe (the three acts; machine-local, against
+the protected roots; EL-10's reachability lesson applied to the
+ceremony itself — a gate whose clearing procedure is unstated is a
+gate nobody clears).** One steady-state acceptance ceremony can carry
+all three records; every value in angle brackets is the owner's
+decision or observation, never a default:
+
+```
+# Environment: the four TRELLIS_EL_* variables pointing at the §2 protected
+# roots; worktree binding = a lean session worktree (the full D:\trellis-engine
+# tree was observed REFUSED by the alias scan, Session 65).
+npm run el:activate -- status
+    # observe: integrity valid; 'ceremonies' admits the steady-state
+    # acceptance change; current statuses.
+npm run el:activate -- print-acceptance-request \
+  --branch <branch> --base <sha> --remote-name origin --remote-url <url> \
+  --approval-id <owner-chosen-id> --created-at <ISO-8601> \
+  --set EL-10=accepted --set EL-11=<status> --set EL-07=planned
+    # author approval material matching requestDigest and
+    # repositoryPrecondition EXACTLY; place it in the protected channel.
+npm run el:activate -- record-acceptance \
+  <the IDENTICAL arguments — the --created-at and --set values byte-equal>
+npm run el:activate -- status
+    # confirm: EL-10 accepted, EL-11 recorded, EL-07 no longer blocked.
+```
+
+The `--set` pairs are decisions: `EL-11=accepted` only if the
+Session 63 implementation satisfies its acceptance items on the
+owner's review (another status otherwise — record what is true);
+`EL-07=planned` is the unblock (any deliberate non-`blocked` status
+works; `planned` lets `next_feature` resolve to it once EL-10 is
+accepted). A fresh `print-acceptance-request` mints a fresh digest —
+a previously composed request (Session 65 composed one) is reusable
+only by replaying its exact `--created-at` and arguments against
+still-unconsumed approval material; otherwise compose anew and
+discard the old material.
+
+**The IEG integration (July 17, 2026).** Same authority chain as A.0
+(`RESEARCH_MAP.md` rows over `IEG_TEACHINGS.md` over this summary);
+AB-1 as amended binds; nothing below adds required scope — the one
+optional item is explicitly a checkpoint decision.
+
+- **What the pilot is, in the laws' vocabulary (owner finding 5).**
+  The engineering loop IS Trellis run on the corpus "building
+  Trellis": sessions are blocks, `HANDOFF.md` is the root hash,
+  ratification is promotion, a consistency pass is an invalidation
+  sweep over prose. EL-07 is therefore the loop's own paired-arm
+  measurement — the house acceptance doctrine applied to the house
+  itself.
+- **L2/L3 name the program's recurring defect class** (four recorded
+  instances: EL-02–06 correct-but-inert; the unreachable recovery
+  ceremonies; `bootstrapStatus`; the drilled-but-unwired support
+  oracle): existence and action are separately funded, and nothing
+  self-funds. B.4 item 1's requirement that every `EL-07-A1`
+  measurement name its collection method is the freeze-time form of
+  the same law — a measurement without a collector is an unfunded
+  organ.
+- **L7.iv: the plan freeze is the sacred partition.** Guardrail
+  B.7-3 (freeze-before-observe) is the train/test split over the
+  program's own evaluation. The July 17 pre-registration mold
+  (Appendix C.3's expectation, written down before the paper is
+  read) is the same discipline and is AVAILABLE to the plan record:
+  where the owner holds a directional expectation for a measurement,
+  pre-state it so the pilot can confirm or refute honestly. An
+  option for the design checkpoint, not new required scope.
+- **L5/L6: the measurements are the loop's exchange ledger, and the
+  pilot is a promotion event.** `EL-07-A1` counts exchanges; the
+  `EL-07-A4` verdict is the check whose output the owner's
+  adopt/revise/reject decision consumes — L6's criterion for when a
+  check becomes a caller, and exactly why the verdict is owner-only
+  (P0-8; L3: the loop cannot promote itself).
+- **C5 offered to the design checkpoint (owner ruling, July 17,
+  2026).** Cost-per-detected-drawback telemetry (counts-only,
+  change-queue item C5) is a candidate `EL-07-A1` shape. Adopting it
+  is a checkpoint decision recorded in the frozen plan; declining it
+  is equally valid. No other C-item enters Track B.
 
 ### Appendix B.3. Session 65 problem statement
 
@@ -3189,3 +3309,241 @@ Do **not**:
 - implement EL-08 tracker/scheduler/concurrency or EL-09 report ingestion; or
 - migrate manual `HANDOFF.md` authority without an explicit protected owner
   adopt verdict after complete EL-07 evidence.
+
+## Appendix C. Preserved program-track objectives — displaced July 17, 2026 (evening), not dropped
+
+*Preserved verbatim from this file's July 16–17 regeneration (heading
+demotion only, `## N.` → `### Appendix C.N`). Contents: the July 17
+morning re-sequencing (the research deep-dive on the owner-supplied
+paper) with its pre-registered expectation, and the four-judge
+reconciliation + panel-drill objective with its full section set.
+Internal references (to "§3", "§4 forks", "Appendix B",
+"Session 66") read against the July 16 regeneration's numbering and
+state. Re-entry order between the two objectives is unchanged: the
+deep-dive when the paper artifact arrives, the four-judge objective
+behind it; each re-enters through an owner-named session per the §0
+loop, with its own gates traveling with it.*
+
+### Appendix C.3. Program problem statement (numbered "Session 66" at the July 16 regeneration)
+
+**Owner re-sequencing (July 17, 2026, post-PR #121 merge — read
+first).** The NEXT session's objective is a research deep-dive,
+displacing the four-judge objective below by owner direction: **study
+the owner-supplied research paper and its data, to understand the
+connection between the J-space and the phase transitions the paper
+finds.** The paper arrives at session start — do not guess its
+identity; ask for the artifact (candidate referents already in the
+register: S8's verbalizable workspace, S13's condensation cascade).
+Ground rules from the principals: follow the paper; improvise open
+questions only with specificity, and only if needed ("we might not
+need any" — the collaborator); attribution rule: Matthew Murphy owns
+the idea, Cnid owns the code. Orientation for J-space standing:
+`docs/product/epistemic-support/RESEARCH_MAP.md` (S8, S13, R-31,
+§4.11), `IEG_TEACHINGS.md` finding 6 (the J-Lens salience reading;
+the public instrument is sharing-queue row 11, with the
+pre-registration rule for any probe run). The four-judge objective
+below is PRESERVED as the following session's work — displaced, not
+dropped.
+
+**Pre-registered expectation (July 17, 2026, owner-flagged as an
+important finding — written down BEFORE the paper is read, so the
+reading can confirm or refute it honestly):** the phase transitions
+the paper finds are expected to be *condensation thresholds wearing
+another domain's clothes, collapsing onto the same layer* — the
+S13 pattern (structure crystallizes when it can fund its own
+existence; thresholds are sharp, not smooth) recurring in a new
+domain, per owner finding 5 (the collapse recognition) and law L7.
+If the paper's transitions do NOT fit the condensation shape, that
+is the informative outcome and must be recorded as such, not
+reconciled by force (R-30: never force gluing).
+
+<feature_objective>
+
+**Epistemic-support program: reconcile the four-judge designs and pin
+the panel's structural guarantees, zero-paid.**
+`docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` was architected
+from the program's evidence register WITHOUT sight of the
+collaborator's independently evaluated four-judge system (its §10.1
+reconciliation flag is real and unresolved). Separately, the panel's
+three structural guarantees — role blindness is structural, the audit
+role cannot gate, a contested judge cannot compose — are designed with
+enforcement homes and pins named (that record §6) but not implemented.
+A design whose guarantees exist only in prose is exactly what hard
+rule 8 and rule 15 warn about.
+
+</feature_objective>
+
+Two deliverables, in order:
+
+1. **Ingest the collaborator's basic model and complete the role
+   definitions (owner direction, July 16, 2026, amended late session —
+   the FIRST task).** The awaited definitions ARRIVED and are committed
+   verbatim: `docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md`
+   (register S10; claims R-28…R-30). Execute FOUR_JUDGE_DESIGN §10.1
+   item 1 as amended: (a) map the four roles onto the S10
+   registries/ecology (blindness = unselected parameters +
+   abstention_boundary); (b) complete each definition in S10's YAML
+   schema with rubric content reconstructed from the S1 protocols/2×2
+   rubrics and the S9 fork's materials, citing sources per field —
+   derive, never invent; (c) adopt the hard compatibility gate (R-29)
+   and the no-global-section outcome (R-30) into the composition
+   design BEFORE the drills pin it. Dated amendments only; owner
+   ratification is the gate. Non-epistemic registries stay behind
+   AB-7; the PCF reference (S11, arXiv:2508.01581) is acquired via the
+   mirror pattern before its math is canonized.
+2. **The three panel drills** (FOUR_JUDGE_DESIGN §7, all zero-paid,
+   scripted verdicts only, no model calls anywhere): the
+   panel-composition oracle extension — now including a
+   **no-global-section section** (planted incompatible verdicts on
+   shared parameters must produce the typed conflict record, never a
+   blended opinion) — the blindness drill (context-assembly refusals
+   fire before any model-call boundary), and the judge-contest drill
+   (a scripted audit finding contests the judge entity; composition
+   refuses it; recovery is human).
+
+### Appendix C.4. Required design
+
+- **Completion protocol:** a dated §10.1 amendment block in
+  FOUR_JUDGE_DESIGN.md (or `RECONCILIATION.md` if it outgrows a page)
+  that, per role, states the completed definition, its reconstruction
+  sources (S1 protocol/rubric passages; S9 artifact paths; the §3
+  blindness profile), and the verdict (adopt / merge / diverge-
+  recorded) with each divergence carrying its falsifier. Owner
+  ratification is a recorded decision, not an inference. License
+  boundary (updated July 16, late session): the fork now carries an MIT
+  LICENSE (Copyright (c) 2026 Chenyang Yang, added via fork PR #1;
+  upstream still carries none — register §7 row 9 has the dated
+  record). Bounded vendoring WITH ATTRIBUTION is permitted; prefer
+  reconstruction over copying, and attribute anything copied.
+- **Drill shape:** a sibling script `scripts/test_judge_panel.ts` with
+  package script `test:judge-panel` (the non-test entrypoint, rule 15),
+  in the `test_support_oracle.ts` mold: fixture manifest SHA refusal
+  first, sections with named findings, a deliberately broken negative
+  control per drill, counts-only output, `TRELLIS_EXP_*` refusal.
+  Fixtures under `fixtures/judge_panel/` with an independent
+  expected-values generator (no imports from the modules under test).
+- **Blindness as data:** per-role context assembly is a pure function
+  whose input allowlist comes from the role's declared `inputs`; the
+  drill feeds each role one forbidden input and asserts a typed refusal
+  BEFORE any would-be model boundary.
+- **J4-never-gates as structure:** the audit module exports no symbol
+  the composition path imports; pin with a static import check (the
+  drill's `[static-imports]` pattern) plus a scripted attempt that must
+  find no route from an audit verdict to any opinion.
+- **Judge-contest without infrastructure:** model the
+  register→contest→refuse→re-register cycle over the pure manifest
+  structures if possible; if graph seeding is genuinely required, gate
+  that section on the Compose stack the way `test:module-lifecycle`
+  does and say so in the drill header.
+- **Model-coupling (R-27):** judge manifests carry the target model
+  identity in their evidentiary basis so a model migration contests
+  them; the drill asserts the field is required.
+
+### Appendix C.5. File-level starting points
+
+- `docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md` — the
+  collaborator's supplied design (registries, YAML judge schema,
+  ecology, routing stack, gluing rules): the ingestion source.
+- `docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` §3 (roles),
+  §6 (enforcement→pin table this session implements), §7 (drills),
+  §10.1 as twice-amended (the ingestion protocol).
+- `docs/product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md` (verdict
+  schema and taxonomies the fixtures instantiate).
+- `docs/architecture/EPISTEMIC_SUPPORT.md` §5, §7.
+- `src/core/graph/support.ts`, `support_metrics.ts` (consumed, not
+  modified); `scripts/test_support_oracle.ts` (the drill mold);
+  `fixtures/support_oracle/` (the fixture mold).
+- `scripts/register_modules.ts`, `scripts/test_module_lifecycle.ts`
+  (the capability-contest pattern to retarget).
+- `/workspace/migration-analysis` (OpenCnid fork, shallow clone at
+  `b9d3611`, OUTSIDE the Trellis worktree): `src/optimize/proposer.py`
+  + `memory.py` (meta-agent + search memory), `docs/adaptation.md`
+  (failure-mode→strategy guide), `tasks/*/prompts/`,
+  `src/task_evals/`. MIT LICENSE present in the fork as of `2bb5e54`
+  (Copyright (c) 2026 Chenyang Yang; upstream carries none — see the
+  register's dated record); vendor minimally, with attribution.
+- `docs/product/epistemic-support/RESEARCH_MAP.md` §9 (adoption
+  bounds; amend only by dated entry).
+
+### Appendix C.6. Test strategy and acceptance
+
+Offline (no Docker, no API key):
+
+    npm test            # baseline 1,258 across 111 files (merged tree, §2) + this session's pins
+    npm run build
+    npm run python:check
+    npm run test:support-oracle            # stays green, 7 sections / 106 checks
+    npm run test:judge-panel               # new: all sections green
+    npm run test:judge-panel -- --negative-control   # must exit nonzero, named finding
+
+Acceptance items (each observed, not asserted):
+
+1. Blindness: every (role, forbidden-input) pair in the fixture is
+   refused with a typed error naming role and input; zero refusals
+   missing.
+2. J4 isolation: the static check finds no import path from the audit
+   module into composition; the scripted route-attempt section finds no
+   effect of any audit verdict on any opinion.
+3. Judge-contest: contested judge refused from composition with a
+   typed error; re-registration (the human recovery analog) restores
+   composition; the superseded contest record survives.
+4. Reconciliation: either the ratified merged design (dated amendments
+   + owner decision recorded) or an explicit OPEN entry with reason.
+5. `git diff --check` clean; docs cross-references resolve; roadmap §5
+   entry + this file regenerated per §0 in the same PR.
+
+### Appendix C.7. Guardrails
+
+1. **Permanent invariants survive** (hard rules: AST immutability,
+   provenance write path, Zod boundaries, process split). The
+   no-AI-attribution rule stands with the disclosed session-trailer
+   conflict — flag, never hide; owner rules at merge.
+2. **The adoption-bounds register binds** (RESEARCH_MAP §9): writer
+   never sees support or judge outputs; no count-shaped incentives
+   anywhere (AB-5); no evolution/search machinery (AB-8); audit never
+   gates (AB-9); live blocks only (AB-11); anchors byte-pinned, model
+   labels permitted per amended AB-4.
+3. **Zero-paid session.** No LLM call anywhere; the per-role anchor
+   calibration is a separate owner-gated proposal with a printed
+   estimate under the $5/run cap.
+4. **Prompt protocol** (guardrail-11 pattern): read the
+   Prompt-Engineering and Hypershot protocols before authoring any
+   prompt-like artifact; if unavailable, JUDGE_CONTRACT_TEMPLATE.md
+   §6–§7 carries the distilled binding rules.
+5. **Documents lead.** Any deviation from FOUR_JUDGE_DESIGN.md lands
+   as a dated amendment in the same commit as the code it governs.
+6. **Engineering-loop surfaces untouched:** no controller state, no
+   `tools/engineering-loop/` changes, no EL acceptance or unblock —
+   Appendix B is preserved, not executed.
+7. **Correct is not reachable** (rule 15): every drill names its
+   package-script entrypoint; every guarantee names its non-test
+   enforcement home.
+
+### Appendix C.8. Explicit exclusions
+
+Do **not**:
+
+- run paid work or any repository model completion;
+- implement live judges, the `support_sweep` job, judge registration
+  against real databases (unless the Compose-gated contest section is
+  explicitly chosen and labeled), the ratification queue, or the
+  claim-kind plane;
+- build any automated harness-adaptation/optimizer machinery (S9's
+  loop enters, if ever, behind AB-8 and its own proposal);
+- vendor S9 code or prose beyond the license's terms: the fork now
+  carries an MIT LICENSE (dated record in register §7 row 9; upstream
+  still carries none) — copying is permitted ONLY with the MIT
+  attribution notice preserved, reconstruction stays preferred, and
+  nothing enters a Trellis kernel or prompt surface without its own
+  review;
+- execute the approved S1/S8 promotions here (they await a durable
+  deployment; this container's databases are ephemeral);
+- modify the write path, custody tiers, kernel prompts, extraction
+  prompts, module addenda, or any composed-prompt pin;
+- touch `tools/engineering-loop/`, the acceptance ledger, or claim any
+  EL-07/EL-10/EL-11 progress;
+- add glossary terms beyond the four adopted ones, or turn any
+  hypothesis (R-14's subjective-logic source is still missing) into
+  canonical prose;
+- resolve the reconciliation's divergences silently in either design's
+  favor.

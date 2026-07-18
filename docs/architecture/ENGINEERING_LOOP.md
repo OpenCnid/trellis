@@ -314,3 +314,47 @@ boundary; changing same-repository source, out-of-process execution, protected
 external mutable state, single-writer authority, evidence precedence, protected
 human gates, or manual-handoff authority requires a new owner-visible
 architecture decision.
+
+## 15. Dated addendum (July 17, 2026): the IEG reading of the loop
+
+**Status frame:** teaching addendum, docs-only. The ratified boundary (§2),
+SPEC conformance, and every priority-zero answer are untouched; the register
+(`docs/product/epistemic-support/RESEARCH_MAP.md` rows R-32…R-38) is
+authoritative over restatements here, and AB-1 as amended binds — design
+vocabulary only. Track standing and execution deltas live in `HANDOFF.md` §3
+and its Appendix B (B.0).
+
+The July 17 IEG dialogue
+(`docs/product/epistemic-support/IEG_TEACHINGS.md`) read this program back to
+itself:
+
+- **The collapse recognition (owner finding 5).** The loop is Trellis run on
+  the corpus "building Trellis": sessions are blocks, `HANDOFF.md` is the root
+  hash, ratification is promotion, and a consistency pass is an invalidation
+  sweep over prose. §1's problem statement said this in engineering terms; the
+  finding names it as the same shape at another altitude.
+- **L2 (existence and action are separately funded) names the program's
+  recurring defect class:** EL-02–06 as a correct, tested, inert library; the
+  unreachable recovery ceremonies; `bootstrapStatus`. Rule-15 practice and the
+  EL-11 reachability conformance are the enforcement homes (register row
+  R-33); the law adds sight, not machinery.
+- **L3 (self-funding is forgery)** is the seed ledger's genesis rule (EL-10: a
+  ledger cannot sign its own genesis) and §4's authority table in one
+  sentence.
+- **L5 (time is the count of exchanges):** the event journal and the
+  acceptance ledger are the loop's exchange-indexed clock; between recorded
+  events no loop-native time passes — which is why prose restating status is
+  convenience, never authority.
+- **L6 (a check becomes a caller when its output is consumed):** EL-07 is the
+  promotion decision for the whole harness — the pilot's measurements feed the
+  one verdict (`EL-07-A4`) that could rewire `HANDOFF.md` authority, and that
+  consumption is reserved to the owner (P0-8), because the loop must not
+  promote itself (L3).
+- **L7.iv (partition of sight):** freeze-before-observe (the EL-07 guardrail
+  lineage since EL-00) is the sacred train/test partition applied to the
+  program's own evaluation; the July 17 pre-registration mold is available to
+  the pilot plan as a checkpoint option (`HANDOFF.md` Appendix B.0).
+
+Nothing here amends a requirement. If any sentence above ever disagrees with
+SPEC or the conformance suite, this section has the defect (authority order:
+code > glossary > prose).

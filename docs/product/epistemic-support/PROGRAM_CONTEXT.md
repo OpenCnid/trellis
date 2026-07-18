@@ -158,6 +158,12 @@ see the decision record (§6).
   (four-judge role-definition completion + panel drills); the
   engineering-loop track's next objective (EL-07 stage 1, from
   master's Session-64 regeneration) is preserved as its Appendix B.
+  *(Updated July 17, 2026, evening: the owner re-sequenced to two
+  parallel engineering tracks — `HANDOFF.md` §3. The TTT tooling
+  increment is its Appendix A as activated; EL-07 stage 1 is its
+  Appendix B with the B.0 owner ceremony recipe; the program
+  objectives — the paper deep-dive and the four-judge work — are
+  preserved in its Appendix C, displaced not dropped.)*
 - Implemented so far: the support-oracle drill (modules, fixtures,
   entrypoint, 11 unit pins). Not implemented: judges, `support_sweep`,
   registration, ratification queue, rubrics, claim-kind plane. No
