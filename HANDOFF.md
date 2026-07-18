@@ -984,14 +984,28 @@ distilled rules, the final ledger, and harness-shape notes:
 the user-level `judge-composition` skill (record is canonical on
 drift). No engine code changed; no drill touched.
 
-Your objective is **Session 67: the owner-supplied research paper
-deep-dive — the J-space and the paper's phase transitions.** §3
-carries the objective. (Owner re-sequencing, July 16–17, 2026: the
-deep-dive displaced the four-judge objective, and the owner then
-re-selected four-judge as Session 66 — the deep-dive is displaced, not
-dropped, and resumes as the next session. The engineering-loop track's
-next objective — EL-07 stage 1, from master's Session-64 regeneration,
-with its ledger gate — is preserved verbatim in Appendix B.)
+**The research-paper deep-dive is RESOLVED out-of-band (verified
+July 18, 2026):** the paper was Anthropic's *Emotion Concepts and
+their Function in a Large Language Model*
+(transformer-circuits.pub/2026/emotions), read July 17 in the owner
+session that produced `docs/architecture/RESIDUAL_STREAM_SIDECAR.md`
+(PR #123, master `a239342`) — findings distilled in its §2 with typed
+evidence classes, mirror present at `D:\OpenCnid\emotion-concepts-in-llms`,
+J-space identification bounded as design vocabulary (AB-1). The
+dual-track re-sequencing that would have recorded this (PR #125) was
+closed unmerged, which is why this pointer went stale. Residue, not
+re-work: the §3 pre-registered condensation-expectation verdict is an
+OWNER-OWED act (carried below), and the S12 register row was updated
+by dated entry July 18.
+
+Your objective is **Session 67: the judge-panel harness build,
+slice 1 — the filing layer, clean-context judge-prompt assembly, and
+the pre-registration store** (owner direction, July 18, 2026, closing
+the judge-composition game: "the skill is the short-hand for your next
+build session; that's what we'll be building next"). §3 carries the
+objective. (The engineering-loop track's next objective — EL-07
+stage 1, from master's Session-64 regeneration, with its ledger gate —
+is preserved verbatim in Appendix B.)
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
@@ -1756,103 +1770,118 @@ Work on one feature branch and target `master`.
 
 ## 3. Session 67 problem statement
 
-<research_objective>
+<build_objective>
 
-**The owner-supplied research deep-dive: study the paper and its
-data, to understand the connection between the J-space and the phase
-transitions the paper finds.** (Owner direction, July 17, 2026,
-post-PR #121; displaced once by the Session 66 re-selection —
-displaced, not dropped.) The paper arrives at session start — do not
-guess its identity; ask for the artifact (candidate referents already
-in the register: S8's verbalizable workspace, S13's condensation
-cascade). Ground rules from the principals: follow the paper;
-improvise open questions only with specificity, and only if needed
-("we might not need any" — the collaborator); attribution rule:
-Matthew Murphy owns the idea, Cnid owns the code.
+**The judge-panel harness build, slice 1 (owner direction, July 18,
+2026): make the game's rules mechanisms, zero-model.** Three bounded
+deliverables, all pure modules + drills in the Session 66 mold,
+implementing `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`
+§9 (its twenty rules in §6 are the design constraints; ratification of
+them as program law is OPEN, its §11 — building the mechanisms
+implements the owner's direction and does not ratify anything):
 
-</research_objective>
+1. **The filing layer** — promotion-candidate filing as
+   engine-addressed verbatim spans + typed mode annotations (Zod), the
+   code-mediated-text pillar applied to claims (game rule 15). A
+   prose-rewrite filing is structurally impossible; annotations are
+   positive statements (rule 16); span boundaries are a represented,
+   checkable surface (rule 17); intent-readings are labeled filer
+   artifacts bound to their garble (rule 18); refusals typed.
+2. **Clean-context judge-prompt assembly** — extend the Session 66
+   allowlist machinery (`assembleJudgeContext`) into full composed
+   judge prompts: definition + allowlisted evidence + output schema
+   and nothing else. No free-form task-text field exists in the type
+   (the game's steering findings F1/F6, made unrepresentable);
+   claimant masking at the evidence layer (rule 6).
+3. **The pre-registration store** — timestamped, write-once
+   expectation records readable by the audit seat (rules 11/20);
+   registering after a run opens refuses.
 
-**Pre-registered expectation (July 17, 2026, owner-flagged as an
-important finding — written down BEFORE the paper is read, so the
-reading can confirm or refute it honestly):** the phase transitions
-the paper finds are expected to be *condensation thresholds wearing
-another domain's clothes, collapsing onto the same layer* — the
-S13 pattern (structure crystallizes when it can fund its own
-existence; thresholds are sharp, not smooth) recurring in a new
-domain, per owner finding 5 (the collapse recognition) and law L7.
-If the paper's transitions do NOT fit the condensation shape, that
-is the informative outcome and must be recorded as such, not
-reconciled by force (R-30: never force gluing).
+Live judge model calls, `support_sweep` integration, and database
+registration remain OUT — separately authorized features, sequenced
+after the owner rules on RECONCILIATION §7.
 
-Orientation for J-space standing before reading:
-`docs/product/epistemic-support/RESEARCH_MAP.md` (the S8 and S13
-rows, R-31, §4.11 — the typed IEG↔harness synthesis) and
-`IEG_TEACHINGS.md` finding 6 (the J-Lens salience reading; the public
-instrument is sharing-queue row 11, with the pre-registration rule
-for any probe run).
+</build_objective>
+
+**The prior Session 67 objective (the research-paper deep-dive) is
+RESOLVED out-of-band** — see §2's dated note. One piece of it is
+deliberately preserved here until its verdict lands, because a
+pre-registration that disappears unrecorded is the exact failure the
+program exists to prevent:
+
+**Pre-registered expectation (July 17, 2026, owner-flagged; verdict
+OWNER-OWED, still unrecorded as of July 18):** the phase transitions
+the paper finds were expected to be *condensation thresholds wearing
+another domain's clothes, collapsing onto the same layer* — the S13
+pattern (structure crystallizes when it can fund its own existence;
+thresholds are sharp, not smooth), per owner finding 5 and law L7.
+The verdict entry (in `IEG_TEACHINGS.md`, beside finding 5, by dated
+note) must record confirmation, refutation, partial fit with residue —
+or **referent absent**, if the emotions paper's findings do not
+present as phase transitions at all; a non-fit or an absent referent
+is the informative outcome and must not be reconciled by force (R-30).
 
 **Pending owner acts carried into this session (surface them; do not
 perform them):** (1) ratification of the Session 66 reconciliation —
 `RECONCILIATION.md` §7 is OPEN and its §4 verdicts are proposals until
-the owner's dated entry lands; (2) the EL-10/EL-11 acceptance and
-EL-07 unblock ceremonies (Appendix B, unchanged).
+the owner's dated entry lands (this build's natural gate for the
+follow-on live-judge slice); (2) ratification of the game record's
+proposals — `JUDGE_COMPOSITION_GAME.md` §11 (the twenty rules + its
+§9 shape notes); (3) the condensation-expectation verdict above;
+(4) the EL-10/EL-11 acceptance and EL-07 unblock ceremonies
+(Appendix B, unchanged).
 
 ## 4. Required design
 
-This is a research session in the S13 mold (the twice-sessioned
-UIT-IEG study is the precedent — register S13 row, §4.11):
+This is an engineering session in the Session 66 mold (pure modules,
+Zod boundaries, byte-pinned drill fixtures, an independent
+spec-derived oracle, typed refusals everywhere):
 
-- **Acquire before canonizing (the S6 rule).** If the paper is public,
-  mirror it under the OpenCnid org and verify the checksum before
-  reading (the S1/S8/S9 pattern); if it is an unpublished draft, it is
-  reference-only — read it where the owner supplies it, cite by title
-  + version, never commit the artifact (the S13 rule). Record the
-  SHA-256 of whatever was actually read.
-- **Register discipline.** New source ⇒ a numbered `S` row with
-  provenance, license posture, and read-state; new claims ⇒ `R` rows
-  with evidence classes and falsifiers; everything by dated entry,
-  never silent edit. The register-summary header carries the counts —
-  update it in the same change.
-- **The expectation is the experiment.** Read the paper against the
-  pre-registered expectation in §3 and record the verdict either way —
-  confirmation, refutation, or partial fit with the residue named.
-  Never force the condensation reading onto transitions that do not
-  fit (R-30); a non-fit is the informative outcome.
-- **Findings land as typed syntheses** — the §4.11 mold: each chain
-  step tagged evidence or inference, correspondences typed
-  (converges / suggests / names / grounds), physics claims
-  coverage-only unless primary-verified, enforcement weight only
-  through AB-1's design-vocabulary bound.
-- **Docs-only unless the owner directs otherwise.** No mechanism,
-  probe, or measurement runs from this session without its own
-  proposal; candidate follow-ons are recorded as proposals with
-  estimates, not executed.
+- **Invoke the protocols before authoring** (Guardrail 15 + this
+  build's own subject): the Prompt-Engineering, Hypershot, AND
+  `judge-composition` skills — the last is the game's operational
+  shorthand; on any drift from `JUDGE_COMPOSITION_GAME.md` §6/§9, the
+  record wins.
+- **Filing is annotation over engine-addressed spans, never rewrite.**
+  The filing type carries span addresses + hashes into the judged
+  record so any splice re-opens verdicts (the reversibility
+  convention). Make the game's failure modes *unrepresentable*, not
+  discouraged: no free-text restatement field, no negation-shaped
+  annotation forms, no task-text channel in composed prompts.
+- **The assembly extends, never bypasses, Session 66's machinery** —
+  `assembleJudgeContext` allowlists are the blindness mechanism;
+  composed prompts are values the drills can inspect byte-for-byte.
+- **Pre-registration is write-once with a timestamp the audit seat
+  can read**; late registration refuses with a typed error.
+- **Register discipline continues** — any new claims land as `R` rows
+  with falsifiers, by dated entry; the twenty rules are cited from the
+  game record, not restated (no drift copies).
 
 ## 5. File-level starting points
 
-- `docs/product/epistemic-support/RESEARCH_MAP.md` — the register (S8
-  and S13 rows, R-20…R-24, R-31…R-38, §4.10–§4.11, §9 adoption
-  bounds); the destination for new rows and dated entries.
-- `docs/product/epistemic-support/IEG_TEACHINGS.md` — the July 17
-  teaching record (finding 5 the collapse recognition, finding 6 the
-  J-Lens salience reading, law L7, the understanding ladder).
-- `docs/product/epistemic-support/PROGRAM_CONTEXT.md` — program
-  orientation; §6 decision record (paid queue ON HOLD; durable
-  deployment Option A decided).
-- `docs/product/epistemic-support/RECONCILIATION.md` — the Session 66
-  record whose §7 ratification the owner may rule on this session.
-- `D:\OpenCnid\` — the mirror convention on this machine
-  (`who-grades-the-grader-pdf` lineage; `global-workspace-in-llms`,
-  `emotion-concepts-in-llms`, `local-reading-copies` present); the S9
-  fork clone sits at `D:\OpenCnid\migration-analysis` (`2bb5e54`).
-- `D:\UIT_IEG\UIT-IEGv5_1.pdf` — S13 as supplied (SHA-256
-  `c54d14a4…53dd`), if the deep-dive needs the condensation sections
-  (§9, §11, §14.1) beside the new paper.
+- `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` — §6 the
+  twenty rules (design constraints), §9 the harness-shape notes (the
+  slice's spec), §7 the disposition grammar the filing layer's types
+  should anticipate.
+- `src/core/graph/judge_panel.ts` — the Session 66 modules: schemas,
+  registry, `assembleJudgeContext`, `composePanel`; the slice adds
+  siblings, it does not modify the drilled composition path.
+- `src/core/graph/judge_audit.ts` — the audit seat the
+  pre-registration store must be readable by (imports stay one-way).
+- `fixtures/judge_panel/` + `scripts/test_judge_panel.ts` — the drill
+  mold (independent generator, eol-pinned fixtures, negative
+  controls); the new drills follow it.
+- `docs/architecture/CODE_MEDIATED_TEXT.md` — the pillar the filing
+  layer applies to claims (hash-guarded splices, engine-computed
+  addresses).
+- `docs/product/epistemic-support/RECONCILIATION.md` §5 — enforcement
+  homes and pins; the slice's new behaviors get rows of the same
+  shape.
 
 ## 6. Test strategy and acceptance
 
-Offline (no Docker, no API key). A docs-only session still runs the
-standing block before shipping:
+Offline (no Docker, no API key, zero model calls). Standing block
+before shipping:
 
     npm test -- --no-file-parallelism      # baseline 1,275 across 112 files (§2)
     npm run build
@@ -1863,17 +1892,19 @@ standing block before shipping:
 
 Acceptance items (each observed, not asserted):
 
-1. The paper's identity, version, and checksum are recorded; its
-   acquisition path honors the license posture (mirror or
-   reference-only).
-2. The pre-registered expectation has a recorded verdict — confirmed,
-   refuted, or partial with residue — grounded in the paper's own
-   numbers/figures, not paraphrase.
-3. The register is updated by dated entry (source row, claim rows with
-   falsifiers, header counts) and any synthesis lands in the §4.11
-   typed mold.
-4. Open questions, if any, are specific (the collaborator's bar) and
-   recorded as questions, not woven into canonical prose.
+1. Filing: a candidate files only as verbatim spans (address + hash +
+   mode annotations); fixtures include a refused prose-rewrite, a
+   refused negation-shaped annotation, and a span-boundary case; every
+   refusal typed and named.
+2. Assembly: a composed judge prompt is byte-inspectable and contains
+   exactly definition + allowlisted evidence + output schema; the
+   drill pins the *absence* of any task-text channel (the kernel-
+   prompt absence-pin pattern) and the claimant mask.
+3. Pre-registration: write-once + timestamped verified; a
+   late-registration attempt refuses; the audit seat can read the
+   store without any new import path from audit into composition.
+4. Standing suites stay green at baseline counts; new drills carry
+   negative controls in the house pattern (planted breaks named).
 5. `git diff --check` clean; docs cross-references resolve; roadmap §5
    entry + this file regenerated per §0 in the same PR.
 
@@ -1887,16 +1918,19 @@ Acceptance items (each observed, not asserted):
    vocabulary only — no physics claim carries enforcement weight);
    AB-3 (measure at the point of load); AB-10 (session context and
    un-promoted sources have no provenance standing).
-3. **Zero-paid session.** No LLM call anywhere; any probe the reading
-   suggests (the J-Lens instrument, the R-36 knee test) is a separate
-   owner-gated proposal — and the paid queue is ON HOLD by owner
-   ruling until re-opened by dated note.
-4. **Follow the paper.** The pre-registered expectation is tested
-   against the paper's own content; a non-fit is recorded, never
-   reconciled by force (R-30). Open questions only with specificity.
+3. **Zero-paid session.** No LLM call anywhere — the slice is pure
+   modules and drills; live judge spawns are the separately gated
+   follow-on, and the paid queue is ON HOLD by owner ruling until
+   re-opened by dated note.
+4. **The claim is the user's; the rigor belongs to the instruments**
+   (game rule 15 and its §3 lesson). The filing layer must make
+   inflation and deflation unrepresentable; where a claimant's intent
+   is ambiguous, the mechanism's job is to force the clarifying
+   question, never to resolve it silently.
 5. **Documents lead.** Register amendments are dated entries; the
    register-summary header carries the counts; `code > glossary >
-   prose > session inference`.
+   prose > session inference`; the game record is canonical over the
+   `judge-composition` skill on any drift.
 6. **Engineering-loop surfaces untouched:** no controller state, no
    `tools/engineering-loop/` changes, no EL acceptance or unblock —
    Appendix B is preserved, not executed.
@@ -1921,8 +1955,12 @@ Do **not**:
   by collaborator ruling — no alias);
 - implement live judges, the `support_sweep` job, judge registration
   against real databases, the ratification queue, or the claim-kind
-  plane — Session 66's modules keep exactly two callers (the drill
-  and its unit pins) until the sweep-integration proposal;
+  plane — the slice adds sibling modules (filing, assembly,
+  pre-registration) with their own drills; `composePanel`'s drilled
+  path keeps its existing callers until the sweep-integration
+  proposal;
+- record the condensation-expectation verdict or ratify
+  JUDGE_COMPOSITION_GAME §11 — owner acts; surface them (§3);
 - self-ratify the Session 66 reconciliation or edit its §4 verdicts —
   the owner rules; a ruling lands as a dated entry in
   `RECONCILIATION.md` §7;
