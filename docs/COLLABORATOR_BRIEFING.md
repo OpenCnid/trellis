@@ -501,7 +501,8 @@ claim we got wrong mid-session rather than quietly deleting it).
 You were a player in this one, so this is for the record and for
 readers after us. Your clarification that S10's eleven-judge ecology
 is examples-from-primitives, not a roster, became a four-hand teaching
-game: contexts dealt by you, the owner, and Cnidarian; four-role
+game: contexts dealt by you, the owner (Cnid), and the composer
+itself; four-role
 panels composed per context; then the real thing — sub-agent judges in
 isolated clean contexts over the owner's own candidate, sycophancy
 trap armed. The panel caught its composer: the filing had strengthened

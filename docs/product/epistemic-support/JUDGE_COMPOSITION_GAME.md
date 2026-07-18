@@ -2,7 +2,7 @@
 
 **Status: RECORD of a session-layer experiment (July 17–18, 2026), with
 proposals marked where they occur; ratification §11.** Players: the
-owner, the collaborator (M. Murphy), Cnidarian (AI reviewer), and
+owner (Cnid — long form Cnidarian), the collaborator (M. Murphy), and
 Claude (composer). Authored under HANDOFF §7 guardrail 4 /
 Guardrail 15 (Prompt-Engineering + Hypershot invoked before any
 authored prompt bytes). This record is **canonical for the learnings**;
@@ -55,7 +55,7 @@ design** — the space is not exhaustively testable (§7, item P3).
 |---|---|---|---|---|
 | 1 "creek ledger" | composer (self-dealt) | citizen-science water-quality REPL; causal-attribution candidate | epistemic driving question; transcription-fidelity vs grounding split; ethical plane correctly gated (AB-7) | positive; one correction — corroboration's two blindnesses were conflated (became rule 2) |
 | 2 "comedian corpus" | collaborator | approved-routine corpus; unperformed-bit candidate (originality + glue + impact) | aesthetic driving question pulls Emotional/Sensorial registries IN, with the user's own corpus as the standard; compound-candidate decomposition forced by "use the label, what is B?" (became rule 1); nobody judges "funny" — impact is performance-gated, promotion provisional | positive both reviewers |
-| 3 "Armory Theory" | Cnidarian | the owner's own methodological theory as candidate; **sycophancy trap armed** | authorship-blind composition (rule 6); value-mode merit refusal (rule 7); composer conflict disclosure (rule 9); pre-registration discipline | positive; escalated to the live run |
+| 3 "Armory Theory" | owner (Cnid) | the owner's own methodological theory as candidate; **sycophancy trap armed** | authorship-blind composition (rule 6); value-mode merit refusal (rule 7); composer conflict disclosure (rule 9); pre-registration discipline | positive; escalated to the live run |
 
 The hands share zero content. The same four-role skeleton produced
 water-chemistry judges, comedy judges, and methodology judges by
@@ -64,8 +64,7 @@ separation working as the hypershot protocol predicts.
 
 ## 3. The live run (hand 3 executed, four sub-agent judges)
 
-Proposed by the collaborator, authorized by Cnidarian, relayed by the
-owner. Three belief-facing judges ran in **isolated clean contexts** —
+Proposed by the collaborator and authorized by the owner (Cnid). Three belief-facing judges ran in **isolated clean contexts** —
 each receiving only its input allowlist (bundle + claimant-masked
 cited bytes; bundle + curated record digest; bundle + declared
 evidence pool), never the claimant's identity, the conversation, the

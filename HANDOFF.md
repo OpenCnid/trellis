@@ -968,9 +968,9 @@ detection; tampered-fixture and `TRELLIS_EXP_*` refusals exit 2.
 **Inter-session program experiment (July 17–18, 2026, branch
 `d/eight-verdicts-overview-d37582`, docs-only — outside the numbered
 engineering sequence; Session 67's objective below is unchanged): the
-judge-composition game.** The owner, the collaborator, and Cnidarian
-ran a four-hand teaching game that exercised the Session 66
-composition design live at the session layer: adaptive four-role
+judge-composition game.** The owner (Cnid) and the collaborator ran a
+teaching game — three graded hands, then a live run — that exercised
+the Session 66 composition design live at the session layer: adaptive four-role
 panels composed for three unrelated contexts, then a real sub-agent
 run on the owner's own candidate (sycophancy trap armed) whose
 grounding judge **caught the composer's filing strengthening the
