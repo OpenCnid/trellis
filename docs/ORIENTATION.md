@@ -305,7 +305,7 @@ the authority.*
 
 | Entity | Hook | Authority |
 |---|---|---|
-| Authority order | code > glossary > prose, everywhere | `AGENTS.md` |
+| Authority order | code > glossary > prose across the committed record; a collaborator's live instruction outranks it | `AGENTS.md`, `docs/architecture/SESSION_GOVERNANCE.md` |
 | Handoff loop | the session prompt regenerates itself; §3 is the only objective authority | `HANDOFF.md` §0 |
 | Engineering loop | the session loop mechanized; status in the acceptance ledger only | `docs/architecture/ENGINEERING_LOOP.md`, `tools/engineering-loop/SPEC.md` |
 | Change triple | behavior → enforcing tooling → drift-detecting pin | `AGENTS.md` §3 |

@@ -1644,3 +1644,38 @@ maintained by dated entry. `docs/README.md` §2 gains the pointer with
 the future-project category stated. UHE/J-space linkage enters under
 AB-1 (design vocabulary only); the Landauer tell is typed CONJECTURE
 and not load-bearing.
+
+### July 17, 2026 — Owner-directed: session-governance scoping — the substrate's provenance law governs stored beliefs, not the engineering session (branch `d/substrate-provenance-governance-38998e`, docs-only, zero-model and zero-paid)
+
+An external scoping note arrived (PROPOSED, July 17) naming a real
+governance defect: the session-contract files applied the substrate's
+provenance/quarantine/ratification doctrine to the engineering session
+itself, so a live collaborator's clear instruction ranked below
+committed prose and a terminology clarification (UHE) was processed as
+a contested-belief proceeding across sessions. The owner directed its
+application. `docs/architecture/SESSION_GOVERNANCE.md` landed carrying
+the note verbatim plus the dated application record. Three governance
+surfaces amended in the note's sense (the authority order is scoped,
+not abolished): `AGENTS.md`'s opening — "authority order everywhere"
+became "across the committed record," with the collaborator's clear,
+current instruction named the session's highest authority and the
+one-question ambiguity rule stated; `HANDOFF.md`'s opening — "only
+sources of truth" narrowed to "only durable record" (a record, not an
+oracle); `HANDOFF.md` §0 — the cache analogy typed economic, not
+governmental (the session is not a belief inside the substrate), the
+owner-directed amendment setting §0's new preserve-verbatim baseline.
+Mirrors: `docs/ORIENTATION.md`'s governance row scoped and
+`docs/README.md` §2 pointer added; the owner-side session bootstrap
+prompt amended in the same pass. Deliberately untouched, with reasons
+in the record: HANDOFF Appendix B's frozen `<invariant_authority>`
+block (frozen plans are superseded, never edited), `docs/archive/**`,
+`IEG_TEACHINGS.md` finding 5 (a teaching record, corrected not
+rewritten), `GLOSSARY.md` (already correct — provenance "proves
+origin, never correctness" is the very distinction enforced), and
+every remaining `code > glossary > prose` mirror that ranks committed
+artifacts only. §1.5.3's automatable-gates principle is adopted for
+future gate specs and flips no existing gate (zero-paid, merges,
+promotions, ledger ceremonies all stand). Authored under Guardrail 15
+(both prompt protocols invoked before bytes). §5 window management
+deferred per the Session 65 convention. Everything on this branch
+awaits owner ratification at merge review.
