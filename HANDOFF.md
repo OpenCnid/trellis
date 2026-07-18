@@ -965,6 +965,25 @@ detection; tampered-fixture and `TRELLIS_EXP_*` refusals exit 2.
 1,275/112 (zero existing tests changed); support-oracle unchanged
 7/106.
 
+**Inter-session program experiment (July 17–18, 2026, branch
+`d/eight-verdicts-overview-d37582`, docs-only — outside the numbered
+engineering sequence; Session 67's objective below is unchanged): the
+judge-composition game.** The owner (Cnid) and the collaborator ran a
+teaching game — three graded hands, then a live run — that exercised
+the Session 66 composition design live at the session layer: adaptive four-role
+panels composed for three unrelated contexts, then a real sub-agent
+run on the owner's own candidate (sycophancy trap armed) whose
+grounding judge **caught the composer's filing strengthening the
+claimant's claims** (six of eight drawbacks were filing artifacts), a
+byte-accurate corrected re-run, two audits, and an adversarial test of
+the collaborator's primitives thesis (survived conditionally;
+falsifier: representational holism). Canonical record with the twenty
+distilled rules, the final ledger, and harness-shape notes:
+`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`
+(ratification of its proposals OPEN, its §11). Operational shorthand:
+the user-level `judge-composition` skill (record is canonical on
+drift). No engine code changed; no drill touched.
+
 Your objective is **Session 67: the owner-supplied research paper
 deep-dive — the J-space and the paper's phase transitions.** §3
 carries the objective. (Owner re-sequencing, July 16–17, 2026: the
@@ -1609,7 +1628,12 @@ immutable, content-addressed physical location in source material.
   `src/core/graph/judge_panel.ts` / `judge_audit.ts` and pinned by
   `npm run test:judge-panel`. Owner ratification of the verdicts is the
   pending act (RECONCILIATION §7); until it lands the two designs stay
-  co-equal.
+  co-equal. The composition design has since been exercised live at
+  the session layer (July 17–18 judge-composition game,
+  `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`): the
+  differently-blind structure caught its own composer's filing bias,
+  and the game's twenty rules — byte-accurate claim filing above all —
+  plus its §9 harness-shape notes bind the eventual sweep integration.
   `docs/product/epistemic-support/` is the program home;
   PROGRAM_CONTEXT.md orients a fresh session; the adoption-bounds
   register (RESEARCH_MAP §9, AB-1…AB-11) binds all program work and is

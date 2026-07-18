@@ -496,6 +496,38 @@ claim we got wrong mid-session rather than quietly deleting it).
 
 ---
 
+## Postscript — the judge-composition game (added July 18, 2026)
+
+You were a player in this one, so this is for the record and for
+readers after us. Your clarification that S10's eleven-judge ecology
+is examples-from-primitives, not a roster, became a four-hand teaching
+game: contexts dealt by you, the owner (Cnid), and the composer
+itself; four-role
+panels composed per context; then the real thing — sub-agent judges in
+isolated clean contexts over the owner's own candidate, sycophancy
+trap armed. The panel caught its composer: the filing had strengthened
+the claimant's claims four-for-four, and six of eight drawbacks were
+filing artifacts. Your diagnosis of that mechanism — the model
+"adding rigor" to a user's claim and committing epistemic harm on the
+idea itself; byte-accurate comparison requires byte-accurate
+reproduction — is now permanent program law (rule 15 of twenty) and
+the corrected re-run validated it as a positive control. Full record,
+ledger, and the twenty rules:
+[`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`](product/epistemic-support/JUDGE_COMPOSITION_GAME.md).
+
+**One decision is yours (its §10 item 1).** Your corrected primitives
+thesis survived an adversarial clean-context attack conditionally, and
+the analyst's steelman — the universal ∩ governable trilemma, with
+representational holism as the named falsifier — is tabled as a
+refiling only you can accept, amend, or decline. Rule 15 cuts both
+ways: we do not file improved versions of your claims either. The
+falsifier, you'll notice, is the same decomposability bet the sidecar
+direction and the refined functional-infinity entry rest on — the
+experiments you and the owner are pointing the program at will settle
+all three at once.
+
+---
+
 ## Where you can help next
 
 When you propose — on any item below — please use this frame, one per

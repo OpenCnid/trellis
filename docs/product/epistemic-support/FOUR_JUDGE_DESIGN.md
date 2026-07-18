@@ -274,3 +274,13 @@ preserved as written.
 5. Rubric composition machinery: see
    [`COMPOSABLE_RUBRICS_DESIGN.md`](COMPOSABLE_RUBRICS_DESIGN.md)
    (owner decision #4) — the rubric side of every role contract.
+6. *(Added July 18, 2026.)* The composition design was exercised live
+   at the **session layer** — isolated sub-agent judges over a real
+   promotion candidate, twice, with audits — in the judge-composition
+   game: [`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md).
+   The run validated the differently-blind structure (the panel caught
+   its own composer's filing bias) and produced twenty distilled rules
+   plus harness-shape notes (its §9) that bind the eventual sweep
+   integration when that bounded feature is authorized. No engine code
+   changed; this record's §10.1 status and RECONCILIATION §7
+   ratification are unaffected.
