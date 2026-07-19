@@ -270,8 +270,37 @@ authorization; nothing here authorizes build):
 
 ## 11. Ratification
 
-**OPEN.** The factual sections (§2–§5, §7) record what happened and
-need no ratification. The proposals — the twenty rules as binding
-program law (§6), the harness-shape notes (§9), and this record's
-canonical-over-skill authority — are ratified by the owner's dated
-entry here; until then any consumer must say so.
+**RATIFIED — July 18, 2026 (owner, Session 67).** All three proposals
+are ratified as written. From this date:
+
+- **The twenty rules of §6 are binding program law.** They are cited by
+  number; consumers do not restate them, and a paraphrased copy is drift,
+  not an implementation.
+- **The §9 harness-shape notes bind the implementing feature.** Their
+  first consumer is
+  [`JUDGE_INTAKE_DESIGN.md`](JUDGE_INTAKE_DESIGN.md), whose §1.2
+  dispositions each intake-relevant rule against the Trellis substrate.
+- **This record is canonical over the `judge-composition` skill.** On any
+  drift between the two, the record wins and the skill is corrected.
+
+**Scope note (owner ruling, July 18, 2026).** These rules were distilled
+from an exercise that ran *without a workspace* — claims existed as
+conversation prose, so filing required a model to retype them. Trellis
+has a fact space and a beliefs workspace; a promotion candidate is an
+addressed object and the engine copies its bytes. **Ratifying the rules
+as law does not import that missing substrate.** A rule whose failure
+mode an architecture cannot express is satisfied by that architecture,
+and the disposition is recorded per rule rather than assumed in either
+direction — see JUDGE_INTAKE_DESIGN §1.2. Rules about the filer's pen
+are satisfied structurally; rules about the composer's packaging bind
+the engine.
+
+Ratified in the same act: [`RECONCILIATION.md`](RECONCILIATION.md) §7.
+Records ratified under this entry are amended only by dated entry, never
+by silent edit.
+
+*The gate this entry closes, preserved: "**OPEN.** The factual sections
+(§2–§5, §7) record what happened and need no ratification. The proposals
+— the twenty rules as binding program law (§6), the harness-shape notes
+(§9), and this record's canonical-over-skill authority — are ratified by
+the owner's dated entry here; until then any consumer must say so."*

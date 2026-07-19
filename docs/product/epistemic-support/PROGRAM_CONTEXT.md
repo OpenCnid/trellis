@@ -56,6 +56,22 @@ see the decision record (§6).
    the PROPOSED change queue for existing code (its §5 table is
    authoritative for the rows — counts are not restated here). Docs only;
    the register's §4.11 and rows R-32…R-38 are authoritative over it.
+7. [`JUDGE_INTAKE_DESIGN.md`](JUDGE_INTAKE_DESIGN.md) *(added July 18,
+   2026, Session 67)* — **judge intake**: the named bounded feature
+   covering what stands between a promotion candidate and a judge —
+   selection-and-ratification, clean-context prompt assembly, and the
+   write-once record store. Read its §1.2 first: the
+   judge-composition game ran **without a workspace**, so its filing
+   rules address a transcription step Trellis does not have; §1.2
+   dispositions each rule against the substrate (rules about the
+   filer's pen are satisfied by
+   [`WORKSPACE_AND_MODULES.md`](../../architecture/WORKSPACE_AND_MODULES.md)
+   §4.1/§4.2/§6; rules about the composer's packaging survive into the
+   engine). Design authorized and leading; implementation follows it.
+   Its constraints are the twenty rules of
+   [`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md) §6 and the
+   §9 shape notes — **binding program law since the July 18, 2026
+   ratification (§11)** — cited by number, never restated.
 
 ## 3. Context you cannot infer from the artifacts alone
 
@@ -74,9 +90,12 @@ see the decision record (§6).
   ingestion protocol that Session 66 EXECUTED (July 17, 2026):
   [`RECONCILIATION.md`](RECONCILIATION.md) holds the completed
   definitions and composition design, and `npm run test:judge-panel`
-  pins the structural guarantees. Until owner ratification
-  (RECONCILIATION §7, OPEN), neither document is authoritative
-  over the other. Terminology: UHE (Unified Hyperplane of Experience)
+  pins the structural guarantees. **RATIFIED July 18, 2026
+  (RECONCILIATION §7): the co-equality is ended — RECONCILIATION.md
+  governs wherever the two designs differ, and its §4 verdicts are
+  binding. `JUDGE_COMPOSITION_GAME.md` §11 was ratified in the same
+  act, making the twenty rules binding program law.** Terminology:
+  UHE (Unified Hyperplane of Experience)
   is a loaned Lexideck house term — see the basic model's header
   addendum and RESEARCH_MAP §4.10 (**the externality principle**, the
   program's unifying frame: Trellis as an engineering practice of

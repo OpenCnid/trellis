@@ -26,9 +26,14 @@ per-field sources, the adopted composition design (R-29 hard
 compatibility gate; R-30 no-global-section), the per-role verdicts
 with falsifiers, and the enforcement/pin table. The panel drills of §7
 items 1–3 are implemented in the same PR
-(`npm run test:judge-panel`). **Ratification remains OPEN**
-(RECONCILIATION §7): the verdicts are proposals until the owner's
-dated entry lands, and the two designs stay co-equal until then.
+(`npm run test:judge-panel`). **Fourth amendment (July 18, 2026,
+Session 67): RATIFIED.** RECONCILIATION §7 carries the owner's dated
+entry. The verdicts there are binding, the co-equality is ended, and
+**RECONCILIATION.md governs this record wherever the two differ** — its
+layer mapping, completed role definitions, composition design (R-29,
+R-30), and §5 enforcement table are authoritative. This record stands as
+the architecture it graduated from; read it with RECONCILIATION beside
+it. `JUDGE_COMPOSITION_GAME.md` §11 was ratified in the same act.
 
 Program context: [`PROGRAM_CONTEXT.md`](PROGRAM_CONTEXT.md). Parent
 design record: [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)

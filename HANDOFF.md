@@ -1751,8 +1751,24 @@ Repository state at handoff creation:
   byte-pinned under `fixtures/judge_panel/` with an independent
   spec-derived generator. With the session's 17 unit pins, `npm test`
   passes **1,275 tests across 112 files** (`--no-file-parallelism`
-  reading). **RECONCILIATION ratification is OPEN** — the owner
-  ratifies by dated entry in `RECONCILIATION.md` §7.
+  reading). ~~RECONCILIATION ratification is OPEN~~ **RATIFIED July 18,
+  2026** (`RECONCILIATION.md` §7) — see the Session 67 bullet.
+- **Session 67 (July 18, 2026) was docs-only; no test count moved.**
+  `npm test` and the standing drill block were not re-run because no
+  executable byte changed — the counts above are Session 66's readings,
+  carried forward unverified. The session named and designed **judge
+  intake** (`docs/product/epistemic-support/JUDGE_INTAKE_DESIGN.md`) and
+  landed two owner ratifications: `RECONCILIATION.md` §7 (§4 verdicts
+  binding; FOUR_JUDGE_DESIGN / FOUR_JUDGE_BASIC_MODEL co-equality ended,
+  RECONCILIATION governs where they differ) and
+  `JUDGE_COMPOSITION_GAME.md` §11 (the twenty rules are binding program
+  law; the record is canonical over the `judge-composition` skill). **The
+  substrate correction is the session's load-bearing finding:** the game
+  ran without a workspace, so its filing rules address a transcription
+  step Trellis does not have — JUDGE_INTAKE_DESIGN §1.2 dispositions each
+  rule against the substrate, and a first draft that re-derived a
+  parallel span-addressing scheme was withdrawn. A `scope` enumeration
+  and an `IntentReading` type were withdrawn in the same pass.
 - **EL-10 and EL-11 acceptance is not recorded.** Both are implemented; neither
   is accepted. The reachability blocker on EL-10 acceptance is CLOSED — the
   unreachable-producer set is empty, re-derived from the import graph every run —
@@ -1778,46 +1794,69 @@ docker compose config --quiet
 
 Work on one feature branch and target `master`.
 
-## 3. Session 67 problem statement
+## 3. Session 68 problem statement
 
 <build_objective>
 
-**The judge-panel harness build, slice 1 (owner direction, July 18,
-2026): make the game's rules mechanisms, zero-model.** Three bounded
-deliverables, all pure modules + drills in the Session 66 mold,
-implementing `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`
-§9 (its twenty rules in §6 are the design constraints; ratification of
-them as program law is OPEN, its §11 — building the mechanisms
-implements the owner's direction and does not ratify anything):
+**Judge intake, slice 1 — implementation (owner direction, July 18,
+2026): build the design record, zero-model.** The design is DONE and
+ratified-adjacent work is closed; this session writes code.
+`docs/product/epistemic-support/JUDGE_INTAKE_DESIGN.md` is the spec and
+leads — **read its §1.2 first**, then §3. On any drift between this
+summary and that record, the record wins.
 
-1. **The filing layer** — promotion-candidate filing as
-   engine-addressed verbatim spans + typed mode annotations (Zod), the
-   code-mediated-text pillar applied to claims (game rule 15). A
-   prose-rewrite filing is structurally impossible; annotations are
-   positive statements (rule 16); span boundaries are a represented,
-   checkable surface (rule 17); intent-readings are labeled filer
-   artifacts bound to their garble (rule 18); refusals typed.
-2. **Clean-context judge-prompt assembly** — extend the Session 66
-   allowlist machinery (`assembleJudgeContext`) into full composed
-   judge prompts: definition + allowlisted evidence + output schema
-   and nothing else. No free-form task-text field exists in the type
-   (the game's steering findings F1/F6, made unrepresentable);
-   claimant masking at the evidence layer (rule 6).
-3. **The pre-registration store** — timestamped, write-once
-   expectation records readable by the audit seat (rules 11/20);
-   registering after a run opens refuses.
+Three modules plus one drill, all pure, in the Session 66
+`test:judge-panel` mold (Zod boundaries, byte-pinned fixtures, an
+independent spec-derived generator, typed refusals everywhere):
+
+1. **`src/core/graph/judge_intake.ts` — selection + ratification**
+   (record §3.1). Addresses are *carried, never minted*: a selection
+   names workspace segment uuids / Tier-1 block ids and the engine
+   fetches bytes at them. A selection carrying literal text refuses
+   (`LiteralTextRefusedError`) — the model has no channel to supply
+   claim bytes at all. Building a candidate without a recorded
+   `Ratification` refuses (`UnratifiedSelectionError`). Every selection
+   carries engine-computed `neighborContext` so the cut is visible at
+   approval (rule 17). `claimMode` lives on the ratification, chosen by
+   the user, never inferred by the agent.
+2. **`src/core/graph/judge_intake_prompt.ts` — clean-context assembly**
+   (record §3.2). `PromptSection` is a closed discriminated union —
+   identity / definition / evidence / output_schema — with **no
+   task-text member**; the drill pins the absence, in the kernel-prompt
+   absence-pin pattern. Evidence is built only through
+   `assembleJudgeContext`, so blindness cannot be bypassed. Attribution
+   is partitioned by address and the allowlist never admits address
+   components. `renderPrompt` is pure and deterministic so prompts
+   byte-pin.
+3. **`src/core/graph/judge_prereg.ts` — the write-once store**
+   (record §3.3). Two record kinds, ratifications and pre-registrations,
+   sharing one module because they share every property that matters.
+   Second write per key refuses; registration after run-open refuses,
+   typed. Exports nothing the prompt module imports (rule 11);
+   `judge_audit.ts` may read it (rule 20).
+4. **`scripts/test_judge_intake.ts` + `fixtures/judge_intake/`** —
+   sections per record §6, `--negative-control` exiting nonzero and
+   naming three planted breaks (unratified selection; smuggled
+   expectation in a composed prompt; registration after run-open).
+   `[attribution-partition]` is the section that would have caught this
+   feature's original design error — seed one workspace with two users'
+   beliefs under distinct address partitions and assert composed judge
+   contexts differ only in claim content.
+
+Imports stay one-way: `judge_intake → judge_intake_prompt →
+judge_panel`, and `judge_audit → judge_prereg`. `composePanel`'s drilled
+path keeps its callers and is not modified.
 
 Live judge model calls, `support_sweep` integration, and database
-registration remain OUT — separately authorized features, sequenced
-after the owner rules on RECONCILIATION §7.
+registration remain OUT — separately authorized bounded features.
+RECONCILIATION §7 ratification unblocked the live-judge slice as a
+*gate*; it did not authorize the build.
 
 </build_objective>
 
-**The prior Session 67 objective (the research-paper deep-dive) is
-RESOLVED out-of-band** — see §2's dated note. One piece of it is
-deliberately preserved here until its verdict lands, because a
+**Carried from Session 67 — one owner-owed verdict, preserved because a
 pre-registration that disappears unrecorded is the exact failure the
-program exists to prevent:
+program exists to prevent:**
 
 **Pre-registered expectation (July 17, 2026, owner-flagged; verdict
 OWNER-OWED, still unrecorded as of July 18):** the phase transitions
@@ -1831,92 +1870,118 @@ or **referent absent**, if the emotions paper's findings do not
 present as phase transitions at all; a non-fit or an absent referent
 is the informative outcome and must not be reconciled by force (R-30).
 
-**Pending owner acts carried into this session (surface them; do not
-perform them):** (1) ratification of the Session 66 reconciliation —
-`RECONCILIATION.md` §7 is OPEN and its §4 verdicts are proposals until
-the owner's dated entry lands (this build's natural gate for the
-follow-on live-judge slice); (2) ratification of the game record's
-proposals — `JUDGE_COMPOSITION_GAME.md` §11 (the twenty rules + its
-§9 shape notes); (3) the condensation-expectation verdict above;
+**Owner acts — status (surface them; do not perform them):**
+(1) ~~ratification of the Session 66 reconciliation~~ **DONE July 18,
+2026** — `RECONCILIATION.md` §7 carries the dated entry; §4 verdicts are
+binding, the FOUR_JUDGE_DESIGN / FOUR_JUDGE_BASIC_MODEL co-equality is
+ended with RECONCILIATION governing where they differ.
+(2) ~~ratification of the game record's proposals~~ **DONE July 18,
+2026** — `JUDGE_COMPOSITION_GAME.md` §11: the twenty rules are binding
+program law, the §9 shape notes bind the implementing feature, and the
+record is canonical over the `judge-composition` skill. **Read its scope
+note:** ratifying the rules as law does not import the workspace-less
+setting they were distilled in; per-rule dispositions against the
+substrate live in JUDGE_INTAKE_DESIGN §1.2.
+(3) the condensation-expectation verdict above — **still OWNER-OWED,
+unrecorded**.
 (4) the EL-10/EL-11 acceptance and EL-07 unblock ceremonies
 (Appendix B, unchanged).
 
 ## 4. Required design
 
-This is an engineering session in the Session 66 mold (pure modules,
-Zod boundaries, byte-pinned drill fixtures, an independent
-spec-derived oracle, typed refusals everywhere):
+An engineering session in the Session 66 mold. The design record leads;
+this section names only what the record does not:
 
-- **Invoke the protocols before authoring** (Guardrail 15 + this
-  build's own subject): the Prompt-Engineering, Hypershot, AND
-  `judge-composition` skills — the last is the game's operational
-  shorthand; on any drift from `JUDGE_COMPOSITION_GAME.md` §6/§9, the
+- **Read `JUDGE_INTAKE_DESIGN.md` §1.2 before writing a line.** It
+  dispositions each intake-relevant rule against the substrate. The
+  single most expensive error available here is the one Session 67 made
+  and the owner corrected: transplanting a failure mode from the
+  judge-composition game — which ran *without a workspace* — into an
+  architecture that structurally cannot express it. Before building a
+  safeguard, check whether Trellis can express the failure.
+- **Addresses are carried, never minted.** Workspace segments are
+  already uuid-delimited and origin-stamped (`WORKSPACE_AND_MODULES.md`
+  §4.2); Tier-1 blocks already carry Merkle addresses. Do not invent a
+  parallel addressing scheme — that was the withdrawn draft's mistake.
+- **The engine copies bytes; the model never retypes** (WORKSPACE §4.1,
+  `CODE_MEDIATED_TEXT.md`). The refusal on literal text is the pin that
+  proves it.
+- **Make failures unrepresentable where the type system can.** No
+  task-text member in `PromptSection`; no free-text claim field; no
+  agent-authored annotations. Where a type cannot carry it, use a typed
+  refusal — never a convention.
+- **Invoke the protocols before authoring any prompt-shaped bytes**
+  (Guardrail 15): Prompt-Engineering AND Hypershot. `renderPrompt`'s
+  output is prompt bytes. The `judge-composition` skill is the
+  operational shorthand for the rules; on any drift, the ratified game
   record wins.
-- **Filing is annotation over engine-addressed spans, never rewrite.**
-  The filing type carries span addresses + hashes into the judged
-  record so any splice re-opens verdicts (the reversibility
-  convention). Make the game's failure modes *unrepresentable*, not
-  discouraged: no free-text restatement field, no negation-shaped
-  annotation forms, no task-text channel in composed prompts.
-- **The assembly extends, never bypasses, Session 66's machinery** —
-  `assembleJudgeContext` allowlists are the blindness mechanism;
-  composed prompts are values the drills can inspect byte-for-byte.
-- **Pre-registration is write-once with a timestamp the audit seat
-  can read**; late registration refuses with a typed error.
-- **Register discipline continues** — any new claims land as `R` rows
-  with falsifiers, by dated entry; the twenty rules are cited from the
-  game record, not restated (no drift copies).
+- **Register discipline continues** — new empirical claims land as `R`
+  rows with falsifiers, by dated entry. Design commitments do not need
+  rows. The twenty rules are cited by number, never restated.
 
 ## 5. File-level starting points
 
-- `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` — §6 the
-  twenty rules (design constraints), §9 the harness-shape notes (the
-  slice's spec), §7 the disposition grammar the filing layer's types
-  should anticipate.
-- `src/core/graph/judge_panel.ts` — the Session 66 modules: schemas,
-  registry, `assembleJudgeContext`, `composePanel`; the slice adds
-  siblings, it does not modify the drilled composition path.
-- `src/core/graph/judge_audit.ts` — the audit seat the
-  pre-registration store must be readable by (imports stay one-way).
-- `fixtures/judge_panel/` + `scripts/test_judge_panel.ts` — the drill
-  mold (independent generator, eol-pinned fixtures, negative
-  controls); the new drills follow it.
-- `docs/architecture/CODE_MEDIATED_TEXT.md` — the pillar the filing
-  layer applies to claims (hash-guarded splices, engine-computed
-  addresses).
-- `docs/product/epistemic-support/RECONCILIATION.md` §5 — enforcement
-  homes and pins; the slice's new behaviors get rows of the same
-  shape.
+- `docs/product/epistemic-support/JUDGE_INTAKE_DESIGN.md` — **the
+  spec.** §1.2 the per-rule disposition, §3 the three mechanisms, §5 the
+  file table, §6 behavior→enforcement→pin (every row is a drill section
+  to write), §7 the drill shape, §9 the falsifiers.
+- `src/core/graph/judge_panel.ts` — Session 66: `ROLE_DEFINITIONS`,
+  verdict/manifest schemas, registry, `assembleJudgeContext`
+  (the blindness mechanism the assembly consumes), `composePanel`
+  (untouched — keeps its callers).
+- `src/core/graph/judge_audit.ts` — the audit seat that reads the
+  pre-registration store; imports stay one-way.
+- `scripts/test_judge_panel.ts` + `fixtures/judge_panel/` — the drill
+  mold to copy: independent spec-derived generator, SHA-256 fixture
+  manifest checked before any section, `TRELLIS_EXP_*` refusal, named
+  planted breaks.
+- `docs/architecture/WORKSPACE_AND_MODULES.md` §3/§4.1/§4.2/§6 — the
+  substrate contract the whole design rests on: the three tiers,
+  mechanical capture, origin-stamped segments, the operator-gated
+  promotion path.
+- `docs/product/epistemic-support/RECONCILIATION.md` §5 — the
+  enforcement-table shape; §6's rows merge here once observed rather
+  than designed (JUDGE_INTAKE_DESIGN §10.4).
 
 ## 6. Test strategy and acceptance
 
-Offline (no Docker, no API key, zero model calls). Standing block
-before shipping:
+Offline (no Docker, no API key, zero model calls). Fresh worktrees have
+no `node_modules` — `npm ci` first. Standing block before shipping:
 
+    npm ci                                 # fresh worktree
     npm test -- --no-file-parallelism      # baseline 1,275 across 112 files (§2)
     npm run build
     npm run python:check
     npm run test:support-oracle            # stays green, 7 sections / 106 checks
     npm run test:judge-panel               # stays green, 10 sections / 182 checks
     npm run test:judge-panel -- --negative-control   # exits 3, three named breaks
+    npm run test:judge-intake              # NEW — sections per design record §6
+    npm run test:judge-intake -- --negative-control  # NEW — exits nonzero, 3 named breaks
 
 Acceptance items (each observed, not asserted):
 
-1. Filing: a candidate files only as verbatim spans (address + hash +
-   mode annotations); fixtures include a refused prose-rewrite, a
-   refused negation-shaped annotation, and a span-boundary case; every
-   refusal typed and named.
-2. Assembly: a composed judge prompt is byte-inspectable and contains
-   exactly definition + allowlisted evidence + output schema; the
-   drill pins the *absence* of any task-text channel (the kernel-
-   prompt absence-pin pattern) and the claimant mask.
-3. Pre-registration: write-once + timestamped verified; a
-   late-registration attempt refuses; the audit seat can read the
-   store without any new import path from audit into composition.
-4. Standing suites stay green at baseline counts; new drills carry
-   negative controls in the house pattern (planted breaks named).
-5. `git diff --check` clean; docs cross-references resolve; roadmap §5
-   entry + this file regenerated per §0 in the same PR.
+1. **Selection + ratification**: a selection carrying literal text
+   refuses; a candidate built without a recorded ratification refuses;
+   both typed and named. A selection's `neighborContext` is
+   engine-computed and present in the ratification payload. `claimMode`
+   is unreachable except through a ratification.
+2. **Assembly**: a composed prompt is byte-inspectable and contains
+   exactly identity + definition + allowlisted evidence + output schema;
+   the drill pins the *absence* of any task-text channel; a forbidden
+   input still raises `BlindnessViolationError` through the new path.
+3. **Attribution partition**: two users' beliefs in one workspace under
+   distinct address partitions produce composed judge contexts that
+   differ **only** in claim content. Any address component reaching a
+   judge context fails the section by name.
+4. **Store**: write-once verified on both record kinds; late
+   registration refuses; static import checks green in both directions
+   (store exports nothing the prompt module imports; audit gains no path
+   into composition).
+5. Standing suites stay green at baseline counts; the new drill carries
+   negative controls in the house pattern with breaks named individually.
+6. `git diff --check` clean; docs cross-references resolve; the §6 table
+   merges into RECONCILIATION §5 now that its rows are observed; roadmap
+   §5 entry + this file regenerated per §0 in the same PR.
 
 ## 7. Guardrails
 
@@ -1933,10 +1998,12 @@ Acceptance items (each observed, not asserted):
    follow-on, and the paid queue is ON HOLD by owner ruling until
    re-opened by dated note.
 4. **The claim is the user's; the rigor belongs to the instruments**
-   (game rule 15 and its §3 lesson). The filing layer must make
-   inflation and deflation unrepresentable; where a claimant's intent
-   is ambiguous, the mechanism's job is to force the clarifying
-   question, never to resolve it silently.
+   (rule 15, now binding law). In Trellis the substrate already carries
+   this — the engine copies bytes at an address and the model never
+   retypes. The session's job is to *pin* that, and to build the
+   ratification gate so the clarifying question is forced by structure
+   rather than remembered by discipline. Never let an agent supply a
+   claim property the user should ratify.
 5. **Documents lead.** Register amendments are dated entries; the
    register-summary header carries the counts; `code > glossary >
    prose > session inference`; the game record is canonical over the
@@ -1944,9 +2011,13 @@ Acceptance items (each observed, not asserted):
 6. **Engineering-loop surfaces untouched:** no controller state, no
    `tools/engineering-loop/` changes, no EL acceptance or unblock —
    Appendix B is preserved, not executed.
-7. **Owner acts stay owner acts:** RECONCILIATION §7 ratification and
-   the EL ceremonies are recorded decisions the owner performs;
-   surface them, never infer or perform them.
+7. **Owner acts stay owner acts:** the EL ceremonies and the
+   condensation-expectation verdict are recorded decisions the owner
+   performs; surface them, never infer or perform them. RECONCILIATION
+   §7 and JUDGE_COMPOSITION_GAME §11 were ratified July 18, 2026 — those
+   records are now amended **only by dated entry, never by silent
+   edit**, and a ratified record is not re-opened by an implementing
+   session.
 8. **Prompt protocol** (guardrail-11 pattern): if any prompt-like
    artifact is authored, read the Prompt-Engineering and Hypershot
    protocols first; JUDGE_CONTRACT_TEMPLATE.md §6–§7 carries the
@@ -1965,15 +2036,19 @@ Do **not**:
   by collaborator ruling — no alias);
 - implement live judges, the `support_sweep` job, judge registration
   against real databases, the ratification queue, or the claim-kind
-  plane — the slice adds sibling modules (filing, assembly,
-  pre-registration) with their own drills; `composePanel`'s drilled
-  path keeps its existing callers until the sweep-integration
-  proposal;
-- record the condensation-expectation verdict or ratify
-  JUDGE_COMPOSITION_GAME §11 — owner acts; surface them (§3);
-- self-ratify the Session 66 reconciliation or edit its §4 verdicts —
-  the owner rules; a ruling lands as a dated entry in
-  `RECONCILIATION.md` §7;
+  plane — the slice adds sibling modules (intake, assembly, store)
+  with their own drill; `composePanel`'s drilled path keeps its
+  existing callers until the sweep-integration proposal. RECONCILIATION
+  §7's ratification unblocked the live-judge slice as a *gate*; it is
+  not an authorization to build it;
+- record the condensation-expectation verdict — owner act; surface it (§3);
+- re-open, re-litigate, or silently edit `RECONCILIATION.md` or
+  `JUDGE_COMPOSITION_GAME.md` — both were ratified July 18, 2026 and are
+  amended only by the owner's dated entry;
+- invent a span-addressing scheme, an `IntentReading` type, or a `scope`
+  enumeration — all three were designed and then **withdrawn** for cause
+  (JUDGE_INTAKE_DESIGN §10.2 and the substrate correction). Re-deriving
+  them is the specific regression this handoff exists to prevent;
 - execute the approved S1/S8 promotions here (they await the durable
   deployment build — PROGRAM_CONTEXT §6, Option A decided);
 - modify the write path, custody tiers, kernel prompts, extraction
