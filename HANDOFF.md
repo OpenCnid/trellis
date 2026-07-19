@@ -2042,6 +2042,11 @@ Do **not**:
   §7's ratification unblocked the live-judge slice as a *gate*; it is
   not an authorization to build it;
 - record the condensation-expectation verdict — owner act; surface it (§3);
+- re-derive or re-open the judge-actuation / calm-sycophancy hazard, or
+  push the collaborator for the design that answers it —
+  `RESIDUAL_STREAM_SIDECAR.md` §9 carries the pointer and the reason
+  (AB-10 + the S13 unpublished-artifact rule). It arrives when they
+  publish it;
 - re-open, re-litigate, or silently edit `RECONCILIATION.md` or
   `JUDGE_COMPOSITION_GAME.md` — both were ratified July 18, 2026 and are
   amended only by the owner's dated entry;
