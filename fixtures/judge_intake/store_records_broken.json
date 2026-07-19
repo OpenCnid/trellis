@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "note": "DELIBERATELY BROKEN twin for the --negative-control mode. Two planted breaks: (1) the sel-primary ratification is ABSENT, so the drill's expectation that the sel-primary candidate builds fails against the ratification gate — a candidate built from an unratified selection is the break the gate must be seen refusing; (2) lateAttempt names run-gamma, which never opens, so the registration RECORDS where the drill expects the rule-20 refusal — a store that accepts this twin silently has a pre-registration hole. A drill that absorbs either is itself the failure.",
+  "ratifications": [
+    { "selectionId": "sel-twin-b", "claimMode": "fact", "confirmedAtMs": 1752801000002 },
+    { "selectionId": "sel-worded-b", "claimMode": "fact", "confirmedAtMs": 1752801000003 },
+    { "selectionId": "sel-decomp-1", "claimMode": "belief", "confirmedAtMs": 1752801000004 },
+    { "selectionId": "sel-decomp-2", "claimMode": "fact", "confirmedAtMs": 1752801000005 },
+    { "selectionId": "sel-multi", "claimMode": "inference", "confirmedAtMs": 1752801000006 }
+  ],
+  "preRegistrations": [
+    {
+      "registrationId": "prereg-1",
+      "runId": "run-alpha",
+      "registeredAtMs": 1752801500000,
+      "expectations": [
+        {
+          "itemId": "item-1",
+          "expectedVerdict": "drawback",
+          "expectedDrawbackClass": "unsupported_citation",
+          "rationale": "the selected span stops short of the cited strength."
+        }
+      ]
+    },
+    {
+      "registrationId": "prereg-2",
+      "runId": "run-beta",
+      "registeredAtMs": 1752801600000,
+      "supersedes": "prereg-1",
+      "expectations": [
+        {
+          "itemId": "item-1",
+          "expectedVerdict": "clean",
+          "rationale": "the revised selection carries its qualifier."
+        }
+      ]
+    }
+  ],
+  "runOpens": [{ "runId": "run-alpha", "openedAtMs": 1752802000000 }],
+  "lateAttempt": {
+    "registrationId": "prereg-late",
+    "runId": "run-gamma",
+    "registeredAtMs": 1752802100000,
+    "expectations": [
+      {
+        "itemId": "item-1",
+        "expectedVerdict": "clean",
+        "rationale": "a forecast made after the run is not a forecast."
+      }
+    ]
+  },
+  "invalidRecords": [
+    {
+      "name": "dup-ratification",
+      "kind": "ratification",
+      "expect": "DuplicateRecordError",
+      "record": { "selectionId": "sel-primary", "claimMode": "value", "confirmedAtMs": 1752801000099 }
+    },
+    {
+      "name": "dup-prereg",
+      "kind": "preRegistration",
+      "expect": "DuplicateRecordError",
+      "record": {
+        "registrationId": "prereg-1",
+        "runId": "run-beta",
+        "registeredAtMs": 1752801700000,
+        "expectations": [{ "itemId": "item-2", "expectedVerdict": "abstain", "rationale": "duplicate key probe." }]
+      }
+    },
+    {
+      "name": "dup-run-open",
+      "kind": "runOpen",
+      "expect": "DuplicateRecordError",
+      "record": { "runId": "run-alpha", "openedAtMs": 1752802200000 }
+    },
+    {
+      "name": "supersedes-unknown",
+      "kind": "preRegistration",
+      "expect": "PreregSchemaError",
+      "record": {
+        "registrationId": "prereg-3",
+        "runId": "run-beta",
+        "registeredAtMs": 1752801800000,
+        "supersedes": "prereg-ghost",
+        "expectations": [{ "itemId": "item-3", "expectedVerdict": "clean", "rationale": "supersession must reference an existing record." }]
+      }
+    },
+    {
+      "name": "empty-expectations",
+      "kind": "preRegistration",
+      "expect": "PreregSchemaError",
+      "record": { "registrationId": "prereg-4", "runId": "run-beta", "registeredAtMs": 1752801900000, "expectations": [] }
+    },
+    {
+      "name": "class-on-clean-forecast",
+      "kind": "preRegistration",
+      "expect": "PreregSchemaError",
+      "record": {
+        "registrationId": "prereg-5",
+        "runId": "run-beta",
+        "registeredAtMs": 1752801950000,
+        "expectations": [
+          {
+            "itemId": "item-4",
+            "expectedVerdict": "clean",
+            "expectedDrawbackClass": "unsupported_citation",
+            "rationale": "a clean forecast cannot carry a drawback class."
+          }
+        ]
+      }
+    }
+  ]
+}

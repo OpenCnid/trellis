@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "note": "Provided (non-claim) evidence per role, prompt-composition scenarios, and the blindness/attribution probes. prompt-j1-user-a and prompt-j1-user-b file byte-identical claims from two users under distinct address partitions — their composed prompts must be BYTE-IDENTICAL; prompt-j1-user-b2 files the semantically matched re-wording — its prompt must differ from prompt-j1-user-a ONLY in claim content. attributionTokens (with every address in the space) must never appear in any rendered prompt.",
+  "provided": {
+    "j1": { "citedBytes": ["cited: the migration notes name the belief explicitly."] },
+    "j2": { "history": ["history: the belief predates the migration window."], "claimKind": "operational" },
+    "j3": { "independentEvidence": ["independent: a second observer reports the same contest within one cycle."] }
+  },
+  "promptScenarios": [
+    { "name": "prompt-j1-user-a", "role": "J1_GROUNDING", "judgeId": "judge-intake:j1", "selectionId": "sel-primary", "contextKey": "j1" },
+    { "name": "prompt-j1-user-b", "role": "J1_GROUNDING", "judgeId": "judge-intake:j1", "selectionId": "sel-twin-b", "contextKey": "j1" },
+    { "name": "prompt-j1-user-b2", "role": "J1_GROUNDING", "judgeId": "judge-intake:j1", "selectionId": "sel-worded-b", "contextKey": "j1" },
+    { "name": "prompt-j2", "role": "J2_COHERENCE", "judgeId": "judge-intake:j2", "selectionId": "sel-primary", "contextKey": "j2" },
+    { "name": "prompt-j3", "role": "J3_CORROBORATION", "judgeId": "judge-intake:j3", "selectionId": "sel-worded-b", "contextKey": "j3" },
+    { "name": "prompt-multi", "role": "J2_COHERENCE", "judgeId": "judge-intake:j2", "selectionId": "sel-multi", "contextKey": "j2" }
+  ],
+  "forbiddenProbes": [
+    { "role": "J1_GROUNDING", "input": "history" },
+    { "role": "J1_GROUNDING", "input": "address" },
+    { "role": "J1_GROUNDING", "input": "partition" },
+    { "role": "J1_GROUNDING", "input": "userId" },
+    { "role": "J2_COHERENCE", "input": "independentEvidence" },
+    { "role": "J3_CORROBORATION", "input": "citedBytes" }
+  ],
+  "attributionTokens": ["user-a", "user-b", "ws-shared", "doc-tier1"]
+}

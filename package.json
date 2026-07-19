@@ -69,7 +69,8 @@
     "drill:poison-cache": "tsx scripts/poison_oolong_cache.ts",
     "drill:poison": "tsx src/benchmarks/poison_drill_runner.ts",
     "test:support-oracle": "tsx scripts/test_support_oracle.ts",
-    "test:judge-panel": "tsx scripts/test_judge_panel.ts"
+    "test:judge-panel": "tsx scripts/test_judge_panel.ts",
+    "test:judge-intake": "tsx scripts/test_judge_intake.ts"
   },
   "keywords": [],
   "author": "",

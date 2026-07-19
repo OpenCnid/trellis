@@ -471,6 +471,30 @@ superseded contest record survives in the judge's history.
 | Position bias neutralized in J4 | `judge_audit.ts` `debiasedFinding` (agree-in-both-orders rule) | drill `[audit-isolation]` protocol checks; unit pins |
 | Writer never sees any of it | no production wiring exists this session (nothing writes or exposes panel state) | future: the sweep-integration proposal carries the kernel-prompt absence pin (FOUR_JUDGE_DESIGN §6 row 7) — recorded here as deliberately not yet pinnable |
 
+### 5.1 Judge-intake rows (dated entry, July 18, 2026 — Session 68)
+
+Merged from [`JUDGE_INTAKE_DESIGN.md`](JUDGE_INTAKE_DESIGN.md) §6 per its
+§10 item 4, in the implementing PR, now that every row is **observed**
+rather than designed (`npm run test:judge-intake`, 13 sections; the three
+modules land in the same PR as this entry). This is a dated addition
+under the §7 amendment rule, not an edit to the ratified table above.
+
+| Behavior | Enforcement home (non-test) | Pin |
+|---|---|---|
+| Claim bytes are engine-copied from an address, never model-authored | `judge_intake.ts` — input is addresses; bytes fetched engine-side | drill `[engine-copy]` (a selection carrying literal text refuses) |
+| Filing refuses without recorded ratification | ratification lookup precedes candidate construction | drill `[ratification-gate]` |
+| The cut is visible at approval (rule 17) | engine-computed `neighborContext` on every selection | drill `[selection-context]` (qualifier-excluding cut visible in the ratification payload) |
+| Claim mode is user-ratified, never agent-inferred | `claimMode` lives on `Ratification`, not on the selection | drill `[mode-provenance]` |
+| Compound claims decompose as separate ratified selections | one mode per selection; no sub-claim authoring surface | drill `[decomposition]` |
+| Attribution never reaches judge context | user id is an address component; allowlist admits content only | drill `[attribution-partition]` — two users' beliefs in one workspace produce judge contexts identical but for claim content |
+| No task-text channel in composed prompts | `PromptSection` closed union has no task member | drill `[prompt-absence]`; unit pins |
+| Composed prompts byte-inspectable | pure deterministic `renderPrompt` | drill `[prompt-bytes]` against byte-pinned fixtures |
+| Assembly cannot bypass blindness | evidence built only via `assembleJudgeContext` | drill `[blindness-preserved]` |
+| Ratifications and pre-registrations are write-once | store refuses a second write per key | drill `[write-once]` |
+| Late registration refuses | run-open event; later timestamp refuses, typed | drill `[prereg-late]` |
+| Forecasts never share bytes with prompts | no import path store → prompt module | drill `[static-imports]` |
+| Audit reads the store; no new audit→composition path | one-way imports | drill `[static-imports]` (both directions) |
+
 ## 6. Exclusions (this record)
 
 No live judges, no model calls, no `support_sweep`, no database
