@@ -1,0 +1,119 @@
+{
+  "atMs": 1753000000000,
+  "asOfMs": 1753086400000,
+  "pairKeys": {
+    "sel-belief-c/j1-grounding-v1": "20450769ce1daca5bd22e83af72d3e2e820294d46a076472a04867676b524ea9",
+    "sel-belief-c/j2-coherence-v1": "21981d311db460c26a6441230575be6ebce566c6efe85a25425bb7bb894bfe3d",
+    "sel-belief-c/j3-corroboration-v1": "82e9ab9b2dde1f192081d2efbaaca693ee6f096ed109f5676ef00a5aab923f04",
+    "sel-fact-a/j1-grounding-v1": "a81d17f6433119773bcf84d3e83fa538d526d2808ec8e9ab38226cc661287d18",
+    "sel-fact-a/j2-coherence-v1": "95ce953dae80e2dee44677d8023a16fb710290203c18923e1f8390ed36cd5f89",
+    "sel-fact-a/j3-corroboration-v1": "d6e675555699f559a907a1512fb5331169d738f1a8997762936118c17c10c99c",
+    "sel-fact-b/j1-grounding-v1": "fa437797a3772e53f98107538646aebfa5d7d336ecfec1ee724331254e7c054a",
+    "sel-fact-b/j2-coherence-v1": "0bfe2a58fa18865d0cb83b4d56ba48fd1fd6516807c64879a646c7c9b9bc3614",
+    "sel-fact-b/j3-corroboration-v1": "e3d93199326ff2bb941958e909169cac87cac5ca9ccc34750b5080531983eafb"
+  },
+  "poolOrder": [
+    "21981d311db460c26a6441230575be6ebce566c6efe85a25425bb7bb894bfe3d",
+    "a81d17f6433119773bcf84d3e83fa538d526d2808ec8e9ab38226cc661287d18",
+    "95ce953dae80e2dee44677d8023a16fb710290203c18923e1f8390ed36cd5f89",
+    "d6e675555699f559a907a1512fb5331169d738f1a8997762936118c17c10c99c",
+    "fa437797a3772e53f98107538646aebfa5d7d336ecfec1ee724331254e7c054a",
+    "0bfe2a58fa18865d0cb83b4d56ba48fd1fd6516807c64879a646c7c9b9bc3614",
+    "e3d93199326ff2bb941958e909169cac87cac5ca9ccc34750b5080531983eafb"
+  ],
+  "synthesizedPairKeys": [
+    "20450769ce1daca5bd22e83af72d3e2e820294d46a076472a04867676b524ea9"
+  ],
+  "run1": {
+    "runId": "run-drill-1",
+    "poolCandidates": 3,
+    "poolJudges": 3,
+    "poolPairs": 7,
+    "sampled": 7,
+    "deferred": 0,
+    "judged": 6,
+    "skippedNoAnswer": 1,
+    "jurisdictionAbstains": 1,
+    "exclusions": [
+      {
+        "judgeId": "j3-corroboration-v1",
+        "assumption": "independent_evidence_pool_available",
+        "selectionId": "sel-belief-c"
+      }
+    ],
+    "verdictsAppended": 7
+  },
+  "run2": {
+    "runId": "run-drill-2",
+    "poolPairs": 1,
+    "sampled": 1,
+    "deferred": 0,
+    "judged": 1,
+    "skippedNoAnswer": 0,
+    "jurisdictionAbstains": 0,
+    "verdictsAppended": 1
+  },
+  "budgetRun": {
+    "runId": "run-drill-budget",
+    "poolPairs": 7,
+    "sampled": 7,
+    "deferred": 5,
+    "judgedAtMost": 2,
+    "firstTwoPairKeys": [
+      "21981d311db460c26a6441230575be6ebce566c6efe85a25425bb7bb894bfe3d",
+      "a81d17f6433119773bcf84d3e83fa538d526d2808ec8e9ab38226cc661287d18"
+    ]
+  },
+  "seededRun": {
+    "runId": "run-drill-seeded",
+    "seed": 7,
+    "rate": 0.5,
+    "poolPairs": 7,
+    "sampled": 4,
+    "sampledPairKeys": [
+      "21981d311db460c26a6441230575be6ebce566c6efe85a25425bb7bb894bfe3d",
+      "a81d17f6433119773bcf84d3e83fa538d526d2808ec8e9ab38226cc661287d18",
+      "0bfe2a58fa18865d0cb83b4d56ba48fd1fd6516807c64879a646c7c9b9bc3614",
+      "e3d93199326ff2bb941958e909169cac87cac5ca9ccc34750b5080531983eafb"
+    ]
+  },
+  "opinions": {
+    "sel-fact-a": {
+      "b": 0.3962948190799773,
+      "d": 0.19814740953998866,
+      "u": 0.4055577713800342,
+      "projected": 0.5990737047699944,
+      "verdicts": 3,
+      "disagreements": 1,
+      "conflicts": 0,
+      "jurisdictionAbstains": 0,
+      "verdictsConsumed": 3
+    },
+    "sel-fact-b": {
+      "b": 0.5944422286199659,
+      "d": 0,
+      "u": 0.4055577713800342,
+      "projected": 0.797221114309983,
+      "verdicts": 3,
+      "disagreements": 0,
+      "conflicts": 0,
+      "jurisdictionAbstains": 0,
+      "verdictsConsumed": 3
+    },
+    "sel-belief-c": {
+      "b": 0,
+      "d": 0.32821883230821347,
+      "u": 0.6717811676917865,
+      "projected": 0.33589058384589326,
+      "verdicts": 2,
+      "disagreements": 0,
+      "conflicts": 0,
+      "jurisdictionAbstains": 1,
+      "verdictsConsumed": 2
+    }
+  },
+  "storeRows": {
+    "seed": 7,
+    "afterRuns": 19
+  }
+}

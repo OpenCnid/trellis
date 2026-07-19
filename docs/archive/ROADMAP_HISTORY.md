@@ -7383,3 +7383,105 @@ completions, paid calls, and real protected effects: zero.
 **EL-10 is implemented and activated; owner acceptance is not recorded.** All six
 catalog bindings are satisfied. Sessions 56 and 57 moved verbatim to the archive;
 the live window is 58 through 62.
+
+### July 16, 2026 — Session 63: EL-11 acceptance-ledger steady-state write path and approval-gate mapping, zero-model and zero-paid
+
+**The acceptance ledger shipped write-once.** EL-10 seeded generation 0 with
+eleven records and then left no path to change a status. Seeding refuses a
+non-empty generation (`EL-REQ-BOOT-003`), and the only other gated writes are the
+two `ledger_recovery` ceremonies for corruption, so a validating populated ledger
+could record nothing: EL-10 could not be accepted, EL-07 could not be unblocked,
+and no future feature could ever be accepted. Record §9.6 described the
+steady-state `acceptance_change` path exactly — seeding is that path applied to an
+empty ledger — but no `EL-REQ-BOOT-*` required it, so the implementing session
+built the six items with requirements and inverted the seventh. Third instance of
+the program's one pattern (`statusAuthority` rot; the unreachable seeder; this),
+landing in the feature meant to close it.
+
+**1. Steady-state acceptance (`acceptance_change.ts`, `EL-REQ-BOOT-008`).**
+`recordAcceptanceChange` appends an owner-approved `acceptance_change` to a
+non-empty validating generation, superseding by ordinary replay
+(`resolveFeatureStatus` takes the last record per `featureId`) while the
+superseded records stay present, unmutated, and integrity-linked. It adds no
+protected action — `acceptance_change` already covers it, and a second would need
+the mode flag §9.9 warns rots. Seeding and the steady-state path share
+`buildAcceptanceRecordChain`, one construction of the record rather than two free
+to drift. `classifyLedgerGeneration` (one ceremony per state) is replaced by
+`admissibleLedgerCeremonies`, which returns the SET a state admits: a healthy
+populated generation admits both a status change and a content reconciliation,
+told apart by protected action and record kind, never by state and never by a
+flag. The three SPEC §6.1 predicates stay disjoint and total, asserted as such.
+`ledger_recovery` is not used for progress: the `EL-10=planned` record was correct
+when written, so accepting EL-10 is new information, not a correction.
+
+**2. Reachable producer (`activate.ts`, `EL-REQ-APPROVAL-010`).**
+`print-acceptance-request` / `record-acceptance`, mirroring `print-seed-request` /
+`seed`. The owner cannot hand-compute a request digest (sha256 over the canonical
+request material), so a protected action whose authorizing material has no
+reachable producer is a path nobody can walk — the EL-07 "correct but not
+reachable" finding reproduced at the approval artifact. A digest trap found by
+running the command live and fixed: `canonicalJson` sorts object keys but not
+array elements, so `exactScope` order is digest-bearing while approval matching
+sorts before comparing; a transposed `--set` would fail the digest check while
+passing the scope check, refusing a legitimate request. Scope pairs are now
+canonicalized (`canonicalStatusPairs`) — both orders yield the same digest,
+proven live.
+
+**3. Conformance mechanization (`conformance.ts`, `EL-01-A2`).**
+`analyzeConformanceLinkage` fails when a declared requirement carries no §18 row
+or a row has no declaring text: `EL-REQ-APPROVAL-012` landed declared and unmapped
+(114 declared / 113 mapped) and nothing could fail — the exact `statusAuthority`
+shape. `analyzeProducerReachability` fails when a computed-material producer
+resolves only test callers, deriving reachability from the import graph rather
+than a declaration. Both are pure over supplied bytes, so falsifiable against
+fixtures rather than only against a broken repository. The backtick trap is
+pinned: `EL-REQ-STATE-010`'s text begins with a literal, not a capital, and a
+naive pattern reports a false orphan.
+
+**4. SPEC, catalog, guardrails.** `EL-REQ-BOOT-008` and `EL-REQ-APPROVAL-010`
+added and mapped; `EL-REQ-APPROVAL-012` given its §18 row; the
+`EL-REQ-APPROVAL-002` provenance clause amended in text with ownership left on
+accepted EL-06 (its pinned 36 rows unmoved). EL-11 raised at `order: 11`,
+dependencies `EL-06` and `EL-10` — both a lower order, so the prerequisite is a
+real dependency edge and needs no `blocked`-status workaround. 116 requirements
+declared and 116 mapped with zero unmapped; EL-10 keeps its seven BOOT rows. The
+pause-scope norm and a correct-is-not-reachable norm moved to `AGENTS.md` as prose
+(hard rules 14/15), where a behavioral norm binding an agent in a session is
+honestly labelled rather than dressed as a conformance row whose transcript test
+cannot fail.
+
+**5. Falsification.** Every new guard reverted, observed red, restored. Removing
+`APPROVAL-012`'s row reproduces the 114/113 defect
+(`expected [ 'EL-REQ-APPROVAL-012' ] to deeply equal []`); unwiring the
+entrypoint's builder turns the reachability check red
+(`steady_state_acceptance producer: expected false to be true`); reverting
+admission to write-once turns nine acceptance tests red with the write-once
+symptom; disabling the unknown-feature refusal and the canonical ordering each go
+red. A measurement trap corrected mid-pass: the first falsification script matched
+on `\n` against a CRLF working tree and reported a false green — re-run reading
+bytes with explicit line endings.
+
+**6. Open defect, reported not routed around.** Both EL-10 recovery ceremonies
+(`recoverLedgerContent`, `reGenesisLedger`) have no caller outside `tests/` — no
+command, no script, no entrypoint. An owner facing a corrupt ledger still has only
+the hand-edit §9.9 exists to prevent, and cannot author matching approval material
+for a digest nobody produces. Under the new `EL-REQ-APPROVAL-010` this is EL-10
+failing acceptance as unreachable; it is EL-10's scope and the owner's to
+sequence, pinned by the reachability check (currently pinning the two unreachable)
+rather than fixed here, and it is the proposed next objective (HANDOFF §3). Also
+recorded: `printSeedRequest`/`runActivationSeed` are orphaned twins — `main()`
+inlines parallel logic, so the tested composition is not the one an operator runs.
+
+**Acceptance:** `npx vitest run tools/engineering-loop/tests/` 363 tests across 23
+files; `npm test` 1,239 across 110 (`--no-file-parallelism` and default
+parallelism agree — the documented Windows temp-dir flakiness did not manifest);
+`npm run build`, `npm run python:check`, `docker compose config --quiet`, Draft
+2020-12 catalog validation (12 features), and `git diff --check` pass. Model
+completions, paid calls, and real protected effects: zero — the acceptance ledger
+is byte-identical to preflight (sha256 `8bc0e033…`, generation 0, eleven records,
+`EL-10` still `planned`). Committed `e7cd809`; PR #114 open against `master`, not
+merged. **EL-11 is implemented and deterministically verified; owner acceptance is
+not recorded.** Outstanding owner acts: record `EL-10 = accepted` and
+`EL-07 = planned` through `print-acceptance-request` → author approval material →
+`record-acceptance`; record a status for `EL-11`, which is in the catalog with no
+ledger record.

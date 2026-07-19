@@ -70,7 +70,13 @@
     "drill:poison": "tsx src/benchmarks/poison_drill_runner.ts",
     "test:support-oracle": "tsx scripts/test_support_oracle.ts",
     "test:judge-panel": "tsx scripts/test_judge_panel.ts",
-    "test:judge-intake": "tsx scripts/test_judge_intake.ts"
+    "test:judge-intake": "tsx scripts/test_judge_intake.ts",
+    "judges:register": "tsx scripts/register_judges.ts",
+    "judges:verify": "tsx scripts/register_judges.ts --verify",
+    "judge:ratify": "tsx scripts/judge_ratify.ts",
+    "support:sweep": "tsx scripts/support_sweep.ts",
+    "support:report": "tsx scripts/support_report.ts",
+    "test:judge-convocation": "tsx scripts/test_judge_convocation.ts"
   },
   "keywords": [],
   "author": "",

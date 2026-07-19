@@ -86,11 +86,14 @@ see the decision record (§6).
    the spawn boundary (the composed bytes ARE the interface; R-27
    model-identity refusal; oracle twin), and the ratification queue
    (WORKSPACE §6 mold). **AUTHORIZED — Option B (owner, July 18,
-   2026; dated entry §11.1); nothing is built yet** — the build
-   session implements the zero-model machinery plus the triple-gated
-   spawn boundary. No live run is authorized; the paid queue remains
-   ON HOLD, and §10 additionally registers the owner-requested
-   metered promotion-cost measurement (queued, not scheduled).
+   2026; dated entry §11.1); IMPLEMENTED at option-B scope July 19,
+   2026 (Session 70)**: four modules + the `judge_records` table +
+   four operator surfaces + `npm run test:judge-convocation`
+   (23 sections; the §6 rows live in RECONCILIATION §5.2, which also
+   closes §5 row 9's writer-blind pin). No live run has executed; the
+   paid queue remains ON HOLD; §10 registers the owner-requested
+   metered promotion-cost measurement and §11.2 carries the road to
+   option C (the eventual live-LLM test).
 
 ## 3. Context you cannot infer from the artifacts alone
 

@@ -1,0 +1,11 @@
+{
+  "files": {
+    "broken_twins.json": "fb9d8964145d64d5aeb643970404612c11392ab54af0457106f213e255841649",
+    "candidates.json": "bde1a91303146a402b42cb6573d320bb4e5019aa9783dfe626627e378dacf031",
+    "evidence.json": "ca8f9d766459530a6f34788ab72a99a2ff700b521f4fff1f70f6cbc6fffea844",
+    "expected_convocation.json": "ed4dd3e494febb82d1a3f6ff4674c34a6deff1d839eca03fd640b1ad87522a9a",
+    "judges.json": "983e4b3e4fad9aa32d16d241c50f3d62135dd5d21ed1d81acacbb680587b3621",
+    "oracle_truth_run1.json": "9d09197abf8b9f58829aca6741806b1eeb8e60169a9d30e957df0968cc4ff01f",
+    "oracle_truth_run2.json": "1724a8ca0409bd85b7aae8adc2ecf79da2728377d3245cdb4724b332e9c0aa42"
+  }
+}

@@ -17,12 +17,12 @@ merged, and ARCHIVED: the full dated ledger for that span lives
 verbatim in `docs/archive/ROADMAP_HISTORY.md`
 (Sessions 1–23 moved July 12, 2026 by owner direction; then one
 session entry per PR under the five-session window rule — most
-recently Session 61 with the Session 68 judge-intake PR and Session 62
-with the Session 69 judge-convocation slice-2-proposal PR. The
-roadmap's live §5 window is now Sessions 63–69; this digest carries
-full narrative for Sessions 63–69, with 56–59 compressed into one
-EL-02–EL-05 paragraph and 61–62 compressed into the Session 63
-paragraph, §1.16, and §2). The
+recently Session 62 with the Session 69 judge-convocation
+slice-2-proposal PR and Session 63 with the Session 70 option-B build
+on that same PR. The roadmap's live §5 window is now Sessions 64–70;
+this digest carries full narrative for Sessions 63–70, with 56–59
+compressed into one EL-02–EL-05 paragraph and 61–62 compressed into
+the Session 63 paragraph, §1.16, and §2). The
 one-paragraph digest, oldest first; §1 below carries everything from
 this span that a new session must actually know:
 
@@ -1109,21 +1109,65 @@ Session 62 moved verbatim to the archive (live window 63–69); zero
 executable bytes changed, zero test-count moves (`npm test` stays
 1,290/113).
 
-Your objective is **Session 70: the judge-convocation build at
-OPTION-B scope — `JUDGE_CONVOCATION_DESIGN.md` §11.1, zero-model, in
-the Session 68 mold**. **The §11 gate is SATISFIED: the owner chose
-Option B on July 18, 2026 (dated entry §11.1, recorded in the same PR
-as the proposal)** — option A's zero-model machinery plus the complete
-triple-gated spawn boundary. **No live run is authorized** (option C
-was not taken; the paid queue stays ON HOLD). In the same act the
-owner registered the **metered promotion-cost test** (record §10 dated
-note; PROGRAM_CONTEXT §6 hold-list bracket) — a future measurement of
-the end-to-end cost of promoting a REPL belief to a Tier-1 fact;
-queued, not scheduled. §3 carries the objective. The owner may
-re-point the session — surface the §3 owner-acts list first either
-way. (The engineering-loop track's next objective — EL-07 stage 1,
-from master's Session-64 regeneration, with its ledger gate — is
-preserved verbatim in Appendix B.)
+**Session 70 (July 19, 2026, this PR — the same working period as
+Session 69, by owner direction "let's run option B") is complete: the
+judge-convocation OPTION-B BUILD, zero-model and zero-paid.** The
+§11.1-authorized subset landed in the Session 68 mold: the
+`judge_records` table (`PRIMARY KEY (kind, key)` — write-once
+mechanical) + four modules (`judge_convocation_store.ts` —
+validate-then-append through the slice-1 law, replay re-applies it;
+`judge_registration.ts` — the split representation, manifests
+store-resident, the graph holding only opaque `judge:<id>` contest
+hooks the ordinary invalidation sweep reaches with zero sweep changes;
+`support_sweep.ts` — pair-once bookkeeping with identity spanning
+candidate bytes + manifest identity, mulberry32 seeded sampling,
+budget with counted deferral, run-open through the law BEFORE first
+invocation, R-29 exclusions typed and counted, engine-synthesized
+jurisdiction abstentions at zero spend, judge-all-then-write, opinions
+computed at READ time and advisory only; `judge_spawn.ts` — the
+composed bytes ARE the interface, `promptHash` re-verified pre-send,
+R-27 construct-time model-identity refusal, strict
+`{verdict, drawback, abstainReason}` response surface, oracle twin,
+dynamic openai import inside the live constructor only) + four
+operator surfaces (`judges:register` with the existence gate and
+named-reviewer recovery; `judge:ratify` showing the cut verbatim with
+`--confirm`/`--claim-mode` required; `support:sweep` oracle-by-default
+with the `--live --confirm-paid` mechanical gates; `support:report`).
+Drill `npm run test:judge-convocation`: **23 sections / 140 checks**
+green (one of its own source-order pins corrected in-session);
+`--negative-control` exit 3 naming all four planted breaks;
+`--inject corrupt-expected` passes by detection; tamper and
+`TRELLIS_EXP_*` exit 2. Fixtures byte-pinned with an independent
+spec-derived generator; `.gitattributes -text` added. 15 unit pins;
+`npm test` 1,290/113 → **1,305/114**, zero existing tests changed;
+build, python:check, compose config green; the three sibling drills
+unchanged. Records: the §6 rows merged into **RECONCILIATION §5.2**
+by dated entry with every row OBSERVED — **closing §5 row 9's deferred
+writer-blind pin** (token scan over all ten `src/rlm/*.py` + the
+`search_ast_nodes` body + read-surface isolation);
+EPISTEMIC_SUPPORT §7 residual row split; JUDGE_CONVOCATION_DESIGN
+status flipped with §3.5 implementation notes (pair-identity exact
+forms, mulberry32 spec, synthesized abstentions, the ratification
+payload carrying confirmed bytes, the `run_report` kind amendment,
+injected gatherers) and **§11.2 "The road to option C"** (the
+owner-requested consideration: the six-item checklist to the first
+live-LLM test — queue re-opening; per-run ceremony; four real
+manifests with anchor fixtures; a real docket; the J3 live gatherer
+riding the run's proposal; the run shape = the metered promotion-cost
+test). **No live run has ever executed; the paid queue stays ON
+HOLD.** Session 63 archived (window 64–70).
+
+Your objective is **Session 71: the road-to-C staging — author and
+land the four real judge manifests (rubrics + ten-item anchor
+fixtures, Guardrail 15 REQUIRED), ingest them extraction-free,
+register the roster through the ceremony, and file the first real
+docket — zero-model, zero-paid** (JUDGE_CONVOCATION_DESIGN §11.2
+items 3–4; the two remaining items before a live run are the owner's
+governance acts, and item 5 rides the run's own proposal). §3 carries
+the objective. The owner may re-point the session — surface the §3
+owner-acts list first either way. (The engineering-loop track's next
+objective — EL-07 stage 1, from master's Session-64 regeneration, with
+its ledger gate — is preserved verbatim in Appendix B.)
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
@@ -1747,12 +1791,18 @@ immutable, content-addressed physical location in source material.
   modules (Session 66), and the judge-intake trio (Session 68 —
   selection/ratification `judge_intake.ts`, clean-context assembly
   `judge_intake_prompt.ts`, the write-once store `judge_prereg.ts`,
-  pinned by `npm run test:judge-intake`); live judges, sweep
-  integration, registration, and the ratification queue remain each
-  separately gated — their slice-2 proposal is
-  `docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md`
-  (Session 69), PROPOSED, awaiting the owner's §11 authorization
-  decision.
+  pinned by `npm run test:judge-intake`); and — Session 70, July 19,
+  2026 — **judge convocation at option-B scope**
+  (`docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md`,
+  authorized §11.1, implemented same PR): registration with the split
+  store/graph representation, the `support_sweep` job with pair-once
+  bookkeeping and read-time opinions, the triple-gated spawn boundary
+  with its oracle twin, the ratification queue, and the `judge_records`
+  convocation store, pinned by `npm run test:judge-convocation` and
+  RECONCILIATION §5.2 (which also closed §5 row 9's writer-blind pin).
+  Still gated separately: live judge runs (behind the paid queue —
+  §11.2 carries the road), the J1/J2 evidence channels, the J3 live
+  gatherer, external allowlists, J4 sampling, the claim-kind plane.
 - **The judge layer (RECONCILED Session 66; RATIFIED July 18, 2026,
   RECONCILIATION §7 — §4 verdicts binding, RECONCILIATION governs where
   the designs differ):** four
@@ -1799,14 +1849,14 @@ immutable, content-addressed physical location in source material.
 
 Repository state at handoff creation:
 
-- **Program and Git:** at Session 69's branch point (July 18, 2026)
-  `origin/master` is `cbb0b96` — the Session 68 judge-intake slice-1
-  implementation (PR #133), atop the Session 67 series (PRs #128–#132:
-  the Session-67 re-point, mirror-era amendments, the OpenCnid
-  research-notes wiring, the judge-intake design + ratifications, and
-  the judge-actuation pointer). The Session 69 judge-convocation
-  proposal (docs-only) is this PR. Observe actual Git state rather
-  than assuming merge status either way.
+- **Program and Git:** at the Session 69/70 branch point (July 18–19,
+  2026) `origin/master` is `cbb0b96` — the Session 68 judge-intake
+  slice-1 implementation (PR #133), atop the Session 67 series
+  (PRs #128–#132). This PR (#134) carries THREE things in sequence:
+  the Session 69 judge-convocation proposal, the owner's §11.1
+  Option-B authorization (dated entry), and the Session 70 option-B
+  build. Observe actual Git state rather than assuming merge status
+  either way.
 - **The controller runs, with all four ledger write paths reachable.**
   `npm run el:activate` and `tsx tools/engineering-loop/src/activate.ts` are
   real non-test callers, with `check`, `status`, `print-seed-request`, `seed`,
@@ -1838,13 +1888,13 @@ Repository state at handoff creation:
   `EL-REQ-APPROVAL-012`). Session 64 added no requirement and no row; the
   `EL-REQ-BOOT-006`/`007` evidence entries gained `activate.ts` and the two
   end-to-end command tests, count-preserving.
-- **Acceptance baseline:** `npm test` passes **1,290 tests across 113
-  files, all green** (Session 66's 1,275/112 plus Session 68's 15
-  judge-intake pins in one new file; zero existing tests changed). The
-  focused engineering-loop command passes **371
+- **Acceptance baseline:** `npm test` passes **1,305 tests across 114
+  files, all green** (Session 68's 1,290/113 plus Session 70's 15
+  judge-convocation pins in one new file; zero existing tests
+  changed). The focused engineering-loop command passes **371
   tests across 23 files** on master. Draft 2020-12 catalog validation
   reports **12 features**. Build, Python, and diff checks pass
-  (observed Session 68; Compose config unchanged since Session 66).
+  (observed Session 70; Compose config unchanged since Session 66).
   The full suite has been **flaky under file parallelism on
   Windows** (`ENOTEMPTY`/timeout on temp-dir cleanup); it did not
   manifest in Sessions 63, 64, or 68 — use `--no-file-parallelism` for
@@ -1892,19 +1942,28 @@ Repository state at handoff creation:
   (`generate_expected.ts` — re-run it in the same commit whenever the
   §3.2a grammar or RECONCILIATION §2 role data changes). The §6
   enforcement rows live in RECONCILIATION §5.1 (dated entry).
-- **Session 69 (July 18, 2026) was docs-only; no test count moved.**
-  It named and proposed **judge convocation**
-  (`docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md`,
-  PROPOSED): the slice-2 design record deciding judge registration
-  (split store/graph representation), the `support_sweep` job (with
-  the RECONCILIATION §5 row 9 writer-blind pin DESIGNED), the spawn
-  boundary (oracle twin; live constructor triple-gated), the
-  ratification queue, and the convocation store. **The §11 decision
-  is RECORDED — Option B (same-day dated entry §11.1): the build is
-  authorized at option-B scope; no live run.** The paid queue remains
-  ON HOLD; the record's §10 figures are registered estimates only,
-  now including the owner-requested metered promotion-cost test
-  (queued on the hold list).
+- **Sessions 69–70 (July 18–19, 2026, one PR).** Session 69 named and
+  proposed **judge convocation**
+  (`docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md`); the
+  owner recorded **Option B** the same day (dated entry §11.1) and
+  registered the metered promotion-cost test on the paid-queue hold
+  list; Session 70 BUILT the option-B scope (see the digest above).
+- **Judge-convocation baseline (Session 70):**
+  `npm run test:judge-convocation` → 23 sections / 140 checks green;
+  `--negative-control` exits 3 naming all four planted breaks (roster
+  hook missing reaching a run; duplicate verdict write; spawn
+  transport bytes ≠ rendered prompt; pre-registration after
+  run-open); `--inject corrupt-expected` passes by detection;
+  tampered-fixture and `TRELLIS_EXP_*` refusals exit 2. Fixtures
+  byte-pinned under `fixtures/judge_convocation/` with an independent
+  spec-derived generator (`generate_expected.ts` — re-run it in the
+  same commit whenever the record's §3.5 forms or RECONCILIATION §2
+  role data change). The §6 enforcement rows live in RECONCILIATION
+  §5.2 (dated entry; §5 row 9's writer-blind pin CLOSED there).
+  Operator surfaces exist but have run against nothing: no judge is
+  registered, no selection ratified, no sweep run on the real store.
+  **No live run has ever executed; the paid queue is ON HOLD**; the
+  record's §11.2 carries the six-item road to option C.
 - **EL-10 and EL-11 acceptance is not recorded.** Both are implemented; neither
   is accepted. The reachability blocker on EL-10 acceptance is CLOSED — the
   unreachable-producer set is empty, re-derived from the import graph every run —
@@ -1930,54 +1989,50 @@ docker compose config --quiet
 
 Work on one feature branch and target `master`.
 
-## 3. Session 70 problem statement
+## 3. Session 71 problem statement
 
 <build_objective>
 
-**The judge-convocation build: implement the §11-authorized subset of
-`docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md`,
-zero-model, in the Session 68 mold.**
+**Road-to-C staging (JUDGE_CONVOCATION_DESIGN §11.2 items 3–4): author
+the four real judge manifests — rubric documents and ten-item anchor
+fixtures — land them as verified substrate, register the roster
+through the ceremony, and file the first real docket. Zero-model,
+zero-paid.** The owner's stated aim is the eventual live-LLM test;
+after this session, the only things standing before it are the owner's
+two governance acts (the dated paid-queue re-opening; the per-run
+ceremony) plus the J3 live-gatherer increment that rides the run's own
+proposal (§11.2 item 5 — NOT this session).
 
-**The gate is SATISFIED (July 18, 2026):** the owner's §11 decision is
-recorded — **OPTION B** (record §11.1, a dated entry landed in the
-same PR as the proposal; the Session 67 → 68 precedent). Verify the
-entry exists in the checkout you build from, then build at option-B
-scope: items 1 + 2 below. Item 3 (option C's calibration run) was
-**NOT taken** — no live model call is authorized, and the paid queue
-stays ON HOLD.
-
-The option ladder as decided (B = items 1 + 2):
-
-1. **Option A — zero-model machinery only:** `judge_registration.ts` +
-   `scripts/register_judges.ts` (the split representation: manifest
-   store-resident, opaque `judge:<id>` contest hook graph-resident,
-   existence-gated, consistency refusals), the convocation store (one
-   append-only Postgres table set, `UNIQUE (kind, key)`; the pure
-   slice-1 store replayed by thin wiring), `scripts/judge_ratify.ts`
-   (the ratification queue CLI — `show` prints the ratification
-   payload verbatim; the user's recorded flags are the only source of
-   Y + `claimMode`), `support_sweep.ts` + its runner (pair-once
-   bookkeeping, seeded sampling, budget/deferral, run-open binding,
-   deterministic gatherers, judge-all-then-write, `support:report`
-   computing opinions at read time), the row-9 writer-blind pin, and
-   the drill. The spawn module lands ORACLE-ONLY.
-2. **Option B (CHOSEN — §11.1) — A plus the complete spawn
-   boundary:** the live constructor exists behind the triple gate
-   (operator flag + dated paid-queue re-opening + per-run approval)
-   and the drill pins its refusals. Still $0.
-3. **Option C — NOT taken.** The contingent calibration run stays
-   un-authorized; a live convocation re-enters only through the
-   owner's dated queue-re-opening note AND the ordinary per-run
-   ceremony with the §10 estimate re-printed. The §10 dated note's
-   **metered promotion-cost test** (owner-requested at authorization)
-   sits on the same hold list and, when the queue re-opens, is the
-   natural shape for that first run.
-
-The record's §3–§7 are normative for every mechanism: the split
-representation, pair identity, gatherer definitions, transport bytes,
-store schema, drill sections, and the 21 DESIGNED enforcement rows are
-the build's spec. A deviation discovered during implementation is a
-dated amendment to the record in the same PR, never a silent drift.
+- **Guardrail 15 TRIGGERS THIS SESSION, up front.** Rubric text and
+  anchor items are prompt-facing artifacts: invoke BOTH the
+  Prompt-Engineering and Hypershot protocols BEFORE authoring any byte
+  (JUDGE_CONTRACT_TEMPLATE §6–§7 carries the distilled rules if the
+  skills are unavailable). The rubric one-question-per-class checks
+  are already law — RECONCILIATION §2's per-role `rubric` lines; the
+  authored documents implement THOSE, never new law.
+- **Anchor discipline binds** (FOUR_JUDGE_DESIGN §5;
+  EPISTEMIC_SUPPORT §5): per role, one committed byte-pinned TEN-item
+  anchor fixture (five clear drawbacks, five clean positives); labels
+  per AB-4 as amended (model labeling permitted — but labeling is a
+  model call, so hand-label to stay zero-model this session; fixtures
+  pinned once labeled; refresh is a human ceremony); hand-authored
+  configurations only (AB-8). J4's `targetModelIdentity` differs from
+  J1–J3's by default (AB-9).
+- **Zero-paid landing:** rubric + anchor bytes ingest extraction-free
+  (the record §3.1 mold — fixture-path exclusion, or an explicit
+  `none` extraction policy; a plan echo showing extraction jobs > 0
+  means STOP); manifests cite the ingested hashes (`rubricSha` /
+  `anchorSetSha` = SHA-256 of the committed bytes);
+  `npm run judges:register -- --file <manifests.json>` runs the
+  ceremony against the real store; `npm run judges:verify` reads it
+  back consistent and uncontested.
+- **The first docket:** the candidates are the owner's to pick — ask
+  which beliefs or spans they want judged first, never invent them.
+  `judge:ratify show` each cut (the exact bytes with neighbors);
+  record the owner's Y + claim modes through the CLI flags (rule 15:
+  the recorded confirmation is the only source; these ratifications
+  are owner acts performed live in-session through the operator
+  surface).
 
 </build_objective>
 
@@ -1998,104 +2053,89 @@ present as phase transitions at all; a non-fit or an absent referent
 is the informative outcome and must not be reconciled by force (R-30).
 
 **Owner acts — status (surface them; do not perform them):**
-(1) ~~the JUDGE_CONVOCATION_DESIGN §11 authorization~~ **RECORDED
-July 18, 2026 — Option B (record §11.1).** The residual owner acts on
-this track — the paid-queue re-opening and the per-run ceremony — are
-required only before a live run and are not owed now.
-(2) the condensation-expectation verdict above — **still OWNER-OWED,
+(1) the condensation-expectation verdict above — **still OWNER-OWED,
 unrecorded**.
-(3) the EL-10/EL-11 acceptance and EL-07 unblock ceremonies
+(2) the EL-10/EL-11 acceptance and EL-07 unblock ceremonies
 (Appendix B, unchanged).
+(3) **when the owner wants the live test:** the paid-queue re-opening
+by dated note + the per-run ceremony (JUDGE_CONVOCATION_DESIGN §11.2
+items 1–2; the run shape is the metered promotion-cost test). Not
+owed now; surfaced so it is never inferred.
+(4) **in-session owner acts this session:** the docket choices and
+each ratification Y + claim mode are the owner's recorded decisions,
+performed through the CLI — the session stages and transports, never
+decides.
 
 ## 4. Required design
 
-- **The Session 66/68 implementation mold:** pure modules with Zod
-  boundaries and typed refusals (no database/queue/network/clock in
-  the pure cores); thin wiring owns Postgres/graph I/O; imports
-  one-way per the record's §5, static-pinned in both directions — the
-  spawn must never import the store (rule 11 at the new surface).
-- **The drill first-green before records move:**
-  `npm run test:judge-convocation` in the house mold — byte-pinned
-  fixtures under `fixtures/judge_convocation/` with an INDEPENDENT
-  spec-derived generator, a SHA-256 manifest checked before any
-  section, `TRELLIS_EXP_*` refusal, `--inject corrupt-expected`
-  passing by detection, and `--negative-control` exiting 3 naming all
-  four planted breaks individually (a contested judge's verdict
-  composing through the graph round-trip; a pair judged twice; spawn
-  transport bytes ≠ rendered bytes; a duplicate store write
-  surviving). The oracle judge drives the full sweep path end to end,
-  zero-model.
-- **Record discipline on landing:** the record's §6 rows merge into
-  RECONCILIATION §5 by dated entry ONLY after they are observed green
-  (the §5.1 precedent); EPISTEMIC_SUPPORT §7's residual row splits;
-  JUDGE_CONVOCATION_DESIGN status flips by dated entry;
-  PROGRAM_CONTEXT §2 item 8 gains the implemented note.
-- **The row-9 IOU closes in the same PR as the wiring:** the
-  kernel-prompt support-vocabulary absence pin (fix the closed token
-  list at implementation) plus the read-surface isolation pins
-  (RECONCILIATION §5 row 9; FOUR_JUDGE_DESIGN §6 row 7).
-- **No prompt bytes.** The record's authority flags say why none
-  should exist; if the build finds itself drafting any, STOP, re-read
-  JUDGE_INTAKE_DESIGN §3.2/§3.2a, and invoke both prompt protocols
-  first (Guardrail 15).
-- **New fixture directories need `.gitattributes -text`** (the
-  Session 66/68 eol-pinned fixture mold — byte pins break on CRLF
-  checkout otherwise).
+- **Authoring order:** both prompt protocols FIRST (Guardrail 15),
+  then the four rubric documents (one per role, implementing
+  RECONCILIATION §2's `rubric` lines under the layer rule — invariant
+  frames, no concrete beliefs), then the four ten-item anchor
+  fixtures (synthetic content in the drill-fixture tradition;
+  hand-labeled this session to stay zero-model), all committed
+  byte-pinned with a `.gitattributes -text` line for any new fixture
+  directory.
+- **Manifest shas are engine-computed over the committed bytes:**
+  `rubricSha` / `anchorSetSha` = SHA-256 of the rubric / anchor
+  files; `taxonomyVersion` `v1`; four `judgeId`s in the entity
+  charset (`^[a-z][a-z0-9_-]*$`); models: J1–J3 share one identity,
+  J4 differs (AB-9; the owner may waive with recorded reasoning —
+  ask, don't assume).
+- **Ingest extraction-free** under stable doc keys (e.g.
+  `judge/<judgeId>/rubric`); verify the plan echo shows ZERO
+  extraction jobs before confirming; record the printed block hashes
+  — they are the manifests' `sourceNodeIds`.
+- **Ceremony, then read-back:** `judges:register -- --file`, then
+  `judges:verify` (consistent, uncontested). The registration's
+  existence gate should pass on the first try because the ingest ran
+  first; a refusal is a finding, not a workaround target.
+- **The docket is the owner's** — surface candidate options, run
+  `judge:ratify show` per selection, and record only what the owner
+  confirms with modes the owner picks.
+- **No `src/` byte is expected.** A needed code change is a recorded
+  finding that re-scopes the session, not a quiet edit.
 
 ## 5. File-level starting points
 
-- `docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md` — §3
-  (the four mechanisms), §4 (the store), §5 (files + import law), §6
-  (the 21 DESIGNED rows = the drill plan), §10 (registered estimates),
-  §11 (the authorized option).
-- `src/core/graph/entailment_detection.ts` + the verification-queue
-  wiring — the sweep mold (policy twins, sampling, oracle judge,
-  judge-all-then-write, report shape).
-- `src/core/graph/module_registration.ts` +
-  `scripts/register_modules.ts` — the registry/ceremony mold
-  (existence gate, inactive-status refusal, recovery transition).
-- `src/core/graph/judge_panel.ts` (`parseJudgeManifest`,
-  `registerJudge` / `contestJudge` / `reRegisterJudge`, `composePanel`,
-  `parseJudgeVerdict`), the slice-1 trio (`judge_intake.ts` /
-  `judge_intake_prompt.ts` / `judge_prereg.ts`), `judge_audit.ts` —
-  consumed, never modified.
-- `scripts/test_judge_intake.ts` + `fixtures/judge_intake/` — the
-  drill mold (manifest, negative control, independent generator).
-- `docs/product/epistemic-support/RECONCILIATION.md` — §3.4 (what
-  composition consumes and refuses), §5/§5.1 (the pins that exist),
-  §5 row 9 (the IOU this build closes).
-- `docs/architecture/EPISTEMIC_SUPPORT.md` §7 — the residual row this
-  build splits on landing.
+- `docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md` —
+  §3.1 (registration + evidentiary basis), §3.5 (as-landed forms),
+  §11.2 (this session = items 3–4).
+- `docs/product/epistemic-support/RECONCILIATION.md` §2 — the four
+  completed YAML definitions and their `rubric` lines (the law the
+  rubric documents implement).
+- `docs/product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md` §6–§7 —
+  the distilled prompt-protocol rules and rubric-authoring frames.
+- `docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` §5 — anchor
+  discipline (ten items, five/five, selection guards).
+- `scripts/register_judges.ts` / `scripts/judge_ratify.ts` — the
+  ceremonies (built Session 70, never yet run against the real
+  store).
+- `src/core/ingestion/` + `npm run test:versioned-ingest` — the
+  verified ingest mold for landing the rubric/anchor documents.
 
 ## 6. Test strategy and acceptance
 
 Fresh worktrees do not contain `node_modules`: `npm ci` first.
+No test-count move is expected (fixtures + docs + operator runs).
 Close-out block:
 
-    npm test -- --no-file-parallelism   # grows by the new unit pins only; zero existing tests changed
-    npm run build
-    npm run python:check
-    docker compose config --quiet
+    npm run test:judge-convocation      # 23 sections / 140 checks, unchanged
     npm run test:judge-intake           # 13 sections, unchanged
-    npm run test:judge-panel            # 10 sections / 182 checks, unchanged
-    npm run test:support-oracle         # 7 sections, unchanged
-    npm run test:judge-convocation      # new; then --negative-control (exit 3, four named breaks) and --inject corrupt-expected (exit 0 by detection)
+    npm test -- --no-file-parallelism   # 1,305/114, unchanged unless a fixture pin was added deliberately
     git diff --check
 
 Acceptance items:
 
-1. The authorized-option mechanisms implemented exactly per the
-   record; any deviation recorded as a dated amendment to the record
-   in the same PR.
-2. The new drill green with the negative control naming all four
-   planted breaks; tampered-fixture and `TRELLIS_EXP_*` refusals
-   exit 2 before any section.
-3. Records moved per §4: the RECONCILIATION dated entry lands with
-   rows OBSERVED (never before), EPISTEMIC_SUPPORT §7 splits,
-   JUDGE_CONVOCATION_DESIGN status flips by dated entry.
-4. Zero model completions and zero paid calls (an option-C run, if it
-   ever executes, additionally requires the queue re-opening + the
-   per-run ceremony, and reports actuals against the §10 estimate).
+1. Four rubric documents + four anchor fixtures authored under BOTH
+   prompt protocols, committed byte-pinned; shas recorded.
+2. Bytes ingested extraction-free (plan echo: zero extraction jobs);
+   manifests registered through the ceremony; `judges:verify` reads
+   back consistent and uncontested.
+3. The first docket filed: at least one REAL owner-ratified selection
+   with the owner's recorded claim mode, through `judge:ratify`.
+4. Zero model completions, zero paid calls; the triple gate
+   untouched; no live run.
 5. Roadmap §5 entry + this file regenerated per §0 in the same PR;
    the owner-acts list surfaced in the close-out.
 
@@ -2104,59 +2144,61 @@ Acceptance items:
 1. **Permanent invariants survive** (hard rules: AST immutability,
    provenance write path, Zod boundaries, process split, no AI
    attribution anywhere).
-2. **The adoption-bounds register binds** (RESEARCH_MAP §9): AB-3 (no
-   routing weights), AB-5 (writer-blind — the build's central
-   obligation), AB-8 (no evolution machinery), AB-9 (the audit never
-   gates), AB-10 (no provenance standing for session context), AB-11
-   (live blocks only).
-3. **Zero-paid unless option C was authorized AND the owner re-opened
-   the paid queue by dated note AND the per-run ceremony ran.** Three
-   separate recorded acts; while any one is absent, the live path
-   only ever refuses — and the drill pins exactly that.
-4. **The claim is the user's; the rigor belongs to the instruments**
-   (rule 15, binding law). The queue CLI keeps the user's recorded
-   confirmation as the only source of `claimMode` and claim bytes —
-   no convenience may reintroduce an agent channel.
-5. **Documents lead.** The record is normative for the build; `code >
-   glossary > prose > session inference`; ratified records and the
-   register are amended only by dated entry.
-6. **Sweep-side, never a write gate:** nothing in the build touches
-   the write path, custody tiers, or promotion; opinions are advisory
-   to the human ceremony (EPISTEMIC_SUPPORT §6 — trust elevation is
-   not automated).
-7. **Engineering-loop surfaces untouched:** no controller state, no
+2. **The adoption-bounds register binds** (RESEARCH_MAP §9): AB-4 as
+   amended (labels — hand-label this session to stay zero-model),
+   AB-5 (writer-blind), AB-8 (hand-authored configurations only),
+   AB-9 (J4's model family differs by default), AB-10, AB-11.
+3. **Zero-paid, strictly.** Ingest extraction-free (a plan echo with
+   extraction jobs > 0 means STOP and re-plan); no model labeling; no
+   live spawn — the triple gate stands and only the owner's two
+   recorded governance acts ever open it.
+4. **Guardrail 15 up front, not after.** Rubrics and anchor items are
+   prompt-facing artifacts; both protocols BEFORE any authored byte,
+   stated in the roadmap entry (the Session 51 precedent, not the
+   Session 50 one).
+5. **The claim is the user's; the rigor belongs to the instruments**
+   (rule 15). Docket selections, Y confirmations, and claim modes are
+   the owner's recorded decisions through the CLI; the session never
+   defaults, infers, or backfills one.
+6. **Documents lead.** RECONCILIATION §2 is the law the rubric
+   documents implement — a rubric line that drifts from its §2 twin
+   is a defect, not an improvement; ratified records amend only by
+   dated entry.
+7. **Sweep-side, never a write gate:** registration and ratification
+   touch the convocation store and the graph's `judge:` hooks only;
+   the write path, custody tiers, and promotion stay untouched.
+8. **Engineering-loop surfaces untouched:** no controller state, no
    `tools/engineering-loop/` changes, no EL acceptance or unblock —
    Appendix B is preserved, not executed.
-8. **Owner acts stay owner acts:** the §11 authorization, the paid
-   queue re-opening, the EL ceremonies, and the
+9. **Owner acts stay owner acts:** the paid-queue re-opening, the
+   per-run ceremony, the EL ceremonies, and the
    condensation-expectation verdict are recorded decisions the owner
    performs; surface them, never infer or perform them.
-9. **Prompt protocol** (guardrail-11 pattern): no prompt bytes are
-   expected in this build; if any prompt-like artifact is authored,
-   read the Prompt-Engineering and Hypershot protocols first;
-   JUDGE_CONTRACT_TEMPLATE.md §6–§7 carries the distilled rules if the
-   skills are unavailable.
 
 ## 8. Explicit exclusions
 
 Do **not**:
 
-- build anything the recorded option (B — record §11.1) does not
-  name; verify the §11.1 entry exists in your checkout before any
-  byte;
-- run any live model call anywhere — option C was not taken, and even
-  the queued metered promotion-cost test executes only after the
-  queue's dated re-opening plus its own per-run ceremony;
-- add support fields to any production schema, store computed
-  opinions, or expose any support/judge state to an RLM-visible
-  surface (AB-5 — the writer-blind pin is the build's proof);
-- implement the claim-kind plane, routing weights (AB-3), evolution
-  machinery (AB-8), live J4 sampling or masked replay, or external
-  retrieval allowlists (recorded and deferred per game §8);
-- modify `composePanel`'s drilled path, the slice-1 intake trio,
-  `judge_audit.ts`, the workspace or Tier-1 write paths, custody
-  tiers, kernel prompts, extraction prompts, module addenda, or any
-  composed-prompt pin;
+- run any live model call anywhere — no spawn, no model labeling, no
+  embedding; the queued metered promotion-cost test executes only
+  after the queue's dated re-opening plus its own per-run ceremony;
+- re-open the paid queue, or treat the staged roster/docket as
+  implying permission to run — staging is §11.2 items 3–4 and stops
+  there;
+- build the J3 live gatherer (§11.2 item 5 — it rides the run's own
+  proposal), the J1/J2 evidence channels, external retrieval
+  allowlists, J4 sampling or masked replay, the claim-kind plane, or
+  routing weights (AB-3);
+- modify the drilled convocation surfaces (`judge_convocation_store` /
+  `judge_registration` / `support_sweep` / `judge_spawn`, their
+  ceremonies, or the drill), `composePanel`'s drilled path, the
+  slice-1 intake trio, `judge_audit.ts`, the workspace or Tier-1
+  write paths, custody tiers, kernel prompts, extraction prompts,
+  module addenda, or any composed-prompt pin — a needed change is a
+  recorded finding that re-scopes the session;
+- author rubric content that invents law — RECONCILIATION §2's
+  definitions and rubric lines govern; drawback classes, parameters,
+  and assumptions come from there verbatim;
 - commit an unpublished draft artifact (the S13 rule: reference only,
   cite by title + version; mirrors only for public artifacts, with
   checksums);

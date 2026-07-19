@@ -1,0 +1,27 @@
+{
+  "comment": "Negative-control twins: each entry plants exactly one break the machinery must DETECT, typed and named. Healthy runs never load the broken members.",
+  "graphStatesMissingHook": [
+    { "entityName": "judge:j1-grounding-v1", "sourceNodeIds": ["e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null },
+    { "entityName": "judge:j3-corroboration-v1", "sourceNodeIds": ["e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null },
+    { "entityName": "judge:j4-audit-v1", "sourceNodeIds": ["e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null }
+  ],
+  "lateRegistrationRows": [
+    { "kind": "run_open", "key": "run-broken-late", "payload": { "runId": "run-broken-late", "openedAtMs": 1753000000000 } },
+    { "kind": "pre_registration", "key": "prereg-broken-late", "payload": { "registrationId": "prereg-broken-late", "runId": "run-broken-late", "registeredAtMs": 1752999999999, "expectations": [{ "itemId": "sel-fact-a", "expectedVerdict": "clean", "rationale": "backdated timestamp smuggling a post-run forecast" }] } }
+  ],
+  "duplicateVerdictRows": [
+    { "kind": "verdict", "key": "9999999999999999999999999999999999999999999999999999999999999999", "payload": { "verdict": { "judgeId": "j1-grounding-v1", "role": "J1_GROUNDING", "beliefId": "sel-fact-a", "verdict": "clean", "drawback": null, "atMs": 1753000000000, "weight": 1 }, "promptHash": null, "pairKey": "9999999999999999999999999999999999999999999999999999999999999999", "candidateIdentity": "x", "judgeIdentity": "y", "runId": "run-broken-dup", "synthesized": false } },
+    { "kind": "verdict", "key": "9999999999999999999999999999999999999999999999999999999999999999", "payload": { "verdict": { "judgeId": "j1-grounding-v1", "role": "J1_GROUNDING", "beliefId": "sel-fact-a", "verdict": "drawback", "drawback": "unsupported_citation", "atMs": 1753000000001, "weight": 1 }, "promptHash": null, "pairKey": "9999999999999999999999999999999999999999999999999999999999999999", "candidateIdentity": "x", "judgeIdentity": "y", "runId": "run-broken-dup", "synthesized": false } }
+  ],
+  "tamperedComposedPrompt": {
+    "role": "J1_GROUNDING",
+    "judgeId": "j1-grounding-v1",
+    "sections": [
+      { "kind": "identity", "role": "J1_GROUNDING", "judgeId": "j1-grounding-v1" },
+      { "kind": "definition", "role": "J1_GROUNDING", "claimModes": ["fact", "inference"], "qualifiedParameters": ["logical.evidence_quality/cited", "logical.falsification/cited"], "taxonomy": { "unsupported_citation": "logical.evidence_quality/cited", "overclaimed_evidence": "logical.evidence_quality/cited", "contradicted_by_cited_bytes": "logical.falsification/cited" }, "requiredAssumptions": ["cited_bytes_available"] },
+      { "kind": "evidence", "context": { "claim": "The tide gauge at Dock 9 reads 9.9 m at noon.", "citedBytes": ["Dock 9 log 12:00 — gauge reading 2.3 m."] } },
+      { "kind": "output_schema", "verdicts": ["clean", "drawback", "abstain"], "drawbackClasses": ["contradicted_by_cited_bytes", "overclaimed_evidence", "unsupported_citation"], "abstainReasons": ["evidence", "jurisdiction"] }
+    ],
+    "promptHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  }
+}

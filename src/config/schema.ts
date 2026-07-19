@@ -71,6 +71,20 @@ export const POSTGRES_SCHEMA_SQL = `
     FOREIGN KEY (repo_key, snapshot_seq)
       REFERENCES repository_snapshots (repo_key, snapshot_seq)
   );
+  -- Session 70 (JUDGE_CONVOCATION_DESIGN.md §4): the convocation store.
+  -- Append-only by code discipline; WRITE-ONCE is mechanical — the
+  -- (kind, key) primary key refuses a second write at the storage layer,
+  -- so the slice-1 write-once law is a database refusal, not discipline.
+  -- Supersession is a new record referencing the old, never an
+  -- overwrite. NO RLM tool surface reads this table (the writer-blind
+  -- pin asserts the absence).
+  CREATE TABLE IF NOT EXISTS judge_records (
+    kind VARCHAR(32) NOT NULL,
+    key VARCHAR(256) NOT NULL,
+    payload JSONB NOT NULL,
+    recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (kind, key)
+  );
   -- T15: both the TypeScript API and Python RLM client call this function,
   -- keeping cosine ordering, null filtering and result shape in one schema
   -- definition instead of maintaining parallel queries across languages.

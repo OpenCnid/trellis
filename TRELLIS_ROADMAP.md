@@ -263,11 +263,12 @@ Session 59 EL-05 feature branch, Session 58 with the Session 63 EL-11 PR
 (Sessions 55–57 having moved with the intervening EL PRs), Session 59
 with the Session 64 EL-10 recovery-reachability feature branch, and
 Session 60 with the Session 66 judge-panel PR, Session 61 with the
-Session 68 judge-intake PR, and Session 62 with the Session 69
-judge-convocation slice-2-proposal PR. The live
-ledger below keeps the most recent OpenCnid sessions: 63–64, the July 16
+Session 68 judge-intake PR, Session 62 with the Session 69
+judge-convocation slice-2-proposal PR, and Session 63 with the
+Session 70 option-B build on that same PR. The live
+ledger below keeps the most recent OpenCnid sessions: 64, the July 16
 sister-lab Session 65 entry at its chronological position, and
-Sessions 66–69.)*
+Sessions 66–70.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -802,109 +803,6 @@ if the user needs to, but that shouldn't be the default."
 owner invited a document-first design record for Trellis serving MCP;
 the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
-
-
-### July 16, 2026 — Session 63: EL-11 acceptance-ledger steady-state write path and approval-gate mapping, zero-model and zero-paid
-
-**The acceptance ledger shipped write-once.** EL-10 seeded generation 0 with
-eleven records and then left no path to change a status. Seeding refuses a
-non-empty generation (`EL-REQ-BOOT-003`), and the only other gated writes are the
-two `ledger_recovery` ceremonies for corruption, so a validating populated ledger
-could record nothing: EL-10 could not be accepted, EL-07 could not be unblocked,
-and no future feature could ever be accepted. Record §9.6 described the
-steady-state `acceptance_change` path exactly — seeding is that path applied to an
-empty ledger — but no `EL-REQ-BOOT-*` required it, so the implementing session
-built the six items with requirements and inverted the seventh. Third instance of
-the program's one pattern (`statusAuthority` rot; the unreachable seeder; this),
-landing in the feature meant to close it.
-
-**1. Steady-state acceptance (`acceptance_change.ts`, `EL-REQ-BOOT-008`).**
-`recordAcceptanceChange` appends an owner-approved `acceptance_change` to a
-non-empty validating generation, superseding by ordinary replay
-(`resolveFeatureStatus` takes the last record per `featureId`) while the
-superseded records stay present, unmutated, and integrity-linked. It adds no
-protected action — `acceptance_change` already covers it, and a second would need
-the mode flag §9.9 warns rots. Seeding and the steady-state path share
-`buildAcceptanceRecordChain`, one construction of the record rather than two free
-to drift. `classifyLedgerGeneration` (one ceremony per state) is replaced by
-`admissibleLedgerCeremonies`, which returns the SET a state admits: a healthy
-populated generation admits both a status change and a content reconciliation,
-told apart by protected action and record kind, never by state and never by a
-flag. The three SPEC §6.1 predicates stay disjoint and total, asserted as such.
-`ledger_recovery` is not used for progress: the `EL-10=planned` record was correct
-when written, so accepting EL-10 is new information, not a correction.
-
-**2. Reachable producer (`activate.ts`, `EL-REQ-APPROVAL-010`).**
-`print-acceptance-request` / `record-acceptance`, mirroring `print-seed-request` /
-`seed`. The owner cannot hand-compute a request digest (sha256 over the canonical
-request material), so a protected action whose authorizing material has no
-reachable producer is a path nobody can walk — the EL-07 "correct but not
-reachable" finding reproduced at the approval artifact. A digest trap found by
-running the command live and fixed: `canonicalJson` sorts object keys but not
-array elements, so `exactScope` order is digest-bearing while approval matching
-sorts before comparing; a transposed `--set` would fail the digest check while
-passing the scope check, refusing a legitimate request. Scope pairs are now
-canonicalized (`canonicalStatusPairs`) — both orders yield the same digest,
-proven live.
-
-**3. Conformance mechanization (`conformance.ts`, `EL-01-A2`).**
-`analyzeConformanceLinkage` fails when a declared requirement carries no §18 row
-or a row has no declaring text: `EL-REQ-APPROVAL-012` landed declared and unmapped
-(114 declared / 113 mapped) and nothing could fail — the exact `statusAuthority`
-shape. `analyzeProducerReachability` fails when a computed-material producer
-resolves only test callers, deriving reachability from the import graph rather
-than a declaration. Both are pure over supplied bytes, so falsifiable against
-fixtures rather than only against a broken repository. The backtick trap is
-pinned: `EL-REQ-STATE-010`'s text begins with a literal, not a capital, and a
-naive pattern reports a false orphan.
-
-**4. SPEC, catalog, guardrails.** `EL-REQ-BOOT-008` and `EL-REQ-APPROVAL-010`
-added and mapped; `EL-REQ-APPROVAL-012` given its §18 row; the
-`EL-REQ-APPROVAL-002` provenance clause amended in text with ownership left on
-accepted EL-06 (its pinned 36 rows unmoved). EL-11 raised at `order: 11`,
-dependencies `EL-06` and `EL-10` — both a lower order, so the prerequisite is a
-real dependency edge and needs no `blocked`-status workaround. 116 requirements
-declared and 116 mapped with zero unmapped; EL-10 keeps its seven BOOT rows. The
-pause-scope norm and a correct-is-not-reachable norm moved to `AGENTS.md` as prose
-(hard rules 14/15), where a behavioral norm binding an agent in a session is
-honestly labelled rather than dressed as a conformance row whose transcript test
-cannot fail.
-
-**5. Falsification.** Every new guard reverted, observed red, restored. Removing
-`APPROVAL-012`'s row reproduces the 114/113 defect
-(`expected [ 'EL-REQ-APPROVAL-012' ] to deeply equal []`); unwiring the
-entrypoint's builder turns the reachability check red
-(`steady_state_acceptance producer: expected false to be true`); reverting
-admission to write-once turns nine acceptance tests red with the write-once
-symptom; disabling the unknown-feature refusal and the canonical ordering each go
-red. A measurement trap corrected mid-pass: the first falsification script matched
-on `\n` against a CRLF working tree and reported a false green — re-run reading
-bytes with explicit line endings.
-
-**6. Open defect, reported not routed around.** Both EL-10 recovery ceremonies
-(`recoverLedgerContent`, `reGenesisLedger`) have no caller outside `tests/` — no
-command, no script, no entrypoint. An owner facing a corrupt ledger still has only
-the hand-edit §9.9 exists to prevent, and cannot author matching approval material
-for a digest nobody produces. Under the new `EL-REQ-APPROVAL-010` this is EL-10
-failing acceptance as unreachable; it is EL-10's scope and the owner's to
-sequence, pinned by the reachability check (currently pinning the two unreachable)
-rather than fixed here, and it is the proposed next objective (HANDOFF §3). Also
-recorded: `printSeedRequest`/`runActivationSeed` are orphaned twins — `main()`
-inlines parallel logic, so the tested composition is not the one an operator runs.
-
-**Acceptance:** `npx vitest run tools/engineering-loop/tests/` 363 tests across 23
-files; `npm test` 1,239 across 110 (`--no-file-parallelism` and default
-parallelism agree — the documented Windows temp-dir flakiness did not manifest);
-`npm run build`, `npm run python:check`, `docker compose config --quiet`, Draft
-2020-12 catalog validation (12 features), and `git diff --check` pass. Model
-completions, paid calls, and real protected effects: zero — the acceptance ledger
-is byte-identical to preflight (sha256 `8bc0e033…`, generation 0, eleven records,
-`EL-10` still `planned`). Committed `e7cd809`; PR #114 open against `master`, not
-merged. **EL-11 is implemented and deterministically verified; owner acceptance is
-not recorded.** Outstanding owner acts: record `EL-10 = accepted` and
-`EL-07 = planned` through `print-acceptance-request` → author approval material →
-`record-acceptance`; record a status for `EL-11`, which is in the catalog with no
-ledger record.
 
 
 ### July 16, 2026 — Owner-directed: repository-wide documentation-drift audit (docs-only, zero-paid)
@@ -1741,3 +1639,127 @@ only after the queue's dated re-opening plus the per-run ceremony.
 HANDOFF re-run per the §0 event-loop rule (the §3 gate now reads
 SATISFIED; the owner-acts item is closed; the condensation verdict and
 EL ceremonies remain).
+
+### July 19, 2026 — Session 70: judge convocation built at option-B scope — registration, the convocation store, the support_sweep job, the spawn boundary, the ratification queue, and their drill (zero-model and zero-paid)
+
+The §11.1-authorized subset of `JUDGE_CONVOCATION_DESIGN.md`
+implemented in the Session 68 mold, on the authorizing PR by owner
+direction ("let's run option B"), zero model calls and $0.00. The
+record's §3–§7 were the spec; every deviation discovered during
+implementation landed as its §3.5 dated implementation-notes entry in
+the same PR, never as silent drift.
+
+1. **`src/core/graph/judge_convocation_store.ts` (record §4).** The
+   `judge_records` table joined the idempotent bootstrap with
+   `PRIMARY KEY (kind, key)` — write-once as a MECHANICAL storage
+   refusal. Pure core, thin shell: every write validates through the
+   slice-1 `judge_prereg` law BEFORE appending (validate-then-append),
+   replay re-applies the law on every load (a tampered table refuses,
+   typed), and the memory twin honors the exact uniqueness semantics
+   for drills. The ratification payload carries the ratified selection
+   AND the confirmed address-space entries beside the untouched
+   slice-1 record, so the sweep judges exactly the bytes the user
+   confirmed. Kind set as amended: the slice-1 three +
+   `judge_manifest` + `verdict` + `run_report` (§3.5 dated note).
+2. **`src/core/graph/judge_registration.ts` +
+   `scripts/register_judges.ts` (record §3.1).** The split
+   representation landed: full manifests (R-27 `targetModelIdentity`
+   required) store-resident; the graph carries only an opaque
+   `judge:<id>` contest hook citing evidentiary hashes (the merge
+   cypher sets name/id/kind/hashes and NOTHING else — opacity
+   drill-pinned), so the ordinary invalidation sweep contests judges
+   with zero sweep changes while AB-5's model-visible surface stays
+   an opaque id plus hashes. Existence gate before both writes;
+   consistency is a refusal naming the judge in both directions;
+   recovery requires `--reviewed-by` (a named human) and refuses an
+   uncontested judge; a manifest change is a NEW registration under a
+   NEW id.
+3. **`src/core/graph/support_sweep.ts` + the runner (record §3.2).**
+   The Session 32 mold property by property: (candidate, judge) pairs
+   judged at most once ever (identity spans candidate bytes + mode
+   and the manifest identity triple — §3.5 exact forms); uniform
+   pool, mulberry32 seeded sampling, hard budget with counted
+   deferral; run-open through the slice-1 law BEFORE the first
+   invocation (rule 20 bound to real runs at last); R-29 exclusions
+   typed and counted; jurisdiction abstentions ENGINE-SYNTHESIZED at
+   zero spend (S10 layer 3 is engine-decidable), flagged
+   `synthesized` with null promptHash; judge-all-then-write (a
+   planted infrastructure failure appends zero verdict records);
+   opinions computed at READ time (`support:report` →
+   `computeConvocationReport` → the unmodified `composePanel` and
+   drilled v1 arithmetic), advisory to the WORKSPACE §6 ceremony,
+   never stored, never gating. Config twins `SUPPORT_SAMPLE_RATE` /
+   `SUPPORT_JUDGE_BUDGET_PER_SWEEP` / `SUPPORT_VERDICT_WEIGHT`
+   (0.1 / 25 max 500 / 1.0).
+4. **`src/core/graph/judge_spawn.ts` (record §3.3).** The composed
+   `ComposedJudgePrompt` bytes ARE the interface: `buildSpawnRequest`
+   re-renders and re-verifies `promptHash` pre-send and yields
+   exactly the rendered bytes as the single user message — no system
+   message, no wrapper byte. `makeLiveJudge` refuses a model-identity
+   mismatch at CONSTRUCT time, before any import or I/O (R-27); the
+   model's response surface is the strict
+   `{verdict, drawback, abstainReason}` schema (a weight or time
+   field refuses — no count-shaped channel); every other verdict
+   field is engine-constructed. The oracle twin drives the entire
+   sweep path zero-model; the openai import is dynamic inside the
+   live constructor only (drill-pinned); the runner's mechanical
+   gates (`--live` + `--confirm-paid`, oracle by default) are
+   source-pinned, with the governance half — the owner's dated
+   paid-queue re-opening plus per-run approval — named in the refusal.
+5. **`scripts/judge_ratify.ts` (record §3.4).** The operator queue:
+   `show` prints the `buildRatificationRequest` payload VERBATIM (the
+   exact bytes with engine-computed neighbors — rule 17); `record`
+   requires `--confirm` and `--claim-mode` with no defaults
+   (rule 15); declines record nothing. Capture is mechanical: Tier-1
+   block addresses resolve engine-side (current document → ordered
+   `collectExtractionBlocks` walk → `nodeText` bytes + ordinal
+   neighbors); workspace segments arrive only as the engine's own
+   park serialization via `--space`.
+6. **The drill: `npm run test:judge-convocation`** (fixtures under
+   `fixtures/judge_convocation/` with an independent spec-derived
+   generator re-deriving pair identities, the mulberry32 sequence,
+   iteration order, and the §3 opinion arithmetic from record text;
+   `.gitattributes -text` pinned). **23 sections / 140 checks green**
+   (one section's own source-order pin was corrected in-session — it
+   had matched the recovery path's merge; scoped to the register
+   path); `--negative-control` exits 3 naming ALL FOUR planted breaks
+   individually (a hook missing for a store manifest reaching a run;
+   a duplicate verdict write for one pair key; spawn transport bytes
+   differing from the rendered prompt; a pre-registration recorded
+   after its run opened); `--inject corrupt-expected` passes by
+   detection; tampered-fixture and `TRELLIS_EXP_*` refusals exit 2
+   before any section. 15 unit pins in `judge_convocation.test.ts`.
+7. **Records.** JUDGE_CONVOCATION_DESIGN §6 merged into
+   RECONCILIATION as **§5.2** — a dated entry under the §7 amendment
+   rule, after every row was OBSERVED green; **§5 row 9's deferred
+   writer-blind pin is CLOSED** (kernel-prompt token scan over all
+   ten `src/rlm/*.py` + the `search_ast_nodes` body + read-surface
+   isolation). EPISTEMIC_SUPPORT §7's residual row split (the
+   convocation row added; the residue now names live runs, the J1/J2
+   evidence channels, the J3 live gatherer, external allowlists, J4
+   sampling, and the claim-kind plane). JUDGE_CONVOCATION_DESIGN
+   status flipped by dated entry; §3.5 implementation notes and
+   **§11.2 "The road to option C"** added (owner-requested: the
+   six-item checklist to the first live-LLM test, whose run shape is
+   the metered promotion-cost test). PROGRAM_CONTEXT §2 item 8
+   updated. Session 63 moved verbatim to the archive (window rule;
+   live window 64–70); HANDOFF regenerated per §0.
+8. **Evidence.** `npm test -- --no-file-parallelism` → **1,305 tests
+   / 114 files** (from 1,290/113; the 15 new pins; zero existing
+   tests changed); `npm run build` green; `npm run python:check`
+   green; `docker compose config --quiet` green;
+   `npm run test:judge-intake` 13 sections, `test:judge-panel` 10
+   sections, `test:support-oracle` 7 sections — all unchanged;
+   `git diff --check` clean. Zero model completions, zero paid calls,
+   zero live-DB effects (the drill is infra-free; the ceremonies are
+   operator surfaces that ran against nothing this session).
+9. **Deliberately NOT done:** no live run of any kind (the triple
+   gate stands; the paid queue is ON HOLD); no J1/J2 evidence
+   channels; no J3 live gatherer (§11.2 item 5 — it rides the first
+   live run's proposal); no real manifests or anchor fixtures yet
+   (§11.2 item 3, zero-paid operator work); no external allowlists;
+   no J4 sampling; no claim-kind plane. Owner acts outstanding and
+   surfaced, not performed: the condensation-expectation verdict;
+   EL-10/EL-11 acceptance + the EL-07 unblock ceremonies; and — when
+   the owner wants the live test — the paid-queue re-opening by dated
+   note (§11.2 item 1).

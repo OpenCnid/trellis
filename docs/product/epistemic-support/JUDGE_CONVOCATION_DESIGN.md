@@ -1,13 +1,25 @@
 # Judge Convocation — Design Record (the slice-2 proposal)
 
 ~~**Status: PROPOSED — AWAITING OWNER AUTHORIZATION. NOTHING BUILT.**~~
-**AUTHORIZED — OPTION B (owner, July 18, 2026 — dated entry §11.1).
-NOTHING BUILT.** The build session implements option B's scope: the
-zero-model machinery plus the complete triple-gated spawn boundary.
-Option C's calibration run was NOT taken — no live model call is
-authorized, and the paid queue stays ON HOLD; a live run re-enters
-only through the queue's dated re-opening plus the per-run ceremony.
-Original status line July 18, 2026 (Session 69).
+~~**AUTHORIZED — OPTION B (owner, July 18, 2026 — dated entry §11.1).
+NOTHING BUILT.**~~
+**IMPLEMENTED AT OPTION-B SCOPE — July 19, 2026 (Session 70, dated
+entry; the authorizing PR).** The option-B machinery landed zero-model
+and zero-paid: the four modules (`judge_convocation_store.ts`,
+`judge_registration.ts`, `support_sweep.ts`, `judge_spawn.ts`), the
+`judge_records` table, the four operator surfaces
+(`npm run judges:register` / `judge:ratify` / `support:sweep` /
+`support:report`), and the drill `npm run test:judge-convocation`
+(23 sections / 140 checks first-run green — one section's own
+source-order pin was corrected in-session; `--negative-control` exits
+3 naming all four planted breaks; `--inject corrupt-expected` passes
+by detection; tampered-fixture and `TRELLIS_EXP_*` refusals exit 2)
+plus 15 unit pins (`npm test` 1,290/113 → 1,305/114, zero existing
+tests changed). The §6 rows are now OBSERVED and merged into
+RECONCILIATION §5.2 by dated entry; §3.5 records the implementation
+notes as landed; §11.2 carries the road to option C. **No live run has
+ever executed; the paid queue stays ON HOLD.** Prior status lines
+July 18, 2026 (Session 69) preserved above.
 Authored July 18, 2026 (Session 69), zero-model, document-first. This
 record is how authorization was sought:
 [`RECONCILIATION.md`](RECONCILIATION.md) §7 unblocked the live-judge
@@ -373,6 +385,47 @@ The WORKSPACE §6 promotion ceremony mold applied one boundary earlier
 
 **Zero-model boundary: entirely zero-model.**
 
+### 3.5 Implementation notes as landed (dated entry — July 19, 2026, Session 70)
+
+The record governs; these notes fix the concrete forms the
+implementation and the drill's independent generator BOTH derive from
+this text (on drift, the byte-pin fails and this entry adjudicates):
+
+- **Pair identity, exact forms.** `candidateHash` = SHA-256 of the
+  canonical JSON (recursively key-sorted, no whitespace) of
+  `{claimContent, claimMode}`; `candidateIdentity` =
+  `` `${selectionId}#${candidateHash}` ``; `judgeIdentity` =
+  `` `${judgeId}|${rubricSha}|${targetModelIdentity}` ``; `pairKey` =
+  SHA-256 of `` `${candidateIdentity}::${judgeIdentity}` ``.
+- **The seeded sampler is mulberry32** (`a += 0x6d2b79f5` in uint32;
+  `t = imul(t ^ (t >>> 15), t | 1)`;
+  `t ^= t + imul(t ^ (t >>> 7), t | 61)`;
+  yield `((t ^ (t >>> 14)) >>> 0) / 2^32`). Iteration order:
+  candidates ascending by `selectionId`, judges ascending by
+  `judgeId`, candidate-major; one RNG draw per pool pair.
+- **Jurisdiction abstentions are engine-synthesized at zero spend.**
+  S10 layer 3 is engine-decidable, so spawning a judge to learn its
+  own claim modes would buy nothing: an applicable-evidence,
+  inapplicable-mode pair records an `abstain/jurisdiction` verdict
+  flagged `synthesized` with `promptHash: null`. Pair-once bookkeeping
+  covers synthesized records like any other.
+- **The ratification payload carries the ratified selection AND the
+  confirmed address-space entries** beside the untouched slice-1
+  record, so the sweep judges exactly the bytes the user confirmed —
+  no re-fetch, no drift channel. Slice-1 schemas unchanged.
+- **§4's kind set gains `run_report`, keyed by `runId`** — the §3.2
+  run record the §4 list omitted; recorded here as the dated
+  amendment rather than a silent widening.
+- **Evidence gatherers are injected.** First edition: no citation or
+  history channel exists in the intake chain, so J1/J2 report
+  unavailable in production and the R-29 gate excludes them, typed
+  and counted; J3's live gatherer requires an embedding call and is
+  therefore part of the LIVE path's spend (§11.2 item 5) — zero-model
+  runs use supplied or oracle evidence. The channels' entry is
+  future-edition work, recorded, not built.
+- **The verdict weight rides `SUPPORT_VERDICT_WEIGHT`** (engine
+  constant, default 1.0), never model-supplied.
+
 ## 4. The convocation store (the durable persistence decision)
 
 Slice 1's `PreregStore` is pure and in-memory by design. Convocation
@@ -441,7 +494,11 @@ byte-untouched. Imports are one-way:
 
 Rows are DESIGNED here, in the JUDGE_INTAKE_DESIGN §10.4 discipline:
 they merge into RECONCILIATION §5 by dated entry only in the
-implementing PR, after every pin is observed green.
+implementing PR, after every pin is observed green. *(Done July 19,
+2026, Session 70: merged as RECONCILIATION §5.2 with every row
+observed — the drill section names there are the as-landed ones;
+option-B scope notes mark the two rows whose live halves await
+option C.)*
 
 | Behavior | Enforcement home (non-test) | Pin |
 |---|---|---|
@@ -636,6 +693,48 @@ consequence:
 *The gate this entry closes, preserved: "This record is the
 deliverable gate of Session 69: nothing below happens until the owner
 records a choice."*
+
+### 11.2 The road to option C (dated entry — July 19, 2026, Session 70; owner-requested consideration)
+
+The owner asked, at the option-B authorization, that the road to the
+eventual live-LLM test be considered. Recorded here so the first live
+convocation is a checklist walk, not a redesign. What must be true,
+in order:
+
+1. **The owner's dated paid-queue re-opening** (PROGRAM_CONTEXT §6) —
+   governance, not machinery; nothing below substitutes for it.
+2. **The per-run ceremony:** a presented proposal with the §10
+   estimate re-printed, per-run approval under the ≤$5 cap, actuals
+   reported after.
+3. **Four real manifests.** Hand-authored rubrics and ten-item anchor
+   fixtures (FOUR_JUDGE_DESIGN §5 anchor discipline; AB-8 — no
+   generation), committed byte-pinned, ingested extraction-free
+   (§3.1), registered through the ceremony. J4's
+   `targetModelIdentity` differs from J1–J3's by default (AB-9).
+   Zero-paid; can land any time before the run as ordinary operator
+   work.
+4. **Real ratified candidates** through the queue (§3.4) — the
+   docket. Zero-paid operator work; the promotion candidates the
+   owner actually cares about are the right first docket.
+5. **The J3 live evidence gatherer** — embedding-backed retrieval
+   over live blocks excluding the candidate's citation chain (rule 2;
+   AB-11). The one small code increment option B deferred (its
+   embedding call is paid-path spend); it rides the run's own
+   proposal, not a separate session.
+6. **The run shape: the metered promotion-cost test (§10).** The
+   first calibration convocation and the promotion-cost meter are ONE
+   run — per-stage actuals (ratification $0, verdicts at the §10
+   band, report $0, promotion ceremony $0, ingest/extraction of the
+   promoted segment) reported against the ≈$0.02–$0.06/belief
+   estimate.
+
+What option B already delivered toward C: the full path rehearsed
+zero-model end to end (run-open → sampling → composition → oracle
+verdicts → store → report), the spawn boundary's refusal pins
+observed (R-27 identity, transport byte-equality, the triple gate),
+rule 20 bound to real runs, and the row-9 writer-blind pin closed.
+The live constructor exists and can only refuse until items 1–2
+exist.
 
 ## 12. No `R` rows
 
