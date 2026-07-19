@@ -1763,3 +1763,168 @@ the same PR, never as silent drift.
    EL-10/EL-11 acceptance + the EL-07 unblock ceremonies; and — when
    the owner wants the live test — the paid-queue re-opening by dated
    note (§11.2 item 1).
+
+### July 19, 2026 — Collaborator-directed: harness invariants — three prose-only bounds become engine surfaces, and the self-model direction they produced (branch `d/repl-harness-invariants-s70`, zero-model and zero-paid)
+
+**Origin.** A read-only audit of the whole REPL construction (research
+leg, July 18–19: the RLM paper's density-chain note, the rlms 0.1.3
+internals, and the Trellis kernel) was shared with the external
+collaborator (M. Murphy). The audit's central finding was that AGENTS.md
+rule 8 — *tooling shape closes a failure class; prompt text only
+reinforces* — was violated in three places inside the harness that
+states it. The collaborator returned directions on all three; the owner
+approved them the same day ("follow Matt's genuine advice and
+directions, we approve"). Independent convergence recorded in the
+scaffolding record: ClawVM (EuroMLSys '26, arXiv:2604.10352) reaches the
+same conclusion from the memory-management side.
+
+**What was wrong.** (1) `UPSUM_BUDGET` shipped as a bare int with the
+size check asked of the model in prose — nothing observed `upsum` at
+all, in a bounds table whose every other entry RAISES. (2) Raw
+`splice()` was reachable with the guarded family merely "preferred" in
+the addendum, so the Session 41 closure was available rather than
+enforced and the guarded/raw telemetry split could only measure the
+choice after the fact. (3) Task precedence was taught as a hard rule
+with no surface that could rule on a candidate span.
+
+**What landed.**
+- `trellis_upsum` (`src/rlm/trellis_scaffold.py`, injected on every
+  research run beside `trellis_task`): `commit()` validates the shape
+  (four standing list-valued keys; domain keys bounded at 12), measures a
+  canonical key-sorted serialization so insertion order cannot move the
+  number, and REFUSES an over-budget state with per-key sizes
+  largest-first; `size()` probes without registering; `state()` re-reads
+  the last committed state by code. A refused commit leaves the last good
+  revision standing.
+- `TRELLIS_TEXTEDIT_GUARDED_ONLY` + `guarded_only=` (`trellis_textedit.py`):
+  raw `splice()` raises `RawSpliceDisabledError` naming the three guarded
+  replacements. OFF by default (surface, telemetry, and prompt
+  byte-identical when unset); malformed values RAISE at parse time rather
+  than resolving to the unsafe default. The addendum follows the mode, so
+  a guarded-only run is never taught a call that would refuse it.
+- `trellis_task.verify(candidate)`: adjudication by code over a candidate
+  instruction span against this run's uuid tags, with a foreign-run tag
+  reported distinctly so the recorded same-run echo-loop residual stays
+  diagnosable. Plus re-read/grep/verdict counters.
+- Telemetry: `upsum_commits`, `upsum_budget_refusals`,
+  `upsum_shape_refusals`, `upsum_revision`, `task_reads`, `task_greps`,
+  `task_verify_authorized`, `task_verify_refused`,
+  `textedit_guarded_only`, `textedit_raw_splice_refusals`. Shape and
+  budget refusals are counted separately because shape validation runs
+  before measurement — one folded number would under-report whichever
+  raised first (rule 11).
+
+**Prompt and pins (Guardrails 15 and 9).** Both prompt skills
+(prompt-engineering, hypershot-protocol) were invoked via the Skill tool
+BEFORE any addendum byte was authored. The UPSUM section now teaches the
+commit loop through a brace-free construction frame — a `dict(...)`
+constructor with spread slots, the hypershot technique under the rlms
+`.format()` constraint that forbids literal braces — an ADJUDICATE BY
+CODE bullet teaches `verify`, and `trellis_upsum` joins the TOOLS
+manifest as item 5. Both composed-prompt sha256 pins moved wittingly and
+were recomputed in the same commit: default `6183de3a…ed50` →
+`ee5bfca6…1200`, omit-arm `34b00be6…d02a` → `322cbe5d…45ae`, each with
+its move rationale recorded in place in `scripts/test_modules.py`.
+
+**Commands and counts (on `origin/master` = #134 `24e1fe0`, the
+authoritative figures).** `npm test` **1317/1317 passed across 114
+files**, against a baseline measured on the same worktree with the change
+stashed of **1305/1305 across 114 files** — **12 tests added, zero
+regressions**. That baseline reproduces the 1,305/114 recorded for the
+judge-convocation build exactly, which is the independent check that the
+rebase landed clean. (The same +12 delta was measured twice on earlier
+bases during two rebases: 1275 -> 1287 at #132, then 1290 -> 1302 at
+#133. The delta held constant across both.) `npm run test:modules`,
+`npm run test:textedit` (new section [15], 13 checks), and
+`npm run test:answer-channel` all pass; scaffold vitest 41/41.
+
+**Defects found and fixed along the way.** (a) `upsum` shape refusals
+were initially folded into one `upsum_refusals` counter and silently
+under-reported, because `_validate` raises before the counter increments
+— split into `upsum_shape_refusals` and `upsum_budget_refusals`. (b) The
+first `stats()` assertion counted five keys and had to move to seven; the
+mode bool is deliberately included so a run summary can distinguish a
+raw-capable run that chose guarded calls from one where the operator
+removed the raw path. (c) A first pass at the guarded-only test wrote
+fixture bytes in text mode on Windows, so the frame held `alpha\r` and
+the anchor guard refused the edit — the guard behaving exactly as
+designed; the test harness was wrong, not the code.
+
+**Honest scope — no behavior claim attends this entry** (guardrail 8).
+Nothing here is measured to improve any outcome; it is a posture
+correction, and whether enforcement changes run quality is open and
+unmeasured. `verify()` informs and does not gate (the `citable()`
+precedent); `commit()` gates only what it is given, so a run that never
+calls it keeps an unbounded `upsum` — `upsum_commits == 0` is the
+telemetry that exposes it. Guarded-only is an operator gate, not a
+default. Coupling the decisive steps (first `write_back`, insight write,
+`submit`) to a re-read or an adjudication is the obvious next increment
+and was deliberately NOT taken: it changes `trellis_answer`'s contract
+and deserves its own owner-gated proposal with a measured before/after.
+
+**Records.** `docs/architecture/HARNESS_SELF_MODEL.md` (NEW — the
+self-model direction; principle endorsed, implementation not
+authorized), `RLM_HARNESS_SCAFFOLDING.md` §8 + §8.5 (new),
+`STRUCTURAL_SPLICE.md` §9 (new), `CODE_MEDIATED_TEXT.md` §2.8 (amended
+with the audit, the correction, and the generalized lesson: a documented
+bound with no engine behind it reads exactly like an enforced one), and
+`docs/GLOSSARY.md` (six entries: harness self-model, composed read,
+guard-derived account, drift invariant, the bijection, advisory vs
+enforced voice).
+
+**Numbering — UNRESOLVED, and recorded because it moved twice.** This
+work began on a REPL *research* branch cut from a local `master` that was
+stale, and the numbering was mis-set twice as a result. First draft
+claimed "Session 69"; that collided with the judge slice-2 proposal, and
+the owner ruled (July 19) that this work claim **Session 70** with
+slice-2 keeping 69. Before that could be recorded, a `git fetch` showed
+`origin/master` had advanced to **#134 `24e1fe0`, which merged Sessions
+69 AND 70 together** (the slice-2 proposal, the Option-B authorization,
+and the option-B build) from a parallel session — so 70 is taken by
+shipped work, and Session 71 is already designated for road-to-C staging.
+
+This entry therefore uses the **unnumbered date form**, the precedent
+being the July 11 wall-clock benchmark and the July 17 orientation
+ladder: out-of-band work that earns a roadmap entry without consuming a
+session number. Every in-code reference was made **date-anchored**
+(`the July 19, 2026 harness-invariants pass`) rather than
+session-numbered, so it stays correct under any numbering the owner
+later prefers; the number, if one is assigned, need only change here.
+**The owner's "claim it as 70" instruction is not defied but overtaken —
+it was given before #134 was visible, and the collision is factual, not a
+judgment call.** Recorded for a decision rather than resolved here.
+
+**Process lesson, twice-earned:** a worktree's local `master` and even
+its `origin/*` refs go stale silently; `git fetch` before branching, and
+again before claiming a session number. Both mis-numberings in this
+session trace to that single omission.
+
+**HANDOFF is deliberately NOT regenerated by this session.** §0's loop
+takes the next objective from the roadmap, and this session did not
+consume one. §3 keeps pointing at whatever the judge program's next
+objective is; nothing here displaces it.
+
+**The design exchange this produced (the larger outcome).** The three
+fixes prompted an owner/collaborator exchange that generalized them into
+a standing direction, recorded as the new
+`docs/architecture/HARNESS_SELF_MODEL.md`: Trellis's interior surfaces as
+*free meta-prompt composition primitives*, so the model always receives a
+**composed, bounded-context read of what the system actually expects**
+(the owner's framing: *Explainable AI, but for the AI*). The load-bearing
+mechanism is that **the guards ARE the expectations** — every refusal
+path already encodes what the system expects, so the account can be
+DERIVED from the guard predicates rather than authored beside them, and
+the same code that refuses is the code that explains. That yields a
+mechanizable acceptance criterion (**the bijection**: every line in a
+composed read maps to an enforcing guard and vice versa, no orphans)
+which, run against the pre-July-19 kernel, flags all three of this
+session's findings automatically. One correction is recorded in the
+record's §0: an argument that boundedness forces a weaker guarantee was
+wrong — a bounded composed projection is *complete with respect to the
+expectations it covers*. A named defect fell out of it (§4): the kernel
+currently writes enforced contracts and unbacked aspirations in identical
+voice, so the agent cannot tell which promises the system will keep.
+**Status: principle owner-endorsed, IMPLEMENTATION NOT AUTHORIZED**;
+the record's §8 carries the gate, the two separable workstreams, and a
+pre-stated cheap first test (derive the textedit addendum from a surface
+descriptor and pin the derived bytes byte-identical to the current ones).

@@ -105,6 +105,37 @@ For every RLM interaction with text — research runs, editing, authoring:
    writes, review diffs that expose wholesale rewrites — with prompt text as
    reinforcement, never as the sole barrier.
 
+   **Audit and correction, July 19, 2026 (collaborator direction,
+   owner-approved).** A review of the whole REPL construction found this
+   clause violated in three places *inside the harness that states it* —
+   each one a bound the kernel announced with nothing behind it:
+   `UPSUM_BUDGET` injected as a bare int with the size check asked of the
+   model in prose; raw `splice()` reachable with the guarded family merely
+   "preferred" in the addendum; and task precedence taught as a rule with no
+   surface that could rule on a candidate. All three are now surfaces —
+   `trellis_upsum.commit` (measures and refuses),
+   `TRELLIS_TEXTEDIT_GUARDED_ONLY` (removes the raw path), and
+   `trellis_task.verify` (adjudicates by code) — recorded in
+   RLM_HARNESS_SCAFFOLDING.md §8 and STRUCTURAL_SPLICE.md §9. Two of the
+   three still inform rather than gate; the honest scope is in those
+   sections and is not restated here.
+
+   The lesson generalizes past the three instances, so it belongs in the
+   pillar: **a documented bound with no engine behind it reads exactly like
+   an enforced one** — in a bounds table, in a design record, and to a
+   session that trusts the record. When this clause is applied, the test is
+   not "does the prompt teach it" but "what refuses, and what does the
+   refusal say." Anything else is a claim about behavior wearing a
+   guarantee's clothes — the same shape rule 15 names for capabilities that
+   are correct but unreachable.
+
+   The design exchange that followed this correction generalized it into a
+   standing direction — surfaces as meta-prompt primitives, accounts
+   derived from the guard predicates that enforce them, and a bijection
+   between stated expectations and enforcing guards as the check.
+   Recorded in [HARNESS_SELF_MODEL.md](HARNESS_SELF_MODEL.md) (principle
+   endorsed July 19, 2026; implementation NOT authorized).
+
 ## 3. Scope
 
 | surface | application of the pillar |

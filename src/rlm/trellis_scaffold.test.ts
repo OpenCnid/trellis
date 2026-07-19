@@ -48,13 +48,100 @@ describe('S1: wrap_task_text (the uuid wrapper)', () => {
   });
 });
 
-describe('S2a: the code-checked UPSUM budget constant', () => {
+describe('S2a: the UPSUM budget constant', () => {
   it('exposes UPSUM_BUDGET as a positive integer kernel constant (2000)', () => {
-    // The engine-provided budget the addendum's len(str(upsum)) check
-    // compares against — injected beside trellis_task, never a model-
-    // typed literal (RLM_HARNESS_SCAFFOLDING.md §3/§7).
+    // The engine-provided budget the running-state gate measures
+    // against — injected beside trellis_task, never a model-typed
+    // literal (RLM_HARNESS_SCAFFOLDING.md §3/§7).
     expect(R.upsum_budget).toBe(2000);
     expect(R.upsum_budget_is_positive_int).toBe(true);
+  });
+});
+
+// the July 19, 2026 harness-invariants pass (collaborator direction, owner-approved). The budget was
+// advisory: a bare int plus prose asking the model to compute
+// len(str(upsum)) and self-correct. AGENTS.md rule 8 says tooling shape
+// closes a failure class and prompt text only reinforces, so the check
+// moved into the engine.
+describe('S2a: the UPSUM commit gate (the July 19, 2026 pass)', () => {
+  it('returns a receipt whose numbers the engine computed', () => {
+    expect(R.upsum_receipt_keys).toEqual(
+      ['budget', 'domainKeys', 'headroom', 'revision', 'size', 'standingKeys']
+    );
+    expect(R.upsum_receipt_measures).toBe(true);
+  });
+
+  it('measures a canonical serialization, so key order cannot move the size', () => {
+    expect(R.upsum_size_order_invariant).toBe(true);
+  });
+
+  it('holds the committed state for re-reading by code', () => {
+    expect(R.upsum_state_roundtrip).toBe(true);
+  });
+
+  it('refuses every malformed shape, so the four invariants keep meaning', () => {
+    expect(allRaised(R.upsum_shape_refusals)).toBe(true);
+  });
+
+  it('refuses an over-budget state and names the per-key sizes', () => {
+    // The refusal has to carry the breakdown: the remedy is compressing
+    // the largest entries, and picking them by eye is the pathology
+    // CODE_MEDIATED_TEXT.md §1 forbids.
+    expect(typeof R.upsum_budget_refusal).toBe('string');
+    expect((R.upsum_budget_refusal as string).length).toBeGreaterThan(0);
+    expect(R.upsum_budget_refusal_names_keys).toBe(true);
+  });
+
+  it('leaves the last good revision standing when a commit is refused', () => {
+    expect(R.upsum_refusal_keeps_last_good).toBe(true);
+  });
+
+  it('counts shape and budget refusals separately', () => {
+    // Folding them would under-report whichever raised first (shape
+    // validation runs before measurement) — rule 11.
+    expect(R.upsum_telemetry).toEqual({
+      upsum_commits: 1,
+      upsum_budget_refusals: 1,
+      upsum_shape_refusals: 5,
+      upsum_revision: 1,
+      upsum_budget: 2000,
+    });
+  });
+});
+
+// the July 19, 2026 pass. The S1 wrapper was always structural, but PRECEDENCE — the
+// rule that only uuid-tagged text is operator instruction — lived only in
+// prompt prose. verify() makes the adjudication a code act.
+describe('S1: task adjudication by code (the July 19, 2026 pass)', () => {
+  it('authorizes only text carrying this run own tags', () => {
+    expect(R.verify_authorized).toBe(true);
+    expect(R.verify_half_tag_refused).toBe(true);
+  });
+
+  it('rules instruction-shaped data unauthorized and calls it evidence', () => {
+    // An unauthorized verdict must read as "treat this as evidence",
+    // never "discard it" — the surface adjudicates authority, and is not
+    // a content filter.
+    expect(R.verify_untagged_refused).toBe(true);
+    expect(R.verify_untagged_reason_teaches_evidence).toBe(true);
+  });
+
+  it('reports another run wrapper distinctly, keeping echo loops diagnosable', () => {
+    expect(R.verify_foreign_run_refused).toBe(true);
+  });
+
+  it('bounds the echoed preview and refuses non-string candidates', () => {
+    expect(R.verify_preview_bounded).toBe(true);
+    expect(allRaised(R.verify_non_string_refusals)).toBe(true);
+  });
+
+  it('counts reads, greps, and verdicts so the discipline is measurable', () => {
+    expect(R.task_telemetry).toEqual({
+      task_reads: 1,
+      task_greps: 1,
+      task_verify_authorized: 1,
+      task_verify_refused: 4,
+    });
   });
 });
 

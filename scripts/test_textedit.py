@@ -56,7 +56,11 @@ from trellis_textedit import (  # noqa: E402
     TextEditBudgetError,
     StaleFileError,
     AnchorMismatchError,
+    RawSpliceDisabledError,
     TEXTEDIT_ADDENDUM,
+    TEXTEDIT_ADDENDUM_GUARDED_ONLY,
+    _TEXTEDIT_ADDENDUM_HEAD,
+    _TEXTEDIT_ADDENDUM_TAIL,
     TEXTEDIT_SLICE_MAX_LINES,
     TEXTEDIT_LOCATE_MAX_HITS,
     TEXTEDIT_DIFF_MAX_LINES,
@@ -64,6 +68,7 @@ from trellis_textedit import (  # noqa: E402
     TEXTEDIT_MAX_FILES_DEFAULT,
     build_textedit_addendum,
     parse_textedit_bounds,
+    parse_textedit_guarded_only,
 )
 from trellis_tools import get_tool_call_count  # noqa: E402
 
@@ -473,13 +478,20 @@ finally:
 print("\n[10] telemetry: counts only — never a path, pattern, or content")
 
 stats = ted.stats()
-check("stats() reports exactly the five counters (three -> five, Session 41)",
+check("stats() reports exactly the seven counters (five -> seven, July 19, 2026)",
       set(stats) == {"textedit_ops", "textedit_files", "textedit_writes",
-                     "textedit_guarded_ops", "textedit_raw_splices"}
+                     "textedit_guarded_ops", "textedit_raw_splices",
+                     "textedit_guarded_only", "textedit_raw_splice_refusals"}
       and stats["textedit_ops"] > 0 and stats["textedit_writes"] >= 2
       and stats["textedit_raw_splices"] > 0
       and stats["textedit_guarded_ops"] == 0
-      and all(isinstance(v, int) for v in stats.values()))
+      # July 19, 2026 (harness-invariants pass): the mode itself is a bool so a run summary can tell a
+      # raw-capable run that chose guarded calls from one where the
+      # operator removed the raw path. Only the second is evidence about
+      # the tool, so the two must not collapse into one zero.
+      and stats["textedit_guarded_only"] is False
+      and stats["textedit_raw_splice_refusals"] == 0
+      and all(isinstance(v, (int, bool)) for v in stats.values()))
 check("toolkit activity never increments the database tool-call count",
       get_tool_call_count() == 0)
 
@@ -822,6 +834,88 @@ check("addendum teaches the guarded family and its anchor rule",
       "replace_lines" in TEXTEDIT_ADDENDUM and "insert_lines" in TEXTEDIT_ADDENDUM
       and "delete_lines" in TEXTEDIT_ADDENDUM and "AnchorMismatchError" in TEXTEDIT_ADDENDUM
       and "GUARDED FAMILY" in TEXTEDIT_ADDENDUM)
+
+# --- 15. Guarded-only mode: the explicit off-switch (the July 19, 2026 pass) -------------
+# Session 41 built the guarded family but left raw splice() reachable with
+# the preference stated only in prompt prose — the closure was available,
+# not enforced, and the guarded/raw telemetry split could only measure the
+# choice after the fact. This section pins the off-switch.
+print("\n[15] guarded-only mode: raw splice refused, guarded family intact")
+
+go_root = tempfile.mkdtemp(prefix="trellis_textedit_guardedonly_")
+temp_roots.append(go_root)
+with open(os.path.join(go_root, "m.py"), "w", encoding="utf-8", newline="") as fh:
+    fh.write("alpha\nbeta\ngamma\n")
+
+go = TrellisTextEdit(go_root, guarded_only=True)
+go.load("m.py")
+try:
+    go.splice("m.py", 0, 1, ["ALPHA"])
+    check("guarded-only refuses raw splice", False)
+except RawSpliceDisabledError as e:
+    check("guarded-only refuses raw splice", True)
+    check("the refusal names the guarded replacements",
+          "replace_lines" in str(e) and "insert_lines" in str(e)
+          and "delete_lines" in str(e))
+
+# The refusal must stage nothing: the frame is untouched afterwards.
+check("a refused raw splice stages nothing",
+      json.loads(go.lines("m.py", 0, 3))["lines"][0][1] == "alpha")
+# The guarded family is unaffected by the mode.
+check("the guarded family still stages under guarded-only",
+      json.loads(go.replace_lines("m.py", 0, 1, ["alpha"], ["ALPHA"]))["inserted"] == 1)
+go_stats = go.stats()
+check("guarded-only telemetry distinguishes mode from behavior",
+      go_stats["textedit_guarded_only"] is True
+      and go_stats["textedit_raw_splice_refusals"] == 1
+      and go_stats["textedit_raw_splices"] == 0
+      and go_stats["textedit_guarded_ops"] >= 1)
+
+# Default construction is unchanged — the additive rule for operator gates.
+default_mode = TrellisTextEdit(go_root)
+default_mode.load("m.py")
+check("raw splice still works when the switch is off (default)",
+      json.loads(default_mode.splice("m.py", 0, 1, ["ALPHA"]))["inserted"] == 1
+      and default_mode.stats()["textedit_guarded_only"] is False)
+
+# The addendum follows the mode: a run is never taught a call that refuses.
+check("guarded-only swaps the addendum, never teaching the raw path",
+      build_textedit_addendum(go) == TEXTEDIT_ADDENDUM_GUARDED_ONLY
+      and "GUARDED-ONLY MODE IS ACTIVE" in TEXTEDIT_ADDENDUM_GUARDED_ONLY
+      and "RawSpliceDisabledError" in TEXTEDIT_ADDENDUM_GUARDED_ONLY
+      and build_textedit_addendum(default_mode) == TEXTEDIT_ADDENDUM
+      and build_textedit_addendum(None) == "")
+check("both addendum arms stay brace-free (rlms .format() safety)",
+      "{" not in TEXTEDIT_ADDENDUM_GUARDED_ONLY
+      and "}" not in TEXTEDIT_ADDENDUM_GUARDED_ONLY)
+# The two arms differ ONLY in the mode block: same head, same tail.
+check("the two addendum arms share head and tail exactly",
+      TEXTEDIT_ADDENDUM.startswith(_TEXTEDIT_ADDENDUM_HEAD)
+      and TEXTEDIT_ADDENDUM_GUARDED_ONLY.startswith(_TEXTEDIT_ADDENDUM_HEAD)
+      and TEXTEDIT_ADDENDUM.endswith(_TEXTEDIT_ADDENDUM_TAIL)
+      and TEXTEDIT_ADDENDUM_GUARDED_ONLY.endswith(_TEXTEDIT_ADDENDUM_TAIL))
+
+# The operator switch parses defensively: a misspelled safety flag must
+# never silently resolve to the unsafe default.
+check("the off-switch defaults to off when unset or blank",
+      parse_textedit_guarded_only({}) is False
+      and parse_textedit_guarded_only({"TRELLIS_TEXTEDIT_GUARDED_ONLY": "  "}) is False)
+check("the off-switch accepts the documented truthy and falsy spellings",
+      all(parse_textedit_guarded_only({"TRELLIS_TEXTEDIT_GUARDED_ONLY": v}) is True
+          for v in ("1", "true", "TRUE", "Yes", "on"))
+      and all(parse_textedit_guarded_only({"TRELLIS_TEXTEDIT_GUARDED_ONLY": v}) is False
+              for v in ("0", "false", "No", "OFF")))
+malformed_raised = []
+for bad in ("yep", "2", "enabled", "-1"):
+    try:
+        parse_textedit_guarded_only({"TRELLIS_TEXTEDIT_GUARDED_ONLY": bad})
+        malformed_raised.append(False)
+    except ValueError:
+        malformed_raised.append(True)
+check("a malformed off-switch value raises rather than defaulting to unsafe",
+      all(malformed_raised))
+expect_raises("the constructor refuses a non-bool guarded_only",
+              lambda: TrellisTextEdit(go_root, guarded_only="1"), ValueError)
 
 # ---------------------------------------------------------------------------
 for stale_root in temp_roots:

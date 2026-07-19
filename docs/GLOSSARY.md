@@ -111,6 +111,33 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   Consequence: effective context is bounded by REPL memory, not the
   attention window. Canonical record:
   `docs/architecture/CODE_MEDIATED_TEXT.md`.
+- **Harness self-model (principle endorsed July 19, 2026; not built)** —
+  the direction that Trellis's interior surfaces serve as *free
+  meta-prompt composition primitives*, so the model always receives a
+  **composed, bounded-context read of what the system actually expects**
+  rather than inferring the system's behavior from text authored at a
+  different time. The owner's framing: *Explainable AI, but for the AI.*
+  Record: `docs/architecture/HARNESS_SELF_MODEL.md`.
+- **Composed read** — the bounded projection of a surface's expectations
+  served at a decision point. Bounded and *complete with respect to what
+  it covers*: boundedness is not a weakened accuracy claim
+  (HARNESS_SELF_MODEL.md §0).
+- **Guard-derived account** — a composed read generated from the guard
+  predicates that enforce it, so the same code that refuses is the code
+  that explains. The mechanism that makes the self-model resist drift
+  structurally rather than by authorial discipline (§2).
+- **Drift invariant** — *the account must read the same state the
+  behavior reads, or it is documentation again* (§2.1). One field drives
+  both the refusal and the self-description; two fields reintroduce the
+  prose-only class.
+- **The bijection (self-model acceptance criterion)** — every line in a
+  surface's composed read maps to an enforcing guard, and every guard
+  maps to a line; neither set has orphans (§3). Run against the
+  pre-July-19 kernel it flags all three audit findings automatically.
+- **Advisory vs enforced voice** — the named defect that the current
+  kernel writes enforced contracts and unbacked aspirations in identical
+  typography ("HARD RULE" for both), so the agent cannot tell which
+  promises the system will keep (§4).
 - **Engine-computed address** — a location handle (row index, hash, segment
   id) produced by a query and consumed by code in the same turn; transient
   by definition — re-query rather than remember. The opposite of a
