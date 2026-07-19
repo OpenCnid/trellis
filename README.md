@@ -118,10 +118,18 @@ it. Support never mints custody; custody never implies support; a
 freshly written belief starts at maximal uncertainty. Doctrine:
 [EPISTEMIC_SUPPORT](docs/architecture/EPISTEMIC_SUPPORT.md); program
 documents: [docs/product/epistemic-support/](docs/product/epistemic-support/PROGRAM_CONTEXT.md).
-The first bounded feature — the support-computation oracle drill,
-`npm run test:support-oracle` — is implemented and pinned; judges, the
-support sweep, and the ratification queue remain proposals behind
-their own gated features.
+Three bounded features are implemented and pinned — the
+support-computation oracle drill (`npm run test:support-oracle`), judge
+intake (`npm run test:judge-intake`), and judge convocation
+(`npm run test:judge-convocation`). No live judge run has ever
+executed and the paid queue is on hold. How judges are built is
+governed by
+[JUDGE_COMPOSITION_GAME](docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md)
+(ratified; twenty rules of binding program law) and the principle it
+generalizes to,
+[COMPOSITION_FROM_PRIMITIVES](docs/architecture/COMPOSITION_FROM_PRIMITIVES.md):
+judges compose per context from parameter registries, and there is no
+default cast.
 
 **Where the humans are.** Every trust elevation is a human running a
 gated CLI: promotion (`npm run promote`), module registration

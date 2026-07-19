@@ -91,7 +91,17 @@ system-level framing is the root `README.md`.
   judge-computed support opinions (b, d, u) orthogonal to the custody
   tiers; plane geometry, v1 arithmetic and metric grammar (drill-pinned),
   the judge layer, and the automation ladder. Working documents in
-  `docs/product/epistemic-support/`.
+  `docs/product/epistemic-support/`. Its §5 states the judge layer as a
+  standing cast; read it against `COMPOSITION_FROM_PRIMITIVES.md` below,
+  which governs.
+- **[`COMPOSITION_FROM_PRIMITIVES.md`](architecture/COMPOSITION_FROM_PRIMITIVES.md)**
+  — **foundational lesson** (July 19, 2026): harness functions compose
+  per context from categoric primitives, and there are no default
+  instances. Frames are invariant; instances are not, and an instance
+  that reaches a schema, byte-pin, or registration has silently become
+  law. Judges are the worked example — including the case where this
+  house lost the principle across seven documents and built the roster
+  the rules forbid.
 - **[`RESIDUAL_STREAM_SIDECAR.md`](architecture/RESIDUAL_STREAM_SIDECAR.md)**
   — **future project, out of scope** (recorded July 17, 2026): the
   functional-affect instrumentation-and-control record — the evidence
@@ -176,16 +186,38 @@ program (the `engineering-loop/` pattern):
 
 - **[`epistemic-support/`](product/epistemic-support/PROGRAM_CONTEXT.md)**
   — the epistemic-support program (doctrine ADOPTED July 16, 2026 —
-  `docs/architecture/EPISTEMIC_SUPPORT.md`; the oracle drill is
-  IMPLEMENTED, `npm run test:support-oracle`; everything else —
-  judges, sweep, registration, ratification queue — remains PROPOSED
-  behind its own bounded feature): `PROGRAM_CONTEXT.md` is the entry
-  point, orientation, and owner decision record; `RESEARCH_MAP.md` the
-  evidence register (its own header carries the authoritative
-  source/claim counts; adoption-bounds register in §9);
-  `FOUR_JUDGE_DESIGN.md` + `FOUR_JUDGE_BASIC_MODEL.md` +
-  `JUDGE_CONTRACT_TEMPLATE.md` the judged-input architecture and its
-  prompt-facing frames; `ORACLE_DRILL_PROPOSAL.md` the first drill's
+  `docs/architecture/EPISTEMIC_SUPPORT.md`; the oracle drill, judge
+  intake, and judge convocation are IMPLEMENTED —
+  `npm run test:support-oracle`, `test:judge-intake`,
+  `test:judge-convocation`; no live judge run has ever executed and
+  the paid queue is on hold).
+
+  **Read `JUDGE_COMPOSITION_GAME.md` first.** It is the ratified
+  canonical record for how judges are composed — twenty rules that are
+  binding program law, cited by number and never restated — and it is
+  the most instructive document the program has. Its companion is
+  `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`, which states the
+  principle in general form: judges compose per context from parameter
+  registries, and **there is no default cast**. Several older records
+  below encode a standing four-judge roster and are being corrected;
+  where they and the game record differ, the game record governs.
+
+  Then: `RECONCILIATION.md` (RATIFIED July 18, 2026) is the panel law
+  and governs `FOUR_JUDGE_DESIGN.md` / `FOUR_JUDGE_BASIC_MODEL.md`
+  wherever they differ — their co-equality formally ended;
+  `PROGRAM_CONTEXT.md` is the entry point, orientation, and owner
+  decision record; `RESEARCH_MAP.md` the evidence register (its own
+  header carries the authoritative source/claim counts;
+  adoption-bounds register in §9); `FOUR_JUDGE_BASIC_MODEL.md` (S10,
+  the collaborator's source) is where the primitives are stated —
+  registries, not judges; `FOUR_JUDGE_DESIGN.md` the originating
+  architecture, read with RECONCILIATION beside it;
+  `JUDGE_CONTRACT_TEMPLATE.md` the prompt-facing frames;
+  `COMPOSABLE_RUBRICS_DESIGN.md` the rubric-construction direction
+  (owner ruling 4, BUILD — its "adaptive means selection" definition
+  is under re-decision); `JUDGE_INTAKE_DESIGN.md` and
+  `JUDGE_CONVOCATION_DESIGN.md` the two implemented slices;
+  `ORACLE_DRILL_PROPOSAL.md` the first drill's
   record (implemented; its header carries the observed runs);
   `IEG_TEACHINGS.md` the July 17, 2026 teaching record behind the
   register's S13 rows (the collaborator's UIT-IEG framework,

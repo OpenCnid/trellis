@@ -24,6 +24,22 @@ see the decision record (§6).
 
 ## 2. Reading order (program-local)
 
+**0. READ FIRST —
+[`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md)** (RATIFIED
+July 18, 2026, §11; its twenty rules of §6 are binding program law,
+cited by number and never restated). The canonical record for how
+judges are composed, and the most instructive document this program
+has: judges are composed **per context** from primitives, and **there
+is no default cast**. Its companion is
+[`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md),
+which states the principle generally and records what it cost when a
+session built the standing roster the rules forbid.
+
+This item is numbered 0 because several records below were authored
+before it and encode a fixed four-judge cast with per-role taxonomies.
+**Where they and the game record differ, the game record governs.**
+Reading them first is how the error happened.
+
 1. [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)
    — the adopted doctrine record: the two-axis doctrine, the support
    state, plane geometry, the v1 arithmetic and metric grammar, the
@@ -39,9 +55,13 @@ see the decision record (§6).
    bounds register** — the live rules bounding what may be built on
    which evidence.
 3. [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md) — the judged-input
-   architecture: four differently-blind roles (grounding, coherence,
-   corroboration, audit), engine-side composition, judges as
-   contestable capabilities.
+   architecture: four differently-blind role *slots* (grounding,
+   coherence, corroboration, audit), engine-side composition, judges as
+   contestable capabilities. Read it with
+   [`RECONCILIATION.md`](RECONCILIATION.md) beside it — RATIFIED
+   July 18, 2026, and it governs this record wherever the two differ.
+   Both describe the four as "a minimal ecology instance" and then
+   operate on them as a standing roster; item 0 governs that tension.
 4. [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md) — the
    prompt-facing hypershot frames and rubric-authoring rules.
 5. [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md) — the first

@@ -303,6 +303,9 @@ the authority.*
 |---|---|---|
 | Epistemic support | (b, d, u) sweep-side; support never mints custody | `docs/architecture/EPISTEMIC_SUPPORT.md` |
 | Judge op | drawback \| clean \| abstain; clean ≠ correct | `GLOSSARY.md` |
+| Judge composition | composed per context from primitives; no default cast; twenty rules are binding law | `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` |
+| Composition from primitives | frames invariant, instances never; an encoded instance has become law | `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
+| Panel law | role definitions, R-29 gates, R-30 no-global-section; governs the older four-judge records | `docs/product/epistemic-support/RECONCILIATION.md` |
 | Evidence register | sources, claims, adoption bounds, by dated entry | `docs/product/epistemic-support/RESEARCH_MAP.md` |
 | IEG | collaborator's exchange-geometry frame; design vocabulary only (AB-1) | `docs/product/epistemic-support/IEG_TEACHINGS.md` |
 

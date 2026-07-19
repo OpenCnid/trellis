@@ -35,6 +35,25 @@ R-30), and §5 enforcement table are authoritative. This record stands as
 the architecture it graduated from; read it with RECONCILIATION beside
 it. `JUDGE_COMPOSITION_GAME.md` §11 was ratified in the same act.
 
+**Fifth amendment (dated note — July 19, 2026, Session 71; a
+correction pointer, not a re-decision).** This record's §3 is the
+origin of the standing-roster idiom that later documents inherited —
+"a fifth judge with a blindness profile **already on the panel**", the
+role table with per-role drawback classes fixed inline, and §5's
+anchor discipline stated **per role** with fixtures byte-pinned ahead
+of any candidate. Its own §1 already says the four are "a *minimal
+ecology instance for belief-support*"; the operative sections do not
+honor that framing, and the framing is what governs. Under
+`JUDGE_COMPOSITION_GAME.md` §6 rule 4 and the owner's July 19, 2026
+ruling, **there is no default cast**: the four are role *slots*, each
+buying a blindness the others lack, and every judge filling one is
+composed for its context from the S10 registries. §5's per-role anchor
+discipline is consequently under re-decision — anchors calibrate a
+taxonomy, and belief-facing taxonomies do not exist until a
+composition does. See
+[`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md)
+for the principle and the case that produced it.
+
 Program context: [`PROGRAM_CONTEXT.md`](PROGRAM_CONTEXT.md). Parent
 design record: [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)
 (the original review-series proposal it graduated from was removed at

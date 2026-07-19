@@ -8,6 +8,21 @@ these bytes were written. Every frame below is a **hypershot**: an
 invariant structural skeleton with free variables; no concrete belief,
 topic, or example appears at the frame layer.
 
+> **Correction pointer (dated note — July 19, 2026, Session 71).** The
+> layer rule immediately below places **role names and taxonomy class
+> names on the invariant side**, and §2–§5 hard-code each role's
+> drawback classes into the prompt bytes. That is in direct tension
+> with [`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md) §6
+> rule 4 — binding program law since July 18, 2026 — under which
+> belief-facing taxonomies **close per composition** and only the audit
+> taxonomy is invariant. Under the owner's July 19 ruling there is no
+> default cast: the *shape* of a taxonomy is invariant, its *classes*
+> are composed for the context. Read the game record and
+> [`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md)
+> before treating any class list below as law. A substantive amendment
+> to §1's layer rule is owed and is an owner act; this note only marks
+> the tension so the frames are not copied forward unexamined.
+
 **Layer rule (the invariance test).** A token belongs in these frames
 only if it is byte-identical across every invocation: role names,
 verdict enums, taxonomy class names, schema field names. Everything

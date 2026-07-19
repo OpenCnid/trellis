@@ -80,7 +80,8 @@ today).
 | `docs/architecture/` | Living doctrine (design records lead implementation) |
 | `docs/benchmarks/` | Measured evidence — dated reports behind every claim |
 | `docs/operations/` | Runbook |
-| `docs/product/` | PRDs and benchmark specs (planning history) |
+| `docs/product/` | PRDs, benchmark specs, and ACTIVE programs — `epistemic-support/` is live work, not history. Building anything judge-shaped starts at `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` (ratified; its twenty rules are binding program law) and `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
+| `skills/` | Composition skills versioned in-repo (`judge-composition`); the record each derives from is canonical over it |
 | `docs/archive/` | Preserved history (verbatim, never edited) |
 | Root: `HANDOFF.md`, `TRELLIS_ROADMAP.md`, `API_REFERENCE.md` | Session prompt / sequencing + dated ledger / HTTP + SSE contract |
 | `data/`, `fixtures/` | Committed durable corpora (byte-pinned) / test fixtures (never extracted) |
@@ -194,6 +195,27 @@ start. Worked instances of the frame:
     green tests, a seeder whose request digest nobody could produce,
     and both acceptance-ledger recovery ceremonies with no entrypoint
     at all.
+16. **Prompt authoring runs the protocols** (permanent; owner-directed
+    July 13, 2026). ANY session that creates or edits prompt text — a
+    kernel or module addendum, an RLM task text, an agent or sub-agent
+    instruction, an extraction or classification prompt, an output
+    schema, a hypershot frame, a judge rubric or anchor item — MUST
+    FIRST invoke BOTH the `prompt-engineering` and `hypershot-protocol`
+    skills and author against their loaded guidance. A process gate
+    checked before the bytes are written, never a claim made in prose
+    after. Judge-shaped work adds `judge-composition`. (Restated here
+    because it is permanent and `HANDOFF.md` §7, its only prior home,
+    is regenerated every session.)
+17. **Compose from primitives; never encode a default instance.**
+    Harness functions compose per context from parameter registries.
+    Frames are invariant (schema shapes, field names, role slots and
+    the blindness each buys); instances are not (selections,
+    orientations, closed taxonomies, names). An instance that reaches
+    a wire schema, a byte-pin, a registration, or an operator
+    checklist has silently become law. The tell: if a second instance
+    would need a second registration under a different name, the first
+    was never a frame. Full record with the case that produced it:
+    `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`.
 
 ## 5. Working protocol (commands)
 

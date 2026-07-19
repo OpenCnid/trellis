@@ -202,8 +202,20 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   requires a governance question no existing plane answers, plus drills.
 - **Judge op** — a drawback detector over a belief: a single-question
   check returning `drawback | clean | abstain` with a named class from
-  a closed per-role taxonomy; `clean` means no known drawback found,
+  a closed taxonomy; `clean` means no known drawback found,
   never certified correctness; abstention feeds uncertainty only.
+  Belief-facing taxonomies close **per composition**, not per role
+  (`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` §6
+  rule 4, binding program law); the audit taxonomy is invariant.
+- **Judge composition** — building a judge as a sparse selection from
+  the four parameter registries plus claim modes, orientation, a closed
+  taxonomy, and a declared blindness, composed for the context in front
+  of it. There is no default cast: registries and role slots are the
+  invariant frame, and every judge filling a slot is a special case.
+  Canonical record:
+  `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`; the
+  general principle:
+  `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`.
 - **Adoption bounds register** — the live, dated rule set (AB-1…, in
   `docs/product/epistemic-support/RESEARCH_MAP.md` §9) bounding what may
   be built on which evidence class; amended by dated entry, never

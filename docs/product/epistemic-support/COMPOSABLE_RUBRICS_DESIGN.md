@@ -9,6 +9,22 @@ WonderSuite conceptual primitives strategy to build adaptively-aligned
 judges with composable rubrics."* Implementation is not authorized by
 this record.
 
+> **Correction pointer (dated note — July 19, 2026, Session 71).** This
+> record's §4 defines the adaptive step as *selection*: "'Adaptively-
+> aligned' means the rubric **selection** fits the claim, not that the
+> rubric mutates," with the harness choosing among **pre-registered**
+> compositions. Under [`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md)
+> §6 rule 4 and the owner's July 19, 2026 ruling, that is the wrong
+> half of the distinction: judges and their rubrics are **composed for
+> the context**, not selected from a standing set, and there is no
+> default cast to select from. §4's step 4 ("author the v1
+> compositions: one hand-authored rubric per role … each with its
+> anchor fixture") is the instruction a session followed in Session 71
+> to build exactly the roster the rules forbid; it was rolled back.
+> This direction is owner-authorized (decision #4) but its central
+> definition needs re-deciding before it is built. See
+> [`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md).
+
 Parent doctrine: [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md).
 Judge architecture: [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md).
 Contract frames: [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md).
