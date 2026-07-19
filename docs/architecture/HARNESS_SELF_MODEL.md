@@ -216,12 +216,27 @@ exchange that produced it is not lost.
 Two workstreams, deliberately separable, which should NOT ride together:
 
 **A. The trace (buffer + decision log).**
-Phase 0 — read the counters shipped July 19 (`task_reads`, `task_greps`,
-`task_verify_authorized`, `task_verify_refused`, `upsum_commits`,
-`upsum_*_refusals`) against existing zero-paid drills, to establish
-whether runs already re-read and whether the surfaces get adopted at all.
-Zero-paid, uses telemetry that now exists, and it is the measurement that
-would justify or refute everything after it.
+
+Phase 0 — **CORRECTED July 19, 2026, by attempting to execute it; the
+original wording was wrong and is preserved in §10 (Phase 0 executed)
+with the reason.** It splits into two halves that were conflated:
+
+- **Phase 0a — reachability (zero-paid).** Make the counters shipped
+  July 19 (`task_reads`, `task_greps`, `task_verify_authorized`,
+  `task_verify_refused`, `upsum_commits`, `upsum_*_refusals`,
+  `textedit_guarded_only`, `textedit_raw_splice_refusals`) readable on
+  the worker path, and pin that they are. Today they are not: see §10.2
+  (Finding 1). Zero-paid, small, and independent of everything else.
+- **Phase 0b — adoption (PAID, owner-gated).** Whether a model *reaches
+  for* these surfaces when they would help. This **cannot be measured
+  zero-paid at any price of effort** — see §10.1 (Finding 0), the
+  correction that matters most. It needs a probe-mold run with a task
+  set designed so the surfaces are genuinely load-bearing, and it is the
+  measurement that would justify or refute Phases 1–4.
+
+Phase 0b is the gating measurement; 0a is a cleanup that makes production
+runs observable and is **not** a prerequisite for 0b (§10.2 explains why:
+the probe drivers already parse the full payload).
 Phase 1 — the read seam (turn boundary; currently absent, and it is what
 any "this turn" semantics requires).
 Phase 2 — buffer as pure observer: records and telemetry, gates nothing.
@@ -255,3 +270,111 @@ quality is open and unmeasured; the probe-round mold would answer it.
 | PROVENANCE_THREADING.md | `_retrieved_addresses` is the existing single-surface read buffer §6 generalizes; T1/T2 taxonomy bounds what the buffer can catch |
 | GROUNDED_AUTHORING.md | §7's verification tiers cover the semantic residual §6.1 deliberately leaves |
 | AGENTS.md rules 8 and 15 | the law is rule 8 made checkable; §4's voice-collapse defect is rule 15's shape applied to prompt claims rather than capabilities |
+
+## 10. Phase 0 executed — what it found, and what it corrected
+
+**July 19, 2026, owner-directed, read-only, zero-paid, $0 spent.** No
+code changed; this section is the whole deliverable. Phase 0 was run as
+§8 (Scope, sequencing, and the authorization gate) specified it, and the
+attempt falsified the specification. Both findings are recorded here
+because the second one is a live gap and the first is a trap that will
+catch the next person who tries to measure model behavior cheaply.
+
+### 10.1 Finding 0 — the specification was wrong: adoption cannot be measured zero-paid
+
+The original §8 (Scope, sequencing, and the authorization gate) Phase 0
+read: *"read the counters shipped July 19 …
+against existing zero-paid drills, to establish whether runs already
+re-read and whether the surfaces get adopted at all."*
+
+That is not possible, for a reason that holds for **every** zero-paid
+harness in this repository and is not specific to these counters:
+
+> **A zero-paid run contains no model. Every zero-paid harness drives the
+> tool sequence from a script, so any counter it moves records the
+> script's author, not a model's decision.**
+
+The clearest instance is the closest thing the repo has to a "run"
+without spend: `scripts/test_selfedit_rehearsal.py` (the Session 35
+scripted stage-2 rehearsal, which drives the run's REAL tool sequence
+zero-LLM). It constructs a `TrellisTask` and calls `task.grep("notes.txt")`
+— a line a human typed. Counting it would have yielded `task_greps: 1`
+and that 1 would have meant nothing about adoption.
+
+Adoption is a claim about model behavior. Observing model behavior
+requires a model in the loop, which is a paid run. There is no cheap
+substitute, and the honest consequence is that **Phase 0b is paid or it
+does not happen.** The comparable precedent for scale and cost is the
+effective-context probe rounds (`EFFECTIVE_CONTEXT_PROBE_REPORT.md`),
+whose round 4 ran 36 runs for $0.9452.
+
+This is guardrail 8 turned on this record itself: a stated measurement
+with no mechanism behind it is the same defect class the July 19 pass
+existed to close, reproduced in the record that documented the closing.
+It survived authoring, review, and merge, and was caught only by someone
+trying to run it — which is the argument for executing a specification
+early rather than trusting that it reads well.
+
+### 10.2 Finding 1 — the telemetry allowlist drops most counters on the worker path
+
+Tracing whether the counters can be read anywhere surfaced a real,
+**pre-existing** gap:
+
+`parseTelemetryLine` (`src/core/observability/rlm_telemetry.ts`)
+constructs an explicit **nine-field** result — `input_tokens`,
+`output_tokens`, `subcall_count`, `tool_calls`, `mcp_calls`,
+`workspace_ops`, `workspace_segments`, `workspace_bytes`,
+`execution_time_s`. Every other key in the payload is parsed and
+discarded. `src/workers/rlm_worker.ts` then logs five of those nine and
+increments five metrics.
+
+So on the worker path these never reach a consumer:
+
+| dropped counters | shipped in |
+|---|---|
+| `upsum_commits`, `upsum_budget_refusals`, `upsum_shape_refusals`, `upsum_revision` | July 19, 2026 |
+| `task_reads`, `task_greps`, `task_verify_authorized`, `task_verify_refused` | July 19, 2026 |
+| `textedit_guarded_only`, `textedit_raw_splice_refusals` | July 19, 2026 |
+| `textedit_ops`, `textedit_files`, `textedit_writes`, `textedit_guarded_ops`, `textedit_raw_splices` | Sessions 20 / 41 |
+| `answer_submits` | Session 22 |
+| `retrieved_addresses` | Session 30 |
+| the retrieval-discipline counters | Session 33 |
+
+**Nature and severity, stated precisely.** Nothing broke and nothing
+regressed: the Python side grew counters across Sessions 20–70 and the
+Node allowlist, written when nine fields existed, was never widened. No
+behavior depends on the dropped fields — no gate reads them; they are
+human-facing diagnostics. The consequence is that **an operator cannot
+see these counts in production worker logs or metrics.** That is an
+observability gap, not a correctness bug, and it should not be described
+as one.
+
+Note the precision the earlier record owed and did not give: Session 30
+recorded that the scanner's *tolerance* of unknown fields was pinned.
+Tolerance is exactly right — the scanner does not break on an unknown
+key. It also does not record it. Those are different properties and only
+the first was ever pinned.
+
+**Why this does not block Phase 0b.** The probe drivers do not use the
+worker path. `scripts/exp_effective_context.ts` parses the entire
+`TRELLIS_TELEMETRY:` payload into an object and reads keys off it, so
+every counter is already present there and reading a new one is a
+one-line change per field. A paid adoption probe could run today without
+touching the allowlist. The two findings are independent, and an earlier
+draft of this analysis implied a causal link between them that does not
+exist.
+
+### 10.3 What Phase 0a should do
+
+Widen the worker-path scanner so counts survive to a consumer, and pin
+the property that was never pinned: that a named counter present in the
+payload is present in the parsed result. Prefer a general shape (a
+counts map) over extending a nine-item list by hand a fourth time — the
+list has now been out of date across five sessions, and hand-extension
+is what let it drift. Whatever lands owes a non-test caller by AGENTS.md
+hard rule 15 (*Correct is not the same claim as reachable*): a scanner
+that parses a field nothing reads has not made it reachable.
+
+Not authorized by this section. It is a bounded feature and wants its own
+authorization, like everything else in §8 (Scope, sequencing, and the
+authorization gate).

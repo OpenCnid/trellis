@@ -1928,3 +1928,86 @@ voice, so the agent cannot tell which promises the system will keep.
 the record's §8 carries the gate, the two separable workstreams, and a
 pre-stated cheap first test (derive the textedit addendum from a surface
 descriptor and pin the derived bytes byte-identical to the current ones).
+
+### July 19, 2026 — Phase 0 executed against the harness self-model: the specification was wrong, and the telemetry allowlist gap it surfaced (branch `d/phase0-counter-reachability`, docs-only, read-only, zero-model and zero-paid)
+
+**Origin.** Owner-directed follow-on to the same-day harness-invariants
+pass (PR #135, master `3bdc0e7`). That PR's new record
+`docs/architecture/HARNESS_SELF_MODEL.md` §8 (Scope, sequencing, and the
+authorization gate) named a Phase 0 as the cheap next move; the owner
+directed running it. It was run. **$0 spent, no code changed** — the
+deliverable is the record correction and the finding below.
+
+**Finding 0 — the specification was wrong (the important one).** §8's
+Phase 0 said to read the July-19 counters "against existing zero-paid
+drills, to establish whether runs already re-read and whether the
+surfaces get adopted at all." That is not possible, and the reason
+generalizes to every zero-paid harness in the repo: **a zero-paid run
+contains no model, so every counter a zero-paid harness moves records the
+script's author rather than a model's decision.** The nearest thing the
+repo has to a run without spend is the Session 35 scripted stage-2
+rehearsal (`scripts/test_selfedit_rehearsal.py`), which drives the real
+tool sequence zero-LLM — its `task.grep("notes.txt")` is a line a human
+typed, and counting it would have produced `task_greps: 1` meaning
+nothing. Adoption is a claim about model behavior; observing it needs a
+model in the loop; that is a paid run. Consequence recorded honestly:
+**the adoption half is paid or it does not happen** (comparable
+precedent: effective-context probe round 4, 36 runs, $0.9452). This is
+guardrail 8 turned on the record itself — a stated measurement with no
+mechanism behind it, which is the same defect class the July-19 pass
+existed to close, reproduced in the record documenting the closing. It
+survived authoring, review, and merge, and was caught only by attempting
+to execute it.
+
+**Finding 1 — the telemetry allowlist drops most counters on the worker
+path (pre-existing, observability-only).** `parseTelemetryLine`
+(`src/core/observability/rlm_telemetry.ts`) builds an explicit
+**nine-field** result and discards every other key; `src/workers/
+rlm_worker.ts` then logs five of those nine. So on the worker path the
+July-19 counters never reach a consumer — and neither do
+`textedit_ops`/`textedit_guarded_ops`/`textedit_raw_splices` (Sessions
+20/41), `answer_submits` (Session 22), `retrieved_addresses` (Session
+30), or the retrieval-discipline counters (Session 33). **Nothing broke
+and nothing regressed:** the Python side grew counters across Sessions
+20–70 while the Node allowlist, written when nine fields existed, was
+never widened. No behavior depends on the dropped fields — no gate reads
+them; they are human-facing diagnostics. The consequence is that an
+operator cannot see these counts in production worker logs or metrics:
+an observability gap, **not** a correctness bug, and it should not be
+described as one. Precision the earlier record owed: Session 30 pinned
+the scanner's *tolerance* of unknown fields, which is exactly right — the
+scanner does not break on an unknown key, and it also does not record it.
+Those are different properties and only the first was ever pinned.
+
+**The two findings are independent.** An earlier draft of this analysis
+implied a causal link and was corrected: the probe drivers do not use the
+worker path — `scripts/exp_effective_context.ts` parses the entire
+`TRELLIS_TELEMETRY:` payload into an object and reads keys off it, so
+every counter is already available there and reading a new one is a
+one-line change per field. A paid adoption probe could run today without
+touching the allowlist; equally, fixing the allowlist completely would
+still leave adoption unmeasurable zero-paid.
+
+**Records.** `HARNESS_SELF_MODEL.md` §8 (Scope, sequencing, and the
+authorization gate) rewritten: Phase 0 splits into **0a reachability
+(zero-paid)** and **0b adoption (paid, owner-gated)**, with 0a explicitly
+NOT a prerequisite for 0b. New §10 (Phase 0 executed — what it found, and
+what it corrected) carries both findings, the original wrong wording, and
+§10.3's guidance for whoever builds 0a: prefer a general counts-map shape
+over hand-extending a nine-item list a fourth time, and owe a non-test
+caller per AGENTS.md hard rule 15 (*Correct is not the same claim as
+reachable*) — a scanner that parses a field nothing reads has not made it
+reachable.
+
+**Nothing authorized.** Phase 0a is a bounded feature wanting its own
+authorization; Phase 0b additionally needs the paid-queue position
+resolved (recorded ON HOLD at `HANDOFF.md` §2 (Current baseline) and
+`PROGRAM_CONTEXT.md` §2 (Reading order — program-local), both in
+judge-convocation context — whether the hold is program-scoped or global
+is genuinely ambiguous and is the owner's to settle) plus a task set
+designed so the surfaces are load-bearing. A probe run on tasks that do not exercise them yields a
+null indistinguishable from "the surfaces are ignored", which is why the
+task design, not the spend, is the expensive part.
+
+**Counts.** Docs-only; no suite affected. `npm test` unchanged at
+1,317/114 on `3bdc0e7`.
