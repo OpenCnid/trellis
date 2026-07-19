@@ -1687,3 +1687,94 @@ meaning); and the collaborator's operating-layer promotion direction,
 accepted — promote what the next session must operate on, archive
 what it need only find. Agent-side memory updated in the same pass.
 Everything rides PR #124 and awaits owner merge.
+
+### July 18, 2026 — Session 67: judge intake named and designed; the substrate correction; RECONCILIATION §7 and JUDGE_COMPOSITION_GAME §11 RATIFIED (docs-only, zero-model and zero-paid)
+
+The judge-panel harness build (HANDOFF §3, owner-pointed July 18) opened
+with its naming gate rather than its code. `EPISTEMIC_SUPPORT.md` §7's
+last row requires each unbuilt mechanism to be "named in its own proposal
+before implementation"; the feature is **judge intake** — what stands
+between a promotion candidate and a judge. The name avoids two live
+collisions: "harness" is taken by the RLM harness and the stage-2
+self-edit harness, and "composition" is taken by `composePanel`, which
+composes verdicts rather than prompts. The record is
+`docs/product/epistemic-support/JUDGE_INTAKE_DESIGN.md`, in the
+FOUR_JUDGE_DESIGN mold, with a reading-order entry in PROGRAM_CONTEXT §2.
+
+**The substrate correction (owner ruling) is the session's real finding
+and it invalidated the record's first draft.** That draft transplanted
+the judge-composition game's filing failures into Trellis wholesale —
+inventing a `FiledSpan` address type, an `IntentReading` mechanism, and a
+`scope` enumeration to make filing inflation "unrepresentable." The
+owner's correction: **the game had no workspace.** Its claims existed as
+conversation prose, so its composer had to *transcribe* a claim into a
+filing, and that transcription was the corruption channel every filing
+rule was written against. Trellis has a fact space and a beliefs
+workspace; a promotion candidate is an addressed object and the engine
+copies its bytes. `WORKSPACE_AND_MODULES.md` already states it as an
+axiom (§4.1, "capture is mechanical, not behavioral"), already
+origin-stamps segments (§4.2), and already gates promotion on operator
+approval (§6). The draft had been re-deriving a parallel addressing
+scheme beside the Merkle one and calling it a safeguard. Rewritten: §1.2
+now dispositions each intake-relevant rule against the substrate, and the
+pattern that falls out is **rules about the filer's pen are satisfied by
+the substrate; rules about the composer's packaging survive into the
+engine**. Deliverable 2 (clean-context prompt assembly) was untouched by
+the correction — F1/F6 steering is a prompt-channel property independent
+of claim origin.
+
+Two mechanisms survive into §3.1 as the load-bearing additions. The
+**ratification gate**: the agent shows the user exactly what it will file
+— the bytes plus their engine-computed neighbors, so a cut that drops an
+adjacent qualifier is visible at approval (rule 17) — and the user
+confirms Y/N; building a candidate without a recorded ratification
+refuses, typed. Without it the guarantee degrades to session-layer
+discipline, which is what the game proved fails. And **claim mode is
+ratified, never inferred**: R-29 applicability gates need a mode, and an
+agent-supplied mode would be agent testimony about the user's claim — the
+corruption channel returning as metadata — so the user picks it as part
+of the same confirmation.
+
+The **masking tension** the first draft recorded as an unresolved
+falsifier (rule 15 files verbatim bytes; verbatim bytes carry writing
+style; style identifies authors; rule 6 masks authorship) was closed
+structurally by owner ruling: **a unique user id is encoded in the
+workspace graph address**, so one beliefs workspace partitions many
+parties' beliefs in address space while judge context is assembled from
+content and the allowlist never admits address components. There is no
+attribution in the bytes to leak, and the partition scales to N parties
+by construction. `[attribution-partition]` is its named detector in §6.
+The **`scope` enumeration was withdrawn** (§10.2): under-determined (four
+values back-derived from four ledger rows; comparative, causal, and
+conditional claims fit none), and — decisively — since the user ratifies
+exact bytes, an agent-assigned scope is testimony about a claim already
+fixed, which is rule 15's failure class returning as metadata.
+
+**Two ratifications landed (owner, same day).** `RECONCILIATION.md` §7:
+its §4 per-role verdicts are binding, the FOUR_JUDGE_DESIGN /
+FOUR_JUDGE_BASIC_MODEL co-equality is ended with RECONCILIATION governing
+where they differ, and the live-judge follow-on is unblocked as a gate
+(not as an authorization). `JUDGE_COMPOSITION_GAME.md` §11: the twenty
+rules are binding program law, the §9 shape notes bind the implementing
+feature, and the record is canonical over the `judge-composition` skill.
+The game record's ratification carries an owner scope note — ratifying
+the rules as law does **not** import the workspace-less setting they were
+distilled in; dispositions are recorded per rule rather than assumed in
+either direction. Downstream consumers amended by dated entry:
+FOUR_JUDGE_DESIGN (fourth amendment), PROGRAM_CONTEXT §2/§3,
+JUDGE_INTAKE_DESIGN authority flags and §1.2 (two dispositions tightened
+from "dissolved" to "satisfied vacuously" / "satisfied by construction" —
+under a law framing a satisfied rule still binds any future surface that
+reintroduces the step it governs).
+
+Scope was docs-only: no code, no fixtures, no drill, no test count moved;
+`npm test` and the standing drill block were not re-run because no
+executable byte changed. `git diff --check` clean. Deliberately NOT done:
+`EPISTEMIC_SUPPORT.md` §7's "not yet built" row stands (still true —
+amended when code lands); the §6 enforcement table stays in
+JUDGE_INTAKE_DESIGN rather than merging into RECONCILIATION §5, because
+§5 records enforcement that exists and every §6 row names a pin not yet
+written (merge in the implementing PR); no `R` rows proposed, the record
+making design commitments rather than empirical claims. Next objective is
+the slice-1 implementation against the revised §3.1 — `judge_intake.ts`
+first.

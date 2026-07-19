@@ -482,8 +482,31 @@ prompt pin.
 
 ## 7. Ratification
 
-**OPEN.** This record and its drills were authored in Session 66
-(July 17, 2026). The owner ratifies by dated entry here; until then
-the verdicts in §4 are proposals, FOUR_JUDGE_DESIGN.md and
-FOUR_JUDGE_BASIC_MODEL.md remain co-equal, and any consumer of this
-record must say so.
+**RATIFIED — July 18, 2026 (owner, Session 67).** This record and its
+drills, authored in Session 66 (July 17, 2026), are ratified as written.
+In consequence, from this date:
+
+- **The §4 per-role verdicts are binding**, not proposals. Consumers no
+  longer carry the unratified caveat.
+- **This record governs where the two designs differ.**
+  [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md) and
+  [`FOUR_JUDGE_BASIC_MODEL.md`](FOUR_JUDGE_BASIC_MODEL.md) are no longer
+  co-equal: the layer mapping, the completed role definitions, the
+  adopted composition design (R-29 hard compatibility gate; R-30
+  no-global-section), and the §5 enforcement table are authoritative.
+- **The §3 composition design binds implementation.** The §3.3
+  resolution of the cross-role vs same-jurisdiction boundary stands with
+  its falsifier.
+- **The live-judge follow-on slice is unblocked** as a separately
+  authorized bounded feature — ratification removes the gate, it does
+  not authorize the build.
+
+Ratified in the same act: [`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md)
+§11 — the twenty rules as binding program law. Records ratified under
+this entry are amended only by dated entry, never by silent edit.
+
+*The gate this entry closes, preserved: "**OPEN.** This record and its
+drills were authored in Session 66 (July 17, 2026). The owner ratifies by
+dated entry here; until then the verdicts in §4 are proposals,
+FOUR_JUDGE_DESIGN.md and FOUR_JUDGE_BASIC_MODEL.md remain co-equal, and
+any consumer of this record must say so."*
