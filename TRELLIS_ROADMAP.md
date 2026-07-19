@@ -262,11 +262,12 @@ Session 53 with the Session 58 EL-04 feature branch, Session 54 with the
 Session 59 EL-05 feature branch, Session 58 with the Session 63 EL-11 PR
 (Sessions 55–57 having moved with the intervening EL PRs), Session 59
 with the Session 64 EL-10 recovery-reachability feature branch, and
-Session 60 with the Session 66 judge-panel PR, and Session 61 with the
-Session 68 judge-intake PR. The live
-ledger below keeps the most recent OpenCnid sessions: 62–64, the July 16
+Session 60 with the Session 66 judge-panel PR, Session 61 with the
+Session 68 judge-intake PR, and Session 62 with the Session 69
+judge-convocation slice-2-proposal PR. The live
+ledger below keeps the most recent OpenCnid sessions: 63–64, the July 16
 sister-lab Session 65 entry at its chronological position, and
-Sessions 66–68.)*
+Sessions 66–69.)*
 
 ### July 11, 2026 — Owner-directed: the wall-clock engine benchmark (Python native vs polars) + the Trellis-edits-Trellis expansion series
 
@@ -802,132 +803,6 @@ owner invited a document-first design record for Trellis serving MCP;
 the record landed as `docs/architecture/MCP_SERVER_SURFACE.md`
 (PR #87), unsequenced.
 
-
-### July 15, 2026 — Session 62: EL-10 controller activation and status-authority migration, owner-activated, zero-model and zero-paid
-
-**The controller had never run.** `StateStore.open()` took a caller-supplied
-`stateRoot` with no default and no environment variable; every caller was a test
-using a temporary directory; no CLI, entrypoint, `package.json` bin, npm script,
-or `src/` importer existed; no state root existed on disk. EL-02 through EL-06
-built a correct, thoroughly tested, entirely inert library. The decomposition
-that mattered: 1,161 passing tests established that the kernel is **correct**,
-not that it is **reachable**. Those are independent claims and the suite spoke
-only to the first, so nothing failed.
-
-**1. Machinery (PR #111, merged `6d5670d`).** Five new modules under
-`tools/engineering-loop/src/`. The **acceptance ledger** is program-scoped in its
-own protected root: `StateSnapshotSchema` is single-feature and a state root
-holds one workflow, so nothing in protected state could express which features
-are accepted. Append-only, monotonically sequenced, integrity-linked with
-`sha256Canonical()`, `actor` pinned to `human`. `WriterLock` reused unchanged —
-it is scoped by path, so a distinct root cannot contend with a workflow lock. The
-**approval channel** is the first concrete `ProtectedApprovalChannel` outside a
-test. The **entrypoint** resolves four locations from explicit configuration,
-refuses contained, aliased, and symlink-reachable roots, and reuses the accepted
-EL-03 observer rather than reading Git directly, so there is no second definition
-of `clean`. The **seeder** applies eleven enumerated pairs under one
-`acceptance_change`: all records append or none, and consumption is derived from
-replay since each record carries its `approvalId`. **Two recovery ceremonies**
-with disjoint predicates re-derived every run; genesis and acceptance land in one
-atomic append against the empty generation, so the seeding gate governs a
-re-genesis generation unchanged. `ledger_recovery` joined `PROTECTED_ACTIONS`
-(a `policy_change`; EL-06's exact-array pin moved wittingly).
-
-**2. Activation (owner-directed).** SPEC `EL-REQ-BOOT-002` was rewritten by the
-owner: approval reduces to the owner's authenticated, scope-bound decision, not
-to who performs its transport; a rule requiring the owner to personally perform a
-transport step the controller can execute is an accessibility barrier, not a
-security boundary. The owner affirmed the exact eleven `(feature, status)` pairs;
-the controller composed the request against clean `master` (`6d5670d`,
-`clean: true`, digest `48ac158f…`), executed the transport, and seeded. Ledger:
-generation 0, eleven records, chain valid, approval consumed. Re-seeding refuses —
-"seeding is once-only".
-
-**3. Migration.** `statusAuthority` moved to `protected_controller_state`;
-`bootstrapStatus` removed from all eleven entries and from
-`feature.schema.json`, which now pins the authority as a `const` and, with
-`additionalProperties: false`, **refuses the drift** rather than merely not
-exercising it. The bootstrap value survived four features past its stated end
-because the audit only ever checked that the value was one of two permitted,
-never which one. Observed live against the seeded ledger: accepted EL-00 through
-EL-06 from protected state, EL-07 `blocked` and correctly excluded,
-`next_feature` `EL-10`. The catalog-drift note fires as specified — records
-seeded against the pre-migration catalog carry a different `catalogDigest`,
-reported in the derived view, not refused and not silently ignored. Renderer byte
-pins did **not** move: status changed where it comes from, not what it says.
-
-**4. Defects found and fixed in this session's own work.** A high-effort review of
-the diff found seven, three of which would have shipped. (a) A crash between the
-temp write and the atomic rename left a deterministic temp file that made every
-seeding retry fail `EEXIST` forever, recoverable only by a human deleting a file
-inside the protected root — **the §9.9 deadlock class reintroduced inside the fix
-for it**; it now truncates under the held writer lock. (b) The signed genesis
-record coerced a truncated-tail break (`sequence -1`) to `0`, permanently
-accusing an intact record while the approved scope said `-1`;
-`breakPointSequence` is now nullable with an explicit `breakReason`, and the
-scope says `break_point=truncated_tail`. (c) Referencing `LEDGER_BREACH_REASONS`
-from the schema was a temporal-dead-zone crash on module import, caught by
-loading the module rather than trusting the typecheck. Also fixed: the refusal
-taxonomy declared seven classes but constructed two (the other five are
-approval-policy judgements and correctly surface as `ProtectedPolicyError`);
-`appendAll` moved the generation pointer with no monotonicity guard;
-reconciliation stored `supersedes` in a different order than the approved scope;
-inspection took the writer lock, so `status` could not run when a stuck lock was
-what you needed to diagnose. Every new guard carries a negative control: the fix
-was reverted and the test confirmed red before it was trusted.
-
-**5. The environmental trap.** The documented convention named `%LOCALAPPDATA%`.
-This host runs the agent containerized (MSIX): a write there is redirected into
-`Packages\<package>\LocalCache\Local\...`, proven by probe. The ledger would have
-lived inside one application's private cache, and the same configuration would
-have named a **different directory** for the owner's uncontainerized shell —
-approval issued into a channel the controller never reads, both sides seeing a
-coherent, empty, disagreeing ledger. The convention now avoids per-user
-application-data directories entirely, and `resolveActivation` reports every role
-whose configured path is not the path it resolved to, since documentation alone
-would not have caught it. Protected roots in use: `D:\trellis-protected\engineering-loop\`.
-
-**6. Recorded, not closed.** **The acceptance ledger is write-once.** Seeding
-refuses a non-empty generation, and the only other gated writes are the two
-`ledger_recovery` ceremonies for corruption, so there is no path to record an
-ordinary status change: EL-10 cannot be marked `accepted`, EL-07 cannot be
-unblocked, and no future feature can ever be accepted. Record §9.6 describes that
-steady state exactly — the ordinary `acceptance_change` path that seeding is an
-instance of — but **no `EL-REQ-BOOT-*` requires it**, so it was prose with no
-row and no test that could fail, and the implementing session built the six items
-that had requirements while inverting the seventh. It is the third instance of
-this program's one pattern (`statusAuthority`, the unreachable seeder, this),
-landing in the feature whose purpose was to close it. Deferred to `EL-11` as its
-first item, with its own requirement (`EL-REQ-BOOT-008`, EL-11-owned; families
-already span features) so it cannot be prose twice. `ledger_recovery` must not be
-used for it: the `EL-10=planned` record was correct when written, so accepting
-EL-10 is new information rather than a correction, and using the corruption
-ceremony for ordinary progress would collapse the disjoint predicates §9.9 keeps
-mechanically checkable. `EL-REQ-APPROVAL-012` was added to SPEC §12 with no
-conformance-matrix row: 114 requirements declared, 113 mapped, breaking
-`EL-01-A2` with no test that can fail — the same disease this feature exists to
-close. `APPROVAL-*` belongs to accepted EL-06 (36 rows, pinned), so it needs an
-owning feature; deferred to `EL-11` together with the reachable-producer
-requirement (`APPROVAL-010`). Separately: EL-02 through EL-06 requirement-linkage
-pointers are unverifiable by construction, while EL-10's now resolve to real
-`it(...)` titles under a check proven to fail. And the threat model assumes an
-agent can only write the worktree; that assumption is false for an agent with
-shell access, so the channel's location is not a boundary against this
-controller — the protection is discipline plus review, recorded rather than
-denied.
-
-**Acceptance:** `npx vitest run tools/engineering-loop/tests/` 342 tests across 22
-files; `npm test` 1,218 across 109 files; `npm run build`, `npm run python:check`,
-`docker compose config --quiet`, Draft 2020-12 catalog validation (11 features),
-and `git diff --check` all pass. The full suite is flaky under file parallelism on
-Windows (`ENOTEMPTY` and timeout on temp-dir cleanup); verified pre-existing by
-stashing the branch and running clean `HEAD`, which fails 2 to 5 per run including
-files this work never touches. Counts are from `--no-file-parallelism`. Model
-completions, paid calls, and real protected effects: zero.
-
-**EL-10 is implemented and activated; owner acceptance is not recorded.** All six
-catalog bindings are satisfied. Sessions 56 and 57 moved verbatim to the archive;
-the live window is 58 through 62.
 
 ### July 16, 2026 — Session 63: EL-11 acceptance-ledger steady-state write path and approval-gate mapping, zero-model and zero-paid
 
@@ -1750,3 +1625,101 @@ engineering-loop surface touched.
    performed: the condensation-expectation verdict (IEG_TEACHINGS,
    beside finding 5); EL-10/EL-11 acceptance and the EL-07 unblock
    ceremonies (HANDOFF Appendix B).
+
+### July 18, 2026 — Session 69: judge convocation named and proposed — the slice-2 design record, zero-model and zero-paid, ending at the owner-authorization gate
+
+A document-first proposal session in the Session 45/67 mold: the
+record leads, nothing is implemented, and the session's deliverable
+gate is the owner decision it ends by surfacing. New record:
+`docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md`, status
+PROPOSED — AWAITING OWNER AUTHORIZATION.
+
+1. **The naming gate.** EPISTEMIC_SUPPORT §7's residual row requires
+   each unbuilt mechanism named in its own proposal; **judge
+   convocation** is that name for what stands between a ratified
+   candidate with a composed prompt and a recorded support opinion.
+   Collisions avoided and recorded: "harness" (taken twice),
+   "composition" (`composePanel`), "intake" (slice 1), bare "sweep"
+   (the quarantine/entailment sweeps; `support_sweep` stays the JOB
+   name), and "judge-actuation" (the reserved pointer for the
+   collaborator's forthcoming calm-sycophancy design,
+   RESIDUAL_STREAM_SIDECAR §9 — untouched). The residual row itself
+   is amended on landing, not now.
+2. **The decisions, each against ratified sources cited by number.**
+   (a) **Judge registration** (record §3.1): the module-registry mold
+   with a deliberate split — the full manifest (R-27
+   `targetModelIdentity` REQUIRED) is store-resident; the graph
+   carries only an opaque `judge:<id>` contest hook citing the
+   evidentiary hashes, so the ordinary invalidation sweep contests
+   judges with zero sweep changes while AB-5's model-visible surface
+   stays minimal (the residual is named with a falsifier).
+   Evidentiary bytes ingest as extraction-excluded fixtures —
+   registration is zero-paid by construction. (b) **The
+   `support_sweep` job** (§3.2): the Session 32 mold property by
+   property — (candidate, judge) pairs judged at most once ever with
+   identity spanning candidate bytes and manifest identity; uniform
+   pool, seeded sampler, budget with counted deferral (rule 14);
+   run-open events bound to real runs at last (rule 20); engine-side
+   deterministic evidence gatherers (J1 cited bytes, J2 mechanical
+   bounded history, J3 live-blocks-only excluding the citation chain
+   per rule 2 and AB-11 — external allowlists per game §8 recorded
+   and deferred); judge-all-then-write; verdict records append-only;
+   **opinions computed at read time** (`support:report`), advisory to
+   the WORKSPACE §6 ceremony, never stored model-visible, never
+   gating. The deliberately deferred **RECONCILIATION §5 row 9
+   writer-blind pin is DESIGNED here** (kernel-prompt
+   support-vocabulary absence + read-surface isolation, the
+   FOUR_JUDGE_DESIGN §6 row 7 shape). (c) **The spawn boundary**
+   (§3.3): the composed `ComposedJudgePrompt` bytes ARE the interface
+   — single user message, no system message, no wrapper byte,
+   `promptHash` re-verified pre-send; model identity must equal the
+   manifest's or refuse before I/O; the model supplies only
+   `{verdict, drawback, abstainReason}`, weight an engine constant;
+   oracle twin for zero-model drills; the live constructor
+   triple-gated (operator flag + the owner's dated paid-queue
+   re-opening + per-run approval ≤$5). (d) **The ratification queue**
+   (§3.4): an operator CLI in the WORKSPACE §6 mold — `show` prints
+   the `buildRatificationRequest` payload verbatim (rule 17), the
+   user's recorded flags are the only source of Y and `claimMode`
+   (rule 15; no agent channel), declines record nothing. (e) **The
+   convocation store** (§4): one append-only Postgres table set with
+   `UNIQUE (kind, key)` — write-once as a mechanical storage refusal;
+   the pure slice-1 store replayed by thin wiring; graph, JSONL, and
+   EL roots rejected with reasons; verdict records carry the shape a
+   future J4 sampling edition needs (game §9's masked-replay and
+   construal-fork homes reachable later, named and deferred).
+3. **Program discipline held.** Enforcement/pin skeletons cover every
+   mechanism (§6, 21 rows), each marked DESIGNED — they merge into
+   RECONCILIATION §5 by dated entry only in the implementing PR after
+   observation. Falsifiers per mechanism (§9), including the standing
+   RECONCILIATION §3.3 falsifier (cited, not restated) and the
+   attribution-partition detector driven through the full sweep
+   plumbing. Zero-model boundaries stated per mechanism. Spend
+   appears only as registered estimates (§10: $0 for options A/B;
+   $0.002–$0.01 per verdict, $0.05–$0.25 per default-budget sweep, from
+   measured entailment telemetry). **No `R` rows** — design
+   commitments only (§12). **No prompt bytes authored** — Guardrail 15
+   untriggered, stated in the record's authority flags. The twenty
+   rules cited by number throughout; RECONCILIATION and
+   JUDGE_COMPOSITION_GAME untouched.
+4. **The owner decision (§11), surfaced as named options:** A =
+   zero-model machinery only (spawn lands oracle-only); B = A plus
+   the complete triple-gated spawn boundary, $0 this build
+   (RECOMMENDED — the refusal pins are worth more than the deferral);
+   C = B plus a pre-authorized first calibration convocation
+   contingent on the queue re-opening and the per-run ceremony; D =
+   re-scope or decline. Sequencing under A/B/C: one implementation
+   session (Session 70) in the Session 68 mold.
+5. **Records and bookkeeping.** PROGRAM_CONTEXT §2 gained the
+   reading-order entry (item 8). Session 62 moved verbatim to the
+   archive (window rule; live window now 63–69). HANDOFF regenerated
+   per §0 with the owner-acts list surfaced.
+6. **Evidence.** Docs-only tree: zero executable byte changes, zero
+   test-count moves (`npm test` stays 1,290/113 as landed by
+   Session 68); `git diff --check` clean. Zero model completions,
+   zero paid calls.
+7. **Owner acts outstanding, surfaced not performed:** (1) the §11
+   authorization decision above — the session's deliverable gate;
+   (2) the condensation-expectation verdict (IEG_TEACHINGS, beside
+   finding 5 — OWNER-OWED since July 17); (3) EL-10/EL-11 acceptance
+   and the EL-07 unblock ceremonies (HANDOFF Appendix B).

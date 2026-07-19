@@ -76,6 +76,19 @@ see the decision record (§6).
    [`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md) §6 and the
    §9 shape notes — **binding program law since the July 18, 2026
    ratification (§11)** — cited by number, never restated.
+8. [`JUDGE_CONVOCATION_DESIGN.md`](JUDGE_CONVOCATION_DESIGN.md) *(added
+   July 18, 2026, Session 69)* — **judge convocation**: the slice-2
+   proposal for what stands between a ratified candidate with a
+   composed prompt and a recorded support opinion — judge registration
+   (the split store/graph representation), the `support_sweep` job
+   (Session 32 mold; pair-once bookkeeping; run-open binding for
+   rule 20; the RECONCILIATION §5 row 9 writer-blind pin designed),
+   the spawn boundary (the composed bytes ARE the interface; R-27
+   model-identity refusal; oracle twin), and the ratification queue
+   (WORKSPACE §6 mold). **PROPOSED — awaiting the owner's §11
+   authorization decision; nothing is built**, and the paid queue
+   remains ON HOLD (its §10 spend figures are registered estimates,
+   not authorization).
 
 ## 3. Context you cannot infer from the artifacts alone
 
