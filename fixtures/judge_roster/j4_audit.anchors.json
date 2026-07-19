@@ -1,0 +1,146 @@
+{
+  "anchorSet": "j4_audit",
+  "role": "J4_AUDIT",
+  "taxonomyVersion": "v1",
+  "rubric": "j4_audit.rubric.md",
+  "labeling": {
+    "method": "hand_authored_zero_model",
+    "labeledIn": "Session 71 (2026-07-19)",
+    "note": "Items and labels were authored directly, with no model completion of any kind (AB-4 permits model labeling; this set stays zero-model by session scope). Refresh is a human ceremony with an audit stamp; anchor drift, not pool drift, is the watched failure (FOUR_JUDGE_DESIGN §5)."
+  },
+  "domain": "Synthetic verdict records produced by other roles over synthetic harbor-observation material. The judged item is always a (judge, verdict, evidence) triple, never a claim.",
+  "composition": { "drawback": 5, "clean": 5 },
+  "note_on_protocol": "Every comparison is judged twice with positions swapped; a finding counts only when both orders agree. Each item records the expected outcome under that protocol. `label: drawback` means a finding class fires; `label: clean` means the finding is `none`.",
+  "items": [
+    {
+      "id": "j4-d1",
+      "label": "drawback",
+      "finding": "rubric_gamed",
+      "records": {
+        "A": "J1 verdict `clean`. rationaleSpan: 'the tide gauge at Dock 9'. Claim asserted the gauge was serviced; the cited bytes report only a reading.",
+        "B": "J1 verdict `drawback: unsupported_citation`. rationaleSpan: 'The tide gauge at Dock 9 reads 2.3 m at noon.' Notes the bytes carry no servicing statement."
+      },
+      "preferred": "B",
+      "swapAgreement": true,
+      "rationaleSpan": "rationaleSpan: 'the tide gauge at Dock 9'",
+      "why": "A produced a span that shares vocabulary with the claim, satisfying the rubric's requirement that a span be given, while defeating the question the span exists to answer. Letter met, question evaded."
+    },
+    {
+      "id": "j4-d2",
+      "label": "drawback",
+      "finding": "rubric_gamed",
+      "records": {
+        "A": "J1 verdict `abstain`, abstainReason `evidence`. rationaleSpan: 'this one is difficult to call.' The cited bytes do bear on the claim.",
+        "B": "J1 verdict `drawback: overclaimed_evidence`. rationaleSpan: 'during the 2044 season' — names the bound the claim drops."
+      },
+      "preferred": "B",
+      "swapAgreement": true,
+      "rationaleSpan": "abstainReason `evidence`. rationaleSpan: 'this one is difficult to call.'",
+      "why": "Abstention is for evidence that does not bear on the claim, not for difficulty. A that abstains to avoid a hard call satisfies the abstention rule's letter while defeating its purpose. Contrast j4-c3, where abstention is correct."
+    },
+    {
+      "id": "j4-d3",
+      "label": "drawback",
+      "finding": "convention_blind",
+      "records": {
+        "A": "Audit note on a J3 record: 'The judge abstained instead of reaching a verdict; incomplete performance, prefer any judge that decides.'",
+        "B": "Audit note on the same J3 record: 'The evidence pool had no reason to mention the claim; abstention with abstainReason `evidence` is the correct act here.'"
+      },
+      "preferred": "B",
+      "swapAgreement": true,
+      "rationaleSpan": "abstained instead of reaching a verdict; incomplete performance",
+      "why": "A penalizes abstention as such. Abstention on out-of-scope evidence is a required convention of this system, and treating it as a defect is the convention-blind failure named in the task contract."
+    },
+    {
+      "id": "j4-d4",
+      "label": "drawback",
+      "finding": "convention_blind",
+      "records": {
+        "A": "Audit note on a J1 record: 'The verdict cites block identifiers rather than reproducing the evidence text; the reader cannot follow it. Mark down for incompleteness.'",
+        "B": "Audit note on the same J1 record: 'By-reference citation is the required form; the identifiers resolve and the deciding span is quoted. No finding.'"
+      },
+      "preferred": "B",
+      "swapAgreement": true,
+      "rationaleSpan": "cites block identifiers rather than reproducing the evidence text",
+      "why": "By-reference answering is a required convention. Penalizing it as incompleteness is convention-blindness, not a coverage finding."
+    },
+    {
+      "id": "j4-d5",
+      "label": "drawback",
+      "finding": "systematic_drift",
+      "records": {
+        "A": "Sample of twelve J1 verdicts from one judge, ordered by issue time: the first four on directly-stated claims are `clean`; the last four, on claims of the same shape and equally direct citations, are `drawback: overclaimed_evidence`. The rubric's threshold did not change and the rubricSha is identical throughout.",
+        "B": "Sample of twelve J1 verdicts from a second judge over the same pool: verdicts track the claim shapes, with clean and drawback interleaved throughout the ordering."
+      },
+      "preferred": "B",
+      "swapAgreement": true,
+      "rationaleSpan": "the last four, on claims of the same shape and equally direct citations, are `drawback: overclaimed_evidence`",
+      "why": "Directional movement across the sample that the rubric does not account for, with the rubric hash held constant. This is the one question whose evidence is the set rather than a single triple."
+    },
+    {
+      "id": "j4-c1",
+      "label": "clean",
+      "finding": "none",
+      "records": {
+        "A": "J1 verdict `drawback: contradicted_by_cited_bytes`. rationaleSpan: 'North light out from 0200 to 0500 on the 14th' — the minimal span that contradicts the claim.",
+        "B": "J1 verdict `drawback: contradicted_by_cited_bytes`. rationaleSpan: the full cited block, including the relighting clause and the following two entries."
+      },
+      "preferred": "A",
+      "swapAgreement": true,
+      "rationaleSpan": "'North light out from 0200 to 0500 on the 14th' — the minimal span that contradicts the claim",
+      "why": "Both reach the right class; A isolates the deciding span and B over-quotes. A better application of the same rubric, with no finding against either."
+    },
+    {
+      "id": "j4-c2",
+      "label": "clean",
+      "finding": "none",
+      "records": {
+        "A": "J2 verdict `drawback: self_contradictory`. rationaleSpan: 'closed to all traffic for the entire week, and shallow-draft vessels transited it daily'.",
+        "B": "J2 verdict `drawback: self_contradictory`. rationaleSpan: 'closed to all traffic ... shallow-draft vessels transited it daily' — same two clauses, elided in the middle."
+      },
+      "preferred": "indistinguishable",
+      "swapAgreement": true,
+      "rationaleSpan": "same two clauses",
+      "why": "Two correct applications that differ only cosmetically. Indistinguishable is a complete outcome, not a failure to choose."
+    },
+    {
+      "id": "j4-c3",
+      "label": "clean",
+      "finding": "none",
+      "records": {
+        "A": "J3 verdict `abstain`, abstainReason `evidence`. rationaleSpan: 'the supplied register covers contracts only and would not record a survey.'",
+        "B": "J3 verdict `abstain`, abstainReason `evidence`. rationaleSpan: 'nothing here would have mentioned a survey either way.'"
+      },
+      "preferred": "indistinguishable",
+      "swapAgreement": false,
+      "rationaleSpan": "abstainReason `evidence`",
+      "why": "The two orders disagreed on preference after the swap, so the result is a tie recorded as indistinguishable. Both abstentions are correct — the evidence pool was never positioned to speak to the claim. Contrast j4-d2, where abstention evaded a decidable case."
+    },
+    {
+      "id": "j4-c4",
+      "label": "clean",
+      "finding": "none",
+      "records": {
+        "A": "J1 verdict `clean` on the claim that the harbor recorded a 4.9 m tide. rationaleSpan: 'harbor gauge peaked at 4.9 m' — the cited bytes state the claim exactly.",
+        "B": "J1 verdict `drawback: overclaimed_evidence` on the same item. rationaleSpan: 'highest reading on record' — reasons that the figure seems too large to accept."
+      },
+      "preferred": "A",
+      "swapAgreement": true,
+      "rationaleSpan": "reasons that the figure seems too large to accept",
+      "why": "A applies the rubric; B imports outside plausibility, which the grounding role is explicitly denied. Preferring A is rubric-application quality, not agreement with the auditor's own view of the tide."
+    },
+    {
+      "id": "j4-c5",
+      "label": "clean",
+      "finding": "none",
+      "records": {
+        "A": "Sample of ten J1 verdicts over a pool assembled from known-weak citations: nine `drawback`, one `clean`. Each verdict names a class and quotes a deciding span; the pool's skew is stated in the sample header.",
+        "B": "Sample of ten J1 verdicts from a second judge over the same known-weak pool: eight `drawback`, two `clean`, with the same span discipline."
+      },
+      "preferred": "indistinguishable",
+      "swapAgreement": true,
+      "rationaleSpan": "the pool's skew is stated in the sample header",
+      "why": "A high drawback rate on a pool selected for weak citations is the rubric working, not drift. Direction alone is not a finding — drift is directional movement the rubric does not explain."
+    }
+  ]
+}

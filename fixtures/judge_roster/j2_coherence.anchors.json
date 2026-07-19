@@ -1,0 +1,145 @@
+{
+  "anchorSet": "j2_coherence",
+  "role": "J2_COHERENCE",
+  "taxonomyVersion": "v1",
+  "rubric": "j2_coherence.rubric.md",
+  "labeling": {
+    "method": "hand_authored_zero_model",
+    "labeledIn": "Session 71 (2026-07-19)",
+    "note": "Items and labels were authored directly, with no model completion of any kind (AB-4 permits model labeling; this set stays zero-model by session scope). Refresh is a human ceremony with an audit stamp; anchor drift, not pool drift, is the watched failure (FOUR_JUDGE_DESIGN §5)."
+  },
+  "domain": "Synthetic harbor-observation records. The domain is deliberately unrelated to this system's own subject matter so that calibration cannot teach the judge anything about the beliefs it will actually judge.",
+  "composition": { "drawback": 5, "clean": 5 },
+  "items": [
+    {
+      "id": "j2-d1",
+      "label": "drawback",
+      "drawback": "self_contradictory",
+      "claim": "The channel was closed to all traffic for the entire week, and shallow-draft vessels transited it daily that week.",
+      "history": [
+        "v1 (live): The channel was closed to all traffic for the entire week, and shallow-draft vessels transited it daily that week."
+      ],
+      "claimKind": null,
+      "rationaleSpan": "closed to all traffic for the entire week, and shallow-draft vessels transited it daily",
+      "why": "The two halves of the single claim cannot both hold. No history is needed to see it."
+    },
+    {
+      "id": "j2-d2",
+      "label": "drawback",
+      "drawback": "self_contradictory",
+      "claim": "The Dock 9 gauge was replaced in 2044 and has been in continuous service since 2041.",
+      "history": [
+        "v1 (live): The Dock 9 gauge was replaced in 2044 and has been in continuous service since 2041."
+      ],
+      "claimKind": null,
+      "rationaleSpan": "replaced in 2044 and has been in continuous service since 2041",
+      "why": "A replacement interrupts the continuity the same sentence asserts. Internal, not historical."
+    },
+    {
+      "id": "j2-d3",
+      "label": "drawback",
+      "drawback": "history_inconsistent",
+      "claim": "The north light has never been out of service.",
+      "history": [
+        "v1 (live, uncontested): North light out from 0200 to 0500 on the 14th; relit by the watch.",
+        "v2 (live): The north light has never been out of service."
+      ],
+      "claimKind": null,
+      "rationaleSpan": "v1 (live, uncontested): North light out from 0200 to 0500 on the 14th",
+      "why": "The claim contradicts a live, uncontested entry in its own record. The contradiction is with the record, not within the sentence."
+    },
+    {
+      "id": "j2-d4",
+      "label": "drawback",
+      "drawback": "history_inconsistent",
+      "claim": "The Dock 9 gauge has read below 2 m at every noon reading this season.",
+      "history": [
+        "v1 (live, uncontested): The tide gauge at Dock 9 reads 2.3 m at noon.",
+        "v2 (live): The Dock 9 gauge has read below 2 m at every noon reading this season."
+      ],
+      "claimKind": null,
+      "rationaleSpan": "v1 (live, uncontested): The tide gauge at Dock 9 reads 2.3 m at noon.",
+      "why": "A universal in the current version is falsified by a live prior entry of the same record, and no revision reconciles them."
+    },
+    {
+      "id": "j2-d5",
+      "label": "drawback",
+      "drawback": "kind_incoherent",
+      "claim": "The channel will be free of silt next season.",
+      "history": [
+        "v1 (live): Dredging completed this season; survey scheduled next season."
+      ],
+      "claimKind": "prediction; wide interval; no mechanism stated",
+      "rationaleSpan": "will be free of silt",
+      "why": "A prediction is asserted with the flat certainty of a settled fact, which its own kind position does not admit. The record is otherwise consistent — the incoherence is between the claim's certainty and its kind."
+    },
+    {
+      "id": "j2-c1",
+      "label": "clean",
+      "drawback": null,
+      "claim": "The Dock 9 gauge read 2.3 m at noon on the 14th.",
+      "history": [
+        "v1: The Dock 9 gauge read 2.3 m at noon on the 14th.",
+        "contested: cited source superseded by a later survey document.",
+        "recovered: re-cited against the current survey block after review.",
+        "v2 (live): The Dock 9 gauge read 2.3 m at noon on the 14th."
+      ],
+      "claimKind": null,
+      "rationaleSpan": "recovered: re-cited against the current survey block after review.",
+      "why": "Contest and recovery are the designed lifecycle, not instability. A judge that reads a contest record as evidence of incoherence fails this item."
+    },
+    {
+      "id": "j2-c2",
+      "label": "clean",
+      "drawback": null,
+      "claim": "The harbor has two docks.",
+      "history": [
+        "v1 (live): The harbor has two docks.",
+        "v2 (live): Both docks are fitted with tide gauges."
+      ],
+      "claimKind": null,
+      "rationaleSpan": "v1 (live): The harbor has two docks.",
+      "why": "The claim may be false in the world; nothing in its own record contradicts it and it does not contradict itself. A coherent falsehood is clean HERE — the roles that judge support and corroboration run separately."
+    },
+    {
+      "id": "j2-c3",
+      "label": "clean",
+      "drawback": null,
+      "claim": "The Dock 9 gauge read 2.3 m at noon.",
+      "history": [
+        "v1 (live): The Dock 9 gauge read above 2 m at noon.",
+        "v2 (live): The Dock 9 gauge read 2.3 m at noon."
+      ],
+      "claimKind": null,
+      "rationaleSpan": "v2 (live): The Dock 9 gauge read 2.3 m at noon.",
+      "why": "A refinement that narrows a prior claim without contradicting it. Sharper is not inconsistent."
+    },
+    {
+      "id": "j2-c4",
+      "label": "clean",
+      "drawback": null,
+      "claim": "The channel is more likely than not to require dredging next season.",
+      "history": [
+        "v1 (live): Silt accumulation measured above the ten-year mean this season."
+      ],
+      "claimKind": "prediction; hedged; mechanism stated",
+      "rationaleSpan": "more likely than not",
+      "why": "The certainty asserted matches what the kind position admits. Paired with j2-d5, which differs only in that respect."
+    },
+    {
+      "id": "j2-c5",
+      "label": "clean",
+      "drawback": null,
+      "claim": "The north light was out from 0200 to 0500 on the 14th.",
+      "history": [
+        "v1: North light reported out on the 14th.",
+        "v2: North light out during the early hours of the 14th.",
+        "v3: North light out from about 0200 on the 14th.",
+        "v4 (live): The north light was out from 0200 to 0500 on the 14th."
+      ],
+      "claimKind": null,
+      "rationaleSpan": "v4 (live): The north light was out from 0200 to 0500 on the 14th.",
+      "why": "Four revisions, each a monotone refinement of the last. A claim is never penalized for having been revised, and the rubric never counts versions."
+    }
+  ]
+}
