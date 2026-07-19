@@ -14,8 +14,3 @@ fixtures/judge_panel/*.json -text
 fixtures/judge_intake/*.json -text
 # Judge-convocation fixtures carry the same manifest-pin/eol hazard.
 fixtures/judge_convocation/*.json -text
-# Judge-roster rubrics and anchor sets ARE the registered evidentiary
-# bytes: each file's SHA-256 is a manifest's rubricSha/anchorSetSha, so
-# eol conversion on a Windows checkout would silently invalidate every
-# registration. Both extensions, not just .json.
-fixtures/judge_roster/* -text
