@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "ratificationRequests": {
+    "sel-primary": {
+      "selectionId": "sel-primary",
+      "selectedAtMs": 1752800000001,
+      "items": [
+        {
+          "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2",
+          "content": "the sweep contests stale edges within one refresh cycle.",
+          "neighborBefore": "Only while the cited corpus stays available:",
+          "neighborAfter": "the sweep contests stale edges within one refresh cycle."
+        }
+      ]
+    },
+    "sel-decomp-1": {
+      "selectionId": "sel-decomp-1",
+      "selectedAtMs": 1752800000004,
+      "items": [
+        {
+          "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa1",
+          "content": "Only while the cited corpus stays available:",
+          "neighborBefore": null,
+          "neighborAfter": "the sweep contests stale edges within one refresh cycle."
+        }
+      ]
+    },
+    "sel-decomp-2": {
+      "selectionId": "sel-decomp-2",
+      "selectedAtMs": 1752800000005,
+      "items": [
+        {
+          "address": "bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22",
+          "content": "cited: the migration notes name the belief explicitly.",
+          "neighborBefore": "history: the belief predates the migration window.",
+          "neighborAfter": null
+        }
+      ]
+    },
+    "sel-multi": {
+      "selectionId": "sel-multi",
+      "selectedAtMs": 1752800000007,
+      "items": [
+        {
+          "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa1",
+          "content": "Only while the cited corpus stays available:",
+          "neighborBefore": null,
+          "neighborAfter": "the sweep contests stale edges within one refresh cycle."
+        },
+        {
+          "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2",
+          "content": "the sweep contests stale edges within one refresh cycle.",
+          "neighborBefore": "Only while the cited corpus stays available:",
+          "neighborAfter": "the sweep contests stale edges within one refresh cycle."
+        }
+      ]
+    }
+  },
+  "candidates": {
+    "sel-decomp-1": {
+      "selectionId": "sel-decomp-1",
+      "claimMode": "belief",
+      "claims": [
+        {
+          "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa1",
+          "content": "Only while the cited corpus stays available:"
+        }
+      ],
+      "ratifiedAtMs": 1752801000004,
+      "promptInput": {
+        "selectionId": "sel-decomp-1",
+        "claimMode": "belief",
+        "claimContent": [
+          "Only while the cited corpus stays available:"
+        ]
+      }
+    },
+    "sel-decomp-2": {
+      "selectionId": "sel-decomp-2",
+      "claimMode": "fact",
+      "claims": [
+        {
+          "address": "bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22",
+          "content": "cited: the migration notes name the belief explicitly."
+        }
+      ],
+      "ratifiedAtMs": 1752801000005,
+      "promptInput": {
+        "selectionId": "sel-decomp-2",
+        "claimMode": "fact",
+        "claimContent": [
+          "cited: the migration notes name the belief explicitly."
+        ]
+      }
+    },
+    "sel-multi": {
+      "selectionId": "sel-multi",
+      "claimMode": "inference",
+      "claims": [
+        {
+          "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa1",
+          "content": "Only while the cited corpus stays available:"
+        },
+        {
+          "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2",
+          "content": "the sweep contests stale edges within one refresh cycle."
+        }
+      ],
+      "ratifiedAtMs": 1752801000006,
+      "promptInput": {
+        "selectionId": "sel-multi",
+        "claimMode": "inference",
+        "claimContent": [
+          "Only while the cited corpus stays available:",
+          "the sweep contests stale edges within one refresh cycle."
+        ]
+      }
+    },
+    "sel-primary": {
+      "selectionId": "sel-primary",
+      "claimMode": "fact",
+      "claims": [
+        {
+          "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2",
+          "content": "the sweep contests stale edges within one refresh cycle."
+        }
+      ],
+      "ratifiedAtMs": 1752801000001,
+      "promptInput": {
+        "selectionId": "sel-primary",
+        "claimMode": "fact",
+        "claimContent": [
+          "the sweep contests stale edges within one refresh cycle."
+        ]
+      }
+    },
+    "sel-twin-b": {
+      "selectionId": "sel-twin-b",
+      "claimMode": "fact",
+      "claims": [
+        {
+          "address": "bbbbbbbb-2222-4bbb-9bbb-bbbbbbbbbbb1",
+          "content": "the sweep contests stale edges within one refresh cycle."
+        }
+      ],
+      "ratifiedAtMs": 1752801000002,
+      "promptInput": {
+        "selectionId": "sel-twin-b",
+        "claimMode": "fact",
+        "claimContent": [
+          "the sweep contests stale edges within one refresh cycle."
+        ]
+      }
+    },
+    "sel-worded-b": {
+      "selectionId": "sel-worded-b",
+      "claimMode": "fact",
+      "claims": [
+        {
+          "address": "bbbbbbbb-2222-4bbb-9bbb-bbbbbbbbbbb2",
+          "content": "Stale edges are contested by the sweep inside a single refresh cycle."
+        }
+      ],
+      "ratifiedAtMs": 1752801000003,
+      "promptInput": {
+        "selectionId": "sel-worded-b",
+        "claimMode": "fact",
+        "claimContent": [
+          "Stale edges are contested by the sweep inside a single refresh cycle."
+        ]
+      }
+    }
+  },
+  "preregContentHashes": {
+    "prereg-1": "08af0c4722b3ce535e71c24ac34d2f67cad53f742d210a1aecd33abb32d5f4ca",
+    "prereg-2": "bdbf2ff02d168618b8e768f313a6ce7a51902c03de441bf9ab69728f21840de5"
+  }
+}

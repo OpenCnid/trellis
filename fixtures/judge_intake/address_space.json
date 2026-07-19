@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "note": "Engine-held address space for the judge-intake drill. Two containers: ws-shared (a beliefs workspace holding TWO users' beliefs under distinct address partitions — the attribution-partition seed) and doc-tier1 (Tier-1 blocks, 64-hex ids, no partition). Segment uuids and block ids are the two structurally disjoint carried-address families (WORKSPACE_AND_MODULES.md §4.2). ws-shared ordinal 0 is a qualifier whose exclusion by a cut at ordinal 1 must be visible in neighbor context (rule 17).",
+  "entries": [
+    {
+      "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa1",
+      "containerId": "ws-shared",
+      "ordinal": 0,
+      "content": "Only while the cited corpus stays available:",
+      "partition": "user-a"
+    },
+    {
+      "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2",
+      "containerId": "ws-shared",
+      "ordinal": 1,
+      "content": "the sweep contests stale edges within one refresh cycle.",
+      "partition": "user-a"
+    },
+    {
+      "address": "bbbbbbbb-2222-4bbb-9bbb-bbbbbbbbbbb1",
+      "containerId": "ws-shared",
+      "ordinal": 2,
+      "content": "the sweep contests stale edges within one refresh cycle.",
+      "partition": "user-b"
+    },
+    {
+      "address": "bbbbbbbb-2222-4bbb-9bbb-bbbbbbbbbbb2",
+      "containerId": "ws-shared",
+      "ordinal": 3,
+      "content": "Stale edges are contested by the sweep inside a single refresh cycle.",
+      "partition": "user-b"
+    },
+    {
+      "address": "aa11aa11aa11aa11aa11aa11aa11aa11aa11aa11aa11aa11aa11aa11aa11aa11",
+      "containerId": "doc-tier1",
+      "ordinal": 0,
+      "content": "history: the belief predates the migration window."
+    },
+    {
+      "address": "bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22",
+      "containerId": "doc-tier1",
+      "ordinal": 1,
+      "content": "cited: the migration notes name the belief explicitly."
+    }
+  ],
+  "invalidEntries": [
+    {
+      "name": "bad-address-shape",
+      "entry": { "address": "not-an-address", "containerId": "ws-shared", "ordinal": 9, "content": "x" }
+    },
+    {
+      "name": "duplicate-address",
+      "entry": { "address": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa1", "containerId": "ws-other", "ordinal": 0, "content": "x" }
+    },
+    {
+      "name": "duplicate-slot",
+      "entry": { "address": "cccccccc-3333-4ccc-8ccc-ccccccccccc9", "containerId": "ws-shared", "ordinal": 0, "content": "x" }
+    },
+    {
+      "name": "extra-field",
+      "entry": { "address": "cccccccc-3333-4ccc-8ccc-ccccccccccc8", "containerId": "ws-x", "ordinal": 0, "content": "x", "authorNote": "smuggle" }
+    }
+  ]
+}

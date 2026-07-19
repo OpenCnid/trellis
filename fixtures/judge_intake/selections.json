@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "note": "Selections carry ADDRESSES only — never text. The refusal set exercises the closed address-shape family: any non-address string in an address position is literal text (rule 15). sel-primary cuts the ws-shared claim away from its ordinal-0 qualifier, which must be visible as neighborBefore at ratification (rule 17). sel-decomp-1/sel-decomp-2 are the decomposition pair (rule 1): separate selections, separately ratified, each with its own mode.",
+  "valid": [
+    { "selectionId": "sel-primary", "addresses": ["aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2"], "selectedAtMs": 1752800000001 },
+    { "selectionId": "sel-twin-b", "addresses": ["bbbbbbbb-2222-4bbb-9bbb-bbbbbbbbbbb1"], "selectedAtMs": 1752800000002 },
+    { "selectionId": "sel-worded-b", "addresses": ["bbbbbbbb-2222-4bbb-9bbb-bbbbbbbbbbb2"], "selectedAtMs": 1752800000003 },
+    { "selectionId": "sel-decomp-1", "addresses": ["aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa1"], "selectedAtMs": 1752800000004 },
+    { "selectionId": "sel-decomp-2", "addresses": ["bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22bb22"], "selectedAtMs": 1752800000005 },
+    { "selectionId": "sel-unratified", "addresses": ["bbbbbbbb-2222-4bbb-9bbb-bbbbbbbbbbb2"], "selectedAtMs": 1752800000006 },
+    { "selectionId": "sel-multi", "addresses": ["aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa1", "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2"], "selectedAtMs": 1752800000007 }
+  ],
+  "refusals": [
+    {
+      "name": "literal-text",
+      "expect": "LiteralTextRefusedError",
+      "selection": { "selectionId": "sel-literal", "addresses": ["the sweep contests stale edges within one refresh cycle."], "selectedAtMs": 1752800000008 }
+    },
+    {
+      "name": "unknown-address",
+      "expect": "AddressNotFoundError",
+      "selection": { "selectionId": "sel-unknown", "addresses": ["cccccccc-3333-4ccc-8ccc-ccccccccccc1"], "selectedAtMs": 1752800000009 }
+    },
+    {
+      "name": "empty",
+      "expect": "EmptySelectionError",
+      "selection": { "selectionId": "sel-empty", "addresses": [], "selectedAtMs": 1752800000010 }
+    },
+    {
+      "name": "duplicate-address",
+      "expect": "IntakeSchemaError",
+      "selection": { "selectionId": "sel-dup", "addresses": ["aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2", "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2"], "selectedAtMs": 1752800000011 }
+    },
+    {
+      "name": "malformed-empty-id",
+      "expect": "IntakeSchemaError",
+      "selection": { "selectionId": "", "addresses": ["aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaa2"], "selectedAtMs": 1752800000012 }
+    }
+  ]
+}

@@ -1,9 +1,16 @@
 # Judge Intake — Design Record
 
-**Status: DESIGN — IMPLEMENTATION AUTHORIZED, NOTHING BUILT.** July 18,
-2026 (Session 67). Document-driven design: this record leads; the slice-1
-modules follow it. Zero-model, zero-paid by construction — no mechanism
-here calls a judge.
+~~**Status: DESIGN — IMPLEMENTATION AUTHORIZED, NOTHING BUILT.**~~
+**IMPLEMENTED — July 18, 2026 (Session 68, dated entry).** The three
+slice-1 modules (`judge_intake.ts`, `judge_intake_prompt.ts`,
+`judge_prereg.ts`), their drill (`npm run test:judge-intake`, 13
+sections, negative control naming all three planted breaks), and 15
+unit pins landed zero-model in the implementing PR; the §6 table merged
+into RECONCILIATION §5.1 the same day. §3.2a below records the render
+grammar as landed. Original status line July 18, 2026 (Session 67).
+Document-driven design: this record leads; the slice-1 modules follow
+it. Zero-model, zero-paid by construction — no mechanism here calls a
+judge.
 
 **Substrate correction (owner ruling, July 18, 2026 — this record's
 governing frame).** The first draft of this record transplanted the
@@ -214,6 +221,53 @@ ComposedJudgePrompt { role, judgeId, sections[], promptHash }
 - **Blindness preserved through the new path.** A forbidden input still
   raises `BlindnessViolationError` before any would-be model boundary.
 
+### 3.2a The render grammar as landed (dated entry, July 18, 2026 — Session 68)
+
+The deterministic byte layout `renderPrompt` produces and the drill's
+independent generator re-derives. Both sides derive from THIS text; on
+drift the byte-pin fails and this entry adjudicates. LF newlines
+throughout; authored under the Prompt-Engineering and Hypershot
+protocols (Guardrail 15) — the frame is fixed, every concrete value is
+engine-supplied, and the format line carries spread-style slots, never
+exemplar content.
+
+```
+<judge_prompt role="{role}" judge="{judgeId}">
+
+<identity>
+role: {role}
+judge: {judgeId}
+</identity>
+
+<definition>
+claim_modes: {csv, declared order; "(none)" when empty}
+qualified_parameters: {csv, declared order}
+taxonomy:
+  {class} -> {parameter}          (one line per class, sorted by class)
+required_assumptions: {csv, declared order}
+verdict_rule: Judge only through this definition — restrict every finding to the qualified parameters above, name any drawback from the closed taxonomy, and abstain with a reason when jurisdiction or evidence is absent.
+</definition>
+
+<evidence>
+{key}:
+{canonical JSON of value}         (one pair per allowlisted key, keys sorted;
+                                   canonical JSON = recursively key-sorted, no whitespace)
+</evidence>
+
+<output_schema>
+verdict: clean | drawback | abstain
+drawback: {sorted classes joined " | "} | null
+abstain_reason: evidence | jurisdiction
+format: one JSON object {"verdict": "...", "drawback": "..." | null, "abstainReason": "..."}
+</output_schema>
+
+</judge_prompt>
+```
+
+Sections are joined by one blank line; the file ends with a trailing
+newline after `</judge_prompt>`. `promptHash` is the SHA-256 of exactly
+these bytes, engine-computed at composition.
+
 ### 3.3 The write-once record store (`judge_prereg.ts`)
 
 Two record kinds, one store — ratifications and pre-registrations share
@@ -339,7 +393,10 @@ appearing in a judge context fails the section by name.
 
 1. **Naming gate satisfied.** This record names the feature per
    EPISTEMIC_SUPPORT §7; that record's last table row is amended on
-   landing, not now — "not yet built" is still true.
+   landing, not now — "not yet built" is still true. *(Landed July 18,
+   2026, Session 68: EPISTEMIC_SUPPORT §7 now carries the judge-intake
+   row; the residual "everything else" row names live judges, sweep
+   integration, registration, and the ratification queue.)*
 2. **`scope` withdrawn.** The proposed `universal | existential | modal |
    qualified` enumeration is dropped. Two reasons, the second decisive:
    it was under-determined (four values back-derived from four ledger
@@ -358,7 +415,9 @@ appearing in a judge context fails the section by name.
    slice-1 rows are **observed** rather than designed: RECONCILIATION §5
    records enforcement that exists, and every row in §6 currently names a
    pin that has not been written. Merge in the implementing PR, not this
-   one.
+   one. *(Done July 18, 2026, Session 68: merged as RECONCILIATION §5.1,
+   a dated entry under its §7 amendment rule, with every pin observed
+   green first.)*
 5. **No `R` rows proposed.** This record makes design commitments, not
    empirical claims. If the structural-masking property in §9 item 1 is
    to be asserted as a finding rather than a design goal, it needs its

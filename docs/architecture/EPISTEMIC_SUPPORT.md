@@ -152,7 +152,9 @@ success") applies verbatim to a judge that could elevate beliefs.
 | Vacuous metrics refused | `src/core/graph/support_metrics.ts` validity gate | drill section [validity-gate] |
 | Fixture integrity | SHA-256 manifest checked before any section | drill section [manifest]; refusal halts |
 | Harness can fail loudly | committed broken-fixture negative control | drill `--negative-control` must exit nonzero |
-| Everything else (judges, sweep, registration, ratification queue) | **not yet built** — each is a separately gated bounded feature | named in its own proposal before implementation |
+| Panel composition, role blindness, judge contest (Session 66) | `src/core/graph/judge_panel.ts` / `judge_audit.ts` (pure) | `npm run test:judge-panel`, 10 sections; RECONCILIATION §5 |
+| Judge intake: selection/ratification, clean-context assembly, write-once pre-registration (Session 68, July 18, 2026 — named in `JUDGE_INTAKE_DESIGN.md` per this row's naming gate, then built) | `src/core/graph/judge_intake.ts` / `judge_intake_prompt.ts` / `judge_prereg.ts` (pure) | `npm run test:judge-intake`, 13 sections; RECONCILIATION §5.1 |
+| Everything else (live judges, sweep integration, judge registration, ratification queue) | **not yet built** — each is a separately gated bounded feature | named in its own proposal before implementation |
 
 ## 8. Exclusions (standing)
 

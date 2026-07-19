@@ -67,7 +67,11 @@ see the decision record (§6).
    filer's pen are satisfied by
    [`WORKSPACE_AND_MODULES.md`](../../architecture/WORKSPACE_AND_MODULES.md)
    §4.1/§4.2/§6; rules about the composer's packaging survive into the
-   engine). Design authorized and leading; implementation follows it.
+   engine). **Implemented July 18, 2026 (Session 68):** the three
+   slice-1 modules (`judge_intake.ts`, `judge_intake_prompt.ts`,
+   `judge_prereg.ts`) with `npm run test:judge-intake` (13 sections);
+   the §6 table lives in RECONCILIATION §5.1 by dated entry; the
+   record's §3.2a carries the render grammar as landed.
    Its constraints are the twenty rules of
    [`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md) §6 and the
    §9 shape notes — **binding program law since the July 18, 2026
