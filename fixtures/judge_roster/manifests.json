@@ -1,0 +1,60 @@
+{
+  "judges": [
+    {
+      "manifest": {
+        "judgeId": "j1_grounding",
+        "role": "J1_GROUNDING",
+        "rubricSha": "2851d78157ee8c5be73fd2af2ac2c6f508e2699e84f798cca9d62499596162e3",
+        "anchorSetSha": "3b51ac54d531bf170bf5c260f0ee9a2653dec48784dfd97ad18f21826fa4c1d1",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "gpt-5.4-2026-03-05"
+      },
+      "sourceNodeIds": [
+        "3bbf42cf28bf0e415cc8c76b179a992ef00cd6e2dd11616009f4cf0cac2a100f",
+        "1d3f8d8f4d3c203d038afb9325da46dc40782d81b69b5ed33bb7aaeb1a3de249"
+      ]
+    },
+    {
+      "manifest": {
+        "judgeId": "j2_coherence",
+        "role": "J2_COHERENCE",
+        "rubricSha": "1267425074030364d664b9dfb8e0b3f2e9ccfd5353fe287c1ebacb0fb6ae5844",
+        "anchorSetSha": "2abbd48c2db22a525cb91011ddc9e9e6db080cb5beeaa210229245fa1d5cbcff",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "gpt-5.4-2026-03-05"
+      },
+      "sourceNodeIds": [
+        "33cb92932dbf7d853b9f9943e51e16712bb1ce1f4c95691d23aeaf9425c03de3",
+        "235af01e40cf0f9acbc0820d405dd10d9ae22ceddb9b50470b0fb02aee1fd24b"
+      ]
+    },
+    {
+      "manifest": {
+        "judgeId": "j3_corroboration",
+        "role": "J3_CORROBORATION",
+        "rubricSha": "8ea3ed4edca37a11238b41820d7d33115d19a9d07de8b81ca72ddde233a71dad",
+        "anchorSetSha": "7d28b61be74133739b58f0f50d78193cb3999e21cf1c5444263d1316d3e06664",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "gpt-5.4-2026-03-05"
+      },
+      "sourceNodeIds": [
+        "4ca20dfefcb8730d6dac35266cb7fc9025ae93d8de7a830cd48440cd99da451f",
+        "162488a750ea8ad75fa0bb04b4f3b561e573cc723989c3369cba4d0b930f0b33"
+      ]
+    },
+    {
+      "manifest": {
+        "judgeId": "j4_audit",
+        "role": "J4_AUDIT",
+        "rubricSha": "ddec1920279d03b7b4c2eded9aaec69fe26dbc4c93e51c901849474eb93dae59",
+        "anchorSetSha": "73126fbe88900b4e5ba3cf69ec3646f27f011cd6bc4d9948d9f9ab57c474de8a",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "gemini-3.5-pro"
+      },
+      "sourceNodeIds": [
+        "5ead12d4d198dd6878edbc93f2ceb136a4793513e009085adc937d12fbc51297",
+        "0753067c7d772fd4fe53d9de344d2176adda2a1a416fb898aa465d616cf7907a"
+      ]
+    }
+  ]
+}
