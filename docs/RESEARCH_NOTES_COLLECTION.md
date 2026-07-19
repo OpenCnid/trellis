@@ -92,6 +92,41 @@ paper (canonical)  →  density-chain note (lab working ground truth)  →  insp
   as `sourceNodeIds` in Trellis without operator promotion (AB-10).
   Ingested notes enter unpromoted, under ordinary custody rules.
 
+### 3.1 Consultation and repair (RATIFIED July 19, 2026 — collaborator proposal, owner approved)
+
+The ordering above says which source wins. This says **when to go to
+which, and what you owe afterwards**:
+
+- **For work: the density-chain note is adequate.** Orient from the
+  note, build from the note. Do not re-read a paper to do ordinary work
+  against it.
+- **For disputes: go to the full paper.** Any disagreement about what a
+  source says — between people, between records, or between a record and
+  a session's reading — resolves at the primary, never by arguing over
+  distillations.
+- **When a note fails, repair it.** Once the dispute is settled against
+  the source, the re-discovered truth is written back **into the note,
+  in the appropriate place** — the tier that should have carried it.
+  This is the closing step, not an optional follow-up: a validated
+  correction that isn't written back guarantees the same failure recurs
+  at the same place. Same shape as the substrate's own loop — the note
+  is a derived belief, the paper is ground truth, and a contested
+  derivation is re-derived against source and rewritten.
+
+**Motivating case (July 19, 2026).** A session reasoning about the S12
+emotions paper worked from a record's §2 distillation and from ad-hoc
+web extraction, and never opened the collection's own five-tier note on
+that exact paper. Two errors followed: a cross-vector regularity
+(r = 0.85, which vectors steer effectively) was cited as if it were the
+behavioral dose-response, and a narrow query ("is calm *suppression*
+tested?") returning no was read as covering calm *induction*, which the
+paper does test as an antidote (§3.3.2). Both were caught by a
+collaborator reading the source. The note was never at fault — **it was
+never consulted.** The workflow above only pays if the note is the first
+stop; going around it to a search engine forfeits the whole layer.
+Corollary worth carrying: **absence claims need wider queries than
+presence claims.**
+
 ## 4. The machine face (how consumption is designed to work)
 
 - **Parse `index.json`, don't scrape markdown.** Every note repo

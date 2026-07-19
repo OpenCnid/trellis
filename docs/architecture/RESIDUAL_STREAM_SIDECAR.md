@@ -254,6 +254,23 @@ document entering the repository's orbit (register or promotion), and
 per-increment design records with acceptance drills — zero-paid drills
 proving wiring before any paid or GPU work, as everywhere else.
 
+**Pointer, not content (July 19, 2026 — do not re-open).** A July 2026
+session raised a hazard against actuating on judges: the emotions paper's
+tack-on finding is that positive-valence steering increases sycophancy,
+and a sycophantic judge is a destroyed judge, so the known cost of the
+intervention lands on the capability the judge exists to provide. **The
+hazard is real but it is not open.** A designed answer exists, is held by
+the collaborator, and is deliberately outside this repository's scope
+until they bring it in — which is AB-10 and the S13 unpublished-artifact
+rule working as intended, not a gap. Two things are recorded so the
+question is not re-derived: (1) the raising session's framing assumed
+**single-axis** steering, and the held design does not — any future
+analysis that reconstructs the hazard from one axis is rebuilding a
+strawman; (2) per-host calibration is part of the held design, which
+already satisfies most of the "instrument before actuating" sequencing
+that session proposed. **Do not push the collaborator for the design, and
+do not re-derive it.** It arrives when they publish it.
+
 ## 10. Claims and standings (the compact register)
 
 | Claim | Class | Falsifier / gate |
