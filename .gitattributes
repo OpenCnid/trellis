@@ -12,3 +12,5 @@ fixtures/support_oracle/*.json -text
 fixtures/judge_panel/*.json -text
 # Judge-intake fixtures carry the same manifest-pin/eol hazard.
 fixtures/judge_intake/*.json -text
+# Judge-convocation fixtures carry the same manifest-pin/eol hazard.
+fixtures/judge_convocation/*.json -text

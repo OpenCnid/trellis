@@ -1,0 +1,16 @@
+{
+  "sel-fact-a": {
+    "citedBytes": ["Dock 9 log 12:00 — gauge reading 2.3 m."],
+    "history": ["v1 (noon): recorded 2.3 m; no contest on record."],
+    "independentEvidence": ["Harbor master bulletin: Dock 9 midday tide 2.3 m.", "Ferry schedule note: Dock 9 draft limit unaffected at midday."]
+  },
+  "sel-fact-b": {
+    "citedBytes": ["Dock 9 log 12:00 — gauge reading 2.3 m."],
+    "history": ["v1 (noon): recorded 2.3 m; no contest on record."],
+    "independentEvidence": ["Harbor master bulletin: Dock 9 midday tide 2.3 m.", "Ferry schedule note: Dock 9 draft limit unaffected at midday."]
+  },
+  "sel-belief-c": {
+    "citedBytes": ["Crew superstition ledger, unsourced."],
+    "history": ["v1: asserted without qualification; v2: restated as certain fact."]
+  }
+}

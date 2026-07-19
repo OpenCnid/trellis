@@ -76,6 +76,24 @@ see the decision record (§6).
    [`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md) §6 and the
    §9 shape notes — **binding program law since the July 18, 2026
    ratification (§11)** — cited by number, never restated.
+8. [`JUDGE_CONVOCATION_DESIGN.md`](JUDGE_CONVOCATION_DESIGN.md) *(added
+   July 18, 2026, Session 69)* — **judge convocation**: the slice-2
+   proposal for what stands between a ratified candidate with a
+   composed prompt and a recorded support opinion — judge registration
+   (the split store/graph representation), the `support_sweep` job
+   (Session 32 mold; pair-once bookkeeping; run-open binding for
+   rule 20; the RECONCILIATION §5 row 9 writer-blind pin designed),
+   the spawn boundary (the composed bytes ARE the interface; R-27
+   model-identity refusal; oracle twin), and the ratification queue
+   (WORKSPACE §6 mold). **AUTHORIZED — Option B (owner, July 18,
+   2026; dated entry §11.1); IMPLEMENTED at option-B scope July 19,
+   2026 (Session 70)**: four modules + the `judge_records` table +
+   four operator surfaces + `npm run test:judge-convocation`
+   (23 sections; the §6 rows live in RECONCILIATION §5.2, which also
+   closes §5 row 9's writer-blind pin). No live run has executed; the
+   paid queue remains ON HOLD; §10 registers the owner-requested
+   metered promotion-cost measurement and §11.2 carries the road to
+   option C (the eventual live-LLM test).
 
 ## 3. Context you cannot infer from the artifacts alone
 
@@ -259,7 +277,11 @@ dated entry and the merge itself are the record.
 - **Paid queue: ON HOLD (owner ruling, July 17, 2026).** The queue
   stays recorded and important — the v2 anti-shortcut run, the
   baseline head-to-head, the R-36 knee scoping — but nothing executes
-  until the owner re-opens it by dated note.
+  until the owner re-opens it by dated note. **[Added July 18, 2026,
+  at the slice-2 authorization: the metered promotion-cost test —
+  the end-to-end cost of promoting a REPL belief to a Tier-1 fact;
+  registered in `JUDGE_CONVOCATION_DESIGN.md` §10's dated note,
+  estimate class ≈ $0.02–$0.06 per promoted belief.]**
 - **Durable deployment: DECIDED — Option A** (owner ruling, July 17,
   2026): the owner's machine, locally, now —
   [`docs/operations/DURABLE_DEPLOYMENT.md`](../../operations/DURABLE_DEPLOYMENT.md)

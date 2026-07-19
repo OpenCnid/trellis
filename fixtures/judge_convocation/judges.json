@@ -1,0 +1,82 @@
+{
+  "manifests": [
+    {
+      "manifest": {
+        "judgeId": "j1-grounding-v1",
+        "role": "J1_GROUNDING",
+        "rubricSha": "abababababababababababababababababababababababababababababababab",
+        "anchorSetSha": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "gpt-5.4-2026-03-05"
+      },
+      "sourceNodeIds": ["e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"]
+    },
+    {
+      "manifest": {
+        "judgeId": "j2-coherence-v1",
+        "role": "J2_COHERENCE",
+        "rubricSha": "1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b",
+        "anchorSetSha": "2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "gpt-5.4-2026-03-05"
+      },
+      "sourceNodeIds": ["e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2"]
+    },
+    {
+      "manifest": {
+        "judgeId": "j3-corroboration-v1",
+        "role": "J3_CORROBORATION",
+        "rubricSha": "3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b",
+        "anchorSetSha": "4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "gpt-5.4-2026-03-05"
+      },
+      "sourceNodeIds": ["e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3"]
+    },
+    {
+      "manifest": {
+        "judgeId": "j4-audit-v1",
+        "role": "J4_AUDIT",
+        "rubricSha": "5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b",
+        "anchorSetSha": "6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d6d",
+        "taxonomyVersion": "v1",
+        "targetModelIdentity": "claude-fable-5"
+      },
+      "sourceNodeIds": ["e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4"]
+    }
+  ],
+  "graphStates": [
+    { "entityName": "judge:j1-grounding-v1", "sourceNodeIds": ["e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null },
+    { "entityName": "judge:j2-coherence-v1", "sourceNodeIds": ["e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null },
+    { "entityName": "judge:j3-corroboration-v1", "sourceNodeIds": ["e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null },
+    { "entityName": "judge:j4-audit-v1", "sourceNodeIds": ["e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null }
+  ],
+  "graphStatesContestedJ3": [
+    { "entityName": "judge:j1-grounding-v1", "sourceNodeIds": ["e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null },
+    { "entityName": "judge:j2-coherence-v1", "sourceNodeIds": ["e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null },
+    { "entityName": "judge:j3-corroboration-v1", "sourceNodeIds": [], "orphanedSourceIds": ["e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3"], "contested": true, "contestedAt": 1753000100000, "rederivedAt": null },
+    { "entityName": "judge:j4-audit-v1", "sourceNodeIds": ["e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4"], "orphanedSourceIds": [], "contested": false, "contestedAt": null, "rederivedAt": null }
+  ],
+  "invalidRegistrations": [
+    {
+      "name": "bad-charset",
+      "expect": "JudgeRegistrationError",
+      "judges": [{ "manifest": { "judgeId": "J1:Grounding", "role": "J1_GROUNDING", "rubricSha": "abababababababababababababababababababababababababababababababab", "anchorSetSha": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd", "taxonomyVersion": "v1", "targetModelIdentity": "m" }, "sourceNodeIds": ["e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"] }]
+    },
+    {
+      "name": "missing-model-identity",
+      "expect": "JudgeManifestError",
+      "judges": [{ "manifest": { "judgeId": "j5-extra-v1", "role": "J1_GROUNDING", "rubricSha": "abababababababababababababababababababababababababababababababab", "anchorSetSha": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd", "taxonomyVersion": "v1" }, "sourceNodeIds": ["e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"] }]
+    },
+    {
+      "name": "empty-evidentiary-basis",
+      "expect": "JudgeRegistrationError",
+      "judges": [{ "manifest": { "judgeId": "j5-extra-v1", "role": "J1_GROUNDING", "rubricSha": "abababababababababababababababababababababababababababababababab", "anchorSetSha": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd", "taxonomyVersion": "v1", "targetModelIdentity": "m" }, "sourceNodeIds": [] }]
+    },
+    {
+      "name": "duplicate-existing-id",
+      "expect": "JudgeRegistrationError",
+      "judges": [{ "manifest": { "judgeId": "j1-grounding-v1", "role": "J1_GROUNDING", "rubricSha": "abababababababababababababababababababababababababababababababab", "anchorSetSha": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd", "taxonomyVersion": "v1", "targetModelIdentity": "m" }, "sourceNodeIds": ["e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"] }]
+    }
+  ]
+}

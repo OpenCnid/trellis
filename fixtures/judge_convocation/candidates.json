@@ -1,0 +1,49 @@
+{
+  "ratifications": [
+    {
+      "key": "sel-fact-a",
+      "payload": {
+        "record": { "selectionId": "sel-fact-a", "claimMode": "fact", "confirmedAtMs": 1752990000001 },
+        "selection": { "selectionId": "sel-fact-a", "addresses": ["aaaaaaaa-0000-4000-8000-000000000002"], "selectedAtMs": 1752980000001 },
+        "entries": [
+          { "address": "aaaaaaaa-0000-4000-8000-000000000001", "containerId": "cont-alpha", "ordinal": 1, "content": "Log opened by the harbor watch.", "partition": "user-alpha" },
+          { "address": "aaaaaaaa-0000-4000-8000-000000000002", "containerId": "cont-alpha", "ordinal": 2, "content": "The tide gauge at Dock 9 reads 2.3 m at noon.", "partition": "user-alpha" },
+          { "address": "aaaaaaaa-0000-4000-8000-000000000003", "containerId": "cont-alpha", "ordinal": 3, "content": "Gauge serviced last Tuesday.", "partition": "user-alpha" }
+        ]
+      }
+    },
+    {
+      "key": "sel-fact-b",
+      "payload": {
+        "record": { "selectionId": "sel-fact-b", "claimMode": "fact", "confirmedAtMs": 1752990000002 },
+        "selection": { "selectionId": "sel-fact-b", "addresses": ["bbbbbbbb-0000-4000-8000-000000000002"], "selectedAtMs": 1752980000002 },
+        "entries": [
+          { "address": "bbbbbbbb-0000-4000-8000-000000000001", "containerId": "cont-beta", "ordinal": 1, "content": "Second logbook, second hand.", "partition": "user-beta" },
+          { "address": "bbbbbbbb-0000-4000-8000-000000000002", "containerId": "cont-beta", "ordinal": 2, "content": "The tide gauge at Dock 9 reads 2.3 m at noon.", "partition": "user-beta" },
+          { "address": "bbbbbbbb-0000-4000-8000-000000000003", "containerId": "cont-beta", "ordinal": 3, "content": "Countersigned at shift change.", "partition": "user-beta" }
+        ]
+      }
+    },
+    {
+      "key": "sel-belief-c",
+      "payload": {
+        "record": { "selectionId": "sel-belief-c", "claimMode": "belief", "confirmedAtMs": 1752990000003 },
+        "selection": { "selectionId": "sel-belief-c", "addresses": ["cccccccc-0000-4000-8000-000000000002"], "selectedAtMs": 1752980000003 },
+        "entries": [
+          { "address": "cccccccc-0000-4000-8000-000000000001", "containerId": "cont-gamma", "ordinal": 1, "content": "Crew notes, informal.", "partition": "user-alpha" },
+          { "address": "cccccccc-0000-4000-8000-000000000002", "containerId": "cont-gamma", "ordinal": 2, "content": "Salt air improves the catch.", "partition": "user-alpha" }
+        ]
+      }
+    }
+  ],
+  "attributionTokens": [
+    "user-alpha",
+    "user-beta",
+    "cont-alpha",
+    "cont-beta",
+    "cont-gamma",
+    "aaaaaaaa-0000-4000-8000-000000000002",
+    "bbbbbbbb-0000-4000-8000-000000000002",
+    "cccccccc-0000-4000-8000-000000000002"
+  ]
+}

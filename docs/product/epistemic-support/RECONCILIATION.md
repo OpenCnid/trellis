@@ -495,6 +495,41 @@ under the §7 amendment rule, not an edit to the ratified table above.
 | Forecasts never share bytes with prompts | no import path store → prompt module | drill `[static-imports]` |
 | Audit reads the store; no new audit→composition path | one-way imports | drill `[static-imports]` (both directions) |
 
+### 5.2 Judge-convocation rows (dated entry, July 19, 2026 — Session 70)
+
+Merged from [`JUDGE_CONVOCATION_DESIGN.md`](JUDGE_CONVOCATION_DESIGN.md)
+§6 in the implementing PR, now that every row is **observed** rather
+than designed (`npm run test:judge-convocation`, 23 sections /
+140 checks; 15 unit pins in `judge_convocation.test.ts`). A dated
+addition under the §7 amendment rule. Build scope is OPTION B (that
+record's §11.1): the live spawn path exists and is pinned at its
+refusals; no live run has executed. **This entry also closes §5
+row 9's deferred pin** — see the writer-blind row below.
+
+| Behavior | Enforcement home (non-test) | Pin |
+|---|---|---|
+| Manifests validated, R-27 required, hand-authored only | `parseJudgeManifest` at registration; no generator exists (AB-8) | drill `[roster-manifest]`; unit pins |
+| Registration existence-gated before any write | `findMissingEvidentiaryHashes` gate in `register_judges.ts`, before both writes | drill `[roster-existence]` (gate logic + source-order pin) |
+| Store manifest ↔ graph hook consistent; the hook carries only name + id + kind + hashes | one ceremony writes both; `buildRegistryFromState` refuses mismatch naming the judge | drill `[roster-consistency]`; hook-opacity cypher pins in `[roster-lifecycle]` + unit pins |
+| Contested judge unreachable by a run (graph state → pure registry → composition) | contest state carried by `buildRegistryFromState`; `composePanel` refuses (existing law) | drill `[roster-lifecycle]` |
+| Recovery is human re-registration; a manifest change is a new id | plan refusal on an existing judgeId; ceremony requires `--reviewed-by` and refuses uncontested recovery | drill `[roster-recovery]`; unit pins |
+| Pairs judged at most once ever; identity spans candidate bytes + manifest identity | durable verdict lookup excludes judged pairs before sampling (`support_sweep.ts`) | drill `[sweep-pairs]` + `[sweep-once]` (a third run finds an exhausted pool) |
+| Uniform pool, seeded sampling, budget, counted deferral | sweep policy (config twins `SUPPORT_*`); mulberry32 per the record §3.5 | drill `[sweep-selection]` (independent-generator sequence + budget order) |
+| Run-open recorded before the first invocation; late pre-registration refuses | `appendThroughLaw` ordering in `runConvocationSweep`; slice-1 store law | drill `[sweep-run-open]` |
+| Judge-all-then-write; infrastructure failure writes nothing | collect-then-write in `runConvocationSweep` | drill `[sweep-atomicity]` |
+| Never a write gate; no path to the write path or promotion | no such import exists | drill `[static-imports]` |
+| Excluded judges typed and counted; designed silence disclosed (rule 12) | R-29 gate at selection; the run report carries exclusions + jurisdiction abstains; synthesized abstentions flagged, zero spend | drill `[sweep-evidence]` |
+| Attribution never re-enters through sweep plumbing | prompts only via `toPromptInput`; store payloads carry ids, never addresses or partitions | drill `[sweep-attribution]` (partition twins through the FULL sweep path; token scan over prompts and appended payloads) |
+| Opinions computed at read time, advisory only | `computeConvocationReport` replays verdicts through `composePanel`; nothing stores an opinion | drill `[report]` (independent arithmetic; cross-role disagreement surfaced as data) |
+| **Writer never sees any of it** (§5 row 9, deferred there — CLOSED here) | no support vocabulary on any kernel-prompt source; no RLM surface reaches `judge_records` or any support field | drill `[writer-blind]` (token scan over all ten `src/rlm/*.py` + the `search_ast_nodes` body) + unit pins |
+| Spawn transport = exactly the rendered bytes; `promptHash` re-verified pre-send | `buildSpawnRequest` (`parseComposedPrompt` re-render) | drill `[spawn-transport]`; unit pins |
+| Model identity must equal the manifest's, or refuse before I/O (R-27) | `makeLiveJudge` construct-time refusal | drill `[spawn-model]`; unit pins |
+| The model supplies only `{verdict, drawback, abstainReason}`; weight and time engine-side | strict `judgeResponseSchema`; `buildEngineVerdict` | drill `[spawn-verdict]`; unit pins |
+| Live spawn unreachable without the operator flags (the mechanical half of the triple gate) | runner defaults to the oracle; `--live` without `--confirm-paid` refuses | drill `[spawn-gate]` (source pins; the governance half is the owner's dated re-opening + per-run approval) |
+| The queue shows the cut verbatim (rule 17) | `show` prints the `buildRatificationRequest` payload unmodified | drill `[queue-shows-cut]` |
+| `claimMode` only from the user's recorded flags; declines record nothing | required flags with no default; the store schema has no other entry point | drill `[queue-provenance]` |
+| Store write-once mechanical; supersession references, never overwrites | `judge_records` `PRIMARY KEY (kind, key)` + the slice-1 law via validate-then-append | drill `[store-write-once]`; DDL unit pin |
+
 ## 6. Exclusions (this record)
 
 No live judges, no model calls, no `support_sweep`, no database

@@ -1,0 +1,26 @@
+{
+  "a81d17f6433119773bcf84d3e83fa538d526d2808ec8e9ab38226cc661287d18": {
+    "verdict": "clean",
+    "drawback": null
+  },
+  "95ce953dae80e2dee44677d8023a16fb710290203c18923e1f8390ed36cd5f89": {
+    "verdict": "clean",
+    "drawback": null
+  },
+  "d6e675555699f559a907a1512fb5331169d738f1a8997762936118c17c10c99c": {
+    "verdict": "drawback",
+    "drawback": "authority_contradicted"
+  },
+  "fa437797a3772e53f98107538646aebfa5d7d336ecfec1ee724331254e7c054a": {
+    "verdict": "clean",
+    "drawback": null
+  },
+  "e3d93199326ff2bb941958e909169cac87cac5ca9ccc34750b5080531983eafb": {
+    "verdict": "clean",
+    "drawback": null
+  },
+  "21981d311db460c26a6441230575be6ebce566c6efe85a25425bb7bb894bfe3d": {
+    "verdict": "drawback",
+    "drawback": "kind_incoherent"
+  }
+}

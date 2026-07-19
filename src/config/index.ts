@@ -123,6 +123,18 @@ const EnvSchema = z.object({
   ENTAILMENT_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
   ENTAILMENT_JUDGE_BUDGET_PER_SWEEP: z.coerce.number().int().positive().max(500).default(25),
 
+  // Judge-convocation support sweep (Session 70,
+  // JUDGE_CONVOCATION_DESIGN.md §3.2): the same knobs as the entailment
+  // detector under separate keys — the rate samples unjudged
+  // (candidate, judge) pairs per sweep; the budget hard-bounds judge
+  // invocations per sweep (overflow counted as deferred, never silent).
+  // The verdict weight is the engine constant a verdict record carries
+  // (§3.3: never model-supplied — a model-supplied weight would be a
+  // count-shaped self-report).
+  SUPPORT_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
+  SUPPORT_JUDGE_BUDGET_PER_SWEEP: z.coerce.number().int().positive().max(500).default(25),
+  SUPPORT_VERDICT_WEIGHT: z.coerce.number().positive().default(1),
+
   // Per-run retrieval budget for the RLM agent (Session 33,
   // RETRIEVAL_DISCIPLINE.md §4): the operator env twin of the Python
   // kernel default (64 fetches/run, RETRIEVAL_BUDGET_DEFAULT in
@@ -366,6 +378,11 @@ export const config = {
   entailment: {
     sampleRate: env.ENTAILMENT_SAMPLE_RATE,
     judgeBudgetPerSweep: env.ENTAILMENT_JUDGE_BUDGET_PER_SWEEP,
+  },
+  support: {
+    sampleRate: env.SUPPORT_SAMPLE_RATE,
+    judgeBudgetPerSweep: env.SUPPORT_JUDGE_BUDGET_PER_SWEEP,
+    verdictWeight: env.SUPPORT_VERDICT_WEIGHT,
   },
   retrieval: {
     /** Per-run fetch budget for the spawned agent; undefined = kernel default. */
