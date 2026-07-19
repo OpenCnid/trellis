@@ -99,7 +99,24 @@ def expect_raises(name, fn, needle=""):
 #     Authored under the prompt-engineering + hypershot-protocol skills
 #     (Guardrail 15); the constant lives in src/rlm/trellis_scaffold.py
 #     and is injected beside trellis_task — the prompt only teaches it.
-COMPOSED_SYSTEM_PROMPT_SHA256 = "6183de3a0f348d2849e3f93570d0e7ea29160ae301700ad7d949228a6027ed50"
+#   ee5bfca6...1200 — the July 19, 2026 harness-invariants pass (collaborator direction, owner-approved):
+#     two prose-only disciplines became engine surfaces, and the addendum
+#     follows them. (a) UPSUM: the model no longer computes
+#     len(str(upsum)) and self-corrects against a constant — it builds the
+#     state and registers it with trellis_upsum.commit(upsum), which
+#     measures the canonical serialization and REFUSES an over-budget or
+#     malformed state with per-key sizes. The suffix now carries a
+#     brace-free construction frame (dict(...) constructor with spread
+#     slots — the hypershot technique under the rlms .format() constraint,
+#     which forbids literal braces). (b) TASK PRECEDENCE: a new
+#     ADJUDICATE BY CODE bullet teaches trellis_task.verify(candidate),
+#     so instruction-shaped data is ruled on by the engine rather than by
+#     the model's reading. trellis_upsum joins the TOOLS manifest as
+#     item 5. Authored under the prompt-engineering + hypershot-protocol
+#     skills (Guardrail 15). Rationale: AGENTS.md rule 8 — tooling shape
+#     closes a failure class, prompt text only reinforces; both of these
+#     were reinforcement with nothing behind it.
+COMPOSED_SYSTEM_PROMPT_SHA256 = "ee5bfca69a8da64c3ba78e4e6d02c9c81ac921274166e871648786c0ff241200"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -191,13 +208,34 @@ check("the empty selection composes exactly base + workflow rules",
 # properties — the four lists rewritten IN PLACE each turn (never
 # appended) and the size bound checked BY CODE against the injected
 # UPSUM_BUDGET constant (CODE_MEDIATED_TEXT.md §1), not eyeballed.
+#
+# the July 19, 2026 harness-invariants pass (collaborator direction, owner-approved) moved WHERE the check
+# lives: the model no longer computes len(str(upsum)) and self-corrects
+# against a constant it was trusted to compare by eye — it registers the
+# state with trellis_upsum.commit(), which measures and refuses
+# engine-side. The rewrite-not-append property is unchanged; the
+# code-checked property is now enforced rather than requested, so the
+# assertion below tracks the surface instead of the old prose formula.
 _base_addendum = trellis_agent.TRELLIS_ADDENDUM_BASE
 check("the base addendum teaches the rewrite-not-append UPSUM rule",
       "IN PLACE" in _base_addendum and "never append" in _base_addendum)
-check("the base addendum teaches the code-checked UPSUM budget",
-      "UPSUM_BUDGET" in _base_addendum and "len(str(upsum))" in _base_addendum)
+check("the base addendum teaches the engine-checked UPSUM commit",
+      "UPSUM_BUDGET" in _base_addendum
+      and "trellis_upsum.commit(upsum)" in _base_addendum
+      and "ENGINE-CHECKED" in _base_addendum)
+check("the base addendum carries the brace-free upsum construction frame",
+      "upsum = dict(" in _base_addendum
+      and "decisive_facts=[...]" in _base_addendum)
 check("trellis_agent re-exports the injected UPSUM_BUDGET constant (2000)",
       trellis_agent.UPSUM_BUDGET == 2000)
+
+# July 19, 2026 (harness-invariants pass): task precedence stopped being prose-only. The addendum
+# teaches the adjudication surface, and the surface is what a run's
+# telemetry records — the rule 8 posture applied to the instruction
+# channel (RLM_HARNESS_SCAFFOLDING.md §2).
+check("the base addendum teaches code adjudication of instruction-shaped data",
+      "trellis_task.verify(candidate)" in _base_addendum
+      and "ADJUDICATE BY CODE" in _base_addendum)
 
 stripped = trellis_agent.TRELLIS_ADDENDUM.replace("{{", "").replace("}}", "")
 check("the composed addendum has no unescaped braces (rlms .format() safety)",
@@ -329,7 +367,12 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     pin's history) lands in BOTH arms — the UPSUM tightening is
 #     kernel scaffolding, not part of the discipline experiment (still
 #     structurally default minus exactly the block).
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "34b00be69dd7bbdd623ae4b50774a6753591a2178ec38fcaca3c1ff4fe84d02a"
+#   322cbe5d...45ae — the July 19, 2026 harness-invariants pass (see the default
+#     pin's history) lands in BOTH arms — the upsum commit gate and the
+#     task adjudication surface are kernel scaffolding, not part of the
+#     discipline experiment (still structurally default minus exactly
+#     the block; the structural check below re-proves that on every run).
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "322cbe5dc5f73a279ee253910dbf1e6d4e1267c64c1c11289f975f93824245ae"
 
 import subprocess  # noqa: E402
 

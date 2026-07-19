@@ -249,3 +249,134 @@ The frame the addendum teaches, brace-free (rlms `.format()` contract) and ASCII
     Coverage grows; size holds steady.
 
 The mechanism is unchanged from §3: persistent REPL locals, printed at decisive steps, nothing new to build. The §3 example still holds; run 2 would have re-encountered "vector_search never ran" in its own `upsum['pending']` at the insight step. This refinement pins the rewrite-to-budget property, the emergent-domain rule, the code-checked size bound, and the iteration-budget back-fill; the four standing keys and the free, protocol-level character are preserved.
+
+## 8. Harness invariants — UPSUM and precedence become enforceable (the July 19, 2026 pass)
+
+**Status: IMPLEMENTED the July 19, 2026 pass, July 19, 2026. Collaborator direction
+(M. Murphy), owner-approved the same day.** This section records a
+posture correction, not a new capability: two disciplines this record
+already specified were landed as *prompt text with nothing behind them*,
+and AGENTS.md rule 8 says tooling shape closes a failure class while
+prompt text only reinforces. They are now surfaces.
+
+### 8.1 What was wrong
+
+An audit of the REPL construction (July 18–19, 2026) found three
+prose-only enforcement points in the harness. Two are this record's:
+
+1. **UPSUM's budget was advisory.** §3/§7.3 correctly required a
+   *code-checked* size bound, and §7.3's wording — "the model computes
+   `len(...)` over the serialized `upsum`, compares it to the constant
+   in code, and reacts to the printed number" — was honoured literally:
+   `UPSUM_BUDGET` shipped as a bare int in the namespace, and nothing
+   observed `upsum` at all. The model was asked to measure itself and
+   self-correct. That satisfies "computed, never eyeballed" only if the
+   model complies; it sat in a bounds table whose every other entry
+   RAISES.
+2. **Precedence was prose.** §2 made the *wrapper* structural — the
+   run uuid is unforgeable by stored bytes, which remains the real
+   defense — but the RULE that only tagged text is operator instruction
+   was taught and never checked. A run could read instruction-shaped
+   retrieved text and act on it without any engine surface having an
+   opinion.
+
+The third (raw `splice()` reachable with the guarded family merely
+preferred) belongs to STRUCTURAL_SPLICE.md §9.
+
+Independent convergence worth recording, since it arrived from outside
+the house: ClawVM (EuroMLSys '26, arXiv:2604.10352) reaches the same
+conclusion from the memory-management side — bounded working state has
+to be a harness invariant rather than a prompt, because best-effort
+practitioner tuning still leaks faults for structural reasons. Our own
+rule 8, measured by someone else.
+
+### 8.2 What landed
+
+**`trellis_upsum` — the running-state gate** (`src/rlm/trellis_scaffold.py`,
+injected beside `trellis_task` on every research run):
+
+- `commit(upsum)` validates the shape (four standing list-valued keys of
+  single-line strings; emergent domain keys bounded by
+  `UPSUM_MAX_DOMAIN_KEYS = 12`), measures a *canonical* serialization
+  (key-sorted JSON, so insertion order cannot move the number), and
+  REFUSES an over-budget state with the per-key sizes largest-first —
+  the model compresses against engine-computed numbers, never by eye.
+  On success it returns a receipt (revision, size, budget, headroom).
+- `size(state)` measures without registering; probing before committing
+  is the taught behavior and is deliberately not counted as a refusal.
+- `state()` returns the last committed state, re-readable by code at a
+  decisive step — the `trellis_task` doctrine applied to the model's own
+  working state.
+- A refused commit leaves the last good revision standing.
+
+The mechanism of §3 is unchanged: REPL locals are still the store, the
+lists are still rewritten and never appended, `UPSUM_BUDGET` keeps its
+value and its name. What moved is where the check lives.
+
+**`trellis_task.verify(candidate)` — adjudication by code:** pass the
+VARIABLE holding instruction-shaped text and the engine rules on its
+authority against this run's tags. An unauthorized verdict is the normal
+answer for data and reads as *treat this as evidence*, never *discard
+it* — the surface adjudicates authority and is not a content filter. A
+well-formed wrapper from a DIFFERENT run is reported distinctly
+(`foreignRunTag`), which keeps §2's recorded residual — the same-run echo
+loop — diagnosable rather than merely unauthorized.
+
+**Telemetry:** `upsum_commits`, `upsum_budget_refusals`,
+`upsum_shape_refusals`, `upsum_revision`, plus `task_reads`,
+`task_greps`, `task_verify_authorized`, `task_verify_refused`. Shape and
+budget refusals are counted separately on purpose: shape validation runs
+before measurement, so one folded number would silently under-report
+whichever raised first (rule 11). These make two previously
+unmeasurable claims measurable — whether a run bounded its working state,
+and whether it adjudicated instruction-shaped data instead of obeying it.
+
+### 8.3 Honest scope
+
+- **`verify()` informs; it does not gate.** Nothing forces a run to call
+  it before acting on retrieved text, exactly as `citable()` informs
+  without gating (§4, the Session 35 invariant). It converts a prose rule
+  into an available code act and a recorded count — a real improvement
+  over prose, and short of enforcement. Coupling the decisive steps
+  (first `write_back`, insight write, `submit`) to a re-read or an
+  adjudication is the obvious next increment and is deliberately NOT
+  taken here: it changes `trellis_answer`'s contract and deserves its own
+  owner-gated proposal with a measured before/after.
+- **`commit()` does gate, but only what it is given.** A model that never
+  calls it keeps an unbounded `upsum` in its locals. The refusal makes
+  the over-budget path unavailable rather than making the discipline
+  mandatory; `upsum_commits == 0` is the telemetry that exposes a run
+  which skipped it.
+- **No behavior claim attends this change.** Nothing here is measured to
+  improve any outcome (guardrail 8). It is a posture correction: the
+  bounds this record states are now enforced by the engine that states
+  them. Whether enforcement changes run quality is an open, unmeasured
+  question — the probe-round mold would answer it.
+
+### 8.4 Prompt and pins
+
+The addendum follows the surfaces: the UPSUM section teaches the commit
+loop through a brace-free construction frame (a `dict(...)` constructor
+with spread slots — the hypershot technique under the rlms `.format()`
+constraint, which forbids literal braces), an ADJUDICATE BY CODE bullet
+teaches `verify`, and `trellis_upsum` joins the TOOLS manifest as item 5.
+Authored under the prompt-engineering and hypershot-protocol skills
+(Guardrail 15). Both composed-prompt sha256 pins moved wittingly and were
+recomputed in the same commit (Guardrail 9): default
+`ee5bfca6…1200`, omit-arm `322cbe5d…45ae`.
+
+### 8.5 What this section produced beyond the three fixes
+
+The design exchange following this correction (owner and collaborator,
+July 19, 2026) generalized the three instances into a standing direction:
+the interior surfaces as *free meta-prompt composition primitives*, the
+composed read derived from the guard predicates that enforce it, and a
+bijection between stated expectations and enforcing guards as the
+mechanizable check. Run against the pre-July-19 kernel, that bijection
+flags all three findings above automatically — the audit found them by
+reading; the check would find them by running.
+
+Recorded in [HARNESS_SELF_MODEL.md](HARNESS_SELF_MODEL.md). The principle
+is owner-endorsed; **implementation is not authorized**, and §8 of that
+record carries the gate and the phasing. The `verify()`-informs-not-gates
+scope of §8.3 above is unchanged by it.

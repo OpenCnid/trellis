@@ -328,3 +328,72 @@ kernel prompt (no composed-pin motion).
   decomposed minimal edit left the executable neighbor byte-intact,
   and the rehearsal guarded arm passed the live Session 31 gate with
   the full checker at zero findings.
+
+## 9. The explicit off-switch: guarded-only mode (the July 19, 2026 pass)
+
+**Status: IMPLEMENTED the July 19, 2026 pass, July 19, 2026. Collaborator direction
+(M. Murphy), owner-approved the same day.**
+
+### 9.1 The gap this closes
+
+Session 41 built the guarded family and this record scoped it honestly —
+§4 is titled "what this PREVENTS vs what it only DETECTS." What neither
+the record nor the code said plainly is that the *raw* path stayed fully
+reachable: `splice(relpath, start, end, new_lines)` took a bare index
+pair with no anchor, no verification, and no way for an operator to
+remove it. The preference lived in the addendum ("PREFER THE GUARDED
+FAMILY"), which under AGENTS.md rule 8 is reinforcement, not closure.
+
+The `textedit_raw_splices` / `textedit_guarded_ops` split (§8) was built
+so an acceptance criterion could pre-state "a guarded-only run is
+`textedit_raw_splices == 0`". That is a **post-hoc measurement of a
+choice**, not a guarantee about the tool — and the failure class this
+record exists to close could be reintroduced by a model that simply
+called `splice()`.
+
+### 9.2 What landed
+
+`TRELLIS_TEXTEDIT_GUARDED_ONLY` (operator environment; constructor
+parameter `guarded_only`), parsed by `parse_textedit_guarded_only`:
+
+- **Off by default.** Unset or blank keeps the pre-Session-69 surface,
+  telemetry, and prompt byte-identical — the additive rule every operator
+  gate in this kernel follows.
+- **On:** `splice()` raises `RawSpliceDisabledError` before touching the
+  frame, and the refusal names the three guarded replacements and the
+  re-derive step. Nothing is staged.
+- **Malformed values RAISE** at parse time, before any paid work. An
+  operator who misspells a safety switch must never silently receive the
+  unsafe default; the accepted spellings are `1/true/yes/on` and
+  `0/false/no/off`, case-insensitively.
+- **The addendum follows the mode.** In guarded-only runs the toolkit
+  text describes the guarded family as the whole surface and names the
+  raw path as disabled, so a run is never taught a call that would refuse
+  it. The two arms share head and tail exactly and differ only in the
+  mode block (pinned); both are brace-free.
+- **Telemetry gains `textedit_guarded_only` (bool) and
+  `textedit_raw_splice_refusals`.** This is the point of the change for
+  evidence purposes: a run summary can now distinguish a run that COULD
+  have spliced raw and chose not to from one where the operator removed
+  the path. Only the second is evidence about the tool, and before this
+  the two collapsed into the same zero.
+
+### 9.3 Honest scope
+
+- **This is an operator gate, not a default.** The class is closed only
+  in runs where the operator turns it on. Making guarded-only the default
+  is a separate, behavior-changing proposal that would move the pinned
+  surface and belongs to its own increment with a measured before/after —
+  §4's honest-scope discipline applies to this section too.
+- **Guarded-only does not make edits correct.** The family verifies that
+  the bytes you *say* you are removing are the bytes that are *there*;
+  it has never claimed the edit is the right edit. §4 stands unchanged.
+- **No behavior claim attends this change** (guardrail 8). Nothing is
+  measured to improve; the off-switch makes an existing closure
+  enforceable.
+
+Pinned by `npm run test:textedit` section [15] (13 checks: the refusal
+and that it stages nothing, the guarded family unaffected, telemetry
+distinguishing mode from behavior, default-off byte-identity, the
+addendum swap and its shared head/tail, the env-parsing matrix, and the
+malformed-value and non-bool refusals).
