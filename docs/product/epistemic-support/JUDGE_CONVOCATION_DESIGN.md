@@ -1,8 +1,15 @@
 # Judge Convocation — Design Record (the slice-2 proposal)
 
-**Status: PROPOSED — AWAITING OWNER AUTHORIZATION. NOTHING BUILT.**
+~~**Status: PROPOSED — AWAITING OWNER AUTHORIZATION. NOTHING BUILT.**~~
+**AUTHORIZED — OPTION B (owner, July 18, 2026 — dated entry §11.1).
+NOTHING BUILT.** The build session implements option B's scope: the
+zero-model machinery plus the complete triple-gated spawn boundary.
+Option C's calibration run was NOT taken — no live model call is
+authorized, and the paid queue stays ON HOLD; a live run re-enters
+only through the queue's dated re-opening plus the per-run ceremony.
+Original status line July 18, 2026 (Session 69).
 Authored July 18, 2026 (Session 69), zero-model, document-first. This
-record is how authorization is sought:
+record is how authorization was sought:
 [`RECONCILIATION.md`](RECONCILIATION.md) §7 unblocked the live-judge
 slice **as a gate, not an authorization**, and
 [`EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md) §7's
@@ -559,6 +566,23 @@ fixtures extended, never modified).
   same band. Hard bounds stack: the judge budget, the ≤$5/run cap, the
   per-run approval, and the queue's dated re-opening before any of it.
 
+**Owner-requested measurement, registered July 18, 2026 (dated note,
+recorded at the §11.1 authorization; queued, not scheduled — it
+executes only after the queue's dated re-opening plus the per-run
+ceremony):** the **metered promotion-cost test** — what it costs,
+end to end, to promote a REPL workspace belief to a Tier-1 fact
+through the full chain: selection → ratification ($0, operator) →
+convocation verdicts (three belief-facing judges at the per-verdict
+band above) → `support:report` ($0) → the WORKSPACE §6 operator
+promotion ($0) → verified ingest with extraction of the promoted
+segment (size-dependent; single-segment extraction at stage-1 rates
+≈ $0.01–$0.03) plus embedding (negligible). Estimate class
+≈ **$0.02–$0.06 per promoted belief**, judging and extraction
+co-dominant. The deliverable is measured actuals PER STAGE against a
+pre-stated criterion, reported against this estimate — the test rides
+naturally on the first calibration convocation's shape. Also listed
+in the PROGRAM_CONTEXT §6 paid-queue hold list by dated bracket.
+
 ## 11. The authorization decision (owner act — scope, spend, sequencing as named options)
 
 This record is the deliverable gate of Session 69: nothing below
@@ -589,6 +613,29 @@ Sequencing under A/B/C: one implementation session (Session 70), drill
 first-green before records move, the §6 rows merged into
 RECONCILIATION §5 by dated entry only when observed, EPISTEMIC_SUPPORT
 §7's residual row split on landing.
+
+### 11.1 Authorization (dated entry — July 18, 2026)
+
+**RECORDED — the owner chose OPTION B** at the Session 69 close-out
+review, the same day this record was authored (the live in-session
+decision recorded here per the Session 67 → 68 precedent). In
+consequence:
+
+- The Session 70 build implements option A's zero-model machinery
+  PLUS the complete spawn boundary behind the triple gate. Spend
+  $0.00.
+- **No live run is authorized.** Option C was not taken; the paid
+  queue stays ON HOLD, and any live convocation re-enters only
+  through the owner's dated queue re-opening plus the ordinary
+  per-run ceremony with the §10 estimate re-printed.
+- In the same act the owner registered the **metered promotion-cost
+  test** (§10 dated note): a future measurement of the end-to-end
+  cost of promoting a belief to fact in the REPL. Queued on the paid
+  queue's hold list; not scheduled.
+
+*The gate this entry closes, preserved: "This record is the
+deliverable gate of Session 69: nothing below happens until the owner
+records a choice."*
 
 ## 12. No `R` rows
 

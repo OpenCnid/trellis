@@ -1723,3 +1723,21 @@ PROPOSED — AWAITING OWNER AUTHORIZATION.
    (2) the condensation-expectation verdict (IEG_TEACHINGS, beside
    finding 5 — OWNER-OWED since July 17); (3) EL-10/EL-11 acceptance
    and the EL-07 unblock ceremonies (HANDOFF Appendix B).
+
+**Same-day addendum (July 18, 2026, at the close-out review): the §11
+authorization is RECORDED — OPTION B** (dated entry
+`JUDGE_CONVOCATION_DESIGN.md` §11.1, this PR; status header flipped to
+AUTHORIZED — OPTION B, NOTHING BUILT). The Session 70 build implements
+the zero-model machinery plus the complete triple-gated spawn
+boundary; no live run is authorized and the paid queue stays ON HOLD.
+In the same act the owner registered a future measurement — the
+**metered promotion-cost test**: the end-to-end cost of promoting a
+REPL workspace belief to a Tier-1 fact (selection → ratification →
+convocation verdicts → report → operator promotion → verified
+ingest/extraction; estimate class ≈ $0.02–$0.06 per promoted belief) —
+recorded in the record's §10 dated note and added to the
+PROGRAM_CONTEXT §6 paid-queue hold list by dated bracket; it executes
+only after the queue's dated re-opening plus the per-run ceremony.
+HANDOFF re-run per the §0 event-loop rule (the §3 gate now reads
+SATISFIED; the owner-acts item is closed; the condensation verdict and
+EL ceremonies remain).

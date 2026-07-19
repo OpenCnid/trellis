@@ -85,10 +85,12 @@ see the decision record (§6).
    rule 20; the RECONCILIATION §5 row 9 writer-blind pin designed),
    the spawn boundary (the composed bytes ARE the interface; R-27
    model-identity refusal; oracle twin), and the ratification queue
-   (WORKSPACE §6 mold). **PROPOSED — awaiting the owner's §11
-   authorization decision; nothing is built**, and the paid queue
-   remains ON HOLD (its §10 spend figures are registered estimates,
-   not authorization).
+   (WORKSPACE §6 mold). **AUTHORIZED — Option B (owner, July 18,
+   2026; dated entry §11.1); nothing is built yet** — the build
+   session implements the zero-model machinery plus the triple-gated
+   spawn boundary. No live run is authorized; the paid queue remains
+   ON HOLD, and §10 additionally registers the owner-requested
+   metered promotion-cost measurement (queued, not scheduled).
 
 ## 3. Context you cannot infer from the artifacts alone
 
@@ -272,7 +274,11 @@ dated entry and the merge itself are the record.
 - **Paid queue: ON HOLD (owner ruling, July 17, 2026).** The queue
   stays recorded and important — the v2 anti-shortcut run, the
   baseline head-to-head, the R-36 knee scoping — but nothing executes
-  until the owner re-opens it by dated note.
+  until the owner re-opens it by dated note. **[Added July 18, 2026,
+  at the slice-2 authorization: the metered promotion-cost test —
+  the end-to-end cost of promoting a REPL belief to a Tier-1 fact;
+  registered in `JUDGE_CONVOCATION_DESIGN.md` §10's dated note,
+  estimate class ≈ $0.02–$0.06 per promoted belief.]**
 - **Durable deployment: DECIDED — Option A** (owner ruling, July 17,
   2026): the owner's machine, locally, now —
   [`docs/operations/DURABLE_DEPLOYMENT.md`](../../operations/DURABLE_DEPLOYMENT.md)

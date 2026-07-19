@@ -1057,9 +1057,10 @@ surfaces untouched.
 **Session 69 (July 18, 2026, this PR) is complete: judge convocation
 named and proposed — the slice-2 design record, docs-only, zero-model
 and zero-paid, ending at the owner-authorization gate.** New record
-`docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md`, status
-**PROPOSED — AWAITING OWNER AUTHORIZATION** (its §11 puts the decision
-as named options; option B recommended). The naming gate walked
+`docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md` (its §11
+put the decision as named options; **the owner chose OPTION B the
+same day — dated entry §11.1, this PR — so the record's status is
+AUTHORIZED — OPTION B, NOTHING BUILT**). The naming gate walked
 (collisions avoided and recorded: "harness" ×2, "composition",
 "intake", bare "sweep" — `support_sweep` stays the JOB name — and the
 reserved "judge-actuation" pointer, untouched). The decisions, each
@@ -1108,17 +1109,21 @@ Session 62 moved verbatim to the archive (live window 63–69); zero
 executable bytes changed, zero test-count moves (`npm test` stays
 1,290/113).
 
-Your objective is **Session 70: the judge-convocation build — the
-§11-authorized subset of `JUDGE_CONVOCATION_DESIGN.md`, zero-model, in
-the Session 68 mold**. **THE GATE IS REAL: as this handoff was
-written, the owner's §11 decision was NOT yet recorded.** If it is
-still unrecorded when you read this, surface the §3 owner-acts list
-and stop — authorization is sought, never assumed or inferred (the
-RECONCILIATION §7 gate-vs-authorization distinction is the precedent).
-§3 carries the objective. The owner may re-point the session — surface
-the §3 owner-acts list first either way. (The engineering-loop track's
-next objective — EL-07 stage 1, from master's Session-64 regeneration,
-with its ledger gate — is preserved verbatim in Appendix B.)
+Your objective is **Session 70: the judge-convocation build at
+OPTION-B scope — `JUDGE_CONVOCATION_DESIGN.md` §11.1, zero-model, in
+the Session 68 mold**. **The §11 gate is SATISFIED: the owner chose
+Option B on July 18, 2026 (dated entry §11.1, recorded in the same PR
+as the proposal)** — option A's zero-model machinery plus the complete
+triple-gated spawn boundary. **No live run is authorized** (option C
+was not taken; the paid queue stays ON HOLD). In the same act the
+owner registered the **metered promotion-cost test** (record §10 dated
+note; PROGRAM_CONTEXT §6 hold-list bracket) — a future measurement of
+the end-to-end cost of promoting a REPL belief to a Tier-1 fact;
+queued, not scheduled. §3 carries the objective. The owner may
+re-point the session — surface the §3 owner-acts list first either
+way. (The engineering-loop track's next objective — EL-07 stage 1,
+from master's Session-64 regeneration, with its ledger gate — is
+preserved verbatim in Appendix B.)
 
 **Owner direction, July 14, 2026:** the engineering-session loop remains
 prioritized ahead of the paused TTT tooling-shape objective. `EL-00` through
@@ -1894,10 +1899,12 @@ Repository state at handoff creation:
   (split store/graph representation), the `support_sweep` job (with
   the RECONCILIATION §5 row 9 writer-blind pin DESIGNED), the spawn
   boundary (oracle twin; live constructor triple-gated), the
-  ratification queue, and the convocation store. **The §11
-  authorization decision is the open owner act — nothing in that
-  record may be built until it is recorded.** The paid queue remains
-  ON HOLD; the record's §10 figures are registered estimates only.
+  ratification queue, and the convocation store. **The §11 decision
+  is RECORDED — Option B (same-day dated entry §11.1): the build is
+  authorized at option-B scope; no live run.** The paid queue remains
+  ON HOLD; the record's §10 figures are registered estimates only,
+  now including the owner-requested metered promotion-cost test
+  (queued on the hold list).
 - **EL-10 and EL-11 acceptance is not recorded.** Both are implemented; neither
   is accepted. The reachability blocker on EL-10 acceptance is CLOSED — the
   unreachable-producer set is empty, re-derived from the import graph every run —
@@ -1931,16 +1938,15 @@ Work on one feature branch and target `master`.
 `docs/product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md`,
 zero-model, in the Session 68 mold.**
 
-**The gate (check FIRST, before any byte):** the owner's §11 decision
-must exist as a recorded act — a dated status flip on the record's
-header naming the chosen option (the Session 67 → 68 precedent:
-JUDGE_INTAKE_DESIGN carried "IMPLEMENTATION AUTHORIZED" before
-Session 68 built it). **As this handoff was written, NO decision was
-recorded.** If it is still absent, surface the owner-acts list below
-and stop; if the owner picks option D (re-scope/decline), this
-objective dissolves and the session re-points.
+**The gate is SATISFIED (July 18, 2026):** the owner's §11 decision is
+recorded — **OPTION B** (record §11.1, a dated entry landed in the
+same PR as the proposal; the Session 67 → 68 precedent). Verify the
+entry exists in the checkout you build from, then build at option-B
+scope: items 1 + 2 below. Item 3 (option C's calibration run) was
+**NOT taken** — no live model call is authorized, and the paid queue
+stays ON HOLD.
 
-Scope by authorized option:
+The option ladder as decided (B = items 1 + 2):
 
 1. **Option A — zero-model machinery only:** `judge_registration.ts` +
    `scripts/register_judges.ts` (the split representation: manifest
@@ -1955,14 +1961,17 @@ Scope by authorized option:
    deterministic gatherers, judge-all-then-write, `support:report`
    computing opinions at read time), the row-9 writer-blind pin, and
    the drill. The spawn module lands ORACLE-ONLY.
-2. **Option B (recommended in the record) — A plus the complete spawn
+2. **Option B (CHOSEN — §11.1) — A plus the complete spawn
    boundary:** the live constructor exists behind the triple gate
    (operator flag + dated paid-queue re-opening + per-run approval)
    and the drill pins its refusals. Still $0.
-3. **Option C — B plus the contingent first calibration convocation:**
-   the run executes ONLY after the owner's dated queue-re-opening note
-   AND the ordinary per-run ceremony with the §10 estimate re-printed
-   — two further recorded acts; §11 alone never runs it.
+3. **Option C — NOT taken.** The contingent calibration run stays
+   un-authorized; a live convocation re-enters only through the
+   owner's dated queue-re-opening note AND the ordinary per-run
+   ceremony with the §10 estimate re-printed. The §10 dated note's
+   **metered promotion-cost test** (owner-requested at authorization)
+   sits on the same hold list and, when the queue re-opens, is the
+   natural shape for that first run.
 
 The record's §3–§7 are normative for every mechanism: the split
 representation, pair identity, gatherer definitions, transport bytes,
@@ -1989,9 +1998,10 @@ present as phase transitions at all; a non-fit or an absent referent
 is the informative outcome and must not be reconciled by force (R-30).
 
 **Owner acts — status (surface them; do not perform them):**
-(1) **the JUDGE_CONVOCATION_DESIGN §11 authorization decision — THE
-GATE on this session's objective; unrecorded as this handoff was
-written.**
+(1) ~~the JUDGE_CONVOCATION_DESIGN §11 authorization~~ **RECORDED
+July 18, 2026 — Option B (record §11.1).** The residual owner acts on
+this track — the paid-queue re-opening and the per-run ceremony — are
+required only before a live run and are not owed now.
 (2) the condensation-expectation verdict above — **still OWNER-OWED,
 unrecorded**.
 (3) the EL-10/EL-11 acceptance and EL-07 unblock ceremonies
@@ -2131,10 +2141,12 @@ Acceptance items:
 
 Do **not**:
 
-- build anything the recorded §11 option does not name; do not start
-  building at all while the §11 decision is unrecorded;
-- run any live model call in the build itself (an option-C calibration
-  run is a separately ceremonied act even after authorization);
+- build anything the recorded option (B — record §11.1) does not
+  name; verify the §11.1 entry exists in your checkout before any
+  byte;
+- run any live model call anywhere — option C was not taken, and even
+  the queued metered promotion-cost test executes only after the
+  queue's dated re-opening plus its own per-run ceremony;
 - add support fields to any production schema, store computed
   opinions, or expose any support/judge state to an RLM-visible
   surface (AB-5 — the writer-blind pin is the build's proof);
