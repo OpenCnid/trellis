@@ -89,17 +89,32 @@ It characterizes; it does not argue, explain, or assert content. The
 distinction is load-bearing: an expository summary would carry claims
 into the composer, and the composer would compose criteria around them.
 
-**This agent never sees the candidate.**
+**The candidate is not privileged in the characterization.** We know
+the *domain* of the claim — its region of the pool is in scope, and
+must be, or the composed cover would not cover the space the claim
+lives in. What is withheld is *which* claim is under test. The
+candidate receives no marking, no weight, no position, and no mention
+distinguishing it from the rest of the pool it belongs to.
+
+The property is **anonymity, not exclusion**, and that distinction is
+the whole design. Excluding the claim's content would make the
+characterization unrepresentative of the very region the judges must
+cover. Leaving it in, unmarked, means the composer can compose criteria
+fit for the domain while being structurally unable to tailor them to
+the claim — it cannot tell which of many facts and beliefs is the one
+being judged.
 
 ### Stage 2 — Composition (agent per seat)
 The composer receives the Stage-1 characterization and the invariant
 schema, and composes one judge per seat, plus that judge's anchors.
 
-**The composer never sees the candidate's claim bytes.** It composes
-criteria for the *pool*, not for the claim. This is the seat where bias
-lives — the game established that the belief-facing panel's clean
-contexts do not protect the composer's layer — so the candidate is
-withheld structurally rather than by instruction.
+**The composer cannot identify the candidate.** It composes criteria
+for the *domain*, not for the claim. This is the seat where bias lives
+— the game established that the belief-facing panel's clean contexts
+do not protect the composer's layer — so the candidate's identity is
+withheld structurally rather than by instruction. Per Stage 1 the
+withholding is anonymity: the claim's domain is present and its
+identity is not.
 
 Composition emits, per seat: the filled game-template YAML, and a
 ten-item anchor set improvised from the domain content space (five
@@ -114,8 +129,11 @@ typed, on failure**:
    all-abstain. This is R-02's protection, rehomed from committed
    fixtures onto composition time; it is taxonomy-agnostic and survives
    composition intact.
-2. **Coverage** — the seats cover the claim's parameter space; nothing
-   in scope is unjudged.
+2. **Coverage** — the seats cover the characterized domain, and the
+   candidate lies inside it by construction (Stage 1 keeps the claim's
+   region in scope while withholding its identity). Coverage is
+   therefore checkable without ever privileging the claim: cover the
+   domain, and the claim is covered because it is in the domain.
 3. **Overlap** — seats are pairwise disjoint in their qualified
    parameters, **or** overlapping with a declared gluing rule. Strict
    disjointness is not required: a cover normally overlaps, and gluing
@@ -220,10 +238,17 @@ any metered ceremony runs.
 2. Whether the characterizer's output is itself byte-pinned into the
    promotion record (it is composer input, so the audit seat needs it —
    assumed yes, unconfirmed).
-3. How the coverage gate decides "the claim's parameter space" without
-   reading the claim. Stage 2 withholds the candidate from the
-   composer; the gate runs engine-side and may see more. **Unresolved
-   and load-bearing** — a coverage check that needs the claim, run by a
-   composer that must not see it, has to be split carefully.
+3. ~~How the coverage gate decides "the claim's parameter space"
+   without reading the claim.~~ **RESOLVED July 19, 2026
+   (collaborator, owner-approved):** we know the domain of the claim
+   but not the claim under test, and it is not privileged in the
+   descriptive summary. The gate covers the domain; the candidate is
+   inside it by construction. See §3 Stage 1.
 4. Whether seats beyond four are composed when the topology needs them,
    and what admits a fifth.
+5. Whether the anonymity property needs a mechanical check, or rests on
+   the characterizer's contract. A characterization that inadvertently
+   made one item salient — by recency, by unusual vocabulary, by being
+   the only instance of its kind — would leak the candidate's identity
+   without any rule being broken. Worth a falsifier before the first
+   metered ceremony.
