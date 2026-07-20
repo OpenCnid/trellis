@@ -15,8 +15,8 @@ composition method as Trellis, one agent evaluating the context first,
 and a judges-judge over the telemetry and logs of the sub-agent runs"
 — at owner (Cnid) direction. It is a **fresh** skill: the earlier
 `complexity-ceremony` skill on the same surface was neither consulted
-nor built upon, at the owner's instruction, and is deprecated in favor
-of this one.
+nor built upon, at the owner's instruction, and has since been
+deprecated and then deleted in favor of this one.
 
 `SKILL.md` here is a verbatim copy of the user-level skill as of that
 date. It is a derived artifact; this directory is not an independent
