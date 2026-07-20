@@ -26,6 +26,30 @@ in-repo custody.
 
 ## The skills
 
+### Meta-prompting foundation (invoked first — house Guardrail 15)
+
+- **[`prompt-engineering/`](prompt-engineering/)** — the Lexideck
+  prompt-engineering protocol: structural clarity and manifold alignment
+  over "magic words." Invoked, with the next skill, before any session
+  authors prompt bytes (Guardrail 15). Canonical authority: the Lexideck
+  Prompt Engineering Curriculum (Matthew Murphy); this `SKILL.md` is the
+  deployed artifact, not the full curriculum.
+
+- **[`hypershot-protocol/`](hypershot-protocol/)** — priming structure
+  without priming content: a frame with free variables in place of
+  contaminating few-shot examples. The mandatory pair with
+  `prompt-engineering` under Guardrail 15 — the composition frames in the
+  skills below *are* hypershots. Same Lexideck lineage.
+
+### Composition and clean-room evaluation
+
+- **[`subagent-composition/`](subagent-composition/)** — composing a
+  Claude Code sub-agent (persona, the inherited-context ledger, tool
+  budget, return contract): composition-from-primitives at the
+  harness-agent boundary. `complexity-convocation` builds on it and
+  `self-play` uses its spawn gate. House-authored, verified against the
+  Claude Code docs (its `SKILL.md` carries the provenance).
+
 - **[`judge-composition/`](judge-composition/)** — composing the four-role
   judge panel (grounding, coherence, corroboration, audit) from parameter
   primitives, per context, with **no default cast**. A verbatim copy of
@@ -51,6 +75,15 @@ in-repo custody.
   own `SKILL.md` states it is canonical over any copy; worked examples live
   in `docs/architecture/DOUBTS_WORKSPACE.md §11–§12` and
   `docs/product/epistemic-support/PRIMITIVE_ENCODING_AUDIT.md`.
+
+### Authoring
+
+- **[`density-chain/`](density-chain/)** — the OpenCnid five-tier
+  chain-of-density method for research-paper notes and paper-repo
+  scaffolding. Its subject is the separate research-notes collection rather
+  than this codebase, but the same method shapes in-repo orientation docs,
+  and it is versioned here as house doctrine. Canonical form: the OpenCnid
+  chain-of-density spec / this `SKILL.md`.
 
 ## House note — authoring skill bytes
 
