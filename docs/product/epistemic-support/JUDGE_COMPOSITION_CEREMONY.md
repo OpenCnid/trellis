@@ -247,8 +247,38 @@ any metered ceremony runs.
 4. Whether seats beyond four are composed when the topology needs them,
    and what admits a fifth.
 5. Whether the anonymity property needs a mechanical check, or rests on
-   the characterizer's contract. A characterization that inadvertently
-   made one item salient — by recency, by unusual vocabulary, by being
-   the only instance of its kind — would leak the candidate's identity
-   without any rule being broken. Worth a falsifier before the first
-   metered ceremony.
+   the characterizer's contract (§9 F4 carries the falsifier).
+
+## 9. Falsifiers
+
+Each names the observation that would break the design, not a risk to
+be managed.
+
+- **F1 — Composed criteria track the candidate.** If composed
+  taxonomies correlate with the candidate's own content more than with
+  the domain's, the anonymity property is not holding and the composer
+  is tailoring. Detectable by composing twice over the same pool with
+  different candidates drawn from it: the two covers should differ
+  little.
+- **F2 — Composition is not discriminative.** If covers composed for
+  genuinely different domains come back substantially alike, the
+  composer is emitting a template rather than composing, and the
+  standing cast has returned by another route.
+- **F3 — Gates never fire.** If validity, coverage, overlap and
+  falsifiability refuse nothing across a run of scripted compositions,
+  they are decoration. The zero-paid drill must plant compositions that
+  each gate catches.
+- **F4 — Anonymity leaks by salience.** The candidate's identity can
+  reach the composer with no rule broken, purely through how the
+  characterization is shaped: the claim's region being the only
+  instance of its kind, carrying unusual vocabulary, or landing last in
+  a recency-ordered summary. **This is the same shape as the drift the
+  audit caught in the game's corrected re-run** — expectation content
+  relocating out of task text and into annotation phrasing after the
+  obvious channel was closed. The lesson there was that *bias is
+  conserved under correction unless the correction is itself audited*
+  ([`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md) §4), and it
+  applies here: closing the direct channel (never name the candidate)
+  moves the leak to a quieter one (make it conspicuous). The audit seat
+  must read the characterization as a first-class target, watching the
+  vector and not only the magnitude.
