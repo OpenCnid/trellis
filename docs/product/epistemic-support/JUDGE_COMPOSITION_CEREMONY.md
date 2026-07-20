@@ -147,10 +147,22 @@ the ceremony with a report; it never degrades into judging with a
 defective cover.
 
 ### Stage 4 — Judging (existing spawn boundary)
+
+**Judges see the candidate only after they are instantiated, on the
+judgement forward pass.** The blindness of Stages 1–2 is a
+*composition-time* property, not a standing one: criteria are built
+without knowing which claim is under test, and then the instantiated
+judge is shown the claim and judges it. Reading "blind to the
+candidate" as covering the forward pass would leave nothing to judge.
+
+The temporal split is the whole safeguard. Criteria that cannot have
+been shaped to the claim are then applied to it.
+
 Each composed judge runs in an isolated clean context receiving only
-its definition, its declared inputs, and the output schema. No
-claimant identity, no sibling verdicts, no composer expectations.
-Existing R-27 identity refusal and transport byte-equality pins apply.
+its definition, its declared inputs (which at this stage include the
+candidate), and the output schema. No claimant identity, no sibling
+verdicts, no composer expectations. Existing R-27 identity refusal and
+transport byte-equality pins apply.
 
 ### Stage 5 — Audit
 The audit seat runs over the judges' prompts and verdicts **plus the
