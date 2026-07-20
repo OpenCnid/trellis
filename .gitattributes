@@ -14,3 +14,7 @@ fixtures/judge_panel/*.json -text
 fixtures/judge_intake/*.json -text
 # Judge-convocation fixtures carry the same manifest-pin/eol hazard.
 fixtures/judge_convocation/*.json -text
+# Doubts-workspace fact-base is a ground-truth discrimination corpus (same
+# class as the probe corpora above): eol conversion would silently move the
+# bytes the admission test reasons over. Protect it before any future pin.
+fixtures/doubts_workspace/*.md -text

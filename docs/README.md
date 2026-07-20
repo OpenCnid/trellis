@@ -102,6 +102,23 @@ system-level framing is the root `README.md`.
   law. Judges are the worked example — including the case where this
   house lost the principle across seven documents and built the roster
   the rules forbid.
+- **[`DOUBTS_WORKSPACE.md`](architecture/DOUBTS_WORKSPACE.md)** —
+  **DESIGN, PROPOSED July 20, 2026, nothing built.** The third REPL
+  type. Today `-1` is *residual* — the absence of support plus a label
+  (`contestedReason`); this makes it constructed. Support composes as a
+  cover, defeat as a search, so defeaters are never judges with an
+  inverted sign. Scoped by the owner as a general critique engine, not a
+  Trellis-only mechanism. **Read §11 and §12 before §2:** the keystone
+  corrosion bound (*a doubt may cite facts only*) was **falsified by
+  adversarial analysis the day it was written** (§11), then **partly
+  recovered** (§12) — its positive-citation core was empirically
+  validated against a real corpus of flat-earth arguments (13 of 14
+  rejected, `fixtures/doubts_workspace/`), and the relevance gap resolved
+  to a second layer (the applicability gate handles relevance; §2 handles
+  positivity). The bootstrap and cost gaps stay open; nothing is built
+  against §2 until they close. The test itself is a **derivation** test,
+  not a citation test — which is why it catches corrosive doubt, whose
+  defects are inferential.
 - **[`RESIDUAL_STREAM_SIDECAR.md`](architecture/RESIDUAL_STREAM_SIDECAR.md)**
   — **future project, out of scope** (recorded July 17, 2026): the
   functional-affect instrumentation-and-control record — the evidence
@@ -192,6 +209,17 @@ program (the `engineering-loop/` pattern):
   `test:judge-convocation`; no live judge run has ever executed and
   the paid queue is on hold).
 
+  **[`STANDING_MODEL.md`](product/epistemic-support/STANDING_MODEL.md)**
+  (RATIFIED as principle, July 20, 2026) is how a claim is *valued*: one
+  signed-ternary standing axis (`-1` doubt / `0` belief / `+1` fact),
+  user-gated ratification with a non-decaying in-address qualifier, and
+  the principle that **the panel never moves standing — it records
+  findings and the user gates**. Ratified as principle only; it
+  authorizes no build, and two carve-outs (§3 removes no code; the
+  corrosion bound is validated-core-only) mark where ratification stops.
+  Its `-1` tier is `docs/architecture/DOUBTS_WORKSPACE.md` (§14
+  ratification).
+
   **Read `JUDGE_COMPOSITION_GAME.md` first.** It is the ratified
   canonical record for how judges are composed — twenty rules that are
   binding program law, cited by number and never restated — and it is
@@ -201,6 +229,15 @@ program (the `engineering-loop/` pattern):
   registries, and **there is no default cast**. Several older records
   below encode a standing four-judge roster and are being corrected;
   where they and the game record differ, the game record governs.
+
+  `PRIMITIVE_ENCODING_AUDIT.md` (FINDINGS, July 19, 2026) is what that
+  correction has not yet reached: five verified statements about bytes
+  in this repository, each with the command that re-checks it. The
+  engine froze the two layers S10 presented as examples and dropped or
+  left decorative the two it called primitive — `orientation` is
+  specified four times in ratified `RECONCILIATION.md` and appears
+  nowhere in `src/`, and AB-7 has no enforcement code. Findings only;
+  every correction named there is an owner act by dated entry.
 
   `JUDGE_COMPOSITION_CEREMONY.md` (DESIGN, July 19, 2026) is how that
   governance cashes out in a promotion: judges, taxonomies and anchors

@@ -621,3 +621,25 @@ Unchanged by this entry: §3.1's R-29 hard compatibility gate, §3.3's
 cross-role vs same-jurisdiction resolution, and the §5 enforcement
 tables (§5.1 intake, §5.2 convocation), whose rows record observed
 behavior of shipped code.
+
+### 7.2 Standing-model pointer (dated entry — July 20, 2026, owner)
+
+A ratified standing model now sits above this record's verdict model:
+[`STANDING_MODEL.md`](STANDING_MODEL.md) (owner-ratified as principle,
+July 20, 2026). Two effects on this record, recorded here so the two do
+not silently disagree:
+
+- **The verdict enum `clean | drawback | abstain` (§2) becomes the
+  signed delta `+1 | −1 | 0`** of a single ternary standing axis
+  (doubt/belief/fact). The enum mechanics and the §5.1/§5.2 enforcement
+  tables are **unchanged** — this is a reframing of what the enum *is*,
+  not an edit to shipped behavior.
+- **Merit-refusal is superseded in principle** by user-gated
+  ratification (STANDING_MODEL §2): a value-mode candidate the panel
+  cannot dispute is recorded as user-gated rather than refused into
+  silence. No code changes under this entry; the supersession is a
+  gated build.
+
+STANDING_MODEL is ratified as *principle only* and authorizes no build;
+this record's shipped surfaces stand until a separately gated build
+changes them.
