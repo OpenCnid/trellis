@@ -129,7 +129,10 @@ governed by
 generalizes to,
 [COMPOSITION_FROM_PRIMITIVES](docs/architecture/COMPOSITION_FROM_PRIMITIVES.md):
 judges compose per context from parameter registries, and there is no
-default cast.
+default cast. The harness skills that carry these compositions out in an
+agent runtime — one sub-agent per judge, built from primitives at ceremony
+time — are versioned in [`skills/`](skills/README.md), each a derived copy
+kept honest against the record it descends from.
 
 **Where the humans are.** Every trust elevation is a human running a
 gated CLI: promotion (`npm run promote`), module registration
