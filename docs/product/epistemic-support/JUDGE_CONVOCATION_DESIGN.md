@@ -706,16 +706,48 @@ in order:
 2. **The per-run ceremony:** a presented proposal with the §10
    estimate re-printed, per-run approval under the ≤$5 cap, actuals
    reported after.
-3. **Four real manifests.** Hand-authored rubrics and ten-item anchor
+3. ~~**Four real manifests.** Hand-authored rubrics and ten-item anchor
    fixtures (FOUR_JUDGE_DESIGN §5 anchor discipline; AB-8 — no
    generation), committed byte-pinned, ingested extraction-free
    (§3.1), registered through the ceremony. J4's
    `targetModelIdentity` differs from J1–J3's by default (AB-9).
    Zero-paid; can land any time before the run as ordinary operator
-   work.
-4. **Real ratified candidates** through the queue (§3.4) — the
+   work.~~
+4. ~~**Real ratified candidates** through the queue (§3.4) — the
    docket. Zero-paid operator work; the promotion candidates the
-   owner actually cares about are the right first docket.
+   owner actually cares about are the right first docket.~~
+
+**Items 3 and 4 are SUPERSEDED and merged — dated entry, July 19, 2026
+(owner ruling, Session 71).** They sequenced roster-then-docket, which
+inverts the design: **composition follows the candidate.** Item 3's
+clause *"can land any time before the run as ordinary operator work"*
+is the specific instruction that misled Session 71 into authoring four
+rubrics with fixed taxonomies, byte-pinning them, and registering them
+as a standing roster — all rolled back. Note the dates: §11.2 was
+written July 19, one day **after** JUDGE_COMPOSITION_GAME §11 was
+ratified July 18. A ratified rule failed to propagate into the road map
+written beside it.
+
+**3–4 (merged). The ceremony, per candidate.** For each ratified
+candidate: an isolated agent characterizes the REPL's fact and belief
+spaces descriptively (the candidate's domain in scope, its identity not
+privileged); a composer builds each seat and its anchors from that
+characterization; the instantiation gates run (validity, coverage,
+overlap, falsifiability) with retry on failure; the composed judges are
+recorded write-once; judging proceeds on the forward pass, where the
+instantiated judges do see the candidate. Nothing is authored ahead of
+a ceremony and no composition is reused. Full design:
+[`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md).
+
+Consequences for this record's §3.1 that need their own design pass,
+NOT assumed here: what `rubricSha` hashes when the rubric is composed
+rather than committed; what a composed judge's evidentiary basis is and
+therefore what the existence gate checks; whether the graph carries one
+hook per ceremony rather than per judge, plus a durable `composer`
+entity as the contestable capability; what survives of the
+`judges:register` CLI; and how `support_sweep`'s sample-rate and budget
+semantics re-derive when there is no judge × candidate matrix to sample
+from.
 5. **The J3 live evidence gatherer** — embedding-backed retrieval
    over live blocks excluding the candidate's citation chain (rule 2;
    AB-11). The one small code increment option B deferred (its

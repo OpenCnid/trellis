@@ -569,3 +569,55 @@ drills were authored in Session 66 (July 17, 2026). The owner ratifies by
 dated entry here; until then the verdicts in §4 are proposals,
 FOUR_JUDGE_DESIGN.md and FOUR_JUDGE_BASIC_MODEL.md remain co-equal, and
 any consumer of this record must say so."*
+
+### 7.1 Composition supersession (dated entry — July 19, 2026, Session 71)
+
+**Owner ruling: there are no base judges and no default cast.** Judges,
+their registry selections, orientations, closed taxonomies, names and
+anchors all compose per context at ceremony time from the REPL's own
+fact and belief space. This record's §1 and §2 are hereby read as **one
+composition instance for an epistemic driving question** — the "minimal
+ecology instance" its own §1 already calls them — and not as a standing
+roster. Governing records:
+[`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md) §6 rule 4 (as
+superseded, §6.1),
+[`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md), and
+[`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md).
+
+Three consequences for this record specifically:
+
+**(a) §2's four completed definitions are an instance, not law.** Their
+per-role taxonomies (`unsupported_citation`…, `self_contradictory`…,
+`uncorroborated`…, `rubric_gamed`…) are what one epistemic composition
+looked like. They are not the classes a future composition must use,
+and nothing may byte-pin, register, or schema-encode them as such. What
+remains binding from §2 is the *schema* — the field set a judge
+definition must fill — not the fills.
+
+**(b) The §4 Routing-stack divergence is reopened; its own falsifier
+fired.** That row adopted S10 layers 3–4 and 6 while discarding layers
+1–2 and 5 (context signature, semantic retrieval,
+coverage/complementarity) as *"selection machinery a four-role fixed
+panel does not need,"* with the recorded falsifier: *"an ecology larger
+than one configuration per role — then the routing layers enter behind
+their own proposal."* Under per-context composition that condition is
+permanently met. **Layers 1, 2 and 5 enter now** (owner approval,
+July 19, 2026), behind their own proposal, with AB-3/AB-8 binding any
+weights or search. They are the machinery composing a cover over an
+arbitrary linguistic topology requires.
+
+**(c) The §1 pairwise-disjointness pin moves, and loosens.** The
+drill-pinned property — the four roles' qualified-parameter selections
+are pairwise disjoint, computed from the definitions and failing if any
+intersection is non-empty — was a static check over a fixed cast. It
+becomes a **composition-time gate** run over each composed cover before
+any judging. It also loosens: strict disjointness is not required of a
+cover, since opens normally overlap and gluing happens on the overlaps.
+The gate accepts either disjoint seats **or** overlapping seats with a
+declared gluing rule, which §3.2's R-30 no-global-section outcome
+already handles as a typed fork rather than a blend.
+
+Unchanged by this entry: §3.1's R-29 hard compatibility gate, §3.3's
+cross-role vs same-jurisdiction resolution, and the §5 enforcement
+tables (§5.1 intake, §5.2 convocation), whose rows record observed
+behavior of shipped code.

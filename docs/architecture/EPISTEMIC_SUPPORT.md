@@ -113,6 +113,35 @@ failure.)
 
 ## 5. The judge layer
 
+> **Dated amendment — July 19, 2026 (owner ruling, Session 71).**
+> **There is no default cast.** The four seats below are *slots*, each
+> earning its place by buying a blindness no other slot buys; the
+> judges filling them — names, purposes, registry selections,
+> orientations, closed taxonomies, and anchors — are **composed per
+> ceremony** from the REPL's own fact and belief space, because the
+> domain of the facts in the REPL is not known in advance. Read the
+> definite article below as naming the slots, never a roster.
+>
+> **Anchor discipline is amended in the same act.** The paragraph below
+> requires committed, byte-pinned ten-item fixtures refreshed only by
+> human ceremony. That presumes a standing judge with a taxonomy that
+> exists before the candidate does. **Anchors now compose at
+> instantiation** alongside the judge, with the categories that compose
+> them as the only prior; they are validated at composition time by the
+> validity gate (no all-pass/all-fail/all-abstain — R-02's protection,
+> which is taxonomy-agnostic and survives the move intact), and the
+> composing agent retries on gate failure. They are recorded write-once
+> in the promotion record, which is where "byte-pinned" now binds.
+> AB-8 was amended in the same act to separate composition (permitted,
+> and the design) from evolution/search over compositions (still
+> gated).
+>
+> Governing records:
+> [`JUDGE_COMPOSITION_GAME.md`](../product/epistemic-support/JUDGE_COMPOSITION_GAME.md)
+> §6 rule 4 (as superseded, §6.1),
+> [`JUDGE_COMPOSITION_CEREMONY.md`](../product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md),
+> [`COMPOSITION_FROM_PRIMITIVES.md`](COMPOSITION_FROM_PRIMITIVES.md).
+
 Judged events come from a panel of **differently-blind roles** —
 grounding, coherence, corroboration, and an audit role that judges
 judges rather than beliefs, sits outside every loop, and can only
