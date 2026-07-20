@@ -1888,10 +1888,11 @@ Repository state at handoff creation:
   `EL-REQ-APPROVAL-012`). Session 64 added no requirement and no row; the
   `EL-REQ-BOOT-006`/`007` evidence entries gained `activate.ts` and the two
   end-to-end command tests, count-preserving.
-- **Acceptance baseline:** `npm test` passes **1,305 tests across 114
-  files, all green** (Session 68's 1,290/113 plus Session 70's 15
-  judge-convocation pins in one new file; zero existing tests
-  changed). The focused engineering-loop command passes **371
+- **Acceptance baseline:** `npm test` passes **1,317 tests across 114
+  files, all green** (corrected July 19, 2026 — this line previously
+  read 1,305/114, which was written at Session 70 before PRs #135/#136
+  landed the harness-invariants pins; Session 71 verified 1,317/114 and
+  moved it by zero). The focused engineering-loop command passes **371
   tests across 23 files** on master. Draft 2020-12 catalog validation
   reports **12 features**. Build, Python, and diff checks pass
   (observed Session 70; Compose config unchanged since Session 66).
@@ -1964,6 +1965,24 @@ Repository state at handoff creation:
   registered, no selection ratified, no sweep run on the real store.
   **No live run has ever executed; the paid queue is ON HOLD**; the
   record's §11.2 carries the six-item road to option C.
+- **Session 71 (July 19, 2026) — the standing roster was built and
+  rolled back; composition-from-primitives adopted.** The session
+  executed §11.2 item 3 as written (four rubrics, four ten-item anchor
+  fixtures, extraction-free ingest, registration verified clean) and
+  the collaborator stopped it: **there are no base judges and no
+  default cast.** `judge_records` = 0 and graph hooks = 0 again; the
+  fixtures are deleted (`74b0741`, recoverable at `c9d417d`) and their
+  ingested copies tombstoned (snapshot `trellis#16`). Read
+  `JUDGE_COMPOSITION_GAME.md` first for anything judge-shaped, then
+  `COMPOSITION_FROM_PRIMITIVES.md` and `JUDGE_COMPOSITION_CEREMONY.md`.
+  Rule 4 is SUPERSEDED (game record §6.1) and AB-8 amended to separate
+  composition from search. **§11.2 items 3–4 are superseded and
+  merged** — do not execute them.
+- **Instrument gaps found, unactioned:** `judges:verify` reports
+  healthy while the bytes behind a `rubricSha` are gone;
+  `makeLiveJudge` builds `new OpenAI()` with no `base_url` so no
+  non-OpenAI identity can spawn; `judge_records` write-once is
+  delete-bypassable by direct SQL.
 - **EL-10 and EL-11 acceptance is not recorded.** Both are implemented; neither
   is accepted. The reachability blocker on EL-10 acceptance is CLOSED — the
   unreachable-producer set is empty, re-derived from the import graph every run —
@@ -1989,82 +2008,77 @@ docker compose config --quiet
 
 Work on one feature branch and target `master`.
 
-## 3. Session 71 problem statement
+## 3. Session 72 problem statement
 
 <build_objective>
 
-**Road-to-C staging (JUDGE_CONVOCATION_DESIGN §11.2 items 3–4): author
-the four real judge manifests — rubric documents and ten-item anchor
-fixtures — land them as verified substrate, register the roster
-through the ceremony, and file the first real docket. Zero-model,
-zero-paid.** The owner's stated aim is the eventual live-LLM test;
-after this session, the only things standing before it are the owner's
-two governance acts (the dated paid-queue re-opening; the per-run
-ceremony) plus the J3 live-gatherer increment that rides the run's own
-proposal (§11.2 item 5 — NOT this session).
+**Build the zero-paid instantiation-gate harness for the judge
+composition ceremony (JUDGE_COMPOSITION_CEREMONY.md §3 Stage 3 and §9):
+validity, coverage, overlap, and falsifiability, as deterministic
+engine surfaces with a drill that plants a composition each gate must
+refuse. Zero-model, zero-paid.** The gates are the part of the ceremony
+that can be proven before a single composer call is metered, and the
+owner's sequencing is explicit: the goal is not to over-test, this is
+the project's Landauer bill, and a solid harness comes first.
 
-- **Guardrail 15 TRIGGERS THIS SESSION, up front.** Rubric text and
-  anchor items are prompt-facing artifacts: invoke BOTH the
-  Prompt-Engineering and Hypershot protocols BEFORE authoring any byte
-  (JUDGE_CONTRACT_TEMPLATE §6–§7 carries the distilled rules if the
-  skills are unavailable). The rubric one-question-per-class checks
-  are already law — RECONCILIATION §2's per-role `rubric` lines; the
-  authored documents implement THOSE, never new law.
-- **Anchor discipline binds** (FOUR_JUDGE_DESIGN §5;
-  EPISTEMIC_SUPPORT §5): per role, one committed byte-pinned TEN-item
-  anchor fixture (five clear drawbacks, five clean positives); labels
-  per AB-4 as amended (model labeling permitted — but labeling is a
-  model call, so hand-label to stay zero-model this session; fixtures
-  pinned once labeled; refresh is a human ceremony); hand-authored
-  configurations only (AB-8). J4's `targetModelIdentity` differs from
-  J1–J3's by default (AB-9).
-- **Zero-paid landing:** rubric + anchor bytes ingest extraction-free
-  (the record §3.1 mold — fixture-path exclusion, or an explicit
-  `none` extraction policy; a plan echo showing extraction jobs > 0
-  means STOP); manifests cite the ingested hashes (`rubricSha` /
-  `anchorSetSha` = SHA-256 of the committed bytes);
-  `npm run judges:register -- --file <manifests.json>` runs the
-  ceremony against the real store; `npm run judges:verify` reads it
-  back consistent and uncontested.
-- **The first docket:** the candidates are the owner's to pick — ask
-  which beliefs or spans they want judged first, never invent them.
-  `judge:ratify show` each cut (the exact bytes with neighbors);
-  record the owner's Y + claim modes through the CLI flags (rule 15:
-  the recorded confirmation is the only source; these ratifications
-  are owner acts performed live in-session through the operator
-  surface).
+- **Read `JUDGE_COMPOSITION_GAME.md` FIRST** — ratified, its twenty
+  rules of §6 are binding program law cited by number, and it is the
+  most instructive document the program has. Then
+  `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` and
+  `docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md`.
+  Session 71 built a standing four-judge roster without reading any of
+  them and it was rolled back; the reading order in PROGRAM_CONTEXT §2
+  (items 0 and 0b) exists because of that.
+- **There are no base judges and no default cast.** Nothing in this
+  objective authors a rubric, a taxonomy, an anchor, or a judge. The
+  gates take a *composition* as input and decide whether it is a usable
+  cover. Scripted compositions are drill fixtures, and they are drill
+  fixtures for the gate machinery — never a roster, never registered,
+  never ingested as evidentiary bytes.
+- **Guardrail 15 triggers only if prompt bytes are authored.** The
+  gates are deterministic engine code and need none. If the session
+  authors any composer or characterizer prompt text, both prompt
+  protocols plus `judge-composition` come first (AGENTS.md rule 16).
+- **The four gates**, per the ceremony record §3 Stage 3: *validity* —
+  no seat's anchors are all-pass, all-fail, or all-abstain (R-02's
+  protection, rehomed from committed fixtures and taxonomy-agnostic);
+  *coverage* — the seats cover the characterized domain; *overlap* —
+  seats pairwise disjoint **or** overlapping with a declared gluing
+  rule (a cover normally overlaps; R-30 already handles overlap as a
+  typed fork, so strict disjointness is NOT required); *falsifiability*
+  — every seat has an abstention path and a way to fail.
+- **Refusals are typed and the drill plants one per gate.** A gate that
+  never fires is decoration (ceremony record §9 F3). The negative
+  control must exit non-zero naming each planted break, in the
+  `test:judge-convocation` mold.
 
 </build_objective>
 
-**Carried from Session 67 — one owner-owed verdict, preserved because a
-pre-registration that disappears unrecorded is the exact failure the
-program exists to prevent:**
+**Carried, owner-owed, still unrecorded:** the condensation-expectation
+verdict (Session 67; `IEG_TEACHINGS.md` beside finding 5, by dated
+note — confirmation, refutation, partial fit, or **referent absent**,
+and a non-fit is the informative outcome, R-30).
 
-**Pre-registered expectation (July 17, 2026, owner-flagged; verdict
-OWNER-OWED, still unrecorded as of July 18):** the phase transitions
-the paper finds were expected to be *condensation thresholds wearing
-another domain's clothes, collapsing onto the same layer* — the S13
-pattern (structure crystallizes when it can fund its own existence;
-thresholds are sharp, not smooth), per owner finding 5 and law L7.
-The verdict entry (in `IEG_TEACHINGS.md`, beside finding 5, by dated
-note) must record confirmation, refutation, partial fit with residue —
-or **referent absent**, if the emotions paper's findings do not
-present as phase transitions at all; a non-fit or an absent referent
-is the informative outcome and must not be reconciled by force (R-30).
+**Owner acts — surface them, never perform them:**
+(1) the condensation verdict above; (2) EL-10/EL-11 acceptance and the
+EL-07 unblock (Appendix B, unchanged); (3) the paid-queue re-opening
+plus a per-run ceremony, whenever the live test is wanted — **note the
+§10 estimate of ~$0.02–$0.06 per belief no longer holds**, because
+composition is N+ model calls before judging begins and must be
+re-estimated first.
 
-**Owner acts — status (surface them; do not perform them):**
-(1) the condensation-expectation verdict above — **still OWNER-OWED,
-unrecorded**.
-(2) the EL-10/EL-11 acceptance and EL-07 unblock ceremonies
-(Appendix B, unchanged).
-(3) **when the owner wants the live test:** the paid-queue re-opening
-by dated note + the per-run ceremony (JUDGE_CONVOCATION_DESIGN §11.2
-items 1–2; the run shape is the metered promotion-cost test). Not
-owed now; surfaced so it is never inferred.
-(4) **in-session owner acts this session:** the docket choices and
-each ratification Y + claim mode are the owner's recorded decisions,
-performed through the CLI — the session stages and transports, never
-decides.
+**Open and load-bearing — wants its own design record before any
+implementation:** the registration redesign. What `rubricSha` hashes
+when the rubric is composed rather than committed; what a composed
+judge's evidentiary basis is and therefore what the existence gate
+checks; whether the graph carries one hook per ceremony rather than per
+judge, plus a durable `composer` entity as the contestable capability;
+what survives of the `judges:register` CLI; and how `support_sweep`'s
+sample-rate and budget semantics re-derive when there is no
+judge x candidate matrix to sample from. The owner has approved the
+other four code items (the `role` enum, the `judges:verify` byte-pin
+check, `judge_spawn`'s base_url seam, and this gate harness) and asked
+that registration get deeper coverage first.
 
 ## 4. Required design
 
