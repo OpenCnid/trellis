@@ -1,22 +1,27 @@
-# In-repo harness skills
+# Project skills
 
-Versioned copies of the Claude Code (harness) skills this project depends
-on, kept in the repository so they are **inventoried with the collection a
-session consults**. This is the direct remedy for a failure the record
-paid for: a skill living only outside the repository was part of why
-Session 71 rebuilt the standing judge roster the rules forbid — without
-ever reading the game record or invoking the skill that would have stopped
-it ([`judge-composition/README.md`](judge-composition/README.md);
+The Claude Code skills this project depends on, versioned here at
+`.claude/skills/` — the project skill-load path — so Claude Code **loads
+them for anyone working in this repository** (no per-person install), and
+they are **inventoried with the collection a session consults**.
+Auto-loading is the onboarding half; inventory is the other, and the direct
+remedy for a failure the record paid for: a skill living only outside the
+repository was part of why Session 71 rebuilt the standing judge roster the
+rules forbid — without ever reading the game record or invoking the skill
+that would have stopped it
+([`judge-composition/README.md`](judge-composition/README.md);
 `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md §6.1`).
 
-## Authority — these are derived artifacts
+## Authority
 
-Each skill here is subordinate to a canonical authority, and on any drift
-**the authority wins and the copy is corrected**, never the reverse. A
-paraphrased copy is drift, not an implementation — consumers cite the
-record, they do not restate it. These copies also sit under the house
-ordering **code > glossary > prose**; they bind nothing that code or the
-glossary contradicts.
+Each skill here is subordinate to a canonical authority — its design record
+— and on any drift **the authority wins and the copy is corrected**, never
+the reverse. A paraphrased copy is drift, not an implementation — consumers
+cite the record, they do not restate it. These copies also sit under the
+house ordering **code > glossary > prose**; they bind nothing that code or
+the glossary contradicts. The owner keeps personal mirrors under
+`~/.claude/skills/` for use outside this repo; those and these are kept
+byte-identical, and neither is authority over the record.
 
 Versioning a skill here is an owner act
 (`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md §10`, open item

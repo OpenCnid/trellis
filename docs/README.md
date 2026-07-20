@@ -230,8 +230,8 @@ program (the `engineering-loop/` pattern):
   below encode a standing four-judge roster and are being corrected;
   where they and the game record differ, the game record governs. The
   harness skills that carry these compositions out in an agent runtime are
-  versioned at [`skills/`](../skills/README.md) — derived copies governed
-  by the records above.
+  versioned as project skills at [`.claude/skills/`](../.claude/skills/README.md)
+  — loaded for anyone working in the repo, governed by the records above.
 
   `PRIMITIVE_ENCODING_AUDIT.md` (FINDINGS, July 19, 2026) is what that
   correction has not yet reached: five verified statements about bytes

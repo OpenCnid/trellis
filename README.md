@@ -169,7 +169,8 @@ generalizes to,
 judges compose per context from parameter registries, and there is no
 default cast; the harness skills that carry these compositions out — one
 sub-agent per judge, built from primitives at ceremony time — are
-versioned in [`skills/`](skills/README.md). The `-1` (doubt) tier is a
+versioned as project skills in [`.claude/skills/`](.claude/skills/README.md),
+loaded for anyone working in the repository. The `-1` (doubt) tier is a
 *constructed* object — a defeater grounded in facts, not the mere absence
 of support — opening a general critique direction in which **support
 composes as a cover and defeat as a search**
