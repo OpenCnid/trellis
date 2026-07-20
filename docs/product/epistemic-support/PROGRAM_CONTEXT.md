@@ -40,6 +40,15 @@ before it and encode a fixed four-judge cast with per-role taxonomies.
 **Where they and the game record differ, the game record governs.**
 Reading them first is how the error happened.
 
+**0b. [`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md)**
+(DESIGN, July 19, 2026) — how a promotion is actually judged under
+that governance: the candidate is ratified, an isolated agent
+characterizes the REPL's fact and belief spaces descriptively, and the
+judges, their taxonomies and their anchors are all composed for that
+pool at ceremony time. Nothing is authored in advance, nothing is
+reused, and the composer never sees the candidate. Read it before
+building anything judge-shaped.
+
 1. [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)
    — the adopted doctrine record: the two-axis doctrine, the support
    state, plane geometry, the v1 arithmetic and metric grammar, the

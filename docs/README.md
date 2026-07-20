@@ -202,6 +202,12 @@ program (the `engineering-loop/` pattern):
   below encode a standing four-judge roster and are being corrected;
   where they and the game record differ, the game record governs.
 
+  `JUDGE_COMPOSITION_CEREMONY.md` (DESIGN, July 19, 2026) is how that
+  governance cashes out in a promotion: judges, taxonomies and anchors
+  are all composed at ceremony time from a descriptive characterization
+  of the REPL's fact and belief spaces, by a composer that never sees
+  the candidate.
+
   Then: `RECONCILIATION.md` (RATIFIED July 18, 2026) is the panel law
   and governs `FOUR_JUDGE_DESIGN.md` / `FOUR_JUDGE_BASIC_MODEL.md`
   wherever they differ — their co-equality formally ended;
