@@ -14,6 +14,17 @@ unchanged.
 **Amendment discipline:** dated entries in §2's application record;
 the §1 note is a received artifact and is never edited.
 
+**Neighbouring rule (pointer, July 19, 2026).** This record governs
+*which authority wins* — a collaborator's live instruction over the
+committed record. It does not govern *reading the record correctly in
+the first place*, which is the adjacent failure and has its own home:
+[`CODE_MEDIATED_TEXT.md`](CODE_MEDIATED_TEXT.md) §2.9 (a derivation
+never discharges an obligation to its source on a load-bearing act),
+with the internal authority ordering at `AGENTS.md` §1.5 and the
+operational rule at `AGENTS.md` 18. The two compose: §1.5 tells you
+which record governs, §2.9 tells you to go read it rather than recall
+it.
+
 ---
 
 ## 1. The scoping note (received July 17, 2026 — verbatim)

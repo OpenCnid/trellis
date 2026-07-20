@@ -84,6 +84,16 @@ paper (canonical)  →  density-chain note (lab working ground truth)  →  insp
   evidence class, and never satisfies a "read the primary" obligation.
   Notes are the fast orientation layer — load a tier, then verify at
   the source before anything load-bearing.
+  **This rule is the paper-instance of a general one** — a derived
+  representation never satisfies an obligation to its source on a
+  load-bearing act. Generalized July 19, 2026 to the repository's own
+  records, whose authority chain has the identical structure:
+  [`CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md) §2.9
+  carries the principle, `AGENTS.md` §1.5 the internal ordering and
+  rule 18 the operational form. The generalization was written after
+  the rule below was ratified here and then violated three times in one
+  session against in-repo records, which this scoping had never
+  covered.
 - **Inspirations entries are never evidence.** They are claims about
   *OpenCnid's work*, receipts-linked, explicitly labeled by influence
   kind. Authority runs one direction; an entry can't cite itself into

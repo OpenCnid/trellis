@@ -305,6 +305,8 @@ the authority.*
 | Judge op | drawback \| clean \| abstain; clean ≠ correct | `GLOSSARY.md` |
 | Judge composition | composed per context from primitives; no default cast; twenty rules are binding law | `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` |
 | Composition from primitives | frames invariant, instances never; an encoded instance has become law | `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
+| Derived-source substitution | a derivation never discharges an obligation to its source on a load-bearing act | `docs/architecture/CODE_MEDIATED_TEXT.md` §2.9 |
+| Authority ordering | ratified → adopted → design → compression → derived; live instruction outranks the record | `AGENTS.md` §1.5 |
 | Panel law | role definitions, R-29 gates, R-30 no-global-section; governs the older four-judge records | `docs/product/epistemic-support/RECONCILIATION.md` |
 | Evidence register | sources, claims, adoption bounds, by dated entry | `docs/product/epistemic-support/RESEARCH_MAP.md` |
 | IEG | collaborator's exchange-geometry frame; design vocabulary only (AB-1) | `docs/product/epistemic-support/IEG_TEACHINGS.md` |

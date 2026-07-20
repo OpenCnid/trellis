@@ -163,6 +163,16 @@ repository under any label would keep anchoring every future judge to
 those four. They remain in version history at `c9d417d`, which is
 sufficient; preserving them anywhere else was over-caution.
 
+**The shape of the failure that made it reachable has its own name and
+home:** *derived-source substitution* — acting on a compression of a
+governing record instead of retrieving the record, on a load-bearing
+act. It is the pillar's "never copies" applied to authority rather than
+bytes, and it is stated normatively in
+[`CODE_MEDIATED_TEXT.md`](CODE_MEDIATED_TEXT.md) §2.9, with the
+operational rule at `AGENTS.md` 18 and the authority ordering it
+depends on at `AGENTS.md` §1.5. It occurred three times in this one
+session; the instances below are the first and second.
+
 Three failures made it reachable:
 
 1. **The session never read the game record**, whose rule 4 forbids

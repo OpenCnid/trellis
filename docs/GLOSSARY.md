@@ -207,6 +207,15 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   Belief-facing taxonomies close **per composition**, not per role
   (`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` §6
   rule 4, binding program law); the audit taxonomy is invariant.
+- **Derived-source substitution** — acting on a compression of a
+  governing record (a handoff, a design record, a skill, a memory, a
+  recollection) instead of retrieving the record, on a load-bearing
+  act: deciding what to build, or stating what the record establishes.
+  The derivation is fluent and self-consistent, so nothing signals the
+  loss; the resulting work passes every check because the checks derive
+  from the same misreading. Canonical record:
+  `docs/architecture/CODE_MEDIATED_TEXT.md` §2.9; operational rule
+  `AGENTS.md` 18; authority ordering `AGENTS.md` §1.5.
 - **Composition ceremony** — the per-candidate sequence that judges one
   promotion: ratify the candidate, characterize the REPL's fact and
   belief spaces, compose each seat and its anchors for that pool, run
