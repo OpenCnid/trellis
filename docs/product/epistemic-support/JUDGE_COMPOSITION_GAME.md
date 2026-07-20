@@ -389,3 +389,24 @@ by silent edit.
 — the twenty rules as binding program law (§6), the harness-shape notes
 (§9), and this record's canonical-over-skill authority — are ratified by
 the owner's dated entry here; until then any consumer must say so."*
+
+## 12. Standing-model pointer (dated entry — July 20, 2026, owner)
+
+A ratified standing model — [`STANDING_MODEL.md`](STANDING_MODEL.md),
+owner-ratified as principle July 20, 2026 — reframes this record without
+editing it:
+
+- **The twenty rules of §6 bind unchanged.** No rule is superseded by
+  the standing model; they are cited by number as before.
+- **The §6 disposition grammar is reframed by STANDING_MODEL §3.** If
+  the panel never moves standing, the dispositions that *act* (promote,
+  merit-refuse) are **user acts the engine records**, not engine acts
+  the user reviews. This changes who holds the pen, not the grammar's
+  vocabulary. It is a *ratified principle* and an *unbuilt reduction*
+  (STANDING_MODEL §5).
+- **Claim modes (§7 ledger uses them) are ratified as a first
+  vocabulary, not a primitive** (STANDING_MODEL §4). The §7 ledger rows
+  stand; the reclassification does not rewrite them.
+- **The §7 ledger replays under the ternary with no verdict flipped** —
+  recorded in STANDING_MODEL §1 as corroboration that preceded
+  ratification.

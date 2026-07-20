@@ -16,6 +16,13 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   "provenance-preserving GraphRAG" now names the Tier-1/2 substrate
   viewed from the retrieval angle, not the system (reframed July 9,
   2026; root README, "What Trellis is").
+- **Target function (ratified as principle July 20, 2026)** — what
+  Trellis *is for*, from which its primitives derive: **a personalized
+  composable expert system whose expertise is the user's data** — not
+  strictly a coding tool, not strictly a RAG system. Its load-bearing
+  consequence: the user is the domain authority, so standing moves by a
+  user gate wherever no fact compels it. Canonical:
+  [STANDING_MODEL.md](product/epistemic-support/STANDING_MODEL.md) §0.
 - **RLM (Recursive Language Model)** — the MIT CSAIL formulation (see
   [FLYWHEEL_EXPLAINER.md](benchmarks/FLYWHEEL_EXPLAINER.md)): a language model
   given a Python REPL that treats context as data in the persistent namespace
@@ -37,6 +44,22 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
 - **sourceNodeIds** — the array, carried by every semantic node/edge, of
   SHA-256 Merkle AST hashes (`^[0-9a-f]{64}$`, rows in `ast_nodes`) the fact
   was derived from; the only values with provenance standing.
+- **Standing / signed ternary (ratified as principle July 20, 2026;
+  not built)** — a claim's value on one axis: **`-1` doubt / `0` belief
+  / `+1` fact**. Mode, verdict and standing are one vocabulary at two
+  times — a seat returns a *signed delta*, and standing moves only by a
+  user gate. Canonical:
+  [STANDING_MODEL.md](product/epistemic-support/STANDING_MODEL.md).
+- **Doubt / Objection / Defeater (ratified as vocabulary July 20, 2026;
+  not built)** — the `-1` tier: a **doubt** is the standing; an
+  **objection** is the fact-grounded object that attacks a claim
+  (sustained / overruled / outstanding); a **defeater** is the composed
+  instrument that searches for objections. A doubt must cite facts, and
+  enters the workspace only if it survives the fact base — a fact-refuted
+  doubt held anyway is delusion. Canonical:
+  [DOUBTS_WORKSPACE.md](architecture/DOUBTS_WORKSPACE.md). Under this
+  vocabulary **Contested** (below) becomes a *derived* predicate — "carries
+  outstanding objections?" — once built.
 - **Contested** — the belief state of a fact whose cited source bytes were
   orphaned or whose verification failed: excluded from retrieval, preserved
   with audit history, recoverable by re-derivation from live bytes.
