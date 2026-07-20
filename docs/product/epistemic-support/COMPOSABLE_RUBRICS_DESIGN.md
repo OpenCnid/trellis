@@ -106,7 +106,25 @@ own measured proposal).
 
 ### 2.3 Adaptive alignment (the selection)
 
-"Adaptively-aligned" means the rubric *selection* fits the claim, not
+> **Amended July 19, 2026 (owner ruling, Session 71).** The paragraph
+> below defines the adaptive step as **selection from pre-registered
+> compositions**. That is superseded: rubrics are **composed for the
+> context at ceremony time**, and there is no registered set to select
+> from — a mechanism that picked a stored composition for a new
+> candidate would reintroduce the standing roster under another name.
+> What survives is the paragraph's *properties*: logged, auditable, and
+> invisible to the judged model. What changes is where they attach —
+> the audited artifact is the **composed bytes**, not a selection rule,
+> and the **composer's prompt is a versioned artifact** because the
+> audit seat reads it. Determinism does not survive: composition is a
+> model call, so the audit surface moves from "verify the rule that
+> chose" to "audit what was composed." §4 step 4's instruction to
+> author one hand-authored rubric per role is withdrawn — it is what
+> Session 71 followed to build the roster that was rolled back. See
+> [`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md).
+
+*(Superseded text, retained for the record:)* "Adaptively-aligned"
+means the rubric *selection* fits the claim, not
 that the rubric mutates: for a given judged item, the harness selects a
 registered composition by deterministic, logged rules over the item's
 observable coordinates — its claim-kind position when that plane

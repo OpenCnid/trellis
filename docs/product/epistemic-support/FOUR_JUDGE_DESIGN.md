@@ -187,7 +187,24 @@ flowchart LR
 
 ## 5. Anchors and lifecycle
 
-Per role: one committed, byte-pinned **ten-item anchor fixture**
+> **Amended July 19, 2026 (owner ruling, Session 71).** Anchors are
+> **per composition, not per role**, and they **compose at
+> instantiation** from the domain's own content space — the categories
+> that compose them are the only prior. There is no committed
+> byte-pinned fixture authored ahead of a candidate, because the
+> taxonomy an anchor calibrates does not exist until a composition
+> does. The ten-item five-and-five shape survives; where it binds
+> moves. Validation moves with it: the validity gate (no
+> all-pass/all-fail/all-abstain) runs at composition time and the
+> composing agent retries on failure, which is where R-02's protection
+> actually lives — it is taxonomy-agnostic and survives the move
+> intact. "Byte-pinned" now binds on the write-once promotion record
+> that stores the composed anchors. AB-8 was amended in the same act.
+> See [`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md)
+> §3 and §9.
+
+*(Superseded text, retained for the record:)* Per role: one committed,
+byte-pinned **ten-item anchor fixture**
 (five clear drawbacks, five clean positives — the S1 dev-set shape;
 R-04 supports sufficiency at this size), labels human or mechanical
 (AB-4). Selection guards are mandatory and fail closed: a judge

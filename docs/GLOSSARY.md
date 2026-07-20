@@ -207,6 +207,24 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   Belief-facing taxonomies close **per composition**, not per role
   (`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` §6
   rule 4, binding program law); the audit taxonomy is invariant.
+- **Composition ceremony** — the per-candidate sequence that judges one
+  promotion: ratify the candidate, characterize the REPL's fact and
+  belief spaces, compose each seat and its anchors for that pool, run
+  the instantiation gates, judge on the forward pass, audit, record.
+  Nothing is authored ahead of it and no composition is reused.
+  Canonical record:
+  `docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md`.
+- **Characterization** — the descriptive (never expository) summary of
+  the fact and belief spaces that a composer builds criteria from,
+  produced by an isolated agent. The candidate's domain is in scope;
+  its identity is not privileged — **anonymity, not exclusion**, since
+  excluding the claim's region would leave the composed cover with a
+  hole exactly where the candidate sits.
+- **Cover** — the composed set of judge seats over a claim's linguistic
+  topology. Constructed for the space in front of it, required to cover
+  it, never carried between topologies; seats are pairwise disjoint or
+  overlap with a declared gluing rule. The number of seats is not fixed
+  by the design.
 - **Judge composition** — building a judge as a sparse selection from
   the four parameter registries plus claim modes, orientation, a closed
   taxonomy, and a declared blindness, composed for the context in front
