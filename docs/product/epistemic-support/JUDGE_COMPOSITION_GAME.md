@@ -230,12 +230,41 @@ cannot. That last point is collaborator direction (M. Murphy,
 owner-approved July 19, 2026) and is the reason supersession was chosen
 over an additive note.
 
-**Standing of the underlying thesis, recorded so the law does not
-overstate it.** Composition-from-primitives remains
-*corroborated-by-failed-counterexample, conditionally* (§5), carrying
-its named empirical falsifier: representational holism. Rule 4 is
-binding program law; the thesis it rests on is still under test, and a
-holism result would reopen it.
+**Standing of the underlying thesis — stated precisely, because a
+first draft of this entry blurred it.** Two distinct claims sit under
+rule 4 and they do not have the same standing.
+
+**(a) Primitives are load-bearing for governability — corroborated,
+not open.** §5's adversarial clean-context attack ran five candidate
+paradigms (learned reward models, prediction markets, proof checkers,
+evolutionary selection, common-law precedent) and **every one
+fractured along the same seam: *primitive-free ⟹ ungovernable or
+non-universal*.** Remove the primitives and the system stops being
+governable, or stops being universal. That is a result the program
+already has, by failed counterexample. The "conditionally" in §5's
+verdict is narrow and attaches elsewhere — the thesis is *contentful*
+only under a strong reading of "governable" plus a substantive-
+reduction guardrail. It does not put (a) in doubt.
+
+**(b) Decomposability is the open bet.** The named falsifier,
+representational holism, tests whether judgment-relevant structure in
+learned judges decomposes into interpretable dimensions. Per §8 that
+same bet underwrites the refined functional-infinity entry and the
+residual-stream sidecar direction; the owner's ruling is that it is
+**tested empirically, not argued**, and all three settle together.
+
+So rule 4 does not rest on an untested framework. It rests on (a),
+which is corroborated, while (b) is the flank the program is
+deliberately pointed at. A holism result would reopen the
+decomposability claims — it would not restore primitive-free judging as
+governable.
+
+**Not adopted here:** the analyst's steelman formulation (*no judging
+system is simultaneously universal, governable, and primitive-free;
+composition-from-primitives is the unique design occupying universal ∩
+governable*) remains **TABLED as a claimant-optional refiling** (§10
+item 1) — the decision is the collaborator's, and rule 15 cuts both
+ways. This entry cites the test result, not the steelman.
 
 **Mechanical note.** The rule keeps its number. No source file cites
 rule 4 (`judge_intake_prompt.ts` cites 6 and 16, `judge_prereg.ts`
