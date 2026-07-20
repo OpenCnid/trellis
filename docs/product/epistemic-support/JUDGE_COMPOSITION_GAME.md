@@ -175,7 +175,7 @@ superior). The decision belongs to the collaborator.
 1. **Decompose before composing** — applicability gates cannot run on a conjunction; split compound candidates into labeled sub-claims with modes first.
 2. **Two blindnesses, never conflated** — evidence-facing (the candidate's citation chain is not corroboration) vs verdict-facing (no belief-facing judge sees another's output; that is the audit's seat alone). Corroboration base = record − citation chain + allowlist.
 3. **The driving question sets registry access** — epistemic questions keep Emotional/Ethical out (AB-7); aesthetic or human-impact questions pull them in, with the user's own corpus as the standard, never the judge's taste.
-4. **Belief-facing taxonomies close per composition; the audit taxonomy is invariant** — how judges fail does not depend on what they judge.
+4. **Belief-facing composition is total; only the audit seat's failure taxonomy is invariant.** A judge's name, purpose, registry selections, orientation, closed taxonomy, and anchors are all composed for the context at ceremony time. The audit seat composes the same way — its name and angle are load-bearing, and what it does depends on what it is judging the judges judge — while how judges fail does not depend on what they judge, so its failure taxonomy alone stays invariant. **Names are a composition surface, not labels:** an adaptive name is a surface over which the context clusters, and promotes more structural coherence than a generic one. *(Superseding text — dated entry §6.1, July 19, 2026; the original wording is preserved there.)*
 5. **Allowlists are user-shaped** — authoritative sources belong to the user's data, not the panel.
 6. **Authorship is never a parameter** — claimant-masked always; audit runs claimant-masked replays; drift in either direction (courtier or contrarian) is drift.
 7. **Value-mode candidates compose as declarations, not endorsements** — merit refuses on all-jurisdiction-abstain; the panel records the user's values, never ratifies them.
@@ -192,6 +192,84 @@ superior). The decision belongs to the collaborator.
 18. **Intent-readings are judged against the garble** — indeterminate bytes are the baseline; any determinate repair is a labeled strengthening even when all rival parses are equally strong.
 19. **Construal conflicts compose like overlaps** — the same ambiguity resolved oppositely by isolated seats is a typed fork in the record, never a silent blend (no-global-section, one layer up).
 20. **Non-spawn rationales are demonstrated, not asserted** — "untestable as composed" is shown against the pool's contents, never solely by the party whose filing created the unreachability; pre-registrations need a registry the audit seat can timestamp.
+
+### 6.1 Rule 4 superseded (dated entry — July 19, 2026, Session 71)
+
+**Original wording, preserved:**
+
+> 4. **Belief-facing taxonomies close per composition; the audit
+>    taxonomy is invariant** — how judges fail does not depend on what
+>    they judge.
+
+**Why it was superseded rather than annotated.** The original is a
+*lossy distillation of this record's own evidence*. §2 and §3 show the
+three hands varying names, purposes, selections, orientations and
+taxonomies together — the same four-role skeleton producing
+water-chemistry, comedy and methodology panels — while the rule
+distilled only the taxonomy half of that. A rule narrower than the
+demonstration it was drawn from understates its own source, and a
+consumer reading the rule alone would conclude that everything except
+belief-facing taxonomies is fixed.
+
+That conclusion was reached in practice. Session 71 authored four
+judges with fixed names and per-role taxonomies, byte-pinned them and
+registered them as a standing roster, working from the ratified records
+without contradiction from any of them. The roster was rolled back and
+the fixtures deleted. Holding the original wording stable for citation
+stability would have preserved the exact encoding that produced the
+error — and this program's own finding is that machinery and encodings
+beat the prose around them
+([`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md)).
+
+**What the new wording adds:** composition covers name, purpose,
+selections, orientation, taxonomy and anchors — not taxonomy alone; the
+audit seat composes like the others except in its failure taxonomy; and
+**the name is a composition surface**, a place where context clusters,
+so an adaptive name buys structural coherence a generic slot label
+cannot. That last point is collaborator direction (M. Murphy,
+owner-approved July 19, 2026) and is the reason supersession was chosen
+over an additive note.
+
+**Standing of the underlying thesis — stated precisely, because a
+first draft of this entry blurred it.** Two distinct claims sit under
+rule 4 and they do not have the same standing.
+
+**(a) Primitives are load-bearing for governability — corroborated,
+not open.** §5's adversarial clean-context attack ran five candidate
+paradigms (learned reward models, prediction markets, proof checkers,
+evolutionary selection, common-law precedent) and **every one
+fractured along the same seam: *primitive-free ⟹ ungovernable or
+non-universal*.** Remove the primitives and the system stops being
+governable, or stops being universal. That is a result the program
+already has, by failed counterexample. The "conditionally" in §5's
+verdict is narrow and attaches elsewhere — the thesis is *contentful*
+only under a strong reading of "governable" plus a substantive-
+reduction guardrail. It does not put (a) in doubt.
+
+**(b) Decomposability is the open bet.** The named falsifier,
+representational holism, tests whether judgment-relevant structure in
+learned judges decomposes into interpretable dimensions. Per §8 that
+same bet underwrites the refined functional-infinity entry and the
+residual-stream sidecar direction; the owner's ruling is that it is
+**tested empirically, not argued**, and all three settle together.
+
+So rule 4 does not rest on an untested framework. It rests on (a),
+which is corroborated, while (b) is the flank the program is
+deliberately pointed at. A holism result would reopen the
+decomposability claims — it would not restore primitive-free judging as
+governable.
+
+**Not adopted here:** the analyst's steelman formulation (*no judging
+system is simultaneously universal, governable, and primitive-free;
+composition-from-primitives is the unique design occupying universal ∩
+governable*) remains **TABLED as a claimant-optional refiling** (§10
+item 1) — the decision is the collaborator's, and rule 15 cuts both
+ways. This entry cites the test result, not the steelman.
+
+**Mechanical note.** The rule keeps its number. No source file cites
+rule 4 (`judge_intake_prompt.ts` cites 6 and 16, `judge_prereg.ts`
+cites 11 and 20, `support_sweep.ts` cites 12, 14 and 20), so the
+supersession causes no citation churn.
 
 ## 7. The final ledger (both runs composed)
 
@@ -263,8 +341,15 @@ authorization; nothing here authorizes build):
    on the functional-infinity entry (§7 row 2).
 3. The narrowly scoped corroboration spawn on the keystone-routing
    question (re-run audit finding F5) — available on request.
-4. In-repo copy of the `judge-composition` skill, if the owner wants
-   it versioned here (drift rule in the header governs either way).
+4. ~~In-repo copy of the `judge-composition` skill, if the owner wants
+   it versioned here (drift rule in the header governs either way).~~
+   **CLOSED July 19, 2026 (Session 71)** — versioned at
+   `skills/judge-composition/`, with a README recording that this
+   record is canonical over it and that drift resolves toward the
+   record. Landing it in-repo was itself the remedy: a skill outside
+   the repository is not part of the collection a session inventories,
+   and Session 71 authored four judge rubrics without consulting either
+   the skill or this record.
 5. Formal eval round + description-optimization pass for the skill
    (the game itself served as iterations 1–4 with two human graders).
 

@@ -24,6 +24,33 @@ see the decision record (§6).
 
 ## 2. Reading order (program-local)
 
+**0. READ FIRST —
+[`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md)** (RATIFIED
+July 18, 2026, §11; its twenty rules of §6 are binding program law,
+cited by number and never restated). The canonical record for how
+judges are composed, and the most instructive document this program
+has: judges are composed **per context** from primitives, and **there
+is no default cast**. Its companion is
+[`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md),
+which states the principle generally and records what it cost when a
+session built the standing roster the rules forbid.
+
+This item is numbered 0 because several records below were authored
+before it and encode a fixed four-judge cast with per-role taxonomies.
+**Where they and the game record differ, the game record governs.**
+Reading them first is how the error happened.
+
+**0b. [`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md)**
+(DESIGN, July 19, 2026) — how a promotion is actually judged under
+that governance: the candidate is ratified, an isolated agent
+characterizes the REPL's fact and belief spaces descriptively, and the
+judges, their taxonomies and their anchors are all composed for that
+pool at ceremony time. Nothing is authored in advance and nothing is
+reused. The candidate's *domain* is in scope for the composer while its
+*identity* is withheld — anonymity, not exclusion — and the
+instantiated judges do see the claim, on the forward pass. Read it
+before building anything judge-shaped.
+
 1. [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)
    — the adopted doctrine record: the two-axis doctrine, the support
    state, plane geometry, the v1 arithmetic and metric grammar, the
@@ -39,9 +66,13 @@ see the decision record (§6).
    bounds register** — the live rules bounding what may be built on
    which evidence.
 3. [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md) — the judged-input
-   architecture: four differently-blind roles (grounding, coherence,
-   corroboration, audit), engine-side composition, judges as
-   contestable capabilities.
+   architecture: four differently-blind role *slots* (grounding,
+   coherence, corroboration, audit), engine-side composition, judges as
+   contestable capabilities. Read it with
+   [`RECONCILIATION.md`](RECONCILIATION.md) beside it — RATIFIED
+   July 18, 2026, and it governs this record wherever the two differ.
+   Both describe the four as "a minimal ecology instance" and then
+   operate on them as a standing roster; item 0 governs that tension.
 4. [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md) — the
    prompt-facing hypershot frames and rubric-authoring rules.
 5. [`ORACLE_DRILL_PROPOSAL.md`](ORACLE_DRILL_PROPOSAL.md) — the first
@@ -330,3 +361,54 @@ items above predate it and keep their standing there **by reference**
 — C2(b) points here rather than duplicating. Neither queue is a work
 order: the active objective is always `HANDOFF.md` §3, and sequencing
 is an owner ruling — see the precedence note at the head of that §5.)*
+
+### 6.1 Composition rulings (dated entry — July 19, 2026, Session 71)
+
+Seven decisions, made by the owner and the collaborator in session,
+recorded here because the program's decision record is where rulings
+live and a resolution that survives only in conversation is the failure
+this program exists to prevent. Full design:
+[`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md).
+
+1. **There are no base judges and no default cast.** Every judge is a
+   special case composed at ceremony time from the REPL's own fact and
+   belief space. The four roles that appear throughout this program's
+   older records were **teaching examples**, composed to explain the
+   model to an earlier session, which were then promoted to a
+   standardized cast across seven documents. That was never the intent.
+2. **What the composer sees.** A *descriptive, not expository* summary
+   of the fact and belief spaces, produced by an isolated agent — the
+   nature of the pool being promoted from and to.
+3. **Anonymity, not exclusion.** The domain of the claim is known and
+   in scope; the claim under test is **not privileged** in that
+   summary. Excluding it would leave the composed cover with a hole
+   exactly where the candidate sits.
+4. **Judges see the candidate on the forward pass.** The blindness is a
+   composition-time property; instantiated judges are shown the claim
+   and judge it. Criteria that cannot have been shaped to the claim are
+   then applied to it.
+5. **Compositions are records, never a library.** Stored write-once as
+   the account of why one promotion was decided; never selected from or
+   reused. The ceremony polls the REPL for fresh state every time.
+6. **The composer is the durable contestable capability**, not the
+   judge. Its prompt is versioned and the audit seat reads it. If
+   evidentiary bytes are missing at ceremony time the judge cannot
+   ground a verdict, so there is no promotion and there is a
+   transparent report; bytes dying *after* promotion is the ordinary
+   invalidation sweep contesting the belief, untouched machinery.
+7. **Anchors compose at instantiation** and are validated there, with
+   agent retry on gate failure.
+
+Records amended in the same act, each by its own dated entry:
+JUDGE_COMPOSITION_GAME §6 rule 4 (superseded, §6.1) and §10 item 4
+(closed); RESEARCH_MAP AB-8; RECONCILIATION §7.1; EPISTEMIC_SUPPORT §5;
+JUDGE_CONVOCATION_DESIGN §11.2 items 3–4 (merged); plus
+JUDGE_CONTRACT_TEMPLATE §1, COMPOSABLE_RUBRICS_DESIGN §4, and
+FOUR_JUDGE_DESIGN §5 as proposal-status corrections.
+
+**Open, and load-bearing:** the registration redesign (what `rubricSha`
+hashes when the rubric is composed; what a composed judge's evidentiary
+basis is; one graph hook per ceremony plus a durable `composer` entity;
+what survives of `judges:register`; how `support_sweep`'s sampling
+re-derives with no judge × candidate matrix) wants its own design
+record before implementation.

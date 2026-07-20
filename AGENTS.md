@@ -56,6 +56,47 @@ Directory-scoped `AGENTS.md` files add local rules; the nearest one to
 the file you are editing also applies (`src/frontend/AGENTS.md` exists
 today).
 
+**Do not skip step 2's mental-model half to reach the objective.**
+`HANDOFF.md` §1 is the living architectural model and §3 is the current
+task; a session that reads §2/§3 and skips §1 gets an objective without
+a model. Recorded because it happened: Session 71 skipped §1, which is
+where the pointer to the ratified record governing its work lived, and
+built the wrong object.
+
+## 1.5 Authority ordering (which record wins)
+
+The navigation map below says where things live. It does not say which
+one governs when two disagree — and a reader who assumes the document
+in front of them is the top of the chain will build confidently against
+a superseded one. The ordering:
+
+```
+ratified record  →  adopted doctrine  →  design record  →  HANDOFF / roadmap compression  →  skill, memory
+```
+
+- **Ratified and adopted records win**, and are amended only by dated
+  entry, never by silent edit. A record's own header carries its
+  standing — read it before treating the body as law.
+- **A design record leads its implementation** (document-driven design)
+  but does not outrank a ratified record it was written under.
+- **`HANDOFF.md` and `TRELLIS_ROADMAP.md` are compressions.** They are
+  the single source of *volatile* truth — branch state, counts, the
+  current objective — and they are downstream of the records they
+  summarize. A task instruction in `HANDOFF.md` §3 that conflicts with
+  a ratified record is drift in the handoff, not new law. This has
+  happened: `JUDGE_CONVOCATION_DESIGN.md` §11.2 was written one day
+  after the rule it contradicted was ratified.
+- **Skills and memories are derived artifacts.** Where a skill and its
+  record drift, the record wins and the skill is corrected. A memory is
+  a private note about a past state, never authority.
+- **A collaborator's clear, current instruction in the live session
+  outranks the committed record** — `docs/architecture/SESSION_GOVERNANCE.md`,
+  scoped July 17, 2026.
+
+Standing is shown in the navigation map's third column so it is visible
+at the index, not only inside each file. Rule 18 governs how you consume
+this chain.
+
 ## 2. Navigation map (where things live)
 
 | Path | What lives there |
@@ -80,10 +121,39 @@ today).
 | `docs/architecture/` | Living doctrine (design records lead implementation) |
 | `docs/benchmarks/` | Measured evidence — dated reports behind every claim |
 | `docs/operations/` | Runbook |
-| `docs/product/` | PRDs and benchmark specs (planning history) |
+| `docs/product/` | PRDs, benchmark specs, and ACTIVE programs — `epistemic-support/` is live work, not history. Building anything judge-shaped starts at `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` (ratified; its twenty rules are binding program law) and `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
+| `skills/` | Composition skills versioned in-repo (`judge-composition`); the record each derives from is canonical over it |
 | `docs/archive/` | Preserved history (verbatim, never edited) |
 | Root: `HANDOFF.md`, `TRELLIS_ROADMAP.md`, `API_REFERENCE.md` | Session prompt / sequencing + dated ledger / HTTP + SSE contract |
 | `data/`, `fixtures/` | Committed durable corpora (byte-pinned) / test fixtures (never extracted) |
+
+### 2.1 Standing of the load-bearing records
+
+The map above says where things live; §1.5 says which wins. This says
+what each one **is**, because standing was invisible at the index and a
+superseded design record sat in every reading path looking exactly as
+authoritative as the ratified record governing it.
+
+**Each file's own header is the authority on its standing** — this
+table is an index, kept current as records are ratified, not a
+substitute for reading the header.
+
+| Record | Standing |
+|---|---|
+| `docs/architecture/CODE_MEDIATED_TEXT.md` | **RATIFIED** pillar (July 9, 2026) — the model never counts, never copies; §2.9 extends it to authority |
+| `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` | **RATIFIED** (July 18, 2026, §11) — its twenty §6 rules are **binding program law**, cited by number, never restated. Read first for anything judge-shaped |
+| `docs/product/epistemic-support/RECONCILIATION.md` | **RATIFIED** (July 18, 2026, §7) — panel law; governs FOUR_JUDGE_DESIGN and FOUR_JUDGE_BASIC_MODEL where they differ |
+| `docs/architecture/EPISTEMIC_SUPPORT.md` | **ADOPTED** doctrine (July 16, 2026) — amended by dated entry |
+| `docs/RESEARCH_NOTES_COLLECTION.md` §3.1 | **RATIFIED** (July 19, 2026) — consultation and repair for external sources |
+| `docs/architecture/SESSION_GOVERNANCE.md` | **SCOPED RULING** (July 17, 2026) — live instruction vs committed record |
+| `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` | **FOUNDATIONAL LESSON** (July 19, 2026) — no default instances; authorizes no build |
+| `docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` | **DESIGN, GOVERNED BY RECONCILIATION** — the co-equality with FOUR_JUDGE_BASIC_MODEL formally ended July 18, 2026; read them together |
+| `docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md` | **SOURCE ARTIFACT** (S10), committed verbatim — takes addenda, not edits |
+| `docs/product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md`, `COMPOSABLE_RUBRICS_DESIGN.md` | **PROPOSED — DESIGN ONLY**; both carry July 19, 2026 corrections |
+| `docs/product/epistemic-support/JUDGE_INTAKE_DESIGN.md`, `JUDGE_CONVOCATION_DESIGN.md` | **IMPLEMENTED** (slices 1 and 2); §6 rows merged into RECONCILIATION §5.1/§5.2 |
+| `docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md` | **DESIGN — nothing built** (July 19, 2026) |
+| `HANDOFF.md`, `TRELLIS_ROADMAP.md` | **COMPRESSIONS** — volatile truth (branch state, counts, current objective), downstream of the records they summarize |
+| `skills/`, agent memory | **DERIVED** — the record wins on drift; a memory is never authority |
 
 ## 3. How things connect (the one-paragraph system)
 
@@ -194,6 +264,58 @@ start. Worked instances of the frame:
     green tests, a seeder whose request digest nobody could produce,
     and both acceptance-ledger recovery ceremonies with no entrypoint
     at all.
+16. **Prompt authoring runs the protocols** (permanent; owner-directed
+    July 13, 2026). ANY session that creates or edits prompt text — a
+    kernel or module addendum, an RLM task text, an agent or sub-agent
+    instruction, an extraction or classification prompt, an output
+    schema, a hypershot frame, a judge rubric or anchor item — MUST
+    FIRST invoke BOTH the `prompt-engineering` and `hypershot-protocol`
+    skills and author against their loaded guidance. A process gate
+    checked before the bytes are written, never a claim made in prose
+    after. Judge-shaped work adds `judge-composition`. (Restated here
+    because it is permanent and `HANDOFF.md` §7, its only prior home,
+    is regenerated every session.)
+17. **Compose from primitives; never encode a default instance.**
+    Harness functions compose per context from parameter registries.
+    Frames are invariant (schema shapes, field names, role slots and
+    the blindness each buys); instances are not (selections,
+    orientations, closed taxonomies, names). An instance that reaches
+    a wire schema, a byte-pin, a registration, or an operator
+    checklist has silently become law. The tell: if a second instance
+    would need a second registration under a different name, the first
+    was never a frame. Full record with the case that produced it:
+    `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`.
+18. **Retrieve before you decide or claim.** A derived representation
+    never satisfies an obligation to its source on a load-bearing act.
+    Use `HANDOFF.md`'s compression, a design record, a skill, or a
+    memory **to do the work**; **retrieve and quote the source** to
+    decide what work to do, or to state what a record establishes. The
+    tell: you cannot name the file and section you actually retrieved
+    *this session*. A lossy summary reads exactly like a faithful one
+    from the inside, so nothing prompts the retrieval that would
+    correct it — and in a documents-lead repo the result is a green
+    suite around the wrong object. This is
+    `docs/architecture/CODE_MEDIATED_TEXT.md` §2.9 (the pillar applied
+    to authority) and generalizes the rule already ratified for papers
+    in `docs/RESEARCH_NOTES_COLLECTION.md` §3. See §1.5 below for the
+    authority ordering it depends on.
+19. **Observe before you mutate; verify before you describe; and prove
+    the check can fail.** Three habits, one root — acting on a belief
+    about state instead of an observation of it.
+    (a) **Observe shared state first.** Look at what is already
+    running, present, or registered before starting or creating
+    anything in it. §2's own instruction to observe actual Git state
+    rather than assume applies to containers, databases, and stores
+    equally.
+    (b) **Verify before you describe.** A commit message is a claim.
+    Check it against the diff before making it; never write that
+    something was done and then not do it.
+    (c) **A verification you have not seen fail is not a
+    verification.** Every drill here ships a `--negative-control` that
+    must exit 3 for exactly this reason. Before trusting a check that
+    passed, know what would make it fail — a check that cannot fail
+    reports success on anything, including bytes about to become
+    registration hashes.
 
 ## 5. Working protocol (commands)
 

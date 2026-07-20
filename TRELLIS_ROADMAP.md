@@ -2011,3 +2011,123 @@ task design, not the spend, is the expensive part.
 
 **Counts.** Docs-only; no suite affected. `npm test` unchanged at
 1,317/114 on `3bdc0e7`.
+
+### July 19, 2026 — Session 71: the roster was the wrong object — composition-from-primitives adopted, the standing cast rolled back, and the index surface that caused it repaired (branch `d/session-71-ef6714`, zero-model and zero-paid, $0)
+
+**Guardrail 15 was invoked up front** — `prompt-engineering` and
+`hypershot-protocol` before any authored byte, per HANDOFF §7 item 4.
+The session later invoked `judge-composition` as well, which it should
+have invoked first and did not; that omission is half the finding
+below.
+
+**What was built, then withdrawn.** The session executed
+JUDGE_CONVOCATION_DESIGN §11.2 item 3 as written: four rubric documents
+implementing RECONCILIATION §2's rubric lines (12/12 verbatim, checked
+mechanically), four ten-item anchor fixtures (5 drawback / 5 clean,
+every closed class covered, hand-labeled zero-model), committed
+byte-pinned with a `.gitattributes -text` pin, ingested extraction-free
+(snapshot `trellis#15`, plan echo `extraction: none`, **paid-job bound
+0 blocks**, `blocksQueued 0` on all eight files), and registered
+through the ceremony — `judges:verify` reporting four manifests, four
+hooks, consistent, uncontested, zero orphaned hashes, first try.
+
+**The collaborator stopped it in review: there are no base judges and
+no default cast.** JUDGE_COMPOSITION_GAME §6 rule 4 closes belief-facing
+taxonomies per composition, and its §1 flow builds judges *for* a posed
+context. The four roles entered the program as **teaching examples**,
+composed to explain the model to an earlier session out of a vast
+space, and were promoted to a standardized cast across seven documents.
+Everything was rolled back: `judge_records` = 0, graph hooks = 0, the
+eight fixtures deleted entirely (`74b0741`, recoverable at `c9d417d`),
+and the ingested copies tombstoned at version 3 (snapshot
+`trellis#16`) — verified non-live, the only remaining rows being one
+shared empty root at `content_len 0`.
+
+**Why it was reachable — three failures, all recorded.** (1) No
+top-level index pointed at the game record: zero references from
+README, AGENTS.md, docs/README.md, ORIENTATION, GLOSSARY, RESEARCH_MAP
+or EPISTEMIC_SUPPORT, so **every** reading path reached the superseded
+FOUR_JUDGE_DESIGN.md first. (2) The `judge-composition` skill lived
+outside the repository and so was not part of the collection a session
+inventories. (3) The instruction followed was itself drift — §11.2
+item 3 was written July 19, **one day after** the game was ratified
+July 18.
+
+**The lesson, recorded at architecture level:**
+`docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`. Harness functions
+compose per context from categoric primitives; frames are invariant and
+instances never are; an instance reaching a schema, byte-pin,
+registration or operator checklist has silently become law. The
+mechanism is the hypershot protocol's own rationale operating on
+documentation rather than a context window — a concrete example anchors
+everything downstream to itself, which is why the four were deleted
+rather than relabeled. Carries the plural test and the teaching test.
+
+**The design that replaces it:**
+`docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md` — seven
+owner/collaborator rulings resolved in session. Judges, selections,
+taxonomies, names and anchors all compose per ceremony from a
+descriptive characterization of the REPL's fact and belief spaces
+produced by an isolated agent; the candidate's **domain is in scope and
+its identity is not privileged** (anonymity, not exclusion, because
+exclusion would leave the cover a hole where the candidate sits);
+instantiated judges see the claim on the forward pass; compositions are
+write-once records never reused; the **composer** is the durable
+contestable capability. Four falsifiers, F4 being the salience leak —
+the same shape as the drift the game's audit caught in its corrected
+re-run, where closing one channel moved the bias to a quieter one.
+
+**Amendments landed (each a dated entry, none a silent edit).**
+JUDGE_COMPOSITION_GAME §6 **rule 4 SUPERSEDED** (§6.1, original wording
+preserved; number kept — no source file cites rule 4) and §10 item 4
+closed; **RESEARCH_MAP AB-8 amended** to separate composition
+(permitted, and the design) from evolution/search over compositions
+(still gated), with R-02's protection rehomed onto the composition-time
+validity gate; **RECONCILIATION §7.1** — §1/§2 read as one composition
+instance, the §4 Routing-stack falsifier fired on its own terms so S10
+layers 1, 2 and 5 enter now, and the pairwise-disjointness pin moves to
+a composition-time gate and loosens to allow declared-gluing overlap;
+**EPISTEMIC_SUPPORT §5** — slots not a cast, anchors compose at
+instantiation; **JUDGE_CONVOCATION_DESIGN §11.2 items 3–4 merged** into
+one per-candidate ceremony. Proposal-status corrections to
+JUDGE_CONTRACT_TEMPLATE §1 (the layer rule now names the real
+invariants), COMPOSABLE_RUBRICS_DESIGN §4 (adaptive ≠ selection), and
+FOUR_JUDGE_DESIGN §5 (anchors per composition).
+
+**Index surface repaired.** AGENTS.md gains the program path — its nav
+map had called `docs/product/` "planning history" — plus **rule 16**
+restating the prompt-protocol gate (marked permanent since July 13 but
+homed only in HANDOFF §7, which is regenerated every session) and
+**rule 17** for the composition principle. docs/README.md,
+PROGRAM_CONTEXT §2 (items 0 and 0b), ORIENTATION D4, GLOSSARY and
+README now reach the game record first. The `judge-composition` skill
+is versioned at `skills/judge-composition/`.
+
+**Other findings, unactioned.** `judges:verify` cannot detect a
+dangling byte-pin — it compares store against graph and reports healthy
+while the bytes behind `rubricSha` are gone, which is how a prior
+registration passed. `makeLiveJudge` builds `new OpenAI()` with no
+`base_url`, so no Gemini identity can spawn regardless of manifest.
+`judge_records` write-once is delete-bypassable by direct SQL
+(`PK(kind,key)` prevents overwrite, not delete) — exercised twice this
+session on owner instruction, backed up both times. Three colliding
+"rule 15"s across AGENTS.md, HANDOFF §7 and the game record.
+
+**Acceptance:** `npm test` **1,317 / 114 unchanged** (the HANDOFF §2
+baseline of 1,305/114 was stale — written at Session 70, before
+#135/#136 landed); `test:judge-convocation` 23 sections and
+`test:judge-intake` 13 sections both green and unchanged;
+`git diff --check` clean. **Zero model completions, zero embeddings,
+zero paid calls, $0.** The triple gate was never touched and no live
+run executed.
+
+**Next: the zero-paid gate harness** — validity, coverage, overlap and
+falsifiability are deterministic and drillable against scripted
+compositions, so the machinery is proven before a single composer call
+is metered (owner: the goal is not to over-test; this is the project's
+Landauer bill, and a solid harness comes first). **The registration
+redesign wants its own design record first** — what `rubricSha` hashes
+when the rubric is composed, what a composed judge's evidentiary basis
+is, one graph hook per ceremony plus a durable `composer` entity, what
+survives of `judges:register`, and how `support_sweep`'s sampling
+re-derives with no judge × candidate matrix.

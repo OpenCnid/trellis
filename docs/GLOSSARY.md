@@ -202,8 +202,47 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   requires a governance question no existing plane answers, plus drills.
 - **Judge op** — a drawback detector over a belief: a single-question
   check returning `drawback | clean | abstain` with a named class from
-  a closed per-role taxonomy; `clean` means no known drawback found,
+  a closed taxonomy; `clean` means no known drawback found,
   never certified correctness; abstention feeds uncertainty only.
+  Belief-facing taxonomies close **per composition**, not per role
+  (`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` §6
+  rule 4, binding program law); the audit taxonomy is invariant.
+- **Derived-source substitution** — acting on a compression of a
+  governing record (a handoff, a design record, a skill, a memory, a
+  recollection) instead of retrieving the record, on a load-bearing
+  act: deciding what to build, or stating what the record establishes.
+  The derivation is fluent and self-consistent, so nothing signals the
+  loss; the resulting work passes every check because the checks derive
+  from the same misreading. Canonical record:
+  `docs/architecture/CODE_MEDIATED_TEXT.md` §2.9; operational rule
+  `AGENTS.md` 18; authority ordering `AGENTS.md` §1.5.
+- **Composition ceremony** — the per-candidate sequence that judges one
+  promotion: ratify the candidate, characterize the REPL's fact and
+  belief spaces, compose each seat and its anchors for that pool, run
+  the instantiation gates, judge on the forward pass, audit, record.
+  Nothing is authored ahead of it and no composition is reused.
+  Canonical record:
+  `docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md`.
+- **Characterization** — the descriptive (never expository) summary of
+  the fact and belief spaces that a composer builds criteria from,
+  produced by an isolated agent. The candidate's domain is in scope;
+  its identity is not privileged — **anonymity, not exclusion**, since
+  excluding the claim's region would leave the composed cover with a
+  hole exactly where the candidate sits.
+- **Cover** — the composed set of judge seats over a claim's linguistic
+  topology. Constructed for the space in front of it, required to cover
+  it, never carried between topologies; seats are pairwise disjoint or
+  overlap with a declared gluing rule. The number of seats is not fixed
+  by the design.
+- **Judge composition** — building a judge as a sparse selection from
+  the four parameter registries plus claim modes, orientation, a closed
+  taxonomy, and a declared blindness, composed for the context in front
+  of it. There is no default cast: registries and role slots are the
+  invariant frame, and every judge filling a slot is a special case.
+  Canonical record:
+  `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`; the
+  general principle:
+  `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`.
 - **Adoption bounds register** — the live, dated rule set (AB-1…, in
   `docs/product/epistemic-support/RESEARCH_MAP.md` §9) bounding what may
   be built on which evidence class; amended by dated entry, never

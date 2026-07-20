@@ -136,10 +136,67 @@ For every RLM interaction with text — research runs, editing, authoring:
    Recorded in [HARNESS_SELF_MODEL.md](HARNESS_SELF_MODEL.md) (principle
    endorsed July 19, 2026; implementation NOT authorized).
 
+## 2.9 The pillar applied to authority (dated extension — July 19, 2026, Session 71)
+
+The pillar says the model never copies: existing bytes are moved by
+code, never re-typed through the model's attention, because attention
+is a corruption channel. **A paraphrase of a governing record is a
+re-typing of it.** Same channel, different object — and where the
+object is authority rather than content, the corruption does not
+surface as a garbled quote. It surfaces as a confident, well-formed
+decision that should never have been made.
+
+**The rule: a derived representation never satisfies an obligation to
+its source on a load-bearing act.** Derived artifacts are meant to be
+used — that is what `HANDOFF.md`'s compression, a design record, a
+skill, or a memory is *for*. The boundary is what the artifact is being
+used **for**:
+
+- **To do the work** — the derivation is adequate. Orient from it,
+  build from it, do not re-read the source for ordinary work.
+- **To decide what work to do, or to state what the record
+  establishes** — retrieve the source. Quote it. A summary cannot carry
+  a claim about its own faithfulness.
+
+**The operational tell:** you cannot name the file and section you
+actually retrieved *this session* for the decision you are about to
+take or the claim you are about to make.
+
+**Why it needs stating.** A lossy summary is indistinguishable from a
+faithful one from the inside. It reads complete, it is self-consistent,
+and it emits no ragged edge — so nothing prompts the retrieval that
+would correct it. And in a documents-lead program the damage compounds:
+a wrong read of a governing record produces an implementation that
+faithfully encodes the wrong thing, plus tests written from the same
+misreading that confirm it. **Green suite, wrong object.**
+
+**Recorded instance.** Session 71 authored four judge rubrics, byte-
+pinned them, ingested them extraction-free and registered them as a
+standing roster, working from `HANDOFF.md` §3 and `RECONCILIATION.md`
+§2 without retrieving `JUDGE_COMPOSITION_GAME.md`, whose ratified
+rule 4 forbade the object being built. Every check passed — rubric
+lines verbatim 12/12, anchors balanced across every closed class,
+paid-job bound 0, registration verified consistent and uncontested,
+drills green, $0 spent. The work was rolled back in review. *Whether
+the object should exist is not a detectable property of the object.*
+Full case: [`COMPOSITION_FROM_PRIMITIVES.md`](COMPOSITION_FROM_PRIMITIVES.md)
+§5.
+
+**This is a generalization, not a new rule.** The same rule is already
+ratified for external research sources in
+[`docs/RESEARCH_NOTES_COLLECTION.md`](../RESEARCH_NOTES_COLLECTION.md)
+§3: *"Notes are the fast orientation layer — load a tier, then verify
+at the source before anything load-bearing,"* and a note *"never
+satisfies a 'read the primary' obligation."* That rule was scoped to
+papers and their density-chain notes; the repository's own records have
+the identical structure and were never covered. The authority ordering
+for internal records lives in `AGENTS.md`.
+
 ## 3. Scope
 
 | surface | application of the pillar |
 |---|---|
+| Governing records (§2.9) | a derivation never discharges an obligation to its source on a load-bearing act: retrieve and quote the source to decide, or to state what it establishes |
 | RLM research runs | in-REPL handling of all retrieved text: structures + queries + bounded pulls; `llm_query` fans out over slices, the root context stays thin |
 | Self-editing (code) | the §6.1 toolkit: content-query location, computed-address splice, hash-guarded write-back — the enablement session's edit primitive |
 | Authoring | corpus text is pulled by segment query and moved by code; the draft's *new* prose is authored, corpus bytes are never re-typed (the harness already pins citations — attribution was made mechanical in Session 19) |

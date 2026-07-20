@@ -8,11 +8,37 @@ these bytes were written. Every frame below is a **hypershot**: an
 invariant structural skeleton with free variables; no concrete belief,
 topic, or example appears at the frame layer.
 
+> **Amended July 19, 2026 (Session 71), per JUDGE_COMPOSITION_GAME §6
+> rule 4 as superseded (§6.1).** The layer rule below previously put
+> **role names and taxonomy class names on the invariant side**, and
+> §2–§5 still hard-code each role's drawback classes into the prompt
+> bytes. Those class lists are **one composition instance**, retained
+> below as a worked illustration of the frame's shape — never as the
+> classes a composition must use. The wire schema's closed `role` enum
+> is superseded by a composed judge name plus a declared blindness.
+> See [`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md).
+
 **Layer rule (the invariance test).** A token belongs in these frames
-only if it is byte-identical across every invocation: role names,
-verdict enums, taxonomy class names, schema field names. Everything
-that varies per invocation — the claim, the evidence, the history — is
-a placeholder bound downstream at task time. Placeholder grammar
+only if it is byte-identical across every invocation: **the schema
+field names** (`judge`, `purpose`, `claim_modes`, `select`,
+`orientation`, `taxonomy`, `blind_to`; and in the verdict schema
+`role`, `verdict`, `drawback`, `rationaleSpan`, `rubricSha`,
+`abstainReason`), **the verdict enum** (`drawback | clean | abstain`),
+**the abstain-reason enum** (`jurisdiction | evidence`), and **the
+shape rules** — one question per class, taxonomies closed before
+judging, a drawback naming a class from the composition's own taxonomy,
+`clean` never certifying.
+
+Everything else composes per ceremony and is therefore **not** an
+invariant token: the judge's name, its purpose, its registry
+selections, its orientation values, its taxonomy classes, its
+`blind_to` statement, and its anchors. Names especially are a
+composition surface rather than a label — a surface over which the
+context clusters, buying structural coherence a generic slot name
+cannot.
+
+Everything that varies per invocation — the claim, the evidence, the
+history — remains a placeholder bound downstream at task time. Placeholder grammar
 follows the Prompt-Engineering conventions: `${...}` task-supplied
 content, `{...}` harness-resolved components, `[...]` collections,
 `(...)` closed option sets.

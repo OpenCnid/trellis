@@ -35,6 +35,25 @@ R-30), and §5 enforcement table are authoritative. This record stands as
 the architecture it graduated from; read it with RECONCILIATION beside
 it. `JUDGE_COMPOSITION_GAME.md` §11 was ratified in the same act.
 
+**Fifth amendment (dated note — July 19, 2026, Session 71; a
+correction pointer, not a re-decision).** This record's §3 is the
+origin of the standing-roster idiom that later documents inherited —
+"a fifth judge with a blindness profile **already on the panel**", the
+role table with per-role drawback classes fixed inline, and §5's
+anchor discipline stated **per role** with fixtures byte-pinned ahead
+of any candidate. Its own §1 already says the four are "a *minimal
+ecology instance for belief-support*"; the operative sections do not
+honor that framing, and the framing is what governs. Under
+`JUDGE_COMPOSITION_GAME.md` §6 rule 4 and the owner's July 19, 2026
+ruling, **there is no default cast**: the four are role *slots*, each
+buying a blindness the others lack, and every judge filling one is
+composed for its context from the S10 registries. §5's per-role anchor
+discipline is consequently under re-decision — anchors calibrate a
+taxonomy, and belief-facing taxonomies do not exist until a
+composition does. See
+[`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md)
+for the principle and the case that produced it.
+
 Program context: [`PROGRAM_CONTEXT.md`](PROGRAM_CONTEXT.md). Parent
 design record: [`docs/architecture/EPISTEMIC_SUPPORT.md`](../../architecture/EPISTEMIC_SUPPORT.md)
 (the original review-series proposal it graduated from was removed at
@@ -168,7 +187,24 @@ flowchart LR
 
 ## 5. Anchors and lifecycle
 
-Per role: one committed, byte-pinned **ten-item anchor fixture**
+> **Amended July 19, 2026 (owner ruling, Session 71).** Anchors are
+> **per composition, not per role**, and they **compose at
+> instantiation** from the domain's own content space — the categories
+> that compose them are the only prior. There is no committed
+> byte-pinned fixture authored ahead of a candidate, because the
+> taxonomy an anchor calibrates does not exist until a composition
+> does. The ten-item five-and-five shape survives; where it binds
+> moves. Validation moves with it: the validity gate (no
+> all-pass/all-fail/all-abstain) runs at composition time and the
+> composing agent retries on failure, which is where R-02's protection
+> actually lives — it is taxonomy-agnostic and survives the move
+> intact. "Byte-pinned" now binds on the write-once promotion record
+> that stores the composed anchors. AB-8 was amended in the same act.
+> See [`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md)
+> §3 and §9.
+
+*(Superseded text, retained for the record:)* Per role: one committed,
+byte-pinned **ten-item anchor fixture**
 (five clear drawbacks, five clean positives — the S1 dev-set shape;
 R-04 supports sufficiency at this size), labels human or mechanical
 (AB-4). Selection guards are mandatory and fail closed: a judge
