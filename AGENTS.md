@@ -122,7 +122,7 @@ this chain.
 | `docs/benchmarks/` | Measured evidence — dated reports behind every claim |
 | `docs/operations/` | Runbook |
 | `docs/product/` | PRDs, benchmark specs, and ACTIVE programs — `epistemic-support/` is live work, not history. Building anything judge-shaped starts at `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` (ratified; its twenty rules are binding program law) and `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
-| `skills/` | Composition skills versioned in-repo (`judge-composition`); the record each derives from is canonical over it |
+| `skills/` | Composition skills versioned in-repo (`judge-composition`; `self-play` — the clean-room method for testing any LLM-assisted feature without the builder's read leaking in); the record each derives from is canonical over it |
 | `docs/archive/` | Preserved history (verbatim, never edited) |
 | Root: `HANDOFF.md`, `TRELLIS_ROADMAP.md`, `API_REFERENCE.md` | Session prompt / sequencing + dated ledger / HTTP + SSE contract |
 | `data/`, `fixtures/` | Committed durable corpora (byte-pinned) / test fixtures (never extracted) |
@@ -316,6 +316,23 @@ start. Worked instances of the frame:
     passed, know what would make it fail — a check that cannot fail
     reports success on anything, including bytes about to become
     registration hashes.
+20. **Instructions are specifications, not hypotheses — never test that
+    a prompt moves behavior.** A well-engineered instruction constrains
+    the model to its spec; that it differs from, or beats, an
+    unspecified base-model response is *entailed* by what an instruction
+    is, not an open question, and re-proving it burns credits (rule 8,
+    applied to testing). Never validate a prompt, skill, or agent
+    instruction by baseline comparison ("with vs without", "does it
+    help"). Measure an instruction only against a **stated engineering
+    target**, or probe it for **failure modes** (leak, over-trigger,
+    break); if no target is stated, set one — do not substitute a
+    comparison. Measurement harnesses are for tooling interventions
+    (rule 8), never for proving prompts. The tell: you are about to run
+    a test whose outcome is entailed, because a familiar comparison was
+    easier to reach for than naming the target — the **nearby-attractor**
+    trap. The case that produced it: a with-skill/without-skill baseline
+    run on the self-play skill (2026-07-20), re-violating the owner's
+    2026-07-11 tooling-over-prompts ruling (rule 8).
 
 ## 5. Working protocol (commands)
 

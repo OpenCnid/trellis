@@ -2188,6 +2188,14 @@ Acceptance items:
    per-run ceremony, the EL ceremonies, and the
    condensation-expectation verdict are recorded decisions the owner
    performs; surface them, never infer or perform them.
+10. **Instructions are specs, not hypotheses** (AGENTS.md rule 20 — the
+    permanent home; restated here for salience because this file
+    regenerates). Never test that a prompt, skill, or instruction moves
+    behavior by baseline comparison against a base model — the outcome
+    is entailed and re-proving it burns credits. Measure against a
+    stated engineering target or probe failure modes; if no target
+    exists, set one rather than reach for the nearby-attractor
+    comparison.
 
 ## 8. Explicit exclusions
 
