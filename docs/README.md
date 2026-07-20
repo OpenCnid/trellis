@@ -228,7 +228,10 @@ program (the `engineering-loop/` pattern):
   principle in general form: judges compose per context from parameter
   registries, and **there is no default cast**. Several older records
   below encode a standing four-judge roster and are being corrected;
-  where they and the game record differ, the game record governs.
+  where they and the game record differ, the game record governs. The
+  harness skills that carry these compositions out in an agent runtime are
+  versioned at [`skills/`](../skills/README.md) — derived copies governed
+  by the records above.
 
   `PRIMITIVE_ENCODING_AUDIT.md` (FINDINGS, July 19, 2026) is what that
   correction has not yet reached: five verified statements about bytes
