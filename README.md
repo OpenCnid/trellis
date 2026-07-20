@@ -1,11 +1,16 @@
 # Trellis Engine
 
-Trellis is OpenCnid's **Recursive Language Model runtime**: an operating
-environment in which a language model's context, memory, knowledge, and
+Trellis is **a personalized composable expert system whose expertise is
+the user's data** — not strictly a coding tool, not strictly a RAG
+system. It is built as OpenCnid's **Recursive Language Model runtime**: an
+operating environment in which the user's context, memory, knowledge, and
 capabilities live as engine state — queryable stores with enforced
-provenance — and the model reaches all of it through code. It is an
-original codebase, unrelated to other projects named Trellis, and open
-source under the [MIT License](LICENSE).
+provenance — and the model reaches all of it through code. Because the
+expertise *is* the user's data, **the user is the domain authority**:
+Trellis composes its experts, judges, and protocols per question from
+primitives against that data, and never overrules the user about the
+user's own domain. It is an original codebase, unrelated to other
+projects named Trellis, and open source under the [MIT License](LICENSE).
 
 Trellis began as a provenance-preserving GraphRAG engine. That machinery
 survives intact — but it is now the *substrate* of the system, not the
@@ -29,7 +34,7 @@ a scroll.**
 
 Trellis takes that formulation seriously as a *system design* rather than
 a prompting technique, and builds the runtime the formulation implies.
-Five commitments, layered in the order the system grew them:
+Six commitments, layered in the order the system grew them:
 
 1. **The substrate (what "GraphRAG" named).** Every source — a PDF, a
    markdown file, a repository, a promoted web page — becomes an
@@ -109,30 +114,66 @@ Five commitments, layered in the order the system grew them:
    guards, refusal on stale writes — with prompt text as reinforcement
    only.
 
-**The second axis (epistemic support).** Custody answers *where did
-this come from*; a second, orthogonal axis — adopted as forward design
-July 16, 2026 — answers *how has it held up*: a graded opinion (belief
-`b`, disbelief `d`, uncertainty `u`; b+d+u = 1) computed sweep-side
-from judged events, never asserted by the writer and never visible to
-it. Support never mints custody; custody never implies support; a
-freshly written belief starts at maximal uncertainty. Doctrine:
+6. **Composition from primitives (the *composable* in "composable expert
+   system").** Trellis's functions are not a fixed cast. The judges that
+   vet a claim, the experts that answer a question, the protocol
+   **modules** that shape a run — each is composed *per context* from
+   categoric primitives (parameter registries plus invariant frames),
+   against the user's own data, at the moment it is needed. Frames are
+   invariant; instances are not, and an instance that hardens into a
+   schema, a byte-pin, or a registration has silently become law — the
+   failure this house paid for when it built a standing judge roster its
+   own rules forbid. **There is no default cast**
+   ([COMPOSITION_FROM_PRIMITIVES](docs/architecture/COMPOSITION_FROM_PRIMITIVES.md)).
+
+**The composition framework (collaborator origin).** Trellis's identity as
+a *composable expert system whose expertise is the user's data* — and the
+composition-from-primitives thesis beneath it: categoric primitives
+composing per context into judges, experts, and protocols; the four
+parameter registries (Emotional, Logical, Sensorial, Ethical); the sheaf
+intuition that a panel is a *cover* over a question's linguistic topology
+whose composed ruling is a *global section* — originate with the project's
+collaborator (Matthew Murphy, Lexideck). The target function is
+owner-ratified (July 20, 2026); the composition thesis is adopted as
+foundational doctrine. Worked derivation and the twenty binding rules:
+[JUDGE_COMPOSITION_GAME](docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md);
+the general principle:
+[COMPOSITION_FROM_PRIMITIVES](docs/architecture/COMPOSITION_FROM_PRIMITIVES.md);
+the outsider briefing:
+[COLLABORATOR_BRIEFING](docs/COLLABORATOR_BRIEFING.md).
+
+**How a claim is valued (the standing model).** Custody answers *where
+did this come from*; a second, orthogonal axis answers *how has it held
+up* — and as of July 20, 2026 it does so on **one signed-ternary standing
+axis**: `-1` doubt, `0` belief, `+1` fact
+([STANDING_MODEL](docs/product/epistemic-support/STANDING_MODEL.md),
+ratified as principle). A claim's standing moves toward fact only by
+evidence or by a **user gate**: a panel of composed judges records
+findings and **never moves standing itself**, because the user is the
+domain authority over the user's own data. Underneath that axis sits the
+support arithmetic — a graded opinion (belief `b`, disbelief `d`,
+uncertainty `u`; b+d+u = 1) computed sweep-side from judged events, never
+asserted by the writer and never visible to it; a freshly written belief
+starts at maximal uncertainty, and support never mints custody. Doctrine:
 [EPISTEMIC_SUPPORT](docs/architecture/EPISTEMIC_SUPPORT.md); program
 documents: [docs/product/epistemic-support/](docs/product/epistemic-support/PROGRAM_CONTEXT.md).
 Three bounded features are implemented and pinned — the
 support-computation oracle drill (`npm run test:support-oracle`), judge
 intake (`npm run test:judge-intake`), and judge convocation
-(`npm run test:judge-convocation`). No live judge run has ever
-executed and the paid queue is on hold. How judges are built is
-governed by
+(`npm run test:judge-convocation`); no live judge run has ever executed
+and the paid queue is on hold. How judges are built is governed by
 [JUDGE_COMPOSITION_GAME](docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md)
 (ratified; twenty rules of binding program law) and the principle it
 generalizes to,
 [COMPOSITION_FROM_PRIMITIVES](docs/architecture/COMPOSITION_FROM_PRIMITIVES.md):
 judges compose per context from parameter registries, and there is no
-default cast. The harness skills that carry these compositions out in an
-agent runtime — one sub-agent per judge, built from primitives at ceremony
-time — are versioned in [`skills/`](skills/README.md), each a derived copy
-kept honest against the record it descends from.
+default cast; the harness skills that carry these compositions out — one
+sub-agent per judge, built from primitives at ceremony time — are
+versioned in [`skills/`](skills/README.md). The `-1` (doubt) tier is a
+*constructed* object — a defeater grounded in facts, not the mere absence
+of support — opening a general critique direction in which **support
+composes as a cover and defeat as a search**
+([DOUBTS_WORKSPACE](docs/architecture/DOUBTS_WORKSPACE.md), proposed).
 
 **Where the humans are.** Every trust elevation is a human running a
 gated CLI: promotion (`npm run promote`), module registration
