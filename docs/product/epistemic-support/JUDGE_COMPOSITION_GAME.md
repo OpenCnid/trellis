@@ -170,6 +170,26 @@ as a claimant-optional refiling** (rule 15 cuts both ways: the
 composer does not file improved versions of anyone's claim, however
 superior). The decision belongs to the collaborator.
 
+### 5.1 The steelman refiling accepted (dated entry — July 21, 2026)
+
+**ACCEPTED.** The decision §5 left open is made this session: the
+collaborator (M. Murphy) accepts the refiling, and the owner (Cnid)
+ratifies. The steelman — *no judging system is simultaneously
+universal, governable, and primitive-free; composition-from-primitives
+is the unique design occupying universal ∩ governable* — is **adopted
+as the program's thesis formulation**, no longer tabled. Collaborator's
+stated reason for accepting now: the game tabled it for want of context
+at the time, and that gap has since closed.
+
+It carries its standing falsifier **unchanged**: representational holism
+— the decomposability bet of §6.1(b) and §8 — which the program still
+settles empirically, not by argument. Adoption states the frame the bet
+is about; it does not resolve the bet, and a holism result still breaks
+the thesis. This entry supersedes the "TABLED" / "not adopted here"
+dispositions at §5, §6.1, and §10 item 1, and the derived
+`judge-composition` skill's Provenance is corrected to match. Amended
+only by dated entry, per §11.
+
 ## 6. The twenty rules (canonical)
 
 1. **Decompose before composing** — applicability gates cannot run on a conjunction; split compound candidates into labeled sub-claims with modes first.
@@ -264,7 +284,10 @@ system is simultaneously universal, governable, and primitive-free;
 composition-from-primitives is the unique design occupying universal ∩
 governable*) remains **TABLED as a claimant-optional refiling** (§10
 item 1) — the decision is the collaborator's, and rule 15 cuts both
-ways. This entry cites the test result, not the steelman.
+ways. This entry cites the test result, not the steelman. *(Superseded
+July 21, 2026 — §5.1: the collaborator accepted the refiling and the
+owner ratified; the steelman is now adopted as the thesis formulation,
+its decomposability falsifier unchanged.)*
 
 **Mechanical note.** The rule keeps its number. No source file cites
 rule 4 (`judge_intake_prompt.ts` cites 6 and 16, `judge_prereg.ts`
@@ -335,8 +358,11 @@ authorization; nothing here authorizes build):
 
 ## 10. Open items
 
-1. The trilemma steelman — the collaborator accepts, amends, or
-   declines the refiling (§5).
+1. ~~The trilemma steelman — the collaborator accepts, amends, or
+   declines the refiling (§5).~~ **RESOLVED July 21, 2026 — ACCEPTED**
+   (§5.1): the collaborator accepts, the owner ratifies; the steelman is
+   adopted as the thesis formulation, carrying its decomposability
+   falsifier.
 2. Independent (non-composer) replication to lift the steering caveat
    on the functional-infinity entry (§7 row 2).
 3. The narrowly scoped corroboration spawn on the keystone-routing

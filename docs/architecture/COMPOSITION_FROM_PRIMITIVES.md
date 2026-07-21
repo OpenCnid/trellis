@@ -209,6 +209,30 @@ record names them; it performs none.
 - **JUDGE_CONVOCATION_DESIGN §11.2** — items 3 and 4 sequence
   roster-then-docket; composition follows the candidate. Merging them
   is the substantive fix.
+
+### 6.1 Resolved (dated entry — July 21, 2026)
+
+All three owed corrections have since landed by dated entry in their
+home records; this register is closed. Verified this session:
+
+- **RECONCILIATION §1/§2** — RESOLVED by
+  [`RECONCILIATION.md`](../product/epistemic-support/RECONCILIATION.md)
+  §7.1 (July 19, 2026): §7.1(a) reads §2's completed definitions as one
+  composition instance, "not law"; §7.1(b) reopens S10 layers 1, 2 and 5
+  behind their own proposal.
+- **JUDGE_CONTRACT_TEMPLATE §1** — RESOLVED by
+  [`JUDGE_CONTRACT_TEMPLATE.md`](../product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md)'s
+  July-19 amendment (role and taxonomy names moved to the composed side)
+  and its July-21 dated correction carrying the one exception (the audit
+  seat's *failure* taxonomy stays invariant vocabulary).
+- **JUDGE_CONVOCATION_DESIGN §11.2** — RESOLVED by
+  [`JUDGE_CONVOCATION_DESIGN.md`](../product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md)
+  §11.2's July-19 dated entry merging items 3 and 4 ("composition
+  follows the candidate"), pointing to `JUDGE_COMPOSITION_CEREMONY.md`.
+
+The §6 intro rule stands unchanged: this record still performs no
+corrections; it records that the ones it named were performed in their
+home records.
 - **EPISTEMIC_SUPPORT §5** — states a cast in adopted doctrine.
 - **COMPOSABLE_RUBRICS_DESIGN §4** — "adaptive means selection, not
   mutation" is the opposite of composition-from-primitives and needs

@@ -530,6 +530,21 @@ row 9's deferred pin** — see the writer-blind row below.
 | `claimMode` only from the user's recorded flags; declines record nothing | required flags with no default; the store schema has no other entry point | drill `[queue-provenance]` |
 | Store write-once mechanical; supersession references, never overwrites | `judge_records` `PRIMARY KEY (kind, key)` + the slice-1 law via validate-then-append | drill `[store-write-once]`; DDL unit pin |
 
+**Dated addition (July 21, 2026) — the read-time explanation render.**
+The advisory report gained a pure, code-mediated explanation render
+(`judge_explain.ts`; the `support:report` surface prints it) that joins
+already-stored verdict fields — seat, verdict, drawback class, its
+qualified-parameter dimension, abstain reason, and the typed
+conflict/disagreement/exclusion records — into human-readable lines. No
+wire/schema/store change, no model call, authors no byte; `clean` reads
+"no known drawback found," never certified correctness (R-01). Specified
+at [`JUDGE_CONVOCATION_DESIGN.md`](JUDGE_CONVOCATION_DESIGN.md) §13
+(Option A); pinned by `judge_explain.test.ts` and the `[report]` /
+`[static-imports]` sections of `npm run test:judge-convocation`. It is
+the engine-side analogue of the session-layer `judge-composition` skill's
+per-item rationale, aligning the two layers as far as the code-mediated
+pillar allows.
+
 ## 6. Exclusions (this record)
 
 No live judges, no model calls, no `support_sweep`, no database

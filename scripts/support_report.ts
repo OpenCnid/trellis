@@ -6,6 +6,7 @@ import {
 } from '../src/core/graph/judge_convocation_store';
 import { fetchJudgeEntityStates } from '../src/core/graph/judge_registration';
 import { computeConvocationReport } from '../src/core/graph/support_sweep';
+import { explainCandidate, explanationLines } from '../src/core/graph/judge_explain';
 
 // The read-time report (JUDGE_CONVOCATION_DESIGN.md §3.2): verdict
 // records replayed through composePanel → computeSupportOpinion at
@@ -25,19 +26,22 @@ async function main(): Promise<number> {
 
   console.log(`Convocation report (asOf ${new Date(asOf).toISOString()}; opinions computed at read time, never stored)`);
   console.log(`Candidates: ${reports.length}; stored verdicts: ${state.verdicts.length}; runs: ${state.runReports.size}`);
+  // Human-readable EXPLANATION render (JUDGE_CONVOCATION_DESIGN §13,
+  // Option A): a pure, code-mediated join over already-stored fields.
+  // Authors no byte and calls no model.
   for (const r of reports) {
-    console.log(`\n  ${r.selectionId}  (mode ${r.claimMode}, ${r.verdicts} verdict(s))`);
-    if (r.refusal !== null) {
-      console.log(`    COMPOSITION REFUSED: ${r.refusal}`);
-      continue;
-    }
-    if (r.composition === null) continue;
-    const { opinion, conflicts, disagreements, exclusions, counts } = r.composition;
-    console.log(`    opinion: b=${opinion.b.toFixed(4)} d=${opinion.d.toFixed(4)} u=${opinion.u.toFixed(4)} projected=${opinion.projected.toFixed(4)}`);
-    console.log(`    counts: consumed=${counts.verdictsConsumed} withheld=${counts.verdictsWithheld} jurisdictionAbstains=${counts.jurisdictionAbstains}`);
-    for (const c of conflicts) console.log(`    NO-GLOBAL-SECTION on ${c.parameter}: ${c.judges.map((j) => `${j.judgeId}=${j.verdict}`).join(' vs ')}`);
-    for (const d of disagreements) console.log(`    cross-role disagreement on ${d.registryEntry}: ${d.judges.map((j) => `${j.judgeId}=${j.verdict}`).join(' vs ')}`);
-    for (const e of exclusions) console.log(`    excluded: ${e.judgeId} (${e.assumption} negated)`);
+    const verdicts = state.verdicts
+      .filter((p) => p.verdict.beliefId === r.selectionId)
+      .map((p) => p.verdict);
+    const explanation = explainCandidate({
+      selectionId: r.selectionId,
+      claimMode: r.claimMode,
+      refusal: r.refusal,
+      composition: r.composition,
+      verdicts,
+    });
+    console.log('');
+    for (const line of explanationLines(explanation)) console.log(`  ${line}`);
   }
 
   // Rule 12: designed silence disclosed — the per-run counts.
