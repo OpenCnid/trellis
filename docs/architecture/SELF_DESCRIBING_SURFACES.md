@@ -9,7 +9,10 @@ concrete instantiation candidate for
 sequencing), and it extends
 [`WORKSPACE_AND_MODULES.md`](WORKSPACE_AND_MODULES.md) (the module manifest),
 under [`CODE_MEDIATED_TEXT.md`](CODE_MEDIATED_TEXT.md) and
-[`COMPOSITION_FROM_PRIMITIVES.md`](COMPOSITION_FROM_PRIMITIVES.md).
+[`COMPOSITION_FROM_PRIMITIVES.md`](COMPOSITION_FROM_PRIMITIVES.md). The buildable
+specification — the descriptor schema, the `llm_help` frames, the guard-derivation,
+the human-doc generation, and the self-play validation gate — is
+[`LLM_HELP_SPEC.md`](LLM_HELP_SPEC.md).
 
 ---
 
