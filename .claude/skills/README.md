@@ -90,6 +90,18 @@ in-repo custody.
   and it is versioned here as house doctrine. Canonical form: the OpenCnid
   chain-of-density spec / this `SKILL.md`.
 
+### Harness self-steering
+
+- **[`spark-steering/`](spark-steering/)** — diagnose which SPARK axis
+  (Skills, Personalities, Approaches, Resources, Knowledge) is actually
+  short before reaching for a fix, and move only that one: a wrong-axis fix
+  stays installed and charges rent every turn. User-invoked
+  (`disable-model-invocation`); the judgment lives in the body, the costed
+  levers and cost classes in `references/`. Backed by a 373-primitive map
+  of Claude Code surfaces (the PCF corpus), kept outside this repo with the
+  research paper it belongs to. Canonical form: this `SKILL.md` + its
+  `references/`.
+
 ## House note — authoring skill bytes
 
 Editing any skill that primes a model's generation invokes Guardrail 15:

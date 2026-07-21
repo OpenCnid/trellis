@@ -9,7 +9,7 @@ description: Assess whether something is excessively complex and return interpre
 
 ## What this is, and what governs it
 
-This is the **harness-orchestration form** of the judge-composition ceremony, pointed at one driving question: **is this complexity warranted, and if not, what specifically should change?** It spawns real sub-agent judges — composed fresh for the artifact, never a standing cast — and a judges-judge that audits their runs on **real run telemetry** (`subagent_tokens`, `tool_uses`, `duration_ms`, transcript paths) the zero-paid engine cannot see.
+This is the **harness-orchestration form** of the judge-composition ceremony, on one driving question: **is this complexity warranted, and if not, what specifically should change?** It spawns sub-agent judges — composed fresh for the artifact, never a standing cast — and a judges-judge that audits their runs on **real run telemetry** (`subagent_tokens`, `tool_uses`, `duration_ms`, transcript paths) the zero-paid engine cannot see.
 
 The law lives in the record, not here. Canonical, in `docs/product/epistemic-support/` of the Trellis repo:
 
@@ -19,7 +19,7 @@ The law lives in the record, not here. Canonical, in `docs/product/epistemic-sup
 - `STANDING_MODEL.md` — the signed ternary and the user gate.
 - `RECONCILIATION.md §7.1 (Composition supersession)` — "there are no base judges and no default cast."
 
-On any drift between this skill and those records, **the record wins and the skill is corrected** — never the reverse. This skill is a derived runner, not an independent authority.
+On any drift, **the record wins and the skill is corrected** — never the reverse: this is a derived runner, not an independent authority.
 
 ## The invariants — never adapt these
 
@@ -28,13 +28,13 @@ Four seats, differently blind by construction; the composer fills them per artif
 - **The verdict vocabulary is ternary — `clean | drawback | abstain` — and it *is* the signed standing delta `+1 | −1 | 0`** (`STANDING_MODEL.md §1 (The signed ternary)`). `clean` = this complexity is warranted; `drawback` = a named over-engineering class, **a constructed doubt that cites facts in the artifact only** (the corrosion bound: a doubt citing beliefs is a competing belief, not a doubt); `abstain` carries a typed reason `jurisdiction | evidence`.
 - **The judge-definition schema field names are fixed:** `judge, purpose, claim_modes, select, orientation, taxonomy, blind_to`.
 - **The audit seat's failure taxonomy is invariant** — `rubric_gamed, convention_blind, systematic_drift`, plus coverage findings — because how judges fail does not depend on what they judge. Its *name and angle* compose per context; its taxonomy does not.
-- **There is no default cast** (rule 4; `RECONCILIATION.md §7.1`). Judge names, registry selections, orientations, closed taxonomies, and anchors are all composed at ceremony time. The Session-71 rollback — four judges byte-pinned as a standing roster — is the cautionary case (`JUDGE_COMPOSITION_GAME.md §6.1`). **If you ever find yourself reusing a prior run's judges, stop: that is the forbidden thing.**
+- **There is no default cast** (rule 4; `RECONCILIATION.md §7.1`). Judge names, registry selections, orientations, closed taxonomies, and anchors are all composed at ceremony time. The Session-71 rollback — four judges byte-pinned as a standing roster — is the cautionary case (`JUDGE_COMPOSITION_GAME.md §6.1`). **If you ever reuse a prior run's judges, stop: that is the forbidden thing.**
 
 ## The three belief-facing seats, on the complexity surface
 
-The blindness structure is invariant; what follows is *one composition* of it, and the composer adapts the specifics per artifact — never hard-code these names or taxonomies as a cast.
+The blindness structure is invariant; what follows is *one composition* — the composer adapts the specifics per artifact, never a hard-coded cast.
 
-- **J1 Grounding — warrant-in-the-bytes.** Does each unit of complexity trace to a need **present in the artifact's own bytes**? Sees the unit plus the bytes that justify it — its own comments **and the declarations, contracts, and referenced justification wherever they sit in the artifact**, never only the physically adjacent lines (a justification one scroll away is still the unit's justification; over-tightening this to "co-located only" is what let a distributed warrant fall through the panel in the July-20 validation — see `VALIDATION.md`). Fidelity, never taste; blind to alternatives and to whether a simpler design could exist.
+- **J1 Grounding — warrant-in-the-bytes.** Does each unit trace to a need **present in the artifact's own bytes**? Sees the unit plus the bytes that justify it — its comments and the declarations, contracts, and referenced justification **wherever they sit in the artifact**, never only the physically adjacent lines (a justification one scroll away is still the unit's; over-tightening to "co-located only" let a distributed warrant fall through the panel in the July-20 validation — see `VALIDATION.md`). Fidelity, never taste; blind to alternatives and to whether a simpler design could exist.
 - **J2 Coherence — internal necessity.** Does the structure hold together — non-redundant, non-self-contradictory, each layer actually load-bearing for another? Sees the artifact's internal structure and its history; blind to external evidence.
 - **J3 Corroboration — independent warrant.** Do signals **independent of the artifact's own self-justification** — its tests, its call sites, real usage, the domain's conventions in the user's allowlist — support that the complexity is earned rather than accidental? Blind to the artifact's own rationale comments (anti-circularity).
 
@@ -48,7 +48,7 @@ Every sub-agent below wakes as a stranger holding one page: the inheritance ledg
 
 Enumerate the artifact's **units of complexity from the bytes**, not from your impression. File each as a **verbatim span with an address** (`path:line`), never retyped or rephrased — filing is a write on the user's artifact and paraphrase inflates the case four-for-four (rule 15). A span cut is itself a judged surface: never crop an adjacent qualifier (rule 17). Preserve garbles as garbles; an intent-reading is a labeled filer artifact judged against the bytes, not against rival repairs (rule 18).
 
-If what the user means by "too complex" is ambiguous, ask **one** clarifying question and file the scope **as intended — not inflated, not deflated** — before any spawn (rule 15). Only the user upgrades intent. The user is the **self-invested claimant** here — it is their artifact — so **authorship is never a parameter**: mask it in everything downstream (rule 6). Impartiality comes from the isolated contexts, not from your framing.
+If what the user means by "too complex" is ambiguous, ask **one** clarifying question and file the scope **as intended — not inflated, not deflated** — before any spawn (rule 15). Only the user upgrades intent. The user is the **self-invested claimant** — it is their artifact — so **authorship is never a parameter**: mask it in everything downstream (rule 6). Impartiality comes from the isolated contexts, not from your framing.
 
 ### Stage 1 — Characterize the context first (one isolated sub-agent, blind to the suspicion)
 
@@ -113,9 +113,9 @@ anchors:   # ten items — FIVE clear drawbacks, FIVE clean positives; calibrati
   - { input: {Domain_Shaped_Case}, expected: {clean|drawback} }
 ```
 
-Anchors **calibrate**; they are never example verdicts — a verdict example teaches the judge what answers look like (`JUDGE_CONTRACT_TEMPLATE.md §7`). Every frame stays a hypershot. The composer is the versioned, contestable capability; the judges it emits are ephemeral.
+Anchors **calibrate**; they are never example verdicts — a verdict example teaches the judge what answers look like (`JUDGE_CONTRACT_TEMPLATE.md §7`). The composer is the versioned, contestable capability; the judges it emits are ephemeral.
 
-When the composer scopes the grounding seat's `inputs`, its evidence is the unit **and the bytes that justify it wherever they live in the artifact** — never narrowed to the physically adjacent lines. A justification that sits elsewhere in the same file (a contract comment on the function a construct calls, a constant's declaration) is still the unit's grounding; a seat that cannot see it will abstain where it should have grounded, and the warrant falls through the panel.
+When the composer scopes the grounding seat's `inputs`, its evidence is the unit **and the bytes that justify it wherever they live in the artifact** — never narrowed to the physically adjacent lines. A justification elsewhere in the same file (a contract comment on a called function, a constant's declaration) is still the unit's grounding; a seat that cannot see it will abstain where it should have grounded, and the warrant falls through the panel.
 
 ### Stage 3 — Instantiation gates (you, zero-model, deterministic) and pre-registration
 
@@ -146,7 +146,7 @@ Per filed unit:
 </output_schema>
 ```
 
-No highlighted question, no named drawback classes in the task, no embedded expectation, no sight of the other judges or of your pre-registration. **Capture each judge's return AND its telemetry** — `subagent_tokens`, `tool_uses`, `duration_ms`, and its transcript output-file path — for the audit.
+No highlighted question, no named drawback classes in the task, no embedded expectation, no sight of the other judges or of your pre-registration. **Capture each judge's return AND its telemetry** — `subagent_tokens`, `tool_uses`, `duration_ms`, and its transcript output-file path (`Subagent_Transcript_Nesting`: each spawned sub-agent's own nested `.jsonl` under the parent session) — for the audit.
 
 ### Stage 5 — Audit (the judges-judge: one isolated sub-agent, findings only, never gates)
 
@@ -208,16 +208,16 @@ Every **cut** recommendation is a `−1` doubt and, by the corrosion bound, must
 
 ## Guardrails the game paid to learn (watch for these in yourself)
 
-1. **Filing inflation** (rule 15) — "adding rigor" to the user's artifact before judging it; it feels like service while it bills the user for your words. File verbatim spans; annotate positively, never as the negation of a known failure class (rule 16).
-2. **Steering, and its relocation** — expectation content in a task channel, or moved into characterization/annotation phrasing once the task channel is cleaned. Audit for the content, not the location.
+1. **Filing inflation** (rule 15) — "adding rigor" to the user's artifact before judging bills the user for your words. File verbatim spans; annotate positively, never as the negation of a known failure class (rule 16).
+2. **Steering, and its relocation** — expectation content in a task channel, or relocated into characterization/annotation phrasing once the task channel is cleaned. Audit for the content, not the location.
 3. **No default cast** (rule 4; Session 71) — the moment a judge outlives its ceremony you have rebuilt the standing roster that was rolled back.
 4. **Anonymity leak by salience** (`§9 F4`) — the suspected unit reaching the composer through recency, unusual vocabulary, or being the lone instance of its kind.
-5. **Self-invested claimant** — the default here; the whole ceremony exists because the person who thinks it is too complex authored it. Isolation, not your good intentions, is the safeguard.
-6. **The corrosion bound** — a "cut" grounded in another critique rather than the artifact's own bytes is not a doubt, it is an opinion; refuse it. Support covers, doubt cites facts.
+5. **Self-invested claimant** — the default here; the person who calls it too complex authored it. Isolation, not your good intentions, is the safeguard.
+6. **The corrosion bound** — a "cut" grounded in another critique rather than the artifact's own bytes is an opinion, not a doubt; refuse it. Support covers, doubt cites facts.
 
 ## Cost, and trust versus simulation
 
-A full run is six sub-agent spawns — one characterizer, one composer, three judges, one audit — so it is the expensive path. Estimate before spawning; scope the units first on a large artifact. Until the composition meta-prompts here are **tested against real artifacts**, the system is *trusted or simulated, never assumed* (the July-19 note in the in-repo `judge-composition` README). Support a `simulate` invocation that runs the full pipeline with judges stubbed by their own anchors — it exercises the gates, the audit, and the report shape without spend, and it is the clean-room path (see `self-play`) for hardening the frames before a paid run.
+A full run is six sub-agent spawns (`Agent_Spawn_Subagent` — "the expensive path" by its own schema) — one characterizer, one composer, three judges, one audit. Estimate before spawning; scope the units first on a large artifact. Until the composition meta-prompts here are **tested against real artifacts**, the system is *trusted or simulated, never assumed* (the July-19 note in the in-repo `judge-composition` README). Support a `simulate` invocation that runs the full pipeline with judges stubbed by their own anchors — it exercises the gates, the audit, and the report shape without spend, and is the clean-room path (see `self-play`) for hardening the frames before a paid run.
 
 ## Range
 
