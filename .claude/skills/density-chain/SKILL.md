@@ -1,6 +1,6 @@
 ---
 name: density-chain
-description: Write an OpenCnid five-tier chain-of-density note for a research paper, or scaffold a complete new paper repo around one. Use whenever the user asks to add, summarize, note, recognize, or "make a repo for" a research paper (arXiv, ACL Anthology, a lab blog post — any published research), mentions a density chain, CoD note, tier note, paper note, or the OpenCnid paper-repo collection — even if they never name this skill. Also use when updating, re-verifying, or extending existing OpenCnid paper repos, including batch runs across many paper repos at once.
+description: Write an OpenCnid five-tier chain-of-density note for a research paper, or scaffold a complete new paper repo around one. Use whenever the user asks to add, summarize, note, recognize, or "make a repo for" a research paper (arXiv, ACL Anthology, a lab blog post — any published research), mentions a density chain, CoD note, tier note, paper note, or the OpenCnid paper-repo collection — even if they never name this skill. Also use when updating, re-verifying, or extending existing OpenCnid paper repos, including batch runs across many paper repos at once. Also runs in SYSTEM MODE — a chain-of-density map of a whole codebase or system rather than a paper: a branching "density-trellis" reverse-engineered from the project's commit history, written to docs/density-chain/DENSITY-CHAIN.md with an interactive HTML+SVG render. Use system mode when the user asks to map, summarize at increasing density, or make a density-chain / density-trellis of a project, engine, codebase, or its features and roadmap.
 ---
 
 # density-chain
@@ -122,6 +122,29 @@ Pause and surface instead of guessing when: a README has no findable paper link 
 paper the repo studies), or a repo already contains a committed paper PDF (report it and
 suggest replacing it with the one-command fetch section — removing someone's committed file
 is the owner's call, not the skill's).
+
+## System mode: an in-repo density-trellis of a whole codebase
+
+When the subject is a whole system (a codebase, an engine, its features and roadmap) rather
+than a paper: same method, different shape and home.
+
+- **A trellis, not a spine.** A shared *trunk* (whole system at T0 sentence / T1 paragraph / T2
+  class map) plus one *branch per subsystem class*; each branch is its own fixed-length five-tier
+  chain whose tiers traverse **T1 general essence → T2–T3 current shipped machinery → T4–T5
+  frontier and future**. Seed classes from the user; branch out as coverage demands; compose the
+  trunk, a general→current→future cross-section, and a cross-link lattice yourself.
+- **The repo is the source that wins.** Reverse-engineer from `git log` (the true build order) +
+  design records + code; never from memory. Verify status labels — `shipped-pinned` ≠ `adopted /
+  ratified-as-principle (no build)` ≠ `proposed / recorded-research` — and never write a
+  capability you cannot locate. Optional: fan out one read-only sub-agent per class (shared
+  verbatim ground block + rigid return frame) under `prompt-engineering` + `hypershot-protocol` +
+  `subagent-composition` (Guardrail 15).
+- **Output — a pair in `docs/density-chain/`:** `DENSITY-CHAIN.md` (markdown, ground truth) and
+  `DENSITY-CHAIN.html` (a self-contained, theme-aware render with the house **theme-neutral
+  animated SVG banner** — palette #58a6ff→#9b8cf7→#ef6fd0, mono type — and the five-tier density
+  ramp as its gradient), kept in sync (markdown wins), plus a folder `README.md` if absent. One
+  `<NAME>.md`/`<NAME>.html` pair per system; the whole engine is `DENSITY-CHAIN`. Fixed length per
+  tier, ship all five, own words, exact locators all still bind.
 
 ## Non-negotiables
 
