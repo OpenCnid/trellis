@@ -29,5 +29,25 @@ reverse-engineered from its commit history, rather than to a research paper.
 - **Status labels are load-bearing** everywhere: `shipped-pinned` ≠ `adopted / ratified-as-principle`
   ≠ `proposed / recorded-research`. Never blur them.
 
+## Living document & authority chain
+
+These maps are **living documents**, not snapshots: the
+[`density-chain`](../../.claude/skills/density-chain/SKILL.md) skill (system mode)
+reverse-engineers each one from `git log`, design records, and code — the product it maps —
+never from memory. The chain the owner names runs one way: **docs track the product, the skill
+that produces the docs is corrected against the records, and the whole ladder answers to the
+repo as ground truth** — code > glossary > prose, then design record, then this compression,
+then skill / memory (`AGENTS.md` §1.5). Where a map disagrees with what it summarizes, the map
+has the defect.
+
+**Scoped exception — the session wins during a live edit.** A collaborator's clear, current
+instruction in the live session outranks the committed record: the repo is the durable record
+a context-free session relies on, never an oracle over the person directing the work
+(`docs/architecture/SESSION_GOVERNANCE.md`, scoped July 17, 2026; generalized to the committed
+record at large by `AGENTS.md` §1.5).
+
+Maintained by **densification, never elongation**, and amended only by **dated entry** — never
+a silent edit.
+
 This folder is subordinate to everything it summarizes; it is an orientation aid, not an
 authority. Live state lives in `HANDOFF.md` and the acceptance ledger.

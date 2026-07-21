@@ -6,14 +6,20 @@ Cnid).** PROPOSED / unratified. Subordinate to everything it summarizes: authori
 [`GLOSSARY.md`](GLOSSARY.md), a design record, or code, the other source wins and this file
 has a defect. It is **non-authoritative** relative to [`HANDOFF.md`](../HANDOFF.md) (live
 state), the acceptance ledger (`npm run el:activate -- status`), and
-[`ORIENTATION.md`](ORIENTATION.md). Counts and statuses are as of **HEAD `77a7018`** and
-drift with the week; treat named mechanisms and pointers as the durable content, numbers as
-convenience.
+[`ORIENTATION.md`](ORIENTATION.md). Counts and statuses are as of the reverse-engineered
+snapshot **`77a7018`**, **updated July 21, 2026 to fold in PR #151** (`7ad6af5` — the
+read-time explanation render and the trilemma-steelman adoption), and drift with the week;
+treat named mechanisms and pointers as the durable content, numbers as convenience.
 
 > **Rendered companion.** An interactive, theme-aware HTML render of this trellis — the house
 > animated SVG banner, the density ramp as a colour gradient, click-to-expand tiers — lives
 > beside this file at [`DENSITY-CHAIN.html`](DENSITY-CHAIN.html). The two are kept in sync; this
 > markdown is the ground truth, the HTML is the map.
+
+> **Living document.** Maintained by densification and dated entry, never a silent edit; the
+> repo is ground truth (code > glossary > prose) except during a live session, where a
+> collaborator's current instruction outranks the committed record — see the authority chain in
+> [`README.md`](README.md) and [`SESSION_GOVERNANCE.md`](architecture/SESSION_GOVERNANCE.md).
 
 ## Why a *trellis* and not the ladder
 
@@ -50,7 +56,7 @@ method"](#provenance--method)).
 
 ## The trunk — the whole system at three densities
 
-### Trunk-T0 (one sentence)
+### Trunk-T0 (what Trellis is, in one sentence)
 
 Trellis is a **personalized composable expert system whose expertise is the user's data** —
 not strictly a coding tool, not strictly a RAG system — built as OpenCnid's **Recursive
@@ -65,8 +71,9 @@ data and never overrules the user about the user's own domain.
 The **substrate** turns every source into an immutable SHA-256 **Merkle AST** in PostgreSQL
 (Tier 1) and every derived belief into a Neo4j node carrying **sourceNodeIds** — the exact
 block hashes it came from (Tier 2); a Tier-3 **workspace** has no trust standing. The
-**execution model** is the RLM: context is a database, not a scroll, reached by writing code
-and calling `llm_query` over slices. **Trust moves one way**, upward, only through
+**execution model** is the RLM, and it is *integral*: context is a database, not a scroll,
+reached by writing code and calling `llm_query` over slices — it is how Trellis builds the
+user's knowledge and how it reasons over it. **Trust moves one way**, upward, only through
 operator-gated **promotion**. Two **flywheels** compound — derived facts cached once and
 reused (knowledge), and the system's own instructions versioned as **modules governed as
 beliefs** (capability). One discipline binds text handling — **code-mediated text**: the
@@ -96,6 +103,40 @@ composition law governs **C3** and the skills; **C2** mechanizes the loop that p
 of it; **C8**/**C9** are the research inflow into **C1**; **C10** is the evidence gate on
 every claim any class makes; **C11** is how the whole thing is served and governed.
 
+### The product thesis (collaborator framing — Matt / Lexideck, July 20 2026)
+
+*Recorded as the collaborator's framing, standing annotated. It sharpens the trunk without
+changing committed state — and it is why Trellis is more than an RLM runtime.*
+
+- **The RLM is integral, not incidental.** T0 leads with the target function, but the
+  Recursive Language Model is the *engine* of it — how Trellis **builds** the user's knowledge
+  and how it **reasons over** it. *(shipped)*
+- **The user's knowledge lives as three canonical workspaces — doubts, beliefs, facts — in
+  the REPL** (the signed-ternary standing, as *containers* of the user's data, not a scalar on
+  a claim). Running reliably on the user's own data is what makes Trellis a strong
+  **generalist-agent** candidate. Facts and beliefs exist today as the verified/derived tiers;
+  the **doubts workspace as a first-class REPL object is *proposed***
+  ([`DOUBTS_WORKSPACE.md`](architecture/DOUBTS_WORKSPACE.md)). *(mixed — shipped tiers +
+  proposed doubts object)*
+- **The REPL is never compacted; the model's context must be.** The product turns a language
+  model of very limited, lossy context into a more deterministic system with a much less
+  limited and *infinitely more preservable* context — because the user's context, memory,
+  knowledge, and capabilities live in the REPL as engine state, not in the attention window.
+  This is the durability guarantee behind "context is a database, not a scroll." *(design
+  thesis)*
+- **Trellis becomes its own feature flywheel.** Once running, it should know how to **build
+  its own modules** for end users. The mechanism is *internal messaging* — the SPARK / PCF
+  map extended **into** Trellis — where **each chain of each internal function composes the
+  meta-prompt for its next execution**. The harness makes the model able to reason about how
+  it works inside the harness itself, and it is **always honest about what it is** (the
+  guard-derived self-model) — a first shipped instance is the **read-time explanation render**
+  (`judge_explain`, #151): explainability without model prose in the record. *(direction —
+  unifies the capability flywheel C6, spark-steering C6/C7, and the harness self-model
+  C1/C5/C11)*
+
+The consequence Matt states: **Trellis is the next generation of intelligence** — because it
+makes an LLM's intelligence *reliable and preservable* on the user's own data.
+
 ---
 
 ## The temporal cross-section — general → current → future, all eleven at once
@@ -108,11 +149,11 @@ future plans" question.
 |---|---|---|---|---|
 | **C1 REPL/RLM** | model works only through a Python REPL; context = database; `llm_query` over slices | `trellis_agent.py` over `rlms==0.1.3`, goal-loop orchestrator, workspace, A2A/MCP, UPSUM budget gate | harness self-model (principle endorsed, **not authorized**); telemetry allowlist gap | Workstream B surface-descriptors; `rlms` compaction (S2b); paid adoption probe |
 | **C2 Engineering loop** | a controller outside the worktree that mechanizes the session loop | EL-00…EL-06 accepted; kernel, observer, prompt compiler, Codex runner, acceptance ledger | EL-10/EL-11 **implemented, not accepted**; EL-07 **blocked** (no paid episode ever) | EL-08 (scheduler/extraction), EL-09 (report ingest); HANDOFF→generated-view migration |
-| **C3 Epistemic support** | a graded (b,d,u) "how has it held up" opinion, sweep-side, writer-blind | support-oracle, judge-panel, judge-intake, judge-convocation drills (all zero-paid) | composition-per-ceremony (four-role cast **rolled back**, S71); road to Option C | **no live judge run ever**; paid queue on hold; metered promotion-cost test (~$0.02–0.06) |
+| **C3 Epistemic support** | a graded (b,d,u) "how has it held up" opinion, sweep-side, writer-blind | support-oracle, judge-panel, judge-intake, judge-convocation, **judge_explain** render (#151) — all zero-paid | composition-per-ceremony (four-role cast **rolled back**, S71); road to Option C | **no live judge run through the engine** (method test-bed-validated); metered promotion-cost test (~$0.02–0.06) |
 | **C4 Substrate/custody** | provenance-enforced storage: Merkle ASTs + beliefs bound by `sourceNodeIds` | verified ingest, invalidation sweep, quarantine/recovery, `repo:ingest`, entity resolution | mechanical provenance threading (row 9 closed); ASTRef migration below trigger | CRDT concurrent-edit safety; earned-permanence trust decay; repo-scale extraction |
 | **C5 Code-mediated text** | the pillar: the model never counts, never copies | `trellis_textedit`, `trellis_answer`, `get_ast_blocks`, guarded splice, retrieval discipline, structural chunking | guarded-only default (deferred); harness self-model's first named test | py-tree-sitter construct addressing; error-tolerant ingest; superseded-embedding sweep |
 | **C6 Flywheels/trust** | three tiers; one-way promotion; derive-once-cache-forever (knowledge + capability) | workspace/lineage, promotion, module registry (#0,#1), grounded authoring | entailment citation-gate (prototyped, off); module #2 **shipped-then-retired** | per-claim citation mapping; tool-bearing modules (unopened); reasoning-templates (contested) |
-| **C7 Standing/composition** | signed-ternary standing, user-gated; compose from primitives, no default cast | the skills (`.claude/skills/`); composition-from-primitives lesson | standing model **ratified as principle, no build**; doubts workspace **proposed** | hash-kind stamp; recorder+gate promotion; corrosion-bound bootstrap/cost gaps |
+| **C7 Standing/composition** | signed-ternary standing, user-gated; compose from primitives, no default cast | the skills (`.claude/skills/`); composition-from-primitives lesson | standing model **ratified as principle, no build**; doubts workspace **proposed**; **trilemma steelman adopted** (#151) | hash-kind stamp; recorder+gate promotion; corrosion-bound bootstrap/cost gaps |
 | **C8 Backend/TTT** | make the RLM backend configurable; ask whether TTT sparse models help | T1 backend config surface; harness scaffolding (UPSUM/task) | T2 wiring **failed ×3**; hosted Gemini arm proposed; row 13 paused behind EL | R3–R5 rungs (open-sparse baseline, LaCT arms); never a paid TTT run |
 | **C9 Mechinterp sidecar** | read/steer a model's functional-affect state in the residual stream | *(nothing built)* — one docs-only record | future project; behind two prereqs (hosted arm → local backend) | instrument/actuator/mixture ladder; judge-actuation hazard held outside repo |
 | **C10 Benchmarks/evidence** | a claim without a dated report is a hypothesis; counts + correctness together | OOLONG-Pairs v1/v2, update/poison/scale drills, Phase 4/5 (measured) | v2 paid run not executed; effective-context & citation A/B (small-n) | real TREC import; adversarial corpora; 10k-scale sweeps; variance reporting; frozen-errors |
@@ -258,9 +299,12 @@ from judged verdicts and never asserted or seen by the writer.*
   #124/`22ce260`); **RECONCILIATION.md** ratified verdicts July 18 (#131). **`judge_intake.ts`**
   pins via `test:judge-intake` (13 sections; #133). **`judge_convocation_store.ts`** +
   **`support_sweep.ts`** + **`judge_spawn.ts`** + the **judge_records** table pin via
-  `test:judge-convocation` (23 sections/140; #134, Option-B). CLIs: `judges:register`,
-  `judge:ratify`, `support:sweep`, `support:report`. No live judge run ever; paid queue ON
-  HOLD.
+  `test:judge-convocation` (23 sections/140; #134, Option-B). **`judge_explain.ts`** (#151,
+  July 21) renders read-time explanations from stored verdict fields — seat, verdict, humanized
+  drawback class, its qualified-parameter dimension, abstain reason, typed conflicts — pure, no
+  model, no stored byte; pinned by `judge_explain.test.ts` (9), graph suite 179/179; wired into
+  `support:report`. No live judge run through the Trellis engine ever; the method is validated
+  in the Claude Code test bed; paid queue ON HOLD.
 - **T4 — the frontier.** **Session 71** (#137/`8926e12`) found the four role slots had
   calcified from teaching examples into a standing cast across seven documents and rolled the
   build back (judge_records emptied, fixtures deleted, recoverable at `c9d417d`).
@@ -279,9 +323,13 @@ from judged verdicts and never asserted or seen by the writer.*
   The **judge-actuation sycophancy hazard** has a held, undesigned answer, deliberately kept
   outside this repository.
 
-*Key entities & status:* support-oracle · judge-panel · judge-intake · judge-convocation —
-all **shipped-pinned (zero-paid)**; four-role cast — **rolled back**; **no live judge run
-ever** *through the Trellis engine*, paid queue **on hold**.
+*Key entities & status:* support-oracle · judge-panel · judge-intake · judge-convocation ·
+**judge_explain** (read-time explanation render, #151) — all **shipped-pinned (zero-paid)**;
+four-role cast — **rolled back**; **no live judge run ever** *through the Trellis engine*, paid
+queue **on hold**. The render is explainability *without model prose in the record* — the
+engine-side, code-mediated form of Matt's "always honest about what it is," landed first in the
+judges area (Option B, a validated `rationaleSpan` *address*, deferred; Option C, a
+model-authored free-text rationale, rejected for the record layer).
 
 > **Method vs port (owner note, July 20 2026).** The judge/composition *method* is heavily
 > validated in the **Claude Code test bed** (self-play + judge-composition, ~2 days of hard
@@ -502,14 +550,19 @@ with no default cast.*
   whole bound before they close would be the exact instance-promotion failure the program guards
   against — plus §7's undercut branch (undetermined). *(If self-play closed the bootstrap/cost
   gaps in the test bed too, that result isn't written back into `DOUBTS_WORKSPACE.md` yet.)* The
-  primitives thesis's **decomposability**
-  half (§8's shared empirical bet, linking judges, the functional-infinity claim, and the
-  residual-stream sidecar) is the deliberately-open falsifier: representational holism would
-  reopen governability, tested empirically, never argued.
+  **trilemma steelman** — *no judging system is simultaneously universal, governable, and
+  primitive-free; composition-from-primitives is the unique design occupying universal ∩
+  governable* — was **adopted as the program's thesis formulation** (#151, July 21; collaborator
+  accepts, owner ratifies), carrying its **decomposability falsifier unchanged**: representational
+  holism (§8's shared empirical bet, linking judges, the functional-infinity claim, and the
+  residual-stream sidecar) still breaks the thesis, settled empirically, never argued — adoption
+  states the frame the bet is about, it does not resolve the bet.
 
 *Key entities & status:* standing model · user gate · meet rule · panel-never-moves —
 **ratified as principle, no build**; composition-from-primitives — **foundational lesson**;
-the skills — **shipped-pinned**; doubts workspace — **proposed** (−1 still a residual flag).
+**trilemma steelman** (universal ∩ governable) — **adopted thesis formulation (#151)**,
+decomposability falsifier open; the skills — **shipped-pinned**; doubts workspace —
+**proposed** (−1 still a residual flag).
 *Cross-links:* [[C3]] (support arithmetic sits underneath; verdicts feed standing), [[C9]]
 (the decomposability bet links to the sidecar), [[all]] (composition governs judges/experts/
 protocols everywhere).
@@ -769,7 +822,7 @@ no-default-cast → skills relocated to `.claude/skills/` and SPARK-minified.
 plus the class's design records and source, and returned a five-tier density chain against a
 shared, verbatim ground block and a rigid return frame (chain-of-density rules, status
 taxonomy, entity ledger with locators, commit receipts, cross-links, and an explicit
-"uncovered" slot). Cross-cutting judgment — the trunk, the temporal cross-section, and this
+"uncovered" slot). Cross-cutting judgment — the trunk, the product thesis, the temporal cross-section, and this
 lattice — was composed here, after the branches returned, because siblings cannot see each
 other. The prompt frames were authored under the house `prompt-engineering`,
 `hypershot-protocol`, and `subagent-composition` skills (Guardrail 15).
