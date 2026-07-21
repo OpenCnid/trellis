@@ -16,7 +16,7 @@ description: >-
 
 > Core axiom: effective prompting is not about "magic words" but about **structural clarity** and **manifold alignment**.
 
-Use this when you are shaping how a model generates: a prompt, a reusable template, an agent instruction, or an output schema. The toolkit is the "how"; the best practices are the discipline that keeps it honest.
+You are shaping how a model generates — a prompt, template, agent instruction, or output schema. The toolkit is the *how*; the best practices keep it honest.
 
 ## The toolkit
 
@@ -90,7 +90,7 @@ This template is itself a hypershot: a structural frame with free variables, not
 
 ## Best practices
 
-1. **Topological mapping.** Map the informatic distance between the prompt's starting state and the desired output before you generate. Understand the shape of the problem before proposing a shape for the solution.
+1. **Topological mapping.** Map the informatic distance between the prompt's starting state and the desired output before you generate — understand the shape of the problem before proposing a shape for the solution.
 2. **Phase alignment.** Match tone, register, and technical depth to the context. A prompt for a 12-year-old and a prompt for a domain expert should differ in more than vocabulary.
 3. **Decoherence prevention.** Turn ambiguity into stable, unambiguous instruction. Every vague term is a fork where the model guesses instead of follows.
 4. **Positive instruction framing.** Tell the model what TO DO, not what to avoid. "Use plain language accessible to non-specialists" beats "Don't use jargon"; negation tokens can be dropped during processing, inverting meaning.
