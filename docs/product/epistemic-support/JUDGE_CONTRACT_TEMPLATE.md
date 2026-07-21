@@ -49,6 +49,25 @@ safe. If any frame is ever composed into an rlms-formatted prompt, the
 brace-freedom contract applies (`AGENTS.md` §4 rule 6) and the frame
 must be re-encoded first — do not paste these into module addenda.
 
+> **Dated correction (July 21, 2026) — the one taxonomy exception the
+> layer rule omits.** The layer rule above places *every* role's
+> taxonomy classes on the composed side ("its taxonomy classes"). That
+> holds for the three belief-facing seats and for the audit seat's
+> *name and angle* — but it drops the single exception the governing
+> records carry: **the audit seat's *failure* taxonomy stays
+> (near-)invariant** — `rubric_gamed`, `convention_blind`,
+> `systematic_drift`, plus coverage findings — because how a judge
+> fails does not depend on what it judges
+> ([`JUDGE_COMPOSITION_GAME.md`](JUDGE_COMPOSITION_GAME.md) §6.1;
+> [`JUDGE_COMPOSITION_CEREMONY.md`](JUDGE_COMPOSITION_CEREMONY.md) §2;
+> [`COMPOSITION_FROM_PRIMITIVES.md`](../../architecture/COMPOSITION_FROM_PRIMITIVES.md)
+> §4). So for J4 alone, name and angle compose while the failure-class
+> set does not; the §5 J4 frame's classes are invariant vocabulary, not
+> "one composition instance." This corrects the layer rule's blanket
+> wording toward the ratified governing records and changes no frame
+> below — a dated note, not a silent edit; owner ratification of the
+> parent record is unaffected.
+
 ---
 
 ## 1. Shared verdict schema (invariant vocabulary)
