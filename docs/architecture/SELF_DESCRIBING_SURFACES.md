@@ -300,7 +300,9 @@ this record's proposals are corrections on top of MASH, not imports of it.
   MASH; this record maps them onto Trellis, develops the `llm_help` shape, and
   records the six-axis correspondence (§7). The mapping and the Trellis
   instantiation are the session's work — the seed and the prior art are his, and
-  the debt is acknowledged in strong regard.
+  the debt is acknowledged in strong regard. A full chain-of-density map of MASH
+  itself, reverse-engineered from the code, lives in OpenCnid's fork at
+  [`docs/density-chain/`](https://github.com/OpenCnid/MASH/tree/main/docs/density-chain).
 - **Byte-accurate on MASH — verified in the clone, not merely described.** The
   command doc-metadata registry (`mash_engine.py:67`, `:306`), the Sensory /
   Visual Loom and the "bloom" (`ai_layer.py:32`, `:334`, `:365`), and `world.json`
