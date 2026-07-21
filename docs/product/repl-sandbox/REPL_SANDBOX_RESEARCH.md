@@ -128,15 +128,15 @@ hosted-only vendor.
 
 ## 1. What Trellis runs today (grounded)
 
-Trellis' REPL is the `rlms` package (`rlms==0.1.3`, [requirements.txt](../../requirements.txt)),
+Trellis' REPL is the `rlms` package (`rlms==0.1.3`, [requirements.txt](../../../requirements.txt)),
 the reference implementation of MIT CSAIL's Recursive Language Models. It is the
 execution substrate for the code-mediated-text pillar
-([CODE_MEDIATED_TEXT.md](../architecture/CODE_MEDIATED_TEXT.md)): text lives as
+([CODE_MEDIATED_TEXT.md](../../architecture/CODE_MEDIATED_TEXT.md)): text lives as
 queryable structures in a persistent Python REPL and the model operates on it with
 code. The current backend, `rlms`' `LocalREPL`, has these properties (read from
 the upstream source, `github.com/alexzhang13/rlm`, and corroborated against
-[trellis_agent.py](../../src/rlm/trellis_agent.py) and
-[RLM_HARNESS_SCAFFOLDING.md](../architecture/RLM_HARNESS_SCAFFOLDING.md)):
+[trellis_agent.py](../../../src/rlm/trellis_agent.py) and
+[RLM_HARNESS_SCAFFOLDING.md](../../architecture/RLM_HARNESS_SCAFFOLDING.md)):
 
 - **In-process execution.** `execute_code` builds a merged namespace and runs
   `exec(code, combined, combined)` in the host process. There is **no OS
@@ -488,7 +488,7 @@ signature + one-line doc, bodies stripped; (b) **slice-by-address** — the engi
 returns node-ids / line-ranges the model re-queries, rather than shipping content
 (this is the code-mediated-text pillar realised as a slicing API, and it aligns with
 the existing `get_ast_blocks` accessor in
-[CODE_MEDIATED_TEXT.md](../architecture/CODE_MEDIATED_TEXT.md)); (c)
+[CODE_MEDIATED_TEXT.md](../../architecture/CODE_MEDIATED_TEXT.md)); (c)
 `ExecResult.value_repr` is a capped `repr`/`head` with a `spill_handle` the model
 re-slices — `df.head()` made a first-class seam field.
 

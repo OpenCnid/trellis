@@ -12,7 +12,7 @@ requirements, not suggestions. Diagrams: [isolation view](repl_sandbox_architect
 ## 0. Purpose
 
 Trellis' REPL is the execution substrate for the code-mediated-text pillar
-([CODE_MEDIATED_TEXT.md](../architecture/CODE_MEDIATED_TEXT.md)): the model operates on text
+([CODE_MEDIATED_TEXT.md](../../architecture/CODE_MEDIATED_TEXT.md)): the model operates on text
 by writing and running Python, not by reading/retyping it. Today that runs on `rlms`'
 `LocalREPL` — the MIT CSAIL Recursive Language Model reference implementation — which
 executes model-authored Python **in-process on the host, with no isolation**, and injects
