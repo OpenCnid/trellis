@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three-Lens Study · Why I Left Google DeepMind</title>
+<meta name="description" content="Alex Turner's essay read through Trellis's epistemology and its two developers — Cnid and Matt. A cover over one argument; the readings must glue into a global section.">
+<style>
+  :root{
+    --bg:#f5f4fb; --panel:#ffffff; --panel-2:#efedf9; --ink:#1a1930; --ink-soft:#4d4a66;
+    --line:#e2def0; --line-2:#cfc9e6; --brand:#6b5ed0;
+    --t1:#3f7fe0; --t2:#7280ec; --t3:#9b8cf7; --t4:#c579e4; --t5:#e46fc4;
+    --ok:#177f68; --ok-bg:#d8f0e9; --hold:#95701c; --hold-bg:#f3e9cf; --wip:#bd524f; --wip-bg:#f5dedd;
+    --shadow:0 1px 2px rgba(30,20,60,.06),0 10px 30px rgba(40,26,80,.06);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0d0e1b; --panel:#161a2e; --panel-2:#1c2038; --ink:#e9e9f6; --ink-soft:#a6a4c6;
+      --line:#282c47; --line-2:#3a3e60; --brand:#9b8cf7;
+      --t1:#58a6ff; --t2:#8093fb; --t3:#a794f8; --t4:#cd83e6; --t5:#ef6fd0;
+      --ok:#54ccac; --ok-bg:#123027; --hold:#dcb46b; --hold-bg:#312a19; --wip:#ec8d84; --wip-bg:#33211f;
+      --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 34px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#f5f4fb; --panel:#ffffff; --panel-2:#efedf9; --ink:#1a1930; --ink-soft:#4d4a66;
+    --line:#e2def0; --line-2:#cfc9e6; --brand:#6b5ed0;
+    --t1:#3f7fe0; --t2:#7280ec; --t3:#9b8cf7; --t4:#c579e4; --t5:#e46fc4;
+    --ok:#177f68; --ok-bg:#d8f0e9; --hold:#95701c; --hold-bg:#f3e9cf; --wip:#bd524f; --wip-bg:#f5dedd;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d0e1b; --panel:#161a2e; --panel-2:#1c2038; --ink:#e9e9f6; --ink-soft:#a6a4c6;
+    --line:#282c47; --line-2:#3a3e60; --brand:#9b8cf7;
+    --t1:#58a6ff; --t2:#8093fb; --t3:#a794f8; --t4:#cd83e6; --t5:#ef6fd0;
+    --ok:#54ccac; --ok-bg:#123027; --hold:#dcb46b; --hold-bg:#312a19; --wip:#ec8d84; --wip-bg:#33211f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+  .wrap{max-width:1120px;margin:0 auto;padding:clamp(16px,3vw,34px) clamp(14px,4vw,40px) 72px}
+  a{color:var(--brand);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--brand) 34%,transparent)}
+  a:hover{border-bottom-color:var(--brand)}
+
+  /* ===== animated banner ===== */
+  .banner{border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);
+    margin-bottom:24px;background:#131530;display:block}
+  .banner svg{display:block;width:100%;height:auto}
+  .nd{transform-box:fill-box;transform-origin:center;animation:pulse 3.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.26}50%{opacity:1}}
+  .sweep{animation:sweep 7.5s linear infinite}
+  @keyframes sweep{from{transform:translateX(-320px)}to{transform:translateX(1240px)}}
+  .grow{stroke-dasharray:240;stroke-dashoffset:240;animation:grow 2.6s ease-out forwards}
+  @keyframes grow{to{stroke-dashoffset:0}}
+
+  .lede{font-size:clamp(15px,1.7vw,18px);color:var(--ink-soft);max-width:70ch;margin:0 0 20px}
+  .lede b{color:var(--ink);font-weight:600}
+  .lede i{color:var(--brand);font-style:italic}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 13px;
+    display:flex;gap:9px;align-items:baseline;box-shadow:var(--shadow)}
+  .stat b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:16px;font-weight:700;
+    font-variant-numeric:tabular-nums;color:var(--brand)}
+  .stat span{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em}
+
+  .trunk{margin:26px 0 8px;background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);border-left:3px solid var(--t3);border-radius:12px;
+    padding:18px 22px;box-shadow:var(--shadow)}
+  .trunk .k{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--brand);margin:0 0 8px}
+  .trunk p{margin:0;font-size:15.5px;max-width:84ch}
+  .trunk p+p{margin-top:10px}
+  .trunk b{color:var(--brand)} .trunk i{color:var(--ink);font-style:italic;font-weight:500}
+
+  .group{margin-top:44px}
+  .group-hd{display:flex;align-items:baseline;gap:14px;margin:0 0 4px;flex-wrap:wrap}
+  .group-hd .n{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--brand);
+    letter-spacing:.14em;text-transform:uppercase}
+  .group-hd h2{font-size:21px;margin:0;font-weight:700;letter-spacing:-.01em}
+  .group-hd .sub{color:var(--ink-soft);font-size:13.5px}
+
+  /* ===== architecture stage ===== */
+  .stage{margin:20px 0 6px;border-radius:16px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:var(--shadow);background:#111433}
+  .stage svg{display:block;width:100%;height:auto}
+  .dl{font-family:ui-monospace,Menlo,Consolas,monospace;fill:#aeb8e6}
+  .dh{font-weight:700;fill:#eef0ff}
+  .dsub{fill:#c2c8ee}
+  .dq{font-style:italic;fill:#d7dbf8}
+
+  /* ===== lens cards ===== */
+  .lenses{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+  .lens{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .lens .stripe{height:6px;flex:none}
+  .lens .pad{padding:15px 17px 17px}
+  .lens .who{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:14px;letter-spacing:.02em}
+  .lens .role{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;
+    font-family:ui-monospace,Menlo,Consolas,monospace;margin:2px 0 11px}
+  .lens .reads{font-size:13.5px;color:var(--ink);margin:0 0 10px}
+  .lens .reads b{color:var(--brand)}
+  .lens .q{font-size:13.5px;font-style:italic;color:var(--ink-soft);border-left:2px solid var(--line-2);
+    padding-left:11px;margin:0 0 12px}
+  .lens .anchors{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+  .lens .a{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;padding:2px 8px;border-radius:20px;
+    background:var(--panel-2);border:1px solid var(--line);color:var(--ink-soft)}
+  .lens.tl .stripe{background:linear-gradient(90deg,var(--t1),var(--t2))}
+  .lens.cn .stripe{background:linear-gradient(90deg,var(--t3),var(--t4))}
+  .lens.mt .stripe{background:linear-gradient(90deg,var(--t4),var(--t5))}
+  .lens.tl .who{color:var(--t1)} .lens.cn .who{color:var(--t3)} .lens.mt .who{color:var(--t5)}
+
+  /* ===== mappings ===== */
+  .mapgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+  .mcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    box-shadow:var(--shadow);position:relative}
+  .mcard h4{margin:0 0 6px;font-size:14.5px;font-weight:700;letter-spacing:-.01em;padding-right:96px}
+  .mcard p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.5}
+  .mcard p i{color:var(--ink);font-style:italic}
+  .chip{position:absolute;top:14px;right:14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;
+    padding:3px 9px;border-radius:20px;font-weight:700;letter-spacing:.03em;white-space:nowrap;border:1px solid transparent}
+  .chip.spine{color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,var(--panel));
+    border-color:color-mix(in srgb,var(--brand) 32%,transparent)}
+  .chip.ctrl{color:var(--ok);background:var(--ok-bg);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+  .chip.open{color:var(--hold);background:var(--hold-bg);border-color:color-mix(in srgb,var(--hold) 34%,transparent)}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:12px 0 0;font-size:12px;color:var(--ink-soft)}
+  .legend .chip{position:static}
+
+  .note{margin:18px 0 0;padding:13px 16px;border-radius:11px;font-size:13.5px;line-height:1.6;
+    background:color-mix(in srgb,var(--brand) 9%,var(--panel));
+    border:1px solid color-mix(in srgb,var(--brand) 26%,transparent);border-left:3px solid var(--brand)}
+  .note b{color:var(--brand)}
+  .note .tag{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--brand);display:block;margin-bottom:5px}
+
+  /* ===== code / prompt ===== */
+  .code{margin-top:16px;background:#0f1230;border:1px solid var(--line-2);border-radius:12px;overflow:hidden}
+  .code .bar{display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.02)}
+  .code .bar .dot{width:10px;height:10px;border-radius:50%}
+  .code .bar .t{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:#aeb8e6;letter-spacing:.04em}
+  .code pre{margin:0;padding:16px 18px;overflow-x:auto;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:12.5px;line-height:1.62;color:#d7dbf6;tab-size:2}
+  .code pre .v{color:#c579e4} .code pre .tag{color:#58a6ff} .code pre .c{color:#7e86b6;font-style:italic}
+  details{margin-top:14px;border:1px solid var(--line);border-radius:11px;background:var(--panel);box-shadow:var(--shadow)}
+  details>summary{cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;list-style:none}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::before{content:"▸ ";color:var(--brand)}
+  details[open]>summary::before{content:"▾ "}
+  details .inner{padding:0 16px 4px}
+
+  footer{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:13px}
+  footer b{color:var(--ink)}
+  footer .mono{font-size:12px}
+
+  @media(max-width:760px){.lenses{grid-template-columns:1fr}.mapgrid{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
+    .grow{stroke-dashoffset:0!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== BANNER ===================== -->
+  <div class="banner" role="img" aria-label="Three-Lens Study banner — an essay read through Trellis's eyes">
+    <svg viewBox="0 0 1200 250" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="house" x1="0" y1="0" x2="1200" y2="250" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#58a6ff"/><stop offset="0.5" stop-color="#9b8cf7"/><stop offset="1" stop-color="#ef6fd0"/>
+        </linearGradient>
+        <linearGradient id="bbg" x1="0" y1="0" x2="1200" y2="250" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#111433"/><stop offset="1" stop-color="#241a3e"/>
+        </linearGradient>
+        <linearGradient id="shim" x1="0" y1="0" x2="240" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.13"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="fade" x1="0" y1="0" x2="820" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#0f1230" stop-opacity="0.92"/><stop offset="0.62" stop-color="#0f1230" stop-opacity="0.7"/><stop offset="1" stop-color="#0f1230" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="250" fill="url(#bbg)"/>
+      <!-- three lenses as an abstract cover over a point -->
+      <g fill="none" stroke-width="2">
+        <circle class="nd" cx="1000" cy="70"  r="30" stroke="#58a6ff" style="animation-delay:.0s"/>
+        <circle class="nd" cx="1060" cy="128" r="30" stroke="#9b8cf7" style="animation-delay:.5s"/>
+        <circle class="nd" cx="1000" cy="186" r="30" stroke="#ef6fd0" style="animation-delay:1s"/>
+        <path class="grow" d="M973 84 L905 122" stroke="#58a6ff" opacity="0.7"/>
+        <path class="grow" d="M1033 128 L905 125" stroke="#9b8cf7" opacity="0.7" style="animation-delay:.3s"/>
+        <path class="grow" d="M973 172 L905 128" stroke="#ef6fd0" opacity="0.7" style="animation-delay:.6s"/>
+        <circle cx="900" cy="125" r="7" fill="#e9ecff" stroke="none"/>
+      </g>
+      <g class="sweep"><rect x="0" y="0" width="240" height="250" fill="url(#shim)"/></g>
+      <rect width="820" height="250" fill="url(#fade)"/>
+      <text x="56" y="64" class="mono" fill="#aeb8e6" font-size="14" letter-spacing="4" style="font-weight:600">TRELLIS ENGINE &#183; A THREE-LENS STUDY</text>
+      <text x="53" y="132" class="mono" fill="url(#house)" font-size="52" style="font-weight:800;letter-spacing:-1px">READ THROUGH OUR EYES</text>
+      <text x="56" y="172" class="mono" fill="#c7cdf0" font-size="17" style="font-weight:600">&#8220;Why I Left Google DeepMind&#8221; &#8212; TurnTrout, on the instrument's table</text>
+      <text x="56" y="204" class="mono" fill="#7e86b6" font-size="13.5" letter-spacing="1">Trellis doctrine &#183; Cnid &#183; Matt &#8226; a cover over one argument</text>
+    </svg>
+  </div>
+
+  <p class="lede">One essay, read three ways at once &mdash; not summarised, not rebutted, but run through an
+    <b>instrument</b>. Trellis's epistemology is the lens; Alex Turner's account of leaving Google DeepMind is the
+    specimen. The three readings &mdash; the engine's doctrine, <b>Cnid</b>'s, <b>Matt</b>'s &mdash; form a
+    <i>cover</i> over the essay's argument, and a single ruling is the <i>global section</i> they must glue into.
+    Nothing here is a verdict: every mapping is a hypothesis carrying its own positive control.</p>
+
+  <div class="stats">
+    <div class="stat"><b>3</b><span>lenses / the cover</span></div>
+    <div class="stat"><b>7</b><span>mappings to test</span></div>
+    <div class="stat"><b>1</b><span>spine hypothesis</span></div>
+    <div class="stat"><b>0</b><span>conclusions pre-stated</span></div>
+  </div>
+
+  <!-- ===================== THE SPINE ===================== -->
+  <div class="trunk">
+    <p class="k">The spine &#183; the one hypothesis the whole study turns on</p>
+    <p>Turner: <i>&#8220;A principle is something you commit to in advance so you can't talk yourself out of it
+      later.&#8221;</i> &nbsp;Trellis: <i>&#8220;Prose is not a constraint; it is a wish.&#8221;</i></p>
+    <p>Two houses, one claim &mdash; a commitment with no <b>structural enforcement</b> is not binding; it is talked
+      away the moment an incentive pushes. The study's job is to <b>test</b> that resonance against the text, with
+      Anthropic (refused, and won in court) standing ready as the positive control &mdash; not to assume it.</p>
+  </div>
+
+  <!-- ===================== ARCHITECTURE ===================== -->
+  <div class="group">
+    <div class="group-hd"><span class="n">Fig. 1</span><h2>The study architecture</h2>
+      <span class="sub">specimen &rarr; cover &rarr; global section &rarr; memo</span></div>
+
+    <div class="stage">
+      <svg viewBox="0 0 1040 940" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Architecture diagram: the essay is read by three lenses forming a cover, which glue into a global section and a study memo.">
+        <defs>
+          <linearGradient id="astage" x1="0" y1="0" x2="1040" y2="940" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#111433"/><stop offset="1" stop-color="#20163a"/>
+          </linearGradient>
+          <linearGradient id="gTrellis" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3f7fe0"/><stop offset="1" stop-color="#58a6ff"/></linearGradient>
+          <linearGradient id="gCnid" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9b8cf7"/><stop offset="1" stop-color="#a794f8"/></linearGradient>
+          <linearGradient id="gMatt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e46fc4"/><stop offset="1" stop-color="#ef6fd0"/></linearGradient>
+          <linearGradient id="gSpine" x1="0" y1="0" x2="1040" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#58a6ff"/><stop offset="0.5" stop-color="#9b8cf7"/><stop offset="1" stop-color="#ef6fd0"/>
+          </linearGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#8b93c4"/>
+          </marker>
+        </defs>
+        <rect width="1040" height="940" fill="url(#astage)"/>
+        <!-- faint lattice dots -->
+        <g fill="#ffffff" opacity="0.05">
+          <circle cx="90" cy="360" r="3"/><circle cx="150" cy="620" r="3"/><circle cx="960" cy="330" r="3"/>
+          <circle cx="905" cy="640" r="3"/><circle cx="520" cy="900" r="3"/><circle cx="60" cy="120" r="3"/>
+        </g>
+        <!-- center spine guide -->
+        <line x1="520" y1="150" x2="520" y2="716" stroke="url(#gSpine)" stroke-width="1.5" stroke-dasharray="3 7" opacity="0.5"/>
+
+        <text x="40" y="40" class="dl" font-size="12" letter-spacing="3">THE PIPELINE</text>
+
+        <!-- 1 · ESSAY -->
+        <g>
+          <rect x="350" y="56" width="340" height="88" rx="14" fill="#1a1f3d" stroke="url(#gSpine)" stroke-width="1.5"/>
+          <text x="520" y="84" text-anchor="middle" class="dl" font-size="11" letter-spacing="2">THE SPECIMEN</text>
+          <text x="520" y="108" text-anchor="middle" class="dh" font-size="18">Why I Left Google DeepMind</text>
+          <text x="520" y="129" text-anchor="middle" class="dsub" font-size="12">TurnTrout &#183; incl. the immigration-supply-chain section</text>
+        </g>
+
+        <!-- fan to lenses -->
+        <g fill="none" stroke="#8b93c4" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85">
+          <path class="grow" d="M520 148 C 300 176, 195 190, 190 226"/>
+          <path class="grow" d="M520 148 L 520 226" style="animation-delay:.2s"/>
+          <path class="grow" d="M520 148 C 740 176, 850 190, 850 226" style="animation-delay:.4s"/>
+        </g>
+
+        <!-- cover label + bracket -->
+        <text x="520" y="196" text-anchor="middle" class="dl" font-size="12" letter-spacing="2" fill="#c2c8ee">THE COVER &#8212; THREE LOCAL READINGS OF ONE TOPOLOGY</text>
+
+        <!-- 2 · LENSES -->
+        <!-- Trellis -->
+        <g>
+          <rect x="40" y="230" width="300" height="250" rx="13" fill="#171b34" stroke="#2a2f52"/>
+          <rect x="40" y="230" width="300" height="6" rx="3" fill="url(#gTrellis)"/>
+          <text x="60" y="266" class="dl" font-size="13" fill="#58a6ff" style="font-weight:700">TRELLIS DOCTRINE</text>
+          <text x="60" y="285" class="dl" font-size="10" fill="#8b93c4" letter-spacing="1">THE ENGINE'S INVARIANTS</text>
+          <text x="60" y="316" class="dsub" font-size="13">reads for: was the</text>
+          <text x="60" y="335" class="dsub" font-size="13">commitment <tspan fill="#eef0ff" style="font-weight:700">structure</tspan>, or</text>
+          <text x="60" y="354" class="dsub" font-size="13">merely <tspan fill="#eef0ff" style="font-weight:700">prose?</tspan></text>
+          <text x="60" y="392" class="dq" font-size="12.5">custody &#8800; correctness</text>
+          <text x="60" y="411" class="dq" font-size="12.5">standing moves by gate</text>
+          <text x="60" y="430" class="dq" font-size="12.5">basis changes &#8594; contest</text>
+          <line x1="60" y1="448" x2="320" y2="448" stroke="#2a2f52"/>
+          <text x="60" y="468" class="dl" font-size="10.5" fill="#8b93c4">STANDING &#183; CUSTODY &#183; RE-REVIEW</text>
+        </g>
+        <!-- Cnid -->
+        <g>
+          <rect x="370" y="230" width="300" height="250" rx="13" fill="#171b34" stroke="#2a2f52"/>
+          <rect x="370" y="230" width="300" height="6" rx="3" fill="url(#gCnid)"/>
+          <text x="390" y="266" class="dl" font-size="13" fill="#a794f8" style="font-weight:700">CNID</text>
+          <text x="390" y="285" class="dl" font-size="10" fill="#8b93c4" letter-spacing="1">OWNER &#183; DOMAIN AUTHORITY</text>
+          <text x="390" y="316" class="dsub" font-size="13">reads for: <tspan fill="#eef0ff" style="font-weight:700">authority</tspan></text>
+          <text x="390" y="335" class="dsub" font-size="13">and the <tspan fill="#eef0ff" style="font-weight:700">gate</tspan> &#8212; who</text>
+          <text x="390" y="354" class="dsub" font-size="13">was allowed to move it?</text>
+          <text x="390" y="392" class="dq" font-size="12.5">decided in advance,</text>
+          <text x="390" y="411" class="dq" font-size="12.5">or rationalised after?</text>
+          <text x="390" y="430" class="dq" font-size="12.5">demand the positive control</text>
+          <line x1="390" y1="448" x2="650" y2="448" stroke="#2a2f52"/>
+          <text x="390" y="468" class="dl" font-size="10.5" fill="#8b93c4">GATES &#183; PRECOMMITMENT &#183; VERIFY&gt;CLAIM</text>
+        </g>
+        <!-- Matt -->
+        <g>
+          <rect x="700" y="230" width="300" height="250" rx="13" fill="#171b34" stroke="#2a2f52"/>
+          <rect x="700" y="230" width="300" height="6" rx="3" fill="url(#gMatt)"/>
+          <text x="720" y="266" class="dl" font-size="13" fill="#ef6fd0" style="font-weight:700">MATT &#183; LEXIDECK</text>
+          <text x="720" y="285" class="dl" font-size="10" fill="#8b93c4" letter-spacing="1">CROSS-DOMAIN COLLABORATOR</text>
+          <text x="720" y="316" class="dsub" font-size="13">reads for: <tspan fill="#eef0ff" style="font-weight:700">mechanism</tspan></text>
+          <text x="720" y="335" class="dsub" font-size="13">and <tspan fill="#eef0ff" style="font-weight:700">residual</tspan> &#8212; which</text>
+          <text x="720" y="354" class="dsub" font-size="13">incentive gradient?</text>
+          <text x="720" y="392" class="dq" font-size="12.5">what would compose,</text>
+          <text x="720" y="411" class="dq" font-size="12.5">and what failed to?</text>
+          <text x="720" y="430" class="dq" font-size="12.5">file it in one frame</text>
+          <line x1="720" y1="448" x2="980" y2="448" stroke="#2a2f52"/>
+          <text x="720" y="468" class="dl" font-size="10.5" fill="#8b93c4">COMPOSITION &#183; COVER/SECTION &#183; RESIDUAL</text>
+        </g>
+
+        <!-- glue arrows -->
+        <g fill="none" stroke="#8b93c4" stroke-width="1.6" marker-end="url(#arrow)" opacity="0.85">
+          <path class="grow" d="M190 482 C 190 520, 300 528, 360 540" style="animation-delay:.2s"/>
+          <path class="grow" d="M520 482 L 520 536" style="animation-delay:.35s"/>
+          <path class="grow" d="M850 482 C 850 520, 740 528, 680 540" style="animation-delay:.5s"/>
+        </g>
+
+        <!-- 3 · GLOBAL SECTION -->
+        <g>
+          <rect x="150" y="540" width="740" height="176" rx="14" fill="#1a1f3d" stroke="#3a3e60"/>
+          <text x="520" y="572" text-anchor="middle" class="dl" font-size="11" letter-spacing="2" fill="#c2c8ee">THE GLOBAL SECTION &#8212; DO THE READINGS GLUE?</text>
+          <text x="520" y="596" text-anchor="middle" class="dsub" font-size="13">one synthesis in Matt's proposal frame &#8212; or an honest report that they don't</text>
+          <!-- proposal frame chips -->
+          <g font-size="11.5" text-anchor="middle" class="dl" fill="#d7dbf6">
+            <g><rect x="180" y="616" width="120" height="30" rx="8" fill="#22284a" stroke="#3a3e60"/><text x="240" y="635">Claim</text></g>
+            <g><rect x="312" y="616" width="120" height="30" rx="8" fill="#22284a" stroke="#3a3e60"/><text x="372" y="635">Mechanism</text></g>
+            <g><rect x="444" y="616" width="152" height="30" rx="8" fill="#22284a" stroke="#3a3e60"/><text x="520" y="635">Failure-it-closes</text></g>
+            <g><rect x="608" y="616" width="120" height="30" rx="8" fill="#22284a" stroke="#3a3e60"/><text x="668" y="635">Measurement</text></g>
+            <g><rect x="740" y="616" width="120" height="30" rx="8" fill="#22284a" stroke="#3a3e60"/><text x="800" y="635">Residual</text></g>
+          </g>
+          <!-- discipline badges -->
+          <g font-size="10.5" text-anchor="middle" class="dl">
+            <g><rect x="236" y="668" width="176" height="26" rx="13" fill="none" stroke="#54ccac" opacity="0.9"/><text x="324" y="685" fill="#7fe0c6">hypotheses, not conclusions</text></g>
+            <g><rect x="430" y="668" width="132" height="26" rx="13" fill="none" stroke="#8093fb" opacity="0.9"/><text x="496" y="685" fill="#aeb8e6">positive control</text></g>
+            <g><rect x="580" y="668" width="120" height="26" rx="13" fill="none" stroke="#dcb46b" opacity="0.9"/><text x="640" y="685" fill="#e6c98c">steelman first</text></g>
+          </g>
+        </g>
+
+        <!-- to memo -->
+        <path class="grow" d="M520 716 L 520 762" fill="none" stroke="#8b93c4" stroke-width="1.6" marker-end="url(#arrow)" style="animation-delay:.4s"/>
+
+        <!-- 4 · MEMO -->
+        <g>
+          <rect x="340" y="766" width="360" height="84" rx="14" fill="#171b34" stroke="url(#gSpine)" stroke-width="1.5"/>
+          <text x="520" y="794" text-anchor="middle" class="dl" font-size="11" letter-spacing="2">THE OUTPUT</text>
+          <text x="520" y="818" text-anchor="middle" class="dh" font-size="17">Study memo</text>
+          <text x="520" y="838" text-anchor="middle" class="dsub" font-size="12">the output frame &#8212; a hypershot: shape without verdict</text>
+        </g>
+
+        <!-- spine caption -->
+        <text x="520" y="892" text-anchor="middle" class="dl" font-size="12" fill="#9aa2d2">
+          &#8220;commit in advance&#8221; &#10231; &#8220;prose is not a constraint&#8221; &#8212; the spine runs the whole length</text>
+      </svg>
+    </div>
+    <p class="note"><span class="tag">reading the figure</span>The essay enters as a <b>specimen</b>. Three lenses
+      open over it as a <b>cover</b> &mdash; each a complete local reading, none the whole picture. Their readings
+      then attempt to <b>glue</b> into a global section: one synthesis in a single frame, <i>or</i> an honest record
+      of where they refuse to agree. Doubt, here, is not the absence of a reading &mdash; it is a constructed
+      defeater. The spine &mdash; precommitment vs. prose &mdash; runs the entire length and is what every stage is
+      really measuring.</p>
+  </div>
+
+  <!-- ===================== THE THREE LENSES ===================== -->
+  <div class="group">
+    <div class="group-hd"><span class="n">§1</span><h2>The three lenses</h2>
+      <span class="sub">held apart on purpose &mdash; a panel, not a narrator</span></div>
+
+    <div class="lenses">
+      <div class="lens tl">
+        <div class="stripe"></div>
+        <div class="pad">
+          <div class="who">Trellis doctrine</div>
+          <div class="role">the engine's invariants</div>
+          <p class="reads">The named doctrines do the reading. <b>Custody</b> answers where a commitment came from;
+            <b>standing</b> answers how it held up; a claim moves toward fact only by evidence or a gate; a
+            capability whose basis changes is <b>contested and re-reviewed</b>, never silently updated in place.</p>
+          <p class="q">The engine has no opinion about Google. It has invariants &mdash; and it checks whether
+            Google's principles were enforced structure or unenforced prose.</p>
+          <div class="anchors"><span class="a">STANDING_MODEL</span><span class="a">CODE_MEDIATED_TEXT</span><span class="a">capabilities-are-beliefs</span></div>
+        </div>
+      </div>
+
+      <div class="lens cn">
+        <div class="stripe"></div>
+        <div class="pad">
+          <div class="who">Cnid</div>
+          <div class="role">owner &#183; domain authority</div>
+          <p class="reads">Reads for <b>authority</b> and the <b>gate</b>. Who was allowed to move the standing of
+            <i>we will not build weapons or surveillance AI</i>? Was the decision made in advance, or rationalised
+            after the fact under pressure? Cnid's instinct is the <b>positive control</b>: don't accept the null
+            (&#8220;leadership cared&#8221;) until the experiment has shown it <i>could</i> fail.</p>
+          <p class="q">Deterministic verification outranks the claim. Prose without enforcement conserves nothing.</p>
+          <div class="anchors"><span class="a">the human gate</span><span class="a">positive-control</span><span class="a">verify &gt; claim</span></div>
+        </div>
+      </div>
+
+      <div class="lens mt">
+        <div class="stripe"></div>
+        <div class="pad">
+          <div class="who">Matt &#183; Lexideck</div>
+          <div class="role">cross-domain collaborator</div>
+          <p class="reads">Reads for <b>mechanism</b> and <b>residual</b>. What incentive gradient did the contract
+            induce &mdash; and does the failure track the gradient rather than the virtue of the people? The
+            luminaries Turner tried to mobilise are a <b>cover</b> over &#8220;resist the deal&#8221;; collective
+            refusal is the <b>global section</b> that never glued.</p>
+          <p class="q">Files the finding in one frame: Claim / Mechanism / Failure-it-closes / Measurement /
+            Residual. Never an &#8220;improved&#8221; version of another's claim &mdash; rule 15.</p>
+          <div class="anchors"><span class="a">composition</span><span class="a">cover &rarr; section</span><span class="a">incentive gradient</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MAPPINGS ===================== -->
+  <div class="group">
+    <div class="group-hd"><span class="n">§2</span><h2>Seven mappings to test</h2>
+      <span class="sub">confirm, qualify, or refute &mdash; never assume</span></div>
+
+    <div class="mapgrid">
+      <div class="mcard"><span class="chip spine">SPINE</span>
+        <h4>Precommitment is the gate</h4>
+        <p><i>Commit in advance so you can't talk yourself out of it</i> vs. <i>prose is not a constraint</i>. Were
+          Google's 2018 principles enforced structure, or unenforced prose?</p></div>
+
+      <div class="mcard"><span class="chip ctrl">CONTROL READY</span>
+        <h4>Standing moved without a gate</h4>
+        <p>Who was authorised to move the standing of the weapons/surveillance commitment &mdash; evidence, a gate,
+          or executive discretion under an incentive?</p></div>
+
+      <div class="mcard"><span class="chip ctrl">CONTROL READY</span>
+        <h4>Capabilities are beliefs &mdash; inverted</h4>
+        <p>Trellis contests and re-reviews a commitment when its basis changes. Did Google do that &mdash; or
+          <i>silently update in place</i>, no audit, no re-ratification by the pledge-signers?</p></div>
+
+      <div class="mcard"><span class="chip ctrl">CONTROL READY</span>
+        <h4>Incentive-driven, not dispositional</h4>
+        <p>Is Turner's structural diagnosis the same shape as the laundering finding &mdash; the failure tracks the
+          incentive gradient, not the character of the people in the room?</p></div>
+
+      <div class="mcard"><span class="chip open">RESIDUAL</span>
+        <h4>A cover that failed to compose</h4>
+        <p>The luminaries and colleagues are a cover over &#8220;resist the deal.&#8221; Did local sections exist but
+          fail to glue &mdash; and is the search for one irreplaceable defector <i>defeat as a search</i>?</p></div>
+
+      <div class="mcard"><span class="chip ctrl">CONTROL READY</span>
+        <h4>Anthropic as the positive control</h4>
+        <p>Anthropic refused and prevailed; Google capitulated. The arm where structural refusal held vs. the arm
+          where it did not &mdash; a control the essay hands us for free.</p></div>
+
+      <div class="mcard"><span class="chip open">RESIDUAL</span>
+        <h4>Provenance hygiene</h4>
+        <p>Turner's care with attribution (&#8220;I never quote private words without permission&#8221;) and his
+          evidence table read as a <i>custody ledger</i> &mdash; strong custody, with standing still the open axis.</p></div>
+    </div>
+    <div class="legend">
+      <span class="chip spine">SPINE</span><span>the load-bearing analogy</span>
+      <span class="chip ctrl">CONTROL READY</span><span>the essay supplies a case that could falsify it</span>
+      <span class="chip open">RESIDUAL</span><span>partly beyond what this lens can settle</span>
+    </div>
+  </div>
+
+  <!-- ===================== THE PROMPT ===================== -->
+  <div class="group">
+    <div class="group-hd"><span class="n">§3</span><h2>The instrument, in two layers</h2>
+      <span class="sub">semantic containers over a contamination-free frame</span></div>
+
+    <p class="lede" style="margin-top:14px">The driver that runs this study is built the way Trellis builds anything
+      that primes a model: <b>invariants at the system layer, verdicts nowhere</b>. Semantic tags carry the
+      containers; a <b>hypershot</b> output frame carries the shape. The full prompt lives in
+      <span class="mono">docs/studies/turntrout-why-i-left-deepmind.metaprompt.md</span>; its two load-bearing layers
+      are below.</p>
+
+    <div class="code">
+      <div class="bar"><span class="dot" style="background:#ec8d84"></span><span class="dot" style="background:#dcb46b"></span><span class="dot" style="background:#54ccac"></span>
+        <span class="t">the containers &#183; prompt-engineering semantic tags</span></div>
+<pre><span class="tag">&lt;request</span> <span class="v">type</span>=<span class="v">"Three_Lens_Essay_Study"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;role_and_frame&gt;</span>   <span class="c"># three named vantage points; instrument, not advocacy</span>
+  <span class="tag">&lt;subject&gt;</span>          <span class="c"># fetch the essay first; the summary only points</span>
+  <span class="tag">&lt;grounding&gt;</span>        <span class="c"># primary doctrine sources, read not paraphrased</span>
+  <span class="tag">&lt;compact_briefing&gt;</span> <span class="c"># stands alone when the repo is not loaded</span>
+  <span class="tag">&lt;method&gt;</span>           <span class="c"># claim vs inference vs judgment; steelman; rule 15</span>
+  <span class="tag">&lt;candidate_mappings_to_test&gt;</span> <span class="c"># hypotheses, each with a control</span>
+  <span class="tag">&lt;output_frame&gt;</span>     <span class="c"># the hypershot below</span>
+  <span class="tag">&lt;constraints&gt;</span>      <span class="c"># *** CRITICAL *** — attention zone, start &amp; end</span>
+<span class="tag">&lt;/request&gt;</span></pre>
+    </div>
+
+    <div class="code">
+      <div class="bar"><span class="dot" style="background:#ec8d84"></span><span class="dot" style="background:#dcb46b"></span><span class="dot" style="background:#54ccac"></span>
+        <span class="t">the shape &#183; a hypershot &mdash; free variables, no seeded content</span></div>
+<pre><span class="c"># Study: {Essay_Title} through Three Lenses</span>
+## Claim-by-claim reading
+### {Essay_Move_Or_Section}
+- Essay claims (cited): "{Quoted_Or_Anchored_Claim}"
+- Trellis doctrine reading: {Named_Doctrine} &rarr; {What_It_Says_Here}
+- Cnid's read: {Authority_Gate_Precommitment_Enforcement_Angle}
+- Matt's read: {Mechanism_Incentive_Composition_Residual_Angle}
+- Holds / breaks: {Where_The_Mapping_Is_Load_Bearing_And_Its_Residual}
+
+## Synthesis &mdash; the one structural claim  <span class="c"># Matt's proposal frame</span>
+- Claim / Mechanism / Failure-it-closes / Measurement / Residual</pre>
+    </div>
+    <p class="note"><span class="tag">why free variables</span>The frame primes the memo's <b>shape</b> and gives
+      the analyst its <b>primitives</b>, but pins no content &mdash; so the study is not nudged toward a verdict, the
+      way grounded authoring supplies a corpus and a template but never the citations. Primacy is the mechanism: put
+      the shape first, and the undesired pattern (a pre-baked conclusion) never becomes a live option.</p>
+  </div>
+
+  <!-- ===================== THE VOICE ===================== -->
+  <div class="group">
+    <div class="group-hd"><span class="n">§4</span><h2>The voice, codified</h2>
+      <span class="sub">what &#8220;OpenCnid style&#8221; is, and the hypershot that holds it</span></div>
+
+    <p class="lede" style="margin-top:14px">The house register is legible once you name it: <b>aphoristic doctrine
+      lines balanced on a semicolon</b>; layered em-dash sentences that stack precise qualifications; a load-bearing
+      lexicon (<span class="mono">substrate, standing, custody, contested, cover, global section, defeater, residual,
+      incentive gradient, tooling shape</span>); <b>mechanism over disposition</b>; and honesty markers that name a
+      failure and keep its trail. Authority is stated as law &mdash; an invariant enforced at a single boundary,
+      never diffused through convention. To reproduce it without copying any one sentence, prime the <i>shape</i>:</p>
+
+    <div class="code">
+      <div class="bar"><span class="dot" style="background:#ec8d84"></span><span class="dot" style="background:#dcb46b"></span><span class="dot" style="background:#54ccac"></span>
+        <span class="t">the OpenCnid voice &#183; a style hypershot</span></div>
+<pre>{Aphoristic_Doctrine_Line_Balanced_On_A_Semicolon_Or_Em_Dash}.
+{Layered_Claim__Not_X__Not_Y__Em_Dash__The_Load_Bearing_Z};
+  {Precise_Parenthetical_With_An_Exact_Qualification_Or_Doc_Pointer}.
+{Named_Pathology_Or_Move}: {One_Line_Definition_That_Makes_It_Reusable}.
+Authority is stated as law &mdash; {The_Invariant}, enforced at
+  {The_Single_Boundary}, not diffused through {The_Convention}.
+{Honest_Residual__What_The_Mechanism_Cannot_Close_And_What_Covers_It}.</pre>
+    </div>
+    <p class="note"><span class="tag">frame-vs-variable balance</span>Strip the variables and the frame still tells
+      you the register: maxim, then a stacked qualification, then a named move, then law, then an honest residual.
+      That is the test from the hypershot protocol &mdash; if the frame alone carries the shape, the variables are
+      doing exactly their share and no more.</p>
+  </div>
+
+  <details>
+    <summary>Colophon &mdash; how this page was built</summary>
+    <div class="inner">
+      <p class="note" style="border-left-color:var(--t3)"><span class="tag">provenance of the artifact</span>
+        Visual system inherited verbatim from <span class="mono">docs/density-chain/DENSITY-CHAIN.html</span> &mdash;
+        the same brand violet, the five-stop spectral ramp (<span class="mono">--t1..--t5</span>), the mono
+        uppercase labels, the animated dark-stage SVG. Theme-aware in light and dark; motion respects
+        <span class="mono">prefers-reduced-motion</span>. Prose authored under the in-repo
+        <span class="mono">prompt-engineering</span> and <span class="mono">hypershot-protocol</span> skills. The
+        study it renders is a companion to the meta-prompt in the same directory; the analysis itself runs in a
+        separate session. Nothing on this page is a verdict on the essay &mdash; it is the instrument, laid open.</p>
+    </div>
+  </details>
+
+  <footer>
+    <p><b>Three-Lens Study &#183; Why I Left Google DeepMind</b> &mdash; a companion render to
+      <span class="mono">turntrout-why-i-left-deepmind.metaprompt.md</span>.</p>
+    <p class="mono">Trellis &#183; OpenCnid &#8226; instrument: custody / standing / precommitment / incentive &#8226;
+      the mappings are hypotheses, the readings a cover, the ruling a global section it must glue into.</p>
+  </footer>
+
+</div>
+</body>
+</html>
