@@ -1,0 +1,430 @@
+<title>Trellis Density-Trellis</title>
+<style>
+  :root{
+    --bg:#f5f4fb; --panel:#ffffff; --panel-2:#efedf9; --ink:#1a1930; --ink-soft:#4d4a66;
+    --line:#e2def0; --line-2:#cfc9e6; --brand:#6b5ed0;
+    --t1:#3f7fe0; --t2:#7280ec; --t3:#9b8cf7; --t4:#c579e4; --t5:#e46fc4;
+    --ok:#177f68; --ok-bg:#d8f0e9; --hold:#95701c; --hold-bg:#f3e9cf; --wip:#bd524f; --wip-bg:#f5dedd;
+    --shadow:0 1px 2px rgba(30,20,60,.06),0 10px 30px rgba(40,26,80,.06);
+    --band:#141634; --band-2:#2a1b40;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0d0e1b; --panel:#161a2e; --panel-2:#1c2038; --ink:#e9e9f6; --ink-soft:#a6a4c6;
+      --line:#282c47; --line-2:#3a3e60; --brand:#9b8cf7;
+      --t1:#58a6ff; --t2:#8093fb; --t3:#a794f8; --t4:#cd83e6; --t5:#ef6fd0;
+      --ok:#54ccac; --ok-bg:#123027; --hold:#dcb46b; --hold-bg:#312a19; --wip:#ec8d84; --wip-bg:#33211f;
+      --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 34px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#f5f4fb; --panel:#ffffff; --panel-2:#efedf9; --ink:#1a1930; --ink-soft:#4d4a66;
+    --line:#e2def0; --line-2:#cfc9e6; --brand:#6b5ed0;
+    --t1:#3f7fe0; --t2:#7280ec; --t3:#9b8cf7; --t4:#c579e4; --t5:#e46fc4;
+    --ok:#177f68; --ok-bg:#d8f0e9; --hold:#95701c; --hold-bg:#f3e9cf; --wip:#bd524f; --wip-bg:#f5dedd;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d0e1b; --panel:#161a2e; --panel-2:#1c2038; --ink:#e9e9f6; --ink-soft:#a6a4c6;
+    --line:#282c47; --line-2:#3a3e60; --brand:#9b8cf7;
+    --t1:#58a6ff; --t2:#8093fb; --t3:#a794f8; --t4:#cd83e6; --t5:#ef6fd0;
+    --ok:#54ccac; --ok-bg:#123027; --hold:#dcb46b; --hold-bg:#312a19; --wip:#ec8d84; --wip-bg:#33211f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+  .wrap{max-width:1120px;margin:0 auto;padding:clamp(16px,3vw,34px) clamp(14px,4vw,40px) 72px}
+
+  /* ===== animated SVG banner (theme-neutral) ===== */
+  .banner{border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);
+    margin-bottom:26px;background:#131530;display:block}
+  .banner svg{display:block;width:100%;height:auto}
+  .node{transform-box:fill-box;transform-origin:center;animation:pulse 3.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.28}50%{opacity:1}}
+  .sweep{animation:sweep 7s linear infinite}
+  @keyframes sweep{from{transform:translateX(-320px)}to{transform:translateX(1240px)}}
+  .grow{stroke-dasharray:200;stroke-dashoffset:200;animation:grow 2.4s ease-out forwards}
+  @keyframes grow{to{stroke-dashoffset:0}}
+
+  /* header text under banner */
+  .lede{font-size:clamp(15px,1.7vw,18px);color:var(--ink-soft);max-width:66ch;margin:0 0 20px}
+  .lede b{color:var(--ink);font-weight:600}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 13px;
+    display:flex;gap:9px;align-items:baseline;box-shadow:var(--shadow)}
+  .stat b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:16px;font-weight:700;
+    font-variant-numeric:tabular-nums;color:var(--brand)}
+  .stat span{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em}
+
+  .trunk{margin:26px 0 8px;background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);border-left:3px solid var(--t2);border-radius:12px;
+    padding:18px 22px;box-shadow:var(--shadow)}
+  .trunk .k{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--brand);margin:0 0 8px}
+  .trunk p{margin:0;font-size:15.5px;max-width:82ch}
+  .trunk b{color:var(--brand)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:22px;align-items:center;margin:24px 0 6px;
+    padding:14px 18px;background:var(--panel);border:1px solid var(--line);border-radius:11px}
+  .legend h4{margin:0 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+    font-family:ui-monospace,Menlo,Consolas,monospace}
+  .ramp{display:flex;align-items:center;gap:0}
+  .ramp i{width:26px;height:14px;display:block}
+  .ramp i:first-child{border-radius:4px 0 0 4px}.ramp i:last-child{border-radius:0 4px 4px 0}
+  .ramp-lab{display:flex;justify-content:space-between;width:130px;font-size:10.5px;color:var(--ink-soft);
+    margin-top:3px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;padding:2px 8px;border-radius:20px;
+    font-weight:600;letter-spacing:.02em;white-space:nowrap;border:1px solid transparent}
+  .chip.ok{color:var(--ok);background:var(--ok-bg);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+  .chip.hold{color:var(--hold);background:var(--hold-bg);border-color:color-mix(in srgb,var(--hold) 34%,transparent)}
+  .chip.wip{color:var(--wip);background:var(--wip-bg);border-color:color-mix(in srgb,var(--wip) 34%,transparent)}
+
+  .group{margin-top:38px}
+  .group-hd{display:flex;align-items:baseline;gap:14px;margin:0 0 4px;flex-wrap:wrap}
+  .group-hd .n{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--brand);
+    letter-spacing:.14em;text-transform:uppercase}
+  .group-hd h2{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em}
+  .group-hd .sub{color:var(--ink-soft);font-size:13.5px}
+
+  .branch{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px 8px;box-shadow:var(--shadow)}
+  .branch-hd{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+  .badge{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:13px;color:#fff;
+    border-radius:8px;padding:5px 9px;flex:none;letter-spacing:.02em;
+    background:linear-gradient(135deg,var(--t2),var(--t4))}
+  .branch-hd .tt{flex:1;min-width:220px}
+  .branch-hd h3{margin:0;font-size:17.5px;font-weight:700;letter-spacing:-.01em}
+  .branch-hd .charter{margin:3px 0 0;color:var(--ink-soft);font-size:13.5px;max-width:78ch}
+
+  .note{margin:0 0 14px;padding:11px 14px;border-radius:10px;font-size:13px;line-height:1.55;
+    background:color-mix(in srgb,var(--brand) 9%,var(--panel));
+    border:1px solid color-mix(in srgb,var(--brand) 26%,transparent);border-left:3px solid var(--brand)}
+  .note b{color:var(--brand)}
+  .note .tag{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--brand);display:block;margin-bottom:4px}
+
+  .lattice{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;position:relative}
+  .vine{position:absolute;top:26px;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--t1),var(--t2),var(--t3),var(--t4),var(--t5));
+    opacity:.34;z-index:0}
+  .cell{position:relative;z-index:1;background:var(--panel-2);border:1px solid var(--line);
+    border-radius:10px;padding:0;text-align:left;cursor:pointer;overflow:hidden;
+    font:inherit;color:inherit;display:flex;flex-direction:column;transition:border-color .15s,transform .12s}
+  .cell:hover{border-color:var(--line-2);transform:translateY(-1px)}
+  .cell:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  .cell .stripe{height:5px;flex:none}
+  .cell .top{display:flex;align-items:center;gap:7px;padding:9px 10px 6px}
+  .cell .tno{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;font-weight:700}
+  .cell .phase{font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;
+    font-family:ui-monospace,Menlo,Consolas,monospace;margin-left:auto}
+  .cell .gist{padding:0 10px 10px;font-size:12.5px;color:var(--ink);line-height:1.42}
+  .cell .st{margin:2px 10px 11px}
+
+  .xl{border-top:1px dashed var(--line);margin-top:14px;padding:11px 2px 12px;font-size:12.5px;color:var(--ink-soft)}
+  .xl b{color:var(--brand);font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:600;font-size:11.5px}
+
+  .sheet{position:fixed;inset:0;background:rgba(10,10,24,.55);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .sheet.on{display:flex}
+  .sheet-card{background:var(--panel);border:1px solid var(--line-2);border-radius:16px;max-width:640px;width:100%;
+    max-height:84vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.45);padding:24px 26px}
+  .sheet-card .sh-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .sheet-card h3{margin:0;font-size:15px;font-weight:700}
+  .sheet-card .cls{font-size:12px;color:var(--ink-soft);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .sheet-card .full{margin:14px 0 0;font-size:14.5px;line-height:1.62}
+  .sheet-card .meta{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-soft);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .x{margin-left:auto;background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink);
+    width:30px;height:30px;cursor:pointer;font-size:16px;line-height:1;flex:none}
+  .x:hover{border-color:var(--line-2)}
+
+  footer{margin-top:52px;padding-top:24px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:13px}
+  footer b{color:var(--ink)}
+  footer .mono{font-size:12px}
+  @media(max-width:720px){.lattice{grid-template-columns:1fr}.vine{display:none}.cell .gist{display:block}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="banner" role="img" aria-label="Trellis Density-Trellis — animated lattice banner">
+    <svg viewBox="0 0 1200 250" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="house" x1="0" y1="0" x2="1200" y2="250" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#58a6ff"/><stop offset="0.5" stop-color="#9b8cf7"/><stop offset="1" stop-color="#ef6fd0"/>
+        </linearGradient>
+        <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="250" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#111433"/><stop offset="1" stop-color="#241a3e"/>
+        </linearGradient>
+        <linearGradient id="shim" x1="0" y1="0" x2="240" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0.14"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="fade" x1="0" y1="0" x2="760" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#0f1230" stop-opacity="0.92"/><stop offset="0.62" stop-color="#0f1230" stop-opacity="0.72"/><stop offset="1" stop-color="#0f1230" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="250" fill="url(#bg)"/>
+      <g id="lattice"></g>
+      <g class="sweep"><rect x="0" y="0" width="240" height="250" fill="url(#shim)"/></g>
+      <rect width="760" height="250" fill="url(#fade)"/>
+      <text x="56" y="66" class="mono" fill="#aeb8e6" font-size="14" letter-spacing="4" style="font-weight:600">TRELLIS ENGINE &#183; CHAIN-OF-DENSITY MAP</text>
+      <text x="53" y="140" class="mono" fill="url(#house)" font-size="62" style="font-weight:800;letter-spacing:-1px">DENSITY&#8209;TRELLIS</text>
+      <text x="56" y="180" class="mono" fill="#c7cdf0" font-size="17" style="font-weight:600">the whole engine as a branching lattice</text>
+      <text x="56" y="212" class="mono" fill="#7e86b6" font-size="13.5" letter-spacing="1">11 classes &#183; 5 density tiers &#183; general &#8594; current &#8594; future</text>
+    </svg>
+  </div>
+
+  <p class="lede">One system, summarised as a <b>branching lattice</b> instead of a single spine: eleven subsystem
+    classes, each its own <b>fixed-length chain of density</b>. Every branch's five tiers densify along one axis —
+    <b>general essence → current shipped machinery → the frontier and future plans</b>. Stop at the first tier that
+    answers your question; a deeper tier only <i>adds</i>. Reverse-engineered from 203 commits.</p>
+  <div class="stats">
+    <div class="stat"><b>11</b><span>classes / branches</span></div>
+    <div class="stat"><b>5</b><span>density tiers each</span></div>
+    <div class="stat"><b>203</b><span>commits read</span></div>
+    <div class="stat"><b>11</b><span>sub-agents, one per class</span></div>
+  </div>
+
+  <div class="trunk">
+    <p class="k">Trunk · T0 · what Trellis is, in one sentence</p>
+    <p>Trellis is a <b>personalized composable expert system whose expertise is the user's data</b> — not strictly a
+      coding tool, not strictly a RAG system — built as OpenCnid's <b>Recursive Language Model runtime</b>: the user's
+      context, memory, knowledge, and capabilities live as queryable engine state with enforced provenance, the model
+      reaches all of it only through code, and because the expertise <i>is</i> the user's data the <b>user is the domain
+      authority</b> — Trellis composes its experts, judges, and protocols per question from primitives against that
+      data and never overrules the user about the user's own domain.</p>
+  </div>
+
+  <div class="legend">
+    <div>
+      <h4>Density ramp · T1→T5</h4>
+      <div class="ramp"><i style="background:var(--t1)"></i><i style="background:var(--t2)"></i><i style="background:var(--t3)"></i><i style="background:var(--t4)"></i><i style="background:var(--t5)"></i></div>
+      <div class="ramp-lab"><span>general</span><span>future</span></div>
+    </div>
+    <div>
+      <h4>Status</h4>
+      <div class="chips">
+        <span class="chip ok">shipped / measured</span>
+        <span class="chip hold">principle · no build</span>
+        <span class="chip wip">proposed / blocked</span>
+      </div>
+    </div>
+    <div style="color:var(--ink-soft);font-size:12.5px;max-width:30ch">Click any tier to read it in full. The map is the
+      lattice; the territory — full 90-word tiers — lives in <span class="mono">docs/density-chain/DENSITY-CHAIN.md</span>.</div>
+  </div>
+
+  <div id="root"></div>
+
+  <footer>
+    <p><b>How the true state was reconstructed.</b> Eleven read-only sub-agents, one per class, each reverse-engineered
+      the commit log plus its subsystem's design records and source, returning a five-tier density chain against a shared
+      frame (chain-of-density rules, a status taxonomy, an entity ledger with locators, commit receipts, cross-links, and
+      an explicit "uncovered" slot). The trunk, cross-section, and lattice were composed afterward — siblings can't see
+      each other.</p>
+    <p class="mono" style="margin-top:12px;color:var(--wip)"><b style="color:var(--wip)">Honest ledger (engine port, not method):</b>
+      no judge, EL Codex episode, or TTT run has executed <i>inside Trellis</i> (paid queue on hold) — but the
+      judge/composition and self-play <i>methods</i> are heavily validated in the Claude Code test bed. A live Trellis run
+      would establish engine <i>fidelity</i> (reachability + scripted-vs-live equivalence), not whether the method works.
+      Counts are as of 77a7018. Subordinate to code &gt; glossary &gt; prose.</p>
+  </footer>
+</div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title">
+  <div class="sheet-card">
+    <div class="sh-top">
+      <span class="badge" id="sh-badge">T1</span>
+      <div><h3 id="sh-title">—</h3><div class="cls mono" id="sh-cls">—</div></div>
+      <button class="x" id="sh-x" aria-label="Close">×</button>
+    </div>
+    <p class="full" id="sh-full">—</p>
+    <div class="meta" id="sh-meta">—</div>
+  </div>
+</div>
+
+<script>
+// ---- build the animated banner lattice ----
+(function(){
+  const g=document.getElementById('lattice');if(!g)return;
+  const NS="http://www.w3.org/2000/svg";
+  const rows=[46,96,146,190,222].slice(0,5), yTop=40,yBot=226;
+  for(let c=0;c<26;c++){
+    const x=30+c*46;
+    const ln=document.createElementNS(NS,'line');
+    ln.setAttribute('x1',x);ln.setAttribute('y1',yTop);ln.setAttribute('x2',x);ln.setAttribute('y2',yBot);
+    ln.setAttribute('stroke','url(#house)');ln.setAttribute('stroke-width','1');ln.setAttribute('opacity','0.16');
+    ln.setAttribute('class','grow');ln.style.animationDelay=(c*0.05)+'s';g.appendChild(ln);
+    for(let r=0;r<5;r++){
+      const cy=yTop+ (r*(yBot-yTop)/4);
+      const cir=document.createElementNS(NS,'circle');
+      cir.setAttribute('cx',x);cir.setAttribute('cy',cy);cir.setAttribute('r', r===0?2.2:2.6+r*0.5);
+      cir.setAttribute('fill','url(#house)');cir.setAttribute('class','node');
+      cir.style.animationDelay=((c*0.13+r*0.5)%3.4)+'s';g.appendChild(cir);
+    }
+  }
+  for(let r=0;r<5;r++){
+    const y=yTop+(r*(yBot-yTop)/4);
+    const rail=document.createElementNS(NS,'line');
+    rail.setAttribute('x1',24);rail.setAttribute('y1',y);rail.setAttribute('x2',1176);rail.setAttribute('y2',y);
+    rail.setAttribute('stroke','url(#house)');rail.setAttribute('stroke-width','0.6');rail.setAttribute('opacity','0.10');
+    g.appendChild(rail);
+  }
+})();
+
+const RAMP=["var(--t1)","var(--t2)","var(--t3)","var(--t4)","var(--t5)"];
+const PHASE=["essence","current","current","frontier","future"];
+// each tier: [gist, statusLabel, statusClass, fullText]
+const DATA=[
+{g:"Seeds — the starting points",cls:[
+ {id:"C1",t:"REPL & the RLM execution model",ch:"The Python REPL as the model's only interface — context as database, llm_query over slices, one process per task, a tool-free orchestrator above.",
+  x:"runs on C4 (DB tools + sourceNodeIds gate) · C5 · C6 (workspace/modules) · served by C11 (A2A/MCP)",
+  T:[
+   ["Model works only through a persistent Python REPL; context is a database, not a scroll; it writes code that calls itself (llm_query) over slices; one process per task.","concept","ok","Trellis's execution model is a Recursive Language Model (RLM) — MIT CSAIL's formulation taken as system design: the model runs inside a persistent Python REPL where context is data in a stateful namespace, writing code that chunks, queries, and calls llm_query over slices, then aggregates. Each task is one process; a tool-free orchestrator decomposes a goal into bounded sub-tasks and routes state by reference; an async queue layer isolates every LLM call."],
+   ["trellis_agent.py over the rlms library; the custom_tools seam (trellis_task, trellis_upsum, write_derived_insight); kernel base + userspace modules; goal_loop orchestrator; A2A/MCP dispatch.","shipped","ok","The RLM runs via trellis_agent.py (rlms library, RLM_SYSTEM_PROMPT extended not replaced) with tools injected into the custom_tools seam: trellis_task (uuid-wrapped), trellis_upsum (budgeted running-state), DB + workspace tools, and write_derived_insight. Behavior composes from kernel + hash-pinned userspace modules. The goal_loop orchestrator (tool-free, Zod-validated) decomposes goals into RLM sub-tasks, dispatchable via A2A and MCP, streamed as TRELLIS_RESULT/SSE."],
+   ["Phase 3 (10895a8) shipped it; bounds Zod-validated & zero-paid-drilled; Session 48 measured a 402,781-token / 14-iteration blowup that motivated UPSUM.","shipped","ok","Phase 3 (10895a8) shipped trellis_agent.py, spawned per task by rlm_worker.ts, plus trellis_tools.py over rlms==0.1.3. Session 9 added goal_loop; Session 11 A2A; Session 14 the Tier-3 workspace. Bounds (4/8/5) are Zod-validated, zero-paid-drilled. Session 48 measured a 402,781-token / 14-iteration transcript-growth failure, motivating S1/S3 (#95) and S2a UPSUM (#98; UPSUM_BUDGET=2000)."],
+   ["#135 turned UPSUM's budget and task-precedence from prose into engine gates: commit() refuses over-budget state; task.verify() adjudicates instruction-shaped data; new telemetry makes reuse measurable.","shipped","ok","July 19 (#135) closed a rule-8 posture gap: UPSUM's budget and task precedence were prose-only. trellis_upsum.commit()/size()/state() now REFUSES over-budget state by canonical serialization; trellis_task.verify() adjudicates instruction-shaped data against the run's uuid tag (informs, never gates) and reports foreignRunTag. New telemetry makes reuse measurable for the first time. S2b (rlms compaction) stays measured-but-never-enabled."],
+   ["Harness self-model — read the harness's own expectations from the guards that enforce them. Principle ENDORSED, implementation NOT authorized; Phase 0 found the telemetry allowlist drops the new counters.","principle","hold","HARNESS_SELF_MODEL.md generalizes #135: interior surfaces as free meta-prompt composition primitives — 'Explainable AI for the AI.' Status: PRINCIPLE ENDORSED, IMPLEMENTATION NOT AUTHORIZED. Phase 0 (#136) falsified its plan — Finding 0: zero-paid harnesses record the script, not model adoption; Finding 1: the telemetry allowlist drops the July-19 counters on the worker path. Phases 1–4 and Workstream B stay unbuilt."]
+  ]},
+ {id:"C2",t:"Engineering loop (EL)",ch:"A controller outside the worktree that mechanizes the session loop itself: observe the repo, compile prompts, run bounded episodes, verify by code, gate every protected action on human approval.",
+  x:"C11 (harness self-model / session-governance) · C3 (EL's approval-channel is the belief-promotion-gate precedent)",
+  T:[
+   ["A deterministic controller owns workflow truth outside the agent-writable worktree; model output is always an observation; controller evidence and human authority alone decide transitions.","concept","ok","The engineering loop replaces prose-authored session handoffs with a deterministic controller owning workflow truth outside the agent-writable worktree. It observes Git and command state as evidence, compiles typed context packets per role, runs bounded coding-agent episodes, verifies acceptance by code, and pauses at named protected actions for explicit human approval. Model output is always an observation; controller-observed evidence and human authority alone decide state transitions."],
+   ["Control kernel (11 states, 41 of 132 transitions), repo observer, prompt compiler, pinned Codex runner, verifier/checker/recovery, and an append-only, integrity-linked acceptance ledger via el:activate.","shipped","ok","Under tools/engineering-loop/src/: control kernel (kernel.ts, state_machine.ts — 11 states, 132-pair matrix, 41 allowed), repository observer, prompt compiler (planner/implementer/checker/recovery roles), Codex app-server AgentRunner (pinned codex-app-server-jsonl:v2@0.144.2), verifier/checker/recovery, and the acceptance ledger (append-only, integrity-linked; disjoint ledger_recovery vs re_genesis ceremonies) via npm run el:activate."],
+   ["EL-00…EL-06 shipped and accepted (up to 1,161 tests / 105 files, zero-paid); EL-10 activated the real controller; EL-11 closed the write-path gap; SPEC maps 116/116 requirements.","shipped","ok","EL-00→EL-06 shipped and owner-accepted (EL-06: 1,161 tests/105 files, zero-model, zero-paid). EL-10 (#111/#112/#117) activated the real controller (protected roots at D:\\trellis-protected\\engineering-loop\\…), seeded generation-0 with 11 records, flipped statusAuthority to protected_controller_state. EL-11 (#113/#114) added recordAcceptanceChange and closed EL-10's reachable-producer gap. SPEC.md: 116/116 requirements mapped."],
+   ["EL-10 & EL-11 implemented but NOT accepted — the machinery that records acceptance hasn't recorded its own. EL-07 is BLOCKED; no paid Codex episode has ever run.","not accepted / blocked","wip","EL-10 and EL-11 are IMPLEMENTED but NOT ACCEPTED — built, tested, merged, but owner acceptance is unrecorded in the ledger (a self-referential gap). EL-07 (bounded pilot, repeated evaluation, HANDOFF migration decision) is BLOCKED: its preflight requires EL-10 accepted, an EL-11 status, and an owner unblock, none recorded — next_feature resolves to EL-10/null, not EL-07. HANDOFF Appendix B freezes an EL-07 stage-1 pilot-plan as next, via three owner ceremonies."],
+   ["EL-08 (scheduler / extraction) and EL-09 (verified report ingest, off the live path), plus the HANDOFF→generated-view migration — all proposed, all after EL-07. No paid EL-07 trial has ever run.","proposed","wip","Deferred, proposed, requiring fresh owner proposal after EL-07: EL-08 (tracker polling, scheduler, concurrency, multi-machine durability, or standalone extraction) and EL-09 (sanitized verified ingestion of completed-run reports, explicitly NOT feeding the live control path). The HANDOFF→generated-view migration needs EL-07 to clear pre-stated thresholds, perfect adversarial gate tests, and human transcript review. No paid EL-07 trial has ever run."]
+  ]},
+ {id:"C3",t:"Epistemic support & judges",ch:"The graded, sweep-side 'how has it held up' opinion over beliefs — computed from judged verdicts, never asserted or seen by the writer.",
+  n:"<span class='tag'>Method vs port · owner note, July 20</span>The judge/composition <b>method</b> is heavily validated in the <b>Claude Code test bed</b> (self-play + judge-composition, ~2 days) — Claude Code being Trellis's toy-model test bed. Unexercised is the <b>engine port</b>. So the live tests worth their cost are engine-fidelity, not method-efficacy (rule 20 bars 'does the prompt help'): (i) <b>reachability</b> — does judge_spawn spawn the intake-selected judges on a real candidate? (ii) <b>equivalence</b> — does live-model support_sweep reproduce the oracle drill's scripted (b,d,u)? (iii) the registered <b>metered promotion-cost run</b> (belief→fact, ≈$0.02–0.06), owner-gated, ≤$5.",
+  x:"C7 (verdicts feed the signed-ternary standing the user gates) · C4 (grades its beliefs via the sweep) · C2 (approval-channel precedent)",
+  T:[
+   ["Two orthogonal axes: custody (where from) and support (how it held up) — a graded (b,d,u) opinion, sweep-side, writer-blind. Judges emit drawback|clean|abstain; clean ≠ correct. No live run through the engine yet — but the method is battle-tested in the Claude Code test bed.","concept","ok","Trellis beliefs carry two orthogonal axes: custody (where a claim came from, structurally enforced) and epistemic support (how it has held up) — a graded, decaying opinion of belief, disbelief, uncertainty (b+d+u=1), computed sweep-side from judged events, never asserted by the writer and never visible to it. Judges emit drawback|clean|abstain; clean means 'no known drawback found,' never correctness. Judges compose per ceremony, never a standing cast. No live judge run has executed through the Trellis engine port — though the composition method it ports is battle-tested in the Claude Code test bed."],
+   ["v1 support arithmetic (evidence masses, half-life decay, fail-closed validity gate) + a metric grammar; a four-slot judge panel; judge intake feeds judge convocation; scoring automated, trust-elevation human-gated.","shipped","ok","Opinion (b,d,u) is computed under v1 support arithmetic (evidence masses r/s, half-life decay, a fail-closed validity gate) and a metric grammar (leaf/any/all/kofk). A judge panel structures four differently-blind slots — grounding, coherence, corroboration, audit. Judge intake (selection, ratification, clean-context assembly, write-once store) feeds judge convocation (registration, a support_sweep job, a gated spawn boundary, a ratification queue). Automated scoring, human-gated elevation."],
+   ["support-oracle, judge-panel, judge-intake, judge-convocation all shipped & pinned (zero-paid, e.g. convocation 23 sections / 140 checks). No live judge run through the engine ever; paid queue ON HOLD.","shipped","ok","support.ts + support_metrics.ts, pinned by test:support-oracle (7/106; #119). judge_panel.ts + judge_audit.ts via test:judge-panel (10/182; #124); RECONCILIATION.md ratified July 18 (#131). judge_intake.ts via test:judge-intake (13 sections; #133). judge_convocation_store.ts + support_sweep.ts + judge_spawn.ts + the judge_records table via test:judge-convocation (23/140; #134, Option-B). CLIs: judges:register, judge:ratify, support:sweep. No live judge run through the Trellis engine ever; the method is validated in the Claude Code test bed; paid queue ON HOLD."],
+   ["Session 71 rolled back the four-role cast (calcified across 7 docs) → composition-per-ceremony; the judge-composition skill shipped; §11.2 names the road to Option C (paid-queue reopen, J3 gatherer, ~$0.02–0.06/belief test).","frontier","hold","Session 71 (#137) found the four role slots had calcified from teaching examples into a standing cast across seven documents, and rolled the build back (judge_records emptied, fixtures deleted, recoverable at c9d417d). JUDGE_COMPOSITION_CEREMONY.md now governs: judges/taxonomies/anchors compose per candidate from an isolated agent's descriptive characterization; compositions write-once, never reused. The road to Option C: paid-queue reopening, per-run approval, the unbuilt J3 live evidence gatherer, a registered metered promotion-cost test (~$0.02–0.06/belief)."],
+   ["The primitive-encoding audit found the four registries do no computational work (owner-owed fixes, none built); the standing model ratifies 'panel only records, user gates' as principle; the judge-actuation sycophancy hazard is held outside the repo.","proposed","wip","PRIMITIVE_ENCODING_AUDIT.md (July 19–20) found the four S10 registries do no computational work (qualifiedParameters are unvalidated free strings) and flagged an abstention/claim-kind mismatch and a disposition grammar that can't type a promotion depending on a merit-refused row — each owner-owed, none built. STANDING_MODEL.md ratifies the sibling principle (panel only emits findings; user gates) as principle. The judge-actuation sycophancy hazard has a held answer, deliberately outside this repo."]
+  ]}
+]},
+{g:"Branch-out — the substrate and disciplines beneath the seeds",cls:[
+ {id:"C4",t:"Substrate & custody",ch:"The provenance-enforced storage every layer stands on — verified ingest, Merkle-hashed Tier-1 bytes, Tier-2 beliefs bound by sourceNodeIds, and the quarantine/recovery machinery.",
+  x:"C5 (retrieved(run) enforces never-copies over these addresses) · C6 (promote = only door up) · C3 (entailment feeds judged events)",
+  T:[
+   ["Every source becomes an immutable SHA-256 Merkle AST in PostgreSQL (Tier 1); beliefs in Neo4j (Tier 2) carry sourceNodeIds; when bytes die, an invalidation sweep quarantines — never deletes — dependent beliefs.","concept","ok","Trellis's substrate is the provenance-enforced storage every other layer stands on. Every source becomes an immutable, content-addressed SHA-256 Merkle AST in PostgreSQL (Tier 1) through a verified ingest transaction: persist → read-back re-hash → membership → registration → in-transaction Merkle diff. Beliefs live in Neo4j (Tier 2) carrying sourceNodeIds, exact block hashes proving origin, never correctness. When bytes change, the diff finds what moved and an invalidation sweep quarantines (never deletes) beliefs whose evidence died."],
+   ["Two commuting transitions — applyQuarantineSweep (→ contested / orphanedSourceIds) and applyRederivation (→ rederivedAt); repo:ingest produces per-file snapshots and tombstones; equivalence is a SAME_AS overlay.","shipped","ok","The transaction writes ast_nodes/documents/document_nodes in one PostgreSQL transaction. Two commuting transitions govern belief state: applyQuarantineSweep marks contested and moves dead hashes to orphanedSourceIds; applyRederivation clears contested and stamps rederivedAt — order-independent by construction. repo:ingest turns a codebase into per-file ingests recorded as durable snapshots; deleted paths get tombstones. Entity identity is SHA-256(lowercase name); equivalence is a SAME_AS/DISTINCT_FROM overlay from entity resolution."],
+   ["Measured: 5% mutation quarantined exactly 11/220 facts, recall & precision 1.000, post-update F1 1.000; scale drill 300 docs, sweep latency 1.42× vs 5.77× fact growth. Zero-LLM drills pin it.","shipped","ok","ingest_document.ts (Session 8, #30) and provenance/invalidation.ts (Phase 4, 1efd97f) implement transaction and sweep. UPDATE_DRILL_REPORT: a 5% mutation (11/220 questions) quarantined exactly 11 facts, recall/precision 1.000, post-update F1 1.000, $0.73 vs $0.80 rebuild. SCALE_PROVENANCE_REPORT: 300 docs, 286-hash hub, sweep latency 1.42× vs 5.77× fact growth. test:repo-ingest (45 checks) and test:entity-resolution pin resolution zero-LLM."],
+   ["Mechanical provenance threading (row 9 closed) constrains citable hashes to retrieved(run); the semantic residual stays a sampled entailment detector, not a total gate. ASTRef migration proposed but below its trigger.","frontier","ok","Mechanical provenance threading (PROVENANCE_THREADING.md, Sessions 30–32, row 9 closed) closes the write-path transcription channel — citable sourceNodeIds constrained to a run's actual retrieved(run) set — but the semantic-support residual (does a cited block entail the claim?) stays a sampled entailment detector, an architectural limit not a gap. ASTRef/EVIDENCED_BY indexed-anchor storage is proposed but not migrated (286/1,000-hash and 1.42×/1.5× triggers under threshold). Full-repo self-ingest owner-gated, unrun."],
+   ["CRDT concurrent-edit safety and earned-permanence trust decay are proposed, unbuilt (quarantine-over-deletion is the only piece shipped). Repository-scale extraction is pilot-ready but no approved 'changed' run has executed.","proposed","wip","CRDT integration (LSEQ/YATA) is proposed, unbuilt, for concurrent-edit AST safety — no code, no drill. Earned-permanence trust decay (per-edge verified_count, lazy rubric-version re-examination) is roadmap, replacing today's cache-TTL-of-forever; quarantine-over-deletion is the only piece shipped. Repository-scale extraction stays gated: three pilot prerequisites landed zero-paid (Session 25), but no owner-approved whole-repository changed run has executed."]
+  ]},
+ {id:"C5",t:"Code-mediated text (the core pillar)",ch:"The RLM discipline: the model never counts, and the model never copies. Locations are engine-computed and returned by query; existing bytes move only through code.",
+  x:"C4 (ingest already compliant; toolkit ops carry no provenance) · C6 (grounded authoring = pillar applied to citations) · C11 (harness self-model seed)",
+  T:[
+   ["Text enters queryable structures, not scrollback; a location is computed by the engine and returned by a query; existing bytes move by code, never re-typed. Localization and transcription error are one pathology: attention doing code's job.","concept","ok","Code-mediated text is Trellis's core pillar: the model never counts, and the model never copies. Text loaded into an RLM run enters queryable structures, not scrollback; a location (line, hash, block id) is computed by the engine and returned by a query, never estimated by attention over a dump; existing bytes are moved by code — sliced, spliced, joined — never re-typed. The model authors only genuinely new text plus the code manipulating everything else. This unifies localization error and transcription error as one pathology. Enforcement is tooling shape, not prompt text."],
+   ["trellis_textedit (load/locate/splice/diff/write_back, hash-guarded); trellis_answer.submit (by reference); get_ast_blocks; the guarded splice family; retrieval discipline; structural chunking with a liveness filter.","shipped","ok","Shipped: trellis_textedit (load/locate/splice/diff/write_back, hash-guarded); trellis_answer.submit (by-reference final-answer channel, refuses bare literals); get_ast_blocks/trellis_blocks.py (boundary-aware, document-ordered accessor); the guarded splice family (replace/insert/delete_lines, anchor-verified, minimal-span-refusing); retrieval discipline (held-state dedup + per-run fetch budget); structural chunking (cAST/tree-sitter) with the search_ast_nodes liveness filter closing dead-block pollution."],
+   ["Ratified July 9 (#54); the effective-context probe round 4 measured 0/36 localization misses vs round 3's 7/30 after get_ast_blocks; retrieval discipline 25/25 correct; plain lists beat polars for splice inserts to 8M tokens.","shipped","ok","Ratified July 9 as CODE_MEDIATED_TEXT.md (#54); toolkit landed Session 20 (#55). Effective-context probe (Sessions 21–24): round 4 measured 0/36 localization misses vs round 3's 7/30 after get_ast_blocks. STRUCTURAL_SPLICE.md (Session 41) added the guarded family; the TRELLIS_TEXTEDIT_GUARDED_ONLY off-switch July 19. Retrieval discipline (#75): 25/25 correct, $1.96. WALL_CLOCK: plain lists win splice-shaped insertion at every size 100k–8M tokens."],
+   ["The harness self-model's first named test is trellis_textedit (derive its addendum, pin byte-identity) — unbuilt. Phase 0 confirmed a telemetry gap: the worker allowlist drops the textedit/answer counters.","frontier","hold","HARNESS_SELF_MODEL.md (principle ENDORSED, implementation NOT authorized) generalizes §2.8's enforcement posture: interior surfaces as free meta-prompt composition primitives. Its pre-stated first test names trellis_textedit explicitly — derive its addendum from a full descriptor shape, pin byte-identity — unbuilt. Phase 0 (#136) found a confirmed, unfixed gap: the worker-path telemetry allowlist drops the textedit/guarded/raw-splice/answer counters — an observability gap, not a correctness bug. Phase 0b has not run."],
+   ["py-tree-sitter construct addressing (rejected, revisit trigger recorded); guarded-only as default (deferred increment); error-tolerant broken-file ingest; a superseded-embedding sweep — all proposed.","proposed","wip","Proposed/unratified, unbuilt: py-tree-sitter for construct-granular splice addressing (rejected Session 41, revisit trigger recorded); making guarded-only the DEFAULT (deferred as its own measured increment); error-tolerant ingestion of broken files and prose/stage-1b chunking (out of scope in STRUCTURAL_CHUNKING §8); a superseded-embedding sweep (on the owner menu, unchosen). The harness self-model's 5-phase ladder is gated behind the unrun Phase 0b adoption measurement."]
+  ]},
+ {id:"C6",t:"Trust pipeline & the two flywheels",ch:"The operator-gated one-way bridge from ephemeral Tier-3 working memory to citable Tier-1 substrate — and the two flywheels (knowledge, capability) compounding on top.",
+  n:"<span class='tag'>PCF map · spark-steering</span>The 'failures close by tooling, not prompts' doctrine now has a companion tool: <b>spark-steering</b> maps the <b>tooling shape</b> to the <b>prompt shape</b> via the PCF/SPARK axes — verified on <b>7 of the 8</b> repo skills. The mapping is itself a tool, not an exhortation.",
+  x:"C4 (promote writes through verified ingest; the sweep contests registered modules) · C5 (grounded authoring) · C10 (flywheel economics measured)",
+  T:[
+   ["Three tiers (1 immutable bytes, 2 provenance-anchored beliefs, 3 no-standing scratch); trust rises only through operator-gated promotion. Two flywheels: derive-once-cache-forever for knowledge, and for capability.","concept","ok","Trellis assigns three trust tiers to everything the RLM touches: Tier 1 (immutable Merkle-hashed AST bytes), Tier 2 (provenance-anchored derived beliefs), Tier 3 (ephemeral working memory with no trust standing). Trust rises only through operator-gated promotion, never autonomously. Two flywheels ride the substrate: the knowledge flywheel (derive a fact once, cache with provenance, reuse forever) and the capability flywheel (author a protocol once as a versioned module, govern it like a belief, compose it forever)."],
+   ["The Tier-3 workspace captures every tool result as an origin-stamped segment (returns a stub); workspaces park/seed across a goal; promotion is the sole way up; modules compose sha-pinned; grounded authoring holds the pen.","shipped","ok","The Tier-3 workspace captures every external-tool result as an origin-stamped segment mechanically inside the wrapper call, returning a thin stub. Workspaces serialize/park/seed across a goal's tasks (lineage, never a blackboard). A segment reaches Tier 1 only via operator-run promotion — the sole Tier-3→Tier-1 bridge. Protocols compose from a module registry (sparse selection, sha256-pinned). Grounded authoring lets the RLM draft a module from a fixed, promoted corpus, remediating an observed provenance-laundering incident."],
+   ["Sessions 14–19 shipped workspace, lineage, promotion, module registry (#0, #1), and grounded authoring; module #1 laundered citations live and was fixed; the flywheel drove OOLONG sub-LLM calls 5→0.","shipped","ok","Sessions 14–19 (#40–#50) shipped: workspace (test:rlm-workspace), write-path hardening, module registry (module #0 spatial-flywheel, test:modules), lineage (Redis park/seed), promotion (npm run promote, test:promotion 41 checks), manifest-as-graph-entity registration. Module #1 workspace-discipline laundered citations live; GROUNDED_AUTHORING.md fixed it (modules:author, ANCHOR_COVERAGE_THRESHOLD=0.3). FLYWHEEL_EXPLAINER: OOLONG sub-LLM calls 5→0."],
+   ["Laundering measured as incentive-driven — only semantic entailment catches it (prototyped, off). Module #2 was authored, measured, and RETIRED the same day, ending the prompt-module era.","frontier","hold","PROVENANCE_CITATION_AB_REPORT (≈$10 paid) measured laundering as incentive-driven, not dispositional: structural checks miss it; only semantic entailment (TRELLIS_CITATION_ENTAIL, v3) catches it, reserved class-gated/sampled. Module #2 estimation-discipline (authored via grounded authoring) was measured ($2.40 paid) to move behavior but fail its token criterion, and was retired outright the same day — ending the prompt-module era as a behavioral-fix mechanism. reasoning-templates ships contested."],
+   ["The permanent, ratified direction: behavioral failure classes close by tooling shape, not prompt modules (rule 20) — with spark-steering now mapping that tooling to prompt shape. Per-claim citation mapping deferred; tool-bearing modules unopened.","proposed","wip","The owner's permanent ratified direction from module #2's retirement: behavioral failure classes close by tooling shape, not prompt modules (re-ratified July 20 as AGENTS.md rule 20, with a carve-out for live-vs-proposed equivalence testing). The spark-steering PCF map (verified 7/8 skills) now maps that tooling shape to the prompt shape. Per-claim citation mapping (kernelCompat: 2) and embedding-based derivation checking are explicitly deferred, not scheduled. Tool-bearing module classes remain unopened — only protocol modules exist to date."]
+  ]},
+ {id:"C7",t:"Standing model & composition from primitives",ch:"The signed-ternary axis grading how a claim held up, gated by the user not the panel — running on judges and skills composed fresh from categoric primitives, with no default cast.",
+  n:"<span class='tag'>Double-checked · July 20</span>Most doubts-workspace critiques <b>did collapse</b>: the §14 dated entry ratified §12.3's membership rule and adopted it into §5/§7, §12.2 resolved the relevance gap, and the positive-citation core passed a blind 13/14 flat-earth test. What stays open is narrower and <b>kept open by design</b> — the <b>bootstrap</b> (laundering) and <b>cost/volume</b> gaps — because ratifying the whole bound early would be the exact instance-promotion failure the program guards against. <i>If self-play closed those in the test bed too, that isn't written back into DOUBTS_WORKSPACE.md yet.</i>",
+  x:"C3 (support arithmetic sits underneath; verdicts feed standing) · C9 (the decomposability bet) · every class (composition governs judges/experts/protocols)",
+  T:[
+   ["Standing is a signed ternary — doubt (−1), belief (0), fact (+1) — orthogonal to custody, moved toward fact only by evidence or a user gate. Everything evaluating a claim composes per context from primitives; no default cast.","concept","ok","Trellis grades a claim's standing on a signed ternary — doubt (−1), belief (0), fact (+1) — orthogonal to custody. Standing moves toward fact only by evidence or a user gate, never by a panel alone, because the user is the domain authority over their own data (Trellis is a personalized composable expert system whose expertise is the user's data). Everything that evaluates a claim — judges, defeaters, skills — composes per context from categoric primitives rather than a fixed cast; an instance hardened into a schema silently becomes law."],
+   ["A per-seat verdict is the delta's sign against prior standing; user-gated ratification carries a qualifier that lives in the address as a hash kind; the meet rule blocks laundering; the panel never moves standing; composition runs through the skills.","principle","hold","Mode/verdict/standing are one vocabulary at two times: a per-seat verdict (clean|drawback|abstain) is the delta's sign composing against prior standing. User-gated ratification: a candidate the panel can't dispute is ratified carrying a qualifier meaning only the user's authority backs it; the qualifier lives in the address as a hash kind. The meet rule: a derived claim's hash kind is the meet of its dependencies' — no laundering in one hop. The panel never moves standing (carve-out: principle only, no code removal). Composition runs through .claude/skills/."],
+   ["Session 71 rolled back the four-role cast and wrote composition-from-primitives; the standing model & doubts workspace were ratified as principle; self-play, complexity-convocation & spark-steering shipped; skills relocated & SPARK-minified.","shipped","ok","Session 71 (#137) found four teaching-example judge roles had hardened into a default cast; rolled the roster back, wrote COMPOSITION_FROM_PRIMITIVES.md, shipped judge-composition as a skill. #138 ratified STANDING_MODEL.md and DOUBTS_WORKSPACE.md as principle, no build. #139/#140 added self-play and complexity-convocation, clean-room validated. #144/#145 relocated + SPARK-minified skills into .claude/skills/ (net −2.4%, 0 regressions). spark-steering is the PCF/SPARK tooling↔prompt map, verified 7/8 skills."],
+   ["The standing model is ratified as PRINCIPLE, NO BUILD — the hash-kind stamp is unbuilt. The doubts workspace is proposed (−1 is still a residual flag); its corrosion bound validated on its positive-citation core (13/14), bootstrap & cost gaps kept open by design.","frontier","hold","STANDING_MODEL.md is ratified as PRINCIPLE, NO BUILD — the hash-kind stamp layout, the recorder-plus-gate promotion reduction, and re-deriving the applicability gate are each a separately gated bounded build, unbuilt. DOUBTS_WORKSPACE is proposed: −1 is currently a residual flag (entailment_detection.ts:280), not a constructed object. Its corrosion bound was validated on its positive-citation core (13/14 flat-earth arguments rejected, zero false admissions); the bootstrap and cost gaps are kept open by design — ratifying the whole bound early would be the instance-promotion failure the program guards against."],
+   ["Corrected: most critiques collapsed (§12.3 ratified, relevance gap resolved). What remains open, by design, is the bootstrap & cost/volume attacks and §7's undercut branch. The decomposability bet (judges + functional-infinity + sidecar) is the deliberately-open falsifier.","proposed","wip","Correction after owner double-check (July 20): most doubts-workspace critiques collapsed — the §14 dated entry ratified §12.3's membership rule and adopted it into §5/§7, §12.2 resolved the relevance gap. The genuinely-open residue, kept open by design, is §11's bootstrap (laundering) and cost/volume gaps plus §7's undecided undercut branch. The primitives thesis's decomposability half (§8's shared empirical bet, linking judges, the functional-infinity claim, and the residual-stream sidecar) is the deliberately-open falsifier: representational holism would reopen governability, tested empirically, never argued."]
+  ]}
+]},
+{g:"The frontier — research inflow, evidence, and how it is served",cls:[
+ {id:"C8",t:"Model-backend seam & test-time-training",ch:"The design-record and recorded-increment trail for whether the RLM backend can become configurable, and whether test-time-trained sparse models would help. Mostly research record, not shipped features.",
+  x:"C5 (UPSUM/anchor derive from 'never counts') · C2 (EL prioritized ahead → row 13 paused) · C9 (the sidecar sits behind this class's prerequisites)",
+  T:[
+   ["The RLM runs a closed API model hardcoded at two sites; the seam is a proposed config surface to make backend choice expressible. TTT (row 13) asks whether fast-weight sparse models improve adherence. Nothing runs today.","concept","hold","Trellis's RLM runs a closed API model hardcoded at two construction sites; the model-backend seam is a proposed config surface that would make backend choice expressible instead of hardcoded. Test-time-training (TTT) is roadmap row 13: an owner-gated research track asking whether fast-weight adaptation on open-weight sparse models, layered under the RLM's REPL-as-environment design, improves protocol adherence or response quality. Neither TTT nor a served alternate backend runs today; every artifact is research record, proposal, or partial plumbing."],
+   ["R2a (census: rlms accepts backend/base_url kwargs) and R2b (MODEL_BACKEND_SEAM.md, four config keys); harness scaffolding (UPSUM, trellis_task isolation) now serves every run; reasoning-templates is a proposed, contested L-axis library.","recorded-research","hold","The seam's Phase-0 machinery: R2a, the backend-seam census (confirmed rlms==0.1.3 accepts backend/base_url kwargs without library modification), and R2b, the MODEL_BACKEND_SEAM.md record (four TRELLIS_RLM_* config keys, T1–T4 skeletons, a root/worker/embedder split). RLM_HARNESS_SCAFFOLDING.md specifies UPSUM and uuid-wrapped trellis_task isolation, landed as scaffolding that now serves every RLM run. The reasoning-templates module is a proposed, unregistered L-axis library: status contested, never composed."],
+   ["Only T1 (backend config surface) LANDED — first-shot on retry after one FAILED and one quota-blocked attempt. Harness scaffolding hardened into engine gates. T2 (env wiring) FAILED three straight sessions, zero code landed.","recorded-research","wip","Of the seam's T-series only T1 (backend config surface) LANDED — Session 50 (#95), first-shot on retry after Session 48's T1 FAILED ($2.11, evidence-contract miss) and Session 49's quota-blocked $0.0000 attempt. Harness scaffolding (S1 + S2a UPSUM + S3) landed the same commit, later hardened into engine gates by #135. T2 (buildAgentEnv wiring) FAILED three straight sessions (#99/#100/#101) as clean self-refusals with zero code landed."],
+   ["T2 is paused pending an unbuilt engine-resolved-anchor tool; the hosted Gemini-3.5-Flash comparison arm is proposed, downstream of paused T2; the EL program is prioritized ahead — row 13 resumes only on reprioritization.","frontier","wip","T2 sits paused pending an unimplemented engine-resolved-anchor guarded-insert tool (specified in HANDOFF Appendix A, never built); T3 and T4 have zero code. The hosted-comparison-arm proposal (MODEL_BACKEND_HOSTED_ARM.md, #110) asks the owner to admit a Gemini-3.5-Flash arm beside R3's open-sparse arm through the same unbuilt seam — zero implementation, downstream of paused T2. The EL program is now owner-prioritized ahead of T2; row 13 resumes only on reprioritization."],
+   ["Unreached rungs R3–R5 (open-sparse baseline → TTT arms on LaCT → meta-prompt fast-state). The reliance claim splits SUPPORTED / EXTRAPOLATED / UNTESTED. No TTT run, hosted arm, or transport split has ever executed.","proposed","wip","Unreached TTT rungs: R3 (open-sparse baseline) then R4 (paired TTT arms on collaborator-selected LaCT, collaborator-side) then R5 (meta-prompt fast-state). The reliance claim splits C1 SUPPORTED (retrofit efficiency), C2 EXTRAPOLATED (the load-bearing unmeasured improvement gap R3/R4 exist to close), C3 UNTESTED (meta-prompt adherence). No TTT run, hosted arm, or worker-transport split has ever executed; every downstream rung needs its own fresh owner gate."]
+  ]},
+ {id:"C9",t:"Mechinterp / residual-stream sidecar",ch:"A recorded, owner-directed FUTURE-PROJECT engineering thesis for reading and steering a served model's functional-affect state — almost entirely unbuilt.",
+  x:"C8 (§8 prereqs = hosted arm + row-13 local backend) · C3/C7 (judge-actuation hazard; decomposability bet) · C4 (shares a math-doc title only, nominal)",
+  T:[
+   ["A recorded FUTURE PROJECT: a thesis that the model carries functional-affect state in its residual stream that shapes behavior (desperation → cheating), and a sidecar that reads it cheaply and, under kernel gates, steers. Nothing is built.","future project","wip","Trellis's mechanistic-interpretability direction is a recorded FUTURE PROJECT, not shipped machinery: an RLM-harness thesis that a language model carries functional-affect state in its residual stream which causally shapes agentic behavior — desperation from repeated task failure collapsing accuracy into cheating-shaped behavior. The proposed remedy is a sidecar that reads that state cheaply (linear probes / an SAE) and, under kernel-owned gates only, writes corrective steering. Framed as harness engineering, not a safety method; nothing built, ratified, or spent."],
+   ["One docs-only record (RESIDUAL_STREAM_SIDECAR.md, OUT OF SCOPE): it names a read-side instrument, a write-side actuator, three owner-agreed bounds, a four-candidate mixture ladder, and a percolative-Ising controller frame.","future project","wip","Recorded July 17 as RESIDUAL_STREAM_SIDECAR.md, status FUTURE PROJECT / OUT OF SCOPE — ratifies no design, lands no code, adds no roadmap row, authorizes no spend. It names: the read-side instrument (probes/SAE, pre-registered thresholds), the write-side actuator (mixture steering), three owner-agreed bounds (kernel-owned actuator never model-reachable; intervention never erases detection; fire rate = harness-health metric), a four-candidate mixture ladder (M1 agreed-first), and a percolative-Ising controller frame."],
+   ["Evidence anchor: Anthropic's emotion-concepts paper (arXiv:2604.07729v1), register S12, 'mirror only, not ingested.' Its Ising / max-entropy math is authored inside the record itself. One commit, a239342, docs-only.","future project","wip","Evidence anchor: Anthropic's Emotion Concepts and their Function in a Large Language Model (Sofroniew et al., April 2 2026; arXiv:2604.07729v1) — register S12: 'Absent — mirror only, not ingested/promoted.' §2 distills five findings as MEASURED-but-external/cross-family. §7's math — inverse-Ising / pairwise maximum-entropy (Schneidman 2006), Boltzmann fitting, susceptibility χ — is authored inside the sidecar record itself; MATHEMATICAL_FOUNDATIONS.md contains none of it. Landed via #123, commit a239342, docs-only — the only commit that authored subsystem content."],
+   ["It sits behind two unbuilt prerequisites: a hosted A/B arm (itself only a proposal) and a local, activation-reachable backend via the row-13 TTT track. §7's caveats are pre-registered falsifiers decidable by a hysteresis sweep.","frontier","wip","§8's prerequisite ladder gates everything: (1) hosted A/B first — MODEL_BACKEND_HOSTED_ARM.md, itself still PROPOSAL status; (2) a local model via the row-13 TEST_TIME_TRAINING track (also zero-paid) to make residual-stream activations reachable at all — Trellis's live backend is a closed hosted API today; (3) only then do the instrument/actuator/ladder/controller become buildable. §7's caveats are pre-registered falsifiers: binarization vs soft-spin, temperature fitted-not-physical, transition order via a hysteresis sweep."],
+   ["A nine-row claims-and-standings register types everything short of external-measured as extrapolated / hypothesis / conjecture. The judge-actuation hazard (valence steering corrupting a judge) is named but its answer is held outside the repo.","proposed","wip","§10's claims-and-standings register (nine rows) types everything short of MEASURED-external as EXTRAPOLATED, HYPOTHESIS, DESIGN-VOCABULARY, or CONJECTURE — cross-family transfer, desperation-suppression improving hard-task accuracy, and a conjectured Landauer-cost/wellbeing tell 'not load-bearing.' UHE/J-space identification stays design-vocabulary-only (AB-1, S13). §9's judge-actuation pointer names a real, deliberately-unopened hazard — single-axis valence steering could sycophancy-corrupt a judge — answered by the collaborator's unpublished multi-axis design; explicitly not to be re-derived."]
+  ]},
+ {id:"C10",t:"Benchmarks & the evidence culture",ch:"The OOLONG-Pairs harness and its drills, the measured reports behind every capability claim, and the discipline that a claim without a dated report is a hypothesis.",
+  n:"<span class='tag'>On the frozen-errors critique</span>Treated as a residual to <b>minimize, not a defect to eliminate</b>: stochasticity can be bounded, never zeroed — and a critique that can never be ruled out is not a useful critique (the corrosion-bound discipline: objections must be grounded and falsifiable). Phase 4 catches drift; Phase 5's sampled verification catches original sin; consensus writes remain unbuilt roadmap.",
+  x:"C1 (measures the RLM engine, doesn't own it) · C4 (every guarantee rides sourceNodeIds/Merkle) · C3 (Phase-5 sampled verification = ancestor of the judge track)",
+  T:[
+   ["A capability claim is a hypothesis until a dated, reproducible report exists. docs/benchmarks/ is the record; CRITIQUE_AND_FUTURE.md the honest ledger of the unproven. Counts and correctness are reported together; null results are findings.","concept","ok","Trellis treats a capability claim as a hypothesis until a dated, reproducible report exists. docs/benchmarks/ is the evidentiary record; CRITIQUE_AND_FUTURE.md is the honest ledger of what remains unproven. Every reported number carries counts and correctness together, never accuracy alone. Null or surprising results are findings, not failures to bury; outliers are re-run before being believed. Work is graded SHIPPED-AND-PINNED versus PROPOSED/QUEUED, gated behind explicit owner-approved paid spend."],
+   ["The OOLONG-Pairs harness: a v1 saturated corpus and a v2 anti-shortcut hard corpus; oolong_runner drives the flywheel; drill:update / drill:poison / drill:scale exercise invalidation, sampled verification, and provenance growth.","shipped","ok","The evidence discipline is enforced by the OOLONG-Pairs harness: a v1 saturated TREC-pairwise corpus (220 questions, 182 pairs) and a v2 anti-shortcut hard corpus defeating literal-token shortcuts. oolong_runner.ts drives the Spatial Flywheel Protocol; drill:update tests Merkle-diff invalidation under mutation; drill:poison tests sampled verification against confident-but-wrong cached beliefs; drill:scale stress-tests provenance-array growth at zero LLM cost. CRITIQUE_AND_FUTURE separates Phase 4/5 (shipped) from an unbuilt roadmap."],
+   ["Measured: OOLONG F1 1.000; update-drill quarantine recall & precision 1.000, post-update F1 1.000; poison-drill sampled p=0.05 recall 1.000 in 62 sweeps/$0.16; scale 1.42× latency vs 5.77× fact growth, under the migration gate.","shipped","ok","Measured: OOLONG_BENCHMARK_REPORT — F1 1.000 on 20/20, two runs, ~$0.83, sub-LLM calls to zero by Q2/Q5. UPDATE_DRILL — 11/220 mutated, quarantine recall 1.000, precision 1.000, post-update F1 1.000, $0.73 vs $0.80 rebuild. POISONING_DRILL — cold-warmup F1 0.950; mandatory-only detection recall 0.000; sampled p=0.05 recall 1.000 in 62 sweeps/$0.16; p=0.10 in 18 sweeps/$0.09. SCALE — 1.42× latency vs 5.77× fact growth at 300 docs, below the 1.5× migration gate."],
+   ["No paid run against v2 has executed (owner-gated; a warm-phase F1 < 1.0 is an acceptable outcome). Real TREC import, adversarial corpora, 10k-scale sweeps, and variance reporting are queued. Cross-cutting probes are small-n.","frontier","hold","Queued, owner-gated: no paid benchmark run against v2 has executed — CRITIQUE_AND_FUTURE requires approval first, warm-phase F1 below 1.0 called acceptable. Also open: real TREC import (a paid annotation pass), adversarial corpora with contested gold labels, embedding-difficulty corpora, scale sweeps at 10k+ questions, and multi-run variance reporting (n=2 so far). In-flight cross-cutting evidence: the effective-context probe and citation A/B — both directional, small-n, not yet folded into the OOLONG harness."],
+   ["The frozen-errors residual: the cache can freeze a stochastic error into a repeated systematic one — partly closed (Phase 4 drift, Phase 5 original-sin); consensus writes unbuilt. A residual to minimize, not eliminate — stochasticity bounds, never zeroes.","proposed","wip","Bounded open residual (§2): the flywheel's cache can freeze a stochastic per-query error into a repeated systematic one — 'frozen errors' — partly closed: Phase 4 catches drift, Phase 5's sampled verification catches original sin; consensus writes for confusable-boundary categories (~2–3× cost) remain unbuilt roadmap. Framed as a residual to minimize, not a defect to eliminate: stochasticity can be bounded, never zeroed, and a critique that can never be ruled out is not a useful critique (the corrosion-bound discipline). Both drills are n=1 paid runs; variance is undetermined. Node-level contested-quarantine is latent."]
+  ]},
+ {id:"C11",t:"Serving surfaces & governance",ch:"How Trellis is exposed to external callers (MCP client, A2A server, the proposed MCP server) and governed as an engineering project (session authority, the handoff loop, harness self-model).",
+  x:"C1 (A2A/MCP-server are thin adapters over the goal loop) · C4 (MCP results never mint provenance) · C5 (harness self-model generalizes pillar §2.8)",
+  T:[
+   ["Two audiences, two rule sets: operator-gated protocol surfaces out (each off unless configured), and the project's own governance in. One posture — nothing is trusted because it is stated; a live instruction outranks the stored record.","concept","ok","Trellis serves two audiences and is governed by two rule sets. It calls out to external tools and serves external agents through named, operator-gated protocol surfaces, each off unless explicitly configured. Separately, the engineering project that builds Trellis runs its own governance: a self-regenerating session handoff, an authority order over committed documents, and hard rules distinguishing tooling-enforced behavior from prose-only aspiration. Both halves share one posture — nothing is trusted merely because it is stated, and a live collaborator's instruction outranks any stored record."],
+   ["Shipped: the MCP client (external tools, allowlisted, results never citable) and the A2A server (serves the bounded goal loop, off by default). Governance: AGENTS.md, HANDOFF.md §0 (the handoff loop), SESSION_GOVERNANCE.md.","shipped","ok","Shipped: the MCP client (trellis_mcp.py) lets the RLM call external tools (stdio/HTTP, allowlisted, TRELLIS_MCP_SERVERS), whose results count but never as citable provenance. The A2A server (src/core/a2a/, TRELLIS_A2A_ENABLED) serves Trellis's bounded goal loop to external agents at POST /a2a/v1. Both are byte-identical-when-off. Proposed-only: the MCP server surface would let external hosts call Trellis. Governing: AGENTS.md, HANDOFF.md §0 (the handoff loop), SESSION_GOVERNANCE.md."],
+   ["MCP client #34, A2A server #35, remote transports #36. Session-governance scoping (#126): a live instruction outranks the committed authority order, scoped to the session only. Harness invariants (#135) closed three prose-only bounds.","shipped","ok","MCP client: #34 (Session 10), test:rlm-mcp. A2A server: #35 (Session 11), test:a2a. Remote transports: #36 (Session 12). Session-governance scoping (#126, July 17): a collaborator's live instruction outranks AGENTS.md/HANDOFF.md's committed authority order (code>glossary>prose), scoped to the coding-agent session only — stored beliefs keep the old law. Harness invariants (#135) closed three prose-only bounds per rule 8 (the tooling-over-prompts posture; 'instructions are specs' is the rule-20 framing, not a literal doc phrase)."],
+   ["The MCP server surface is a proposed design record (one query tool + citation resources, five open decisions, zero implementation). The harness self-model would compose a guard-derived account — principle endorsed, not authorized.","frontier","hold","MCP_SERVER_SURFACE.md (#87, July 13): status 'proposed design record,' not sequenced, zero implementation. It would reuse the goal loop and A2A's gates, serving one query tool plus trellis://kb/node/{hash} citation resources, gated by TRELLIS_MCP_SERVER_ENABLED; five open decisions (O1–O5) remain. The harness self-model (principle endorsed, implementation not authorized) would compose a guard-derived account — 'Explainable AI, but for the AI' — so the agent's read of what the system expects is derived from the same guards that enforce it."],
+   ["Both frontier items are unauthorized to build. O1–O5 await owner sequencing; a later dual client+server role is flagged. The harness self-model's trace workstream is phased 0–4; Phase 0 found its own spec wrong and a real telemetry gap.","proposed","wip","Neither frontier item is authorized to build. MCP_SERVER_SURFACE §7 leaves O1–O5 (read-tool exposure, transport count, adapter seam, citation source, SDK) for owner sequencing; §8 flags a later dual role (Trellis as both MCP server and client). HARNESS_SELF_MODEL §8 splits into workstreams A (trace, phased 0–4) and B (surface-descriptor convention); Phase 0 (#136) already found its own spec wrong — adoption unmeasurable zero-paid — and a real telemetry-allowlist gap still open."]
+  ]}
+]}
+];
+
+const root=document.getElementById('root');
+const GN=["Seeds","Branch-out","Frontier"];
+DATA.forEach((grp,gi)=>{
+  const sec=document.createElement('section');sec.className='group';
+  sec.innerHTML=`<div class="group-hd"><span class="n">${String(gi+1).padStart(2,'0')} / ${GN[gi]}</span><h2>${grp.g.split(' — ')[0]}</h2><span class="sub">${grp.g.split(' — ')[1]||''}</span></div>`;
+  grp.cls.forEach(c=>{
+    const b=document.createElement('div');b.className='branch';
+    let cells='';
+    c.T.forEach((tt,ti)=>{
+      const[gist,stlab,stcl,full]=tt;
+      cells+=`<button class="cell" data-c="${c.id} · ${c.t}" data-t="${ti+1}" data-full="${full.replace(/"/g,'&quot;')}" data-st="${stlab}">
+        <span class="stripe" style="background:${RAMP[ti]}"></span>
+        <span class="top"><span class="tno">T${ti+1}</span><span class="phase">${PHASE[ti]}</span></span>
+        <span class="st"><span class="chip ${stcl}">${stlab}</span></span>
+        <span class="gist">${gist}</span></button>`;
+    });
+    const note=c.n?`<div class="note">${c.n}</div>`:'';
+    b.innerHTML=`<div class="branch-hd"><span class="badge">${c.id}</span><div class="tt"><h3>${c.t}</h3><p class="charter">${c.ch}</p></div></div>
+      ${note}<div class="lattice"><div class="vine"></div>${cells}</div>
+      <div class="xl"><b>weave ·</b> ${c.x}</div>`;
+    sec.appendChild(b);
+  });
+  root.appendChild(sec);
+});
+
+const sheet=document.getElementById('sheet');
+const shBadge=document.getElementById('sh-badge'),shTitle=document.getElementById('sh-title'),
+  shCls=document.getElementById('sh-cls'),shFull=document.getElementById('sh-full'),shMeta=document.getElementById('sh-meta');
+document.addEventListener('click',e=>{
+  const cell=e.target.closest('.cell');
+  if(cell){
+    shBadge.textContent='T'+cell.dataset.t;
+    shTitle.textContent=cell.dataset.c.split(' · ')[1];
+    shCls.textContent=cell.dataset.c.split(' · ')[0]+'  ·  '+PHASE[cell.dataset.t-1];
+    shFull.textContent=cell.dataset.full;
+    shMeta.textContent='status: '+cell.dataset.st+'   ·   full fixed-length tier — see docs/density-chain/DENSITY-CHAIN.md';
+    sheet.classList.add('on');
+  }
+  if(e.target.id==='sheet'||e.target.id==='sh-x')sheet.classList.remove('on');
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')sheet.classList.remove('on');});
+</script>
