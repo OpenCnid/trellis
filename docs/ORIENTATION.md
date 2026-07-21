@@ -20,8 +20,10 @@ method's canonical home — the lab's methodology, synthesis prompt, and
 note on the paper itself — is
 [OpenCnid/chain-of-density](https://github.com/OpenCnid/chain-of-density);
 the wider notes collection it anchors is recorded in
-[`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md). Three rules
-make the ladder safe to stop on at any rung:
+[`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md). The same method also runs in
+**system mode** on Trellis itself, as a branching sibling to this single spine — see
+[`density-chain/DENSITY-CHAIN.md`](density-chain/DENSITY-CHAIN.md) (one trunk, one fixed-length
+branch per subsystem class). Three rules make the ladder safe to stop on at any rung:
 
 1. **Each density is conceptually complete.** What D0 tells you is true
    and self-consistent on its own terms. A deeper layer *adds* entities

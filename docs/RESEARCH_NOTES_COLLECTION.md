@@ -208,6 +208,9 @@ feature starts from a stated contract instead of re-deriving one.
   `docs/architecture/TEST_TIME_TRAINING.md` (references row 1) — point
   at `recursive-language-models`.
 - `docs/ORIENTATION.md` — names the method's canonical home.
+- `docs/density-chain/DENSITY-CHAIN.md` — the same method's **system mode**: a branching
+  density-trellis of Trellis itself, not a paper note. Disambiguate from this collection's
+  per-paper `density-chain.md` files, which are a different artifact under the same method name.
 - `docs/architecture/RESIDUAL_STREAM_SIDECAR.md` §2 — points at
   `emotion-concepts-in-llms`.
 - The reverse map — what each paper changed *in Trellis*, with receipts

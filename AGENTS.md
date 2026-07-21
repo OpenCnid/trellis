@@ -122,6 +122,7 @@ this chain.
 | `docs/benchmarks/` | Measured evidence — dated reports behind every claim |
 | `docs/operations/` | Runbook |
 | `docs/product/` | PRDs, benchmark specs, and ACTIVE programs — `epistemic-support/` is live work, not history. Building anything judge-shaped starts at `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` (ratified; its twenty rules are binding program law) and `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
+| `docs/density-chain/` | Reverse-engineered branching chain-of-density map of the whole system (trunk + 11 subsystem-class branches; `DENSITY-CHAIN.md` + interactive `.html` render); orientation aid only — subordinate to this file, `HANDOFF.md`, and its single-spine sibling `docs/ORIENTATION.md` |
 | `skills/` | Composition skills versioned in-repo (`judge-composition`; `self-play` — the clean-room method for testing any LLM-assisted feature without the builder's read leaking in); the record each derives from is canonical over it |
 | `docs/archive/` | Preserved history (verbatim, never edited) |
 | Root: `HANDOFF.md`, `TRELLIS_ROADMAP.md`, `API_REFERENCE.md` | Session prompt / sequencing + dated ledger / HTTP + SSE contract |
