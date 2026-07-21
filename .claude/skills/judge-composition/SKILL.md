@@ -83,7 +83,7 @@ A judge that cannot fail — no falsifier, no abstention path — is not a judge
 
 Check the composed cover and **refuse, typed, on failure**, then retry composition; repeated failure ends the ceremony with a report rather than judging with a defective cover:
 
-- **Validity** — no seat's anchors are all-pass, all-fail, or all-abstain. A seat that cannot discriminate on its own anchors cannot discriminate on the candidate. This is the game's dev-set protection, rehomed from committed fixtures onto composition time; it is taxonomy-agnostic and survives the move intact.
+- **Validity** — no seat's anchors are all-pass, all-fail, or all-abstain. A seat that cannot discriminate on its own anchors cannot discriminate on the candidate. This is the game's dev-set protection, rehomed from committed fixtures onto composition time; it is taxonomy-agnostic and survives the move intact. It is the **positive-control duty applied at composition time** — a seat that cannot fire on its own anchors is a blind instrument, and a blind instrument's `clean` is noise, not a verdict (`TEST_TIME_TRAINING.md` §6; the `self-play` skill).
 - **Coverage** — the seats cover the characterized domain; the candidate lies inside it by construction (Step 1 kept the claim's region in scope while withholding its identity), so coverage is checkable without ever privileging the claim.
 - **Overlap** — seats are pairwise disjoint in their qualified parameters, **or** overlapping with a declared gluing rule. Strict disjointness is not required: a cover normally overlaps, and gluing happens on the overlaps (the no-global-section outcome withholds same-jurisdiction conflicts as typed forks rather than blending them).
 - **Falsifiability** — every seat has an abstention path and a way to fail.
