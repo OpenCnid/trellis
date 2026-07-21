@@ -8,7 +8,9 @@ record**, and §8 carries the gate. Sibling of
 [CODE_MEDIATED_TEXT.md](CODE_MEDIATED_TEXT.md) (whose §2.8 enforcement
 posture this generalizes) and
 [RLM_HARNESS_SCAFFOLDING.md](RLM_HARNESS_SCAFFOLDING.md) (whose §8
-correction motivated it).*
+correction motivated it). A concrete `llm_help` instantiation candidate for this
+record's Workstream B is developed in
+[SELF_DESCRIBING_SURFACES.md](SELF_DESCRIBING_SURFACES.md).*
 
 ---
 

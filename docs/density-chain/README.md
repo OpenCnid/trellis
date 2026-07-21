@@ -49,5 +49,13 @@ record at large by `AGENTS.md` §1.5).
 Maintained by **densification, never elongation**, and amended only by **dated entry** — never
 a silent edit.
 
+## Sibling system maps
+
+The method runs on other codebases too. A density-chain of **MASH** — Matthew Murphy's
+(Lexideck's) semantic-reality engine, a close sibling design of Trellis — lives in OpenCnid's
+fork at [OpenCnid/MASH `docs/density-chain/`](https://github.com/OpenCnid/MASH/tree/main/docs/density-chain);
+the correspondence analysis that motivated it is
+[`docs/architecture/SELF_DESCRIBING_SURFACES.md`](../architecture/SELF_DESCRIBING_SURFACES.md).
+
 This folder is subordinate to everything it summarizes; it is an orientation aid, not an
 authority. Live state lives in `HANDOFF.md` and the acceptance ledger.
