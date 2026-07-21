@@ -11,9 +11,17 @@ direction.
 
 `JUDGE_COMPOSITION_GAME.md` §11 (Ratification) is canonical over this
 skill. On any drift between the two, **the record wins and the skill
-is corrected** — never the reverse. `SKILL.md` here is a verbatim copy
-of the user-level skill as of July 18, 2026; it is a derived artifact,
-and this directory is not an independent authority.
+is corrected** — never the reverse. `SKILL.md` here began as a verbatim
+copy of the user-level skill as of July 18, 2026, and was **reconciled
+July 21, 2026** to the records that postdate that distillation — the
+no-default-cast ruling (`PROGRAM_CONTEXT.md` §6.1,
+`COMPOSITION_FROM_PRIMITIVES.md`), the ceremony refinements
+(`JUDGE_COMPOSITION_CEREMONY.md`), and the standing model
+(`STANDING_MODEL.md`) — exactly the record-wins correction this rule
+prescribes. It is a derived artifact, and this directory is not an
+independent authority; the reconciliation is dated in `SKILL.md`'s
+Provenance. (The user-level copy the game record §10 item 4 also
+mentions is a separate artifact and may now lag this one.)
 
 The twenty rules of that record's §6 are binding program law, cited by
 number. Consumers do not restate them, and **a paraphrased copy is
