@@ -81,6 +81,22 @@ in-repo custody.
   in `docs/architecture/DOUBTS_WORKSPACE.md §11–§12` and
   `docs/product/epistemic-support/PRIMITIVE_ENCODING_AUDIT.md`.
 
+### Loop orchestration
+
+- **[`loop-orchestrator/`](loop-orchestrator/)** — runs one turn of the
+  self-improving loop end to end (diagnose → author → spawn → adjudicate →
+  user-gated promote), enforcing the house invariant at every seam and halting
+  at the user gate. A sequencer, not a new capability: it composes the skills
+  above and builds nothing evaluative of its own (no default cast). Composes
+  every emitted prompt as a **functional** contribution (derived from the
+  guards — the Harness Self-Model's "explainable AI for the AI") plus a
+  **user/context-derived** contribution. Installed July 21, 2026 at owner
+  direction; the map that produced it lives outside the repo (a private
+  Artifact). Canonical grounds: `HARNESS_SELF_MODEL.md`,
+  `TEST_TIME_TRAINING.md §12.6`, `STANDING_MODEL.md`. Companions
+  (`loop-ledger`, `loop-cadence`, a wired `skill-creator`) are proposed, not
+  built, and owner-gated.
+
 ### Authoring
 
 - **[`density-chain/`](density-chain/)** — the OpenCnid five-tier

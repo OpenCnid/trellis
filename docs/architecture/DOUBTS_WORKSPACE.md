@@ -219,6 +219,16 @@ judge: the same primitive (an orientation bound to an evidence locus),
 composed per context from the user's domain, under the **search** law of
 §3 rather than a cover law, and constrained by §2 to cite facts.
 
+**Schema-invariant (owner Cnid, July 21, 2026): a defeater is named,
+defined, and instantiated with the *same schema as a judge*** —
+`FOUR_JUDGE_BASIC_MODEL.md`'s YAML (`purpose`, `claim_modes`, `select`,
+`orientation`, `taxonomy`, `blind_to`, plus the ten-item anchor set). The
+**methods and prompts change** — the search law not the cover law, an
+`objection` not a verdict, the ∃ target not the ∀ cover — **but the schema
+does not.** One schema, two instruments; the composition law is the
+difference, and the shared schema is what lets a single composer emit
+either seat from the same primitive (§3; STANDING_MODEL §1).
+
 Meta-prompt-generated defeater candidates are permitted and must be
 tested before shipping (collaborator direction, July 20, 2026). This
 sits on the **permitted** side of amended AB-8: composition, not
@@ -274,6 +284,16 @@ re-derivation from live provenance overrules them; `contested` computes
 false. The four `alias_resolution.ts` call sites need no migration, and
 the result is strictly more informative: the system can be asked *which*
 objection, which the boolean can never answer.
+
+**Learning (dated July 21, 2026 — owner Cnid, in session): a doubt is
+*based on* its objection(s).** The objection is the body; the doubt is
+the standing that body confers (§1); the defeater is what composes the
+objection (§8). The dependency runs one direction — **objection → doubt** —
+so a doubt with no surviving objection is empty, which is exactly why
+`contested` is *derived from outstanding objections* above rather than
+asserted. This names, as a single relation, the symmetry §15 audits: the
+`-1` pole's object is the objection, and the doubt rests on it the way a
+`+1` fact rests on its verified source bytes.
 
 ## 11. Adversarial analysis of §2 (July 20, 2026)
 
@@ -573,3 +593,73 @@ test*, not because it was argued; the two-layer architecture because it
 was *corroborated by the evidence-locus games*; the fates because the
 *collaborator confirmed* them. Where an item rests on argument alone
 (§12.2's untested defeater flank), that is marked, not smoothed over.
+
+## 15. Parity audit with the support side (dated addition — July 21, 2026, owner Cnid + Claude, in session)
+
+Recorded as this session's learning; **ratifies nothing new** and authorizes
+no build. It consolidates the doubt-vs-fact symmetry already distributed across
+the sections above and names one new gap. The audit walked ten dimensions of
+the `-1` and `+1` poles around belief (`0`):
+
+| dimension | fact side `+1` | doubt side `-1` | parity |
+|---|---|---|---|
+| standing | fact | doubt | **symmetric** (§1; STANDING_MODEL §1) |
+| the object it is built on | *unnamed as a single noun* | **objection** (§10) | **GAP — see below** |
+| the instrument | judge | defeater | **symmetric** — one primitive (§8) |
+| composition law | cover (∀) | search (∃) | **asymmetric BY DESIGN** (§3) |
+| typed kinds | grounding / coherence / corroboration / audit | rebutting / undercutting | **symmetric** (§4) |
+| the three fates | promote / defeated / pending | verified / defeated / unresolved | **symmetric** (§5) |
+| grounding rule | provenance / source bytes | positive-citation of facts | **symmetric burden** (§2, positivity core only) |
+| membership | survives the panel + gate | survives the fact base, else delusion | **symmetric** (§12.3) |
+| user gate | gates promotion | gates demotion; mechanical contest auto | **symmetric** (§7; STANDING_MODEL §3) |
+| build status | **built** | **proposed** (`grep doubt src/` = nothing) | **NOT BUILT** (§1) |
+
+**Reading:** seven dimensions symmetric (as principle), one asymmetric by
+design, two open. The design asymmetry is a feature — *support covers, defeat
+searches* — never a parity defect.
+
+**New gap — the fact side's object has no name.** §10 gave the doubt pole a
+clean triad `doubt / objection / defeater`. The fact pole names its **standing**
+(`fact`) and its **instrument** (`judge`), but the **object** an objection
+mirrors — the fact-grounded thing that *supports* a claim — has no single noun;
+it is carried implicitly by judge findings and the J3 *corroboration* role. To
+make the two triads read as one, the support-side object wants a name.
+**Owner-owed**, gated like the §10 rename. Candidate register (juridical, per
+§10): `corroboration` (collides with the judge role), `attestation`,
+`submission`. Not adopted here.
+
+**Resolved this session (July 21, 2026 — collaborator M. Murphy delegated the
+choice, owner Cnid endorsed proceeding): the name is `affirmation`.** It is the
+fact-grounded object that *affirms* a claim — the direct antonym of the
+`objection` that *attacks* it — and it fills the same slot: the fact-grounded
+**support object**, never the candidate. That is why `claim` and `proposal`
+(floated in session) were set aside: they name the thing supported, not the
+support. Collision check that decided it: `corroboration` = the J3 judge role;
+`submission` = `STANDING_MODEL.md §2`'s vote; `attestation` =
+`HARNESS_SELF_MODEL.md §8`'s informing surface; `warrant` = the `warranted`
+adjective; `affirmation` returned zero repo hits and takes the slot cleanly. The
+two triads now read as one — **affirmation / fact / judge** ↔
+**objection / doubt / defeater** — differing only by the §3 law (cover ∀ vs
+search ∃). Gateable: one owner word overrides it.
+
+A **three-round clean-room self-play** (July 21, 2026) probed whether the label
+`affirmation` biases a reasoner's grounding judgments (connotation → auto-validation).
+Across clear items, humanized marginal items (iterated builder, independently
+key-verified 12/12), and a rubric-stripped condition, the name showed **no detectable
+output bias** — the positive control `proof` (the most auto-validating word a blind
+adversary could name) never fired either, so the honest reading is **"no detectable
+connotation harm," not "proven neutral"** (single-word priming sits below the detection
+floor for a capable model doing explicit adjudication). A third round (Matt-directed)
+spread the label across the **full connotation axis** — validating, neutral, a
+counter-label (`bunk`), and a nonsense token, 12 blind trials — and every label produced
+identical 8/8 verdicts, strengthening the null past the near-synonym limit of rounds 1–2.
+`affirmation` **retained**; the self-play method-learnings (including *controls must span
+the manipulated axis*) were written into the `self-play` skill.
+
+**Restated gap — build parity.** The larger asymmetry is §1's: the fact side is
+built and the doubt side is not. No new claim; recorded so the audit is honest
+that "symmetric" above means *as principle*, not *as shipped*.
+
+A visual of this audit was produced this session as a private Artifact
+(current-state parity map); it is provenance, not authority, and this record
+governs on any drift.

@@ -230,8 +230,10 @@ start. Worked instances of the frame:
     generated-with footers, in commits, PRs, or code. Plain
     engineering prose.
 11. **Report honestly**: publish counts and raw numbers; a null or
-    surprising result is a finding; re-run outliers before believing
-    them.
+    surprising result is a finding — **but only once a positive control
+    has fired**: a control that never discriminates means the test was
+    blind, so the result is noise, not a null (the positive-control duty,
+    `TEST_TIME_TRAINING.md` §6). Re-run outliers before believing them.
 12. **One feature branch, one PR to `master`**, and if you ran a
     session: update `TRELLIS_ROADMAP.md` §5 (dated entry, exact
     commands, counts, defects) and regenerate `HANDOFF.md` per its §0

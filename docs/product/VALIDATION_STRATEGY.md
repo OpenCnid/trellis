@@ -48,6 +48,7 @@ Once the PoC proves the math, we build the prototype to test data flow and archi
 ### 4. Ablation Studies for Advanced Features
 As we scale Trellis and introduce groundbreaking features (like HNSW vector overlays or GNN link predictions), we will conduct ablation studies.
 * **The Rule:** If we add Hybrid Vector Search, we must test the system's retrieval accuracy *with* and *without* it. If disabling the vector search does not significantly degrade performance, the feature is discarded. We only keep components that mathematically prove their worth.
+* **The Positive-Control Duty:** an ablation's null — *"disabling it did not degrade performance"* — is only a finding once a **positive control has fired**. Before trusting it, build a condition where performance *demonstrably* degrades and confirm the test detects it; a control that never discriminates means the test was blind, so the result is noise, not a null. Report **"no detectable effect," never "validated."** (The house "Session 28 lesson"; see `docs/architecture/TEST_TIME_TRAINING.md` §6 and the `self-play` skill's disciplines.)
 
 ---
 

@@ -119,7 +119,7 @@ The evaluator's frame additionally withholds the condition label: it judges item
 in a single undifferentiated list and never learns which are the "live" ones and
 which are controls.
 
-## The nine disciplines — each paid for by a real failure
+## The ten disciplines — each paid for by a real failure
 
 1. **Pre-register before the prompts exist.** A forecast that shares bytes with
    the prompt *or with the evidence the players see* is a work order, not a
@@ -147,7 +147,26 @@ which are controls.
 
 6. **Controls first.** Run the negative / control cases before the live ones. **A
    control failing is the signal to STOP, not to push on** — it means the test
-   itself is broken and any live result would be noise.
+   itself is broken and any live result would be noise. **And a positive control
+   that will not fire across escalating designs is itself the finding** — the
+   effect is below your detection floor, not absent-because-you-say-so; you may
+   then report *no detectable effect*, never *validated*. This is the house's
+   **positive-control duty** — the "Session 28 lesson" (`TEST_TIME_TRAINING.md`
+   §6): *a null result is meaningless until the experiment has demonstrated it
+   can produce a positive one*. *(Testing whether the
+   word `affirmation` biased grounding judgments, the positive control `proof`—the
+   most auto-validating word a blind adversary could name—never fired through
+   clear items, then humanized marginal items, then a rubric-stripped condition
+   where the name was the only cue. Explicit adjudication on a capable model
+   swamps single-word priming; surface such an effect with implicit judgments,
+   volume or time pressure, or a weaker model — or accept it is below the floor.
+   **A control must also *span* the manipulated axis, not hug the candidate:** a
+   near-synonym positive control (`proof` for `affirmation`) has too little
+   contrast to reveal a gradient — a later round spread the label across the whole
+   connotation axis (validating / neutral nonce / a counter-label `bunk` / a
+   nonsense token, 12 blind trials) and every label still produced identical
+   verdicts, which is how you tell an *inert* variable from a merely *untested*
+   one.)*
 
 7. **Sound-target discipline.** To isolate a degenerate case you need a *sound*
    target; against a defective one, legitimate findings are always available and
@@ -165,6 +184,20 @@ which are controls.
    smuggle it in as the claim itself. *(A builder silently read a one-line
    criterion three different ways across three turns, each time substituting the
    reading for the words.)*
+
+10. **Build subtle ground truth iteratively, and verify the key blind.** A subtle
+    effect only shows on *marginal* items — but one-shot generation produces clean
+    textbook cases the real variable can't move (a clear-cut item is decided by
+    its own defect, not by whatever you are testing). Give a blind sub-agent a
+    goal and let it **iterate in its clean room** — draft, adversarially
+    stress-test its own answer key, refine — since multiple steps it takes in
+    isolation are independent of your experiment and yield genuinely muddy items
+    a single output cannot. Then have a **second** blind agent independently
+    adjudicate that key: the item-smith's key is *data, not authority*
+    (discipline 8, turned on the ground truth itself). Keep only items where the
+    two agree; discard the genuinely ambiguous. *(A clear-cut first round could
+    not move even a maximally-biasing label; only humanized marginal items,
+    iterated and independently key-verified, made the run interpretable at all.)*
 
 ## The cell that matters — pre-commit it
 

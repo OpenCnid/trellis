@@ -51,12 +51,17 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   user gate. Canonical:
   [STANDING_MODEL.md](product/epistemic-support/STANDING_MODEL.md).
 - **Doubt / Objection / Defeater (ratified as vocabulary July 20, 2026;
-  not built)** — the `-1` tier: a **doubt** is the standing; an
+  not built)** — the `-1` tier: a **doubt** is the standing, *based on* its
+  objection(s) — no objection, no doubt; an
   **objection** is the fact-grounded object that attacks a claim
   (sustained / overruled / outstanding); a **defeater** is the composed
   instrument that searches for objections. A doubt must cite facts, and
   enters the workspace only if it survives the fact base — a fact-refuted
-  doubt held anyway is delusion. Canonical:
+  doubt held anyway is delusion. Its `+1` mirror object — the fact-grounded
+  thing that *supports* a claim — is the **affirmation** (proposed July 21,
+  2026, this session; gateable): `affirmation / fact / judge` mirrors
+  `objection / doubt / defeater`, and a **defeater shares the judge's schema**
+  (methods and prompts differ; the schema does not). Canonical:
   [DOUBTS_WORKSPACE.md](architecture/DOUBTS_WORKSPACE.md). Under this
   vocabulary **Contested** (below) becomes a *derived* predicate — "carries
   outstanding objections?" — once built.
