@@ -776,3 +776,110 @@ falsifiers on design decisions; if any is later asserted as a finding
 — e.g. that graph-visible judge existence is behaviorally inert — it
 enters the register as its own row with that falsifier, by dated
 entry.
+
+## 13. Explanation render — design note (July 21, 2026)
+
+**Status: Option A IMPLEMENTED — July 21, 2026; Option B deferred.** Records, in engineering terms,
+the resolution of an explainability question the collaborator raised:
+should a judge's output carry a human-readable rationale, the way the
+session-layer `judge-composition` skill's output schema does? So a later
+bounded feature can be built from a record rather than from a
+conversation.
+
+### The finding: no rationale exists on the wire or in the record
+
+The model's response surface is `judgeResponseSchema`
+([`judge_spawn.ts:53`](../../../src/core/graph/judge_spawn.ts:53)), a
+`z.strictObject` of exactly `{ verdict, drawback, abstainReason? }` —
+`strictObject` refuses any extra field. The stored verdict `verdictBase`
+([`judge_panel.ts:143`](../../../src/core/graph/judge_panel.ts:143))
+adds only engine-side `{ judgeId, role, beliefId, atMs, weight }`. So
+**there is no `rationale` and no `rationaleSpan` anywhere in the shipped
+path** — the `rationaleSpan` named in the invariant verdict schema of
+[`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md) §1 was
+designed and never carried into the wire or record. That template line
+is now the outlier; either the field is built (Option B below) or the
+template's §1 schema is corrected by dated entry to match the shipped
+three-field surface.
+
+### Why the record layer stays minimal
+
+A model-authored free-text rationale in the store would put model prose
+into a record byte — the corruption channel
+[`CODE_MEDIATED_TEXT.md`](../../architecture/CODE_MEDIATED_TEXT.md)
+forbids for content, applied here to verdicts. It is also unverifiable,
+non-deterministic (breaking the byte-pinned render/report determinism),
+store bloat, and a fresh Goodhart/leak surface that would need its own
+writer-blind and never-reward-length guards. The minimal wire is a
+feature, not an omission.
+
+### The resolution: explanation is a read-time render, not a stored field
+
+Explainability is a *presentation* concern, and the panel outcome is
+already computed at read time — `computeConvocationReport`
+([`support_sweep.ts:374`](../../../src/core/graph/support_sweep.ts:374))
+replays stored verdicts through `composePanel` and stores no opinion
+(RECONCILIATION §5.2). An explanation render is the same pattern one
+layer out: a pure function over already-stored, code-mediated fields.
+
+- **Option A — render from what is already stored (recommended first
+  step; zero schema change).** Per verdict in a `CandidateReport`, join
+  `role` + `verdict` + `drawback` (the class) + the class's one-line
+  gloss (its rubric question, carried on the *composed* judge
+  definition, RECONCILIATION §2) + `abstainReason` + the promotion
+  record's existing addresses. Yields a class-level "which seat, what
+  verdict, what the drawback class means," deterministic, no new model
+  output, nothing new stored. The gloss source is the composed judge
+  definition, not a hard-coded map — under the composition ceremony the
+  taxonomy is per-context (§11.2 3–4), so the gloss travels with the
+  composed rubric.
+- **Option B — capture a deciding-span ADDRESS (follow-on; richer, still
+  code-mediated).** Implement the template's `rationaleSpan` as an
+  *address*, not prose: the model returns a pointer into the evidence it
+  was shown, the engine **validates the address resolves inside that
+  evidence** and stores the address, and the render quotes the resolved
+  bytes. The model authors a pointer, never record text, so the pillar
+  holds. Costs a wire field on `judgeResponseSchema`, an
+  address-validation step at the spawn boundary, and a store field — and
+  it intersects the already-open §11.2 3–4 question of "what a composed
+  judge's evidentiary basis is and therefore what the existence gate
+  checks."
+- **Option C — a model-authored free-text `rationale` field — rejected**
+  for the record-layer reasons above. It stays legitimate at the
+  *session layer*, where the `judge-composition` skill's verbose
+  `rationale` serves an ephemeral human-read panel that is never
+  persisted as a record — the skill's Step 5 note already draws that
+  line.
+
+### Recommendation
+
+Build Option A when an explanation surface is wanted (small,
+house-clean); hold Option B as the follow-on if span-level "why" proves
+necessary; and correct `JUDGE_CONTRACT_TEMPLATE §1`'s `rationaleSpan`
+line by dated entry either way — build it, or drop it to match the wire.
+
+### Implemented (dated entry — July 21, 2026)
+
+**Option A shipped**, owner-authorized ("align the product with the
+skill to the extent we're able, then backprop"). Zero-model, zero-paid,
+no wire / schema / store change:
+
+- [`judge_explain.ts`](../../../src/core/graph/judge_explain.ts) — the
+  pure render. `explainVerdict` joins seat + verdict + humanized drawback
+  class + the qualified-parameter dimension + abstain reason;
+  `explainCandidate` adds the opinion in words, the counts, and the typed
+  no-global-section / cross-role-disagreement / exclusion records.
+  `clean` renders "no known drawback found," never certified correctness
+  (R-01). Authors no stored byte; calls no model.
+- [`support_report.ts`](../../../scripts/support_report.ts) — the
+  advisory `support:report` surface now prints the render.
+- Pins:
+  [`judge_explain.test.ts`](../../../src/core/graph/judge_explain.test.ts)
+  (9 checks); `npm run test:judge-convocation` stays green (23 sections,
+  0 failed) with `[report]` and `[static-imports]` unchanged, and the
+  full graph suite is 179/179.
+
+Option B (a validated `rationaleSpan` **address** on the wire) remains
+the deferred follow-on for span-level "why."
+`JUDGE_CONTRACT_TEMPLATE §1`'s `rationaleSpan` line is corrected by
+dated entry there to match the shipped three-field wire.

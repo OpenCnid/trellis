@@ -515,16 +515,19 @@ the corrected re-run validated it as a positive control. Full record,
 ledger, and the twenty rules:
 [`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`](product/epistemic-support/JUDGE_COMPOSITION_GAME.md).
 
-**One decision is yours (its §10 item 1).** Your corrected primitives
-thesis survived an adversarial clean-context attack conditionally, and
-the analyst's steelman — the universal ∩ governable trilemma, with
-representational holism as the named falsifier — is tabled as a
-refiling only you can accept, amend, or decline. Rule 15 cuts both
-ways: we do not file improved versions of your claims either. The
-falsifier, you'll notice, is the same decomposability bet the sidecar
-direction and the refined functional-infinity entry rest on — the
-experiments you and the owner are pointing the program at will settle
-all three at once.
+**One decision was yours (its §10 item 1), and it is now made.** Your
+corrected primitives thesis survived an adversarial clean-context
+attack conditionally, and the analyst's steelman — the universal ∩
+governable trilemma, with representational holism as the named
+falsifier — was tabled as a refiling only you could accept, amend, or
+decline. **You accepted it July 21, 2026, and the owner ratified**
+(`JUDGE_COMPOSITION_GAME.md` §5.1); the steelman is now the program's
+thesis formulation, carrying that falsifier unchanged. Rule 15 cut both
+ways throughout: we did not file an improved version of your claim, we
+held it until you chose. The falsifier, you'll notice, is the same
+decomposability bet the sidecar direction and the refined
+functional-infinity entry rest on — the experiments you and the owner
+are pointing the program at will settle all three at once.
 
 ---
 

@@ -68,6 +68,25 @@ must be re-encoded first — do not paste these into module addenda.
 > below — a dated note, not a silent edit; owner ratification of the
 > parent record is unaffected.
 
+> **Dated correction (July 21, 2026) — `rationaleSpan` is not on the
+> shipped verdict wire.** The verdict-schema field list above names
+> `rationaleSpan` (and `rubricSha`) as invariant vocabulary, but the
+> shipped model response is exactly `{ verdict, drawback, abstainReason }`
+> (`z.strictObject`,
+> [`judge_spawn.ts:53`](../../../src/core/graph/judge_spawn.ts:53)) and
+> the stored verdict record carries no rationale/span field
+> ([`judge_panel.ts:143`](../../../src/core/graph/judge_panel.ts:143));
+> `rubricSha` lives on the judge *manifest*, not the verdict. Judge
+> explainability is provided instead by a read-time RENDER over the
+> stored fields —
+> [`judge_explain.ts`](../../../src/core/graph/judge_explain.ts), per
+> [`JUDGE_CONVOCATION_DESIGN.md`](JUDGE_CONVOCATION_DESIGN.md) §13
+> (Option A, IMPLEMENTED July 21, 2026) — which keeps model prose out of
+> the record (CODE_MEDIATED_TEXT). A `rationaleSpan` as a validated
+> *address* (Option B) remains a deferred follow-on; until it ships,
+> treat `rationaleSpan` here as design intent, not shipped vocabulary.
+> A dated note, not a silent edit; owner ratification unaffected.
+
 ---
 
 ## 1. Shared verdict schema (invariant vocabulary)
