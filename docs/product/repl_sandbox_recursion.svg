@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 664" width="1040" height="664" role="img" aria-label="Trellis REPL depth-1 flat parallel sub-LLM fan-out, hardened. One Kata microVM (Cloud Hypervisor) runs the root worker at depth 0; it splits context and issues N parallel FLAT llm_query completions over slices, with no child REPLs and no recursion. The worker holds no credentials or API key and is hardened in-guest with cgroups, seccomp and Landlock. A vsock bridge crosses to two host chokepoints: the LM handler (holds the provider API key host-side, authenticates by vsock CID, enforces hard spend and rate caps and content DLP on outbound prompts) and the host broker (read-only NOSUPERUSER DB role, CID auth, statement timeout and cost caps, an APOC allowlist, and DLP). Databases sit behind the broker with host egress denied. Version pins: Kata at least 3.31.0 and Cloud Hypervisor at least 52.0. Deny-by-default egress blocks the NIC but does not stop exfiltration through the sanctioned crossings, so content DLP and per-session byte caps are required, and the sandbox must hold under fully successful prompt injection.">
+  <style>
+    :root{
+      --s-paper:#eef2f4; --s-ink:#1a2830; --s-soft:#5c6d77;
+      --s-host-fill:#e7efec; --s-host-line:#3a936a; --s-vm-fill:#f8efdd; --s-vm-line:#c0842a;
+      --s-gv-line:#7c8ea3; --s-worker-fill:#ffffff; --s-worker-line:#3f5c69;
+      --s-svc-fill:#e6f1ec; --s-broker-fill:#dcece2; --s-svc-line:#3a936a;
+      --s-db-fill:#f2f5f6; --s-accent:#0f8fa1; --s-danger:#c8482f; --s-warn-fill:#fbeee0;
+    }
+    @media (prefers-color-scheme:dark){:root{
+      --s-paper:#0d151d; --s-ink:#dce6ec; --s-soft:#8ca0ac;
+      --s-host-fill:#122019; --s-host-line:#4bab7d; --s-vm-fill:#231a0d; --s-vm-line:#cf9a3f;
+      --s-gv-line:#6d8098; --s-worker-fill:#0f1a22; --s-worker-line:#5f7d8b;
+      --s-svc-fill:#12231c; --s-broker-fill:#132a20; --s-svc-line:#4bab7d;
+      --s-db-fill:#111d25; --s-accent:#2bbccf; --s-danger:#e06a54; --s-warn-fill:#241a0d;
+    }}
+    :root[data-theme="light"]{
+      --s-paper:#eef2f4; --s-ink:#1a2830; --s-soft:#5c6d77;
+      --s-host-fill:#e7efec; --s-host-line:#3a936a; --s-vm-fill:#f8efdd; --s-vm-line:#c0842a;
+      --s-gv-line:#7c8ea3; --s-worker-fill:#ffffff; --s-worker-line:#3f5c69;
+      --s-svc-fill:#e6f1ec; --s-broker-fill:#dcece2; --s-svc-line:#3a936a;
+      --s-db-fill:#f2f5f6; --s-accent:#0f8fa1; --s-danger:#c8482f; --s-warn-fill:#fbeee0;
+    }
+    :root[data-theme="dark"]{
+      --s-paper:#0d151d; --s-ink:#dce6ec; --s-soft:#8ca0ac;
+      --s-host-fill:#122019; --s-host-line:#4bab7d; --s-vm-fill:#231a0d; --s-vm-line:#cf9a3f;
+      --s-gv-line:#6d8098; --s-worker-fill:#0f1a22; --s-worker-line:#5f7d8b;
+      --s-svc-fill:#12231c; --s-broker-fill:#132a20; --s-svc-line:#4bab7d;
+      --s-db-fill:#111d25; --s-accent:#2bbccf; --s-danger:#e06a54; --s-warn-fill:#241a0d;
+    }
+    .rt{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;fill:var(--s-ink)}
+    .rm{font-family:ui-monospace,"SF Mono","Cascadia Code","Roboto Mono",Menlo,Consolas,monospace;fill:var(--s-ink)}
+    .rtitle{font-size:15px;font-weight:700;letter-spacing:.11em}
+    .rsub{font-size:11px;fill:var(--s-soft)}
+    .rzone{font-size:11px;font-weight:700;letter-spacing:.15em}
+    .rstrongsm{font-size:12px;font-weight:700}
+    .rsmall{font-size:10px;fill:var(--s-soft)}
+    .rok{font-size:10px;font-weight:600;fill:var(--s-host-line)}
+    .rchan{font-size:9.5px;font-weight:600;fill:var(--s-accent)}
+    .rgate{font-size:9.5px;font-weight:700;letter-spacing:.12em;fill:var(--s-accent)}
+    .rdanger{font-size:10.5px;font-weight:700;fill:var(--s-danger)}
+    .rdangs{font-size:10px;fill:var(--s-danger)}
+    .rfoot{font-size:10px;fill:var(--s-soft)}
+    .rpin{font-size:10px;font-weight:600;fill:var(--s-accent)}
+  </style>
+  <defs>
+    <marker id="rfa" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="var(--s-accent)"/></marker>
+    <marker id="rfc" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="var(--s-host-line)"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="1040" height="664" fill="var(--s-paper)"/>
+  <text class="rt rtitle" x="24" y="30">TRELLIS REPL &#183; DEPTH 1 &#8212; FLAT PARALLEL SUB-LLM FAN-OUT</text>
+  <text class="rt rsub" x="24" y="49">One Kata microVM. The root worker fans context out to parallel FLAT sub-LLM calls &#8212; no child REPLs, no recursion. Every crossing is a guarded chokepoint.</text>
+
+  <rect x="16" y="62" width="1008" height="470" rx="14" fill="var(--s-host-fill)" stroke="var(--s-host-line)" stroke-width="1.5"/>
+  <text class="rt rzone" x="32" y="86" fill="var(--s-host-line)">HOST &#183; TRUSTED ZONE</text>
+
+  <!-- Worker microVM -->
+  <rect x="36" y="104" width="300" height="404" rx="11" fill="var(--s-vm-fill)" stroke="var(--s-vm-line)" stroke-width="1.6"/>
+  <text class="rt rstrongsm" x="52" y="128">Root worker &#183; Kata microVM</text>
+  <text class="rt rsmall" x="52" y="145">Cloud Hypervisor &#183; untrusted guest &#183; depth 0</text>
+  <text class="rt rpin" x="52" y="162">pin: Kata &#8805;3.31.0 &#183; Cloud Hypervisor &#8805;52.0</text>
+  <rect x="52" y="174" width="268" height="104" rx="7" fill="var(--s-worker-fill)" stroke="var(--s-worker-line)" stroke-width="1.3"/>
+  <text class="rm" x="66" y="196" font-size="11.5">rlms REPL</text>
+  <text class="rt rsmall" x="66" y="214">splits context &#8594; llm_query_batched</text>
+  <text class="rt rsmall" x="66" y="231">N parallel FLAT completions over slices</text>
+  <text class="rt rsmall" x="66" y="248">no child REPL &#183; no child VM &#183; no recursion</text>
+  <text class="rt rsmall" x="66" y="266">code is model-authored &#8594; treat as hostile</text>
+  <text class="rt rok" x="52" y="304">&#10003; holds NO DB creds and NO LLM API key</text>
+  <text class="rt rsmall" x="52" y="326">Tier-0 in-guest hardening:</text>
+  <text class="rt rsmall" x="52" y="343">&#183; cgroups (pids / mem / cpu) &#8212; no fork-bomb</text>
+  <text class="rt rsmall" x="52" y="360">&#183; seccomp allowlist &#183; Landlock read-only roots</text>
+  <text class="rt rsmall" x="52" y="377">host watchdog reaps / replaces wedged VMs</text>
+  <text class="rt rdangs" x="52" y="404">answer &#8594; operator = AUDITED egress point</text>
+  <text class="rt rsmall" x="52" y="421">(content, not just the 64KB volume cap)</text>
+  <text class="rt rsmall" x="52" y="486">rlms transport is AF_INET &#8212; the vsock</text>
+  <text class="rt rsmall" x="52" y="500">bridge is required, unbuilt glue</text>
+
+  <!-- vsock bridge -->
+  <line x1="356" y1="120" x2="356" y2="500" stroke="var(--s-accent)" stroke-width="3"/>
+  <g transform="translate(372,430) rotate(-90)"><text class="rt rgate">VSOCK BRIDGE &#183; loopback&#8594;vsock &#183; minimal &#183; unprivileged &#183; fuzzed</text></g>
+
+  <!-- LM handler -->
+  <rect x="404" y="104" width="316" height="154" rx="10" fill="var(--s-svc-fill)" stroke="var(--s-svc-line)" stroke-width="1.5"/>
+  <text class="rt rstrongsm" x="420" y="128">LM handler (host)</text>
+  <text class="rt rsmall" x="420" y="146">flat sub-LLM server (serves llm_query)</text>
+  <text class="rt rsmall" x="420" y="164">provider API key HOST-SIDE only</text>
+  <text class="rt rsmall" x="420" y="182">auth by vsock CID &#8212; never a payload id</text>
+  <text class="rt rsmall" x="420" y="200">hard spend / rate / concurrency caps (CID)</text>
+  <text class="rt rsmall" x="420" y="218">content-DLP on outbound prompt text</text>
+  <text class="rt rsmall" x="420" y="240">rlms&#8217; own caps are bypassable &#8212; enforce here</text>
+
+  <!-- Broker -->
+  <rect x="404" y="286" width="316" height="186" rx="10" fill="var(--s-broker-fill)" stroke="var(--s-svc-line)" stroke-width="1.8"/>
+  <text class="rt rstrongsm" x="420" y="310">Host broker (DB tools)</text>
+  <text class="rt rsmall" x="420" y="328">read-only NOSUPERUSER role &#183; holds creds</text>
+  <text class="rt rsmall" x="420" y="346">auth by vsock CID (per-session)</text>
+  <text class="rt rsmall" x="420" y="364">statement_timeout + query-cost caps</text>
+  <text class="rt rsmall" x="420" y="382">Neo4j APOC allowlist &#183; forbid unbounded [*]</text>
+  <text class="rt rsmall" x="420" y="400">no dblink / COPY TO PROGRAM / pg_read_file</text>
+  <text class="rt rsmall" x="420" y="418">content-DLP &#183; audit every call by CID</text>
+  <text class="rt rdangs" x="420" y="446">credentials never enter the guest</text>
+
+  <!-- External LLM API -->
+  <rect x="762" y="120" width="248" height="86" rx="10" fill="var(--s-db-fill)" stroke="var(--s-svc-line)" stroke-width="1.4"/>
+  <text class="rt rstrongsm" x="778" y="150">External LLM API</text>
+  <text class="rt rsmall" x="778" y="169">reached only via the host handler</text>
+  <text class="rt rsmall" x="778" y="187">(never directly from the guest)</text>
+
+  <!-- Databases -->
+  <ellipse cx="820" cy="316" rx="36" ry="9" fill="var(--s-db-fill)" stroke="var(--s-svc-line)" stroke-width="1.2"/>
+  <path d="M784,316 L784,352 A36,9 0 0 0 856,352 L856,316" fill="var(--s-db-fill)" stroke="var(--s-svc-line)" stroke-width="1.2"/>
+  <text class="rm" x="820" y="338" font-size="10.5" text-anchor="middle">Postgres</text>
+  <ellipse cx="936" cy="316" rx="36" ry="9" fill="var(--s-db-fill)" stroke="var(--s-svc-line)" stroke-width="1.2"/>
+  <path d="M900,316 L900,352 A36,9 0 0 0 972,352 L972,316" fill="var(--s-db-fill)" stroke="var(--s-svc-line)" stroke-width="1.2"/>
+  <text class="rm" x="936" y="338" font-size="10.5" text-anchor="middle">Neo4j</text>
+  <text class="rt rdanger" x="762" y="392">DB host: egress DENIED</text>
+  <text class="rt rdangs" x="762" y="409">(no route to internet / metadata &#8594; kills SSRF)</text>
+
+  <!-- fan-out arrows worker -> LM handler -->
+  <path d="M320,204 L404,150" fill="none" stroke="var(--s-accent)" stroke-width="2.2" marker-end="url(#rfa)"/>
+  <path d="M320,224 L404,178" fill="none" stroke="var(--s-accent)" stroke-width="2.2" marker-end="url(#rfa)"/>
+  <path d="M320,244 L404,206" fill="none" stroke="var(--s-accent)" stroke-width="2.2" marker-end="url(#rfa)"/>
+  <text class="rt rchan" x="326" y="112">llm_query_batched &#183; N &#8741; flat calls (vsock)</text>
+
+  <!-- LM handler -> external LLM -->
+  <line x1="720" y1="163" x2="762" y2="163" stroke="var(--s-accent)" stroke-width="2.2" marker-end="url(#rfa)"/>
+  <!-- broker -> DBs -->
+  <line x1="720" y1="360" x2="762" y2="340" stroke="var(--s-host-line)" stroke-width="2" marker-end="url(#rfc)"/>
+  <text class="rt rchan" x="726" y="356">read-only</text>
+
+  <!-- exfil callout -->
+  <rect x="16" y="546" width="1008" height="66" rx="10" fill="var(--s-warn-fill)" stroke="var(--s-danger)" stroke-width="1.6"/>
+  <text class="rt rdanger" x="34" y="570">&#9888; Deny-by-default egress blocks the NIC &#8212; it does NOT stop exfiltration.</text>
+  <text class="rt rdangs" x="34" y="588">The sanctioned crossings (llm_query &#183; vector_search &#183; answer) carry model-controlled text out. Guard = content-DLP + per-session byte caps + CID-keyed spend caps.</text>
+  <text class="rt rdangs" x="34" y="604">The sandbox must hold under 100% successful prompt injection &#8212; the tool / network boundary is the only real backstop, never prompt discipline.</text>
+
+  <text class="rt rfoot" x="24" y="636">Depth 1 = flat fan-out only (the RLM paper&#8217;s own default). No recursion; max_depth=2 (child REPLs) was measured harmful (arXiv:2603.02615). trellis_task.verify() is a forgeable substring check &#8212; UX, not security.</text>
+</svg>
