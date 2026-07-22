@@ -84,6 +84,21 @@ the answer channel is an audited egress point, not a size cap.
 substring check (the guest can read `trellis_task.uuid` and re-wrap forged text). Task-precedence
 prompting is UX. The tool/network boundary is the only real backstop.
 
+**Resolution (July 21, 2026, owner Cnid; collaborator Matt) — the boundary is data-flow, not a
+filter.** Content inspection over model-controlled text can't be the guarantee (no perfect
+cover). The fix is to make the guest hold **addressable handles, not secret-bearing payloads**
+(the broker resolves them host-side) — so the sanctioned crossings can't leak what was never
+materialised, *even under 100% successful injection*. On top of that, a **"double cover"**
+composed from the **existing -1 doubt tier** ([DOUBTS_WORKSPACE](../../architecture/DOUBTS_WORKSPACE.md)):
+a mechanical, provenance-grounded doubt that strips command-authority from untrusted-retrieved
+instructions (the §7 automatic-contest path) and a semantic defeater panel on the outbound
+content that *attaches findings, never enforces* (§7). **Lesson:** the strong move was not a
+better filter — it was converting an unsolvable content problem into a solved data-flow one,
+then treating the doubt framework as labelled Tier-2 defense-in-depth (realisable as an
+in-context meta-prompt *or* a TTT-trained tooling-call; robustness is the composition, not the
+substrate), which by DOUBTS_WORKSPACE §7 the engine cannot count as a boundary anyway. Full
+model: [ARCHITECTURE §3.1](REPL_SANDBOX_ARCHITECTURE.md).
+
 ## 7. Identity: the vsock CID is a free, unspoofable anchor
 
 Kernel-assigned per guest, not choosable by the guest. The host broker/handler **must**
