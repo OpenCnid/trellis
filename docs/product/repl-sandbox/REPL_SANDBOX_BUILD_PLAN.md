@@ -1,0 +1,340 @@
+# Trellis REPL Sandbox — Build Plan
+
+**Status: DESIGN — build sequence for owner-ratified decisions; NOT built.** This document
+sequences the owner-ratified architecture ([REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md))
+and spec ([REPL_SANDBOX_SPEC.md](REPL_SANDBOX_SPEC.md)) into a dependency-correct, gated
+construction path from nothing-built to a working, gated boundary. It **leads** implementation
+(document-driven); it does not re-open any decision. Every milestone carries a falsifiable exit
+gate tied to a **named enforcing surface**, and every gate is split into *zero-paid reachability*
+versus *paid adoption* (§1). Diagrams the ratified design already owns: [isolation view](repl_sandbox_architecture.svg).
+
+---
+
+## 0. Purpose & scope
+
+The stack is ratified (July 20–21, 2026); this plan only orders the build. **In scope:** the
+milestone order, the six elevated prototype spikes, the enforcing-surface map for the 12 security
+requirements, the acceptance gates, and the critical path. **Out of scope — do not duplicate:**
+
+| Concern | Authority (reference, never restate) |
+|---|---|
+| The ratified decisions & trust model | [REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md) |
+| Interfaces, config, invariants, acceptance gates | [REPL_SANDBOX_SPEC.md](REPL_SANDBOX_SPEC.md) §8 (Acceptance gates) |
+| The adversarial threat detail & the injection/exfil test design | `REPL_SANDBOX_THREAT_MODEL.md` |
+| Handle model & session state | `REPL_SANDBOX_DATA_MODEL.md` |
+| Wire framing & RPC contracts | `REPL_SANDBOX_INTERFACES.md` |
+| The PROPOSED doubt filter (Layers 1–2) | `REPL_SANDBOX_DOUBT_FILTER.md` |
+| Evidence trail & the origin 6-spike list | [REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §10.4 (First-prototype plan) |
+
+Authority ordering is unchanged: **code > glossary > prose**. Nothing here overrides the records;
+where this plan and a ratified record disagree, the record wins.
+
+## 1. The gate law — reachability vs adoption
+
+**House principle (non-negotiable): every zero-paid harness is *scripted*, so its counters measure
+the script author, not a model.** Therefore each gate is split, and a reachability pass is **never**
+counted as behavioral evidence:
+
+- **[R] Reachability (zero-paid, scripted, deterministic).** Does the wiring exist, round-trip, and
+  *enforce*? A named surface is exercised by a scripted probe with a fixed, adversary-shaped input
+  (e.g. a scripted 100%-injection payload, a scripted fork-bomb, a scripted over-budget call). Cheap,
+  repeatable, run in CI. Proves the control is *present and fires* — nothing about whether a real
+  model uses it correctly.
+- **[A] Adoption (paid, metered LLM run, capped ≤ $5/run).** Does a *real model* actually drive the
+  surface correctly — complete a task through the sandboxed backend, use the broker facade, or get
+  contained while steered by a hostile document? These are the only worthwhile live tests
+  (engine-fidelity: reachability + scripted-vs-live equivalence + the metered equivalence run);
+  never a "does the sandbox help" test. Estimate spend before, report actual after.
+
+**HARD RULE (house):** a documented bound with no engine behind it is not a control. Every gate below
+names the surface that enforces it; a gate whose enforcing surface is only prose does not count.
+
+Label key used throughout: **[R]** = reachability-only gate; **[R+A]** = reachability gate plus a
+required paid-adoption gate before the milestone is "done."
+
+## 2. The research-hold gate (G0 — precedes spike 1)
+
+**G0 is an owner gate, not a scripted one.** Nothing in Phase A starts until the owner lifts the
+research hold. This is the gate the ratified records explicitly place before the first buildable
+piece ([REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md) §10 (Build status & first step):
+"When the research hold is lifted, spike 1 is the first buildable piece").
+
+| | |
+|---|---|
+| **Exit criterion** | Owner records a ratification lifting the research hold (dated). |
+| **Enforcing surface** | The owner ratification gate — the user gate; no engine substitutes for it. |
+| **Reachability / adoption** | N/A — an owner decision, neither scripted nor paid. |
+| **Blocks** | All of Phase A (S1–S6), Phase B, Phase C. |
+| **Open items that inform the owner** | [REPL_SANDBOX_SPEC.md](REPL_SANDBOX_SPEC.md) §9 (Open items): the doubt-filter is PROPOSED; the vsock bridge is unbuilt glue; the `LMHandler port=0` bind host is unconfirmed; the Windows-host deployment shape. G0 does not require these *closed*, but the owner should see them. |
+
+## 3. Milestone map & gate ledger
+
+Two phases of build (A = prototype spikes that close real unknowns; B = hardening to the full
+requirement set) then C = acceptance, plus one PROPOSED side-track (the doubt filter) that is
+**off the boundary critical path**. Every row's exit is checkable by the named surface.
+
+| ID | Milestone / Spike | Phase | Blocks on | Exit gate → enforcing surface | Label | SPEC §8 map |
+|---|---|---|---|---|---|---|
+| **G0** | Research-hold lifted | — | — | Owner ratification (dated) | owner gate | — |
+| **G1** | Host provisioning gate | pre-A | G0 | `kata-runtime check` PASS + `qemu -accel kvm -cpu host` near-native → the KVM-capable host | **[R]** | gate 1 |
+| **S1** | Close the source-reads | A | G0 | Pinned-source conformance test asserts the 3-method contract + wire schemas + tool-materialization path | **[R]** | precondition for gate 3 |
+| **S2** | Boundary + persistence | A | S1, G1 | Scripted boot-once/keep-state/exec-many → the Kata microVM + `IsolatedEnv` | **[R]** | toward gate 3 |
+| **S3** | `llm_query` over vsock | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
+| **S4** | DB broker minimal proof | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
+| **S5** | Tier-0 in-guest hardening | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest cgroups+seccomp+Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
+| **S6** | Author the `IsolatedEnv` subclass | A | S1–S5 | Unedited load → `execute_code` round-trips as `LocalREPL` → the `KataREPL` backend | **[R+A]** | gate 3 |
+| **GB** | Security hardening to the 12 reqs | B | S3, S4, S5, S6 | Each of the 12 [ARCHITECTURE §7](REPL_SANDBOX_ARCHITECTURE.md) reqs mapped to an enforcing surface (§6) | **[R+A]** | gate 2 |
+| **GA-eq** | Equivalence acceptance | C | S6, GB | Scripted equivalence **and** a metered real-model equivalence run | **[R+A]** | gate 3 |
+| **GA-rt** | vsock-bridge red-team | C | S3, GB | Adversarial review + fuzzed frame parser → the vsock bridge, before it ships | **[R]** | gate 4 |
+| **DF** | Doubt filter (Layers 1–2) | side-track | GB | PROPOSED — attaches findings, feeds audit; **never** an enforcing surface (§8) | **[R+A]** | not a §8 gate |
+
+**Critical path (longest chain):** `G0 → S1 → S2 → S3 → S4 → S5 → S6 → GB → GA-eq`. `G1` runs in
+parallel with `S1` (both feed `S2`); `GA-rt` runs in parallel with the tail of `GB`; `DF` is a
+parallel PROPOSED track that never blocks the boundary. Full dependency view: §9.
+
+## 4. Host provisioning gate (G1 — SPEC §8 gate 1)
+
+Kata + Cloud Hypervisor **requires real `/dev/kvm`**; a silent QEMU-TCG fallback is 5–35× slower
+*and loses the hardware VM boundary* ([REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md)
+§8 (Deployment)). So the host is load-bearing and this gate precedes every KVM-dependent spike
+(S2–S5). Hoisted to an explicit milestone because S2–S5 cannot run without it (an ordering call, §11).
+
+- **Objective:** stand up a KVM-capable Linux host and prove acceleration is real, not emulated.
+- **Real unknown it closes:** "a VM boots" ≠ "the VM has hardware KVM" — is acceleration real on the
+  chosen host? ([REPL_SANDBOX_LEARNINGS.md](REPL_SANDBOX_LEARNINGS.md) §8 (Deployment)).
+- **Entry preconditions:** G0 lifted; a host from the ratified set — **Hetzner dedicated (Root) /
+  AWS C8i/M8i/R8i / GCP N2/C2**, **never DigitalOcean** ([REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md)
+  §8). The Windows dev host runs this against a Linux server or nested-virt cloud VM.
+- **Exit acceptance → enforcing surface:** `kata-runtime check` PASS **and** a `qemu -accel kvm -cpu host`
+  smoke test benchmarks near-native (5–30× slow = silent TCG fallback = FAIL). Enforcing surface: the
+  KVM-capable host + Kata's own validator. Maps to **SPEC §8 gate 1**.
+- **Label: [R]** — deterministic host check; no model involved.
+- **Dependencies:** blocks S2–S5.
+
+## 5. The six prototype spikes (Phase A — elevated)
+
+The origin list is [REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §10.4 (First-prototype plan);
+each is elevated here to a first-class milestone with objective / the real unknown it closes / entry
+preconditions / exit acceptance mapped to SPEC §8 / dependencies / label. **No spike is a production
+build** — each closes one unknown and leaves a durable artifact for S6 to integrate.
+
+### 5.1 S1 — Close the source-reads
+
+- **Objective:** confirm the rlms contract byte-exact against the pinned `rlms==0.1.3` install
+  (`pip download`, not GitHub main) and read the Kata vsock mechanism.
+- **Real unknown it closes:** does the drop-in contract actually match what [SPEC §2–§3](REPL_SANDBOX_SPEC.md)
+  records — `IsolatedEnv` signatures, `LMRequest`/`LMResponse`/`REPLResult` field schemas, the reserved
+  namespace names, and **how rlms materializes tools in its *isolated* backends** (code-string vs RPC
+  proxy stub — the single most important read before finalizing `register_capability`)? Plus Kata's
+  `docs/design/VSocks.md` (any guest process may open its own `AF_VSOCK` port).
+- **Entry preconditions:** G0 lifted. **No host needed** — pure reading; runs in parallel with G1.
+- **Exit acceptance → enforcing surface:** a **pinned-source conformance test** that imports
+  `rlms==0.1.3` and asserts the `BaseEnv`/`IsolatedEnv` method signatures, the `REPLResult` fields,
+  and the reserved names match the SPEC record; the tool-materialization path is documented in
+  `REPL_SANDBOX_INTERFACES.md`. Enforcing surface: the conformance test. This is the belief-check the
+  house rule demands before any build proceeds on the contract. **Precondition for SPEC §8 gate 3.**
+- **Label: [R]** — a scripted assertion over pinned source. No model.
+- **Dependencies:** blocks S2 and S6.
+
+### 5.2 S2 — Boundary + persistence
+
+- **Objective:** run the rlms worker inside one Kata microVM (Cloud Hypervisor VMM) as a long-lived
+  process; boot-once, keep-state, exec-many.
+- **Real unknown it closes:** does a Kata guest hold a *stateful* namespace across turns (a var set in
+  turn 1 live in turn 5), the way `LocalREPL` does — and does WSL2 nested-KVM hold, or must this run on
+  a cloud dev VM? ([REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §10.4 item 2.)
+- **Entry preconditions:** S1 (contract confirmed), G1 (real KVM host). Version pins present:
+  **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0** ([SPEC §5](REPL_SANDBOX_SPEC.md) — two upstreams, never
+  "Cloud Hypervisor ≥ 3.31.0").
+- **Exit acceptance → enforcing surface:** `ctr run --runtime io.containerd.kata.v2` boots the guest;
+  a scripted probe sets a variable, then reads it a later turn; teardown is clean. Enforcing surface:
+  the **Kata microVM (boundary)** + the `IsolatedEnv.setup`/`execute_code` skeleton. **Toward SPEC §8 gate 3.**
+- **Label: [R]** — scripted state probe.
+- **Dependencies:** blocks S3, S4, S5.
+
+### 5.3 S3 — `llm_query` over vsock
+
+- **Objective:** carry the sub-LLM channel across the guest boundary — swap loopback `AF_INET` for
+  `AF_VSOCK` (or the guest-side loopback→vsock forwarder), preserving the exact 4-byte-big-endian-length
+  + UTF-8-JSON frame ([SPEC §3](REPL_SANDBOX_SPEC.md)).
+- **Real unknown it closes:** does the identical framing + acceptable latency survive the vsock hop, and
+  can the guest reach the host `LMHandler` at all given it binds `127.0.0.1` unauthenticated? (Confirm
+  the `port=0` bind host — [SPEC §9](REPL_SANDBOX_SPEC.md) open item.)
+- **Entry preconditions:** S2 (booted stateful guest). This spike **builds the vsock bridge** — the new,
+  security-critical glue ([ARCHITECTURE §4](REPL_SANDBOX_ARCHITECTURE.md) (Components)).
+- **Exit acceptance → enforcing surface:**
+  - **[R]** a scripted `llm_query` frame round-trips guest→host over vsock with byte parity to the
+    loopback path and latency within the session budget. Enforcing surface: the **vsock bridge + LM
+    handler**; auth is by kernel vsock peer CID from `accept()`, never a payload id.
+  - **[A]** a metered real-model flat fan-out (N parallel completions over slices at `max_depth` 1)
+    completes correctly through the bridge — the engine-fidelity check that a model actually uses the
+    channel. Capped ≤ $5.
+  - **Toward SPEC §8 gates 2 and 4** (vsock is the only channel out; the bridge must exist to be
+    red-teamed).
+- **Dependencies:** blocks S5 (channel-survival check), S6; is the predecessor the bridge red-team
+  (GA-rt) reviews.
+
+### 5.4 S4 — DB broker minimal proof
+
+- **Objective:** a host-side broker holds the real Postgres/Neo4j clients + credentials, terminates the
+  DB wire protocol, and serves `run_query`/`run_cypher` over a **second** vsock port; the guest holds only
+  a dumb proxy facade. Postgres first (simpler wire), then Bolt.
+- **Real unknown it closes:** can a real query complete from inside the guest with **zero credential
+  material ever in the guest**, under a read-only role — the load-bearing exfil property (guest holds
+  *handles*, not payloads; [ARCHITECTURE §3.1](REPL_SANDBOX_ARCHITECTURE.md) (The exfiltration resolution))?
+- **Entry preconditions:** S2 (guest); reuses the S3 vsock-bridge pattern on a distinct port. Broker
+  policy default = **read-only NOSUPERUSER** ([SPEC §4.2](REPL_SANDBOX_SPEC.md) (Host broker)).
+- **Exit acceptance → enforcing surface:**
+  - **[R]** a scripted query returns rows **and** a scripted grep of the guest env/namespace/memory for
+    the DSN/password returns nothing; a scripted write attempt under the default role is denied; the DB
+    host has no internet/metadata route. Enforcing surface: the **host broker + NOSUPERUSER role +
+    deny-by-default egress**.
+  - **[A]** a metered real-model run drives the facade (`pg.query(...)`) to complete a real workspace
+    query — the ergonomics/adoption check that the facade "feels native" enough for model-authored code.
+    Capped ≤ $5.
+  - **Maps to SPEC §8 gate 2** (no DB creds in guest; DB read-only / no SSRF).
+- **Dependencies:** blocks S5, S6.
+
+### 5.5 S5 — Tier-0 in-guest hardening
+
+*Ordering note (§11): [REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §10.4 item 5 was "gVisor inner
+layer (Systrap)." The ratified architecture **dropped gVisor** ([ARCHITECTURE §1](REPL_SANDBOX_ARCHITECTURE.md)
+(The ratified stack), §9 (Explicitly not adopted)) and adopted **Tier-0 in-guest hardening** as the honest
+inner layer instead. This spike is re-cast to the ratified control; it is not a re-decision.*
+
+- **Objective:** apply **cgroups (pids/mem/cpu) + a seccomp allowlist + Landlock read-only roots** to the
+  worker process at startup, plus wire the host watchdog that reaps/replaces wedged VMs.
+- **Real unknown it closes:** does Tier-0 hardening actually cap self-DoS (fork/thread bomb) and shrink
+  the syscall/filesystem surface **without breaking** the vsock channels or the cheap in-namespace tools?
+- **Entry preconditions:** S2 (guest), S3 + S4 (the channels that must be shown to survive).
+- **Exit acceptance → enforcing surface:** scripted probes — a fork-bomb is capped (cgroup `pids`), a
+  denied syscall is blocked (seccomp), a write to a read-only root is denied (Landlock) — **and** the
+  `llm_query` / DB-broker channels and in-namespace regex/pandas tools still work; the watchdog reaps a
+  deliberately wedged VM from a clean slot. Enforcing surface: **in-guest cgroups+seccomp+Landlock + host
+  watchdog**. **Maps to SPEC §8 gate 2, requirement 8.**
+- **Label: [R]** — scripted resource/syscall/filesystem probes.
+- **Dependencies:** blocks S6.
+
+### 5.6 S6 — Author the `IsolatedEnv` subclass
+
+- **Objective:** wrap S2–S5 behind the three-method contract as the real `KataREPL(IsolatedEnv)`
+  (`setup` / `load_context` / `execute_code`), with tools registered as CapabilityDescriptors materialized
+  into vsock proxy stubs ([SPEC §2](REPL_SANDBOX_SPEC.md), §4.3).
+- **Real unknown it closes:** is the sandboxed backend a genuine **drop-in** for the rlms driver — does an
+  unedited context load → `execute_code` behave as `LocalREPL` does?
+- **Entry preconditions:** S1–S5 complete (contract, boundary, both chokepoints, hardening).
+- **Exit acceptance → enforcing surface:**
+  - **[R]** a scripted equivalence harness: an unedited load → `execute_code` round-trips with the same
+    observable `REPLResult` shape as `LocalREPL`. Enforcing surface: the **`KataREPL` backend + the rlms
+    driver**.
+  - **[A]** a metered real-model run completes a real RLM task through `KataREPL` equivalently to
+    `LocalREPL` — the engine-fidelity equivalence run (scripted-vs-live). Capped ≤ $5.
+  - **Maps to SPEC §8 gate 3.** (This spike's [A] gate and GA-eq's are the same run — recorded once.)
+- **Dependencies:** blocks GB (its surfaces must exist to be mapped) and GA-eq.
+
+## 6. Security hardening — the 12 requirements to enforcing surfaces (Phase B / GB)
+
+The six spikes stand up the isolation; the remaining work is **broker/handler/config**, not new
+isolation ([REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §14.3). GB is done only when **all 12**
+requirements of [ARCHITECTURE §7](REPL_SANDBOX_ARCHITECTURE.md) (Security requirements) are each mapped
+to an enforcing surface with both gate columns satisfied — this **is** SPEC §8 gate 2. A documented
+bound with no engine behind it does not count.
+
+| # (ARCH §7) | Enforcing surface (named) | [R] reachability probe (scripted) | [A] adoption probe (paid ≤ $5) | Built in |
+|---|---|---|---|---|
+| 1 Exfil = data-flow; DLP + byte caps on top | Guest holds handles not payloads (broker) + content-DLP + per-session byte caps on `llm_query`/`vector_search`/`answer` | Scripted 100%-injection payload: no secret-bearing payload ever materializes in guest; byte cap trips | Real model steered by a hostile document (red-team) cannot leak a non-materialized secret via a sanctioned crossing; audit confirms | S4 + GB |
+| 2 API key host-side only | LM handler holds the provider key | Scripted grep of guest env/namespace/memory for the key returns nothing | — | S3 + GB |
+| 3 Split version pins | Deploy config: Kata ≥ 3.31.0 **AND** Cloud Hypervisor ≥ 52.0, separate feeds | Scripted version-assert on both binaries; two advisory feeds tracked | — | G1/GB |
+| 4 Auth by kernel vsock peer CID | CID from `accept()` on broker + handler | Scripted forged-payload-id request is rejected; quota keyed to CID | Real model in session A cannot reach session B's scope | S3, S4 + GB |
+| 5 Host-side CID-keyed hard ceilings | LM handler caps: concurrency, rate, dollar spend (hard-stop) | Scripted burst exceeds each cap → hard-stop (rlms caps proven bypassable) | Real fan-out run halts at the dollar cap | GB |
+| 6 APOC allowlist + DB-host egress deny | Host broker APOC deny-by-default + DB-host has no route | Scripted `apoc.load.json` SSRF attempt denied; no metadata route | — | S4 + GB |
+| 7 `statement_timeout` + cost caps + no unbounded `[*]` | Host broker query governor | Scripted cartesian/`[*]` query is refused or timed out | — | S4 + GB |
+| 8 In-guest cgroups + host watchdog | cgroups (pids/mem/cpu) + watchdog | Scripted fork-bomb capped; wedged VM reaped | — | S5 |
+| 9 Least-privilege Postgres role | NOSUPERUSER, no `pg_read_server_files`/`pg_execute_server_program`/`dblink` | Scripted `COPY TO PROGRAM` / `pg_read_file` denied | — | S4 + GB |
+| 10 Security-review the vsock bridge | The vsock bridge (loopback-only, unprivileged) | Fuzzed frame parser survives; privilege-drop verified | — | GA-rt |
+| 11 Warm-pool reset policy *(contingency)* | Single-use VM or pre-exec-snapshot + rootfs-hash reset | Scripted reuse shows no state bleed *(only if pooling adopted)* | — | deferred (§10) |
+| 12 Prompt defenses are NOT controls | The tool/network boundary is the only backstop | Scripted audit: no enforcing-surface list counts `trellis_task.verify()`, `_SAFE_BUILTINS`, or the output caps | — | GB (documentation-audit) |
+
+**Discipline (from [ARCHITECTURE §3.1](REPL_SANDBOX_ARCHITECTURE.md), §7 requirement 12):** the composed
+doubt filter (§8) and every Tier-2 telemetry surface **must never migrate into this "enforcing surface"
+column.** They reduce the *rate* of injected-instruction compliance; they do not make exfil impossible.
+
+## 7. Acceptance — the four SPEC §8 gates (Phase C)
+
+Build is "done" only when all four [SPEC §8](REPL_SANDBOX_SPEC.md) (Acceptance gates) pass. Each is
+already placed above; this section is the final go/no-go aggregation.
+
+| SPEC §8 gate | Where met | [R] | [A] |
+|---|---|---|---|
+| 1 — `kata-runtime check` + `qemu -accel kvm` near-native | G1 (§4) | Host validator + smoke benchmark | — |
+| 2 — 12 §7 reqs each mapped to an enforcing surface | GB (§6) | Per-req scripted probes (§6 table) | Injection/exfil hold + cap-halt under a real model |
+| 3 — Scripted equivalence: unedited load → `execute_code` round-trips as `LocalREPL` | S6 / GA-eq (§5.6) | Scripted equivalence harness | Metered real-model equivalence run (engine-fidelity), ≤ $5 |
+| 4 — Red-team pass on the vsock bridge before it ships | GA-rt | Adversarial review + fuzzed frame parser | — |
+
+**GA-eq** and **GA-rt** are the final gates. GA-rt may run in parallel with the tail of GB, but the
+bridge does not ship until it passes ([ARCHITECTURE §7](REPL_SANDBOX_ARCHITECTURE.md) requirement 10:
+"before it ships"). The threat model for the [A] probes — the hostile-document exfil attempt and the
+confused-deputy attempt — is specified in `REPL_SANDBOX_THREAT_MODEL.md`; this plan only schedules them.
+
+## 8. The doubt-filter track (DF — PROPOSED, off the critical path)
+
+The composed doubt filter (Layers 1–2 of [ARCHITECTURE §3.1](REPL_SANDBOX_ARCHITECTURE.md)) is
+**defense-in-depth, PROPOSED, and never a boundary.** It is a parallel track that **never blocks** the
+boundary build and is **never** an entry in the §6 enforcing-surface column.
+
+- **Scope:** a mechanical, provenance-grounded injection-doubt that strips command-authority from
+  untrusted-retrieved instructions (the automatic contest of [DOUBTS_WORKSPACE §7](../../architecture/DOUBTS_WORKSPACE.md)
+  (What doubts do not do)), plus a semantic **defeater** panel on the outbound content
+  ([DOUBTS_WORKSPACE §8](../../architecture/DOUBTS_WORKSPACE.md) (Composed defeaters)) that **attaches a
+  finding and feeds audit; it never unilaterally enforces** ([DOUBTS_WORKSPACE §9](../../architecture/DOUBTS_WORKSPACE.md)
+  (Scope — this is a critique engine)). Full design: `REPL_SANDBOX_DOUBT_FILTER.md`.
+- **Guardrail 15 gate:** the seat prompts are prompt bytes — authoring them **requires** invoking the
+  `prompt-engineering` and `hypershot-protocol` skills first ([SPEC §9](REPL_SANDBOX_SPEC.md) open item).
+- **Gate label: [R+A].** [R] the finding is attached and routed to audit on a scripted injection input;
+  [A] a real-model run shows the panel lowers the injected-compliance *rate* (a rate reduction, measured;
+  **not** a boundary claim, and it must not be reported as one). Realizable as an in-context meta-prompt
+  **or** a TTT-trained tooling-call — robustness is the blind-panel composition, not the substrate.
+- **Dependency:** builds on GB; blocks nothing on the boundary critical path.
+
+## 9. Critical path & dependency view
+
+```
+G0 ─┬─ S1 ─────────────┐
+    └─ G1 ─────────────┴─ S2 ─ S3 ─ S4 ─ S5 ─ S6 ─ GB ─ GA-eq   (boundary is shippable)
+                                     └────────────────── GA-rt ──┘  (bridge ships)
+                                                          DF (PROPOSED, parallel; blocks nothing)
+```
+
+- **Longest (critical) path:** `G0 → S1 → S2 → S3 → S4 → S5 → S6 → GB → GA-eq`.
+- **Parallelizable:** `G1` with `S1` (both gate `S2`). Much of `GB`'s config work (version pins, DLP,
+  handler caps) can proceed alongside S3–S6, but GB *completes* only after its surfaces exist (broker
+  from S4, handler from S3, cgroups from S5, backend from S6). `GA-rt` runs alongside the tail of `GB`.
+  `DF` is fully parallel and off the path.
+- **Soft edge:** `S4` depends on `S2` and *reuses* the S3 vsock-bridge pattern on a second port; once the
+  bridge exists, S3 and S4 can overlap (independent chokepoints — LM handler vs DB broker).
+- **Hard ordering rationale:** S1 before S2 (don't build on an unverified contract — the house
+  belief-check); G1 before S2–S5 (no KVM = no boundary); S3/S4 before S5 (Tier-0 must be shown not to
+  break the channels); all spikes before S6 (S6 integrates them); S6 + GB before acceptance.
+
+## 10. Deferred contingencies (not on the path)
+
+Each is a ratified contingency, **not** a live component; each names the gate that would precede it.
+
+| Item | Status | Unlock gate |
+|---|---|---|
+| Warm pool of pre-booted microVMs | Contingency ([ARCHITECTURE §4](REPL_SANDBOX_ARCHITECTURE.md), §6) | A single-use / pre-exec-snapshot + rootfs-hash **reset policy proven no-state-bleed** before pooling adversarial code (req 11) |
+| `max_depth` 2 (children get REPLs) + sibling-microVM pool | Contingency ([ARCHITECTURE §6](REPL_SANDBOX_ARCHITECTURE.md) (Recursion & multiplicity)) | Trellis-specific measurement overturning the depth-2-harmful finding (arXiv:2603.02615); the sibling-pool machinery must exist first. **Not** by RLM-generic optimism. |
+| Relax `_SAFE_BUILTINS` | Open item ([SPEC §9](REPL_SANDBOX_SPEC.md)) | Only once the VM boundary is proven; it is redundant defense-in-depth, never a boundary |
+
+**Explicitly rejected — do not re-litigate:** gVisor nesting inside Kata is **not adopted**
+([ARCHITECTURE §9](REPL_SANDBOX_ARCHITECTURE.md) (Explicitly not adopted)) — it is a parallel alternative,
+not an inner layer; Tier-0 in-guest hardening (S5) is the honest inner layer instead. CubeSandbox and bare
+Firecracker are dropped ([REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §15).
+
+---
+
+*Architecture: [REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md) · Spec & acceptance gates:
+[REPL_SANDBOX_SPEC.md](REPL_SANDBOX_SPEC.md) · Evidence trail: [REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) ·
+Session knowledge: [REPL_SANDBOX_LEARNINGS.md](REPL_SANDBOX_LEARNINGS.md). Siblings (parallel):
+`REPL_SANDBOX_THREAT_MODEL.md` · `REPL_SANDBOX_DATA_MODEL.md` · `REPL_SANDBOX_INTERFACES.md` ·
+`REPL_SANDBOX_DOUBT_FILTER.md`.*

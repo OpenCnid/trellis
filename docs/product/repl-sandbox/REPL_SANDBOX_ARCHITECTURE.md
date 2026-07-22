@@ -70,9 +70,41 @@ two kinds of traffic to two host-side chokepoints:
 
 **The exfiltration truth (load-bearing):** deny-by-default egress blocks the NIC but **does
 not stop exfiltration** — the *sanctioned* crossings (`llm_query`, `vector_search`, the final
-`answer`) carry model-controlled text out. Content-DLP and per-session cumulative-byte caps on
-those crossings are therefore part of the boundary, not an add-on. The `answer` channel is an
-**audited egress control point**, not merely a 64 KB size cap.
+`answer`) carry model-controlled text out, and the NIC block is blind to them. The guarantee
+must hold when the model does exactly what a hostile document tells it to. The resolution is
+§3.1.
+
+### 3.1 The exfiltration resolution — data-flow, not content inspection *(ratified July 21, 2026, owner Cnid; collaborator Matt)*
+
+Content inspection over model-controlled natural language is close to unsolved (no perfect
+cover — a hostile document can steer the model to fold a secret into a plausible answer). So
+the boundary is **not** a filter; it is a **data-flow property**. Three layers, and only the
+first is load-bearing:
+
+| Layer | Mechanism | Status |
+|---|---|---|
+| **0 — boundary** | **The guest holds addressable *handles*, never secret-bearing payloads.** The broker resolves handles host-side; slice-by-address is the code-mediated-text pillar's minification realised. Holds under **100 % successful injection** — the sanctioned crossings cannot leak what was never materialised in the guest. | **Ratified** — the guarantee |
+| **1 — mechanical doubt** | Provenance-gated instruction authority: text whose provenance is *untrusted-retrieved* cannot command an outbound crossing. This is the automatic, no-gate contest of [DOUBTS_WORKSPACE §7](../../architecture/DOUBTS_WORKSPACE.md) ("provenance broke… nothing asserted about the world"), = the existing quarantine path, and = the harness instruction-source-boundary enforced by the engine. | **Proposed** — defensible as automatic |
+| **2 — semantic doubt** | A composed **defeater** panel ([DOUBTS_WORKSPACE §8–§9](../../architecture/DOUBTS_WORKSPACE.md)) on the outbound content — "does this smuggle a secret / serve a suspect instruction?" Per §7 it **attaches a finding and feeds audit; it never unilaterally enforces.** | **Proposed** — Tier-2, **never a boundary** |
+
+Layers 1–2 are the "double cover": composition of the **existing -1 doubt tier**, not a new
+security subsystem. The **universal injection-doubt** is a promoted, gateable **standing
+objection** grounded in a provenance fact (satisfies the §2 corrosion bound) — not a
+harness prompt. Each defeater seat may be realised either as an **in-context meta-prompt**
+(DOUBTS_WORKSPACE §8 permits this; test before shipping) **or** as a **TTT-trained
+tooling-call** emitter on a local open-weight model (the sparsity path) — same instrument,
+two substrates; the robustness is the blind-panel **composition**, not the substrate.
+
+**Discipline (non-negotiable):** Layers 1–2 must **never migrate into the "Enforced by"
+column of the §6/§7 invariants.** They reduce the *rate* at which the model acts on
+injected instructions; they do not make exfil impossible. Content-DLP + per-session
+cumulative-byte caps on the crossings remain as further defense-in-depth. The `answer`
+channel is an **audited egress control point**, not merely a 64 KB size cap.
+
+**Detailed records:** Layer 0 (the handle model, the slice-by-address algebra, and the metered
+materialization exception where the residual exfil-rate bound lives) is specified in
+[REPL_SANDBOX_DATA_MODEL.md](REPL_SANDBOX_DATA_MODEL.md); Layers 1–2 (the composition from the
+−1 doubt tier, PROPOSED) in [REPL_SANDBOX_DOUBT_FILTER.md](REPL_SANDBOX_DOUBT_FILTER.md).
 
 ## 4. Components
 
@@ -117,9 +149,14 @@ the prerequisite *before* depth is ever raised, not a live component.
 ## 7. Security requirements (from the red-team — these are requirements)
 
 The design is sound only with these. Full findings in
-[REPL_SANDBOX_RESEARCH.md §14](REPL_SANDBOX_RESEARCH.md); the enforceable list:
+[REPL_SANDBOX_RESEARCH.md §14](REPL_SANDBOX_RESEARCH.md); the consolidated, maintained model —
+assets, boundaries, per-surface controls, and accepted residual risk — is
+[REPL_SANDBOX_THREAT_MODEL.md](REPL_SANDBOX_THREAT_MODEL.md); the enforceable list:
 
-1. **Content-DLP + per-session byte caps** on `llm_query` / `vector_search` / `answer`.
+1. **Exfil control is data-flow first** (§3.1) — the guest holds addressable handles, not
+   secret-bearing payloads; this is the boundary and it holds under total injection.
+   **Content-DLP + per-session byte caps** on `llm_query` / `vector_search` / `answer` are
+   defense-in-depth on top, never the boundary.
 2. **LLM provider API key host-side only** (symmetric with DB credentials).
 3. **Split version pins** — Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0, separate feeds
    (closes Kata CVE-2026-24834 and Cloud Hypervisor CVE-2026-27211 / CVE-2026-45782).
@@ -135,6 +172,8 @@ The design is sound only with these. Full findings in
 11. **Warm-pool reset policy** (if pooling) — single-use or pre-execution-snapshot + hash.
 12. **Prompt-level defenses are NOT security controls.** `trellis_task.verify()` is a
     forgeable substring check; the sandbox must hold under 100% successful prompt injection.
+    The composed doubt-filter (§3.1, Layers 1–2) sits *under* this rule as defense-in-depth —
+    it reduces attempt rate and feeds audit; it is **never** counted as an enforcing surface.
 
 ## 8. Deployment
 

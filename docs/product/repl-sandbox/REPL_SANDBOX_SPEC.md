@@ -5,6 +5,13 @@ interface, configuration, and invariants for the architecture in
 [REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md). Interface facts marked
 *(source-confirmed)* were read byte-exact from the pinned `rlms==0.1.3` install.
 
+This sheet is the summary. The build-ready detail lives in the companion records:
+wire + RPC contracts → [INTERFACES](REPL_SANDBOX_INTERFACES.md) (expands §2/§3/§4);
+consolidated security → [THREAT_MODEL](REPL_SANDBOX_THREAT_MODEL.md) (expands §6);
+the handle/data-flow boundary → [DATA_MODEL](REPL_SANDBOX_DATA_MODEL.md);
+build order → [BUILD_PLAN](REPL_SANDBOX_BUILD_PLAN.md); the PROPOSED doubt-filter →
+[DOUBT_FILTER](REPL_SANDBOX_DOUBT_FILTER.md). Index: [README](README.md).
+
 ---
 
 ## 1. Summary sheet
@@ -91,7 +98,7 @@ capability.
 | seccomp | allowlist profile applied to the worker process at startup |
 | Landlock | read-only roots for the worker's code/data |
 | Egress | deny-by-default at host/VMM NIC; DB host has no internet/metadata route |
-| vsock ports | one for `llm_query` (→ LM handler), one for DB RPC (→ broker) |
+| vsock ports | `LM_PORT` (→ LM handler), `DB_PORT` (→ broker), **`CONTROL_PORT`** (backend ↔ guest supervisor: exec / load_context / lifecycle) — detailed in [INTERFACES §1 (Seam map), §3 (The vsock bridge)](REPL_SANDBOX_INTERFACES.md) |
 | Spend cap | dollar-denominated, per session, host-enforced |
 | DB role | read-only NOSUPERUSER (writes gated per-tool) |
 
@@ -103,7 +110,7 @@ capability.
 | No DB creds / API key in guest | broker + host-side handler hold them |
 | Per-session identity unspoofable | kernel vsock CID |
 | No unauthorized egress | deny-by-default NIC + broker/handler are the only paths |
-| Exfil via sanctioned crossings bounded | content-DLP + per-session byte caps |
+| Exfil via sanctioned crossings bounded | **data-flow: guest holds handles, not secret-bearing payloads** (ratified — holds under 100% injection); content-DLP + byte caps + composed doubt-filter = defense-in-depth, **never the boundary** (ARCHITECTURE §3.1) |
 | No resource-exhaustion host impact | VM caps; in-guest cgroups + host watchdog for self-DoS |
 | DB stays read-only / no SSRF | NOSUPERUSER role + APOC allowlist + DB-host egress deny |
 | **NOT a boundary** (telemetry only) | `_SAFE_BUILTINS`, audit hooks, `trellis_task.verify()`, the 20 KB / 64 KB output caps |
@@ -130,6 +137,12 @@ capability.
 
 ## 9. Open items
 
+- **Exfil resolved (July 21, 2026): data-flow, not content inspection** — the guest holds
+  addressable handles, not secret-bearing payloads ([ARCHITECTURE §3.1](REPL_SANDBOX_ARCHITECTURE.md)).
+  Remaining open: the composed doubt-filter (Layers 1–2 defense-in-depth) is **PROPOSED** —
+  spec the standing provenance-grounded injection-objection and the outbound defeater seats,
+  composed from the -1 doubt tier ([DOUBTS_WORKSPACE §8–§9](../../architecture/DOUBTS_WORKSPACE.md));
+  Guardrail 15 (prompt-engineering + hypershot-protocol) applies when the seat prompts are authored.
 - The vsock bridge is unbuilt glue — security-critical; spec its frame parser + privilege drop.
 - Warm-pool clean-slate-reset policy (only if pooling is adopted).
 - Whether to relax `_SAFE_BUILTINS` once the VM boundary exists (redundant defense-in-depth).
