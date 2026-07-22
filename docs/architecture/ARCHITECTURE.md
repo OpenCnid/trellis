@@ -1,10 +1,10 @@
 # Trellis Architecture
 
 > **Status: historical (Phase 1 MVP era).** Preserved as the design
-> record of the original substrate. The living architectural model is
-> `HANDOFF.md` §1 at the repository root; the system-level framing
-> (Trellis as a Recursive Language Model runtime) is the root
-> `README.md`; canonical terms are in `docs/GLOSSARY.md`. Where this
+> record of the original substrate. The maintained architectural orientation is
+> `docs/ORIENTATION.md`; the system-level framing (Trellis as a Recursive
+> Language Model runtime) is `docs/operations/OPERATOR_MANUAL.md`; canonical
+> terms are in `docs/GLOSSARY.md`. Where this
 > document and current code disagree, the code and the living records
 > win.
 

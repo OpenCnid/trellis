@@ -58,7 +58,8 @@ us more by *failing subtly* than it would have by succeeding cleanly.
 Trellis is a Recursive Language Model runtime built over a
 provenance-enforced knowledge substrate (the substrate is what the older
 "provenance-preserving GraphRAG" label named; the system-level framing
-was updated July 9, 2026 — root README, "What Trellis is"). Everything
+was updated July 9, 2026 — `docs/operations/OPERATOR_MANUAL.md`, "What
+Trellis is"). Everything
 is organized around one non-negotiable invariant:
 
 > **Every semantic fact remains traceable to an immutable,
@@ -379,8 +380,8 @@ which is your subject.
 **What the engineering loop is.** Everything above describes Trellis editing
 Trellis. One altitude up sits a loop we had never mechanized: the loop that
 *builds* Trellis. A human writes a handoff prompt, an agent works a bounded
-feature, a human reviews, the handoff is rewritten for the next session. That
-loop is currently run by hand, and `HANDOFF.md` — the prompt you have seen
+feature, a human reviews, the handoff is rewritten for the next session. At the
+time of this postscript that loop was run by hand, and `HANDOFF.md` — the prompt you have seen
 referenced — is its state, maintained manually. The engineering-loop program
 builds a controller that owns that loop's truth deterministically, on one
 premise: **deterministic verification outranks model claims.** The controller
@@ -389,6 +390,11 @@ runs acceptance itself, and holds the result in protected state *outside the
 worktree the agent can write* — so that an agent cannot forge the record of its
 own success. Ten bounded features at ratification, `EL-00` through `EL-09`;
 `EL-10` and `EL-11` joined the catalog July 15–16, 2026 (twelve today).
+
+**July 21, 2026 update:** the paragraphs in this postscript preserve the state
+of the program when written. The manual handoff and root roadmap are now retired
+as active authorities; no generated replacement was adopted. Current work comes
+from the collaborator's live task under root `AGENTS.md`.
 
 **Where it got to.** Six features accepted in six sessions: the control kernel
 (schemas, an exhaustive 132-pair transition matrix, an integrity-linked journal,
@@ -573,8 +579,8 @@ vs. null, closed vs. residual):
 | 3 | `docs/architecture/GROUNDED_AUTHORING.md` | the authoring mode and the four grounding properties (§12.2 records the eval's impact) |
 | 4 | `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md` | the full eval: data, corrections, lessons (§9) |
 | 4b | `docs/architecture/CODE_MEDIATED_TEXT.md` | the core pillar your line-editing exchange produced: never counts, never copies |
-| 5 | `TRELLIS_ROADMAP.md` §5 | the dated progress ledger — the most recent five sessions, oldest first; older entries move verbatim to `docs/archive/ROADMAP_HISTORY.md` |
-| 6 | `HANDOFF.md` | the living session-to-session state (regenerated every session; §1 is the maintained mental model) |
+| 5 | `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` §5 | the retired dated progress ledger through Session 71; older entries live in `docs/archive/ROADMAP_HISTORY.md` |
+| 6 | `docs/architecture/REPOSITORY_ROOT_CONTRACT.md` | the current agent-first entrypoint and repository-surface contract |
 
 *Everything above is reproducible: the eval scripts
 (`scripts/exp_citation_ab.ts`, `scripts/exp_citation_metadata.ts`) run

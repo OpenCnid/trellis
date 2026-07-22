@@ -1,7 +1,7 @@
 # Semantic Provenance Scale Report
 
 **Run date:** July 6, 2026
-**Result artifact:** [`scale_drill_results.json`](../../scale_drill_results.json)
+**Result artifact:** [`scale_drill_results.json`](artifacts/scale_drill_results.json)
 **Cost:** zero LLM calls
 
 ## Decision

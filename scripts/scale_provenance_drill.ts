@@ -38,7 +38,12 @@ import type { CandidatePair, AliasEntity } from '../src/core/graph/alias_candida
 import type { Entity } from '../src/core/graph/schemas';
 import { sweepOrphanedProvenance } from '../src/core/graph/invalidation';
 
-const DEFAULT_RESULTS_PATH = path.resolve('scale_drill_results.json');
+const DEFAULT_RESULTS_PATH = path.resolve(
+  'docs',
+  'benchmarks',
+  'artifacts',
+  'scale_drill_results.json',
+);
 const API_PORT = 3215;
 const API_KEY = 'trellis-scale-drill-key';
 const API_BASE = `http://127.0.0.1:${API_PORT}`;

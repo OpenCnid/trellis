@@ -14,7 +14,7 @@
         "docs/product/engineering-loop/RESEARCH.md",
         "docs/product/engineering-loop/features.json",
         "docs/product/engineering-loop/feature.schema.json",
-        "TRELLIS_ROADMAP.md"
+        "docs/archive/TRELLIS_ROADMAP_DEPRECATED.md"
       ],
       "acceptance": [
         {

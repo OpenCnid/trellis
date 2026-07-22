@@ -12,6 +12,13 @@ Program roadmap: [`docs/product/engineering-loop/ROADMAP.md`](../../docs/product
 
 Feature catalog: [`docs/product/engineering-loop/features.json`](../../docs/product/engineering-loop/features.json)
 
+**Dated amendment — July 21, 2026:** the collaborator retired the manually
+maintained `HANDOFF.md` and root roadmap as active session authorities without
+adopting the generated view. `EL-REQ-VIEW-003` and `EL-REQ-VIEW-004` below
+remain the preserved requirements of the paused migration design; they no
+longer govern repository entrypoint authority. The current surface is ratified
+in [`docs/architecture/REPOSITORY_ROOT_CONTRACT.md`](../../docs/architecture/REPOSITORY_ROOT_CONTRACT.md).
+
 ## 1. Normative language
 
 The key words **MUST**, **SHOULD**, and **MAY** are interpreted as follows:

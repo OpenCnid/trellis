@@ -4,9 +4,9 @@ Trellis is document-driven (DDD): design records lead, implementation
 follows, and every document is part of the system's accumulated
 experience. Authority is explicit — **code > glossary > prose** — and
 each document below states whether it is living doctrine, measured
-evidence, or preserved history. The living architectural mental model a
-session loads first is `HANDOFF.md` §1 at the repository root; the
-system-level framing is the root `README.md`.
+evidence, or preserved history. A session loads root `AGENTS.md` first,
+then uses `ORIENTATION.md` and the task's governing source records; the
+root `README.md` is a bounded router.
 
 ## Reading order
 
@@ -15,11 +15,11 @@ system-level framing is the root `README.md`.
 - **Root `AGENTS.md`** — the entry point for coding agents, CLIs, and
   harnesses: the study protocol, the navigation map (which directory
   owns what; where each behavior's enforcement and pins live), and the
-  permanent hard rules. Deliberately invariant-only; everything
-  volatile stays in `HANDOFF.md`.
-- **Root `README.md`** — what Trellis is (a Recursive Language Model
-  runtime over a provenance-enforced substrate), the five commitments,
-  and the full operator manual.
+  permanent hard rules. Deliberately invariant-only; the collaborator's
+  live task supplies volatile objective and scope.
+- **Root `README.md`** — the bounded repository router and fast path.
+- **[`operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md)** —
+  the full system explanation and operator manual formerly housed at root.
 - **[`ORIENTATION.md`](ORIENTATION.md)** — the chain-of-density
   orientation ladder: the whole system summarized five times at
   increasing density (D0 one sentence → D4 the concept-first index),
@@ -34,10 +34,8 @@ system-level framing is the root `README.md`.
   every term that carries architectural load. If prose conflicts with
   this file, the prose has a defect; if this file conflicts with code,
   the code wins.
-- **Root `HANDOFF.md`** — the self-perpetuating session prompt: §0 is
-  the engineering loop (the manual prototype of the capability
-  flywheel), §1 the living mental model, §3–§8 the next session's
-  objective. Regenerated every session; always current.
+- **Root `HANDOFF.md`** — a deprecated compatibility router. It contains no
+  objective or current baseline and is never a source of current work.
 - **[`COLLABORATOR_BRIEFING.md`](COLLABORATOR_BRIEFING.md)** — the
   three-altitude briefing for a technically fluent outsider: where the
   work is right now, the system it lives inside, and the mechanisms one
@@ -279,12 +277,16 @@ program (the `engineering-loop/` pattern):
 
 ### 6. Progress-log archive (`/archive` — historical)
 
-- **`archive/ROADMAP_HISTORY.md`** — the dated engineering ledger from
-  July 4, 2026 (the first Phase-1 commit) onward: Sessions 1–23 moved
-  verbatim out of `TRELLIS_ROADMAP.md` §5 on July 12, 2026, then one
-  session per PR as the window advances. The live roadmap keeps only
-  the most recent five sessions; older entries land here unedited.
+- **[`archive/TRELLIS_ROADMAP_DEPRECATED.md`](archive/TRELLIS_ROADMAP_DEPRECATED.md)**
+  — the former root technical roadmap and session ledger through Session 71,
+  preserved for history and never used to select current work.
+- **[`archive/ROADMAP_HISTORY.md`](archive/ROADMAP_HISTORY.md)** — older
+  progress entries preserved verbatim.
+
+- **`archive/ROADMAP_HISTORY.md`** — older dated engineering sessions,
+  preserved verbatim as history rather than maintained as a live ledger.
 
 ---
 *For immediate tactical setup (Docker, env vars, running the code, API
-endpoints), see the root `README.md` and `API_REFERENCE.md`.*
+endpoints), see [`reference/API_REFERENCE.md`](reference/API_REFERENCE.md) and
+[`operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md).*

@@ -35,7 +35,7 @@ The Update Drill measures whether these three mechanisms actually deliver the cl
 | **3. Re-ingest & sweep** | v2 re-ingested under the same `doc_key`; Merkle diff, semantic refresh of changed records, quarantine sweep, invalidation audit. | no |
 | **4. Post-update** | The same 20-query sequence, scored against the **mutated** ground truth. | yes |
 
-Run: 2026-07-03, model `gpt-5.4-2026-03-05`, single command (`npm run drill:update`). Full artifact: [update_drill_results.json](../../update_drill_results.json).
+Run: 2026-07-03, model `gpt-5.4-2026-03-05`, single command (`npm run drill:update`). Full artifact: [update_drill_results.json](artifacts/update_drill_results.json).
 
 ### 2.1 The Mutations
 
@@ -162,4 +162,4 @@ npm run drill:update -- --acts 2,3   # LLM-free: mutation + diff + sweep + audit
 npm run drill:reset                  # clear registry + drill leftovers to re-run
 ```
 
-Artifacts: [update_drill_results.json](../../update_drill_results.json) (metrics + per-query telemetry), [data/update_drill_manifest.json](../../data/update_drill_manifest.json) (the 11 mutations), [data/oolong_pairs_dataset_v2.json](../../data/oolong_pairs_dataset_v2.json) (mutated corpus + recomputed ground truth).
+Artifacts: [update_drill_results.json](artifacts/update_drill_results.json) (metrics + per-query telemetry), [data/update_drill_manifest.json](../../data/update_drill_manifest.json) (the 11 mutations), [data/oolong_pairs_dataset_v2.json](../../data/oolong_pairs_dataset_v2.json) (mutated corpus + recomputed ground truth).

@@ -1,8 +1,8 @@
 {
   "name": "trellis-engine",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Recursive Language Model runtime over a provenance-enforced knowledge substrate",
+  "private": true,
   "directories": {
     "doc": "docs"
   },
@@ -17,6 +17,7 @@
     "start:api": "node dist/src/api/server.js",
     "start:workers": "node dist/scripts/start_workers.js",
     "python:check": "python scripts/check_python_runtime.py",
+    "check:repo-surface": "tsx tools/repository-surface/cli.ts",
     "el:activate": "tsx tools/engineering-loop/src/activate.ts",
     "test:roundtrip": "node dist/scripts/test_compose_roundtrip.js",
     "test": "vitest run",
@@ -79,8 +80,11 @@
     "test:judge-convocation": "tsx scripts/test_judge_convocation.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "OpenCnid",
   "license": "MIT",
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
   "type": "commonjs",
   "dependencies": {
     "@babel/parser": "^8.0.0",

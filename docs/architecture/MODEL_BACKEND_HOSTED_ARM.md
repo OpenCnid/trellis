@@ -201,6 +201,6 @@ the one owner decision and its open sub-decisions are stated with
 leanings; the blast radius is fenced (§7); and the repository's offline
 suite is untouched-green because the change is docs-only. Ratification,
 if it comes, is a one-line owner decision recorded in
-`TRELLIS_ROADMAP.md` §5 and, when the seam is ready, an R3-style paired
+`docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` §5 and, when the seam is ready, an R3-style paired
 run under the existing owner-gated paid ceremony, zero-paid fixture
 drill first.

@@ -55,7 +55,8 @@ describe('parseMarkdownToAST — Merkle hashing', () => {
 });
 
 describe('parseMarkdownToAST — T13 edge cases (current behavior)', () => {
-  // These tests pin the known quirks flagged as T13 in TRELLIS_ROADMAP.md.
+  // These tests pin the known quirks flagged as T13 in the retired
+  // docs/archive/TRELLIS_ROADMAP_DEPRECATED.md.
   // They document what the hash function does today; changing either
   // behavior changes every stored hash and must be done as a deliberate,
   // migrated change — a failure here means the hash function changed.

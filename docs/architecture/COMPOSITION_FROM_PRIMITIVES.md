@@ -36,7 +36,7 @@ longer express the thing it was built to do.
 
 ## 2. Why: examples anchor, primitives do not
 
-This is the [hypershot protocol's](../../skills/judge-composition/README.md)
+This is the [hypershot protocol's](../../.claude/skills/judge-composition/README.md)
 reason for existing, and it is the load-bearing half of this record.
 
 We use primitives to **minimize the impact on downstream context**. A
@@ -184,7 +184,7 @@ Three failures made it reachable:
    states the invariant/adaptive split in its second paragraph. It
    lived outside the repository, so it was not part of the collection a
    session inventories. It is now versioned at
-   [`skills/judge-composition/`](../../skills/judge-composition/README.md).
+   [`.claude/skills/judge-composition/`](../../.claude/skills/judge-composition/README.md).
 3. **The instruction it followed was itself drift.**
    JUDGE_CONVOCATION_DESIGN §11.2 item 3 was written July 19 — one day
    *after* the game was ratified July 18. A ratified rule did not

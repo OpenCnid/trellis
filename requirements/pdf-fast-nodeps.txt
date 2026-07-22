@@ -1,4 +1,4 @@
 # Fast mode imports geometry/render helpers from unstructured-inference, but it
 # never loads the hi-res Torch/transformer model stack. Install this manifest
-# with --no-deps after requirements-pdf-fast.txt.
+# with --no-deps after requirements/pdf-fast.txt.
 unstructured-inference==1.6.13

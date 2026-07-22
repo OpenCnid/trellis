@@ -12,8 +12,8 @@ import {
   serializeModuleSelection,
 } from './modules.js';
 
-// Single source of truth for runtime configuration (Guideline:
-// .agents/AGENT_CODING_GUIDELINES.md). The environment is read exactly
+// Single source of truth for runtime configuration (AGENTS.md hard rule 9).
+// The environment is read exactly
 // once here, validated, and consumed everywhere else through the
 // exported `config` object. Defaults match the docker-compose.yml
 // development stack so a bare local run needs no .env file.

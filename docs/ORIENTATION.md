@@ -6,8 +6,13 @@ everything it summarizes — authority order **code > glossary > prose** binds
 here with extra force: if any sentence below disagrees with
 [`GLOSSARY.md`](GLOSSARY.md) or with code, the other source wins and this
 file has a defect. It is **invariant-only**: no test counts, no module
-counts, no current objective — all volatile state lives in `HANDOFF.md`
-§2–§3 and the acceptance ledger (`npm run el:activate -- status`).
+counts, no current objective. The collaborator's live task supplies current
+scope; protected engineering-loop state is consulted only when that program is
+explicitly invoked (`npm run el:activate -- status`).
+
+**Dated maintenance entry — July 21, 2026:** the manual `HANDOFF.md` and root
+technical roadmap were retired as active session authorities. References below
+to the old handoff loop describe its historical mechanism, not current routing.
 
 ## How to read this file (the contract)
 
@@ -65,8 +70,8 @@ Two **flywheels** compound on this: derived facts are cached once and
 reused forever (knowledge), and the system's own operating instructions
 are versioned **modules** governed as beliefs (capability). One
 discipline binds the model's text handling: **code-mediated text** — the
-model never counts, never copies. The living state of the work is
-`HANDOFF.md`; the canonical vocabulary is `docs/GLOSSARY.md`.
+model never counts, never copies. The live task supplies current work;
+the canonical vocabulary is `docs/GLOSSARY.md`.
 
 ## D2 — one page
 
@@ -183,11 +188,11 @@ not prompt modules.
 
 ### 3.5 Session governance
 
-`HANDOFF.md` §0 is the **handoff loop**: the file is both the prompt
-that starts a session and the deliverable the session must regenerate —
-the manual prototype of the capability flywheel. Its §3 is the only
-objective authority; sessions do not select their own work. Hard rules
-live in `AGENTS.md` §4; two deserve early attention from any newcomer:
+The former `HANDOFF.md` §0 **handoff loop** made one file both the prompt
+that started a session and the deliverable it regenerated. That manual
+prototype is retired. Root `AGENTS.md` now supplies invariant routing and hard
+rules; the collaborator's live task supplies the objective. Two rules deserve
+early attention from any newcomer:
 **correct is not reachable** (a passing suite never proves a caller
 exists — name the non-test entrypoint or say plainly there is none) and
 **a protected pause refuses only the effect it names** (an owner gate on
@@ -244,9 +249,9 @@ the authority.*
 | RLM | model + REPL, context as database, `llm_query` over slices | `docs/benchmarks/FLYWHEEL_EXPLAINER.md` |
 | REPL namespace | persistent locals across turns = working memory | `GLOSSARY.md` |
 | Kernel / userspace | trust core shipped as code / per-run composed modules | `docs/architecture/WORKSPACE_AND_MODULES.md` |
-| Orchestrator | tool-free planner; decomposes goals; routes by reference | `src/core/agent/`, `API_REFERENCE.md` §4 |
-| A2A surface | one goal per external task, same gates and bounds, off by default | root `README.md`, `API_REFERENCE.md` §5 |
-| MCP tools | operator-allowlisted external tools; results are research context, never provenance | root `README.md` |
+| Orchestrator | tool-free planner; decomposes goals; routes by reference | `src/core/agent/`, `docs/reference/API_REFERENCE.md` §4 |
+| A2A surface | one goal per external task, same gates and bounds, off by default | `docs/operations/OPERATOR_MANUAL.md`, `docs/reference/API_REFERENCE.md` §5 |
+| MCP tools | operator-allowlisted external tools; results are research context, never provenance | `docs/operations/OPERATOR_MANUAL.md` |
 | UPSUM | code-checked size-budgeted state summary between REPL stages | `src/rlm/trellis_scaffold.py`, `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` |
 
 ### Substrate and custody
@@ -257,7 +262,7 @@ the authority.*
 | Verified ingest | persist → read-back re-hash → membership → Merkle diff, one transaction | `src/core/ingestion/` |
 | sourceNodeIds | the only values with provenance standing; 64-hex, must exist | `GLOSSARY.md`, `src/rlm/trellis_tools.py` |
 | Live-by-default retrieval | discovery reads current-version blocks only; history by explicit hash | `AGENTS.md` §4 rule 13 |
-| Repository ingestion | per-file documents, snapshots, tombstones; paid extraction gated | root `README.md`, `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` |
+| Repository ingestion | per-file documents, snapshots, tombstones; paid extraction gated | `docs/operations/OPERATOR_MANUAL.md`, `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` |
 | Structural chunking | cAST-style size-budgeted syntax-aligned code blocks | `docs/architecture/STRUCTURAL_CHUNKING.md` |
 
 ### Belief lifecycle
@@ -275,7 +280,7 @@ the authority.*
 | Entity | Hook | Authority |
 |---|---|---|
 | Workspace / segment | Tier-3 scratch; origin stamped mechanically in the tool call | `src/rlm/trellis_workspace.py` |
-| Lineage | park at task end, seed later tasks, by reference, TTL-bounded | root `README.md`, `docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md` |
+| Lineage | park at task end, seed later tasks, by reference, TTL-bounded | `docs/operations/OPERATOR_MANUAL.md`, `docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md` |
 | Promotion | operator CLI; segment → verified ingest → citable substrate; only bridge up | `src/core/promotion/` |
 
 ### Flywheels and modules
@@ -318,13 +323,13 @@ the authority.*
 | Entity | Hook | Authority |
 |---|---|---|
 | Authority order | code > glossary > prose across the committed record; a collaborator's live instruction outranks it | `AGENTS.md`, `docs/architecture/SESSION_GOVERNANCE.md` |
-| Handoff loop | the session prompt regenerates itself; §3 is the only objective authority | `HANDOFF.md` §0 |
+| Repository session contract | invariant routing at root; current objective from the live task; deprecated surfaces cannot select work | `AGENTS.md`, `docs/architecture/REPOSITORY_ROOT_CONTRACT.md` |
 | Engineering loop | the session loop mechanized; status in the acceptance ledger only | `docs/architecture/ENGINEERING_LOOP.md`, `tools/engineering-loop/SPEC.md` |
 | Change triple | behavior → enforcing tooling → drift-detecting pin | `AGENTS.md` §3 |
 | Byte-identical-when-absent | unconfigured feature = byte-identical prompt and behavior, pinned | `GLOSSARY.md` |
 | Correct ≠ reachable | name the non-test caller or say there is none | `AGENTS.md` §4 rule 15 |
 | Protected pause | refuses the named effect and nothing more | `AGENTS.md` §4 rule 14 |
-| Owner gates | promotion, registration, paid spend, edit root, merges | root `README.md` |
+| Owner gates | promotion, registration, paid spend, edit root, merges | `docs/operations/OPERATOR_MANUAL.md` |
 | Honest ledger | open critiques and unproven claims, kept current | `docs/benchmarks/CRITIQUE_AND_FUTURE.md` |
 | Agent-first authoring canon | every document is a prompt for a reader who cannot ask | `docs/product/epistemic-support/IEG_TEACHINGS.md` §6 |
 
@@ -347,7 +352,7 @@ elongation:
   true and self-consistent; a deeper layer may add, never contradict.
 - **Counts stay out** (the pointers-never-counts rule): the ladder names
   mechanisms and points at authorities; anything that drifts with the
-  week belongs in `HANDOFF.md` or the ledger.
+  week belongs in observed task evidence, not this orientation aid.
 
 ## Postscript — density as custody
 
@@ -374,7 +379,7 @@ draft's coverage of corpus-specific anchors — that gate and CoD
 densification are the same operation run in opposite directions (check
 entities present / add entities missing), so half the machinery has a
 shipped precedent. Natural seams, if ever ratified: UPSUM (the
-scaffold's budgeted state summary), `HANDOFF.md` regeneration, and this
+scaffold's budgeted state summary), a future generated session view, and this
 file's own maintenance. Honest residual, stated up front: entity
 salience is a model judgment — sampled, not engine-decidable — so this
 would close the membership half and leave a semantic residual — the

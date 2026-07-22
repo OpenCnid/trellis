@@ -101,7 +101,7 @@ sequenceDiagram
 
 The benchmark was designed with a polite hypothesis: cold queries (1–14) would be expensive, and the warm repeats (15–20) would demonstrate the savings. The benchmark was run twice, independently, on two development branches — and both runs show something better: **the flywheel didn't wait for the warm phase.**
 
-**Run A** (canonical, persisted as [benchmark_results.json](../../benchmark_results.json)) front-loaded the entire spin-up into a single query:
+**Run A** (canonical, persisted as [benchmark_results.json](artifacts/benchmark_results.json)) front-loaded the entire spin-up into a single query:
 
 | Query window | Sub-LLM calls | What happened |
 |---|--:|---|

@@ -29,14 +29,15 @@ import { pgPool, neo4jDriver } from '../config/db';
 //   npm run oolong:flywheel-prep  (strip annotations; cache starts cold)
 //   npx tsx scripts/start_all.ts  (server + workers)
 
-const DATA_DIR = path.join(__dirname, '..', '..', 'data');
+const REPO_ROOT = path.join(__dirname, '..', '..');
+const DATA_DIR = path.join(REPO_ROOT, 'data');
 const BASE_DATASET_PATH = path.join(DATA_DIR, 'oolong_pairs_dataset.json');
 const V2_DATASET_PATH = path.join(DATA_DIR, 'oolong_pairs_dataset_v2.json');
 const MANIFEST_PATH = path.join(DATA_DIR, 'update_drill_manifest.json');
 const ACT1_PATH = path.join(DATA_DIR, 'update_drill_act1_baseline.json');
 const ACT3_PATH = path.join(DATA_DIR, 'update_drill_reingest.json');
-const RESULTS_PATH = path.join(__dirname, '..', '..', 'update_drill_results.json');
-const LOGS_DIR = path.join(__dirname, '..', '..', 'benchmark_logs');
+const RESULTS_PATH = path.join(REPO_ROOT, 'docs', 'benchmarks', 'artifacts', 'update_drill_results.json');
+const LOGS_DIR = path.join(REPO_ROOT, 'benchmark_logs');
 
 const WARM_REPEATS = 6;
 const QUERY_TIMEOUT_MS = 20 * 60 * 1000;

@@ -247,13 +247,12 @@ What the dialogue implies for what is already built — each item names
 its law, its register row, and its reachability spine. None is
 authorized by this document.
 
-**Precedence (added July 17, 2026, on the owner's question).** This
+**Precedence (added July 17, 2026; amended July 21, 2026).** This
 queue is an inventory, not a work order, and it displaces nothing.
-The active session objective remains whatever `HANDOFF.md` §3 names
-(currently Session 66 — four-judge ingestion + panel drills, the
-owner's July 16 re-sequencing), per the standing rule that a session
-never selects its own objective; the engineering-loop track's next
-objective stays preserved in HANDOFF Appendix B. `PROGRAM_CONTEXT.md`
+The active objective comes from the collaborator's live task; a session never
+selects its own objective. The former handoff had named Session 66 and preserved
+the engineering-loop track in Appendix B; both are now historical.
+`PROGRAM_CONTEXT.md`
 §6's follow-up queue (CI wiring plus the four code-hardening items
 from the PR #119 merge review) predates this table and keeps its
 standing — C2(b) cross-references it rather than duplicating it.

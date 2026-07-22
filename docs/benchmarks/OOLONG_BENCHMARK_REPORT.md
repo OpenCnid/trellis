@@ -67,7 +67,7 @@ The benchmark was executed twice, independently, on two development branches —
 
 ### 3.1 Run A (canonical — persisted artifact)
 
-Full per-query results from [benchmark_results.json](../../benchmark_results.json), model `gpt-5.4-2026-03-05`:
+Full per-query results from [benchmark_results.json](artifacts/benchmark_results.json), model `gpt-5.4-2026-03-05`:
 
 | # | City | Phase | F1 | Pairs | Tokens | Sub-calls | Tool calls | Cost | Time |
 |--:|---|---|--:|--:|--:|--:|--:|--:|--:|
@@ -174,7 +174,7 @@ The runner ([oolong_runner.ts](../../src/benchmarks/oolong_runner.ts)) is a Node
 - **Canonicalizing pair parser:** predicted `(q_x, q_y)` tuples are extracted by regex and re-oriented to `(LOC id, HUM id)` using the dataset's category index — so a semantically correct pair written in the wrong order still scores, while pairs with genuinely wrong categories are kept and scored as spurious.
 - **Set-based F1 scoring:** precision, recall, and F1 are computed per query against ground truth derived directly from the dataset (`LOC × HUM` cross-product per city).
 - **Provenance enforcement:** any run that produced an answer with **zero database tool calls** is flagged `TRELLIS_PROTOCOL_VIOLATION` and re-dispatched (up to 3 attempts) — an answer that never touched either database has no provenance and is inadmissible, *even if it happens to be correct*. Crucially, the cost of every discarded attempt is still accumulated into the query's reported cost, so retries can't hide money.
-- **Audit trail:** every query's full stdout/stderr is written to `benchmark_logs/`, and the aggregate report to [benchmark_results.json](../../benchmark_results.json).
+- **Audit trail:** every query's full stdout/stderr is written to `benchmark_logs/`, and the aggregate report to [benchmark_results.json](artifacts/benchmark_results.json).
 
 ## 5. Bottom Line
 

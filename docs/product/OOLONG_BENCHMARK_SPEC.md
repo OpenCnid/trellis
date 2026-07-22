@@ -104,5 +104,5 @@ The implementation of this benchmark is divided into granular, micro-milestones 
 *   **Task 2c: Metrics and Evaluation Runner**
     *   *Input:* RLM final output answers and dataset ground-truth answers.
     *   *Operation:* Build the scoring module implementing Set F1-score, Exponential Decay, and Exact Match scoring algorithms.
-    *   *Output:* A detailed score report file (`benchmark_results.json`).
+    *   *Output:* A detailed score report file (`docs/benchmarks/artifacts/benchmark_results.json`).
     *   *Verification:* Run unit tests on the scoring function with mock outputs (e.g. perfect match, off-by-one count, partially matching sets).

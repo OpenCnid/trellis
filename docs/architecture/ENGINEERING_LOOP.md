@@ -12,13 +12,19 @@ Program roadmap: [`docs/product/engineering-loop/ROADMAP.md`](../product/enginee
 
 Research record: [`docs/product/engineering-loop/RESEARCH.md`](../product/engineering-loop/RESEARCH.md)
 
+**Dated amendment — July 21, 2026:** the collaborator retired the manual
+`HANDOFF.md` and root roadmap as active session authorities without adopting a
+generated handoff. This record remains the preserved architecture of the
+controller program; it is not current repository routing and authorizes no new
+program work. See [`REPOSITORY_ROOT_CONTRACT.md`](REPOSITORY_ROOT_CONTRACT.md).
+
 This record explains the Trellis-specific boundary and trust decision for the
 engineering-session loop. The companion specification defines conformance.
 This feature authors both records and no controller runtime.
 
 ## 1. Problem
 
-Trellis already has a manual outer engineering loop. `HANDOFF.md` §0 directs a
+At ratification, Trellis had a manual outer engineering loop. `HANDOFF.md` §0 directed a
 session to execute one objective, record evidence, regenerate the next handoff,
 and re-select work when late findings change priority. That protocol works, but
 its current representation combines several different kinds of information in

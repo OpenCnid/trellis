@@ -1,9 +1,9 @@
 # Trellis System Architecture
 
 > **Status: historical (Phase 1 MVP era).** Preserved as the record of
-> the original system design. The living architectural model is
-> `HANDOFF.md` §1 at the repository root; the system-level framing is
-> the root `README.md`. Where this document and current code disagree,
+> the original system design. The maintained architectural orientation is
+> `docs/ORIENTATION.md`; the system-level framing is
+> `docs/operations/OPERATOR_MANUAL.md`. Where this document and current code disagree,
 > the code and the living records win.
 
 This document outlines the macro-level system design and execution environment required to run Trellis at scale.
