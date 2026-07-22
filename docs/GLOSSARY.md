@@ -15,7 +15,7 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   → contested/recovery), and the two flywheels. The older description
   "provenance-preserving GraphRAG" now names the Tier-1/2 substrate
   viewed from the retrieval angle, not the system (reframed July 9,
-  2026; `docs/operations/OPERATOR_MANUAL.md`, "What Trellis is").
+  2026; [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md), "What Trellis is").
 - **Target function (ratified as principle July 20, 2026)** — what
   Trellis *is for*, from which its primitives derive: **a personalized
   composable expert system whose expertise is the user's data** — not
@@ -36,6 +36,29 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
 - **Recursion-over-variables** — the RLM's core move: hold large context in
   REPL variables and reach into it with code and sub-LLM calls, instead of
   holding it in the root model's attention.
+- **REPL sandbox (decisions ratified July 20–21, 2026; NOTHING BUILT)** —
+  the trust boundary around model-authored Python, which today executes
+  in-process on the host with live database clients in the namespace. One
+  hardware-isolated unit per session; credentials held outside it; a
+  single narrow channel to trusted host chokepoints. Language-level
+  guards (the `run_cypher` keyword denylist) are telemetry, never the
+  boundary. Canonical:
+  [`docs/product/repl-sandbox/`](product/repl-sandbox/README.md);
+  stack in
+  [REPL_SANDBOX_ARCHITECTURE.md](product/repl-sandbox/REPL_SANDBOX_ARCHITECTURE.md).
+- **Handle (proposed, unbuilt)** — the sandbox's data-flow primitive: an
+  opaque, session-scoped reference the guest may *address* — slice,
+  project, filter, locate — but never *hold*. Because payloads are never
+  materialized inside the guest, a sanctioned outbound channel cannot
+  leak what was never there; crossing out is metered rather than
+  forbidden. The code-mediated-text pillar carried into the isolation
+  layer. Canonical:
+  [REPL_SANDBOX_DATA_MODEL.md](product/repl-sandbox/REPL_SANDBOX_DATA_MODEL.md).
+- **Doubt filter (PROPOSED, not ratified, not built)** — the sandbox's
+  defense-in-depth layer, composing the existing `-1` doubt tier over
+  what the guest is about to act on. Explicitly *never the boundary*:
+  the boundary is data-flow, this is a second opinion. Canonical:
+  [REPL_SANDBOX_DOUBT_FILTER.md](product/repl-sandbox/REPL_SANDBOX_DOUBT_FILTER.md).
 
 ## Provenance and belief
 
@@ -138,14 +161,14 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   only genuinely new text plus the code that manipulates everything else.
   Consequence: effective context is bounded by REPL memory, not the
   attention window. Canonical record:
-  `docs/architecture/CODE_MEDIATED_TEXT.md`.
+  [`docs/architecture/CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md).
 - **Harness self-model (principle endorsed July 19, 2026; not built)** —
   the direction that Trellis's interior surfaces serve as *free
   meta-prompt composition primitives*, so the model always receives a
   **composed, bounded-context read of what the system actually expects**
   rather than inferring the system's behavior from text authored at a
   different time. The owner's framing: *Explainable AI, but for the AI.*
-  Record: `docs/architecture/HARNESS_SELF_MODEL.md`.
+  Record: [`docs/architecture/HARNESS_SELF_MODEL.md`](architecture/HARNESS_SELF_MODEL.md).
 - **Composed read** — the bounded projection of a surface's expectations
   served at a decision point. Bounded and *complete with respect to what
   it covers*: boundedness is not a weakened accuracy claim
@@ -193,7 +216,7 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   operator-registered space.
 - **Module #0** — the spatial-flywheel protocol formerly hardcoded in
   `TRELLIS_ADDENDUM` ([trellis_agent.py](../src/rlm/trellis_agent.py)),
-  now loaded from `modules/spatial-flywheel/` as the default selection —
+  now loaded from [`modules/spatial-flywheel/`](../modules/spatial-flywheel/) as the default selection —
   extracted into the first registry module with a byte-identical
   composed-prompt pin: the loader's acceptance test, adding zero new
   capability.
@@ -214,7 +237,7 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   a graded opinion (belief `b`, disbelief `d`, uncertainty `u`; b+d+u=1)
   computed sweep-side from judged events, never asserted by the writer
   and never visible to it; support never mints custody. Canonical
-  record: `docs/architecture/EPISTEMIC_SUPPORT.md`.
+  record: [`docs/architecture/EPISTEMIC_SUPPORT.md`](architecture/EPISTEMIC_SUPPORT.md).
 - **Informatic exchange geometry (IEG)** — the collaborator's frame
   (register S13, UIT-IEGv5.1): modeling as information crossing
   relational operators, priced by a floor and bounded by a ceiling.
@@ -222,8 +245,8 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   transfers (floors, budgets, funded existence, honest gluing,
   exchange-indexed time); numbers do not. Enters as design vocabulary
   only (adoption bound AB-1). Records:
-  `docs/product/epistemic-support/RESEARCH_MAP.md` §4.11 and
-  `docs/product/epistemic-support/IEG_TEACHINGS.md`.
+  [`docs/product/epistemic-support/RESEARCH_MAP.md`](product/epistemic-support/RESEARCH_MAP.md) §4.11 and
+  [`docs/product/epistemic-support/IEG_TEACHINGS.md`](product/epistemic-support/IEG_TEACHINGS.md).
 - **Plane (belief geometry)** — a named bundle of related axes owning
   exactly one governance question (custody: *where from*; support: *how
   held up*; claim-kind, deferred: *what kind of claim*); a new plane
@@ -233,7 +256,7 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   a closed taxonomy; `clean` means no known drawback found,
   never certified correctness; abstention feeds uncertainty only.
   Belief-facing taxonomies close **per composition**, not per role
-  (`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` §6
+  ([`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`](product/epistemic-support/JUDGE_COMPOSITION_GAME.md) §6
   rule 4, binding program law); the audit taxonomy is invariant.
 - **Derived-source substitution** — acting on a compression of a
   governing record (a handoff, a design record, a skill, a memory, a
@@ -242,15 +265,15 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   The derivation is fluent and self-consistent, so nothing signals the
   loss; the resulting work passes every check because the checks derive
   from the same misreading. Canonical record:
-  `docs/architecture/CODE_MEDIATED_TEXT.md` §2.9; operational rule
-  `AGENTS.md` 18; authority ordering `AGENTS.md` §1.5.
+  [`docs/architecture/CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md) §2.9; operational rule
+  [`AGENTS.md`](../AGENTS.md) 18; authority ordering [`AGENTS.md`](../AGENTS.md) §1.5.
 - **Composition ceremony** — the per-candidate sequence that judges one
   promotion: ratify the candidate, characterize the REPL's fact and
   belief spaces, compose each seat and its anchors for that pool, run
   the instantiation gates, judge on the forward pass, audit, record.
   Nothing is authored ahead of it and no composition is reused.
   Canonical record:
-  `docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md`.
+  [`docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md`](product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md).
 - **Characterization** — the descriptive (never expository) summary of
   the fact and belief spaces that a composer builds criteria from,
   produced by an isolated agent. The candidate's domain is in scope;
@@ -268,11 +291,11 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   of it. There is no default cast: registries and role slots are the
   invariant frame, and every judge filling a slot is a special case.
   Canonical record:
-  `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`; the
+  [`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`](product/epistemic-support/JUDGE_COMPOSITION_GAME.md); the
   general principle:
-  `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`.
+  [`docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`](architecture/COMPOSITION_FROM_PRIMITIVES.md).
 - **Adoption bounds register** — the live, dated rule set (AB-1…, in
-  `docs/product/epistemic-support/RESEARCH_MAP.md` §9) bounding what may
+  [`docs/product/epistemic-support/RESEARCH_MAP.md`](product/epistemic-support/RESEARCH_MAP.md) §9) bounding what may
   be built on which evidence class; amended by dated entry, never
   silent edit.
 

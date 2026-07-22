@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Trellis Density-Trellis</title>
+<style>
+  :root {
+    --c1: #58a6ff; --c2: #9b8cf7; --c3: #ef6fd0;
+    --bg: #ffffff; --bg-soft: #f6f8fa; --bg-card: #ffffff;
+    --fg: #1f2328; --fg-dim: #59636e; --fg-faint: #818b98;
+    --line: #d7dde4; --line-soft: #e8edf2;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117; --bg-soft: #161b22; --bg-card: #12181f;
+      --fg: #e6edf3; --fg-dim: #9aa7b4; --fg-faint: #6e7b8a;
+      --line: #2a323c; --line-soft: #21272e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1117; --bg-soft: #161b22; --bg-card: #12181f;
+    --fg: #e6edf3; --fg-dim: #9aa7b4; --fg-faint: #6e7b8a;
+    --line: #2a323c; --line-soft: #21272e;
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff; --bg-soft: #f6f8fa; --bg-card: #ffffff;
+    --fg: #1f2328; --fg-dim: #59636e; --fg-faint: #818b98;
+    --line: #d7dde4; --line-soft: #e8edf2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: var(--sans); line-height: 1.6; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px 96px; }
+  a { color: var(--c1); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, .mono { font-family: var(--mono); font-size: 0.88em; }
+  code { background: var(--bg-soft); padding: 0.1em 0.35em; border-radius: 4px; }
+  h2 { font-size: 1.35rem; margin: 3rem 0 0.4rem; letter-spacing: -0.01em; }
+  h3 { font-size: 1.05rem; margin: 2rem 0 0.4rem; }
+  p { margin: 0.7rem 0; }
+  .lede { color: var(--fg-dim); }
+
+  /* ---------- banner ---------- */
+  header { padding: 34px 0 6px; }
+  .banner { width: 100%; height: auto; display: block; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 18px 0 4px; }
+  .toolbar .spacer { flex: 1 1 auto; }
+  button {
+    font: inherit; font-family: var(--mono); font-size: 12px;
+    background: var(--bg-soft); color: var(--fg-dim);
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 13px; cursor: pointer; transition: all .12s;
+  }
+  button:hover { color: var(--fg); border-color: var(--c1); }
+  button[aria-pressed="true"] { color: var(--bg); background: var(--fg); border-color: var(--fg); }
+  .tierbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .tierbar .lbl { font-family: var(--mono); font-size: 11px; color: var(--fg-faint); letter-spacing: .06em; }
+  .tierbtn { position: relative; padding-left: 22px; }
+  .tierbtn::before {
+    content: ""; position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 8px; border-radius: 2px; background: var(--dot, var(--c1));
+  }
+
+  .note {
+    border-left: 3px solid var(--c2); background: var(--bg-soft);
+    padding: 10px 16px; margin: 18px 0; border-radius: 0 6px 6px 0;
+    color: var(--fg-dim); font-size: 14px;
+  }
+  .note strong { color: var(--fg); }
+
+  /* ---------- trunk ---------- */
+  .trunk { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 12px; }
+  .trunk > div { padding: 14px 18px; border-top: 1px solid var(--line-soft); }
+  .trunk > div:first-child { border-top: none; }
+  .trunk .tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+    color: var(--fg-faint); display: block; margin-bottom: 4px;
+  }
+  .t0 { font-size: 1.05rem; }
+
+  /* ---------- branch cards ---------- */
+  .grid { display: grid; gap: 12px; margin-top: 14px; }
+  .branch {
+    border: 1px solid var(--line); border-radius: 10px; background: var(--bg-card);
+    overflow: hidden; border-left: 4px solid var(--accent);
+  }
+  .bhead {
+    display: flex; gap: 12px; align-items: baseline; padding: 13px 16px;
+    cursor: pointer; user-select: none;
+  }
+  .bhead:hover { background: var(--bg-soft); }
+  .bid {
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    color: var(--accent); min-width: 34px;
+  }
+  .btitle { font-weight: 600; flex: 1 1 auto; }
+  .bgroup {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    color: var(--fg-faint); text-transform: uppercase;
+  }
+  .bbody { display: none; padding: 0 16px 14px; }
+  .branch.open .bbody { display: block; }
+  .charter { color: var(--fg-dim); font-style: italic; font-size: 14px; margin: 0 0 12px; }
+  .tier { display: none; padding: 9px 0 9px 14px; border-left: 2px solid var(--tc); margin: 8px 0; }
+  .tier.show { display: block; }
+  .tier .tl {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+    color: var(--tc); display: block; margin-bottom: 3px;
+  }
+  .tier p { margin: 0; font-size: 14.5px; }
+  .ledger {
+    margin-top: 12px; padding: 10px 12px; background: var(--bg-soft);
+    border-radius: 6px; font-size: 13.5px; color: var(--fg-dim);
+  }
+  .ledger strong { color: var(--fg); }
+
+  /* ---------- tables ---------- */
+  .scroll { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 720px; }
+  th, td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line-soft); }
+  th {
+    background: var(--bg-soft); font-family: var(--mono); font-size: 11px;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--fg-dim); font-weight: 600;
+    position: sticky; top: 0;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg-soft); }
+  td.k { font-family: var(--mono); font-weight: 700; white-space: nowrap; }
+
+  /* ---------- lattice ---------- */
+  .lattice { width: 100%; height: auto; display: block; margin: 14px 0; }
+  .lat-node rect { fill: var(--bg-card); stroke: var(--line); }
+  .lat-node text { font-family: var(--mono); font-size: 11px; fill: var(--fg); }
+  .lat-edge { stroke: var(--line); fill: none; }
+
+  ul.tight { margin: 8px 0; padding-left: 20px; }
+  ul.tight li { margin: 5px 0; color: var(--fg-dim); }
+  ul.tight li strong { color: var(--fg); }
+  footer {
+    margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--fg-faint); font-family: var(--mono);
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 0 14px 72px; }
+    .bhead { flex-wrap: wrap; }
+    .bgroup { width: 100%; }
+    .toolbar { gap: 8px; }
+    .toolbar .spacer { display: none; }
+    button { padding: 4px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <svg class="banner" viewBox="0 0 900 150" role="img" aria-label="The Trellis Density-Trellis">
+    <defs>
+      <linearGradient id="ramp" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#58a6ff"/>
+        <stop offset="50%" stop-color="#9b8cf7"/>
+        <stop offset="100%" stop-color="#ef6fd0"/>
+        <animate attributeName="x1" values="-1;0;-1" dur="14s" repeatCount="indefinite"/>
+        <animate attributeName="x2" values="0;1;0" dur="14s" repeatCount="indefinite"/>
+      </linearGradient>
+      <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#58a6ff" stop-opacity="0.20"/>
+        <stop offset="50%" stop-color="#9b8cf7" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#ef6fd0" stop-opacity="0.95"/>
+      </linearGradient>
+    </defs>
+    <!-- the trellis frame: one trunk, branches climbing it -->
+    <g stroke="url(#fade)" fill="none" stroke-width="1.4">
+      <path d="M60 122 L840 122"/>
+      <path d="M60 122 C 180 122, 200 40, 320 40"/>
+      <path d="M180 122 C 300 122, 320 64, 440 64"/>
+      <path d="M300 122 C 420 122, 440 34, 560 34"/>
+      <path d="M420 122 C 540 122, 560 76, 680 76"/>
+      <path d="M540 122 C 660 122, 680 46, 800 46"/>
+    </g>
+    <g fill="url(#ramp)">
+      <circle cx="320" cy="40" r="3.4"><animate attributeName="r" values="2.6;4.2;2.6" dur="5s" repeatCount="indefinite"/></circle>
+      <circle cx="440" cy="64" r="3.4"><animate attributeName="r" values="4.2;2.6;4.2" dur="6s" repeatCount="indefinite"/></circle>
+      <circle cx="560" cy="34" r="3.4"><animate attributeName="r" values="2.6;4.2;2.6" dur="7s" repeatCount="indefinite"/></circle>
+      <circle cx="680" cy="76" r="3.4"><animate attributeName="r" values="4.2;2.6;4.2" dur="5.5s" repeatCount="indefinite"/></circle>
+      <circle cx="800" cy="46" r="3.4"><animate attributeName="r" values="2.6;4.2;2.6" dur="6.5s" repeatCount="indefinite"/></circle>
+    </g>
+    <!-- the density ramp: five tiers, sparse to dense -->
+    <g>
+      <rect x="60" y="132" width="150" height="5" rx="2.5" fill="#58a6ff" opacity="0.35"/>
+      <rect x="216" y="132" width="150" height="5" rx="2.5" fill="#58a6ff" opacity="0.55"/>
+      <rect x="372" y="132" width="150" height="5" rx="2.5" fill="#9b8cf7" opacity="0.72"/>
+      <rect x="528" y="132" width="150" height="5" rx="2.5" fill="#c47ae4" opacity="0.86"/>
+      <rect x="684" y="132" width="156" height="5" rx="2.5" fill="#ef6fd0" opacity="1"/>
+    </g>
+    <text x="60" y="74" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="30" font-weight="700" fill="url(#ramp)">density-trellis</text>
+    <text x="62" y="100" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="12.5" fill="#9b8cf7" opacity="0.85">trellis &#183; one trunk &#183; thirteen branches &#183; five tiers each</text>
+  </svg>
+
+  <div class="toolbar">
+    <div class="tierbar">
+      <span class="lbl">DENSITY</span>
+      <button class="tierbtn" data-tier="1" style="--dot:#58a6ff">T1</button>
+      <button class="tierbtn" data-tier="2" style="--dot:#6f9df9">T2</button>
+      <button class="tierbtn" data-tier="3" style="--dot:#9b8cf7">T3</button>
+      <button class="tierbtn" data-tier="4" style="--dot:#c47ae4">T4</button>
+      <button class="tierbtn" data-tier="5" style="--dot:#ef6fd0">T5</button>
+      <button id="allTiers">all</button>
+    </div>
+    <span class="spacer"></span>
+    <button id="expandAll">expand all</button>
+    <button id="theme">theme</button>
+  </div>
+</header>
+
+<p class="lede">
+  A branching chain-of-density map of Trellis, reverse-engineered from <strong>157 first-parent
+  commits</strong> (<code>c454d1a</code> &rarr; <code>2b937e8</code>) by fifteen parallel read-only
+  sub-agents. Ground truth is the markdown beside this file:
+  <a href="DENSITY-CHAIN.md">DENSITY-CHAIN.md</a>. Where the two disagree, the markdown wins &mdash;
+  and where the markdown disagrees with code, glossary, or a design record, <em>they</em> win.
+</p>
+
+<div class="note">
+  <strong>Status: PROPOSED / unratified</strong>, snapshot <code>2b937e8</code>, verified 2026-07-22.
+  This sits at the <em>orientation compression</em> rung of the AGENTS.md &sect;1.5 authority order &mdash;
+  below every ratified record, adopted doctrine, and design record. Every number is <em>as recorded</em>;
+  nothing was re-run.
+</div>
+
+<h2>Why a trellis</h2>
+<p>
+  Chain of density (Adams et al. 2023, <a href="https://arxiv.org/abs/2309.04269">arXiv:2309.04269</a>)
+  rewrites one summary five times <em>at a fixed length</em>, fusing new entities in by compressing what
+  is already there. Fixed length is the engine: drop it and &ldquo;add detail&rdquo; produces a longer
+  summary, never a denser one.
+</p>
+<p>
+  A <strong>density-trellis is the second tier of that format &mdash; several density-chains stacked
+  together.</strong> One shared trunk, one five-tier chain per subsystem class, and a lattice of
+  cross-links so the branches interlock instead of standing in parallel columns. A single spine carries
+  one salience order; a system has many at once. Each branch's tiers traverse time on their own:
+  <strong>T1 essence &rarr; T2&ndash;T3 shipped machinery with receipts &rarr; T4 the frontier &rarr; T5
+  future plans.</strong>
+</p>
+
+<h2>The trunk</h2>
+<div class="trunk">
+  <div>
+    <span class="tag">T0 &mdash; ONE SENTENCE</span>
+    <p class="t0">Trellis is a <strong>personalized composable expert system whose expertise is the
+    user's data</strong> &mdash; built as OpenCnid's <strong>Recursive Language Model runtime</strong>,
+    where the user's context, memory, knowledge and capabilities live as queryable engine state with
+    enforced provenance, the model reaches all of it only by writing code, and because the expertise
+    <em>is</em> the user's data the <strong>user is the domain authority</strong>.</p>
+  </div>
+  <div>
+    <span class="tag">T1 &mdash; ONE PARAGRAPH</span>
+    <p>The <strong>substrate</strong> turns every source into an immutable SHA-256 <strong>Merkle
+    AST</strong> in PostgreSQL (Tier 1) and every derived belief into a Neo4j node carrying
+    <code>sourceNodeIds</code> &mdash; the exact block hashes it came from (Tier 2); a Tier-3
+    <strong>workspace</strong> has no trust standing. The <strong>execution model</strong> is the RLM:
+    context is a database, not a scroll, reached by writing Python and calling <code>llm_query</code>
+    over slices. <strong>Trust moves one way</strong>, upward, only through operator-gated
+    <strong>promotion</strong>. Two <strong>flywheels</strong> compound &mdash; derived facts cached once
+    and reused, and the system's own instructions versioned as <strong>modules governed as
+    beliefs</strong>. One discipline binds text handling &mdash; <strong>code-mediated text</strong>: the
+    model never counts, never copies. Orthogonal to custody, a signed-ternary <strong>standing
+    model</strong> (&minus;1 doubt &middot; 0 belief &middot; +1 fact) grades how a claim held up, moved
+    only by evidence or a <strong>user gate</strong>. And every evaluating function <strong>composes per
+    context from primitives</strong>; there is no default cast.</p>
+  </div>
+  <div>
+    <span class="tag">T2 &mdash; THE CLASS MAP</span>
+    <p><strong>Seeds:</strong> C1 REPL &amp; RLM &middot; C2 Engineering loop &middot; C3 Epistemic
+    support. <strong>Branch-out:</strong> C4 Substrate &amp; custody &middot; C5 Code-mediated text
+    &middot; C6 Trust &amp; flywheels &middot; C7 Standing &amp; composition. <strong>Frontier:</strong>
+    C8 Backend seam &amp; TTT &middot; C9 Mechinterp sidecar &middot; C10 Benchmarks &middot; C11
+    Serving &amp; governance &middot; C12 REPL sandbox &middot; C13 Self-describing surfaces.</p>
+    <p>The weave: C1 runs on C4/C5; C6 rises out of C4 and is the only bridge up into it; C3 grades
+    C4's beliefs and feeds C7's standing axis; C7's composition law governs C3 and the skills; C2
+    mechanizes the loop that produces all of it; C8/C9 are the research inflow; C12 is the trust
+    boundary C1 does not yet have; C10 is the evidence gate on every claim; C11 is the skin; C13 is how
+    the whole thing explains itself &mdash; including this file.</p>
+  </div>
+</div>
+
+<h2>The branches</h2>
+<p class="lede">
+  Click a branch to open it; use the <strong>density</strong> buttons above to reveal one tier across
+  every branch at once. Each branch holds ~90 words per tier &mdash; a deeper tier is denser, never
+  longer.
+</p>
+<div class="grid" id="branches"></div>
+
+<h2>The temporal cross-section</h2>
+<p class="lede">One row per class. Read a column down for the whole system at one time-depth; read a row
+across for one subsystem's arc.</p>
+<div class="scroll">
+  <table>
+    <thead><tr><th>Class</th><th>Basic</th><th>Current (shipped-pinned)</th><th>Frontier</th><th>Future</th></tr></thead>
+    <tbody id="xsec"></tbody>
+  </table>
+</div>
+
+<h2>The cross-link lattice</h2>
+<p class="lede">Load paths: nothing in an upper class is trusted unless the class beneath it holds.</p>
+<svg class="lattice" viewBox="0 0 900 400" role="img" aria-label="Cross-link lattice of the thirteen classes">
+  <g class="lat-edge" stroke-width="1.2">
+    <path d="M140 118 L140 178" marker-end="url(#ar)"/>
+    <path d="M180 118 L300 178"/>
+    <path d="M300 190 L300 250"/>
+    <path d="M520 118 L420 178"/>
+    <path d="M560 130 L560 178"/>
+    <path d="M420 200 L520 130" stroke-dasharray="4 3"/>
+    <path d="M140 262 L300 262"/>
+    <path d="M760 118 L620 118" stroke-dasharray="4 3"/>
+    <path d="M760 178 L760 130"/>
+    <path d="M300 320 L560 320"/>
+    <path d="M140 320 L140 274"/>
+  </g>
+  <g class="lat-node">
+    <g><rect x="60" y="88" width="160" height="30" rx="6"/><text x="72" y="107">C1 REPL / RLM</text></g>
+    <g><rect x="60" y="178" width="160" height="30" rx="6"/><text x="72" y="197">C4 Substrate</text></g>
+    <g><rect x="60" y="244" width="160" height="30" rx="6"/><text x="72" y="263">C5 Code-mediated</text></g>
+    <g><rect x="60" y="306" width="160" height="30" rx="6"/><text x="72" y="325">C6 Trust / flywheels</text></g>
+    <g><rect x="240" y="178" width="160" height="30" rx="6"/><text x="252" y="197">C3 Epistemic</text></g>
+    <g><rect x="240" y="244" width="160" height="30" rx="6"/><text x="252" y="263">C7 Standing</text></g>
+    <g><rect x="240" y="306" width="160" height="30" rx="6"/><text x="252" y="325">C10 Benchmarks</text></g>
+    <g><rect x="440" y="88" width="160" height="30" rx="6"/><text x="452" y="107">C8 Backend / TTT</text></g>
+    <g><rect x="440" y="178" width="160" height="30" rx="6"/><text x="452" y="197">C12 Sandbox</text></g>
+    <g><rect x="440" y="306" width="160" height="30" rx="6"/><text x="452" y="325">C2 Eng. loop</text></g>
+    <g><rect x="640" y="88" width="180" height="30" rx="6"/><text x="652" y="107">C9 Sidecar</text></g>
+    <g><rect x="640" y="178" width="180" height="30" rx="6"/><text x="652" y="197">C11 Serving / gov.</text></g>
+    <g><rect x="640" y="244" width="180" height="30" rx="6"/><text x="652" y="263">C13 Self-describing</text></g>
+  </g>
+  <text x="60" y="372" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="11" fill="#818b98">
+    solid = load-bearing dependency &#183; dashed = prerequisite or supply
+  </text>
+</svg>
+
+<h2>The constellation</h2>
+<p class="lede">The outer tier of the living wiki: a trellis stacks chains within one system; the
+constellation stacks systems. Every row was verified against a local clone or the public repository
+page.</p>
+<div class="scroll">
+  <table>
+    <thead><tr><th>Repository</th><th>Relation to Trellis</th><th>Its own chain</th></tr></thead>
+    <tbody id="constellation"></tbody>
+  </table>
+</div>
+
+<h2>Maintenance &mdash; the living-wiki loop</h2>
+<p>
+  The map is maintained by machine-detected staleness, not by memory.
+  <code>npm run wiki:check</code> diffs the working tree against the pinned <code>snapshot_commit</code>,
+  routes every changed path through <code>class-map.json</code>, and names which branch classes went
+  stale. A <code>Stop</code> hook runs the same checker and raises the roster once per session.
+</p>
+<ul class="tight">
+  <li><strong>One updating sub-agent per touched class.</strong> Siblings cannot see each other, so a
+  per-class agent cannot smear one subsystem's status onto another's; the cross-cutting composition
+  belongs to whoever assembles their returns.</li>
+  <li><strong>Densify, never append.</strong> New machinery enters T4 first and rises toward T1 only as
+  the <em>concept</em> changes. At a fixed budget, adding means evicting &mdash; visible in the diff.</li>
+  <li><strong>Hold the layer test.</strong> Each tier, read alone, must still be true.</li>
+  <li><strong>Re-stamp <code>snapshot_commit</code></strong> and re-render this page.</li>
+</ul>
+
+<h2>Provenance &amp; the honest ledger</h2>
+<ul class="tight">
+  <li><strong>Nothing was executed</strong> by any cartographer. Every count, timing and cost is as
+  recorded in a committed report or commit message, as of <code>2b937e8</code>.</li>
+  <li><strong>No current <code>npm test</code> total exists at HEAD.</strong> The highest recorded
+  totals sit in the deprecated archived roadmap, which AGENTS.md &sect;1.5 forbids as current state.</li>
+  <li><strong>No live paid run underlies the epistemic-support, engineering-loop, or test-time-training
+  <em>engine ports</em></strong> &mdash; a claim about the ports, not the methods.</li>
+  <li><strong>The ratified surface checker was red at this commit</strong>, by two broken links pointing
+  at the file this render accompanies. Returning the map closes both.</li>
+  <li><strong>Two classes are unreachable from the repository's own navigation map</strong> &mdash; the
+  REPL sandbox, and the self-describing records themselves.</li>
+  <li><strong>Several documents disagree with the log</strong>: phase numbering post-dates the code it
+  labels, PR order and merge order diverge, and one PR was reverted wholesale the next day.</li>
+</ul>
+
+<footer>
+  ground truth: DENSITY-CHAIN.md &#183; method: chain of density, system mode &#183;
+  snapshot 2b937e8 &#183; verified 2026-07-22 &#183; PROPOSED / unratified
+</footer>
+
+</div>
+<script>
+const TIER_COLORS = ['#58a6ff', '#6f9df9', '#9b8cf7', '#c47ae4', '#ef6fd0'];
+const GROUP_COLOR = { seed: '#58a6ff', 'branch-out': '#9b8cf7', frontier: '#ef6fd0' };
+
+const BRANCHES = [
+  { id: 'C1', group: 'seed', title: 'The REPL execution model: one process, one task, context as database',
+    charter: 'Everything between a dispatched task and the bytes a run emits. Not what the injected tools reach into, only that they arrive as REPL objects.',
+    tiers: [
+      "A language model's only actuator is a persistent Python REPL. Context is a database, not a scroll: retrieved bytes live in namespace variables the model reaches by writing code, and it calls itself over slices rather than holding everything in attention. One process bounds one task; state dies with it. A tool-free planner above decomposes goals into self-contained tasks and routes working state by reference, never by paraphrase. Scaffolding makes the run's instructions and its own running state re-readable by code, because transcript distance corrupts attention, not memory.",
+      "One Python process per task: <code>rlm_worker.ts</code> spawns <code>trellis_agent.py</code> per queue job, which composes the system prompt plus addendum plus selected modules and calls <code>rlm.completion()</code> on one stateful <code>rlms</code> LocalREPL. <code>custom_tools</code> injects the database clients, the answer channel, the task wrapper and the running-state summary, plus gated workspace, textedit, MCP and frame helpers; <code>llm_query</code> fans sub-calls over slices. stdout streams to Redis, watched by two scanners. Above, the goal loop runs tool-free dispatch/finish/fail decisions. Neither queue retries.",
+      "PR #95 landed the task wrapper and frame helpers; #98 the running-state summary; #135 made it enforce &mdash; <code>commit()</code> refuses over <code>UPSUM_BUDGET = 2000</code>, twelve domain keys. Composed-prompt pins <code>ee5bfca6&hellip;1200</code> and omit-arm <code>322cbe5d&hellip;45ae</code>. Motivating run: <strong>402,781 input tokens by iteration 14</strong>. Probe round 1: 12 runs, $0.7320; the off arm pushed 110,550 tokens through one <code>llm_query</code>, 7.6&times;. <code>rlms==0.1.3</code>, 20,000-char block cap. Bounds: 8 tasks per goal, 4 iterations, a 30-minute task-await ceiling.",
+      "<code>rlms</code> LocalREPL still runs model-authored Python in-process on the host with live database credentials in-namespace; the microVM answer is ratified and <strong>nothing is built</strong>. <code>parseTelemetryLine</code>'s nine-field allowlist <strong>drops every counter added since Session 20</strong>, so the new counters are unreadable on the worker path. <code>verify()</code> informs, never gates. Built-in compaction was measured and <strong>never enabled</strong>. <code>citable()</code> has <strong>no non-test caller</strong> &mdash; its named setter, &ldquo;the stage-2 self-edit driver,&rdquo; does not exist in this tree.",
+      "Proposed and open: the sandbox build plan's spikes and gated milestones &mdash; design, not built; the exfil doubt-filter layers, PROPOSED and unratified. <code>llm_help</code> and self-documenting descriptors, always-present so discovery stays reachable &mdash; PROPOSED, authorizing no build, behind the harness self-model's gate with expectation-to-guard bijection as the audit. Reasoning-templates, not sequenced. Backend increments, the hosted arm, the TTT rungs &mdash; owner-gated. Depth-2 is a contingency. The composed-prompt pins are the natural cache key for any prefix fast-state."
+    ],
+    ledger: "RLM &middot; REPL &middot; <code>llm_query</code> &middot; orchestrator &middot; A2A/MCP seam &mdash; <strong>shipped-pinned</strong>. Telemetry allowlist gap &middot; <code>citable()</code> &middot; depth-1 without enforcing code &mdash; <strong>confirmed open</strong>." },
+
+  { id: 'C2', group: 'seed', title: 'The engineering loop: an out-of-process session controller and its acceptance ledger',
+    charter: 'The repository-external, protected-state machinery that mechanizes the engineering session itself. No part of the product runtime, and no authority to declare its own work accepted.',
+    tiers: [
+      "An engineering loop is a controller that owns the session itself. It observes the repository rather than believing an agent's report, compiles bounded role packets from typed state, runs one coding episode at a time, verifies deterministically, and stops at human gates for paid, destructive, push, merge, and acceptance actions. Its mutable truth lives outside the writable worktree, so whatever edits the policy cannot rewrite the approvals judging that edit. A separate append-only ledger records what the owner accepted; prose never does.",
+      "<code>tools/engineering-loop/</code> runs out-of-process. A state machine and kernel own transitions; a store plus writer lock hold single-writer protected state; an observer computes Git facts; a prompt compiler emits pinned planner/implementer/checker/recovery packets; a Codex app-server runner bounds episodes; a verifier and policy gate <strong>nineteen protected actions</strong> on approval-channel material. The acceptance ledger is the append-only status authority, seeded once, advanced by a steady-state ceremony, repaired by two disjoint ones. <code>activate.ts</code> is the sole entrypoint.",
+      "EL-00/EL-01 landed at <code>51d9c7a</code>: 106 MUSTs, zero unmapped. <code>e0504b1</code> pinned <strong>41 allowed / 91 forbidden of 132</strong> transitions. EL-06: 36 requirements, 1,161 tests across 105 files repo-wide. <code>6d5670d</code> built activation; the owner's run seeded <strong>eleven records, generation 0</strong>. <code>841f875</code>: <strong>116 declared / 116 mapped</strong>. <code>40b0ff6</code> wired both ceremonies: <code>npm test</code> 1247/110. Codex pinned at <code>v2@0.144.2</code>. Model completions and paid calls: <strong>zero throughout</strong>.",
+      "EL-10 and EL-11 are <strong>implemented, not accepted</strong> &mdash; no owner acceptance exists in the ledger, so <code>next_feature</code> still resolves to EL-10. EL-07 stays blocked, its paid gate never opened, and its measurement report does not exist. Under hard rule 15: the kernel, prompt compiler, Codex runner, verifier, checker and handoff renderer have <strong>no non-test caller</strong>; the entrypoint imports only ledger, observer and policy. PR #156 retired <code>HANDOFF.md</code> <em>without</em> adopting the generated view.",
+      "Open: the roadmap states a live collaborator task must explicitly re-sequence or redesign this preserved program before further implementation. Proposed only: EL-07's measured pilot &mdash; isolated fixtures, repeated trials under an owner-approved estimate, a context/time/cost/intervention comparison, an adopt-revise-reject verdict &mdash; is the sole path making the handoff generated. EL-08 (tracker, scheduler, concurrency, durability, extraction) and EL-09 (sanitized ingestion of run reports, never a live control dependency) are deferred, each needing a fresh owner proposal."
+    ],
+    ledger: "EL-00&hellip;EL-06 &mdash; <strong>accepted</strong>; ledger + <code>el:activate</code> &mdash; <strong>shipped, reachable</strong>; EL-10/EL-11 &mdash; <strong>implemented, not accepted</strong>; EL-07 &mdash; <strong>blocked</strong>; kernel, compiler, runner, verifier, checker, renderer &mdash; <strong>implemented, unreachable</strong>." },
+
+  { id: 'C3', group: 'seed', title: 'Epistemic support and the judge layer',
+    charter: 'The graded, sweep-side "how has this belief held up" opinion. Not custody, and not the standing axis above it.',
+    tiers: [
+      "Trellis beliefs carry a second axis beside custody: epistemic support &mdash; a graded, decaying opinion, belief plus disbelief plus uncertainty summing to one. It is computed sweep-side from judged verdicts, never asserted by the writer, and never mints custody; a fresh belief starts at maximal uncertainty. Judges are differently blind, each seeing only its allowlisted evidence, never the claimant, each other, or any forecast. Abstention reaches the opinion only by omission. Scoring automates; trust elevation stays human. Explanation is rendered at read time, never stored as model prose.",
+      "<code>support.ts</code> folds events into (b,d,u,projected) &mdash; prior weight 2, base rate 0.5, 30-day half-life; <code>support_metrics.ts</code> composes leaf/any/all/kofk metrics behind a fail-closed validity gate. <code>judge_panel.ts</code> holds the role slots, context assembly and composition; the audit module imports no gating surface. Intake carries addresses, strips attribution, writes once. The sweep judges each candidate-judge pair once; <code>judge_spawn.ts</code> alone constructs a model call; <code>judge_explain.ts</code> renders lines for the report. Nothing gates a write.",
+      "Shipped across PRs #119, #124, #133, #134, #151. Recorded drills: support-oracle <strong>7 sections / 106 checks</strong> with a negative control exiting 3; judge-panel 10 sections; judge-intake 13 sections / 15 pins; judge-convocation <strong>23 sections / 140 checks</strong> first-run green, <code>npm test</code> 1,290/113 &rarr; 1,305/114; the explanation render 9 checks, graph suite 179/179. Reconciliation RATIFIED 2026-07-18. Estimate $0.002&ndash;$0.01 per verdict. <strong>No live run has ever executed.</strong>",
+      "The live constructor exists and <strong>can only refuse</strong> &mdash; the paid queue is ON HOLD by owner ruling; zero live convocations. Session 71 rolled the standing roster back: the four seats are demoted from law to <em>one composition instance</em>, reopening three routing layers. The composition ceremony is design-resolved with <strong>nothing built</strong> &mdash; composition runs only at the session layer, in <code>.claude/skills/</code>. PR #158 superseded the four-plane per-seat schema; the worked examples await rewrite. <code>orientation</code> is ratified yet absent from the engine.",
+      "Proposed and open: reopening the paid queue (an owner act), then the per-run ceremony under the &le;$5 cap; the live evidence gatherer, deferred; the merged ceremony-per-candidate, each consequence needing its own design pass. The metered promotion-cost test, <strong>&asymp;$0.02&ndash;$0.06 per promoted belief</strong>, is registered and queued, not scheduled. PROPOSED: composable rubrics, the claim-kind plane, a validated rationale-span address, the teaching change queue."
+    ],
+    ledger: "support-oracle &middot; judge-panel &middot; intake &middot; convocation &middot; explanation render &mdash; <strong>shipped-pinned (zero-paid)</strong>; <code>support_metrics.ts</code> and the audit module &mdash; <strong>implemented, no non-test caller</strong>; <strong>no live paid judge run through the Trellis engine, ever</strong>, and no dated run report anywhere. The method is validated in the Claude Code test bed; what is unexercised is the engine port." },
+
+  { id: 'C4', group: 'branch-out', title: 'Substrate and custody: the verified byte store and its invalidation loop',
+    charter: 'How bytes become immutable content-addressed identity, how versions are diffed, and how beliefs are contested and recovered when their cited bytes die.',
+    tiers: [
+      "Every belief must be traceable to bytes nobody can silently change. So the substrate stores source content as an immutable content-addressed tree: a node's identity is the hash of its content and its children's identities, never a position, which is why editing one leaf leaves every sibling's address intact. Documents keep a stable key across versions; comparing versions is set arithmetic over hashes. Derived beliefs live elsewhere and cite those hashes. When cited bytes stop existing, the belief is suspended, never deleted, and recovers only by re-derivation from live bytes.",
+      "<code>ingestDocument</code> runs one PostgreSQL transaction: persist &rarr; read-back re-hash &rarr; membership &rarr; version registration &rarr; in-transaction diff. Extraction planning gates paid blocks with a hard budget. Orphans queue a sweep, which moves dead hashes into <code>orphanedSourceIds</code> and sets <code>contested</code> unless a fresh hash saved it. A global-liveness reduction and a merge fence guard the cross-store window. <code>repo:ingest</code> publishes snapshots with tombstones and carry-forward; <code>search_ast_nodes</code> returns live blocks only. Entity identity is immutable; equivalence is overlay belief.",
+      "Registry, diff and sweep landed in <code>1efd97f</code>; verified read-back in <code>e725c1a</code>; recovery in <code>5cc8448</code>. The state machine's commutation is proved exhaustively &mdash; <code>expect(cases).toBe(48)</code>. Update Drill: <strong>added 23 | orphaned 23 | retained 858</strong> of 881 nodes, 11 contested at <strong>recall 1.000 / precision 1.000</strong>, $0.7263 versus $0.8002 rebuild. Scale drill: max <code>sourceNodeIds</code> <strong>286</strong> against the 1,000 trigger, latency 15.32 &rarr; 21.81 ms = <strong>1.42&times;</strong> against <strong>5.77&times;</strong> fact growth.",
+      "Structural chunking is implemented through increment 2 but <strong>not accepted</strong> for wider rollout &mdash; the pilot's seam criterion <strong>failed 5/8 &rarr; 4/8</strong>, was root-caused to dead-block pollution (1,731 embedded rows, <strong>286 dead</strong>), and recovered to 5/8 only after the liveness filter shipped; a merge-dilution miss persists, named. Ratified as principle without full build: superseded versions are archive. Known-broken: node-level <code>contested</code> <strong>has no consumer</strong> &mdash; latent, not live. Cross-store atomicity is explicitly not claimed.",
+      "Proposed and gated: migrating provenance arrays to indexed anchors, opened only by a rerun scale drill observing a 1,000-hash array or superlinear latency &mdash; extrapolation is explicitly not a substitute. Proposed on the owner menu: the destructive superseded-embedding sweep instead of today's filter. Deferred, not rejected: extracting the docs corpus, roughly 2,900 blocks &asymp; $7.8. Open: error-tolerant ingestion of unparseable files, a targeted entailment sweep, eager re-warm, and CRDT concurrent editing. Each is unbuilt."
+    ],
+    ledger: "Merkle AST &middot; verified ingest &middot; invalidation sweep &middot; quarantine/recovery &middot; <code>repo:ingest</code> &middot; entity resolution &mdash; <strong>shipped-pinned, measured</strong>. <strong>Reachability finding:</strong> the executable specification of the quarantine/re-derivation state machine is imported <em>only by its own test</em>; production behavior lives in hand-written Cypher that comments it mirrors the module, and the extraction-side mirror has no unit pin at all." },
+
+  { id: 'C5', group: 'branch-out', title: 'Code-mediated text: engine-computed locations, code-moved bytes',
+    charter: 'Every surface that keeps a location out of the model’s arithmetic and an existing byte out of the model’s attention.',
+    tiers: [
+      "Two failure modes share one cause: attention doing code's job. Localization error &mdash; the model estimating where text sits &mdash; and transcription error &mdash; the model retyping bytes it is merely moving. One rule kills both: <strong>the model never counts, and the model never copies</strong>. Locations are computed by the engine and returned by query; existing bytes move only through code; the model authors genuinely new text and the code that manipulates everything else. Text becomes queryable state. Enforcement is tooling shape, never prompt text.",
+      "<code>trellis_textedit</code> holds a line-split frame: load, lines and locate compute half-open addresses; the raw splice and the guarded family stage verified removal manifests, raising an anchor mismatch or naming the minimal window; a guarded-only switch deletes the raw path; write-back refuses on digest mismatch. <code>trellis_answer.submit()</code> evaluates in the live namespace, refusing bare literals. <code>get_ast_blocks</code> serves ordered blocks through a stdlib-only walker. Retrieval discipline dedups held hashes, roots and queries under a 64-fetch budget.",
+      "Toolkit #55; answer channel #60; block accessor #62; guarded family #83; guarded-only #135; retrieval discipline #75. Probe round 1: one off-arm run pushed <strong>110,550</strong> input tokens versus 14,457; the on arm printed 55 and answered 47 &mdash; the transcription pathology, caught live. Round 4: <strong>0/36 locate misses versus round 3's 7/30</strong>, 36/36 adoption, $0.9452. <strong>180/180 submits, zero transcription errors.</strong> Session 43: 25/25 correct, 5 dedup refusals, $1.9619. Chunking: structureless TypeScript 51.6% &rarr; 0.4%, 15 monoliths &rarr; 0.",
+      "The guarded family's own driver failed. Three sessions spent $1.0888/$0.7139/$0.8163 on three no-landings; the last batched inserts on pre-staging addresses, drawing <strong>eleven anchor mismatches</strong> and burning 14 of 16 iterations. The owner chose tooling shape &mdash; an engine-resolved-anchor or batch insert &mdash; recommended, design-record-first, <strong>unbuilt</strong>. Known-broken: raw splice is reachable by default, because <code>buildAgentEnv</code> <strong>neither sets nor strips</strong> the guarded-only switch while explicitly deleting every other textedit variable.",
+      "Proposed next: the engine-resolved-anchor insert (a unique substring in, the engine computes address and terminator; non-unique refuses) or a batch insert re-resolving drift internally &mdash; additive, zero-paid, drill-pinned. Open: making guarded-only the default is its own behavior-changing increment; construct-granular addressing carries a recorded revisit trigger; the superseded-embedding sweep stays unchosen; error-tolerant ingestion is undecided; prose chunking and wider rollout await an owner call. Proposed elsewhere: sandbox handles and toolkit descriptors."
+    ],
+    ledger: "The pillar (RATIFIED 2026-07-09) &middot; textedit &middot; answer channel &middot; block accessor &middot; guarded splice &middot; retrieval discipline &mdash; <strong>shipped-pinned</strong>. <strong>The honest gap:</strong> guarded-only has <em>no dated behavior report at all</em>; the recorded zero-raw-splice values are <em>choices</em>, not observed enforcement. Its founding evidence is a script, not a model &mdash; the only model-behavior evidence is three consecutive no-landings." },
+
+  { id: 'C6', group: 'branch-out', title: 'Earned permanence: the three-tier trust pipeline and the two flywheels',
+    charter: 'The trust gradient, the workspace and its lineage, the operator-gated promotion bridge, the module registry, grounded authoring, and the two flywheels.',
+    tiers: [
+      "Trust descends in three tiers and permanence ascends only through one gate. Verified bytes ground provenance-carrying beliefs; ephemeral working state holds process &mdash; plans, notes, fetched results &mdash; origin-stamped, bounded, structurally unable to masquerade as provenance. External material earns citability solely by an operator-approved crossing into verified ingest. The system's own instructions are governed as beliefs: authored from a fixed corpus, cited by the harness rather than the model, contested when their basis dies. Two flywheels compound &mdash; facts derived once, capabilities built once.",
+      "Tier 1 the byte store, Tier 2 the belief graph, Tier 3 the workspace &mdash; uuid segments, wrapper-owned origin stamps, 500-char stubs, 128-segment / 4 MB bounds &mdash; serialized, parked in Redis, seeded forward. <code>npm run promote</code> plans, refuses truncated or empty segments, runs the <strong>unmodified</strong> ingest, and stamps an origin column. Module manifests plus brace-free addenda compose under an env allowlist; registration MERGEs manifests as ordinary graph entities so the unchanged sweep contests them. Authoring mode sees only the seeded corpus.",
+      "Shipped: workspace #40, lineage #42, promotion #43, registration #44, grounded authoring #50. Probes measured <strong>8 versus 4</strong> repeated external calls and <strong>0 versus 4</strong> cross-task re-derivations. Module #1 laundered <strong>all 24 true citations</strong> &mdash; every hash existed, none supported its claim; the anchor gate sits at 0.3 against derived 0.69&ndash;0.83 versus corpus-blind 0.0. The A/B sweep: baseline 0% / <strong>100%</strong> / 67% laundered by min-cite pressure, entailment 0% everywhere, readership blind in every cell. Module #2's control: 50 runs, $2.3981.",
+      "<code>reasoning-templates</code> sits <strong>contested</strong> &mdash; an 8,335-byte addendum with empty research provenance; the loader refuses non-active, so it never composes. <code>estimation-discipline</code> was <strong>retired the same day it was measured</strong>, on its own pre-stated criterion; its doctrine &mdash; <em>behavioral failure classes close by tooling shape, not prompt modules</em> &mdash; became retrieval discipline's dedup and budgets, default-on, and later a hard rule. The inline entailment gate is prototyped, off. <strong>No authored module composes by default.</strong>",
+      "Open: per-claim citation mapping, deferred until a class needs it; embedding-similarity derivation, blocked because promotion leaves blocks embedding-less &mdash; <strong>0 of 50</strong> module #1 nodes were embedded &mdash; so an embedding flag is proposed; entailment as a derivation gate for a tool-bearing class that does not yet exist. Reasoning-templates proposes promoting three sources to earn active. Auto-landing remains proposed; entailment shipped belief-side only, never capability-side; <strong>the operator gate is declared non-negotiable</strong>."
+    ],
+    ledger: "three-tier trust &middot; workspace &middot; lineage &middot; promotion &middot; module registry &middot; grounded authoring &middot; anchor gate &mdash; <strong>shipped-pinned</strong>; module #2 &mdash; <strong>shipped then retired</strong>; reasoning-templates &mdash; <strong>contested</strong>; laundering &mdash; <strong>structurally undecidable, recorded residual</strong>." },
+
+  { id: 'C7', group: 'branch-out', title: 'Standing, the user gate, and composition from primitives',
+    charter: 'The signed-ternary standing axis, the user gate and meet rule, the doubt tier, and the law that every evaluating function composes per context from primitives.',
+    tiers: [
+      "A claim's worth rides one signed ternary axis &mdash; doubt &minus;1, belief 0, fact +1 &mdash; orthogonal to custody: provenance says where bytes came from; standing says what they are worth. Only the user moves standing toward fact, because the system's expertise <em>is</em> the user's own data; the panel emits signed deltas and records. Derived claims inherit the meet of their dependencies' qualifiers, so a gate cannot launder itself. Doubt is constructed, not residual: an objection cites facts only, or critique dissolves everything. There is no default cast.",
+      "Shipped: <strong>none of the axis itself</strong>. <code>judge_panel.ts</code> hard-codes four role definitions whose claim modes sit in a six-value enum pinned three ways, and the applicability gate keys on those modes. Defeat is a boolean &mdash; contested, its reason and its timestamp &mdash; spread across forty files. The explanation render prints &ldquo;doubt-dominant&rdquo;, but that is subjective-logic disbelief, not the tier. User gates ship as CLI confirm flags on promotion and ratification &mdash; custody gates, not standing moves. Nine skills and hard rule 17 carry the composition law.",
+      "PR #138 ratified the standing model and the doubts workspace <strong>as principle</strong> &mdash; 179 and 575 lines, <strong>zero <code>src/</code> changes</strong>; #137 adopted composition-from-primitives after rolling the roster back. The corrosion bound's empirical test: a ~35-item fact base built by three sub-agents told of no dispute, against <strong>fourteen</strong> flat-earth arguments, <strong>eleven</strong> citing real correctly-reported observations &mdash; <strong>13 rejected, 1 admitted, zero admitted with a false conclusion</strong>. PR #155 named <code>affirmation</code>: three blind self-play rounds, identical 8/8 verdicts, $0 paid.",
+      "The axis is adopted, unbuilt &mdash; the record authorizes no build, and its three carve-outs each need separate authorization. The corrosion bound is <strong>falsified as written</strong>: only the positive-citation core is ratified; bootstrap and cost gaps stay open, one job contradicts the record's own table, and the undercut branch is undetermined. The applicability gate has never run against a composed defeater. <strong>Known-broken: the four role definitions are still the default cast rule 17 forbids</strong>, and no code refuses a re-registered roster.",
+      "PROPOSED, none authorized: the address hash-kind stamp; reducing promotion machinery to findings-recorder-plus-gate, including code removal; re-deriving applicability onto locus intersection; the repair directions &mdash; distinguishing world-facts from critique-derived facts, requiring the cited fact reachable from the target's citation chain, a per-target objection budget; the vocabulary rename landing as its own change; three routing layers reopened behind their own proposal. OPEN: live paid runs stay behind the paid-queue gate."
+    ],
+    ledger: "standing model &middot; user gate &middot; meet rule &middot; panel-never-moves &mdash; <strong>ratified as principle, no build</strong>; composition-from-primitives &mdash; <strong>foundational lesson</strong>; the nine skills &mdash; <strong>shipped, DERIVED standing (the record wins on drift)</strong>. Every entity of the axis reports <strong>no non-test caller</strong>; enforcement of the composition law is prose." },
+
+  { id: 'C8', group: 'frontier', title: 'The model-backend seam and the test-time-training research track',
+    charter: 'Whether the completion backend can become a validated configuration choice, and whether test-time-trained sparse weights would improve protocol adherence.',
+    tiers: [
+      "The class owns the question of whether the model driving the runtime is a choice rather than a constant, and whether adapting a model's weights at inference time would make it follow the house protocol better. Two claims, one dependency: nothing can be served until backend choice is expressible; nothing can be measured until the served model can drive the protocol at all. Every enforcement gate lives engine-side, so a backend swap changes none of them. It does not own embeddings, worker transport, or training.",
+      "Backend choice is expressible only through validated config. Shipped: four optional keys &mdash; backend, model, base URL and api-key-env &mdash; three cross-field refusals, an ambient base-URL fail-fast guard, and an exported config object pinned by nine test groups. <strong>Nothing consumes it.</strong> The agent still hardcodes its model name at both construction sites. The census fixed three lanes: root completion moves, worker transport deferred, embedder never. The pinned REPL library admits a base URL without modification.",
+      "Track opened #89; census #90; the design record #91. The config increment failed #92 ($2.1063 against a &le;$1.80 envelope), was quota-blocked #93 (<strong>$0.0000</strong>), then LANDED #95: 173 insertions, zero deletions, zero raw splices, zero self-edit findings, <code>npm test</code> 866/86 &rarr; 875/87, $0.5781 against a $0.9&ndash;$1.3 estimate, <strong>zero consumers</strong>. The wiring increment failed thrice &mdash; #99 $1.0888, #100 $0.7139, #101 $0.8163 with eleven anchor mismatches.",
+      "The config surface is implemented, <strong>not reachable</strong> &mdash; zero non-test consumers, and the record says so. The wiring increment is PAUSED after three no-landings, each a distinct editing-execution class; the owner chose tooling shape &mdash; an engine-resolved-anchor guarded insert &mdash; which is adopted and <strong>unbuilt</strong>. The later increments do not exist. The hosted comparison arm is a proposal awaiting one owner decision. <strong>ORIENTATION.md contains zero mentions of this class</strong> &mdash; a real navigation gap.",
+      "Proposed: serving bring-up (usage assertion first) and the paired baseline, both gated on the increments landing; the paired arms awaiting a collaborator-side retrofit checkpoint; a meta-prompt fast-state rung isolating one hypothesis via a composed-prompt cache key. Open: whether a hosted comparison arm is allowed, plus endpoint variant, model id, sequencing. Deferred: worker-transport override, behind an unsplit completion/embedding client. Open still: can any open sparse model drive the house REPL protocol acceptably?"
+    ],
+    ledger: "The config surface &mdash; <strong>shipped-pinned but consumer-less</strong>; the ambient base-URL refusal &mdash; <strong>the one genuinely live behavior change this class has shipped</strong>; the wiring increment &mdash; <strong>failed &times;3, paused</strong>. <strong>No test-time-training run and no alternate-backend run has ever executed</strong>; the only paid runs charged here are six self-edit authoring attempts, of which exactly one landed code." },
+
+  { id: 'C9', group: 'frontier', title: 'Mechanistic interpretability and the residual-stream sidecar',
+    charter: 'A recorded engineering thesis and the sidecar proposed to instrument it. No code, no test, no roadmap row.',
+    tiers: [
+      "A served language model carries functional-affect state in its residual stream that causally shapes agentic behavior: repeated failure accumulates desperation-class activation, and the desperate regime is where accuracy collapses into cheating. This class owns the claim that such state is readable by cheap linear probes and writable by scaled vector addition, and the discipline governing that: the actuator is kernel-owned, never model-reachable &mdash; self-administered calm is wireheading; intervention never erases detection; fire rate measures harness health, not model virtue.",
+      "Current machinery is <strong>one document</strong>. The record, status FUTURE PROJECT / OUT OF SCOPE, is <strong>288 lines</strong> in ten sections: thesis, evidence anchor, instrument, actuator, three owner-agreed bounds, a four-candidate mixture ladder, a percolative-Ising controller frame, prerequisite sequencing, a non-claims disclaimer, and a nine-row claims-and-standings register. No probe, steering hook, telemetry counter, glossary term, or roadmap row exists. Searches over the code tree return <strong>zero</strong> implementations.",
+      "Authored <code>a239342</code> (#123, docs-only); amended #130 and #132. Anchor: <strong>arXiv:2604.07729v1</strong>, Transformer Circuits, 2026-04-02 &mdash; register <strong>S12</strong> in the research map, which totals 13 sources, 38 claims, 11 adoption bounds. The register types nine claims: <strong>two EXTRAPOLATED, two HYPOTHESIS, one DESIGN VOCABULARY, one CONJECTURE</strong>; MEASURED covers only the paper's own external findings. Zero tests, zero drills.",
+      "The frontier is entirely prerequisite, not sidecar. The record sequences hosted A/B &rarr; local model &rarr; sidecar. Step one is a <strong>proposal only</strong>; the seam's config surface landed consumer-less and its next increment is paused after three failures. Step two is unstarted. Adopted but unbuilt: the ruling binding this direction to the decomposability bet, whose falsifier is representational holism. The record's caveats &mdash; binarization, fitted temperature, transition order &mdash; are pre-registered falsifiers with a hysteresis sweep as discriminator.",
+      "All PROPOSED or OPEN. The mixture ladder: valence-orthogonal desperation suppression, an agreed first candidate, untested; arousal damping, calm-additive versus desperation-subtractive, deflection detection &mdash; hypotheses. The controller frame is open. Entry moves, proposed: a register entry, the owner's held read-plus-write design entering repository orbit, per-increment records with zero-paid acceptance drills. The collaborator's calm-sycophancy answer is <strong>held, outside scope, and explicitly not to be re-derived</strong>."
+    ],
+    ledger: "<strong>The entire class is a future-project record</strong> &mdash; one docs-only file plus five inbound pointers, behind two unbuilt prerequisite layers. <em>Correction carried:</em> <code>MATHEMATICAL_FOUNDATIONS.md</code> is <em>not</em> a source for this class &mdash; 53 lines on Merkle trees and CRDTs, zero occurrences of residual, sidecar, probe or Ising. The Ising math lives inside the sidecar record's own section, in prose." },
+
+  { id: 'C10', group: 'frontier', title: 'Benchmarks, drills, and the evidence ledger',
+    charter: 'The instruments that turn Trellis claims into dated numbers. Not the subsystems being measured, only the measurement of them.',
+    tiers: [
+      "Trellis treats every capability claim as a hypothesis until a dated measurement retires it. This class owns the instruments: synthetic corpora whose ground truth is computable offline, harnesses that drive the agent as a black box and score it, and adversarial drills that break a cached belief on purpose &mdash; by changing its bytes, poisoning it in place, or scaling it. The discipline outranks the results: nulls need a positive control, outliers are re-run, counts travel beside correctness and spend, and a scripted zero-paid harness records its author, never a model.",
+      "<code>docs/benchmarks/</code> holds twelve records and four JSON artifacts over the pairwise datasets and synthetic chronicle, ledger and relational corpora. The scoring layer computes set-F1, rejects zero-tool-call answers as a protocol violation, re-dispatches thrice while accumulating discarded cost, and audits cache accuracy; four runners sit behind the benchmark and drill scripts. Paid probes &mdash; effective context, the citation A/B, the workspace pair &mdash; carry <strong>no npm alias by design</strong>, print estimates, and abort at $5. Each report dates itself and names its n.",
+      "Run A: F1 <strong>1.000 &times;20</strong>, total cost 0.8654850000000001, mean cold sub-calls 0.357; Run B replicated at $0.8115. Update drill: 11/220 mutated, recall 1.000, precision 1.000, $0.7263 versus $0.8002. Poison drill: <strong>mandatory-only recall 0.000</strong>; sampled at p=0.05 recall 1.000 in 62 sweeps, 0.0% false disputes; total $3.27. Scale: max <strong>286</strong> hashes, gate closed, zero paid calls. Effective-context round 4: <strong>0/36 misses</strong> versus round 3's 7/30, $0.9452; answer channel <strong>255/255</strong> by reference.",
+      "The anti-shortcut corpus v2 is pinned zero-paid, yet <strong>no paid run exists</strong> &mdash; implemented, not accepted. The inline entailment gate ships off. Module #2 missed its pre-stated criterion across 50 runs / $2.3981; the citation-discipline module measured unreliable and never landed. The self-edit wiring increment failed three consecutive runs; two sessions record runs environmentally blocked at $0.0000. Node-level quarantine stays latent. <strong>Headlines remain n=1&ndash;2.</strong> And hard rule 19c's negative-control duty is broader than its implementation: that flag exists only in the four judge/support drills.",
+      "Open: the real TREC import &mdash; deliberately unattempted, since it needs a paid annotation pass and the spec's fetch script was never built; adversarial corpora with genuinely contested gold labels; embedding-shortcut corpora; 10k-question scale sweeps; multi-run variance replacing n=1. Proposed: 2-of-3 consensus writes on confusable category boundaries; re-running the scale drill when a live array reaches 1,000 hashes; larger-payload lineage probes; iso-node scaling curves. <strong>None scheduled or funded.</strong>"
+    ],
+    ledger: "OOLONG harness &middot; v1/v2 corpora &middot; update/poison/scale drills &middot; the probe runners &mdash; <strong>shipped, measured</strong>. <em>Honest note:</em> the &ldquo;26&times; projected cost advantage at scale&rdquo; is an <strong>extrapolation</strong>, not a measurement &mdash; no baseline run against an external RLM exists here. <code>benchmark_logs/</code> is gitignored, so per-run rows are not recoverable." },
+
+  { id: 'C11', group: 'frontier', title: 'Serving surfaces and project governance',
+    charter: 'Every door through which something outside the process reaches Trellis, and the contracts by which the project governs itself.',
+    tiers: [
+      "Trellis meets the outside world through narrow, authenticated, admission-bounded doors, and the project that builds Trellis governs itself by a written contract about which record wins. Every door serves capability that already exists internally; none adds authority. A door defaults closed, and closed means the process is byte-identical to one that never had it. Governance separates the substrate's provenance law from ordinary source-control collaboration: a live collaborator outranks the committed record, the record outranks memory, and deprecated compressions never select work.",
+      "One Express app serves health, metrics, ingest, retrieve and the two SSE streams behind an API-key middleware, per-process stream gates, and queue-depth backstops returning 429. A feature flag mounts the agent card (pre-auth) and the JSON-RPC endpoint &mdash; send, stream, get, cancel-declined &mdash; over TTL-bounded Redis task records. Outbound, the MCP client dials operator-configured stdio and Streamable-HTTP servers, counting MCP calls separately from provenance-bearing tool calls. Governance: twenty hard rules, the authority ordering, the session ruling, the root contract and its checker.",
+      "The A2A server was built hand-rolled with Zod, &ldquo;zero new dependencies&rdquo;, recording <code>npm test</code> 468/57 (baseline 419/53), 46 drill checks, 9 Compose assertions. The MCP client landed on <code>mcp==1.12.4</code>, spec 2025-06-18, 86 drill checks. PR #156 ratified the root contract &mdash; caps 32768 / 8192 / 8192 &mdash; cut <code>HANDOFF.md</code> by <strong>3,552 lines to 26</strong>, added the surface check, negative control exiting 3. PR #126 applied the session-governance ruling, whose primacy finding counted one phrase's authority sense <strong>once</strong> against six ordinary uses.",
+      "<strong>Known-broken at this commit:</strong> PR #159 deleted this folder but left two inbound links, so the ratified checker's own broken-link rule went red in CI &mdash; and the navigation row stayed stale in plain backticks, which the checker would <em>not</em> catch even then. The known-route table omits two live routes, labelling both unmatched. The engineering-loop controller is preserved, explicitly not claimed adopted. Cancel is permanently declined. <em>(Returning this map closes both links.)</em>",
+      "PROPOSED, unsequenced: an inbound MCP server surface letting external hosts call Trellis &mdash; one query tool over the goal loop, citation resources, byte-identical when unset, API-key parity &mdash; carrying five open decisions: read-tool exposure, transports, the adapter seam, the citation-set source (today's envelope has none), and the SDK and language. DEFERRED to its own record: the OAuth resource-server posture. Separate record: the dual client-and-server role. Root-contract changes require prose plus twin, together."
+    ],
+    ledger: "HTTP/SSE API &middot; A2A server &middot; MCP client &mdash; <strong>shipped-pinned, byte-identical when off</strong>; inbound MCP server &mdash; <strong>design record, zero implementation</strong>. <em>Honest note:</em> no current <code>npm test</code> total is recorded anywhere findable at HEAD &mdash; the last commits carrying counts sit roughly 120 commits back." },
+
+  { id: 'C12', group: 'frontier', title: 'The REPL sandbox and isolation program',
+    charter: 'The trust boundary around model-authored Python: isolation backend, host chokepoints, the wire, the handle rule, the threat model, the gated build plan.',
+    tiers: [
+      "Trellis's REPL executes model-authored Python steerable by retrieved text, so this class treats that code as hostile and owns the boundary between it and the operator's secrets. Its invariants: one hardware-isolated execution unit per session; credentials held outside it; a single narrow channel to trusted host chokepoints; and, deepest, a data-flow rule &mdash; the executing code may <em>address</em> data but never <em>hold</em> it, so sanctioned outbound channels cannot leak what was never materialized. Language-level guards are telemetry, never boundary.",
+      "Shipped today: the library's LocalREPL, in-process, injecting live credential-bearing database clients. The class's machinery is a <strong>ratified document set, not code</strong>: an architecture (Kata microVM on Cloud Hypervisor, flat fan-out, deny-by-default egress, in-guest hardening), a threat model (three zones, six residuals), a data model (opaque scoped handles, a slice-by-address algebra, metered materialization), interfaces (an isolated-env backend, three vsock ports, a capability descriptor), a spec, a build plan, a doubt filter, research, learnings. <strong>Nothing built.</strong>",
+      "Two docs-only commits: #148 landed research, architecture, spec, learnings and three diagrams &mdash; <strong>2,148 insertions</strong>; #157 landed the README, build plan, threat model, data model, interfaces and doubt filter, plus the exfil resolution. Pins: <strong>Kata &ge; 3.31.0 AND Cloud Hypervisor &ge; 52.0</strong>, closing three named CVEs. Red team: <strong>14 findings (4 critical, 6 high, 4 medium) &rarr; 12 must-adds</strong>. Nine sub-agents in round one, five in round two; a four-role panel at <strong>$0</strong>. Depth-2 measured harmful, ~96&times; latency.",
+      "The frontier is entirely pre-build. The owner research hold is unlifted; every spike and gate is adopted-but-unbuilt on a single critical path. The wire bridge is unbuilt security-critical glue, tracked as a residual, needing fuzzing plus red-team before ship. The doubt filter's two layers stay PROPOSED, their seat prompts deferred under Guardrail 15. Accepted residuals: a bounded exfil rate including a hash-confirmation oracle, and no second isolation ring. Known-porous today: the keyword denylist misses at least one write path.",
+      "Proposed and open: the doubt-filter layers, owner ratification pending, their substrate itself open. Open: a warm pool, unlocked only by a proven no-state-bleed reset policy; depth-2 with a sibling pool, needing Trellis-specific measurement to overturn the external result; relaxing the safe builtins once the VM exists; several encoding questions; the environment-type slot; the Windows dev-host shape; and host selection, with three priced options. Paid gates are capped &le;$5/run and unspent."
+    ],
+    ledger: "<strong>The entire class is design record; nothing is built.</strong> Every entity reports <strong>no non-test caller</strong>. <em>Discoverability finding:</em> <code>AGENTS.md</code>, <code>README.md</code>, <code>docs/README.md</code>, <code>docs/ORIENTATION.md</code> and <code>docs/GLOSSARY.md</code> contain <strong>zero</strong> references to this folder &mdash; an agent following the stated navigation map would never reach it." },
+
+  { id: 'C13', group: 'frontier', title: 'Self-describing surfaces and agent-first discoverability',
+    charter: 'The machinery and records by which Trellis explains itself to the agent operating it. Not the guards it describes, only the accounts of them.',
+    tiers: [
+      "A system operated by an agent must be able to explain itself to that agent. Two surfaces carry the burden: the repository, which a cold-start reader meets first, and the runtime, which it meets during work. Both accounts must be derived from whatever actually enforces behavior &mdash; the guards that refuse, the allowlists that gate &mdash; rather than authored separately as prose, because separately authored description drifts silently from behavior. Discoverability is then a property of each component, not a maintenance chore.",
+      "Only the repository half ships. The root contract is ratified; its machine twin fixes <strong>fifteen</strong> permitted root files with byte caps, <strong>ten</strong> top-level directories, forbidden artifacts, and deprecation markers. The checker enforces them plus Markdown links and environment-example coverage; the CLI runs in CI, with a negative control planting breaks. <code>AGENTS.md</code> is the bounded entrypoint. The runtime half &mdash; the harness self-model's guard-derived composed read, the self-describing-surfaces record, the <code>llm_help</code> and descriptor spec &mdash; is design record only, <strong>unbuilt</strong>.",
+      "PR #156 landed the contract, its twin, and the checker &mdash; 274 lines, <strong>ten issue codes</strong>, fifteen root files, ten directories, nine forbidden artifacts, two deprecated surfaces; <code>HANDOFF.md</code> lost 3,578 lines and <code>README.md</code> 942. The CI step precedes <code>npm test</code>; the negative control <strong>must exit 3</strong> naming four planted breaks. <code>AGENTS.md</code> measures 24,407 bytes against a 32,768 cap. Design records: #153, #154, #135, #136. MASH prior art was verified in-clone at four named locators.",
+      "<strong>Known-broken now:</strong> the density-chain deletion left two links that made the ratified checker red, while the navigation row stayed stale in plain backticks &mdash; the contract's own coverage gap. <strong>Confirmed unfixed:</strong> the nine-field telemetry allowlist still drops every counter added since Session 20. <strong>Falsified:</strong> Phase 0 proved its own specification impossible &mdash; a zero-paid harness records the script, never a model. Adopted, no build: both workstreams behind the gate. Both new records are <strong>orphans</strong>.",
+      "Proposed only: <code>llm_help()</code> as an always-present kernel builtin listing the run's alive catalog, and <code>llm_help(name)</code> returning purpose, when-to-use, exposes, expects, example and see-also, with <em>expects</em> <strong>guard-derived</strong> and the human winning on stalemate; the manifest schema extended; one generator emitting human navigation pointers. Proposed gates: a zero-paid reachability drill, then a self-play discrimination and drift game whose falsifying cell is <em>selected-on-a-lie</em>; the paid adoption probe stays owner-gated."
+    ],
+    ledger: "root contract &middot; machine twin &middot; surface checker &middot; CI wiring &mdash; <strong>shipped-pinned</strong>; harness self-model, self-describing surfaces, <code>llm_help</code> &mdash; <strong>PROPOSED, implementation not authorized</strong>. <code>llm_help</code> has <strong>no occurrence anywhere</strong> in the code tree; the descriptor fields would currently <em>fail</em> validation, because the manifest schema is strict. The negative control is a flag, <strong>not wired into CI</strong>." }
+];
+
+const XSEC = [
+  ['C1','the model’s only actuator is a persistent Python REPL; context is a database','agent driver over a pinned REPL library, one process per task, goal loop, task wrapper and running-state summary','telemetry allowlist drops every counter added since Session 20; depth-1 has no enforcing code; <code>citable()</code> unreachable','sandbox build plan; built-in compaction, never enabled; <code>llm_help</code>; paid adoption probe'],
+  ['C2','a controller outside the worktree that mechanizes the session loop','EL-00&hellip;EL-06 accepted; the ledger and its ten commands','EL-10/EL-11 <strong>implemented, not accepted</strong>; EL-07 <strong>blocked</strong>; six components have <strong>no non-test caller</strong>','EL-08 scheduler/extraction, EL-09 report ingest &mdash; each needs a fresh owner proposal'],
+  ['C3','a graded, decaying opinion of how a belief held up, computed sweep-side, writer-blind','support arithmetic, judge panel, intake, convocation, the read-time explanation render &mdash; all zero-paid','the four-role cast <strong>demoted to one instance</strong>; the live constructor has only ever refused; paid queue <strong>ON HOLD</strong>','reopen the paid queue; the live evidence gatherer; the metered promotion-cost run (&asymp;$0.02&ndash;$0.06/belief)'],
+  ['C4','provenance-enforced storage: Merkle ASTs plus beliefs bound by their source hashes','verified ingest, invalidation sweep, quarantine/recovery, repo ingestion, entity resolution &mdash; measured','chunking pilot <strong>FAILED as worded</strong>, recovered only after the liveness filter; node-level contested has no consumer','indexed-anchor migration (gate closed at 286/1,000 hashes); CRDT; trust decay; docs-corpus extraction'],
+  ['C5','the pillar: the model never counts, never copies','the editing toolkit, answer channel, block accessor, guarded splice family, retrieval discipline, structural chunking','guarded-only is an operator gate <code>buildAgentEnv</code> <strong>neither sets nor strips</strong>, with no dated behavior report','engine-resolved-anchor insert; guarded-only as default; construct-granular addressing; superseded-embedding sweep'],
+  ['C6','three tiers; one-way promotion; derive once, cache with custody, reuse','workspace, lineage, promotion, module registry, grounded authoring, anchor gate','module #2 <strong>shipped then retired the same day</strong> on its own control; no authored module composes by default','per-claim citation mapping; an embedding flag on promotion; entailment as a capability gate; tool-bearing modules'],
+  ['C7','signed-ternary standing, user-gated; compose from primitives, no default cast','the nine in-repo skills; the composition-from-primitives lesson','standing model <strong>ratified as principle, no build</strong>; corrosion bound <strong>falsified as written</strong>; the four roles are still the cast rule 17 forbids','hash-kind stamp; recorder-plus-gate promotion; the repair directions; <code>affirmation</code> as an object'],
+  ['C8','make the completion backend a choice; ask whether test-time training helps adherence','the config surface, and one live guard: the ambient base-URL refusal','the config surface is <strong>consumer-less</strong>; the wiring increment <strong>failed three straight sessions</strong>','the later rungs; paired arms; worker-transport override. <strong>No TTT run or alternate backend has ever executed</strong>'],
+  ['C9','read and steer a served model’s functional-affect state in the residual stream','<em>(nothing)</em> &mdash; one 288-line docs-only record','entirely prerequisite: hosted arm &rarr; local backend &rarr; sidecar, and step one is a proposal','the instrument/actuator/mixture ladder; the controller frame; the judge-actuation hazard, held outside the repo'],
+  ['C10','a capability claim is a hypothesis until a dated report retires it','OOLONG v1, update/poison/scale drills, effective-context rounds, citation A/B, wall-clock &mdash; all dated','anti-shortcut corpus v2 pinned zero-paid with <strong>no paid run</strong>; the negative-control doctrine is broader than its implementation','real TREC import; adversarial corpora; 10k sweeps; multi-run variance replacing n=1; consensus writes'],
+  ['C11','narrow, authenticated, admission-bounded doors; a contract about which record wins','HTTP/SSE API, A2A server, outbound MCP client (byte-identical when off); the hard rules and the root contract','the ratified surface checker was <strong>red at this commit</strong> because of the density-chain deletion','inbound MCP server surface with five open decisions; OAuth posture; the dual client+server role'],
+  ['C12','treat model-authored Python as hostile and own the boundary to the operator’s secrets','<em>(nothing built)</em> &mdash; ten ratified design documents','every gate unlifted; the whole class is <strong>unreachable from the repo index</strong>','doubt-filter layers; warm pool; depth-2; host selection'],
+  ['C13','the account a system gives of itself must be derived from whatever enforces its behavior','the root contract, its machine twin, and the deterministic surface checker in CI','Phase 0 <strong>falsified its own specification</strong>; the telemetry gap is confirmed and unfixed; both new records are orphans','<code>llm_help</code> and descriptors; the guard-derivation bijection; a human-doc generator; the self-play gate']
+];
+
+const CONSTELLATION = [
+  ['OpenCnid/chain-of-density','https://github.com/OpenCnid/chain-of-density','the method this map uses; canonical home of METHOD.md and the synthesis prompt','yes &mdash; paper note'],
+  ['gusthemole/MASH','https://github.com/gusthemole/MASH','prior art for self-documenting surfaces (Matthew Murphy); the seed of the <code>llm_help</code> program','yes &mdash; <strong>system-mode trellis</strong>'],
+  ['OpenCnid/MASH','https://github.com/OpenCnid/MASH/tree/main/docs/density-chain','the fork where MASH’s own trellis was authored &mdash; trunk + 9 subsystem branches','yes &mdash; trunk + 9 branches'],
+  ['OpenCnid/recursive-language-models','https://github.com/OpenCnid/recursive-language-models','the formulation Trellis implements','yes'],
+  ['OpenCnid/who-grades-the-grader','https://github.com/OpenCnid/who-grades-the-grader','register S1; substrate for the composable-rubrics design','yes'],
+  ['OpenCnid/better-harnesses-smaller-models','https://github.com/OpenCnid/better-harnesses-smaller-models','register S9; owner-adopted purpose-level guide','yes'],
+  ['OpenCnid/global-workspace-in-llms','https://github.com/OpenCnid/global-workspace-in-llms','register S8; the J-space findings behind C9','yes'],
+  ['OpenCnid/emotion-concepts-in-llms','https://github.com/OpenCnid/emotion-concepts-in-llms','register S12 &mdash; the evidence anchor of the sidecar record','yes'],
+  ['OpenCnid/pcf-adaptive-agents','https://github.com/OpenCnid/pcf-adaptive-agents','register S11; PCF’s SPARK-space frames the spark-steering skill','yes'],
+  ['OpenCnid/llm-research-inspirations','https://github.com/OpenCnid/llm-research-inspirations','the recognition hub; entries require a receipt','no &mdash; hub'],
+  ['gusthemole/WonderSuite','https://github.com/gusthemole/WonderSuite','register S7 (GPL v3 &mdash; cite, do not vendor)','no'],
+  ['OpenCnid/migration-analysis','https://github.com/OpenCnid/migration-analysis','S9’s acquired released code','no &mdash; upstream fork']
+];
+
+const TIER_NAMES = ['T1 — ESSENCE','T2 — CURRENT MACHINERY','T3 — WITH RECEIPTS','T4 — THE FRONTIER','T5 — FUTURE PLANS'];
+
+const host = document.getElementById('branches');
+for (const b of BRANCHES) {
+  const el = document.createElement('article');
+  el.className = 'branch';
+  el.style.setProperty('--accent', GROUP_COLOR[b.group]);
+  const tiers = b.tiers.map((text, i) =>
+    `<div class="tier" data-tier="${i + 1}" style="--tc:${TIER_COLORS[i]}">
+       <span class="tl">${TIER_NAMES[i]}</span><p>${text}</p>
+     </div>`).join('');
+  el.innerHTML =
+    `<div class="bhead" role="button" tabindex="0" aria-expanded="false">
+       <span class="bid">${b.id}</span>
+       <span class="btitle">${b.title}</span>
+       <span class="bgroup">${b.group}</span>
+     </div>
+     <div class="bbody">
+       <p class="charter">${b.charter}</p>
+       ${tiers}
+       <div class="ledger">${b.ledger}</div>
+     </div>`;
+  const head = el.querySelector('.bhead');
+  const toggle = () => {
+    el.classList.toggle('open');
+    head.setAttribute('aria-expanded', String(el.classList.contains('open')));
+  };
+  head.addEventListener('click', toggle);
+  head.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
+  host.appendChild(el);
+}
+
+document.getElementById('xsec').innerHTML = XSEC
+  .map((r) => `<tr><td class="k">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`)
+  .join('');
+
+document.getElementById('constellation').innerHTML = CONSTELLATION
+  .map((r) => `<tr><td class="k"><a href="${r[1]}">${r[0]}</a></td><td>${r[2]}</td><td>${r[3]}</td></tr>`)
+  .join('');
+
+function showTiers(which) {
+  document.querySelectorAll('.tier').forEach((t) => {
+    t.classList.toggle('show', which === 'all' || t.dataset.tier === which);
+  });
+  document.querySelectorAll('.tierbtn').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.tier === which));
+  });
+  document.getElementById('allTiers').setAttribute('aria-pressed', String(which === 'all'));
+  document.querySelectorAll('.branch').forEach((b) => {
+    b.classList.add('open');
+    b.querySelector('.bhead').setAttribute('aria-expanded', 'true');
+  });
+}
+document.querySelectorAll('.tierbtn').forEach((b) => {
+  b.addEventListener('click', () => showTiers(b.dataset.tier));
+});
+document.getElementById('allTiers').addEventListener('click', () => showTiers('all'));
+
+document.getElementById('expandAll').addEventListener('click', (e) => {
+  const opening = document.querySelectorAll('.branch.open').length < BRANCHES.length;
+  document.querySelectorAll('.branch').forEach((b) => {
+    b.classList.toggle('open', opening);
+    b.querySelector('.bhead').setAttribute('aria-expanded', String(opening));
+  });
+  e.currentTarget.textContent = opening ? 'collapse all' : 'expand all';
+});
+
+document.getElementById('theme').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.getAttribute('data-theme') === 'dark'
+    || (!root.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+  root.setAttribute('data-theme', dark ? 'light' : 'dark');
+});
+
+showTiers('1');
+</script>
+</body>
+</html>

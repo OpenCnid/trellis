@@ -21,3 +21,10 @@ fixtures/doubts_workspace/*.md -text
 # Benchmark drill outputs are preserved evidence; keep their bytes stable
 # when moving between Windows and Unix checkouts.
 docs/benchmarks/artifacts/*.json -text -diff
+# The density-trellis checker is plain ESM loaded by vitest through vite's
+# transform. A CRLF checkout makes that import fail with a bare
+# `SyntaxError: Invalid or unexpected token` and no stack (observed July 22,
+# 2026 on a Windows rebase). Linux CI checks the file out as LF and never sees
+# it, so the breakage is Windows-only and invisible to the offline job — pin
+# the endings rather than rely on the platform.
+tools/density-chain/*.mjs text eol=lf

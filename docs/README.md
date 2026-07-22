@@ -4,20 +4,24 @@ Trellis is document-driven (DDD): design records lead, implementation
 follows, and every document is part of the system's accumulated
 experience. Authority is explicit — **code > glossary > prose** — and
 each document below states whether it is living doctrine, measured
-evidence, or preserved history. A session loads root `AGENTS.md` first,
-then uses `ORIENTATION.md` and the task's governing source records; the
-root `README.md` is a bounded router.
+evidence, or preserved history. A session loads root
+[`AGENTS.md`](../AGENTS.md) first, then uses
+[`ORIENTATION.md`](ORIENTATION.md) and the task's governing source
+records; the root [`README.md`](../README.md) is a bounded router.
+
+Paths here are markdown links, not backticked strings, so
+`npm run check:repo-surface` fails when one goes stale.
 
 ## Reading order
 
 ### 1. Orientation (start here)
 
-- **Root `AGENTS.md`** — the entry point for coding agents, CLIs, and
+- **Root [`AGENTS.md`](../AGENTS.md)** — the entry point for coding agents, CLIs, and
   harnesses: the study protocol, the navigation map (which directory
   owns what; where each behavior's enforcement and pins live), and the
   permanent hard rules. Deliberately invariant-only; the collaborator's
   live task supplies volatile objective and scope.
-- **Root `README.md`** — the bounded repository router and fast path.
+- **Root [`README.md`](../README.md)** — the bounded repository router and fast path.
 - **[`operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md)** —
   the full system explanation and operator manual formerly housed at root.
 - **[`ORIENTATION.md`](ORIENTATION.md)** — the chain-of-density
@@ -30,7 +34,7 @@ root `README.md` is a bounded router.
   every term that carries architectural load. If prose conflicts with
   this file, the prose has a defect; if this file conflicts with code,
   the code wins.
-- **Root `HANDOFF.md`** — a deprecated compatibility router. It contains no
+- **Root [`HANDOFF.md`](../HANDOFF.md)** — a deprecated compatibility router. It contains no
   objective or current baseline and is never a source of current work.
 - **[`COLLABORATOR_BRIEFING.md`](COLLABORATOR_BRIEFING.md)** — the
   three-altitude briefing for a technically fluent outsider: where the
@@ -135,7 +139,25 @@ root `README.md` is a bounded router.
   record, and genuine ambiguity is one clarifying question, then
   action. Carries the verbatim scoping note and the application
   record.
-- `ARCHITECTURE.md`, `SYSTEM_ARCHITECTURE.md`, `TECHNICAL_SPEC.md` —
+- **[`REPOSITORY_ROOT_CONTRACT.md`](architecture/REPOSITORY_ROOT_CONTRACT.md)**
+  — **RATIFIED July 21, 2026**: the repository's own surface as a
+  machine-checkable contract — permitted root files with byte caps,
+  permitted directories, deprecation markers, and the link and
+  environment-coverage rules. Prose and machine twin change together,
+  and `npm run check:repo-surface` (plus its `--negative-control`)
+  is what proves it.
+- **[`SELF_DESCRIBING_SURFACES.md`](architecture/SELF_DESCRIBING_SURFACES.md)**
+  and **[`LLM_HELP_SPEC.md`](architecture/LLM_HELP_SPEC.md)** —
+  **PROPOSED / UNRATIFIED (July 21, 2026)**: the program for surfaces
+  that describe themselves to the agent operating them, with the
+  description *derived from the guards that enforce behavior* rather
+  than authored beside them. Prior art credited to MASH
+  (Matthew Murphy). Companion:
+  **[`HARNESS_SELF_MODEL.md`](architecture/HARNESS_SELF_MODEL.md)** —
+  **principle endorsed, implementation not authorized**.
+- [`ARCHITECTURE.md`](architecture/ARCHITECTURE.md),
+  [`SYSTEM_ARCHITECTURE.md`](architecture/SYSTEM_ARCHITECTURE.md),
+  [`TECHNICAL_SPEC.md`](architecture/TECHNICAL_SPEC.md) —
   **historical (Phase 1 MVP era)**, preserved as the record of the
   original substrate design. Read them for lineage, not current truth.
 
@@ -197,7 +219,26 @@ way it was; the system-level framing has since moved on (root
 `README.md`, "What Trellis is").
 
 Active research/planning tracks also live here, one directory per
-program (the `engineering-loop/` pattern):
+program (the [`engineering-loop/`](product/engineering-loop/ROADMAP.md)
+pattern):
+
+- **[`repl-sandbox/`](product/repl-sandbox/README.md)** — the isolation
+  program for the RLM's Python REPL. **DESIGN records; decisions owner-ratified
+  July 20–21, 2026; NOTHING BUILT and owner-gated.** Today the REPL runs
+  model-authored Python in-process on the host with live database credentials in
+  the namespace; this program is the boundary that does not yet exist. Its
+  load-bearing move is a data-flow rule rather than content inspection — the
+  executing code may *address* data but never *hold* it, so a sanctioned outbound
+  channel cannot leak what was never materialized
+  ([`DATA_MODEL`](product/repl-sandbox/REPL_SANDBOX_DATA_MODEL.md)). Read
+  [`README.md`](product/repl-sandbox/README.md) first, then
+  [`ARCHITECTURE`](product/repl-sandbox/REPL_SANDBOX_ARCHITECTURE.md),
+  [`THREAT_MODEL`](product/repl-sandbox/REPL_SANDBOX_THREAT_MODEL.md) and
+  [`BUILD_PLAN`](product/repl-sandbox/REPL_SANDBOX_BUILD_PLAN.md). One record is
+  **not** ratified —
+  [`DOUBT_FILTER`](product/repl-sandbox/REPL_SANDBOX_DOUBT_FILTER.md) is
+  **PROPOSED**, composes the `-1` doubt tier, and is defense in depth, never the
+  boundary.
 
 - **[`epistemic-support/`](product/epistemic-support/PROGRAM_CONTEXT.md)**
   — the epistemic-support program (doctrine ADOPTED July 16, 2026 —
@@ -218,11 +259,12 @@ program (the `engineering-loop/` pattern):
   Its `-1` tier is `docs/architecture/DOUBTS_WORKSPACE.md` (§14
   ratification).
 
-  **Read `JUDGE_COMPOSITION_GAME.md` first.** It is the ratified
+  **Read [`JUDGE_COMPOSITION_GAME.md`](product/epistemic-support/JUDGE_COMPOSITION_GAME.md)
+  first.** It is the ratified
   canonical record for how judges are composed — twenty rules that are
   binding program law, cited by number and never restated — and it is
   the most instructive document the program has. Its companion is
-  `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`, which states the
+  [`COMPOSITION_FROM_PRIMITIVES.md`](architecture/COMPOSITION_FROM_PRIMITIVES.md), which states the
   principle in general form: judges compose per context from parameter
   registries, and **there is no default cast**. Several older records
   below encode a standing four-judge roster and are being corrected;
@@ -231,39 +273,49 @@ program (the `engineering-loop/` pattern):
   versioned as project skills at [`.claude/skills/`](../.claude/skills/README.md)
   — loaded for anyone working in the repo, governed by the records above.
 
-  `PRIMITIVE_ENCODING_AUDIT.md` (FINDINGS, July 19, 2026) is what that
+  [`PRIMITIVE_ENCODING_AUDIT.md`](product/epistemic-support/PRIMITIVE_ENCODING_AUDIT.md) (FINDINGS, July 19, 2026) is what that
   correction has not yet reached: five verified statements about bytes
   in this repository, each with the command that re-checks it. The
   engine froze the two layers S10 presented as examples and dropped or
   left decorative the two it called primitive — `orientation` is
   specified four times in ratified `RECONCILIATION.md` and appears
-  nowhere in `src/`, and AB-7 has no enforcement code. Findings only;
+  nowhere in [`src/`](../src/), and AB-7 has no enforcement code. Findings only;
   every correction named there is an owner act by dated entry.
 
-  `JUDGE_COMPOSITION_CEREMONY.md` (DESIGN, July 19, 2026) is how that
+  [`JUDGE_COMPOSITION_CEREMONY.md`](product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md) (DESIGN, July 19, 2026) is how that
   governance cashes out in a promotion: judges, taxonomies and anchors
   are all composed at ceremony time from a descriptive characterization
   of the REPL's fact and belief spaces, by a composer that never sees
   the candidate.
 
-  Then: `RECONCILIATION.md` (RATIFIED July 18, 2026) is the panel law
-  and governs `FOUR_JUDGE_DESIGN.md` / `FOUR_JUDGE_BASIC_MODEL.md`
+  Then: [`RECONCILIATION.md`](product/epistemic-support/RECONCILIATION.md)
+  (RATIFIED July 18, 2026) is the panel law
+  and governs [`FOUR_JUDGE_DESIGN.md`](product/epistemic-support/FOUR_JUDGE_DESIGN.md)
+  / [`FOUR_JUDGE_BASIC_MODEL.md`](product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md)
   wherever they differ — their co-equality formally ended;
-  `PROGRAM_CONTEXT.md` is the entry point, orientation, and owner
-  decision record; `RESEARCH_MAP.md` the evidence register (its own
+  [`PROGRAM_CONTEXT.md`](product/epistemic-support/PROGRAM_CONTEXT.md)
+  is the entry point, orientation, and owner
+  decision record; [`RESEARCH_MAP.md`](product/epistemic-support/RESEARCH_MAP.md)
+  the evidence register (its own
   header carries the authoritative source/claim counts;
   adoption-bounds register in §9); `FOUR_JUDGE_BASIC_MODEL.md` (S10,
   the collaborator's source) is where the primitives are stated —
   registries, not judges; `FOUR_JUDGE_DESIGN.md` the originating
   architecture, read with RECONCILIATION beside it;
-  `JUDGE_CONTRACT_TEMPLATE.md` the prompt-facing frames;
-  `COMPOSABLE_RUBRICS_DESIGN.md` the rubric-construction direction
+  [`JUDGE_CONTRACT_TEMPLATE.md`](product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md)
+  the prompt-facing frames;
+  [`COMPOSABLE_RUBRICS_DESIGN.md`](product/epistemic-support/COMPOSABLE_RUBRICS_DESIGN.md)
+  the rubric-construction direction
   (owner ruling 4, BUILD — its "adaptive means selection" definition
-  is under re-decision); `JUDGE_INTAKE_DESIGN.md` and
-  `JUDGE_CONVOCATION_DESIGN.md` the two implemented slices;
-  `ORACLE_DRILL_PROPOSAL.md` the first drill's
+  is under re-decision);
+  [`JUDGE_INTAKE_DESIGN.md`](product/epistemic-support/JUDGE_INTAKE_DESIGN.md) and
+  [`JUDGE_CONVOCATION_DESIGN.md`](product/epistemic-support/JUDGE_CONVOCATION_DESIGN.md)
+  the two implemented slices;
+  [`ORACLE_DRILL_PROPOSAL.md`](product/epistemic-support/ORACLE_DRILL_PROPOSAL.md)
+  the first drill's
   record (implemented; its header carries the observed runs);
-  `IEG_TEACHINGS.md` the July 17, 2026 teaching record behind the
+  [`IEG_TEACHINGS.md`](product/epistemic-support/IEG_TEACHINGS.md)
+  the July 17, 2026 teaching record behind the
   register's S13 rows (the collaborator's UIT-IEG framework,
   registered at his request — R-32…R-38, synthesis §4.11; design
   vocabulary only per AB-1): the laws, the understanding ladder,
@@ -277,10 +329,8 @@ program (the `engineering-loop/` pattern):
   — the former root technical roadmap and session ledger through Session 71,
   preserved for history and never used to select current work.
 - **[`archive/ROADMAP_HISTORY.md`](archive/ROADMAP_HISTORY.md)** — older
-  progress entries preserved verbatim.
-
-- **`archive/ROADMAP_HISTORY.md`** — older dated engineering sessions,
-  preserved verbatim as history rather than maintained as a live ledger.
+  dated engineering sessions, preserved verbatim as history rather than
+  maintained as a live ledger.
 
 ---
 *For immediate tactical setup (Docker, env vars, running the code, API

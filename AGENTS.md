@@ -109,27 +109,29 @@ so discovery reads live blocks only.
 
 1. **This file, fully.** The navigation tables below are the map.
 2. **The collaborator's live task.** It is the current objective. Do not
-   recover an objective from the deprecated `HANDOFF.md`, the archived
+   recover an objective from the deprecated [`HANDOFF.md`](HANDOFF.md), the archived
    technical roadmap, a branch name, or an old progress entry. If no
    live task exists, the un-tool is the whole move: ask exactly one
    clarifying question in the chat channel and select no work of your
    own (rule 21).
-3. **`docs/GLOSSARY.md`** — one-line canonical definitions for every
+3. **[`docs/GLOSSARY.md`](docs/GLOSSARY.md)** — one-line canonical definitions for every
    load-bearing term (RLM, contested, promotion, module, workspace,
    quarantine, standing, …). Read before any prose that uses them.
-4. **`docs/ORIENTATION.md`** — one system at five densities, D0 through
+4. **[`docs/ORIENTATION.md`](docs/ORIENTATION.md)** — one system at five densities, D0 through
    D4. Read D0–D2 always (under 700 words together); read D3 before
    designing anything; use D4 as the concept→authority index. Stop at
-   the first density that answers your question. The root `README.md` is
+   the first density that answers your question. The root [`README.md`](README.md) is
    only a bounded router; the full operator manual lives at
-   `docs/operations/OPERATOR_MANUAL.md`.
+   [`docs/operations/OPERATOR_MANUAL.md`](docs/operations/OPERATOR_MANUAL.md).
 5. **Task-directed depth** — use §2/§3 below to find the enforcement
    home of whatever you are changing, and read THAT file plus its
    pinned test before designing anything.
-6. **Evidence and history** — `docs/benchmarks/*` for measured claims;
-   `docs/archive/ROADMAP_HISTORY.md` and
-   `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` only when historical
-   session evidence is actually needed.
+6. **Evidence and history** — [`docs/benchmarks/`](docs/benchmarks/) for
+   measured claims;
+   [`docs/archive/ROADMAP_HISTORY.md`](docs/archive/ROADMAP_HISTORY.md)
+   and
+   [`docs/archive/TRELLIS_ROADMAP_DEPRECATED.md`](docs/archive/TRELLIS_ROADMAP_DEPRECATED.md)
+   only when historical session evidence is actually needed.
 
 **Directory-scoped rules also apply.** The nearest `AGENTS.md` to the
 file you are editing adds local rules on top of this one; check for one
@@ -174,6 +176,10 @@ chain.
 
 ## 2. Navigation map (where things live)
 
+Every Path cell is a markdown link so the surface checker resolves it.
+Paths named *inside* a description are an inventory of that row's
+contents and stay backticked; a path that is a destination is a link.
+
 | Path | What lives there |
 |---|---|
 | [`src/core/ingestion/`](src/core/ingestion/) | The verified ingest transaction (persist → read-back re-hash → membership → Merkle diff) and extraction cost planning |
@@ -190,7 +196,7 @@ chain.
 | [`src/workers/`](src/workers/) | BullMQ consumers; pure job-parsing/prompt-selection modules beside each worker (`extraction_job.ts` holds both extraction prompts) |
 | [`src/rlm/`](src/rlm/) | The Python RLM harness: `trellis_agent.py` (kernel prompt + composition), `trellis_tools.py` (DB tools), `trellis_scaffold.py` (task wrapper, UPSUM, staged helpers), `trellis_blocks.py` (stdlib-only, parity-pinned), plus the `answer`/`workspace`/`textedit`/`modules`/`mcp` modules |
 | [`src/benchmarks/`](src/benchmarks/) | Probe machinery: effective-context suites, est suite truths, OOLONG scoring |
-| [`src/frontend/`](src/frontend/) | Next.js dev-only UI — has its own `AGENTS.md`; deferred, don't touch unasked |
+| [`src/frontend/`](src/frontend/) | Next.js dev-only UI — has its own [`AGENTS.md`](src/frontend/AGENTS.md); deferred, don't touch unasked |
 | [`modules/`](modules/) | Protocol modules: `module.json` manifest + brace-free addendum text |
 | [`scripts/`](scripts/) | Operator CLIs (`repo:ingest`, `promote`, `modules:*`) and live zero-LLM drills (`test_*.py`, `test_*.ts`) |
 | [`docs/architecture/`](docs/architecture/) | Living doctrine (design records lead implementation) |
@@ -198,6 +204,8 @@ chain.
 | [`docs/operations/`](docs/operations/) | Operator manual, runbook, deployment records |
 | [`docs/reference/`](docs/reference/) | HTTP, SSE, and external protocol references |
 | [`docs/product/`](docs/product/) | PRDs, benchmark specs, and active programs. Standing and reading order for the epistemic-support records: §2.1 |
+| [`docs/product/repl-sandbox/`](docs/product/repl-sandbox/) | Isolation program for the RLM's Python REPL — threat model, handle data model, build plan, PROPOSED doubt filter. Design ratified, **nothing built** |
+| [`docs/density-chain/`](docs/density-chain/), [`tools/density-chain/`](tools/density-chain/) | Branching chain-of-density map — trunk + 13 subsystem-class branches — and the checker that keeps it honest. Orientation aid only, subordinate to this file and [`docs/ORIENTATION.md`](docs/ORIENTATION.md). The checker stores nothing: routing derives from the map, currency from git |
 | [`.claude/skills/`](.claude/skills/) | Project skills auto-loaded by Claude Code and inventoried for every harness. Roster and triggers: [`.claude/skills/README.md`](.claude/skills/README.md) — read it before assuming no skill covers the task. The record each skill derives from is canonical over it |
 | [`docs/archive/`](docs/archive/) | Preserved history (verbatim, never edited) |
 | [`tools/repository-surface/`](tools/repository-surface/) | Machine root contract and deterministic repository-surface checker (`npm run check:repo-surface`) |
@@ -220,9 +228,9 @@ are amended only by dated entry; **DESIGN / PROPOSED** leads an
 implementation without outranking the record it was written under;
 **IMPLEMENTED** marks a landed slice; **SOURCE ARTIFACT** takes addenda,
 not edits; **DEPRECATED / HISTORICAL** never establishes current state;
-**DERIVED** (skills, memory) loses to its record on drift.
+**DERIVED** (skills, harness config, memory) loses to its record on drift.
 
-**The per-record index lives at `docs/ORIENTATION.md` D4 (Record
+**The per-record index lives at [`docs/ORIENTATION.md`](docs/ORIENTATION.md) D4 (Record
 standing).** It moved there on July 22, 2026: a standing value changes
 every time a record is ratified or a slice lands, and this file carries
 only invariants (see the Status header). Rule 18 governs how you consume

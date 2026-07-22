@@ -70,8 +70,10 @@ deleted. Its code and program records remain preserved in their existing homes.
 
 ## 5. Directory roles
 
-- `.claude/` — project skill auto-discovery for Claude Code; the root agent map
-  links here explicitly for other readers.
+- `.claude/` — project skill auto-discovery **and committed harness
+  configuration** for Claude Code; the root agent map links here explicitly for
+  other readers. Contents are DERIVED (`AGENTS.md` §2.1) and governed by their
+  own records, never by this contract — see [`.claude/README.md`](../../.claude/README.md).
 - `.github/` — CI and community metadata.
 - `data/` — committed durable corpora and drill state.
 - `docs/` — doctrine, designs, references, operations, evidence, and archive.
@@ -115,3 +117,23 @@ A new root entry requires a concrete auto-discovery or zero-context navigation
 need that cannot be met from an existing directory. Change the prose record and
 machine twin together, run both normal and negative-control checks, and update
 all affected paths in the same commit. Convenience alone is not sufficient.
+
+## 8. Amendments
+
+**July 22, 2026 — `.claude/` role widened to name harness configuration.**
+§5 described `.claude/` as "project skill auto-discovery for Claude Code". That
+became false by omission when `.claude/settings.json` was committed, carrying
+`Stop` and `SessionStart` hooks for the density-trellis staleness checker. The
+role now names both, and states that contents are DERIVED and governed by their
+own records.
+
+Prose-only: no machine-twin change was required, because `rootDirectories` is a
+bare allowlist of top-level names and §6 does not enumerate directory roles among
+what the checker proves. Both checks were re-run.
+
+This amendment deliberately does **not** extend the contract to govern what is
+inside `.claude/`. An in-directory allowlist would need a new twin field, a
+checker branch, a unit pin, and a fresh plant in the negative-control fixture —
+and would then make every added skill a contract edit. §7 bars it directly
+(convenience is not sufficient) and no measured failure funds it. The standing of
+`.claude/` contents is carried where standing belongs: `AGENTS.md` §2.1.
