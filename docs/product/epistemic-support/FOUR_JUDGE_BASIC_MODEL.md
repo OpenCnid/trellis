@@ -24,6 +24,20 @@ frame built on this is RESEARCH_MAP §4.10 (the externality principle).
 
 ---
 
+> **Dated supersession note (July 21, 2026 — owner Cnid + collaborator Matt, via self-play).**
+> The per-seat `hyperplane_parameters` YAML below (the UHE four-plane model) was the program's
+> **starting point** for a composed judge/defeater seat (S10, July 16, 2026). The **live per-seat
+> schema has since evolved** to `purpose` · `claim_modes` · flat `select` · `orientation` ·
+> `taxonomy` · `blind_to`, ratified in [`JUDGE_CONTRACT_TEMPLATE.md`](JUDGE_CONTRACT_TEMPLATE.md)
+> (Layer rule). A blind self-play evaluation this session (two runs, blind judge panels, `$0` paid)
+> found the added `taxonomy` + `blind_to` are the stronger primitives; that flat `select` beat
+> **both** the rigid four-plane buckets *and* a plane-categorized `select` at the per-seat level;
+> and that the four-plane structure's only plausible remaining home is **panel-coverage
+> composition** (spanning seats across planes) — a concept, not a per-seat field, and untested.
+> *"We outgrew the UHE-based per-seat judges"* (Matt). The body below is preserved **verbatim** as
+> the S10 provenance record; nothing in it is edited. Provenance cross-refs:
+> [`DOUBTS_WORKSPACE.md`](../../architecture/DOUBTS_WORKSPACE.md) §8 (citation correction).
+
 ## The basic model
 
 - The four hyperplanes are not themselves four judges. They are expandable parameter registries:

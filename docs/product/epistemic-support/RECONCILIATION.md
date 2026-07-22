@@ -103,6 +103,17 @@ made mechanical, from [`COMPOSABLE_RUBRICS_DESIGN.md`](COMPOSABLE_RUBRICS_DESIGN
 (JUDGE_CONTRACT_TEMPLATE §6.4); each is invariant across invocations
 and carries no concrete belief.
 
+> **Dated supersession note (July 21, 2026, via self-play).** The worked role YAMLs
+> below use S10's `hyperplane_parameters` (four-plane) per-seat structure. That per-seat
+> structure is **superseded**: the live schema uses flat `select` (with `taxonomy` +
+> `blind_to` retained — both validated). A blind self-play evaluation this session found
+> the four-plane buckets do not earn their place at the per-seat level, and that a
+> plane-categorized `select` is no better; the mapping to flat `select` is mechanical
+> (each `plane.parameter` becomes a flat `select` entry). These reconstructions are
+> preserved as the §10.1-item-b work; a full rewrite to flat `select` is a separate
+> follow-up. See [`FOUR_JUDGE_BASIC_MODEL.md`](FOUR_JUDGE_BASIC_MODEL.md) supersession
+> note and [`DOUBTS_WORKSPACE.md`](../../architecture/DOUBTS_WORKSPACE.md) §8.
+
 ### J1 — Grounding
 
 ```yaml

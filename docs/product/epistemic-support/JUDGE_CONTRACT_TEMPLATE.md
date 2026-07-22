@@ -120,6 +120,19 @@ insufficient). Both reach the opinion identically (absence of evidence
 routes to `u`); the reason is telemetry and audit material, never
 arithmetic. Non-abstain verdicts omit the field.
 
+**Dated amendment (July 21, 2026, this session, via self-play).** The
+`abstainReason: jurisdiction` route keys on a claim's **truth-maker**, never its
+grammatical framing: a grounding seat **reaches through** an epistemic frame ("I hold
+that…", "I believe…") to adjudicate the empirical **content**, and abstains for
+jurisdiction only when the content itself is non-evidential (a matter of taste, a
+normative/ethical "ought", or a first-person lived-experience report). Abstaining on the
+*belief framing* of an empirical claim is the belief→fact seat abdicating its core, and is
+an exploitable bypass (prefix any empirical claim with "I believe" to dodge grounding).
+Surfaced and validated by the blind self-play schema evaluation this session (see
+[`FOUR_JUDGE_BASIC_MODEL.md`](FOUR_JUDGE_BASIC_MODEL.md) supersession note and
+[`DOUBTS_WORKSPACE.md`](../../architecture/DOUBTS_WORKSPACE.md) §8 citation correction). A
+dated note, not a frame edit; owner ratification unaffected.
+
 ## 2. J1 — Grounding contract
 
 ```xml

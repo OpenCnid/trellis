@@ -221,8 +221,11 @@ composed per context from the user's domain, under the **search** law of
 
 **Schema-invariant (owner Cnid, July 21, 2026): a defeater is named,
 defined, and instantiated with the *same schema as a judge*** —
-`FOUR_JUDGE_BASIC_MODEL.md`'s YAML (`purpose`, `claim_modes`, `select`,
-`orientation`, `taxonomy`, `blind_to`, plus the ten-item anchor set). The
+the live judge schema (`purpose`, `claim_modes`, `select`, `orientation`,
+`taxonomy`, `blind_to`, plus the ten-item anchor set) — its invariant field names
+ratified in [`JUDGE_CONTRACT_TEMPLATE.md`](../product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md)
+(Layer rule), **not** `FOUR_JUDGE_BASIC_MODEL.md`, whose `hyperplane_parameters` YAML
+was the program's superseded starting point (dated correction below). The
 **methods and prompts change** — the search law not the cover law, an
 `objection` not a verdict, the ∃ target not the ∀ cover — **but the schema
 does not.** One schema, two instruments; the composition law is the
@@ -234,6 +237,21 @@ tested before shipping (collaborator direction, July 20, 2026). This
 sits on the **permitted** side of amended AB-8: composition, not
 optimization over compositions. A metric-driven search for better
 defeaters crosses into AB-8(b) and needs its own proposal.
+
+**Dated citation correction (July 21, 2026, owner Cnid + collaborator Matt + Claude, this
+session).** §8's schema citation above previously named `FOUR_JUDGE_BASIC_MODEL.md`'s YAML,
+but that S10 submission's per-seat schema is `hyperplane_parameters` (the UHE four-plane
+model), **not** `select`/`taxonomy`/`blind_to` — a cross-schema mis-attribution introduced
+with this paragraph (PR #155). The field names listed are the **live** schema, ratified in
+`JUDGE_CONTRACT_TEMPLATE.md` (Layer rule); the citation now points there. A blind self-play
+evaluation this session (two runs — a three-way schema comparison and a categorized-`select`
+head-to-head, blind judge panels, `$0` paid) confirmed the direction: `taxonomy` + `blind_to`
+are the stronger primitives; flat `select` beat **both** the rigid four-plane buckets *and* a
+plane-categorized `select` at the per-seat level; and the four-plane structure's only plausible
+remaining home is **panel-coverage composition** (a concept, untested), not a per-seat field.
+The UHE four-judge model was the program's *starting point*; the schema outgrew it. See
+[`FOUR_JUDGE_BASIC_MODEL.md`](../product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md)'s dated
+supersession note.
 
 ## 9. Scope — this is a critique engine
 
