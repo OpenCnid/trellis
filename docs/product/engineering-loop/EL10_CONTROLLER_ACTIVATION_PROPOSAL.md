@@ -41,7 +41,7 @@ Each item below is independently reproducible from a clean checkout.
 | `features.json` status | EL-06 `accepted`; EL-07 `planned`, `paidWork: owner_gated` |
 | EL-07 dependency status | `dependencies: ["EL-06"]`, satisfied |
 | Product roadmap | `ROADMAP.md` §4 EL-06 Accepted; §8 EL-07 next unblocked |
-| Root ledger | `TRELLIS_ROADMAP.md` §194 and the Session 60 entry; owner accepted July 15, 2026 |
+| Retired root ledger | `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` §194 and the Session 60 entry; owner accepted July 15, 2026 |
 
 ### 2.2 The item that is absent: protected controller acceptance
 

@@ -408,7 +408,7 @@ messages as ordinary agentic goals through the same gates and bounds as
 `A2A_AGENT_NAME`, `A2A_AGENT_DESCRIPTION`, `A2A_AGENT_URL` (the
 advertised JSON-RPC URL — set it for any non-local deployment),
 `A2A_TASK_TTL_SECONDS` (task-record retention, default 3600).
-Contract: `API_REFERENCE.md` §5.
+Contract: `docs/reference/API_REFERENCE.md` §5.
 
 **External agent misbehaving** — symptoms and containment:
 

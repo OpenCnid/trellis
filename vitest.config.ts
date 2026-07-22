@@ -9,7 +9,7 @@ export default defineConfig({
     include: [
       'src/**/*.test.ts',
       'scripts/**/*.test.ts',
-      'tools/engineering-loop/**/*.test.ts',
+      'tools/**/*.test.ts',
     ],
     exclude: ['src/frontend/**', 'node_modules/**'],
   },

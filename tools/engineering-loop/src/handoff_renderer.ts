@@ -19,7 +19,7 @@ import {
   type RepositoryStateObservation,
 } from './repo_observer.js';
 
-export const HANDOFF_RENDERER_VERSION = 'handoff-renderer:v1' as const;
+export const HANDOFF_RENDERER_VERSION = 'handoff-renderer:v2' as const;
 export const MAX_RENDERED_VIEW_BYTES = 64 * 1_024;
 
 export class RendererError extends Error {
@@ -320,7 +320,7 @@ export function renderHandoffPreviewBytes(inputValue: unknown): Buffer {
   const text = [
     '# Engineering Loop Handoff Preview',
     '',
-    '> **Authority:** Preview only. The manually maintained `HANDOFF.md` remains authoritative.',
+    '> **Authority:** Preview only. This paused program cannot select repository work; root `AGENTS.md` and the collaborator\'s live task govern.',
     '',
     `Renderer: \`${HANDOFF_RENDERER_VERSION}\``,
     '',

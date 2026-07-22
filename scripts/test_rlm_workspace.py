@@ -444,7 +444,7 @@ check("no workspace still means an empty addendum, seeded or not",
 
 # --- 7. M1 standing fixture: park/seed round-trip at cap sizes --------------
 # Adopted from the July 11, 2026 data-plane representation review
-# (TRELLIS_ROADMAP.md §5, benchmark matrix row M1): the park/seed seam is
+# (docs/archive/TRELLIS_ROADMAP_DEPRECATED.md §5, benchmark matrix row M1): the park/seed seam is
 # exercised at the real byte caps (4 MiB default, 32 MiB hard cap) and at
 # the segment-count hard cap (1024), asserting byte-lossless round-trips
 # and bound enforcement at exactly-cap and cap+1. Wall-clock timings are

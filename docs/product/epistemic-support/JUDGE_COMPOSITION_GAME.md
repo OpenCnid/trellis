@@ -370,7 +370,7 @@ authorization; nothing here authorizes build):
 4. ~~In-repo copy of the `judge-composition` skill, if the owner wants
    it versioned here (drift rule in the header governs either way).~~
    **CLOSED July 19, 2026 (Session 71)** — versioned at
-   `skills/judge-composition/`, with a README recording that this
+   `.claude/skills/judge-composition/`, with a README recording that this
    record is canonical over it and that drift resolves toward the
    record. Landing it in-repo was itself the remedy: a skill outside
    the repository is not part of the collection a session inventories,

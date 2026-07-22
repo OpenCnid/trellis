@@ -4,10 +4,10 @@ You are an agent (CLI, harness, or model) opening this repository. This
 file is your entry point. It teaches three things, in order: how to
 STUDY the repo, how to NAVIGATE it, and the HARD RULES that survive
 every session. It deliberately contains only *invariants* — facts that
-hold across sessions. Everything volatile (current objective, test
-counts, prompt pins, database state) lives in `HANDOFF.md` and is
-POINTED TO, never copied here; if this file and `HANDOFF.md` disagree,
-`HANDOFF.md` is newer and wins. Authority order across the committed
+hold across sessions. The retired `HANDOFF.md` and technical roadmap
+are historical surfaces, not sources of a current objective. Current
+work comes from the collaborator's live task and the task's governing
+records. Authority order across the committed
 record: **code > glossary > prose**. That order ranks committed
 artifacts against each other; it does not rank them against the people
 directing the work. A collaborator's clear, current instruction is the
@@ -33,35 +33,34 @@ rights), not on the substrate's quarantine law.
 ## 1. Study protocol (read in this order)
 
 1. **This file, fully.** The navigation tables below are the map.
-2. **`HANDOFF.md`** — the self-regenerating session prompt and the
-   single source of volatile truth. §0 the session loop, §1 the living
-   architectural mental model, §2 the current baseline (branch state,
-   test counts, prompt pins), §3–§8 the current objective, its design,
-   acceptance, guardrails, and exclusions. If you do session work, §3
-   is your objective; do not select your own.
+2. **The collaborator's live task.** It is the current objective. Do not
+   recover an objective from the deprecated `HANDOFF.md`, the archived
+   technical roadmap, a branch name, or an old progress entry. If no
+   live task exists, ask exactly one clarifying question; do not select
+   your own work.
 3. **`docs/GLOSSARY.md`** — one-line canonical definitions for every
    load-bearing term (RLM, contested, promotion, module, workspace,
    provenance laundering, …). Read before any prose that uses them.
-4. **Root `README.md`, "What Trellis is"** — the five commitments; the
-   system-level framing and the operator manual.
+4. **`docs/ORIENTATION.md`** — read the smallest depth that gives you a
+   complete system model for the task. The root `README.md` is only a
+   bounded router; the full operator manual lives at
+   `docs/operations/OPERATOR_MANUAL.md`.
 5. **Task-directed depth** — use §2/§3 below to find the enforcement
    home of whatever you are changing, and read THAT file plus its
    pinned test before designing anything.
-6. **Evidence and history** — `TRELLIS_ROADMAP.md` §4 (sequencing) and
-   §5 (dated progress ledger, most recent five sessions);
-   `docs/archive/ROADMAP_HISTORY.md` (older sessions, verbatim);
-   `docs/benchmarks/*` (every capability claim's measured report).
+6. **Evidence and history** — `docs/benchmarks/*` for measured claims;
+   `docs/archive/ROADMAP_HISTORY.md` and
+   `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` only when historical
+   session evidence is actually needed.
 
 Directory-scoped `AGENTS.md` files add local rules; the nearest one to
 the file you are editing also applies (`src/frontend/AGENTS.md` exists
 today).
 
-**Do not skip step 2's mental-model half to reach the objective.**
-`HANDOFF.md` §1 is the living architectural model and §3 is the current
-task; a session that reads §2/§3 and skips §1 gets an objective without
-a model. Recorded because it happened: Session 71 skipped §1, which is
-where the pointer to the ratified record governing its work lived, and
-built the wrong object.
+**Do not jump from the live task directly into implementation.** Read the
+orientation and retrieve the governing record first. Session 71 built the
+wrong object after following a stale compression without retrieving the
+ratified record; the remedy is source retrieval, not another global prompt.
 
 ## 1.5 Authority ordering (which record wins)
 
@@ -71,7 +70,7 @@ in front of them is the top of the chain will build confidently against
 a superseded one. The ordering:
 
 ```
-ratified record  →  adopted doctrine  →  design record  →  HANDOFF / roadmap compression  →  skill, memory
+ratified record  →  adopted doctrine  →  design record  →  orientation / historical compression  →  skill, memory
 ```
 
 - **Ratified and adopted records win**, and are amended only by dated
@@ -79,13 +78,10 @@ ratified record  →  adopted doctrine  →  design record  →  HANDOFF / roadm
   standing — read it before treating the body as law.
 - **A design record leads its implementation** (document-driven design)
   but does not outrank a ratified record it was written under.
-- **`HANDOFF.md` and `TRELLIS_ROADMAP.md` are compressions.** They are
-  the single source of *volatile* truth — branch state, counts, the
-  current objective — and they are downstream of the records they
-  summarize. A task instruction in `HANDOFF.md` §3 that conflicts with
-  a ratified record is drift in the handoff, not new law. This has
-  happened: `JUDGE_CONVOCATION_DESIGN.md` §11.2 was written one day
-  after the rule it contradicted was ratified.
+- **The old handoff and technical roadmap are deprecated historical
+  compressions.** They may explain past decisions; they never select
+  current work or establish current Git, test, prompt-pin, or database
+  state. Observe current state and retrieve the governing record.
 - **Skills and memories are derived artifacts.** Where a skill and its
   record drift, the record wins and the skill is corrected. A memory is
   a private note about a past state, never authority.
@@ -120,12 +116,14 @@ this chain.
 | `scripts/` | Operator CLIs (`repo:ingest`, `promote`, `modules:*`) and live zero-LLM drills (`test_*.py`, `test_*.ts`) |
 | `docs/architecture/` | Living doctrine (design records lead implementation) |
 | `docs/benchmarks/` | Measured evidence — dated reports behind every claim |
-| `docs/operations/` | Runbook |
+| `docs/operations/` | Operator manual, runbook, deployment records |
+| `docs/reference/` | HTTP, SSE, and external protocol references |
 | `docs/product/` | PRDs, benchmark specs, and ACTIVE programs — `epistemic-support/` is live work, not history. Building anything judge-shaped starts at `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` (ratified; its twenty rules are binding program law) and `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
-| `docs/density-chain/` | Reverse-engineered branching chain-of-density map of the whole system (trunk + 11 subsystem-class branches; `DENSITY-CHAIN.md` + interactive `.html` render); orientation aid only — subordinate to this file, `HANDOFF.md`, and its single-spine sibling `docs/ORIENTATION.md` |
-| `skills/` | Composition skills versioned in-repo (`judge-composition`; `self-play` — the clean-room method for testing any LLM-assisted feature without the builder's read leaking in); the record each derives from is canonical over it |
+| `docs/density-chain/` | Reverse-engineered branching chain-of-density map of the whole system (trunk + 11 subsystem-class branches; `DENSITY-CHAIN.md` + interactive `.html` render); orientation aid only — subordinate to this file and its single-spine sibling `docs/ORIENTATION.md` |
+| `.claude/skills/` | Project skills auto-loaded by Claude Code and inventoried for every harness (`judge-composition`, `self-play`, prompt protocols, and companions); the record each derives from is canonical over it |
 | `docs/archive/` | Preserved history (verbatim, never edited) |
-| Root: `HANDOFF.md`, `TRELLIS_ROADMAP.md`, `API_REFERENCE.md` | Session prompt / sequencing + dated ledger / HTTP + SSE contract |
+| `tools/repository-surface/` | Machine root contract and deterministic repository-surface checker |
+| Root: `AGENTS.md`, `README.md`, `HANDOFF.md` | Canonical agent entrypoint / bounded router / deprecated compatibility stub |
 | `data/`, `fixtures/` | Committed durable corpora (byte-pinned) / test fixtures (never extracted) |
 
 ### 2.1 Standing of the load-bearing records
@@ -153,8 +151,8 @@ substitute for reading the header.
 | `docs/product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md`, `COMPOSABLE_RUBRICS_DESIGN.md` | **PROPOSED — DESIGN ONLY**; both carry July 19, 2026 corrections |
 | `docs/product/epistemic-support/JUDGE_INTAKE_DESIGN.md`, `JUDGE_CONVOCATION_DESIGN.md` | **IMPLEMENTED** (slices 1 and 2); §6 rows merged into RECONCILIATION §5.1/§5.2 |
 | `docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md` | **DESIGN — nothing built** (July 19, 2026) |
-| `HANDOFF.md`, `TRELLIS_ROADMAP.md` | **COMPRESSIONS** — volatile truth (branch state, counts, current objective), downstream of the records they summarize |
-| `skills/`, agent memory | **DERIVED** — the record wins on drift; a memory is never authority |
+| `HANDOFF.md`, `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` | **DEPRECATED / HISTORICAL** — never sources of a current objective or current state |
+| `.claude/skills/`, agent memory | **DERIVED** — the record wins on drift; a memory is never authority |
 
 ## 3. How things connect (the one-paragraph system)
 
@@ -197,9 +195,10 @@ start. Worked instances of the frame:
 
 *** CRITICAL ***
 
-1. **Read `HANDOFF.md` before any work.** Its §7 guardrails and §8
-   exclusions bind the current session; this list is only the
-   never-changing core.
+1. **Take the objective only from the collaborator's live task.** Read
+   this file, orient at the smallest sufficient depth, and retrieve the
+   task's governing records before deciding or editing. The deprecated
+   handoff and archived roadmap never select work.
 2. **Never mutate an AST node; never persist positional identity.**
    Identity is the SHA-256 Merkle preimage.
 3. **Never merge, rename, or delete Entity nodes.** Equivalence is an
@@ -234,10 +233,10 @@ start. Worked instances of the frame:
     has fired**: a control that never discriminates means the test was
     blind, so the result is noise, not a null (the positive-control duty,
     `TEST_TIME_TRAINING.md` §6). Re-run outliers before believing them.
-12. **One feature branch, one PR to `master`**, and if you ran a
-    session: update `TRELLIS_ROADMAP.md` §5 (dated entry, exact
-    commands, counts, defects) and regenerate `HANDOFF.md` per its §0
-    in the same PR.
+12. **One feature branch, one PR to `master`.** Record durable decisions
+    in the owning design/product record, measured claims in the owning
+    report, and exact verification in the PR. Do not revive or update
+    the deprecated global handoff/roadmap loop.
 13. **Superseded versions are archive, not search space** (owner
     direction, July 13, 2026): any default-discovery retrieval
     surface — present or future — reads LIVE blocks only (members of
@@ -276,8 +275,8 @@ start. Worked instances of the frame:
     skills and author against their loaded guidance. A process gate
     checked before the bytes are written, never a claim made in prose
     after. Judge-shaped work adds `judge-composition`. (Restated here
-    because it is permanent and `HANDOFF.md` §7, its only prior home,
-    is regenerated every session.)
+    because it is permanent and its former home in the regenerated
+    handoff was not durable.)
 17. **Compose from primitives; never encode a default instance.**
     Harness functions compose per context from parameter registries.
     Frames are invariant (schema shapes, field names, role slots and
@@ -290,7 +289,7 @@ start. Worked instances of the frame:
     `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`.
 18. **Retrieve before you decide or claim.** A derived representation
     never satisfies an obligation to its source on a load-bearing act.
-    Use `HANDOFF.md`'s compression, a design record, a skill, or a
+    Use an orientation compression, a design record, a skill, or a
     memory **to do the work**; **retrieve and quote the source** to
     decide what work to do, or to state what a record establishes. The
     tell: you cannot name the file and section you actually retrieved
@@ -347,8 +346,9 @@ Fresh checkout (worktrees ship without `node_modules`):
     npm run build
     npm run python:check
 
-The full live-drill close-out block, with current expected counts, is
-maintained in `HANDOFF.md` §6 — run it from there, not from memory.
+Task-specific records define their own acceptance checks. The root package
+provides the common offline entrypoints; observe current counts rather than
+copying historical expectations.
 Live drills need the Compose stack (`docker compose`); paid probes
 additionally need `OPENAI_API_KEY` in the SHELL environment (dotenv
 never overrides shell env). The Python runtime is pinned by

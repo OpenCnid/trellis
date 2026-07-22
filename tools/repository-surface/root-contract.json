@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "rootFiles": [
+    { "path": ".dockerignore", "class": "tool", "maxBytes": 2048 },
+    { "path": ".env.example", "class": "entrypoint", "maxBytes": 16384 },
+    { "path": ".gitattributes", "class": "tool", "maxBytes": 4096 },
+    { "path": ".gitignore", "class": "tool", "maxBytes": 4096 },
+    { "path": "AGENTS.md", "class": "agent", "maxBytes": 32768 },
+    { "path": "docker-compose.yml", "class": "tool", "maxBytes": 16384 },
+    { "path": "Dockerfile", "class": "tool", "maxBytes": 8192 },
+    { "path": "HANDOFF.md", "class": "compatibility", "maxBytes": 8192 },
+    { "path": "LICENSE", "class": "metadata", "maxBytes": 4096 },
+    { "path": "package-lock.json", "class": "machine", "maxBytes": 524288 },
+    { "path": "package.json", "class": "tool", "maxBytes": 16384 },
+    { "path": "README.md", "class": "entrypoint", "maxBytes": 8192 },
+    { "path": "requirements.txt", "class": "tool", "maxBytes": 4096 },
+    { "path": "tsconfig.build.json", "class": "tool", "maxBytes": 4096 },
+    { "path": "vitest.config.ts", "class": "tool", "maxBytes": 4096 }
+  ],
+  "rootDirectories": [
+    ".claude",
+    ".github",
+    "data",
+    "docs",
+    "fixtures",
+    "modules",
+    "requirements",
+    "scripts",
+    "src",
+    "tools"
+  ],
+  "markdownLinks": {
+    "excludePrefixes": ["docs/archive/"]
+  },
+  "environment": {
+    "schemaPath": "src/config/index.ts",
+    "examplePath": ".env.example",
+    "allowedExampleOnly": ["HOSTED_MCP_TOKEN", "OPENAI_API_KEY"]
+  },
+  "deprecatedSurfaces": [
+    {
+      "path": "HANDOFF.md",
+      "requiredText": "Status: DEPRECATED as an active session authority"
+    },
+    {
+      "path": "docs/archive/TRELLIS_ROADMAP_DEPRECATED.md",
+      "requiredText": "# Trellis Engine — Technical Roadmap"
+    }
+  ],
+  "forbiddenRootFiles": [
+    "benchmark_results.json",
+    "poison_drill_results.json",
+    "scale_drill_results.json",
+    "update_drill_results.json",
+    "TRELLIS_ROADMAP.md",
+    "API_REFERENCE.md",
+    "CONTRIBUTING.md",
+    "requirements-pdf-fast.txt",
+    "requirements-pdf-fast-nodeps.txt"
+  ]
+}

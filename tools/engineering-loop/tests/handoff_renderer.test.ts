@@ -358,8 +358,8 @@ describe('EL-03 trusted report and deterministic derived views', () => {
     expect(renderHandoffPreviewBytes(structuredClone(previewInput))).toEqual(previewBytes);
     expect({ report: digest(reportBytes), status: digest(statusBytes), handoff: digest(previewBytes) }).toEqual({
       report: 'c329941dec4e79ed70ce4ef95256bd21a61bcfb135e1a16abcb1cb4b124a6c6b',
-      status: '63646e346d337f517920106af78c818230e44ce310c66356c5e1eaea398b53b4',
-      handoff: '8e5af95b6e4e502ed703843d4bbecc1c02e8b598ef06bdf8550eea7ea5ac5fd0',
+      status: 'fde313a5029a73007bf51561d5ae3541ecbb117ecb0c628b48e300902cc9708a',
+      handoff: 'ad795bfd08f1ea407eb5388f0f1cfe4fd2205f764343fdcc10249fbd91c3ff27',
     });
   });
 
@@ -410,7 +410,7 @@ describe('EL-03 trusted report and deterministic derived views', () => {
   it('refuses unsupported renderer versions and over-bound context collections', async () => {
     const derived = await report();
     expect(() => renderStatusBytes({
-      rendererVersion: 'handoff-renderer:v2' as typeof HANDOFF_RENDERER_VERSION,
+      rendererVersion: 'handoff-renderer:v3' as typeof HANDOFF_RENDERER_VERSION,
       snapshot: SNAPSHOT,
       repository: REPOSITORY,
       report: derived,

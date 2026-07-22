@@ -34,7 +34,7 @@ The Poisoning Drill measures whether this machinery actually catches a wrong bel
 | **3. Detect** | Verifier sweeps run under a policy (mandatory-only / *p*=0.05 / *p*=0.10) until every poison is quarantined or the sweep budget is exhausted. Detection recall is measured **here**, before Act 4 legitimately clears quarantines. | yes |
 | **4. Recover** | The standard 20-query sequence re-runs; contested poisons must re-derive through the agent's normal lazy-recovery path and F1 must return to 1.000. | yes |
 
-Run: 2026-07-04, model `gpt-5.4-2026-03-05`, `npm run drill:poison`. Full artifact: [poison_drill_results.json](../../poison_drill_results.json). An LLM-free dress rehearsal (ground-truth oracle in place of the sub-LLM) preceded the paid run and reproduced the same detection-sweep counts almost exactly (62 vs. 62 for *p*=0.05, 18 vs. 18 for *p*=0.10) — see §6.1.
+Run: 2026-07-04, model `gpt-5.4-2026-03-05`, `npm run drill:poison`. Full artifact: [poison_drill_results.json](artifacts/poison_drill_results.json). An LLM-free dress rehearsal (ground-truth oracle in place of the sub-LLM) preceded the paid run and reproduced the same detection-sweep counts almost exactly (62 vs. 62 for *p*=0.05, 18 vs. 18 for *p*=0.10) — see §6.1.
 
 ### 2.1 The Poisoned Edges
 
@@ -177,4 +177,4 @@ npm run drill:poison-cache -- --count 11 --seed 4242     # standalone poison inj
 
 **A note on the real run's first attempt:** it initially hit intermittent crashes traced to a *stale* `start_all.ts` process left running from an earlier session, still consuming the same Redis `rlm_queue` and racing the fresh worker to spawn Python subprocesses (Windows `STATUS_DLL_INIT_FAILED`). Before reproducing a real run, confirm exactly one `start_all.ts` (or equivalent worker set) is alive: `Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Select ProcessId, CommandLine` on Windows, or `ps aux | grep start_all` elsewhere.
 
-Artifacts: [poison_drill_results.json](../../poison_drill_results.json) (metrics + full sweep trajectories + recovery telemetry per policy), [data/poison_drill_manifest.json](../../data/poison_drill_manifest.json) (the 11 poisoned edges and their true/poisoned labels).
+Artifacts: [poison_drill_results.json](artifacts/poison_drill_results.json) (metrics + full sweep trajectories + recovery telemetry per policy), [data/poison_drill_manifest.json](../../data/poison_drill_manifest.json) (the 11 poisoned edges and their true/poisoned labels).

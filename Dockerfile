@@ -33,14 +33,15 @@ RUN apt-get update \
         tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt requirements-pdf-fast.txt requirements-pdf-fast-nodeps.txt ./
+COPY requirements.txt ./requirements.txt
+COPY requirements/pdf-fast.txt requirements/pdf-fast-nodeps.txt ./requirements/
 RUN python3 -m venv /opt/venv \
     && /opt/venv/bin/pip install --no-cache-dir --upgrade pip \
     && /opt/venv/bin/pip install --no-cache-dir \
         --requirement requirements.txt \
-        --requirement requirements-pdf-fast.txt \
+        --requirement requirements/pdf-fast.txt \
     && /opt/venv/bin/pip install --no-cache-dir --no-deps \
-        --requirement requirements-pdf-fast-nodeps.txt
+        --requirement requirements/pdf-fast-nodeps.txt
 
 COPY --from=node-production /app/node_modules ./node_modules
 COPY --from=node-build /app/dist ./dist

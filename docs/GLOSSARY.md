@@ -15,7 +15,7 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   → contested/recovery), and the two flywheels. The older description
   "provenance-preserving GraphRAG" now names the Tier-1/2 substrate
   viewed from the retrieval angle, not the system (reframed July 9,
-  2026; root README, "What Trellis is").
+  2026; `docs/operations/OPERATOR_MANUAL.md`, "What Trellis is").
 - **Target function (ratified as principle July 20, 2026)** — what
   Trellis *is for*, from which its primitives derive: **a personalized
   composable expert system whose expertise is the user's data** — not

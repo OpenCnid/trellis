@@ -50,7 +50,7 @@ The quiet-failure benchmark from critique §3.3, structured like the Update Dril
 3. **Detect:** run verifier sweeps under policies (mandatory-only / p=5% / p=10%); a dress-rehearsal mode swaps the sub-LLM for a ground-truth oracle so detection *mechanics* are testable LLM-free.
 4. **Recover:** run the standard 20-query sequence; contested poisons must re-derive and F1 must return to 1.000.
 
-**Metrics reported** (written to `poison_drill_results.json`):
+**Metrics reported** (written to `docs/benchmarks/artifacts/poison_drill_results.json`):
 
 | Metric | Definition | Target |
 |---|---|---|

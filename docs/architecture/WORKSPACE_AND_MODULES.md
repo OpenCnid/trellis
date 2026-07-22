@@ -20,7 +20,7 @@ repository. Canonical one-line definitions for every load-bearing term live in
 
 **Authority and scope.** This is a design record, not a roadmap change. It does
 not renumber sessions, does not alter the recorded sequencing in
-`TRELLIS_ROADMAP.md` §4, and does not modify `HANDOFF.md`. Adopting any part of
+the now-deprecated `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` §4, and did not modify the former active `HANDOFF.md`. Adopting any part of
 it as a numbered session is an owner decision recorded in the roadmap when
 taken. Every permanent guardrail in `HANDOFF.md` §7 survives this design
 unchanged; where this document and a guardrail appear to conflict, the

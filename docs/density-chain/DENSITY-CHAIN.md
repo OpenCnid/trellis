@@ -3,10 +3,10 @@
 **Status: session orientation artifact, reverse-engineered July 20, 2026 (owner-directed,
 Cnid).** PROPOSED / unratified. Subordinate to everything it summarizes: authority order
 **code > glossary > prose** binds here with extra force — if any sentence disagrees with
-[`GLOSSARY.md`](GLOSSARY.md), a design record, or code, the other source wins and this file
-has a defect. It is **non-authoritative** relative to [`HANDOFF.md`](../HANDOFF.md) (live
-state), the acceptance ledger (`npm run el:activate -- status`), and
-[`ORIENTATION.md`](ORIENTATION.md). Counts and statuses are as of the reverse-engineered
+[`GLOSSARY.md`](../GLOSSARY.md), a design record, or code, the other source wins and this file
+has a defect. It is **non-authoritative** relative to the collaborator's live task, the
+acceptance ledger (`npm run el:activate -- status`), and
+[`ORIENTATION.md`](../ORIENTATION.md). Counts and statuses are as of the reverse-engineered
 snapshot **`77a7018`**, **updated July 21, 2026 to fold in PR #151** (`7ad6af5` — the
 read-time explanation render and the trilemma-steelman adoption), and drift with the week;
 treat named mechanisms and pointers as the durable content, numbers as convenience.
@@ -16,14 +16,20 @@ treat named mechanisms and pointers as the durable content, numbers as convenien
 > beside this file at [`DENSITY-CHAIN.html`](DENSITY-CHAIN.html). The two are kept in sync; this
 > markdown is the ground truth, the HTML is the map.
 
+> **Dated maintenance entry — July 21, 2026.** The manual `HANDOFF.md` and root
+> roadmap were retired as active authorities after this snapshot. The
+> engineering-loop tiers below preserve the controller program's state; current
+> repository routing comes from root `AGENTS.md`, the collaborator's live task,
+> and [`REPOSITORY_ROOT_CONTRACT.md`](../architecture/REPOSITORY_ROOT_CONTRACT.md).
+
 > **Living document.** Maintained by densification and dated entry, never a silent edit; the
 > repo is ground truth (code > glossary > prose) except during a live session, where a
 > collaborator's current instruction outranks the committed record — see the authority chain in
-> [`README.md`](README.md) and [`SESSION_GOVERNANCE.md`](architecture/SESSION_GOVERNANCE.md).
+> [`README.md`](../../README.md) and [`SESSION_GOVERNANCE.md`](../architecture/SESSION_GOVERNANCE.md).
 
 ## Why a *trellis* and not the ladder
 
-[`ORIENTATION.md`](ORIENTATION.md) already applies chain-of-density (Adams et al. 2023,
+[`ORIENTATION.md`](../ORIENTATION.md) already applies chain-of-density (Adams et al. 2023,
 [arXiv:2309.04269](https://arxiv.org/abs/2309.04269)) to Trellis as a **single spine**: one
 system, summarized five times at a *growing* budget (D0 sentence → D4 index). A trellis is
 the other shape — a **branching lattice**: one shared *trunk* plus one *branch per
@@ -116,7 +122,7 @@ changing committed state — and it is why Trellis is more than an RLM runtime.*
   a claim). Running reliably on the user's own data is what makes Trellis a strong
   **generalist-agent** candidate. Facts and beliefs exist today as the verified/derived tiers;
   the **doubts workspace as a first-class REPL object is *proposed***
-  ([`DOUBTS_WORKSPACE.md`](architecture/DOUBTS_WORKSPACE.md)). *(mixed — shipped tiers +
+  ([`DOUBTS_WORKSPACE.md`](../architecture/DOUBTS_WORKSPACE.md)). *(mixed — shipped tiers +
   proposed doubts object)*
 - **The REPL is never compacted; the model's context must be.** The product turns a language
   model of very limited, lossy context into a more deterministic system with a much less
@@ -148,7 +154,7 @@ future plans" question.
 | Class | Basic (what it *is*) | Current (shipped-pinned) | Frontier (adopted / in-flight, unbuilt) | Future (proposed / open) |
 |---|---|---|---|---|
 | **C1 REPL/RLM** | model works only through a Python REPL; context = database; `llm_query` over slices | `trellis_agent.py` over `rlms==0.1.3`, goal-loop orchestrator, workspace, A2A/MCP, UPSUM budget gate | harness self-model (principle endorsed, **not authorized**); telemetry allowlist gap | Workstream B surface-descriptors; `rlms` compaction (S2b); paid adoption probe |
-| **C2 Engineering loop** | a controller outside the worktree that mechanizes the session loop | EL-00…EL-06 accepted; kernel, observer, prompt compiler, Codex runner, acceptance ledger | EL-10/EL-11 **implemented, not accepted**; EL-07 **blocked** (no paid episode ever) | EL-08 (scheduler/extraction), EL-09 (report ingest); HANDOFF→generated-view migration |
+| **C2 Engineering loop** | a controller outside the worktree that mechanizes the session loop | EL-00…EL-06 accepted; kernel, observer, prompt compiler, Codex runner, acceptance ledger | EL-10/EL-11 **implemented, not accepted**; EL-07 **blocked** (no paid episode ever) | EL-08 (scheduler/extraction), EL-09 (report ingest); retired handoff→generated-view design |
 | **C3 Epistemic support** | a graded (b,d,u) "how has it held up" opinion, sweep-side, writer-blind | support-oracle, judge-panel, judge-intake, judge-convocation, **judge_explain** render (#151) — all zero-paid | composition-per-ceremony (four-role cast **rolled back**, S71); road to Option C | **no live judge run through the engine** (method test-bed-validated); metered promotion-cost test (~$0.02–0.06) |
 | **C4 Substrate/custody** | provenance-enforced storage: Merkle ASTs + beliefs bound by `sourceNodeIds` | verified ingest, invalidation sweep, quarantine/recovery, `repo:ingest`, entity resolution | mechanical provenance threading (row 9 closed); ASTRef migration below trigger | CRDT concurrent-edit safety; earned-permanence trust decay; repo-scale extraction |
 | **C5 Code-mediated text** | the pillar: the model never counts, never copies | `trellis_textedit`, `trellis_answer`, `get_ast_blocks`, guarded splice, retrieval discipline, structural chunking | guarded-only default (deferred); harness self-model's first named test | py-tree-sitter construct addressing; error-tolerant ingest; superseded-embedding sweep |
@@ -232,7 +238,8 @@ episodes, verifying deterministically, gating every protected action behind huma
   and pauses at named protected actions (paid calls, destructive ops, push, merge,
   self-modification) for explicit human approval. Model output is always an observation;
   controller-observed evidence and human authority alone decide state transitions.
-  `HANDOFF.md` stays authoritative until a measured migration verdict.
+  At the snapshot date, `HANDOFF.md` stayed authoritative pending a measured
+  migration verdict; the July 21 maintenance entry above supersedes that routing.
 - **T2 — current machinery.** Named components under `tools/engineering-loop/src/`:
   **control kernel** (`kernel.ts`, `state_machine.ts`, `domain.ts` — 11 states, 132-pair
   transition matrix, 41 allowed), **repository observer** (`repo_observer.ts`), **prompt
@@ -253,16 +260,16 @@ episodes, verifying deterministically, gating every protected action behind huma
 - **T4 — the frontier.** EL-10 and **EL-11 are IMPLEMENTED but NOT ACCEPTED** — built,
   tested, merged, but owner acceptance is unrecorded in the ledger (a self-referential gap:
   the machinery that records acceptance has not had its own acceptance recorded). **EL-07**
-  (bounded pilot, repeated evaluation, `HANDOFF.md` migration decision) is **BLOCKED**: its
+  (bounded pilot, repeated evaluation, generated-view migration decision) is **BLOCKED**: its
   preflight requires EL-10 accepted, an EL-11 status, and an explicit owner unblock, none
-  recorded — `next_feature` resolves to EL-10/null, not EL-07. HANDOFF Appendix B freezes an
-  EL-07 stage-1 pilot-plan (`EL07_PILOT_PLAN.md`) as the next objective once unblocked, via
+  recorded — `next_feature` resolves to EL-10/null, not EL-07. The former HANDOFF Appendix B
+  froze an EL-07 stage-1 pilot-plan (`EL07_PILOT_PLAN.md`) as its next objective, via
   three owner ceremonies.
 - **T5 — future plans.** Deferred, PROPOSED/UNRATIFIED, requiring fresh owner proposal after
   EL-07: **EL-08** (tracker polling, scheduler, concurrency, multi-machine durability, or
   standalone extraction) and **EL-09** (sanitized verified ingestion of completed-run
   reports into Trellis, explicitly NOT feeding the live control path). The
-  `HANDOFF.md`→generated-view migration requires EL-07 to clear pre-stated thresholds,
+  The preserved generated-view migration design requires EL-07 to clear pre-stated thresholds,
   perfect protected-gate adversarial tests, no acceptance-reliability regression, and human
   transcript review before an owner adopt/revise/reject verdict. **No paid EL-07 trial has
   ever run**; the $5/run cap remains untested against a real agent episode.
@@ -741,12 +748,12 @@ handoff loop).*
   count via `_count_mcp_call()`, never as citable provenance. The **A2A server**
   (`src/core/a2a/`, `TRELLIS_A2A_ENABLED`) serves Trellis's bounded goal loop to external
   agents at `POST /a2a/v1`. Both are byte-identical-when-off. Proposed-only: the **MCP server
-  surface** would let external hosts call Trellis. Governing: **AGENTS.md**, **HANDOFF.md** §0
-  (the **handoff loop**), **SESSION_GOVERNANCE.md**.
+  surface** would let external hosts call Trellis. Governing: **AGENTS.md**,
+  **REPOSITORY_ROOT_CONTRACT.md**, **SESSION_GOVERNANCE.md**.
 - **T3 — with receipts.** MCP client: #34 (`a2119c0`, Session 10), `test:rlm-mcp`. A2A server:
   #35 (`264b007`, Session 11), `test:a2a`, API_REFERENCE §5. Remote transports: #36 (`c3b4c39`,
   Session 12). **Session-governance scoping** (#126, `6259766`, July 17): a collaborator's live
-  instruction outranks AGENTS.md/HANDOFF.md's committed authority order (code>glossary>prose),
+  instruction outranks the committed authority order (code>glossary>prose),
   scoped to the coding-agent session only — stored beliefs keep the old law. **Harness
   invariants** (#135, `3bdc0e7`) closed three prose-only bounds (UPSUM budget, guarded-splice,
   task precedence) per hard rule 8 (the tooling-over-prompts posture; "instructions are specs"
@@ -849,4 +856,4 @@ branch's T4 first (one entity), rises toward T1 only as the *concept* of that su
 changes; at a fixed per-tier budget, adding means compressing or evicting something less
 salient, visible in the diff. The layer test binds every edit: each tier read alone must stay
 true. Volatile counts stay out — this file names mechanisms and points at authorities;
-anything that drifts with the week lives in `HANDOFF.md` or the acceptance ledger.
+anything that drifts with the week belongs in observed task evidence, not this map.

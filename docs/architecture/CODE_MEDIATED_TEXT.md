@@ -517,7 +517,7 @@ than model behavior, so the demotion above — plain loops until the
 model-behavior threshold is measured — stands unchanged.
 
 **The data-plane representation verdict (owner-commissioned review,
-July 11, 2026; full record in TRELLIS_ROADMAP.md §5, same date):**
+July 11, 2026; full record in `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` §5, same date):**
 structure selection is operation-shaped, not size-shaped, and the
 data-plane contracts stay JSON at every boundary — the workspace index,
 MCP payloads, and Redis park/seed snapshots stay canonical JSON;

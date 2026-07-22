@@ -58,4 +58,5 @@ the correspondence analysis that motivated it is
 [`docs/architecture/SELF_DESCRIBING_SURFACES.md`](../architecture/SELF_DESCRIBING_SURFACES.md).
 
 This folder is subordinate to everything it summarizes; it is an orientation aid, not an
-authority. Live state lives in `HANDOFF.md` and the acceptance ledger.
+authority. The collaborator's live task supplies current scope; protected controller state
+applies only when the engineering-loop program is explicitly invoked.

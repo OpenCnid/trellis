@@ -4,9 +4,12 @@
 an agent (or human) opening this program with no memory of the sessions
 that produced it. This file is your entry point; it is deliberately
 self-contained and points at everything else. Repo-wide rules still
-bind you first: read root `AGENTS.md`, then `HANDOFF.md` (whose §7/§8
-bind the *current engineering-loop session*, not this program — but
-whose permanent rules bind everyone), then this file.
+bind you first: read root `AGENTS.md`, take the objective from the
+collaborator's live task, then read this file and the source records it names.
+
+**Maintenance update — July 21, 2026:** the former manual handoff and root
+roadmap are historical surfaces. Any session-state or objective references to
+them below describe the dated program record, not current routing.
 
 ## 1. What this program is
 
@@ -153,14 +156,13 @@ before building anything judge-shaped.
   addendum and RESEARCH_MAP §4.10 (**the externality principle**, the
   program's unifying frame: Trellis as an engineering practice of
   external J-spaces — typed, execution-parallel summary streams).
-- **The prompt-protocol mandate is real but its resources are not in
-  the repo.** `HANDOFF.md` §7 guardrail 11 requires the
-  Prompt-Engineering and Hypershot protocols before authoring any
-  prompt-like artifact. Those documents were supplied in-session
-  (Lexideck lineage, Patreon-distributed — AB-6 forbids committing
-  them without authorization). If you cannot obtain them, the distilled
-  operational rules survive in `JUDGE_CONTRACT_TEMPLATE.md` §6–§7 and
-  the layer rule at its head.
+- **The prompt-protocol mandate is enforced at root.** `AGENTS.md` rule 16
+  requires the Prompt-Engineering and Hypershot protocols before authoring any
+  prompt-like artifact; the project skill distillations live under
+  `.claude/skills/`. The source curriculum remains uncommitted (Lexideck
+  lineage, Patreon-distributed — AB-6 forbids committing it without
+  authorization). Operational rules also survive in
+  `JUDGE_CONTRACT_TEMPLATE.md` §6–§7 and the layer rule at its head.
 - **Network reality:** this environment's proxy blocks most hosts
   (arxiv.org, transformer-circuits.pub) but allows github.com. All
   three primary papers now have checksum-verified OpenCnid mirrors —
@@ -359,8 +361,8 @@ change queue in [`IEG_TEACHINGS.md`](IEG_TEACHINGS.md) §5 spans the
 support plane, the hash authority, the engine, and the substrate; the
 items above predate it and keep their standing there **by reference**
 — C2(b) points here rather than duplicating. Neither queue is a work
-order: the active objective is always `HANDOFF.md` §3, and sequencing
-is an owner ruling — see the precedence note at the head of that §5.)*
+order: the active objective comes from the collaborator's live task, and
+sequencing is an owner ruling — see the precedence note at the head of that §5.)*
 
 ### 6.1 Composition rulings (dated entry — July 19, 2026, Session 71)
 

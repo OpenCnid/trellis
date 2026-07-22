@@ -1,5 +1,12 @@
 # Trellis Engineering Loop Roadmap
 
+**Program posture update — July 21, 2026:** the manual `HANDOFF.md` and root
+technical-roadmap loop are deprecated as active session authorities. This
+program remains preserved but is not the source of current work; a live
+collaborator task must explicitly re-sequence or redesign it before further
+implementation. Status claims below describe the preserved controller program,
+not the repository's current objective.
+
 Status: **EL-10 implemented and activated and EL-11 implemented, owner acceptance not yet recorded for either; EL-00 through EL-06 accepted in the ledger; EL-07 blocked pending an owner unblock**
 
 Owner direction: July 15, 2026
@@ -35,7 +42,8 @@ artifacts.
 Authority remains **code > glossary > prose**. Within the engineering-loop
 program:
 
-1. `TRELLIS_ROADMAP.md` decides whether this program is scheduled.
+1. The collaborator's live task decides whether this preserved program is
+   re-sequenced; the archived technical roadmap records only historical scheduling.
 2. This file decides the program's feature sequence.
 3. `features.json` is the machine-readable twin of that sequence.
 4. `RESEARCH.md` preserves the evidence and hypothesis behind the sequence.
@@ -154,7 +162,8 @@ Artifacts:
 - `docs/product/engineering-loop/RESEARCH.md`
 - `docs/product/engineering-loop/features.json`
 - `docs/product/engineering-loop/feature.schema.json`
-- One scheduling pointer in `TRELLIS_ROADMAP.md` §4
+- One historical scheduling pointer in
+  `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` §4
 
 Acceptance:
 

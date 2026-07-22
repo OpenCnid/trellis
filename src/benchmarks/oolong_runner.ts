@@ -13,7 +13,7 @@ import { QueryTelemetry, cityTruth, executeScoredQuery } from './oolong/scoring'
 //   Queries 15-20: repeats of the first 6 cities (warm — cached
 //                  classifications should collapse sub-call count and cost).
 // Scores every answer with the Set-based F1 metric against ground truth
-// and writes the results file at the repo root.
+// and writes the results under docs/benchmarks/artifacts/.
 //
 // Scoring, query construction, and the dispatch/retry loop live in
 // ./oolong/scoring.ts, shared with the Phase 4 Update Drill runner.
@@ -29,6 +29,7 @@ import { QueryTelemetry, cityTruth, executeScoredQuery } from './oolong/scoring'
 
 const V1_DATASET_NAME = 'oolong-pairs-trec-synthetic-v1';
 const REPO_ROOT = path.join(__dirname, '..', '..');
+const ARTIFACTS_DIR = path.join(REPO_ROOT, 'docs', 'benchmarks', 'artifacts');
 const LOGS_DIR = path.join(REPO_ROOT, 'benchmark_logs');
 
 function resolveResultsPath(argv: string[], datasetName: string): string {
@@ -39,8 +40,8 @@ function resolveResultsPath(argv: string[], datasetName: string): string {
   }
   const resolved = explicit
     ? path.resolve(explicit)
-    : path.join(REPO_ROOT, datasetName === V1_DATASET_NAME ? 'benchmark_results.json' : 'benchmark_results_v2.json');
-  if (datasetName !== V1_DATASET_NAME && resolved === path.join(REPO_ROOT, 'benchmark_results.json')) {
+    : path.join(ARTIFACTS_DIR, datasetName === V1_DATASET_NAME ? 'benchmark_results.json' : 'benchmark_results_v2.json');
+  if (datasetName !== V1_DATASET_NAME && resolved === path.join(ARTIFACTS_DIR, 'benchmark_results.json')) {
     throw new Error(
       `Refusing to write ${resolved} for dataset "${datasetName}" — benchmark_results.json records the committed v1 baseline.`
     );

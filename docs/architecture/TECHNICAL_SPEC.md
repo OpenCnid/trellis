@@ -3,8 +3,8 @@
 > **Status: historical (Phase 1 MVP era).** Preserved as the record of
 > the original build specification; parts of the stack listed here have
 > since changed (e.g. the LLM SDK is OpenAI structured outputs; parsers
-> now include code-aware TS/JS/Python). The living architectural model
-> is `HANDOFF.md` §1 at the repository root. Where this document and
+> now include code-aware TS/JS/Python). The maintained architectural model
+> is `docs/ORIENTATION.md`. Where this document and
 > current code disagree, the code and the living records win.
 
 This document provides the concrete engineering specifications required to build the Trellis MVP.

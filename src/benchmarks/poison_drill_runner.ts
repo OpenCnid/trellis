@@ -63,11 +63,12 @@ import { config } from '../config/index';
 
 const execFileAsync = util.promisify(execFile);
 
-const DATA_DIR = path.join(__dirname, '..', '..', 'data');
+const REPO_ROOT = path.join(__dirname, '..', '..');
+const DATA_DIR = path.join(REPO_ROOT, 'data');
 const DATASET_PATH = path.join(DATA_DIR, 'oolong_pairs_dataset_v2.json');
 const MANIFEST_PATH = path.join(DATA_DIR, 'poison_drill_manifest.json');
-const RESULTS_PATH = path.join(__dirname, '..', '..', 'poison_drill_results.json');
-const LOGS_DIR = path.join(__dirname, '..', '..', 'benchmark_logs');
+const RESULTS_PATH = path.join(REPO_ROOT, 'docs', 'benchmarks', 'artifacts', 'poison_drill_results.json');
+const LOGS_DIR = path.join(REPO_ROOT, 'benchmark_logs');
 
 const WARM_REPEATS = 6;
 const QUERIES_PER_INTERVAL = 20; // one standard OOLONG-Pairs sequence
