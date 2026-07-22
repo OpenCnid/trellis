@@ -30,6 +30,7 @@ The priority order is:
 | `README.md` | bounded router | Ecosystem landing page and short map to agent, operator, and reference surfaces. |
 | `package.json`, `package-lock.json` | Node project boundary | Dependency lock, command registry, and npm working directory. |
 | `tsconfig.build.json`, `vitest.config.ts` | tool discovery | Build and test configuration used by root package commands. |
+| `conftest.py`, `pytest.ini` | tool discovery | Python test configuration. Root-anchored because pytest resolves rootdir and `conftest` discovery relative to the invocation root; the Python peers of the row above. |
 | `requirements.txt` | Python base manifest | Conventional direct-runtime install surface; specialized PDF layers are grouped under `requirements/`. |
 | `Dockerfile`, `docker-compose.yml`, `.dockerignore` | container discovery | Preserve zero-flag Docker and Compose commands with the repository as build context. |
 | `.env.example` | configuration entrypoint | Copy-to-`.env` setup surface, checked against the validated TypeScript schema. |
@@ -120,7 +121,22 @@ all affected paths in the same commit. Convenience alone is not sufficient.
 
 ## 8. Amendments
 
-**July 22, 2026 — `.claude/` role widened to name harness configuration.**
+**July 22, 2026 — `conftest.py` and `pytest.ini` admitted as tool discovery.**
+The REPL-sandbox package (`src/repl_sandbox/`) is Python, and pytest resolves
+both its rootdir and its `conftest` import hook relative to the invocation root,
+so neither file can move into a subdirectory without breaking the discovery it
+exists to perform. This is the same auto-discovery need §7 already accepted for
+`tsconfig.build.json` and `vitest.config.ts`; both new entries take the existing
+`tool` class and the tightest cap already in use (4,096 bytes, against actual
+sizes of 460 and 82). No cap was raised, no rule relaxed, no new field invented.
+
+Recorded late, and that is the finding. The machine twin was edited when the
+checker refused the undeclared files; §2 was not updated in the same commit, as
+§7 requires. Nothing detected the gap, because the checker proves twin-against-
+tree and never record-against-twin — so the ratified prose was false by omission
+while every check stayed green. The durable fix is a checker branch asserting
+that the §2 table and `rootFiles` name the same set; it is unbuilt, and until it
+exists this direction of the contract rests on the author remembering.
 §5 described `.claude/` as "project skill auto-discovery for Claude Code". That
 became false by omission when `.claude/settings.json` was committed, carrying
 `Stop` and `SessionStart` hooks for the density-trellis staleness checker. The

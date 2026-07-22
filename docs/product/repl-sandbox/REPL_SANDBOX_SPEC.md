@@ -34,6 +34,9 @@ build order → [BUILD_PLAN](REPL_SANDBOX_BUILD_PLAN.md); the PROPOSED doubt-fil
 
 ```
 class KataREPL(IsolatedEnv):                       # rlms IsolatedEnv = "separate machine from the LM"
+    # NOTE: that signature is BaseEnv's. IsolatedEnv.__init__ is
+    # (self, persistent=False, **kwargs), so depth and max_concurrent_subcalls
+    # reach the base by KEYWORD only -- KataREPL(False, 1) raises TypeError.
     __init__(persistent=False, depth=1, max_concurrent_subcalls=4, **kwargs)
     setup(self)                                    # boot/attach the microVM, wire the vsock bridge, register tools
     load_context(self, payload: dict|list|str)     # expose the REPL variable `context`
@@ -42,7 +45,11 @@ class KataREPL(IsolatedEnv):                       # rlms IsolatedEnv = "separat
     #   add_context, get_context_count, add_history, get_history_count
 ```
 
-- `REPLResult` fields: `stdout, stderr, locals, execution_time, rlm_calls, final_answer`.
+- `REPLResult` **instance attributes**: `stdout, stderr, locals, execution_time, rlm_calls,
+  final_answer`. Its **dataclass field list** names `llm_calls` where the constructor assigns
+  `rlm_calls` (`core/types.py:166` vs `:182`), so the generated `__repr__` and `__eq__` **raise
+  `AttributeError`** — never `repr()` or compare a `REPLResult`. Corrected July 22, 2026 from
+  [CONFORMANCE §4](REPL_SANDBOX_CONFORMANCE.md); pinned by `test_rlms_conformance.py`.
 - Reserved namespace names (cannot be overridden): `llm_query, llm_query_batched, rlm_query,
   rlm_query_batched, SHOW_VARS, answer, context, history`.
 - **Integration seam:** `EnvironmentType` is a fixed `Literal` (local/ipython/docker/modal/
@@ -143,6 +150,13 @@ capability.
   spec the standing provenance-grounded injection-objection and the outbound defeater seats,
   composed from the -1 doubt tier ([DOUBTS_WORKSPACE §8–§9](../../architecture/DOUBTS_WORKSPACE.md));
   Guardrail 15 (prompt-engineering + hypershot-protocol) applies when the seat prompts are authored.
+- **`MAX_FRAME_LEN` — rule settled July 22, 2026, shipped value still owner-gated.** Size the cap
+  off the worker's context window rather than off the largest frame the plumbing might carry, so it
+  is a structural guarantee (no single frame can context-saturate a worker) and not only a DoS
+  bound. Derivation: 1,050,000-token window × 50% × ~4 bytes/token ≈ 2.1 MB → **2 MiB**, set as
+  `config.DEFAULT_MAX_FRAME_LEN` with the window recorded beside it as the input to re-derive from
+  when the model pin changes. The DoS property is unchanged: the reader still rejects an over-length
+  declaration before allocating.
 - The vsock bridge is unbuilt glue — security-critical; spec its frame parser + privilege drop.
 - Warm-pool clean-slate-reset policy (only if pooling is adopted).
 - Whether to relax `_SAFE_BUILTINS` once the VM boundary exists (redundant defense-in-depth).

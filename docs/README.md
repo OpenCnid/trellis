@@ -223,10 +223,11 @@ program (the [`engineering-loop/`](product/engineering-loop/ROADMAP.md)
 pattern):
 
 - **[`repl-sandbox/`](product/repl-sandbox/README.md)** — the isolation
-  program for the RLM's Python REPL. **DESIGN records; decisions owner-ratified
-  July 20–21, 2026; NOTHING BUILT and owner-gated.** Today the REPL runs
-  model-authored Python in-process on the host with live database credentials in
-  the namespace; this program is the boundary that does not yet exist. Its
+  program for the RLM's Python REPL. **Ratified July 20–21, 2026; G0 lifted
+  July 22 — control plane built in `src/repl_sandbox/`, the boundary is not:
+  no microVM, no vsock bridge, G1 unsatisfied. Not yet a sandbox.** Today the
+  REPL still runs model-authored Python in-process with live database
+  credentials in the namespace. Its
   load-bearing move is a data-flow rule rather than content inspection — the
   executing code may *address* data but never *hold* it, so a sanctioned outbound
   channel cannot leak what was never materialized

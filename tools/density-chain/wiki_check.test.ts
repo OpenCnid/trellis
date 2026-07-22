@@ -65,8 +65,30 @@ describe('the map is the declaration', () => {
   });
 
   it('parses a Declares cell into globs and ignores the prose around them', () => {
-    expect(router.declarations.get('C12')).toEqual(['docs/product/repl-sandbox/**']);
-    expect(router.declarations.get('C9')).toEqual(['docs/architecture/RESIDUAL_STREAM_SIDECAR.md']);
+    // Asserted against a literal rather than a live row. This test names a
+    // property of the parser, and pinning a real class's Declares cell made
+    // every honest map edit redden the build — which happened twice in one
+    // session while C12's cell legitimately grew from one glob to five. A gate
+    // that reddens honest work gets switched off, so the live-map invariants
+    // that genuinely need the map are asserted by shape below and by
+    // `wiki:check --verify` in CI.
+    const table = [
+      '## The self-index — where each class lives',
+      '',
+      '| Class | Declares | Drills |',
+      '| --- | --- | --- |',
+      '| **C98** | `a/**`, `b/c.md`, prose that is not a glob, `d.ini` | `some:script` |',
+      '| **C99** | `e/**` | *(none)* |',
+    ].join('\n');
+    const parsed = extractDeclarations(table);
+    expect(parsed.get('C98')).toEqual(['a/**', 'b/c.md', 'd.ini']);
+    expect(parsed.get('C99')).toEqual(['e/**']);
+  });
+
+  it('gives every class in the live map at least one declared glob', () => {
+    for (const id of router.roster) {
+      expect(router.declarations.get(id)?.length ?? 0, `${id} declares nothing`).toBeGreaterThan(0);
+    }
   });
 
   it('routes each class by its own declaration', () => {

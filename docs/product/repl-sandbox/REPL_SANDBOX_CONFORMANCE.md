@@ -1,0 +1,199 @@
+# Trellis REPL Sandbox — rlms Source Conformance (S1)
+
+**Status: FINDINGS — read 2026-07-22 against the installed `rlms==0.1.3`; the contract is now
+pinned by an executing test.** This record closes
+[REPL_SANDBOX_BUILD_PLAN.md §5.1 (S1 — Close the source-reads)](REPL_SANDBOX_BUILD_PLAN.md) and
+the three items of
+[REPL_SANDBOX_INTERFACES.md §9 (Open encoding questions)](REPL_SANDBOX_INTERFACES.md). The
+enforcing surface is `src/repl_sandbox/tests/test_rlms_conformance.py` — 12 tests, zero-paid, no
+model. Every claim carries the file and line it was read from, and every claim the test can
+execute, the test executes.
+
+Source root: `C:\Users\Darian\AppData\Roaming\Python\Python313\site-packages\rlm\` (distribution
+`rlms`, import name `rlm`); line numbers are that tree at `0.1.3`. Where a record and the source
+disagree the **source wins** for the assertion and the disagreement is listed in §4 — the records
+were not edited to match.
+
+---
+
+## 1. What the test pins
+
+| # | Claim | Source |
+|---|---|---|
+| 0 | `importlib.metadata.version("rlms") == "0.1.3"` — fails first if the environment moves ([INTERFACES §8 (Versioning model)](REPL_SANDBOX_INTERFACES.md)) | — |
+| 1 | `IsolatedEnv(BaseEnv, ABC)`, abstract, `__abstractmethods__ == {setup, load_context, execute_code}`; `BaseEnv.__init__(self, persistent=False, depth=1, max_concurrent_subcalls=4, **kwargs)` vs `IsolatedEnv.__init__(self, persistent=False, **kwargs)` — `depth` reaches it only via `**kwargs` | `environments/base_env.py:216-222, 237-256` |
+| 2 | `REPLResult.__init__(stdout, stderr, locals, execution_time=None, rlm_calls=None, final_answer=None)`; instance attrs carry `rlm_calls`, while the dataclass field list still names `llm_calls` and no such attribute exists | `core/types.py:160-183` |
+| 3 | `RESERVED_TOOL_NAMES` is a `frozenset` of exactly the eight recorded names | `environments/base_env.py:13-24` |
+| 4 | framing = `struct.pack(">I", len(payload))` + UTF-8 JSON, no length ceiling on read; and `repl_sandbox.frame.encode_frame` bytes are accepted unchanged by rlms' `socket_recv` (and the reverse) over a real connected socket pair | `core/comms_utils.py:146-176` + test |
+| 5 | `LMRequest` fields `prompt, prompts, model, depth` (`depth` default `0`, `from_dict` default `-1`); `LMResponse` fields `error, chat_completion, chat_completions`, `to_dict` always emitting all three keys | `core/comms_utils.py:21-138` |
+| 6 | `socket_request` opens `socket.AF_INET` and no other family appears in the module; `EnvironmentType` is a closed seven-member `Literal` with no `kata` | `core/comms_utils.py:192`, `core/types.py:15` |
+| 7 | `SupportsPersistence` is `@runtime_checkable`, five members, index-returning signatures | `environments/base_env.py:282-388` |
+
+Run: `python -m pytest src/repl_sandbox/tests/test_rlms_conformance.py` → `12 passed`.
+
+---
+
+## 2. Open encoding questions — closed
+
+### 2.1 `LMHandler` bind host with `port=0` — CLOSED, loopback on every path
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Does `port=0` ever bind `0.0.0.0`? | **No.** The host is a constructor default of `"127.0.0.1"` and is stored verbatim; the only construction site in the package passes no `host`. | `core/lm_handler.py:153-164`, `core/rlm.py:241` |
+| Is the auto-assigned port host-discoverable? | **Yes** — the `.address`-shaped property [INTERFACES §9 (Open encoding questions)](REPL_SANDBOX_INTERFACES.md) asked for. | `core/lm_handler.py:193-203` |
+
+```python
+# core/lm_handler.py:156-164
+        host: str = "127.0.0.1",
+        port: int = 0,  # auto-assign available port
+        ...
+        self.host = host
+
+# core/lm_handler.py:193-203
+    @property
+    def port(self) -> int:          # docstring elided
+        if self._server:
+            return self._server.server_address[1]
+        return self._port
+
+    @property
+    def address(self) -> tuple[str, int]:
+        return (self.host, self.port)
+```
+
+`start()` binds `ThreadingLMServer((self.host, self._port), ...)` and returns `self.address`
+(`core/lm_handler.py:205-216`) — the port is read off the bound server, not guessed. The single
+construction site passes no `host` (`core/rlm.py:241`), so loopback holds for every rlms run.
+
+**What it forces in the build.** Option A (guest-side forwarder,
+[INTERFACES §3.3 (Bridge options — A vs B)](REPL_SANDBOX_INTERFACES.md)) is viable unchanged: the
+host shim reads `handler.address` after `start()` and needs no patch. Two caveats:
+
+- The handler is **unauthenticated** and sets `allow_reuse_address = True`
+  (`core/lm_handler.py:138-142`) — any local process reaching the port is served. Loopback is
+  host scoping, not an auth control; the vsock CID stays the identity
+  ([INTERFACES §1 (Seam map)](REPL_SANDBOX_INTERFACES.md)).
+- `LMHandler` is the only loopback-clean binder in the package. rlms' other isolated backends run
+  in-guest brokers that bind wildcard (`environments/modal_repl.py:105`, `prime_repl.py:104`,
+  `daytona_repl.py:146`, `e2b_repl.py:95`) and `docker_repl.py:514` binds `("0.0.0.0", 0)` on the
+  **host**. None is on the Kata path; none may be reused as a pattern.
+
+### 2.2 `REPLResult.locals` marshalling — CLOSED, reprs at `to_dict` time only
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Does `locals` cross as reprs/JSON-safe values or via pickle? | **`_serialize_value` is repr/JSON-safe and pickles nothing** — no `pickle`/`dill` import exists in `core/types.py`. | `core/types.py:18-34` |
+| Does the value actually arrive marshalled? | **No — not in the object.** `LocalREPL.execute_code` returns `locals=self.locals.copy()`: **live Python objects**. Marshalling happens only inside `REPLResult.to_dict()`. | `environments/local_repl.py:576-583`, `core/types.py:188-196` |
+
+```python
+# core/types.py:18-34
+def _serialize_value(value: Any) -> Any:
+    """Convert a value to a JSON-serializable representation."""
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+    if isinstance(value, ModuleType):
+        return f"<module '{value.__name__}'>"
+    if isinstance(value, (list, tuple)):
+        return [_serialize_value(v) for v in value]
+    if isinstance(value, dict):
+        return {str(k): _serialize_value(v) for k, v in value.items()}
+    if callable(value):
+        return f"<{type(value).__name__} '{getattr(value, '__name__', repr(value))}'>"
+    # Try to convert to string for other types
+    try:
+        return repr(value)
+    except Exception:
+        return f"<{type(value).__name__}>"
+```
+
+**What it forces in the build.** The backend **must interpose a marshaller** — because of the
+second row, not the first. rlms does not pickle, but `LocalREPL` hands back the live namespace and
+serialises only if someone calls `to_dict()`. A `KataREPL` mimicking `LocalREPL` literally would
+return live objects across the seam, which
+[INTERFACES §2 (Backend contract) — Marshalling rule](REPL_SANDBOX_INTERFACES.md) forbids. The
+guest supervisor therefore marshals `_serialize_value`-style **in the guest, before the frame is
+written**; host-side `REPLResult.locals` holds reprs only. Two consequences:
+
+- `_serialize_value` recurses with **no depth or width bound** (`core/types.py:24-27`) — a deep or
+  self-referential structure is a guest-side stack/CPU hazard. The guest marshaller must bound
+  both; `repl_sandbox.frame.MAX_JSON_DEPTH` (64) only rejects the payload after it is built.
+- Nothing in `core/rlm.py` reads `REPLResult.locals` (no match in that file); the only consumer is
+  `CodeBlock.to_dict()` (`core/types.py:204-205`) into the logger. Interposing costs no driver
+  compatibility.
+
+### 2.3 `MAX_FRAME_LEN` — evidence for the owner decision (NOT closed here)
+
+This is an owner ratification, not a source read. The evidence:
+
+| Bound | Value | Source |
+|---|---|---|
+| What the wire format admits | `2**32 - 1` = 4 GiB − 1 (`>I` prefix) | `core/comms_utils.py:152, 168` |
+| What rlms enforces on read | **nothing** — `socket_recv` unpacks the length and loops until it has that many bytes | `core/comms_utils.py:164-176` |
+| Largest legitimate **request** frame | one `LMRequest` — a model-authored prompt, or a `prompts` list; unbounded in rlms, bounded by our `ByteLedgerCaps.outbound_per_call` (256 KiB) times a batch | `core/comms_utils.py:38-48` |
+| Largest legitimate **response** frame | one `LMResponse` carrying `RLMChatCompletion.metadata` = `{"run_metadata": ..., "iterations": [...]}` — the child RLM's **entire trajectory**: every iteration, every code block, and every `REPLResult.to_dict()` with serialised `locals` | `core/types.py:130-145`, `logger/rlm_logger.py:80-87`, `core/rlm.py:452, 489`, sent at `environments/ipython_repl.py:210` |
+| Largest legitimate **broker** frame | a DB result, already capped host-side at `BrokerCaps.max_result_bytes` = 8 MiB | `src/repl_sandbox/config.py:124` |
+
+The finding that should drive the number: **the trajectory-metadata frame is the only unbounded
+one**, and it is unbounded by construction — it grows with the child run's iteration count, not
+with any single value. It is attached only when a child logger is configured
+(`core/rlm.py:452, 489`; `core/rlm.py:823`). Two evidence-backed ways to ratify:
+
+1. Run the sub-call path **without a child logger**, removing `metadata` from the wire. The largest
+   remaining legitimate frame is then the broker's 8 MiB result plus envelope, and the existing
+   `DEFAULT_MAX_FRAME_LEN` of 16 MiB (`src/repl_sandbox/config.py:60`) is 2× that — ratifiable.
+2. Keep child trajectories and accept that no static cap is derivable; the frame must then be
+   chunked or handle-addressed rather than sized.
+
+Recommendation: **(1)**, ratify 16 MiB. Either way the cap is enforced before allocation by
+`repl_sandbox/frame.py:142-143`, which is already built and tested.
+
+## 3. Load-bearing hazards found while reading
+
+1. **`repr()` and `==` on a `REPLResult` raise `AttributeError`.** `@dataclass` generates
+   `__repr__`/`__eq__` over the annotated field `llm_calls` (`core/types.py:166`) while the
+   hand-written `__init__` assigns `self.rlm_calls` (`core/types.py:182`), and dataclass leaves an
+   explicit `__init__` in place. `__str__` is hand-written and works. **The backend must never
+   `%r`-log or `==`-compare a `REPLResult`**, audit lines and assertion messages included.
+2. **A frame that omits `depth` yields `depth == -1`**, not `0` (`core/comms_utils.py:57`, whose
+   own comment reads `# TODO: Default should throw an error`). `-1` matches no branch in
+   `LMHandler.get_client` (`core/lm_handler.py:176-191`) and falls through to the default client.
+   The host depth ceiling ([INTERFACES §4 (LM-handler RPC surface)](REPL_SANDBOX_INTERFACES.md))
+   must treat *missing* as its own rejected case, not trust either default.
+3. **`LMResponse().success` is `True` while `LMResponse().to_dict()["error"]` is set**
+   (`core/comms_utils.py:73-75, 102-106`). Never branch on `.success` for a response not built by
+   one of the three classmethod constructors.
+4. **`isinstance(env, SupportsPersistence)` is structural only** — the five names must exist;
+   signatures and return types are unchecked (`environments/base_env.py:282-388`).
+
+## 4. Records contradicted by the source
+
+Listed, not fixed — the records are unedited per the S1 scope.
+
+| Record | Record says | Source says |
+|---|---|---|
+| [INTERFACES §2 (Backend contract)](REPL_SANDBOX_INTERFACES.md), sketch line `def __init__(self, persistent=False, depth=1, max_concurrent_subcalls=4, **kwargs)` marked *(signature source-confirmed)* | that is `IsolatedEnv.__init__` | that is **`BaseEnv.__init__`** (`environments/base_env.py:216-218`). `IsolatedEnv.__init__` is `(self, persistent=False, **kwargs)` (`:243`). A `KataREPL` may accept `depth=` by **keyword** only; `KataREPL(False, 1)` raises `TypeError`. |
+| [INTERFACES §2 (Backend contract)](REPL_SANDBOX_INTERFACES.md), `add_context(payload) -> None` / `add_history(entry) -> None` | one argument, returns `None` | `add_context(context_payload, context_index=None) -> int` and `add_history(message_history, history_index=None) -> int` (`environments/base_env.py:326-328, 356-358`). Both take an optional index and return the index used. `add_history` also requires a **deep copy** of the caller's list (`:370-371`). |
+| [INTERFACES §2 (Backend contract)](REPL_SANDBOX_INTERFACES.md) / [SPEC §2 (Backend interface)](REPL_SANDBOX_SPEC.md) / [DATA_MODEL §8 (`execute_code` result marshaling)](REPL_SANDBOX_DATA_MODEL.md): `REPLResult` fields `... rlm_calls, final_answer` *(source-confirmed)* | a single field list | correct for the **object** and for `to_dict()`, but the **dataclass field list** is `... execution_time, llm_calls, final_answer` (`core/types.py:166`). Both names are real, in different places; see §3 item 1. |
+| [INTERFACES §2 (Backend contract)](REPL_SANDBOX_INTERFACES.md): "`locals` crosses as value-reprs … never live objects" | reads as rlms behaviour | is the **required Trellis behaviour**. rlms' `LocalREPL` returns live objects (`environments/local_repl.py:579`); reprs appear only in `to_dict()`. See §2.2. |
+
+## 5. Not covered by this pass
+
+- **Tool materialisation in rlms' isolated backends** — the other half of BUILD_PLAN §5.1's
+  objective, read only partially. `IPythonREPL` injects custom tools as a **generated code string**
+  carrying a `dill.dumps(..., recurse=True).hex()` payload the guest `loads` back
+  (`environments/ipython_repl.py:767-819`) — a pattern Trellis cannot adopt, since the guest would
+  deserialise host objects. The RPC-proxy-stub alternative
+  ([INTERFACES §6 (CapabilityDescriptor lifecycle)](REPL_SANDBOX_INTERFACES.md)) is unaffected, but
+  `modal`/`prime`/`daytona`/`e2b` are unread and still owed before `register_capability` is fixed.
+- **Kata `docs/design/VSocks.md`** — S1's other read. Not reachable from this host (no Kata, no
+  `/dev/kvm`); still open.
+- **Live behaviour.** All of the above is a zero-paid read plus scripted assertions over installed
+  bytes. No model ran, no VM booted; the parity test uses a real local socket pair, which is a
+  genuine socket but not the vsock seam.
+
+---
+
+*Pinned by: `src/repl_sandbox/tests/test_rlms_conformance.py`. Siblings:
+[INTERFACES](REPL_SANDBOX_INTERFACES.md) (the contracts this checks) ·
+[BUILD_PLAN](REPL_SANDBOX_BUILD_PLAN.md) §5.1 (S1) · [SPEC](REPL_SANDBOX_SPEC.md) §2 (summary
+sheet) · [LEARNINGS](REPL_SANDBOX_LEARNINGS.md) §9 (rlms internals worth remembering).*

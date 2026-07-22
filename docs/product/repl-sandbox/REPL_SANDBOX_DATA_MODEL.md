@@ -121,7 +121,7 @@ non-content (class A):
 
 | Op | Input → Output | Crosses |
 |---|---|---|
-| `slice(H, start, end)` | `[start, end)` half-open (CODE_MEDIATED_TEXT.md §6 Python-slice semantics) → `H'` | handle |
+| `narrow(H, start, end)` | `[start, end)` half-open (CODE_MEDIATED_TEXT.md §6 Python-slice semantics) → `H'` | handle |
 | `project(H, cols)` | column / field selection → `H'` | handle |
 | `filter(H, predicate)` | broker evaluates the predicate host-side → `H'` | handle |
 | `join(H1, H2, on)` | host-side relational join → `H'` | handle |
@@ -130,8 +130,14 @@ non-content (class A):
 | `get_ast_blocks(H_root)` | document structure in order → `[{block-id, type, byte_len}]`, **no text** — the sandbox specialisation of CODE_MEDIATED_TEXT.md §6 item 6 (structure/addresses cross; text is materialised on demand) | addresses |
 | `search(query)` / `vector_search(query)` | → `H'`, a handle to the result **set**, not the rows | handle |
 
+**Naming (owner-authorized 2026-07-22).** The windowing op above was `slice` until this date, which is
+also the name REPL_SANDBOX_INTERFACES.md §5 (DB-broker RPC surface) gives the metered content path —
+two records, one name, two different operations; the collision resolved itself in code by deleting the
+algebra one from the broker's routable set, so narrowing a handle without materialising it was
+unreachable from the guest. The algebra's op is now `narrow`; `slice` keeps its INTERFACES meaning.
+
 **The algebra is closed:** handle in, handle out, zero content. The model composes arbitrarily deep
-host-side derivations (`slice→filter→join→search`) while holding only opaque handles + addresses —
+host-side derivations (`narrow→filter→join→search`) while holding only opaque handles + addresses —
 exactly the pillar's "attention holds only queries, handles, and bounded previews." Note the reframe of
 `vector_search`: REPL_SANDBOX_ARCHITECTURE.md §3.1 lists it among the sanctioned crossings; under this
 model it returns a **handle**, so its rows never cross — only a later `materialize` brings bounded
@@ -215,7 +221,8 @@ interface)) thus holds handles for host-resident referents, a literal only for c
 
 ## 8. `execute_code` result marshaling
 
-`REPLResult` (REPL_SANDBOX_SPEC.md §2: `stdout, stderr, locals, execution_time, rlm_calls,
+`REPLResult` (REPL_SANDBOX_SPEC.md §2 — instance attributes; the dataclass field list says
+`llm_calls`, so `repr()` and `==` raise: `stdout, stderr, locals, execution_time, rlm_calls,
 final_answer`) plus the REPL_SANDBOX_RESEARCH.md §6 (The swappable seam) `ExecResult` shape
 (`value_repr, truncated, spill_handle`) marshal back under these rules:
 
