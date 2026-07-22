@@ -380,3 +380,105 @@ Recorded in [HARNESS_SELF_MODEL.md](HARNESS_SELF_MODEL.md). The principle
 is owner-endorsed; **implementation is not authorized**, and §8 of that
 record carries the gate and the phasing. The `verify()`-informs-not-gates
 scope of §8.3 above is unchanged by it.
+
+### 8.6 The document surface — UPSUM gets a second caller (dated entry — July 22, 2026, owner-directed)
+
+§8.2 landed `trellis_upsum.commit` so the running state's bound was
+measured by the engine and refused with a per-key breakdown, rather than
+asked of the model in prose. The same argument applies unchanged to a
+governed *document*, and there the machinery was half-built.
+
+**The gap.** A contracted root file already has a code-checked bound:
+`maxBytes` in `tools/repository-surface/root-contract.json`, checked by
+`npm run check:repo-surface`. But the checker reports only the total —
+`33446 bytes exceeds 32768` names the overage and not one byte of where
+it lives. An author over budget is returned to eyeballing which prose to
+cut, which is the exact posture §8.1 found and closed for the REPL. A
+bound that says *how much* but not *where* is enforced at the boundary
+and advisory everywhere inside it.
+
+**What landed.** `tools/document-upsum/` — a deterministic, zero-LLM
+transposition of the `TrellisUpsum` contract onto files:
+
+| Running state (§8.2) | Document surface |
+|---|---|
+| the `upsum` dict in REPL locals | the file's bytes on disk |
+| `UPSUM_BUDGET` (2000 chars) | `maxBytes` for that path in the root contract |
+| four standing keys | top-level `##` sections |
+| emergent domain keys | `###` subsections, rolled into their parent |
+| `UpsumBudgetError` + per-key sizes largest-first | refusal + per-section bytes largest-first |
+| `UpsumShapeError` | `DocumentShapeError` — a file with no headings has no compression targets to rank |
+| `commit` returns revision/size/budget/headroom | the receipt prints size/budget/headroom + the ranking |
+
+Entrypoint: `npm run upsum -- <path> [--budget N]` (rule 15 — the
+non-test caller). Exit 0 within budget, 1 refused over budget, 2 on a
+usage/shape/unresolved-budget refusal, 3 for `--negative-control` when
+every planted break is detected (rule 19c). Pins:
+`tools/document-upsum/upsum.test.ts` — twelve, including byte
+conservation (preamble + sections = file size, on LF and CRLF alike) and
+agreement with `check:repo-surface` on the same predicate, so the two
+surfaces cannot disagree about whether a file is within contract.
+
+**Honest scope — it measures and refuses; it never rewrites.**
+Compression stays an authoring act under Guardrail 15. A tool that
+silently rewrote a governing document would violate the pillar this
+surface is derived from (CODE_MEDIATED_TEXT.md §1: the engine computes,
+the author edits). No LLM call, no paid path, no change to the REPL
+surface or to any composed-prompt pin.
+
+**Budget resolution, and why the default lives in the contract
+(owner-directed, July 22, 2026).** The surface first shipped refusing to
+measure an ungoverned path at all, on a rule-17 reading: no default
+instance. The owner directed that a default be added, and the reading
+was too strict — rule 17 forbids encoding a default *instance in the
+machinery*, not having a default at all. The resolution keeps the frame
+in code and the value in the contract:
+
+| Order | Source | Refuses this run | Gated by `check:repo-surface` |
+|---|---|---|---|
+| 1 | `--budget N` | yes — the author asserted it | no |
+| 2 | `rootFiles[].maxBytes` | yes | yes |
+| 3 | `documentUpsum.paths[].maxBytes` | yes | yes |
+| 4 | `documentUpsum.defaultMaxBytes` | **no** | no |
+
+Two properties keep the default from becoming the remembered number this
+surface exists to abolish. **It is declared in
+`root-contract.json`, never in the tool's source** — a bound a tool
+carries privately is one no reviewer reads and no checker audits.
+**Every receipt names its budget's provenance**, so a number's origin is
+always one line away.
+
+`refuses` and `enforced` are deliberately separate. "The author asked
+whether it fits under N" and "the repository guarantees it fits under N"
+are different claims; collapsing them would let a one-run question read
+as a standing guarantee. A default therefore *measures and never gates*:
+exceeding it prints `OVER (unenforced)` and exits 0, naming the missing
+contract row as the remedy. Contract rows added under this entry:
+`docs/ORIENTATION.md` (32,768), `docs/GLOSSARY.md` (24,576),
+`docs/README.md` (20,480) — each an agent-facing document read every
+session, now enforced by a new `oversized_document` issue code.
+
+A document that should be bounded permanently still earns a contract
+row. The default is what you measure against while deciding whether it
+deserves one.
+
+**The REPL form is NOT covered by this entry.** Everything above is a
+Node operator CLI measuring a file on disk. A third form — the surface
+an RLM run would use to measure the document it is editing, including
+its staged-but-unwritten frame — is specified separately at
+[DOCUMENT_UPSUM_REPL_SURFACE.md](DOCUMENT_UPSUM_REPL_SURFACE.md)
+(**DESIGN — PROPOSED July 22, 2026; nothing built, nothing
+authorized**). It extends this entry and does not restate it: the
+transposition table, the section model, and the no-rewrite rule are
+settled here and by `tools/document-upsum/upsum.ts` under `code >
+prose`. Its central finding is that the CLI structurally cannot answer
+the question an editing run actually has — *will this be within budget
+when I write back* — because the disk holds the pre-edit version for as
+long as the edit is in flight.
+
+**The occasion.** The July 22, 2026 `AGENTS.md` restructure hit the
+32,768-byte ceiling three times, and each time the only signal available
+was the total; the session nibbled at prose in four passes before
+locating the real weight in the §2.1 standing table. This surface is
+that session's cost, closed as tooling shape (rule 8) rather than as a
+resolution to be more careful.

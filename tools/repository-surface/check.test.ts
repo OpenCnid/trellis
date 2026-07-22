@@ -50,6 +50,7 @@ describe('repository surface contract', () => {
       },
       deprecatedSurfaces: [],
       forbiddenRootFiles: [],
+      documentUpsum: { defaultMaxBytes: 32768, paths: [] },
     };
 
     const issues = checkRepositorySurface(

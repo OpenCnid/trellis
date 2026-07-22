@@ -234,3 +234,37 @@ recorded the same day.
    next session must OPERATE ON; archive what it need only be able to
    FIND. The working mode going forward is code-the-shape, then test
    and iterate together.
+
+### July 22, 2026 — the one-question rule resolves to stop-and-wait (owner ruling)
+
+§1.5 item 3 and §1.6's restatement both read "ask exactly one
+clarifying question and proceed" / "one question, then act." Read
+literally, that leaves open whether the session waits for the answer or
+acts on its own best reading in the same turn. An agent reading the
+entrypoint could not settle it, and the ambiguity sat in the governance
+text rather than in `AGENTS.md`'s copy of it.
+
+**Ruling (owner, July 22, 2026), recorded verbatim in substance:** the
+session STOPS and WAITS. Asking a question and then proceeding on your
+own guess is the rude-assistant reading; it is not the intended one.
+Putting a question to the collaborator and answering it yourself in the
+same turn spends their attention and discards the answer.
+
+**What this does and does not change.**
+
+- The **one-question cap stands.** This ruling settles what happens
+  after the question, not how many are asked. Interrogation is still
+  the failure the cap was written against.
+- **Rule 14 is unaffected in substance and sharpened in sequence.** A
+  session still discharges every unprotected preparatory step it can;
+  it asks in that same turn, and then it waits rather than
+  self-sequencing past the question. Stopping is not standing down —
+  the preparatory work is already done and reported when the question
+  is put.
+- **"When intent is clear, act" is untouched.** The wait applies to
+  genuine ambiguity and to values or scope calls only the collaborator
+  can make. It is not a licence to convert clear instructions into
+  questions.
+- **`AGENTS.md` follows this record**, in its opening ambiguity clause
+  and in hard rule 21 (the un-tool), which names asking as the cheapest
+  available move.

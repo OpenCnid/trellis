@@ -25,10 +25,8 @@ method's canonical home — the lab's methodology, synthesis prompt, and
 note on the paper itself — is
 [OpenCnid/chain-of-density](https://github.com/OpenCnid/chain-of-density);
 the wider notes collection it anchors is recorded in
-[`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md). The same method also runs in
-**system mode** on Trellis itself, as a branching sibling to this single spine — see
-[`density-chain/DENSITY-CHAIN.md`](density-chain/DENSITY-CHAIN.md) (one trunk, one fixed-length
-branch per subsystem class). Three rules make the ladder safe to stop on at any rung:
+[`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md). Three rules
+make the ladder safe to stop on at any rung:
 
 1. **Each density is conceptually complete.** What D0 tells you is true
    and self-consistent on its own terms. A deeper layer *adds* entities
@@ -332,6 +330,43 @@ the authority.*
 | Owner gates | promotion, registration, paid spend, edit root, merges | `docs/operations/OPERATOR_MANUAL.md` |
 | Honest ledger | open critiques and unproven claims, kept current | `docs/benchmarks/CRITIQUE_AND_FUTURE.md` |
 | Agent-first authoring canon | every document is a prompt for a reader who cannot ask | `docs/product/epistemic-support/IEG_TEACHINGS.md` §6 |
+
+### Record standing
+
+*Moved here from `AGENTS.md` §2.1 on July 22, 2026 (owner-approved).
+Standing values change every time a record is ratified or a slice
+lands, so they are variant content; `AGENTS.md` carries only invariants,
+and this ladder is where per-record state belongs. `AGENTS.md` §2.1
+keeps the invariant rule and points here.*
+
+**Each file's own header is the authority on its standing** — this table
+is an index, and an index drifts. Read the header, and the dated entries
+beneath it: a status line can be superseded by a later dated entry
+inside the same file.
+
+| Record | Standing |
+|---|---|
+| `docs/architecture/CODE_MEDIATED_TEXT.md` | **RATIFIED** pillar (July 9, 2026) — the model never counts, never copies; §2.9 extends it to authority |
+| `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` | **RATIFIED** (July 18, 2026, §11) — its twenty §6 rules are **binding program law**, cited by number, never restated. Read first for anything judge-shaped, with `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
+| `docs/product/epistemic-support/RECONCILIATION.md` | **RATIFIED** (July 18, 2026, §7) — panel law; governs FOUR_JUDGE_DESIGN and FOUR_JUDGE_BASIC_MODEL where they differ |
+| `docs/product/epistemic-support/STANDING_MODEL.md` | **RATIFIED as principle** (July 20, 2026) — signed-ternary standing and the user gate; authorizes **no build** |
+| `docs/architecture/EPISTEMIC_SUPPORT.md` | **ADOPTED** doctrine (July 16, 2026) — amended by dated entry |
+| `docs/RESEARCH_NOTES_COLLECTION.md` §3.1 | **RATIFIED** (July 19, 2026) — consultation and repair for external sources |
+| `docs/architecture/SESSION_GOVERNANCE.md` | **ADOPTED AND APPLIED** (July 17, 2026) — live instruction vs committed record; scoped to the coding-agent session contract only |
+| `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` | **FOUNDATIONAL LESSON** (July 19, 2026) — no default instances; authorizes no build |
+| `docs/architecture/HARNESS_SELF_MODEL.md` | **PRINCIPLE ENDORSED, IMPLEMENTATION NOT AUTHORIZED** (July 19, 2026); §11 carries the case behind `AGENTS.md` rule 20 |
+| `docs/architecture/DOUBTS_WORKSPACE.md` | **DESIGN — PROPOSED** (July 20, 2026) — the −1 tier; nothing built, nothing authorized |
+| `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` | **DESIGN RECORD** (July 13, 2026) — S1/S3 and UPSUM implemented; §8.6 carries the landed document-UPSUM CLI. Further increments owner-gated per run |
+| `docs/architecture/REPOSITORY_ROOT_CONTRACT.md` | **RATIFIED** (July 21, 2026) — the root surface and its machine twin; §7 is the ceremony for changing a governed byte budget |
+| `docs/architecture/DOCUMENT_UPSUM_REPL_SURFACE.md` | **DESIGN — PROPOSED** (July 22, 2026) — the REPL form of document-UPSUM; nothing built, nothing authorized |
+| `docs/product/epistemic-support/FOUR_JUDGE_DESIGN.md` | **DESIGN, GOVERNED BY RECONCILIATION** — the co-equality with FOUR_JUDGE_BASIC_MODEL formally ended July 18, 2026; read them together |
+| `docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md` | **SOURCE ARTIFACT** (S10), committed verbatim — takes addenda, not edits |
+| `docs/product/epistemic-support/JUDGE_CONTRACT_TEMPLATE.md` | **PROPOSED — DESIGN ONLY**; carries July 19 and July 21, 2026 corrections, and is the cited home of the live per-seat judge schema |
+| `docs/product/epistemic-support/COMPOSABLE_RUBRICS_DESIGN.md` | **PROPOSED — DESIGN ONLY**; carries July 19, 2026 corrections |
+| `docs/product/epistemic-support/JUDGE_INTAKE_DESIGN.md`, `JUDGE_CONVOCATION_DESIGN.md` | **IMPLEMENTED** (slices 1 and 2); §6 rows merged into RECONCILIATION §5.1/§5.2 |
+| `docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md` | **DESIGN — nothing built** (July 19, 2026) |
+| `HANDOFF.md`, `docs/archive/TRELLIS_ROADMAP_DEPRECATED.md` | **DEPRECATED / HISTORICAL** — never sources of a current objective or current state |
+| `.claude/skills/`, agent memory | **DERIVED** — the record wins on drift; a memory is never authority |
 
 ---
 
