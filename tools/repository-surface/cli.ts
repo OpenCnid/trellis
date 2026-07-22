@@ -46,6 +46,7 @@ function runNegativeControl(): void {
       },
       deprecatedSurfaces: [],
       forbiddenRootFiles: [],
+      documentUpsum: { defaultMaxBytes: 32768, paths: [] },
     };
     const files = ['.env.example', 'README.md', 'src/config/index.ts', 'unexpected.txt'];
     const issues = checkRepositorySurface(fixtureRoot, contract, files);

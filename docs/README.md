@@ -26,10 +26,6 @@ root `README.md` is a bounded router.
   each layer conceptually complete and safe to stop at. The on-ramp
   when the primary documents feel dense; subordinate to the glossary
   and code.
-- **[`density-chain/DENSITY-CHAIN.md`](density-chain/DENSITY-CHAIN.md)** — the branching
-  sibling to the ladder above: the same chain-of-density method run as a trunk plus one
-  fixed-length branch per subsystem class, rather than one growing spine. Session orientation
-  artifact, not authority.
 - **[`GLOSSARY.md`](GLOSSARY.md)** — canonical one-line definitions for
   every term that carries architectural load. If prose conflicts with
   this file, the prose has a defect; if this file conflicts with code,

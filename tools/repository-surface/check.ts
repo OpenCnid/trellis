@@ -26,6 +26,19 @@ const RootContractSchema = z.strictObject({
     requiredText: z.string().min(1).max(512),
   })),
   forbiddenRootFiles: z.array(z.string().min(1).max(128)),
+  // Budgets for governed documents outside the repository root, plus the
+  // default the document-UPSUM surface measures an ungoverned document
+  // against. The default lives HERE and not in the tool's source: a bound
+  // a tool remembers is a bound nothing can audit, which is the class
+  // CODE_MEDIATED_TEXT.md §2.8 names. `paths` rows are enforced by this
+  // checker; the default is a measuring stick, never a gate.
+  documentUpsum: z.strictObject({
+    defaultMaxBytes: z.number().int().positive(),
+    paths: z.array(z.strictObject({
+      path: z.string().min(1).max(256),
+      maxBytes: z.number().int().positive(),
+    })),
+  }),
 });
 
 export type RootContract = z.infer<typeof RootContractSchema>;
@@ -39,6 +52,7 @@ export interface SurfaceIssue {
     | 'forbidden_root_file'
     | 'missing_root_directory'
     | 'missing_root_file'
+    | 'oversized_document'
     | 'oversized_root_file'
     | 'unexpected_root_directory'
     | 'unexpected_root_file';
@@ -236,6 +250,24 @@ export function checkRepositorySurface(
           code: 'oversized_root_file',
           path: rootFile.path,
           message: `${size} bytes exceeds ${rootFile.maxBytes}`,
+        });
+      }
+    }
+  }
+
+  // A contracted document budget is a real bound, enforced here, so that
+  // `npm run upsum` and this checker cannot disagree about whether a
+  // governed document is within contract. A row here is the difference
+  // between a bound and a remembered number.
+  for (const document of contract.documentUpsum.paths) {
+    const absolutePath = path.join(repoRoot, document.path);
+    if (existsSync(absolutePath)) {
+      const size = statSync(absolutePath).size;
+      if (size > document.maxBytes) {
+        issues.push({
+          code: 'oversized_document',
+          path: document.path,
+          message: `${size} bytes exceeds ${document.maxBytes} — run \`npm run upsum -- ${document.path}\` for the per-section ranking`,
         });
       }
     }

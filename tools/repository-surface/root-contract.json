@@ -47,6 +47,14 @@
       "requiredText": "# Trellis Engine — Technical Roadmap"
     }
   ],
+  "documentUpsum": {
+    "defaultMaxBytes": 32768,
+    "paths": [
+      { "path": "docs/ORIENTATION.md", "maxBytes": 32768 },
+      { "path": "docs/GLOSSARY.md", "maxBytes": 24576 },
+      { "path": "docs/README.md", "maxBytes": 20480 }
+    ]
+  },
   "forbiddenRootFiles": [
     "benchmark_results.json",
     "poison_drill_results.json",

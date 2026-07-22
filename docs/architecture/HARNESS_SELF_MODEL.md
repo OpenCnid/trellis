@@ -380,3 +380,50 @@ that parses a field nothing reads has not made it reachable.
 Not authorized by this section. It is a bounded feature and wants its own
 authorization, like everything else in §8 (Scope, sequencing, and the
 authorization gate).
+
+## 11. The case behind AGENTS.md rule 20 (dated entry — July 20, 2026)
+
+Recorded July 22, 2026 at owner direction, because the rule it grounds
+had no in-repo record: `AGENTS.md` rule 20 cited this case, and the only
+corroborating text was `.claude/skills/self-play/SKILL.md`, which cites
+rule 20 back. A rule whose sole support is a derived artifact citing the
+rule is circular, and rule 18 forbids exactly that substitution.
+
+**What happened.** On July 20, 2026 a session validated the newly
+authored `self-play` skill by running it against a no-skill baseline —
+a with-skill/without-skill comparison asking whether the skill improved
+the output. The run re-violated the owner's July 11, 2026
+tooling-over-prompts direction (`AGENTS.md` rule 8), which had already
+ruled that "prove the prompt moves behavior" is anti-useful work:
+measurement harnesses close *tooling* failure classes, and prompt text
+only reinforces.
+
+**Why it was wrong, stated as the rule rather than the incident.** A
+well-engineered instruction constrains the model to its specification.
+That it differs from, or beats, an unspecified base-model response is
+*entailed* by what an instruction is — the comparison cannot return a
+surprising result, so it purchases no information and burns credits.
+This is the same defect §4 names for prompt claims and §10.1 found for
+adoption: a measurement whose outcome is fixed by construction is not a
+measurement.
+
+**The generalization — the nearby-attractor trap.** The session did not
+reach for a baseline out of ignorance of rule 8. It reached for one
+because a familiar comparison shape was cognitively closer than the
+unfamiliar act of naming a stated engineering target. The trap fires
+whenever a target has not been stated: the baseline is the nearest
+well-formed experiment, so it becomes the default. The countermeasure is
+the ordering, not the prohibition — state the target first, and the
+attractor stops being the only available shape.
+
+**What remains permitted, so the rule is not read wider than it is.**
+Reachability checks and functional-equivalence or regression comparisons
+between two versions of an instruction are the rule-20-safe half
+([SELF_DESCRIBING_SURFACES.md](SELF_DESCRIBING_SURFACES.md) §5); the
+carve-out matters because iterating on a skill *requires* checking that
+the new version still does what the old one did. What is barred is the
+new-versus-null baseline.
+
+**Standing.** This entry records a case and the direction already
+ratified in `AGENTS.md` rules 8 and 20. It authorizes no build and
+changes no gate.

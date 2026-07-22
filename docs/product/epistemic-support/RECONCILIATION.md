@@ -1,14 +1,15 @@
 # Four-Judge Reconciliation — Completed Role Definitions and Composition Design
 
-**Status: PROPOSED — RATIFICATION OPEN.** Authored July 17, 2026
-(Session 66), executing [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md)
+**Status: RATIFIED — July 18, 2026 (owner, Session 67)**, by the dated
+entry in [§7](#7-ratification). Authored July 17, 2026 (Session 66) as
+PROPOSED, executing [`FOUR_JUDGE_DESIGN.md`](FOUR_JUDGE_DESIGN.md)
 §10.1 item 1 as twice-amended: (a) the layer mapping, (b) the completed
 role definitions in S10's YAML schema with per-field sources, (c) the
 adoption of the two structural imports (R-29 hard compatibility gate;
 R-30 no-global-section) into the composition design. Owner ratification
-is a recorded decision, not an inference: until a dated ratification
-entry lands in §7 below, neither this record nor either parent design
-is authoritative over the other. The panel drills
+is a recorded decision, not an inference; the §7 entry is that decision,
+and this record now governs where the two parent designs differ. Amended
+only by dated entry, never by silent edit. The panel drills
 (`npm run test:judge-panel`) pin the composition design in §5 in the
 same PR, per the §10.1 instruction that R-29/R-30 enter the design
 BEFORE the drills pin it.
@@ -669,3 +670,25 @@ not silently disagree:
 STANDING_MODEL is ratified as *principle only* and authorizes no build;
 this record's shipped surfaces stand until a separately gated build
 changes them.
+
+### 7.3 Header correction (dated entry — July 22, 2026, owner)
+
+The header status line of this record read
+`Status: PROPOSED — RATIFICATION OPEN` from authoring on July 17, 2026
+until this entry, four days after §7 ratified it. The two were read
+together only by a reader who reached §7; a reader who stopped at the
+header — which the house rule instructs, since a record's own header is
+authoritative on its standing over any index — was told the opposite of
+the truth, and `AGENTS.md` §2.1 correctly indexed this record as
+RATIFIED against a header that denied it.
+
+Corrected under owner approval, July 22, 2026: the header now states
+RATIFIED with the §7 date and act, and preserves the authoring date and
+original PROPOSED standing so the transition is legible rather than
+erased. **Nothing in §1–§7.2 changes.** This entry amends the status
+line only.
+
+The general defect, recorded because it will recur: a dated ratification
+entry lands at the bottom of a record and the header at the top is left
+alone, so the file's most-read line contradicts its most-authoritative
+one. Ratifying a record includes updating its header in the same act.
