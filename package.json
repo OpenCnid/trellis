@@ -19,6 +19,7 @@
     "python:check": "python scripts/check_python_runtime.py",
     "check:repo-surface": "tsx tools/repository-surface/cli.ts",
     "upsum": "tsx tools/document-upsum/cli.ts",
+    "wiki:check": "node tools/density-chain/wiki_check.mjs",
     "el:activate": "tsx tools/engineering-loop/src/activate.ts",
     "test:roundtrip": "node dist/scripts/test_compose_roundtrip.js",
     "test": "vitest run",

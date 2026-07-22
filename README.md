@@ -17,7 +17,7 @@ evidence contests rather than silently deletes the beliefs that depend on it.
 - **HTTP and SSE contracts:** [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md).
 - **Human contributors:** [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md).
 
-`HANDOFF.md` and the former root technical roadmap are deprecated as active
+[`HANDOFF.md`](HANDOFF.md) and the former root technical roadmap are deprecated as active
 session authorities. Current work comes from the collaborator's live task and
 the task's governing records, not from a stale global objective queue.
 

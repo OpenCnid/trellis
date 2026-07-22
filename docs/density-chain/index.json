@@ -1,0 +1,219 @@
+{
+  "schema_version": 3,
+  "mode": "system",
+  "updated": "2026-07-22",
+  "repo": "https://github.com/OpenCnid/trellis",
+  "note": "System-mode index. Verification is NOT recorded here: a branch is current when the last commit that changed its section is at or after the last commit that changed any code it covers, and tools/density-chain/wiki_check.mjs derives both from git. An earlier edition stored a per-class verified_at pin; storing it was the mistake, because a pin is a claim about a commit that a squash merge or rebase can erase, and this repository squashes. Routing is likewise derived, from the self-index table in DENSITY-CHAIN.md. What remains here is the branch roster, which --verify holds identical to the map headings.",
+  "notes": [
+    {
+      "id": "trellis-density-trellis",
+      "kind": "system",
+      "path": "docs/density-chain/DENSITY-CHAIN.md",
+      "render": "docs/density-chain/DENSITY-CHAIN.html",
+      "title": "The Trellis Density-Trellis",
+      "subject": "Trellis — OpenCnid's Recursive Language Model runtime",
+      "canonical": "https://github.com/OpenCnid/trellis",
+      "first_commit": "c454d1a",
+      "commit_count_first_parent": 157,
+      "commit_count_all": 216,
+      "tier_budget_words": 90,
+      "tier_count": 5,
+      "structure": "trunk (T0-T2) + 13 subsystem-class branches + cross-link lattice + self-index + constellation",
+      "method": "Adams et al. 2023, arXiv:2309.04269 (chain of density), system mode: fixed tier length, one chain per subsystem class",
+      "derivation": "15 parallel read-only sub-agents (13 class cartographers, 1 commit historian, 1 constellation indexer), shared verbatim ground block, rigid return frame, blind to the prior edition; then 4 review agents and a blind fact-checker.",
+      "standing": "PROPOSED / unratified; orientation compression rung of the AGENTS.md 1.5 authority order",
+      "branches": [
+        {
+          "id": "C1",
+          "title": "REPL & RLM execution model",
+          "tier": "seed"
+        },
+        {
+          "id": "C2",
+          "title": "Engineering loop",
+          "tier": "seed"
+        },
+        {
+          "id": "C3",
+          "title": "Epistemic support & judges",
+          "tier": "seed"
+        },
+        {
+          "id": "C4",
+          "title": "Substrate & custody",
+          "tier": "branch-out"
+        },
+        {
+          "id": "C5",
+          "title": "Code-mediated text",
+          "tier": "branch-out"
+        },
+        {
+          "id": "C6",
+          "title": "Trust pipeline & flywheels",
+          "tier": "branch-out"
+        },
+        {
+          "id": "C7",
+          "title": "Standing model & composition from primitives",
+          "tier": "branch-out"
+        },
+        {
+          "id": "C8",
+          "title": "Model-backend seam & test-time training",
+          "tier": "frontier"
+        },
+        {
+          "id": "C9",
+          "title": "Mechinterp & the residual-stream sidecar",
+          "tier": "frontier"
+        },
+        {
+          "id": "C10",
+          "title": "Benchmarks & the evidence ledger",
+          "tier": "frontier"
+        },
+        {
+          "id": "C11",
+          "title": "Serving surfaces & governance",
+          "tier": "frontier"
+        },
+        {
+          "id": "C12",
+          "title": "REPL sandbox & isolation",
+          "tier": "frontier"
+        },
+        {
+          "id": "C13",
+          "title": "Self-describing surfaces & discoverability",
+          "tier": "frontier"
+        }
+      ],
+      "tags": [
+        "recursive-language-model",
+        "provenance",
+        "merkle-ast",
+        "chain-of-density",
+        "density-trellis",
+        "agent-first-documentation",
+        "epistemic-support",
+        "code-mediated-text"
+      ]
+    }
+  ],
+  "connected_repos": [
+    {
+      "repo": "OpenCnid/chain-of-density",
+      "url": "https://github.com/OpenCnid/chain-of-density",
+      "relation": "the method this map uses; canonical home of METHOD.md and the synthesis prompt",
+      "cited_by": "docs/RESEARCH_NOTES_COLLECTION.md",
+      "density_chain": "density-chain.md",
+      "mode": "paper",
+      "verified_on": "local clone D:\\chain-of-density + gh api"
+    },
+    {
+      "repo": "gusthemole/MASH",
+      "url": "https://github.com/gusthemole/MASH",
+      "relation": "prior art for self-documenting surfaces (Matthew Murphy); the seed of the llm_help program",
+      "cited_by": "docs/architecture/SELF_DESCRIBING_SURFACES.md",
+      "density_chain": "docs/density-chain/DENSITY-CHAIN.md",
+      "mode": "system",
+      "verified_on": "gh api repos/gusthemole/MASH/contents/docs/density-chain"
+    },
+    {
+      "repo": "OpenCnid/MASH",
+      "url": "https://github.com/OpenCnid/MASH/tree/main/docs/density-chain",
+      "relation": "the fork where MASH's own density-trellis was authored (trunk + 9 subsystem branches)",
+      "cited_by": "docs/architecture/SELF_DESCRIBING_SURFACES.md",
+      "density_chain": "docs/density-chain/DENSITY-CHAIN.md",
+      "mode": "system",
+      "verified_on": "gh api repos/OpenCnid/MASH/contents/docs/density-chain"
+    },
+    {
+      "repo": "OpenCnid/recursive-language-models",
+      "url": "https://github.com/OpenCnid/recursive-language-models",
+      "relation": "the formulation Trellis implements",
+      "cited_by": "docs/RESEARCH_NOTES_COLLECTION.md",
+      "density_chain": "density-chain.md",
+      "mode": "paper",
+      "verified_on": "local clone + gh api"
+    },
+    {
+      "repo": "OpenCnid/who-grades-the-grader",
+      "url": "https://github.com/OpenCnid/who-grades-the-grader",
+      "relation": "register S1; substrate for COMPOSABLE_RUBRICS_DESIGN.md",
+      "cited_by": "docs/RESEARCH_NOTES_COLLECTION.md",
+      "density_chain": "density-chain.md",
+      "mode": "paper",
+      "verified_on": "local clone + gh api"
+    },
+    {
+      "repo": "OpenCnid/better-harnesses-smaller-models",
+      "url": "https://github.com/OpenCnid/better-harnesses-smaller-models",
+      "relation": "register S9; owner-adopted purpose-level guide",
+      "cited_by": "docs/RESEARCH_NOTES_COLLECTION.md",
+      "density_chain": "density-chain.md",
+      "mode": "paper",
+      "verified_on": "local clone + gh api"
+    },
+    {
+      "repo": "OpenCnid/global-workspace-in-llms",
+      "url": "https://github.com/OpenCnid/global-workspace-in-llms",
+      "relation": "register S8; the J-space findings behind C9",
+      "cited_by": "docs/RESEARCH_NOTES_COLLECTION.md",
+      "density_chain": "density-chain.md",
+      "mode": "paper",
+      "verified_on": "local clone + gh api"
+    },
+    {
+      "repo": "OpenCnid/emotion-concepts-in-llms",
+      "url": "https://github.com/OpenCnid/emotion-concepts-in-llms",
+      "relation": "register S12; the evidence anchor of RESIDUAL_STREAM_SIDECAR.md",
+      "cited_by": "docs/RESEARCH_NOTES_COLLECTION.md",
+      "density_chain": "density-chain.md",
+      "mode": "paper",
+      "verified_on": "local clone + gh api"
+    },
+    {
+      "repo": "OpenCnid/pcf-adaptive-agents",
+      "url": "https://github.com/OpenCnid/pcf-adaptive-agents",
+      "relation": "register S11; PCF's SPARK-space frames the spark-steering skill",
+      "cited_by": "docs/RESEARCH_NOTES_COLLECTION.md",
+      "density_chain": "density-chain.md",
+      "mode": "paper",
+      "verified_on": "gh api"
+    },
+    {
+      "repo": "OpenCnid/llm-research-inspirations",
+      "url": "https://github.com/OpenCnid/llm-research-inspirations",
+      "relation": "the recognition hub; entries require a receipt",
+      "cited_by": "docs/RESEARCH_NOTES_COLLECTION.md",
+      "density_chain": null,
+      "mode": "hub",
+      "verified_on": "local clone + gh api"
+    },
+    {
+      "repo": "gusthemole/WonderSuite",
+      "url": "https://github.com/gusthemole/WonderSuite",
+      "relation": "register S7 (GPL v3 - cite, do not vendor); the conceptual-primitives strategy behind composable rubrics",
+      "cited_by": "docs/product/epistemic-support/RESEARCH_MAP.md",
+      "density_chain": null,
+      "mode": "source",
+      "verified_on": "gh api"
+    },
+    {
+      "repo": "OpenCnid/migration-analysis",
+      "url": "https://github.com/OpenCnid/migration-analysis",
+      "relation": "S9's acquired released code (replication package)",
+      "cited_by": "docs/product/epistemic-support/PROGRAM_CONTEXT.md",
+      "density_chain": null,
+      "mode": "upstream-fork",
+      "verified_on": "local clone + gh api"
+    }
+  ],
+  "unverified": [
+    "OpenCnid/subagent-composition, OpenCnid/claude-spark-steering, OpenCnid/claude-harness-traps: skill bodies are vendored into .claude/skills/, but no file in this repository links the repositories. Relationship inferred from naming, not evidence.",
+    "Lexideck-Technologies/Lexideck2026: located by search, not by any link in this repository.",
+    "Several OpenCnid repositories are private and were not inspected."
+  ]
+}

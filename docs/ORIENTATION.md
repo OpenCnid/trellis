@@ -10,7 +10,7 @@ counts, no current objective. The collaborator's live task supplies current
 scope; protected engineering-loop state is consulted only when that program is
 explicitly invoked (`npm run el:activate -- status`).
 
-**Dated maintenance entry — July 21, 2026:** the manual `HANDOFF.md` and root
+**Dated maintenance entry — July 21, 2026:** the manual [`HANDOFF.md`](../HANDOFF.md) and root
 technical roadmap were retired as active session authorities. References below
 to the old handoff loop describe its historical mechanism, not current routing.
 
@@ -35,7 +35,7 @@ make the ladder safe to stop on at any rung:
 2. **Stop at the first density that answers your question.** D0–D2
    together are under 700 words; read them always. Read D3 before
    designing anything. Use D4 as the concept→authority index — the
-   concept-first transpose of `AGENTS.md` §2, which maps path→content.
+   concept-first transpose of [`AGENTS.md`](../AGENTS.md) §2, which maps path→content.
 3. **Bold marks an entity's first introduction**; every bolded term is
    canonically defined in [`GLOSSARY.md`](GLOSSARY.md) or anchored to
    the named authority document. This file coins no vocabulary of its
@@ -69,7 +69,7 @@ reused forever (knowledge), and the system's own operating instructions
 are versioned **modules** governed as beliefs (capability). One
 discipline binds the model's text handling: **code-mediated text** — the
 model never counts, never copies. The live task supplies current work;
-the canonical vocabulary is `docs/GLOSSARY.md`.
+the canonical vocabulary is [`docs/GLOSSARY.md`](GLOSSARY.md).
 
 ## D2 — one page
 
@@ -84,7 +84,7 @@ the diff drives the sweep. Whole repositories ingest per-file
 surfaces read **live blocks only** — superseded versions are archive,
 reachable solely by explicit hash (owner rule, July 13, 2026).
 
-**Execution.** One Python process per task (`src/rlm/trellis_agent.py`)
+**Execution.** One Python process per task ([`src/rlm/trellis_agent.py`](../src/rlm/trellis_agent.py))
 with the substrate injected as REPL tools: `trellis_neo4j`,
 `trellis_postgres`, the workspace, operator-configured **MCP** tools, and
 — only when the operator sets `TRELLIS_EDIT_ROOT` — the
@@ -116,7 +116,7 @@ opinion (b, d, u) computed sweep-side from judged events, never asserted
 by the writer; support never mints custody.
 
 **Culture.** The repo is document-driven (design records lead); every
-capability claim traces to a dated report in `docs/benchmarks/`
+capability claim traces to a dated report in [`docs/benchmarks/`](benchmarks/)
 (`CRITIQUE_AND_FUTURE.md` is the honest ledger of what is *not* proven);
 every change follows the triple
 `{Behavior_You_Want} → {Tooling_That_Enforces_It} → {Pin_That_Detects_Drift}`;
@@ -132,13 +132,13 @@ designing a change.*
 A Merkle AST's node identity is the SHA-256 of its content plus its
 children's hashes — identity *is* content, as in git, which is why
 positional addressing is never persisted (the Shift Problem;
-`docs/architecture/MATHEMATICAL_FOUNDATIONS.md`). The ingest transaction
+[`docs/architecture/MATHEMATICAL_FOUNDATIONS.md`](architecture/MATHEMATICAL_FOUNDATIONS.md)). The ingest transaction
 re-hashes what it persisted before committing. Documents have stable keys
 (`repo:<key>:<path>`, `web:<url>`, `book:…`) so a changed source is a new
 *version* of the same identity, and the in-transaction diff yields
 exactly the orphaned blocks. The measured founding claim: a 5% corpus
 mutation contested exactly the affected cached facts, recall and
-precision 1.000 (`docs/benchmarks/UPDATE_DRILL_REPORT.md`).
+precision 1.000 ([`docs/benchmarks/UPDATE_DRILL_REPORT.md`](benchmarks/UPDATE_DRILL_REPORT.md)).
 
 ### 3.2 Belief lifecycle
 
@@ -153,7 +153,7 @@ correctness is the support axis's job (§3.6).
 
 ### 3.3 The execution discipline
 
-**Code-mediated text** (`docs/architecture/CODE_MEDIATED_TEXT.md`, core
+**Code-mediated text** ([`docs/architecture/CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md), core
 pillar) unifies two observed failure classes — localization error and
 transcription error — as one pathology: *attention doing code's job*.
 Enforcement is tooling shape: locations are **engine-computed addresses**
@@ -163,54 +163,71 @@ refuses stale digests); answers travel by reference. The workspace
 captures every external result mechanically *inside the tool call* —
 origin-stamped **segments** the model cannot forget to file or forge —
 and retrieval spend is disciplined by held-state dedup and per-run
-budgets (`docs/architecture/RETRIEVAL_DISCIPLINE.md`). Paired-run
+budgets ([`docs/architecture/RETRIEVAL_DISCIPLINE.md`](architecture/RETRIEVAL_DISCIPLINE.md)). Paired-run
 measurements of the discipline live in
-`docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`.
+[`docs/benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md`](benchmarks/EFFECTIVE_CONTEXT_PROBE_REPORT.md).
+
+What that discipline does *not* provide is a trust boundary. Today the
+REPL executes model-authored Python **in-process on the host**, with live
+Neo4j and Postgres clients in the namespace; the read-only posture is a
+keyword denylist plus a transport-level access mode, and the record says
+plainly that the denylist is a courtesy check, not a boundary. The
+**REPL sandbox** program
+([`docs/product/repl-sandbox/`](product/repl-sandbox/README.md)) is the
+answer to that, and its decisions are owner-ratified while **nothing is
+built**: one hardware-isolated unit per session, credentials held outside
+it, a single narrow channel to trusted host chokepoints, and — the
+load-bearing move — a data-flow rule under which the executing code may
+*address* data but never *hold* it, so a sanctioned outbound channel
+cannot leak what was never materialized. That is the code-mediated-text
+pillar carried into the isolation layer: the same by-reference discipline,
+enforced by what the guest can physically reach rather than by what the
+prompt asks for.
 
 ### 3.4 Flywheels, modules, and the laundering lesson
 
 The knowledge flywheel's economics: a stateless recursive baseline pays
 per query forever; Trellis derives once, caches with provenance, and the
-sweep keeps the cache honest (`docs/benchmarks/FLYWHEEL_EXPLAINER.md`).
+sweep keeps the cache honest ([`docs/benchmarks/FLYWHEEL_EXPLAINER.md`](benchmarks/FLYWHEEL_EXPLAINER.md)).
 The capability flywheel applies the same law to instructions — but its
 first turn taught the repo's most load-bearing lesson: asked to cite
 sources, the model laundered (cited real, existing, *unrelated* hashes).
 The remediation is structural, in three parts: scoped authoring (the
 author sees only the corpus), harness-pinned citations (the model never
 supplies provenance), and a derivation gate scoring engagement with
-corpus-specific anchors (`docs/architecture/GROUNDED_AUTHORING.md`,
-`docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`). The follow-on
+corpus-specific anchors ([`docs/architecture/GROUNDED_AUTHORING.md`](architecture/GROUNDED_AUTHORING.md),
+[`docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`](benchmarks/PROVENANCE_CITATION_AB_REPORT.md)). The follow-on
 measurement (module #2's paired control) set permanent doctrine: close
 failure classes with tooling shape — dedup, budgets, typed refusals —
 not prompt modules.
 
 ### 3.5 Session governance
 
-The former `HANDOFF.md` §0 **handoff loop** made one file both the prompt
+The former [`HANDOFF.md`](../HANDOFF.md) §0 **handoff loop** made one file both the prompt
 that started a session and the deliverable it regenerated. That manual
-prototype is retired. Root `AGENTS.md` now supplies invariant routing and hard
+prototype is retired. Root [`AGENTS.md`](../AGENTS.md) now supplies invariant routing and hard
 rules; the collaborator's live task supplies the objective. Two rules deserve
 early attention from any newcomer:
 **correct is not reachable** (a passing suite never proves a caller
 exists — name the non-test entrypoint or say plainly there is none) and
 **a protected pause refuses only the effect it names** (an owner gate on
 one effect is not authorization to stand down unblocked work). The
-**engineering loop** program (`docs/architecture/ENGINEERING_LOOP.md`,
-`tools/engineering-loop/SPEC.md`) mechanizes the session loop itself;
+**engineering loop** program ([`docs/architecture/ENGINEERING_LOOP.md`](architecture/ENGINEERING_LOOP.md),
+[`tools/engineering-loop/SPEC.md`](../tools/engineering-loop/SPEC.md)) mechanizes the session loop itself;
 its activation and acceptance state live in the **acceptance ledger**
 (`npm run el:activate -- status`) — never in Git and never in prose.
 
 ### 3.6 The support axis
 
-Epistemic support (`docs/architecture/EPISTEMIC_SUPPORT.md`;
-program documents `docs/product/epistemic-support/`) grades how a belief
+Epistemic support ([`docs/architecture/EPISTEMIC_SUPPORT.md`](architecture/EPISTEMIC_SUPPORT.md);
+program documents [`docs/product/epistemic-support/`](product/epistemic-support/)) grades how a belief
 has held up: **judge ops** — single-question drawback detectors
 returning `drawback | clean | abstain` from closed taxonomies — feed a
 sweep-side opinion (belief, disbelief, uncertainty; b+d+u=1). `clean`
 never certifies correctness; a fresh belief starts at maximal
 uncertainty; the writer never sees or asserts its own support. The
 program's evidence register and adoption bounds live in
-`docs/product/epistemic-support/RESEARCH_MAP.md`.
+[`docs/product/epistemic-support/RESEARCH_MAP.md`](product/epistemic-support/RESEARCH_MAP.md).
 
 ### 3.7 Where the humans are
 
@@ -226,110 +243,112 @@ control — never as mid-run mutation.
 
 ### 3.8 Evidence culture
 
-A claim without a dated report is a hypothesis; `docs/benchmarks/` holds
-the reports and `docs/benchmarks/CRITIQUE_AND_FUTURE.md` holds the open
+A claim without a dated report is a hypothesis; [`docs/benchmarks/`](benchmarks/) holds
+the reports and [`docs/benchmarks/CRITIQUE_AND_FUTURE.md`](benchmarks/CRITIQUE_AND_FUTURE.md) holds the open
 critiques. Null and surprising results are findings; outliers are re-run
 before they are believed; counts and correctness are always reported
 together. Documents are written agents-first — every document is a
 prompt for a cold-start reader who cannot ask questions
-(`docs/product/epistemic-support/IEG_TEACHINGS.md` §6, the authoring
+([`docs/product/epistemic-support/IEG_TEACHINGS.md`](product/epistemic-support/IEG_TEACHINGS.md) §6, the authoring
 canon this file follows).
 
 ## D4 — the dense index (concept → hook → authority)
 
-*The transpose of `AGENTS.md` §2. One line per entity; the pointer is
+*The transpose of [`AGENTS.md`](../AGENTS.md) §2. One line per entity; the pointer is
 the authority.*
 
 ### Execution model
 
 | Entity | Hook | Authority |
 |---|---|---|
-| RLM | model + REPL, context as database, `llm_query` over slices | `docs/benchmarks/FLYWHEEL_EXPLAINER.md` |
+| RLM | model + REPL, context as database, `llm_query` over slices | [`docs/benchmarks/FLYWHEEL_EXPLAINER.md`](benchmarks/FLYWHEEL_EXPLAINER.md) |
 | REPL namespace | persistent locals across turns = working memory | `GLOSSARY.md` |
-| Kernel / userspace | trust core shipped as code / per-run composed modules | `docs/architecture/WORKSPACE_AND_MODULES.md` |
-| Orchestrator | tool-free planner; decomposes goals; routes by reference | `src/core/agent/`, `docs/reference/API_REFERENCE.md` §4 |
-| A2A surface | one goal per external task, same gates and bounds, off by default | `docs/operations/OPERATOR_MANUAL.md`, `docs/reference/API_REFERENCE.md` §5 |
-| MCP tools | operator-allowlisted external tools; results are research context, never provenance | `docs/operations/OPERATOR_MANUAL.md` |
-| UPSUM | code-checked size-budgeted state summary between REPL stages | `src/rlm/trellis_scaffold.py`, `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` |
+| Kernel / userspace | trust core shipped as code / per-run composed modules | [`docs/architecture/WORKSPACE_AND_MODULES.md`](architecture/WORKSPACE_AND_MODULES.md) |
+| Orchestrator | tool-free planner; decomposes goals; routes by reference | [`src/core/agent/`](../src/core/agent/), [`docs/reference/API_REFERENCE.md`](reference/API_REFERENCE.md) §4 |
+| A2A surface | one goal per external task, same gates and bounds, off by default | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md), [`docs/reference/API_REFERENCE.md`](reference/API_REFERENCE.md) §5 |
+| MCP tools | operator-allowlisted external tools; results are research context, never provenance | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md) |
+| UPSUM | code-checked size-budgeted state summary between REPL stages | [`src/rlm/trellis_scaffold.py`](../src/rlm/trellis_scaffold.py), [`docs/architecture/RLM_HARNESS_SCAFFOLDING.md`](architecture/RLM_HARNESS_SCAFFOLDING.md) |
+| REPL sandbox | the trust boundary the REPL does not yet have: one isolated unit per session, credentials outside it, handles not payloads. **Decisions ratified, nothing built** | [`docs/product/repl-sandbox/`](product/repl-sandbox/README.md) |
+| Handle | an opaque, session-scoped reference the guest may slice and address but never materialize; metered when it must cross out. **Proposed, unbuilt** | [`REPL_SANDBOX_DATA_MODEL.md`](product/repl-sandbox/REPL_SANDBOX_DATA_MODEL.md) |
 
 ### Substrate and custody
 
 | Entity | Hook | Authority |
 |---|---|---|
-| Merkle AST | content-addressed tree; identity is the SHA-256 preimage | `docs/architecture/MATHEMATICAL_FOUNDATIONS.md` |
-| Verified ingest | persist → read-back re-hash → membership → Merkle diff, one transaction | `src/core/ingestion/` |
-| sourceNodeIds | the only values with provenance standing; 64-hex, must exist | `GLOSSARY.md`, `src/rlm/trellis_tools.py` |
-| Live-by-default retrieval | discovery reads current-version blocks only; history by explicit hash | `AGENTS.md` §4 rule 13 |
-| Repository ingestion | per-file documents, snapshots, tombstones; paid extraction gated | `docs/operations/OPERATOR_MANUAL.md`, `docs/benchmarks/REPOSITORY_INGESTION_REPORT.md` |
-| Structural chunking | cAST-style size-budgeted syntax-aligned code blocks | `docs/architecture/STRUCTURAL_CHUNKING.md` |
+| Merkle AST | content-addressed tree; identity is the SHA-256 preimage | [`docs/architecture/MATHEMATICAL_FOUNDATIONS.md`](architecture/MATHEMATICAL_FOUNDATIONS.md) |
+| Verified ingest | persist → read-back re-hash → membership → Merkle diff, one transaction | [`src/core/ingestion/`](../src/core/ingestion/) |
+| sourceNodeIds | the only values with provenance standing; 64-hex, must exist | `GLOSSARY.md`, [`src/rlm/trellis_tools.py`](../src/rlm/trellis_tools.py) |
+| Live-by-default retrieval | discovery reads current-version blocks only; history by explicit hash | [`AGENTS.md`](../AGENTS.md) §4 rule 13 |
+| Repository ingestion | per-file documents, snapshots, tombstones; paid extraction gated | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md), [`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`](benchmarks/REPOSITORY_INGESTION_REPORT.md) |
+| Structural chunking | cAST-style size-budgeted syntax-aligned code blocks | [`docs/architecture/STRUCTURAL_CHUNKING.md`](architecture/STRUCTURAL_CHUNKING.md) |
 
 ### Belief lifecycle
 
 | Entity | Hook | Authority |
 |---|---|---|
-| Contested / quarantine | evidence died → excluded, audited, recoverable | `GLOSSARY.md`, `src/core/graph/` |
-| Invalidation sweep | Merkle diff → contest exactly the dependent beliefs | `docs/benchmarks/UPDATE_DRILL_REPORT.md` |
-| Entity identity | immutable; equivalence is a `SAME_AS` overlay belief | `AGENTS.md` §4 rule 3 |
-| Write path | `write_derived_insight`, the single agentic mutation | `src/rlm/trellis_tools.py` |
-| Retrieval-membership gate | cite only what this run actually retrieved | `docs/architecture/PROVENANCE_THREADING.md` |
+| Contested / quarantine | evidence died → excluded, audited, recoverable | `GLOSSARY.md`, [`src/core/graph/`](../src/core/graph/) |
+| Invalidation sweep | Merkle diff → contest exactly the dependent beliefs | [`docs/benchmarks/UPDATE_DRILL_REPORT.md`](benchmarks/UPDATE_DRILL_REPORT.md) |
+| Entity identity | immutable; equivalence is a `SAME_AS` overlay belief | [`AGENTS.md`](../AGENTS.md) §4 rule 3 |
+| Write path | `write_derived_insight`, the single agentic mutation | [`src/rlm/trellis_tools.py`](../src/rlm/trellis_tools.py) |
+| Retrieval-membership gate | cite only what this run actually retrieved | [`docs/architecture/PROVENANCE_THREADING.md`](architecture/PROVENANCE_THREADING.md) |
 
 ### Working state and trust movement
 
 | Entity | Hook | Authority |
 |---|---|---|
-| Workspace / segment | Tier-3 scratch; origin stamped mechanically in the tool call | `src/rlm/trellis_workspace.py` |
-| Lineage | park at task end, seed later tasks, by reference, TTL-bounded | `docs/operations/OPERATOR_MANUAL.md`, `docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md` |
-| Promotion | operator CLI; segment → verified ingest → citable substrate; only bridge up | `src/core/promotion/` |
+| Workspace / segment | Tier-3 scratch; origin stamped mechanically in the tool call | [`src/rlm/trellis_workspace.py`](../src/rlm/trellis_workspace.py) |
+| Lineage | park at task end, seed later tasks, by reference, TTL-bounded | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md), [`docs/benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md`](benchmarks/WORKSPACE_LINEAGE_PROBE_REPORT.md) |
+| Promotion | operator CLI; segment → verified ingest → citable substrate; only bridge up | [`src/core/promotion/`](../src/core/promotion/) |
 
 ### Flywheels and modules
 
 | Entity | Hook | Authority |
 |---|---|---|
-| Knowledge flywheel | derive once, cache with provenance, sweep keeps it honest | `docs/benchmarks/FLYWHEEL_EXPLAINER.md` |
-| Capability flywheel | modules as beliefs; sweep contests instructions too | `docs/architecture/WORKSPACE_AND_MODULES.md` |
-| Module | manifest + brace-free addendum; sha-pinned composition | `modules/`, `src/rlm/trellis_modules.py` |
-| Grounded authoring | scoped corpus, harness-pinned citations, derivation gate | `docs/architecture/GROUNDED_AUTHORING.md` |
-| Provenance laundering | real-but-unrelated hashes under a count incentive; entailment catches it | `docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md` |
-| Tooling over prompts | failure classes close by tooling shape; prompts reinforce | `AGENTS.md` §4 rule 8 |
+| Knowledge flywheel | derive once, cache with provenance, sweep keeps it honest | [`docs/benchmarks/FLYWHEEL_EXPLAINER.md`](benchmarks/FLYWHEEL_EXPLAINER.md) |
+| Capability flywheel | modules as beliefs; sweep contests instructions too | [`docs/architecture/WORKSPACE_AND_MODULES.md`](architecture/WORKSPACE_AND_MODULES.md) |
+| Module | manifest + brace-free addendum; sha-pinned composition | [`modules/`](../modules/), [`src/rlm/trellis_modules.py`](../src/rlm/trellis_modules.py) |
+| Grounded authoring | scoped corpus, harness-pinned citations, derivation gate | [`docs/architecture/GROUNDED_AUTHORING.md`](architecture/GROUNDED_AUTHORING.md) |
+| Provenance laundering | real-but-unrelated hashes under a count incentive; entailment catches it | [`docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`](benchmarks/PROVENANCE_CITATION_AB_REPORT.md) |
+| Tooling over prompts | failure classes close by tooling shape; prompts reinforce | [`AGENTS.md`](../AGENTS.md) §4 rule 8 |
 
 ### The text discipline
 
 | Entity | Hook | Authority |
 |---|---|---|
-| Code-mediated text | the model never counts, never copies | `docs/architecture/CODE_MEDIATED_TEXT.md` |
+| Code-mediated text | the model never counts, never copies | [`docs/architecture/CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md) |
 | Engine-computed address | locations by query, transient by definition; re-query, never remember | `GLOSSARY.md` |
-| Hash-guarded write | stale digest → loud refusal, never overwrite | `src/rlm/trellis_textedit.py` |
-| Answer by reference | results leave the run as addresses, never retyped prose | `src/rlm/trellis_answer.py` |
-| Retrieval discipline | held-state dedup + per-run budgets at the Tier-1 surfaces | `docs/architecture/RETRIEVAL_DISCIPLINE.md` |
+| Hash-guarded write | stale digest → loud refusal, never overwrite | [`src/rlm/trellis_textedit.py`](../src/rlm/trellis_textedit.py) |
+| Answer by reference | results leave the run as addresses, never retyped prose | [`src/rlm/trellis_answer.py`](../src/rlm/trellis_answer.py) |
+| Retrieval discipline | held-state dedup + per-run budgets at the Tier-1 surfaces | [`docs/architecture/RETRIEVAL_DISCIPLINE.md`](architecture/RETRIEVAL_DISCIPLINE.md) |
 
 ### The support axis
 
 | Entity | Hook | Authority |
 |---|---|---|
-| Epistemic support | (b, d, u) sweep-side; support never mints custody | `docs/architecture/EPISTEMIC_SUPPORT.md` |
+| Epistemic support | (b, d, u) sweep-side; support never mints custody | [`docs/architecture/EPISTEMIC_SUPPORT.md`](architecture/EPISTEMIC_SUPPORT.md) |
 | Judge op | drawback \| clean \| abstain; clean ≠ correct | `GLOSSARY.md` |
-| Judge composition | composed per context from primitives; no default cast; twenty rules are binding law | `docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md` |
-| Composition from primitives | frames invariant, instances never; an encoded instance has become law | `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` |
-| Derived-source substitution | a derivation never discharges an obligation to its source on a load-bearing act | `docs/architecture/CODE_MEDIATED_TEXT.md` §2.9 |
-| Authority ordering | ratified → adopted → design → compression → derived; live instruction outranks the record | `AGENTS.md` §1.5 |
-| Panel law | role definitions, R-29 gates, R-30 no-global-section; governs the older four-judge records | `docs/product/epistemic-support/RECONCILIATION.md` |
-| Evidence register | sources, claims, adoption bounds, by dated entry | `docs/product/epistemic-support/RESEARCH_MAP.md` |
-| IEG | collaborator's exchange-geometry frame; design vocabulary only (AB-1) | `docs/product/epistemic-support/IEG_TEACHINGS.md` |
+| Judge composition | composed per context from primitives; no default cast; twenty rules are binding law | [`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md`](product/epistemic-support/JUDGE_COMPOSITION_GAME.md) |
+| Composition from primitives | frames invariant, instances never; an encoded instance has become law | [`docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`](architecture/COMPOSITION_FROM_PRIMITIVES.md) |
+| Derived-source substitution | a derivation never discharges an obligation to its source on a load-bearing act | [`docs/architecture/CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md) §2.9 |
+| Authority ordering | ratified → adopted → design → compression → derived; live instruction outranks the record | [`AGENTS.md`](../AGENTS.md) §1.5 |
+| Panel law | role definitions, R-29 gates, R-30 no-global-section; governs the older four-judge records | [`docs/product/epistemic-support/RECONCILIATION.md`](product/epistemic-support/RECONCILIATION.md) |
+| Evidence register | sources, claims, adoption bounds, by dated entry | [`docs/product/epistemic-support/RESEARCH_MAP.md`](product/epistemic-support/RESEARCH_MAP.md) |
+| IEG | collaborator's exchange-geometry frame; design vocabulary only (AB-1) | [`docs/product/epistemic-support/IEG_TEACHINGS.md`](product/epistemic-support/IEG_TEACHINGS.md) |
 
 ### Governance and process
 
 | Entity | Hook | Authority |
 |---|---|---|
-| Authority order | code > glossary > prose across the committed record; a collaborator's live instruction outranks it | `AGENTS.md`, `docs/architecture/SESSION_GOVERNANCE.md` |
-| Repository session contract | invariant routing at root; current objective from the live task; deprecated surfaces cannot select work | `AGENTS.md`, `docs/architecture/REPOSITORY_ROOT_CONTRACT.md` |
-| Engineering loop | the session loop mechanized; status in the acceptance ledger only | `docs/architecture/ENGINEERING_LOOP.md`, `tools/engineering-loop/SPEC.md` |
-| Change triple | behavior → enforcing tooling → drift-detecting pin | `AGENTS.md` §3 |
+| Authority order | code > glossary > prose across the committed record; a collaborator's live instruction outranks it | [`AGENTS.md`](../AGENTS.md), [`docs/architecture/SESSION_GOVERNANCE.md`](architecture/SESSION_GOVERNANCE.md) |
+| Repository session contract | invariant routing at root; current objective from the live task; deprecated surfaces cannot select work | [`AGENTS.md`](../AGENTS.md), [`docs/architecture/REPOSITORY_ROOT_CONTRACT.md`](architecture/REPOSITORY_ROOT_CONTRACT.md) |
+| Engineering loop | the session loop mechanized; status in the acceptance ledger only | [`docs/architecture/ENGINEERING_LOOP.md`](architecture/ENGINEERING_LOOP.md), [`tools/engineering-loop/SPEC.md`](../tools/engineering-loop/SPEC.md) |
+| Change triple | behavior → enforcing tooling → drift-detecting pin | [`AGENTS.md`](../AGENTS.md) §3 |
 | Byte-identical-when-absent | unconfigured feature = byte-identical prompt and behavior, pinned | `GLOSSARY.md` |
-| Correct ≠ reachable | name the non-test caller or say there is none | `AGENTS.md` §4 rule 15 |
-| Protected pause | refuses the named effect and nothing more | `AGENTS.md` §4 rule 14 |
-| Owner gates | promotion, registration, paid spend, edit root, merges | `docs/operations/OPERATOR_MANUAL.md` |
-| Honest ledger | open critiques and unproven claims, kept current | `docs/benchmarks/CRITIQUE_AND_FUTURE.md` |
-| Agent-first authoring canon | every document is a prompt for a reader who cannot ask | `docs/product/epistemic-support/IEG_TEACHINGS.md` §6 |
+| Correct ≠ reachable | name the non-test caller or say there is none | [`AGENTS.md`](../AGENTS.md) §4 rule 15 |
+| Protected pause | refuses the named effect and nothing more | [`AGENTS.md`](../AGENTS.md) §4 rule 14 |
+| Owner gates | promotion, registration, paid spend, edit root, merges | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md) |
+| Honest ledger | open critiques and unproven claims, kept current | [`docs/benchmarks/CRITIQUE_AND_FUTURE.md`](benchmarks/CRITIQUE_AND_FUTURE.md) |
+| Agent-first authoring canon | every document is a prompt for a reader who cannot ask | [`docs/product/epistemic-support/IEG_TEACHINGS.md`](product/epistemic-support/IEG_TEACHINGS.md) §6 |
 
 ### Record standing
 

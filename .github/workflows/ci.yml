@@ -24,6 +24,12 @@ jobs:
           cache: pip
       - run: npm ci
       - run: npm run check:repo-surface
+      # Density-trellis contract: every tracked path routes to a branch class,
+      # every class is reachable, and the branch roster is single-sourced.
+      # Deliberately NOT the staleness diff — that needs full history and an
+      # in-progress PR is legitimately stale, so staleness is a session-side
+      # warning rather than a build failure.
+      - run: npm run wiki:check -- --verify
       - run: npm test
       - run: npm run build
       - name: Install Python runtime
