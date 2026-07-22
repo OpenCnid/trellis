@@ -59,8 +59,12 @@ are at the end ([Provenance & method](#provenance--method)).
 4. **Reachability is reported separately from correctness.** `AGENTS.md` hard rule 15 — *correct is
    not the same claim as reachable*. Each branch carries a **no non-test caller** list. Those are
    findings, not accusations.
-5. **Every number here is *as recorded*, never re-run.** No sub-agent executed a test, a drill, or a
-   paid run. A scripted zero-paid harness's counters belong to the script author, not to any model.
+5. **Every number here is *as recorded*, never re-run** — with one dated carve-out. No sub-agent has
+   executed a paid run, and no measured result in this map was re-derived. From **July 22, 2026**, a
+   densifier MAY run a zero-paid check whose output is an exit code or a pass/fail verdict (a suite
+   count, a checker verdict, a negative control) and record it marked *measured this session*; C10,
+   C12 and C13 carry such marks. That licenses nothing further: a scripted zero-paid harness's
+   counters belong to the script author, not to any model.
 
 ---
 
@@ -119,7 +123,7 @@ across for one subsystem's arc.
 
 | Class | Basic (what it *is*) | Current (shipped-pinned) | Frontier (in flight / adopted, unbuilt / known-broken) | Future (proposed / open) |
 |---|---|---|---|---|
-| **C1 REPL & RLM** | the model's only actuator is a persistent Python REPL; context is a database | `trellis_agent.py` over `rlms==0.1.3`, one process per task, goal loop, UPSUM + task wrapper, A2A/MCP injection | telemetry allowlist drops every counter added since Session 20; `max_depth` 1 has no enforcing code; `citable()` unreachable | sandbox build plan; `rlms` compaction (S2b, never enabled); `llm_help`; paid adoption probe |
+| **C1 REPL & RLM** | the model's only actuator is a persistent Python REPL; context is a database | `trellis_agent.py` over `rlms==0.1.3`, one process per task, goal loop, UPSUM + task wrapper, A2A/MCP injection | telemetry allowlist drops every counter added since Session 20; `max_depth` 1 unenforced on this path; pinned `rlms` `REPLResult` `repr`/`==` raise; `citable()` unreachable | sandbox build plan; `rlms` compaction (S2b, never enabled); `llm_help`; paid adoption probe |
 | **C2 Engineering loop** | a controller outside the worktree that mechanizes the session loop | EL-00…EL-06 accepted; ledger + `el:activate`'s ten commands | EL-10/EL-11 **implemented, not accepted**; EL-07 **blocked**; kernel, prompt compiler, runner, verifier, checker, renderer have **no non-test caller** | EL-08 scheduler/extraction, EL-09 report ingest — each needs a fresh owner proposal |
 | **C3 Epistemic support** | a graded, decaying (b,d,u) opinion of how a belief held up, computed sweep-side, writer-blind | support arithmetic, judge panel, intake, convocation, `judge_explain` render — all zero-paid | four-role cast **demoted to one instance** (S71); live judge constructor exists and has only ever refused; paid queue **ON HOLD** | reopen the paid queue; J3 live gatherer; the metered promotion-cost run (≈$0.02–$0.06/belief) |
 | **C4 Substrate & custody** | provenance-enforced storage: Merkle ASTs plus beliefs bound by `sourceNodeIds` | verified ingest, invalidation sweep, quarantine/recovery, `repo:ingest`, entity resolution — measured | structural chunking pilot **FAILED as worded**, recovered only after the liveness filter; node-level `contested` has no consumer | `ASTRef`/`EVIDENCED_BY` migration (gate closed at 286/1,000 hashes); CRDT; trust decay; docs-corpus extraction |
@@ -128,10 +132,10 @@ across for one subsystem's arc.
 | **C7 Standing & composition** | signed-ternary standing, user-gated; compose from primitives, no default cast | the nine in-repo skills; the composition-from-primitives lesson | standing model **ratified as principle, no build**; corrosion bound **falsified as written** (positive core survives); `ROLE_DEFINITIONS` is still the cast rule 17 forbids | hash-kind stamp; recorder-plus-gate promotion; §11 repair directions; `affirmation` as an object |
 | **C8 Backend seam & TTT** | make the completion backend a choice; ask whether test-time training helps adherence | the T1 config surface, and one live guard: the ambient `OPENAI_BASE_URL` refusal | T1 **consumer-less**; T2 **failed three straight sessions**, PAUSED on an unbuilt tooling increment; hosted arm is a proposal | R3–R5 rungs; LaCT arms; worker-transport override. **No TTT run or alternate backend has ever executed** |
 | **C9 Mechinterp sidecar** | read and steer a served model's functional-affect state in the residual stream | *(nothing)* — one 288-line docs-only record | entirely prerequisite: hosted arm → local backend → sidecar, and step one is a proposal | instrument/actuator/mixture ladder M1–M4; percolative-Ising controller; the judge-actuation hazard, held outside the repo |
-| **C10 Benchmarks & evidence** | a capability claim is a hypothesis until a dated report retires it | OOLONG v1, update/poison/scale drills, effective-context rounds, citation A/B, wall-clock — all dated | anti-shortcut corpus v2 pinned zero-paid with **no paid run**; the `--negative-control` doctrine is broader than its implementation | real TREC import; adversarial corpora; 10k sweeps; multi-run variance replacing n=1; consensus writes |
-| **C11 Serving & governance** | narrow, authenticated, admission-bounded doors; a written contract about which record wins | HTTP/SSE API, A2A server, outbound MCP client (byte-identical when off); AGENTS.md, session governance, the root contract | the ratified surface checker is **red at this commit** because of the density-chain deletion; `KNOWN_ROUTES` mislabels two routes | inbound MCP server surface with five open decisions; OAuth posture; the dual client+server role |
-| **C12 REPL sandbox** | treat model-authored Python as hostile and own the boundary between it and the operator's secrets | *(nothing built)* — ten ratified design documents | every gate unlifted: G0 research hold, spikes S1–S6, the vsock bridge; the whole class is **unreachable from the repo index** | doubt-filter Layers 1–2; warm pool; `max_depth` 2; host selection |
-| **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI | Phase 0 **falsified its own specification**; the telemetry allowlist gap is confirmed and unfixed; both new records are orphans | `llm_help` and descriptors; the guard-derivation bijection; a human-doc generator; the self-play discrimination gate |
+| **C10 Benchmarks & evidence** | a capability claim is a hypothesis until a dated report retires it | OOLONG v1, update/poison/scale drills, effective-context rounds, citation A/B, wall-clock — all dated | anti-shortcut corpus v2 pinned zero-paid with **no paid run**; the uncommitted nine-refusal sandbox drill is **[R]**-only, outside CI | real TREC import; adversarial corpora; 10k sweeps; multi-run variance replacing n=1; consensus writes |
+| **C11 Serving & governance** | narrow, authenticated, admission-bounded doors; a written contract about which record wins | HTTP/SSE API, A2A server, outbound MCP client (byte-identical when off); AGENTS.md, session governance, the root contract | the surface checker is **green again** (`20e94ae` restored the density-chain links); `KNOWN_ROUTES` mislabels two routes | inbound MCP server surface with five open decisions; OAuth posture; the dual client+server role |
+| **C12 REPL sandbox** | treat model-authored Python as hostile and own the boundary between it and the operator's secrets | *(nothing shipped)* — still in-process `rlms==0.1.3` LocalREPL; eleven ratified design documents | G0 lifted 2026-07-22, S1 closed; a 781-test host-independent control plane sits **uncommitted, no non-test caller, no CI**, while G1 is unliftable on this Windows host so S2–S6 and the boundary itself stay unbuilt | doubt-filter Layers 1–2; warm pool; `max_depth` 2; host selection; the paid **[A]** halves, ≤$5, unspent |
+| **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI | the twin gained two root files the ratified record's §2 still omits, undetectably — the checker proves twin↔tree, never record↔twin; Phase 0 **falsified its own specification**; the telemetry allowlist gap is confirmed and unfixed; both records stay orphans | `llm_help` and descriptors; the guard-derivation bijection; a human-doc generator; the self-play discrimination gate |
 
 ---
 
@@ -170,25 +174,25 @@ planner above it. Not what the injected tools reach into, only that they arrive 
   20,000-char block cap. Bounds `AGENT_MAX_TASKS_PER_GOAL` 8, `…ITERATIONS_PER_GOAL` 4,
   `TASK_WAIT_TTL_MS` 30 min.
 - **T4 — the frontier.** `rlms` LocalREPL still runs model-authored Python in-process on the host with
-  live Neo4j and Postgres credentials in-namespace; the microVM answer is ratified and **nothing is
-  built**. `parseTelemetryLine`'s nine-field allowlist **drops every counter added since Session 20**,
-  so `upsum_*` and `task_*` are unreadable on the worker path. `verify()` informs, never gates;
-  `commit()` gates only what it is given. S2b `compaction=True` was measured and **never enabled**.
-  `citable()` has **no non-test caller** — its named setter, "the stage-2 self-edit driver," does not
-  exist in this tree.
-- **T5 — future plans.** Proposed and open: the sandbox build plan's spikes and gated milestones —
-  design, not built; the exfil doubt-filter Layers 1–2, PROPOSED and unratified. `llm_help` and
-  self-documenting descriptors, always-present so discovery stays reachable — PROPOSED, authorizing no
+  live Neo4j and Postgres credentials in-namespace; the boundary stays [[C12]]'s, and nothing here
+  has moved off it. A pinned read of `rlms==0.1.3` names a live substrate defect: `REPLResult`
+  annotates `llm_calls` but assigns `rlm_calls`, so its generated `repr()` and `==` **raise** on every
+  `execute_code` return. `parseTelemetryLine`'s nine-field allowlist **drops every counter added
+  since Session 20**. `verify()` informs, never gates. S2b `compaction=True` was measured and **never
+  enabled**. `citable()` has **no non-test caller**.
+- **T5 — future plans.** Proposed and open: replacing this substrate — the ladder, gates and exfil
+  doubt-filter are [[C12]]'s. `llm_help` and self-documenting descriptors — PROPOSED, authorizing no
   build, behind the harness self-model's §8 gate with expectation-to-guard bijection as the audit.
   Reasoning-templates, not sequenced. Backend T2–T4, the hosted arm, TTT rungs R3–R5 — owner-gated.
   `max_depth` 2 is a contingency. The composed-prompt sha pins are the natural cache key for any
   prefix fast-state.
 
 *Status ledger:* RLM · REPL · `llm_query` · orchestrator · workspace injection · A2A/MCP seam — all
-**shipped-pinned**. Telemetry allowlist gap · `citable()` · `max_depth` 1 without enforcing code —
-**confirmed open**. *Cross-links:* [[C4]] (DB tools + the `sourceNodeIds` gate), [[C5]] (the toolkit
-rides the same injection), [[C6]] (workspace/promotion/modules), [[C11]] (A2A/MCP serving), [[C12]]
-(the boundary this class does not yet have).
+**shipped-pinned**. Telemetry allowlist gap · `citable()` · `REPLResult` `repr`/`==` · `max_depth` 1
+unenforced **here** — **confirmed open**; the host `depth_ceiling` that now exists guards [[C12]]'s
+channel, not this one. *Cross-links:* [[C4]] (DB tools + the `sourceNodeIds` gate), [[C5]] (the
+toolkit rides the same injection), [[C6]] (workspace/promotion/modules), [[C11]] (A2A/MCP serving),
+[[C12]] (the boundary this class lacks, and does not call).
 
 #### C2 — the engineering loop: an out-of-process session controller and its acceptance ledger
 *Charter: the repository-external, protected-state machinery that mechanizes the engineering session
@@ -602,48 +606,48 @@ drills, spend gates, and the reports that carry every caveat. Not the subsystems
 the measurement of them.*
 
 - **T1 — essence.** Trellis treats every capability claim as a hypothesis until a dated measurement
-  retires it. This class owns the instruments: synthetic corpora whose ground truth is computable
-  offline, harnesses that drive the agent as a black box and score it, and adversarial drills that
-  break a cached belief on purpose — by changing its bytes, poisoning it in place, or scaling it. The
-  discipline outranks the results: nulls need a positive control, outliers are re-run, counts travel
-  beside correctness and spend, and a scripted zero-paid harness records its author, never a model.
+  retires it. This class owns the instruments: offline-scorable corpora, black-box agent harnesses,
+  adversarial drills that break a cached belief on purpose. Two probe kinds never substitute — scripted
+  **[R] reachability** shows a control is present and fires; metered **[A] adoption** asks whether a
+  real model drives it right. Discipline outranks results: a null needs a positive control, outliers
+  are re-run, and a scripted zero-paid harness records its author, never a model.
 - **T2 — current machinery.** `docs/benchmarks/` holds twelve records and four JSON artifacts over the
   OOLONG-Pairs datasets and synthetic chronicle, ledger and relational corpora. `src/benchmarks/oolong`
   scores set-F1, rejects zero-tool-call answers as `TRELLIS_PROTOCOL_VIOLATION`, re-dispatches thrice
   while accumulating discarded cost, and audits cache accuracy; four runners sit behind
   `oolong:benchmark` and `drill:update|poison|scale`. Paid probes — effective context, the citation
-  A/B, the workspace pair — carry **no npm alias by design**, print estimates, and abort at $5. Each
-  report dates itself, names its n, lists its caveats.
+  A/B, the workspace pair — carry **no npm alias by design**, print estimates, and abort at $5.
 - **T3 — with receipts.** Run A (`17bc7ba`, 2026-07-02): F1 **1.000 ×20**, `total_cost_usd`
   0.8654850000000001, mean cold sub-calls 0.357; Run B replicated at $0.8115. Update drill: 11/220
-  mutated, recall 1.000, precision 1.000, $0.7263 versus $0.8002. Poison drill: **mandatory-only recall
+  mutated, recall/precision 1.000, $0.7263 versus $0.8002. Poison drill: **mandatory-only recall
   0.000**; p=0.05 recall 1.000 in 62 sweeps, 0.0% false disputes; total $3.27. Scale: max **286**
   hashes, 15.32 → 21.81 ms, gate closed, zero paid calls. Effective-context round 4: **0/36 misses**
   versus round 3's 7/30, $0.9452; answer channel **255/255** by reference.
-- **T4 — the frontier.** The anti-shortcut corpus v2 is pinned zero-paid, yet **no paid run exists** —
-  implemented, not accepted. `TRELLIS_CITATION_ENTAIL` ships gated off. Module #2 missed its pre-stated
-  criterion across 50 runs / $2.3981; the citation-discipline module measured unreliable and never
-  landed. Self-edit increment T2 failed three consecutive runs; two sessions record runs
-  environmentally blocked at $0.0000. Node-level quarantine stays latent, unread. **Headlines remain
-  n=1–2.** And AGENTS.md rule 19c's "every drill ships a `--negative-control`" is broader than the
-  implementation: that flag exists only in the four judge/support drills.
-- **T5 — future plans.** Open: the real TREC import — deliberately unattempted, since it needs a paid
-  annotation pass and the spec's fetch script was never built; adversarial corpora with genuinely
-  contested gold labels; embedding-shortcut corpora; 10k-question scale sweeps; multi-run variance
-  replacing n=1. Proposed: 2-of-3 consensus writes on confusable category boundaries; re-running the
-  scale drill when a live array reaches 1,000 hashes; larger-payload lineage probes; iso-node scaling
-  curves; the TTT ladder reusing the estimation suite, behavioral criteria only. **None scheduled or
-  funded.**
+- **T4 — the frontier.** Anti-shortcut corpus v2 is pinned zero-paid with **no paid run** —
+  implemented, not accepted. `TRELLIS_CITATION_ENTAIL` ships gated off. Module #2 missed its criterion
+  across 50 runs / $2.3981; the citation-discipline module measured unreliable, never landed. Self-edit
+  T2 failed three runs; two more were blocked at $0.0000. Quarantine stays latent. **Headlines remain
+  n=1–2.** New and **uncommitted**: `scripts/repl_sandbox_drill.py` drives **nine** [[C12]] refusals
+  over doubles, eight via that class's composition root; run here **exit 0**, and
+  `--negative-control` plants one break behind each and **exits 3**, all nine detected. Its
+  `repl-sandbox:drill` alias is uncommitted; **no CI runs it**.
+- **T5 — future plans.** Open: the real TREC import (unattempted: it needs a paid annotation pass and
+  an unbuilt fetch script); adversarial corpora with contested gold labels; embedding-shortcut corpora;
+  10k-question scale sweeps; multi-run variance replacing n=1. Proposed: 2-of-3 consensus writes on
+  confusable boundaries; re-running the scale drill at 1,000 live hashes; the TTT ladder reusing the
+  estimation suite, behavioral criteria only. **None scheduled or funded.**
 
-*Status ledger:* OOLONG harness · v1/v2 corpora · update/poison/scale drills · the probe runners —
-**shipped, measured**; v2 paid run · real TREC · adversarial corpora · variance reporting —
-**queued-proposed**; frozen errors · consensus writes · TTL decay — **open critique, unbuilt**.
-*Honest note:* the "26× projected cost advantage at scale" (≈$1,120 versus ≈$40 per 1,000 queries) is
-an **extrapolation**, not a measurement — no baseline run against an external RLM exists in this
-repository. `benchmark_logs/` is gitignored, so per-run rows for the probes are not recoverable here.
-*Cross-links:* [[C4]] (the drills measure that class's guarantees), [[C1]] (measures the engine,
-doesn't own it), [[C6]] (flywheel economics), [[C11]] (guardrails 7/8/11/15/19/20 are the ratified
-statement of this discipline).
+*Status ledger:* OOLONG harness · v1/v2 corpora · update/poison/scale drills · probe runners —
+**shipped, measured**; the sandbox refusal drill and `fuzz_frame.py` — **[R] only, uncommitted, outside
+CI**; v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
+*What those two license:* nine refusals and eight planted frame readers are **present and fire** over
+doubles — not that a model drives the surface right. Every [[C12]] **[A]** half (S3, S4, S6, GB, GA-eq,
+≤$5) is **unspent**. Rule 19(c)'s flag now spans **nine** surfaces (`check:repo-surface`, `wiki:check`
+and `upsum` too), none a corpus drill here.
+*Honest note:* "26× at scale" (≈$1,120 vs ≈$40 per 1,000 queries) is an **extrapolation**; no
+external baseline run exists here, and `benchmark_logs/` is gitignored.
+*Cross-links:* [[C4]] · [[C1]] (measured, not owned) · [[C6]] (flywheel economics) · [[C12]] (owns the
+sandbox; C10 owns its drill's standing) · [[C11]] (guardrails 7/8/11/15/19/20).
 
 #### C11 — serving surfaces and project governance
 *Charter: every door through which something outside the Trellis process reaches it, and the written
@@ -671,14 +675,17 @@ the write path, or the discoverability program.*
   **3,552 lines to 26**, added `check:repo-surface`, negative control exiting 3. `6259766` (#126)
   applied the session-governance ruling, whose §2 primacy finding counted the authority sense of one
   phrase **once** against six ordinary uses.
-- **T4 — the frontier.** **Known-broken at this commit:** `5e7295d` (#159) deleted
-  `docs/density-chain/` but left the two inbound links in `docs/README.md:29` and
-  `docs/ORIENTATION.md:30`, so the ratified checker's own `broken_markdown_link` rule should now fail
-  in CI — and `AGENTS.md:122`'s row is stale in plain backticks, which the checker would **not** catch
-  even then. *(This file's own return closes both links; see [Maintenance](#maintenance--the-living-wiki-loop).)*
-  `normalizeRoute`'s known-route table omits two live routes, labelling both `unmatched`. The
-  engineering-loop controller is preserved, explicitly not claimed adopted. `CancelTask` is permanently
-  declined.
+- **T4 — the frontier.** **Green again**, and the durable lesson outlived the outage: `5e7295d`
+  (#159) deleted `docs/density-chain/` while leaving two inbound links, which the
+  ratified `broken_markdown_link` rule caught — but `AGENTS.md`'s row was stale in plain backticks,
+  which the checker would **not** have caught even then. That asymmetry is still live and just
+  recurred: `AGENTS.md` §2 (Navigation map) rows every top-level `src/` package except [[C12]]'s new
+  `src/repl_sandbox/`, and nothing detects an omission — the contract governs repository-root names,
+  never navigation completeness. The same shape one level up is [[C13]]'s record↔twin gap.
+  **`AGENTS.md` now sits 11 bytes under its 32,768 cap on a CRLF checkout** (535 on LF), so the byte
+  gate is platform-dependent at the margin. `normalizeRoute`'s known-route table omits two live routes,
+  labelling both `unmatched`. The engineering-loop controller is preserved, explicitly not claimed
+  adopted. `CancelTask` is permanently declined.
 - **T5 — future plans.** PROPOSED, unsequenced: an inbound MCP server surface letting external hosts
   call Trellis — one `query` tool over the goal loop, `trellis://kb/node/{hash}` citation resources,
   byte-identical when unset, API-key parity — carrying five open decisions: read-tool exposure,
@@ -700,54 +707,53 @@ checker is that class's machinery; this class is what it checks).
 chokepoints, the vsock wire, the handle data-flow rule, the threat model, and the gated build plan. Not
 the RLM execution model, the doubts machinery it borrows, or the pillar it realises.*
 
-- **T1 — essence.** Trellis's REPL executes model-authored Python steerable by retrieved text, so this
-  class treats that code as hostile and owns the boundary between it and the operator's secrets. Its
-  invariants: one hardware-isolated execution unit per session; credentials and API keys held outside
-  it; a single narrow channel to trusted host chokepoints; and, deepest, a data-flow rule — the
-  executing code may *address* data but never *hold* it, so sanctioned outbound channels cannot leak
-  what was never materialized. Language-level guards are telemetry, never boundary. It owns isolation,
-  not reasoning.
-- **T2 — current machinery.** Shipped today: `rlms==0.1.3` LocalREPL, in-process, injecting live
-  credential-bearing database clients. The class's machinery is a ratified document set, not code:
-  `docs/product/repl-sandbox/` — an architecture (Kata microVM on Cloud Hypervisor, flat fan-out,
-  deny-by-default egress, in-guest hardening), a threat model (three zones, residuals R1–R6), a data
-  model (opaque CID-scoped handles, a slice-by-address algebra, metered materialization), interfaces
-  (an isolated-env backend, three vsock ports, a capability descriptor), a spec, a build plan, a doubt
-  filter, research, and learnings. **Nothing built.**
-- **T3 — with receipts.** Two docs-only commits: `84351d4` (#148, ratified 2026-07-20/21) landed
-  research, architecture, spec, learnings and three diagrams — **2,148 insertions**; `8943c46` (#157)
-  landed the README, build plan, threat model, data model, interfaces and doubt filter, plus the exfil
-  resolution. Pins: **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0**, closing three named CVEs. Red team:
-  **14 findings (4 critical, 6 high, 4 medium) → 12 must-adds**. Nine sub-agents in round one, five in
-  round two; a four-role panel at **$0**, disposition promote-weakened. Depth-2 measured harmful,
-  ~96× latency (external). No-KVM fallback 5–35× slower.
-- **T4 — the frontier.** The frontier is entirely pre-build. The owner research hold is unlifted;
-  every spike and gate is adopted-but-unbuilt on a single critical path. The vsock bridge is unbuilt
-  security-critical glue, tracked as a residual, needing fuzzing plus red-team before ship. The doubt
-  filter's two layers stay PROPOSED, their seat prompts deferred under Guardrail 15. Accepted residuals:
-  a bounded exfil rate including a block-id hash-confirmation oracle, and no second isolation ring.
-  Known-porous today: the keyword denylist misses at least one write path, and the transport-level READ
-  mode is the actual guard.
-- **T5 — future plans.** Proposed and open, each labelled: doubt-filter Layers 1–2, owner ratification
-  pending, their substrate itself open — an in-context meta-prompt or a test-time-trained tooling call.
-  Open: a warm pool, unlocked only by a proven no-state-bleed reset policy; depth-2 with a sibling
-  microVM pool, needing Trellis-specific measurement to overturn the external result; relaxing the safe
-  builtins once the VM exists; several encoding questions; the environment-type slot; the Windows
-  dev-host shape; and host selection, with three priced options. Paid gates are capped ≤$5/run and
-  unspent.
-- 
+- **T1 — essence.** Trellis's REPL runs model-authored Python steerable by retrieved text, so this class
+  treats that code as hostile and owns the boundary between it and the operator's secrets. Its
+  invariants: one hardware-isolated unit per session; credentials outside it; one narrow channel to
+  trusted host chokepoints; and, deepest, a data-flow rule — the code may *address* data but never
+  *hold* it. Language-level guards are telemetry, never boundary. **What exists is the software on both
+  sides of that boundary; the boundary itself is unbuilt — there is no working sandbox.**
+- **T2 — current machinery.** Execution still runs on in-process `rlms==0.1.3` LocalREPL holding live
+  credential-bearing clients. New, **uncommitted**: a host-independent control plane,
+  `src/repl_sandbox/` — 19 modules / 8,080 lines against 18 test files / 9,533 lines — the frame
+  codec, the vsock transport (identity read from `accept()`), the guest supervisor protocol, the handle
+  table and slice algebra, the DB broker with backends and a lexical statement inspector, the LM handler
+  with byte/rate/spend ledgers and a DLP hook, the capability lifecycle, a CID-keyed audit log, the
+  error taxonomy, `KataREPL(IsolatedEnv)` and `KataLauncher` — each transport-agnostic, exercised
+  through loopback doubles. Eleven ratified documents, conformance new.
+- **T3 — with receipts.** **G0 lifted 2026-07-22** by owner instruction, in
+  `REPL_SANDBOX_BUILD_PLAN.md` §2 (The research-hold gate), under two qualifications: G1 is
+  unsatisfiable here; a loopback double is never a boundary. **S1 closed** — a 12-test conformance
+  pass over the installed `rlms==0.1.3` found **four places where a record marked
+  *(source-confirmed)* contradicts the source**, listed unfixed. Observed:
+  `python -m pytest src/repl_sandbox/tests -q` → **781 passed**. The frame red-team found **seven
+  defects**, all closed; `fuzz_frame.py --negative-control` plants **eight** broken readers and
+  **exits 3** when all are caught. Pins hold: **Kata ≥ 3.31.0 AND Cloud Hypervisor
+  ≥ 52.0**; no-KVM fallback 5–35× slower; depth-2 harmful (~96×, external).
+- **T4 — the frontier.** **G1 is unlifted and unliftable from this host** — Windows, no `/dev/kvm` —
+  so **S2–S6, everything needing a booted Kata guest, stay blocked**. `KataLauncher.boot` gates first
+  and raises rather than return a handle backed by nothing; an *unmeasured* acceleration benchmark
+  reports **failure**, never a pass. Named gaps: requirement 9's **grant** half (role exists,
+  `NOSUPERUSER`, no `pg_read_server_files`) is a **deployment obligation no Python can enforce** — the
+  DDL ships, the claim does not; `locate` and `get_ast_blocks` **fail closed** for want of a host-side
+  referent evaluator; the LM handler type-checks a guest-supplied model name but enforces **no
+  allowlist**; `MAX_FRAME_LEN` is unratified; rlms' modal/prime/daytona/e2b materialisation paths unread.
+- **T5 — future plans.** Proposed: doubt-filter Layers 1–2, owner ratification pending, substrate
+  open. Open: a warm pool behind a proven no-state-bleed reset; depth-2 with a sibling microVM, pending
+  Trellis-specific measurement; the environment-type slot; the Windows dev-host shape; host selection
+  (three options, never DigitalOcean). Every **[A]** half (S3, S4, S6, GB, GA-eq) is capped ≤$5 and
+  **unspent**.
 
-*Status ledger:* **the entire class is design record; nothing is built.** Every entity — the isolated
-backend, the vsock bridge, the host broker, the host LM handler, the handle algebra, the capability
-descriptor, the doubt filter — reports **no non-test caller**, because no implementation exists.
-*Discoverability finding, reported loudly:* `AGENTS.md`, `README.md`, `HANDOFF.md`, `docs/README.md`,
-`docs/ORIENTATION.md` and `docs/GLOSSARY.md` contain **zero** references to `docs/product/repl-sandbox/`
-— an agent following the stated navigation map would never reach this class. Its folder README is the
-only entry point. *Unreconciled adjacency:* an earlier coverage audit preserved in the deprecated
-roadmap records "(High) Cross-process isolation is unproven" on the same subject family; no
-repl-sandbox document cites it. *Cross-links:* [[C1]] (this class replaces that class's substrate while
-preserving its contract), [[C5]] (the handle model is the pillar realised as a slicing API), [[C7]]
-(Layers 1–2 compose from the −1 tier wholesale).
+*Status ledger:* **control plane implemented in-tree and uncommitted; the boundary it defends is
+unbuilt — this is not a sandbox and must not be read as one.** Unbuilt: the Kata microVM, the vsock
+bridge on a real host, Tier-0 in-guest hardening. Accepted: nothing — no SPEC §8 gate passed.
+*Reachability:* closed by `host.py` + `cli.py` + `scripts/repl_sandbox_drill.py` and five `npm`
+scripts; **no CI job runs any of them**, and `KataLauncher.boot`, both vsock classes and every
+`*_from_env` factory stay uncalled by construction. *Discoverability:* `AGENTS.md`,
+`docs/README.md` and `docs/ORIENTATION.md` now carry the built/boundary split; `AGENTS.md` §2 still
+has no row for `src/repl_sandbox/`. *Cross-links:* [[C1]] (replaces that substrate, preserving its
+contract), [[C5]] (the handle model is the pillar as a slicing API), [[C7]] (Layers 1–2 compose from
+the −1 tier wholesale).
 
 #### C13 — self-describing surfaces and agent-first discoverability
 *Charter: the machinery and design records by which Trellis explains itself to the agent operating it —
@@ -755,55 +761,55 @@ the ratified root contract and its deterministic checker, plus the harness self-
 descriptor program. Not the guards it describes, only the accounts of them.*
 
 - **T1 — essence.** A system operated by an agent must be able to explain itself to that agent. Two
-  surfaces carry the burden: the repository, which a cold-start reader meets first, and the runtime,
-  which it meets during work. Both accounts must be derived from whatever actually enforces behavior —
-  the guards that refuse, the allowlists that gate — rather than authored separately as prose, because
-  separately authored description drifts silently from behavior. Discoverability is then a property of
-  each component, not a maintenance chore; a described surface is both easier to compose from and
-  easier to find.
+  surfaces carry it: the repository a cold-start reader meets first, and the runtime it meets during
+  work. Both accounts must be derived from whatever actually enforces behavior — the guards that
+  refuse, the allowlists that gate — rather than authored separately as prose, because separately
+  authored description drifts silently from behavior. Discoverability is then a property of each
+  component, not a maintenance chore.
 - **T2 — current machinery.** Only the repository half ships. The root contract is ratified; its
-  machine twin fixes **fifteen** permitted root files with byte caps, **ten** top-level directories,
+  machine twin fixes **seventeen** permitted root files with byte caps, **ten** top-level directories,
   forbidden artifacts, and deprecation markers. `tools/repository-surface/check.ts` enforces them plus
-  Markdown links and environment-example coverage; `cli.ts` runs `npm run check:repo-surface` in CI,
-  with `--negative-control` planting breaks. `AGENTS.md` is the bounded entrypoint, `HANDOFF.md` a
-  deprecated stub. The runtime half — the harness self-model's guard-derived composed read, the
-  self-describing-surfaces record, the `llm_help` and descriptor spec — is design record only,
-  **unbuilt**.
+  Markdown links and environment-example coverage; `cli.ts` runs `npm run check:repo-surface` in CI.
+  `AGENTS.md` is the bounded entrypoint, `HANDOFF.md` a deprecated stub. The runtime half — the
+  guard-derived composed read, the self-describing-surfaces record, the `llm_help` and descriptor
+  spec — is design record only, **unbuilt**.
 - **T3 — with receipts.** `72ac673` (#156, 2026-07-21) landed the contract, its twin, and the checker —
-  274 lines, **ten issue codes**, fifteen root files, ten directories, nine forbidden artifacts, two
-  deprecated surfaces; `HANDOFF.md` lost 3,578 lines and `README.md` 942. The CI step precedes
-  `npm test`; the negative control **must exit 3** naming four planted breaks. `AGENTS.md` measures
-  24,407 bytes against a 32,768 cap. Design records: `dc1f55f` (#153), `3a02408` (#154), `3bdc0e7`
-  (#135), `cb12a53` (#136). MASH prior art was verified in-clone at four named locators; six read-only
-  agents produced the six-axis correspondence.
-- **T4 — the frontier.** **Known-broken now:** `5e7295d` (#159) deleted `docs/density-chain/`, so two
-  surviving links made the ratified checker red at `2b937e8`, while `AGENTS.md`'s backticked row stayed
-  stale and undetectable — the contract's own coverage gap. **Confirmed unfixed:** the nine-field
-  telemetry allowlist still drops every counter added since Session 20. **Falsified:** Phase 0, run
-  2026-07-19, proved its own specification impossible — a zero-paid harness records the script, never
-  a model. Adopted, no build: both workstreams behind the §8 gate. Both new records are **orphans**,
-  unlinked from `AGENTS.md` and `ORIENTATION.md`.
+  **ten issue codes**, fifteen root files, ten directories, nine forbidden artifacts; the CI step
+  precedes `npm test`. Uncommitted 2026-07-22: twin entries `conftest.py` and `pytest.ini`, class
+  `tool`, 4,096-byte caps — the Python analogues of `vitest.config.ts` and `tsconfig.build.json`, at
+  root because pytest anchors rootdir and conftest discovery there. Measured this session, not as
+  recorded: checker **PASS (0 issues)**, negative control catching all four planted breaks, and
+  `AGENTS.md` at **32,757 on-disk bytes against its 32,768 cap** — eleven bytes of headroom on a CRLF
+  checkout, 535 on LF. Design records: `dc1f55f` (#153), `3a02408` (#154), `3bdc0e7` (#135), `cb12a53`
+  (#136).
+- **T4 — the frontier.** **The gate fired; the ceremony did not.** Undeclared root files raise
+  `unexpected_root_file`, so the two were declared — but `REPOSITORY_ROOT_CONTRACT.md` §7 (Changing the
+  contract) requires prose record and twin to move together, §2 (The permitted root files) lists
+  neither, and nothing detects it: the checker proves twin↔tree, never record↔twin. Same asymmetry one
+  level down — `AGENTS.md` §2 (Navigation map) rows every other top-level `src/` package and [[C12]]'s
+  new one not at all, while the contract governs repository-root names only. **Named-implies-exists is
+  proved; exists-implies-named is not** — the general form of the backticked-row miss that survived
+  `5e7295d` (green again since `20e94ae`). **Confirmed unfixed:** the nine-field telemetry allowlist.
+  **Falsified:** Phase 0, 2026-07-19, proved its own specification impossible.
 - **T5 — future plans.** Proposed only: `llm_help()` as an always-present kernel builtin listing the
-  run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example and
+  run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
   see-also, with `expects` **guard-derived** and the human winning on stalemate; the module manifest
   schema extended; one generator emitting human navigation pointers. Proposed gates: a zero-paid
   reachability drill, then a self-play discrimination and drift game whose falsifying cell is
   *selected-on-a-lie*; the paid adoption probe stays owner-gated. Open: where `llm_help` composes from
   at the injection seam, and which descriptor fields Trellis adopts.
-- 
 
 *Status ledger:* root contract · machine twin · surface checker · CI wiring — **shipped-pinned**;
 harness self-model, self-describing surfaces, `llm_help` — **PROPOSED / principle endorsed,
 implementation not authorized**. *Reachability:* `llm_help` has **no occurrence anywhere** under `src/`,
-`scripts/`, `modules/` or `tools/`; the descriptor fields would currently **fail** validation, because
-the manifest schema is `.strict()`; the bijection is described as mechanizable and never mechanized;
-the navigation pointers are hand-maintained, and one of them was stale until this file returned. The
-negative control is a flag, **not wired into CI** — so the contract's own trust precondition rests on
-manual operator discipline with no pin. *The orphan class this program names:* "a failure class the
-project has now paid for three times in one session — the density-trellis, the density-chain skill, and
-the MASH map." *Cross-links:* [[C11]] (this class's checker is what governs that class's surfaces),
-[[C5]] (the pillar's enforcement posture is what the self-model generalizes), [[C7]] (the alive catalog
-is the run's actual cover — no default cast).
+`scripts/`, `modules/` or `tools/`; the descriptor fields would **fail** validation — the manifest
+schema is `.strict()`; the bijection is never mechanized. `wiki:check --verify` is a CI step and
+**neither negative control is** — half this class's trust precondition rests on operator discipline.
+*Orphans:* both runtime-half records are missing from `docs/ORIENTATION.md`; `AGENTS.md` backticks one
+and links neither. *Cross-links:* [[C11]] (this class's checker governs that class's surfaces), [[C5]]
+(the pillar's enforcement posture, generalized by the self-model), [[C7]] (the alive catalog is the
+run's actual cover — no default cast), [[C12]] (the package that tested both halves — root files
+caught, navigation map not).
 
 ---
 
@@ -863,9 +869,9 @@ The **Drills and reports** column is prose and script *names*, never paths, and 
 | **C7** | `.claude/skills/**`, `fixtures/doubts_workspace/**`, `docs/product/epistemic-support/STANDING_MODEL.md`, `docs/architecture/{DOUBTS_WORKSPACE,COMPOSITION_FROM_PRIMITIVES}.md` | no engine code — principle only; `fixtures/doubts_workspace/` is the only committed artifact |
 | **C8** | `src/config/index.ts`, `docs/architecture/{MODEL_BACKEND_SEAM,MODEL_BACKEND_HOSTED_ARM,TEST_TIME_TRAINING,REASONING_TEMPLATES}.md` | `rlm_backend.test.ts` (nine groups); no drill |
 | **C9** | `docs/architecture/RESIDUAL_STREAM_SIDECAR.md` | *(none)* |
-| **C10** | `src/benchmarks/**`, `data/**`, `docs/benchmarks/**`, `docs/product/{BENCHMARK_OOLONG,OOLONG_BENCHMARK_SPEC,VALIDATION_STRATEGY,PRD}.md`, `docs/product/PHASE_*.md`, `docs/operations/OOLONG_BENCHMARK_GUIDE.md` | `oolong:benchmark`, `drill:update`, `drill:poison`, `drill:scale` |
+| **C10** | `src/benchmarks/**`, `data/**`, `docs/benchmarks/**`, `docs/product/{BENCHMARK_OOLONG,OOLONG_BENCHMARK_SPEC,VALIDATION_STRATEGY,PRD}.md`, `docs/product/PHASE_*.md`, `docs/operations/OOLONG_BENCHMARK_GUIDE.md` | `oolong:benchmark`, `drill:update`, `drill:poison`, `drill:scale`; `repl-sandbox:drill` (+ `--negative-control`, healthy exit 3) — uncommitted, outside CI |
 | **C11** | `src/api/**`, `src/core/a2a/**`, `src/frontend/**`, `src/rlm/trellis_mcp*`, `src/config/mcp_servers*`, `.env.example`, `AGENTS.md`, `README.md`, `HANDOFF.md`, `.github/**`, `docs/architecture/{MCP_SERVER_SURFACE,SESSION_GOVERNANCE}.md`, `docs/reference/**`, `docs/operations/**` | `test:a2a`, `test:rlm-mcp`, `test:api-hardening` |
-| **C12** | `docs/product/repl-sandbox/**` | *(none)* — ten documents, nothing built |
+| **C12** | `docs/product/repl-sandbox/**`, `src/repl_sandbox/**`, `scripts/repl_sandbox_drill.py`, `conftest.py`, `pytest.ini` | `test:repl-sandbox` — 797 checks, zero-paid; `repl-sandbox:{preflight,selftest,drill}`; `fuzz_frame.py --negative-control` and `repl_sandbox_drill.py --negative-control` (healthy exit 3 each); `test_rlms_conformance.py` (12, pinned source). **No CI job runs any of them** |
 | **C13** | `tools/repository-surface/**`, `tools/density-chain/**`, `.claude/**`, `AGENTS.md`, `README.md`, `.github/**`, `docs/{ORIENTATION,README,GLOSSARY,COLLABORATOR_BRIEFING,RESEARCH_NOTES_COLLECTION}.md`, `docs/architecture/{REPOSITORY_ROOT_CONTRACT,SELF_DESCRIBING_SURFACES,LLM_HELP_SPEC,HARNESS_SELF_MODEL}.md` | `check:repo-surface` (+ `--negative-control`), `wiki:check --verify` |
 
 Two branches may declare the same path — `AGENTS.md` is both a serving-and-governance surface (C11)

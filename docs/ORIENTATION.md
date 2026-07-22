@@ -268,7 +268,7 @@ the authority.*
 | A2A surface | one goal per external task, same gates and bounds, off by default | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md), [`docs/reference/API_REFERENCE.md`](reference/API_REFERENCE.md) §5 |
 | MCP tools | operator-allowlisted external tools; results are research context, never provenance | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md) |
 | UPSUM | code-checked size-budgeted state summary between REPL stages | [`src/rlm/trellis_scaffold.py`](../src/rlm/trellis_scaffold.py), [`docs/architecture/RLM_HARNESS_SCAFFOLDING.md`](architecture/RLM_HARNESS_SCAFFOLDING.md) |
-| REPL sandbox | the trust boundary the REPL does not yet have: one isolated unit per session, credentials outside it, handles not payloads. **Decisions ratified, nothing built** | [`docs/product/repl-sandbox/`](product/repl-sandbox/README.md) |
+| REPL sandbox | the trust boundary the REPL does not yet have: one isolated unit per session, credentials outside it, handles not payloads. **Control plane built (`src/repl_sandbox/`); the boundary is not — G1 unsatisfied, not yet a sandbox** | [`docs/product/repl-sandbox/`](product/repl-sandbox/README.md) |
 | Handle | an opaque, session-scoped reference the guest may slice and address but never materialize; metered when it must cross out. **Proposed, unbuilt** | [`REPL_SANDBOX_DATA_MODEL.md`](product/repl-sandbox/REPL_SANDBOX_DATA_MODEL.md) |
 
 ### Substrate and custody

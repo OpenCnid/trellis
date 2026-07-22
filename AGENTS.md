@@ -204,7 +204,7 @@ contents and stay backticked; a path that is a destination is a link.
 | [`docs/operations/`](docs/operations/) | Operator manual, runbook, deployment records |
 | [`docs/reference/`](docs/reference/) | HTTP, SSE, and external protocol references |
 | [`docs/product/`](docs/product/) | PRDs, benchmark specs, and active programs. Standing and reading order for the epistemic-support records: §2.1 |
-| [`docs/product/repl-sandbox/`](docs/product/repl-sandbox/) | Isolation program for the RLM's Python REPL — threat model, handle data model, build plan, PROPOSED doubt filter. Design ratified, **nothing built** |
+| [`docs/product/repl-sandbox/`](docs/product/repl-sandbox/) | Isolation program for the RLM's Python REPL — threat model, handle data model, build plan, PROPOSED doubt filter. Control plane built; **the boundary is not** |
 | [`docs/density-chain/`](docs/density-chain/), [`tools/density-chain/`](tools/density-chain/) | Branching chain-of-density map — trunk + 13 subsystem-class branches — and the checker that keeps it honest. Orientation aid only, subordinate to this file and [`docs/ORIENTATION.md`](docs/ORIENTATION.md). The checker stores nothing: routing derives from the map, currency from git |
 | [`.claude/skills/`](.claude/skills/) | Project skills auto-loaded by Claude Code and inventoried for every harness. Roster and triggers: [`.claude/skills/README.md`](.claude/skills/README.md) — read it before assuming no skill covers the task. The record each skill derives from is canonical over it |
 | [`docs/archive/`](docs/archive/) | Preserved history (verbatim, never edited) |

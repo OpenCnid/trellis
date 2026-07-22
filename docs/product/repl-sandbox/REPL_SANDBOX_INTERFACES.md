@@ -71,7 +71,12 @@ class KataREPL(IsolatedEnv):
     #   add_history(entry) -> None   ; get_history_count() -> int
 ```
 
-**`__init__(persistent, depth, max_concurrent_subcalls, **kwargs)`** *(signature source-confirmed)*
+**`__init__(persistent, depth, max_concurrent_subcalls, **kwargs)`**
+- **Correction, July 22, 2026** ([CONFORMANCE §4](REPL_SANDBOX_CONFORMANCE.md)): that signature is
+  **`BaseEnv.__init__`** (`environments/base_env.py:216`), not `IsolatedEnv`'s. `IsolatedEnv.__init__`
+  is `(self, persistent=False, **kwargs)` (`:243`), so `depth` and `max_concurrent_subcalls` reach the
+  base **by keyword only** — `KataREPL(False, 1)` raises `TypeError`. The line above previously carried
+  a *(signature source-confirmed)* marker it had not earned.
 - `depth` — pinned **1** (flat fan-out; [ARCHITECTURE §6 (Recursion & multiplicity)](REPL_SANDBOX_ARCHITECTURE.md)).
   The value is advisory to rlms only; the enforced ceiling is host-side. **Enforced by:** the
   LM handler rejects any `LMRequest.depth > 1` (§4); the ceiling is broker-derived, never
@@ -115,6 +120,11 @@ class KataREPL(IsolatedEnv):
   never live objects** — the seam speaks reprs, so no live socket, client, or credential-
   bearing object can ride back across. Large values return a `spill_handle` the model
   re-slices, not the payload ([RESEARCH §7 (minification / state-slicing)](REPL_SANDBOX_RESEARCH.md)).
+  **This is a Trellis requirement the guest supervisor must implement, NOT inherited rlms
+  behaviour** — correction, July 22, 2026 ([CONFORMANCE §4](REPL_SANDBOX_CONFORMANCE.md)). rlms'
+  `LocalREPL` returns **live objects** (`environments/local_repl.py:579`); reprs appear only inside
+  `to_dict()`. Read as an rlms property, this line would license skipping the marshaller and letting
+  live objects cross the seam.
 - **Output caps:** per-turn `stdout` truncated (~20 KB) driver-side. This is **NOT a boundary**
   — it is DoS/output shaping only ([SPEC §6 (Security invariants) — the "NOT a boundary" row](REPL_SANDBOX_SPEC.md)).
 - **Runtime ceilings.** **Enforced by:** in-guest cgroups (pids/mem/cpu, Tier-0) + the host
@@ -127,8 +137,14 @@ class KataREPL(IsolatedEnv):
   `llm_query` destination is set by the trusted driver, never redirected by model code — a
   hostile worker cannot aim the sub-LLM channel at an attacker host. In Option A this address
   is the in-guest loopback the forwarder owns (§3.3); in Option B it is `(2, LM_PORT)`.
-- `add_context` / `get_context_count` / `add_history` / `get_history_count` — accumulate the
+- `add_context(payload, context_index=None) -> int` / `get_context_count()` /
+  `add_history(message_history, history_index=None) -> int` / `get_history_count()` — accumulate the
   reserved `context` / `history` structures across turns; both are reserved names.
+  **Correction, July 22, 2026** ([CONFORMANCE §4](REPL_SANDBOX_CONFORMANCE.md)): this record
+  previously gave both as one-argument methods returning `None`. Source says each takes an optional
+  index and **returns the index used** (`environments/base_env.py:326`, `:356`); index 0 also binds
+  the unversioned alias, the auto-index is the current count, and `add_history` must store a **deep
+  copy** because the caller may mutate the list afterwards (`:370`).
 
 **Reserved namespace names (cannot be overridden)** *(source-confirmed)*: `llm_query,
 llm_query_batched, rlm_query, rlm_query_batched, SHOW_VARS, answer, context, history`. Re-pinned
@@ -255,7 +271,8 @@ Serves the flat sub-LLM fan-out; holds the **provider API key host-side only**
 LMRequest  = { prompt: str            # single-completion path (llm_query)
              | prompts: [str],        # batched path (llm_query_batched)
                model: str,
-               depth: int }           # ceiling-checked host-side; must be <= 1
+               depth: int,            # ceiling-checked host-side; must be <= 1
+               context: Handle | [Handle] }   # TRELLIS EXTENSION — not an rlms field
 LMResponse = { error: str | null,
                chat_completion: {...}         # for prompt
              | chat_completions: [ {...} ] }  # for prompts
@@ -264,6 +281,29 @@ LMResponse = { error: str | null,
 - `llm_query(prompt, model)` → one `chat_completion`; `llm_query_batched(prompts, model)` → a
   `chat_completions` list. rlms' `batch_max_concurrent = 16` bounds the thread pool of **one**
   batched call only *(source-confirmed)* and is **not** a session cap — see caps below.
+
+**`context` is a Trellis extension to this wire, not inherited rlms behaviour.** rlms'
+`LMRequest` has four fields and `context` is not one of them: `from_dict` reads its four keys by
+name and drops every other key, and `to_dict` can only emit what the dataclass holds
+*(source-confirmed, `rlm/core/comms_utils.py:50-58`)*. The extension is backward-compatible by
+construction because **Trellis serves this frame** — `lm_handler.py` parses the wire itself, rlms'
+own client never sets the field, and a native `{prompt, model, depth}` request takes exactly the
+path it took before the field existed. It carries **handle tokens only** (`{id, kind}`,
+[DATA_MODEL §1 (What a handle is)](REPL_SANDBOX_DATA_MODEL.md)); a string where a handle belongs is
+refused, because a second free-text field would be a second prompt with different accounting. The
+host resolves each distinct handle **once per call** against the per-CID handle table, splices the
+referents into the outbound prompt host-side, and dispatches — the sub-LLM reads the referent and
+only the bounded completion returns, which is
+[DATA_MODEL §6 (The bounded materialisation exception)](REPL_SANDBOX_DATA_MODEL.md) given a wire:
+the model reasons over the whole belief base **without one row entering the guest**. Resolution is
+fail-closed and all-or-nothing — a foreign, unknown, dropped, expired, or stale token refuses the
+whole call as a bare `denied` carrying no content and no distinguishing detail, and a
+partially-resolved prompt is never dispatched. The outbound ledger is charged the **full resolved
+size**, not the token's, and the DLP hook runs over the resolved text; both are defense-in-depth on
+the residual and neither is the boundary — the boundary is that the guest never held the bytes
+([ARCHITECTURE §3.1 (The exfiltration resolution)](REPL_SANDBOX_ARCHITECTURE.md)). A `cap_bytes`
+refusal on a resolved prompt reports no byte count, so the error channel is not a size oracle for
+host content. **Enforced by:** the host LM handler, keyed by the CID from `accept()`.
 
 **Auth.** The handler keys the request to the session by the **guest CID from `accept()`**,
 never by any id in `LMRequest`. Unknown CID ⇒ connection dropped + audited. **Enforced by:** the
@@ -450,10 +490,21 @@ reads exactly like an enforced one.
    crosses as `repr`/JSON-safe values or via pickle. The seam requires value-reprs so **no live
    object or pickle-gadget can ride back across the boundary** (§2); if rlms pickles, the backend
    must interpose a repr/JSON marshaller. Source-read gated ([RESEARCH §8 (Open items to close before any build) item 1](REPL_SANDBOX_RESEARCH.md)).
-3. **`MAX_FRAME_LEN` value** (§3.2). The concrete cap on the 4-byte length prefix is an owner
-   decision — large enough for the biggest legitimate frame (context load, batched prompts,
-   `slice` results) plus headroom, small enough to deny the 4-GiB-prefix allocation DoS. A
-   number, not a default, must be ratified before the bridge ships.
+3. **`MAX_FRAME_LEN` value** (§3.2) — **derivation rule settled July 22, 2026; the shipped number
+   remains owner-gated.** The original framing here ("large enough for the biggest legitimate frame
+   plus headroom") had no derivable answer: the source read found the largest legitimate frame is an
+   `LMResponse` carrying a child run's whole trajectory, which grows with iteration count, so no
+   static cap follows from it ([CONFORMANCE §3](REPL_SANDBOX_CONFORMANCE.md)).
+
+   The rule adopted instead sizes the cap off **the worker's context window**, which makes it a
+   structural guarantee rather than only a DoS bound: **no single frame can context-saturate the
+   worker it lands in.** Derivation — a 1,050,000-token window × 50% × ~4 bytes/token ≈ 2.1 MB →
+   **2 MiB**, set as `config.DEFAULT_MAX_FRAME_LEN` with `MODEL_CONTEXT_WINDOW_TOKENS` recorded
+   beside it so the number is re-derived, not re-guessed, when the model pin changes. This sits
+   above `ByteLedgerCaps.inbound_per_call`, so the two bounds stack; and the handle model keeps the
+   context load small by carrying tokens rather than payloads. The DoS property is unchanged — the
+   reader still rejects an over-length declaration **before** allocating. A ratified number is still
+   required before the bridge ships.
 
 ---
 

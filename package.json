@@ -79,7 +79,12 @@
     "judge:ratify": "tsx scripts/judge_ratify.ts",
     "support:sweep": "tsx scripts/support_sweep.ts",
     "support:report": "tsx scripts/support_report.ts",
-    "test:judge-convocation": "tsx scripts/test_judge_convocation.ts"
+    "test:judge-convocation": "tsx scripts/test_judge_convocation.ts",
+    "test:repl-sandbox": "python -m pytest src/repl_sandbox/tests",
+    "repl-sandbox:preflight": "cd src && python -m repl_sandbox.cli preflight",
+    "repl-sandbox:selftest": "cd src && python -m repl_sandbox.cli selftest",
+    "repl-sandbox:config": "cd src && python -m repl_sandbox.cli config",
+    "repl-sandbox:drill": "python scripts/repl_sandbox_drill.py"
   },
   "keywords": [],
   "author": "OpenCnid",

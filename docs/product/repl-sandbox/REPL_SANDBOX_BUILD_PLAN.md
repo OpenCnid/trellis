@@ -59,6 +59,20 @@ research hold. This is the gate the ratified records explicitly place before the
 piece ([REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md) §10 (Build status & first step):
 "When the research hold is lifted, spike 1 is the first buildable piece").
 
+**G0 LIFTED — July 22, 2026, owner Cnid.** Live instruction: *"Let's begin working on the repl…
+study the documentation and review it. Then start the building of the repl."* The hold is
+discharged and Phase A is open. Two facts qualify what that unblocks, and neither reopens a
+decision:
+
+- **G1 is not satisfied and cannot be from the dev host.** The development machine is Windows with
+  no `/dev/kvm`, so S2–S5 — every milestone that needs a booted Kata guest — remain blocked on a
+  KVM-capable Linux host (§4). Work proceeding under this lift is the host-independent control
+  plane: the wire, the handle/ledger state layer, both host chokepoints, the capability lifecycle,
+  the guest supervisor protocol, and the backend contract, each transport-agnostic and exercised
+  through a loopback test double.
+- **A loopback double is never a boundary.** The microVM is the boundary; nothing built ahead of
+  G1 substitutes for it, and no in-process launcher may be reachable from a deployment path.
+
 | | |
 |---|---|
 | **Exit criterion** | Owner records a ratification lifting the research hold (dated). |
