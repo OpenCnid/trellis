@@ -12,6 +12,13 @@ accident. It is the single in-repo home for: what the collection is,
 which repos exist, how they are meant to be consumed, and the safety
 bounds on consuming them.
 
+**Two artifact classes live under one method.** §1–§6 cover **paper notes**
+(one repo per studied paper, pinned to an immutable `vN`). §7, added July 22,
+2026, covers **corpus studies** — the same chain-of-density method in *system
+mode* over somebody else's published prompt or skill corpus, pinned to a commit
+SHA on a moving branch. Same one-way authority rule, different staleness check.
+Do not conflate them: they share a method name and nothing else.
+
 ## 1. What the collection is
 
 OpenCnid maintains a research-notes collection on GitHub: **one
@@ -208,9 +215,12 @@ feature starts from a stated contract instead of re-deriving one.
   `docs/architecture/TEST_TIME_TRAINING.md` (references row 1) — point
   at `recursive-language-models`.
 - `docs/ORIENTATION.md` — names the method's canonical home.
-- `docs/density-chain/DENSITY-CHAIN.md` — the same method's **system mode**: a branching
-  density-trellis of Trellis itself, not a paper note. Disambiguate from this collection's
-  per-paper `density-chain.md` files, which are a different artifact under the same method name.
+- **System mode** — the same method run over a whole codebase rather than a
+  paper: a branching density-trellis, not a paper note. Disambiguate from this
+  collection's per-paper `density-chain.md` files, which are a different
+  artifact under the same method name. Trellis's own in-repo trellis was
+  removed July 21, 2026 (PR #159, recoverable at `5e7295d^`); the live
+  examples are the corpus studies in §7 below.
 - `docs/architecture/RESIDUAL_STREAM_SIDECAR.md` §2 — points at
   `emotion-concepts-in-llms`.
 - The reverse map — what each paper changed *in Trellis*, with receipts
@@ -218,3 +228,70 @@ feature starts from a stated contract instead of re-deriving one.
   [`llm-research-inspirations`](https://github.com/OpenCnid/llm-research-inspirations),
   deliberately outside this repo: influence claims are interpretations,
   and the register stays the authority on evidence.
+
+## 7. Corpus studies (system mode — not paper notes)
+
+**Added July 22, 2026.** A second artifact class under the same method, kept
+in this record so a future session does not mistake it for the paper
+collection or rediscover it by accident.
+
+A **corpus study** is the density-chain method's *system mode* applied to
+somebody else's published prompt or skill corpus: the repository is mirrored
+with its full history and license intact, and a trunk plus one fixed-length
+five-tier branch per subsystem class is added under `docs/density-chain/`.
+The subject is a codebase, not a paper — so there is no arXiv ID, no vN, and
+the pin is a **commit SHA** plus a verification date.
+
+| repo | subject | upstream | pin | what it is useful for here |
+|---|---|---|---|---|
+| [`black-tie-federation`](https://github.com/OpenCnid/black-tie-federation) | Lexideck 2026 Codex Public — six-agent federation, 19 skills, PTG persona corpus | [Lexideck-Technologies/Lexideck2026](https://github.com/Lexideck-Technologies/Lexideck2026), GPL-3.0-only | `a1bc8a6` (2026-07-16), verified 2026-07-22 | the collaborator's own published method corpus, mapped with locators — the nearest external prior art to this repo's skills layer |
+| [`axes-of-wonder`](https://github.com/OpenCnid/axes-of-wonder) | WonderSuite 2.0 — five topological system prompts plus a composite router | [gusthemole/WonderSuite](https://github.com/gusthemole/WonderSuite), GPL-3.0 | `092037f` (2026-01-07), verified 2026-07-22 | the 2025 ancestor of the above; the descent between them is mapped from both ends |
+
+Each carries `index.json` (`artifact_kind: "density-chain-system-mode"`,
+`pinned_commit`, `verified_against_source`, a branch inventory) and a
+`docs/SPARK-STEERING.md` capability-axis diagnosis alongside the chain.
+
+### 7.1 Authority — the same one-way rule, one hop shorter
+
+```
+upstream repository (canonical)  →  corpus study (working ground truth)
+```
+
+The upstream repository always wins; when a study and its corpus disagree, the
+study is defective and gets fixed. **A corpus study is a secondary source for
+Trellis and satisfies no obligation to read the primary**, exactly as §3
+governs paper notes. It never upgrades an evidence class and never enters the
+register (`RESEARCH_MAP.md`) on its own standing.
+
+One difference from §3 worth stating: a paper note's source is immutable at a
+pinned `vN`, whereas a corpus study's source is a **moving branch**. Staleness
+here is checked by SHA, not by version list:
+
+```bash
+git ls-remote https://github.com/Lexideck-Technologies/Lexideck2026.git HEAD
+```
+
+A SHA differing from `index.json`'s `pinned_commit` means the study describes
+an older tree. As in §5, the output is a **flag, never an edit**.
+
+### 7.2 Why these are in-scope for this repo
+
+Two reasons, both narrow, and neither of them "because Trellis should adopt
+them":
+
+1. **Reach.** These are the collaborator's own published corpora
+   (`docs/COLLABORATOR_BRIEFING.md`). A locator-verified map of what they
+   actually contain — as opposed to what a session remembers about them — is
+   the same service `RESEARCH_MAP.md` performs for papers, and it is reachable
+   from `github.com` in the proxy-blocked environments §4 describes.
+2. **A worked test of the method's system mode.** The paper collection
+   exercises density-chain over immutable PDFs. These exercise it over live
+   trees with real commit histories, where the build order is evidence and a
+   squashed commit is a measurable loss of it. That contrast is recorded in
+   both studies' provenance sections.
+
+**What this section does not authorize.** No ingestion, no consumption
+pipeline, and no adoption of any method these corpora describe. Consuming
+them would be its own bounded feature under root `AGENTS.md` rule 15, and the
+`private-*` and licensing boundaries in the upstream corpora are the upstream
+author's to set, not this repository's to route around.

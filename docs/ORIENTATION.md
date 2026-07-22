@@ -26,9 +26,11 @@ note on the paper itself — is
 [OpenCnid/chain-of-density](https://github.com/OpenCnid/chain-of-density);
 the wider notes collection it anchors is recorded in
 [`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md). The same method also runs in
-**system mode** on Trellis itself, as a branching sibling to this single spine — see
-[`density-chain/DENSITY-CHAIN.md`](density-chain/DENSITY-CHAIN.md) (one trunk, one fixed-length
-branch per subsystem class). Three rules make the ladder safe to stop on at any rung:
+**system mode** — one trunk plus one fixed-length branch per subsystem class, a branching
+sibling to this single spine. Trellis's own system-mode trellis was removed July 21, 2026
+(PR #159); the live worked examples are the two external corpus studies recorded in
+[`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md) §7. Three rules make the
+ladder safe to stop on at any rung:
 
 1. **Each density is conceptually complete.** What D0 tells you is true
    and self-consistent on its own terms. A deeper layer *adds* entities

@@ -26,10 +26,14 @@ root `README.md` is a bounded router.
   each layer conceptually complete and safe to stop at. The on-ramp
   when the primary documents feel dense; subordinate to the glossary
   and code.
-- **[`density-chain/DENSITY-CHAIN.md`](density-chain/DENSITY-CHAIN.md)** — the branching
-  sibling to the ladder above: the same chain-of-density method run as a trunk plus one
-  fixed-length branch per subsystem class, rather than one growing spine. Session orientation
-  artifact, not authority.
+- **System-mode density chains** — the branching sibling to the ladder
+  above: the same chain-of-density method run as a trunk plus one
+  fixed-length branch per subsystem class, rather than one growing spine.
+  Trellis's own in-repo trellis was removed July 21, 2026 (PR #159); the
+  method's live worked examples are now the two external corpus studies
+  recorded in
+  [`RESEARCH_NOTES_COLLECTION.md`](RESEARCH_NOTES_COLLECTION.md) §7.
+  Orientation artifacts, never authority.
 - **[`GLOSSARY.md`](GLOSSARY.md)** — canonical one-line definitions for
   every term that carries architectural load. If prose conflicts with
   this file, the prose has a defect; if this file conflicts with code,
@@ -46,7 +50,11 @@ root `README.md` is a bounded router.
   locator-verified, machine-readable pins in `index.json`, no hosted
   PDFs), the authority ordering that keeps notes from masquerading as
   primary evidence, and the PROPOSED ingestion/staleness contract for
-  consuming the collection.
+  consuming the collection. Its **§7** records the second artifact class —
+  **corpus studies**, the same method in system mode over an external
+  prompt/skill corpus, pinned to a commit SHA rather than a paper version:
+  [`black-tie-federation`](https://github.com/OpenCnid/black-tie-federation)
+  and [`axes-of-wonder`](https://github.com/OpenCnid/axes-of-wonder).
 
 ### 2. Doctrine and forward design (`/architecture` — living)
 

@@ -93,8 +93,9 @@ places:
   corpus (`GROUNDED_AUTHORING.md`).
 - The **kernel + module** composition builds the system prompt, hash-pinned.
 - The **SPARK-space internal messaging** thesis: each chain of each internal
-  function composes the meta-prompt for its next operation (the product-thesis
-  block in the density-trellis; `docs/density-chain/DENSITY-CHAIN.md`).
+  function composes the meta-prompt for its next operation (stated in the
+  product-thesis block of the in-repo density-trellis, removed July 21, 2026
+  by PR #159; recoverable from git history at `5e7295d^`).
 
 **What MASH adds is a discipline, not a new runtime path:** *each object is
 responsible for its own contribution.* An object acting on the current function
