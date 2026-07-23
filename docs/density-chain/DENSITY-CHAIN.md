@@ -721,90 +721,86 @@ checker is that class's machinery; this class is what it checks).
 chokepoints, the vsock wire, the handle data-flow rule, the threat model, and the gated build plan. Not
 the RLM execution model, the doubts machinery it borrows, or the pillar it realises.*
 
-- **T1 — essence.** Model-authored Python here is retrieval-steerable, so this class treats it as
-  hostile and owns the boundary between it and the operator's secrets. Its invariants: one
-  hardware-isolated unit per session; credentials outside it; one narrow channel to host chokepoints;
-  identity from the *listener*, never a frame; and, deepest, the code may *address* data but never
-  *hold* it. Language-level guards are telemetry, never boundary. **A microVM boots, holds state, and
-  now a real model answers a fan-out across its own boundary — with no broker and no in-guest
-  hardening, still no working sandbox.** Building that wire cost a correction: **an enforcing surface
-  is only as portable as the mechanism it names.**
-- **T2 — current machinery.** Execution still runs on in-process `rlms==0.1.3` LocalREPL holding live
-  credential-bearing clients. Beside it, a host-independent control plane, `src/repl_sandbox/` —
-  22 modules against 21 test files — the frame codec (the declared fuzz target), the transport, now
-  carrying **both** the native `Vsock*` pair and the hybrid `HybridVsock*` pair the ratified VMM
-  actually provides, the guest supervisor protocol, the handle table and slice algebra, the DB broker
-  with backends and a statement inspector, the LM handler with byte/rate/spend ledgers and a DLP hook,
-  the capability lifecycle, a CID-keyed audit log, `KataREPL(IsolatedEnv)`, and a `KataLauncher` whose
-  four-condition `preflight` drives a real QEMU benchmark — each transport-agnostic, exercised through
-  loopback doubles. Eleven ratified documents. Host-side and outside that tree: `provision_kata_host.sh`,
-  the S2 and S3 probes, and the S3 `[A]` harness (`repl_sandbox_s3_paid.py`, a metered sibling reusing
-  the probe's plumbing behind a real provider), which drive `ctr` directly.
-- **T3 — with receipts.** **G0 lifted 2026-07-22** by owner instruction, in `REPL_SANDBOX_BUILD_PLAN.md`
-  §2 (The research-hold gate), under two qualifications: G1 is unsatisfiable here; a loopback double is
-  never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3` found **four
-  places where a record marked *(source-confirmed)* contradicts the source**, listed unfixed. Measured
-  this session, not as recorded: `pytest src/repl_sandbox/tests` → **902 passed, 5 skipped**; the skips
-  are `AF_UNIX`-gated and pass under WSL, so the hybrid transport is exercised on Linux and nowhere
-  else. The frame red-team's **seven defects** are closed; `fuzz_frame.py --negative-control` plants
-  **eight** broken readers and **exits 3**. Pins, two upstreams: **Kata ≥ 3.31.0 AND Cloud Hypervisor
-  ≥ 52.0**; depth-2 harmful (~96×, external).
-- **T4 — the frontier.** **All host-observed on one Hetzner AX41, 2026-07-23.** **G1** and **S2**
-  passed first — real KVM on a differential benchmark, then a guest holding a namespace across five
-  turns, five consecutive times, its control swapping the guest mid-run to **exit 3**. Both upstreams
-  default *away* from the ratified pin while `kata-runtime check` passes anyway; the provisioner
-  converges them. Then the wire, and **a correction that moved an enforcing surface**: the records
-  specified an `AF_VSOCK` host bind with the guest CID read at `accept()`, which is *native
-  vhost-vsock* and what Kata uses **under QEMU**. Cloud Hypervisor implements **hybrid vsock** — the
-  host side is `AF_UNIX` at `<uds>_<PORT>`, and **a Unix `accept()` carries no peer CID**, so "auth by
-  kernel vsock peer CID" is unimplementable here. Identity becomes the per-sandbox socket path the
-  host created: property preserved, surface moved, written as `INTERFACES.md` **§3.1a**. Read from
-  upstream docs, then **confirmed by its falsifier rather than by the pass** — bound the old way, the
-  guest meets `ECONNRESET` at a listener accepting nothing. **S3 `[R]` PASSED**, six consecutive runs:
-  parity byte-identical both directions, under a millisecond added, `peer_cid = 2` as
-  `require_host_cid` expects, a closed session dropped without an answer. Its control — the guest
-  answering *itself* — kept parity and **improved** latency, and only a host-side witness caught it
-  (**exit 3**). Then **S3 `[A]` PASSED** the same day, ~$0.001: a real `gpt-5.4` drove a flat
-  `max_depth 1` fan-out across the bridge — batched `391,133,863,42` plus a single `60`, every slice
-  correct against a pre-known answer (never the stub's `S3-OK`), the witness counting the two
-  crossings a self-answering guest can't forge, `spend_ledger` metering $0.00055. `--cap-halt` proved
-  the session-terminal dollar stop (`cap_spend`, next call refused in 0.5 ms) **and** surfaced a
-  residual for GB: the cap is *between-calls*, so the batch that trips it runs and bills **upstream**
-  while the refused-not-committed ledger reads $0. Gaps: **GA-rt, fuzz plus a bridge red-team, is owed *before* the
-  bridge ships**; the provisioner installs **no egress policy**, so the guest's missing NIC is a `ctr`
-  default, not the ratified control; `MAX_FRAME_LEN` ships 2 MiB unratified against
-  `CONFORMANCE §2.3`'s 16 MiB.
-- **T5 — future plans.** S3 `[A]` was the first paid run this class has spent (~$0.001); next is
-  **S4**, the DB broker against a real guest, reusing the S3 vsock bridge on a second port. Free and
-  scheduled: a **nested guest** as the virgin instance the provisioner's never-executed install branch
-  is owed. A second *machine* stays **deferred**, re-opening on a kernel-specific finding — and vsock
-  was named the likeliest such surface, which the hybrid correction is the first evidence for. Then
-  **S5**, **S6** (`KataLauncher.boot`
-  still raises), GB, GA-eq, GA-rt. Proposed: doubt-filter Layers 1–2. Open owner calls:
-  `MAX_FRAME_LEN`, handle lifetime, the warm pool, depth-2. The remaining **[A]** halves (S4, S6, GB,
-  GA-eq) are ≤$5 and **unspent**; S3's is **banked**.
+- **T1 — essence.** Model-authored Python here is retrieval-steerable, so it is treated as hostile;
+  this class owns the boundary between it and the operator's secrets. Invariants: one hardware-isolated
+  unit per session; credentials outside it; one narrow channel to host chokepoints; identity from the
+  *listener*, never a frame; and deepest — the code may *address* data but never *hold* it (the handle
+  data-flow rule). Language-level guards are telemetry, never a boundary. Status: a microVM boots,
+  holds state, a real model answers a fan-out across the boundary, and a real database query now
+  crosses it holding a handle rather than a payload — but the hardening and the launch path are absent,
+  so this is still not a working sandbox and must not be read as one. Building the wire cost a lesson:
+  an enforcing surface is only as portable as the mechanism it names.
+- **T2 — current machinery.** Execution still runs in-process on `rlms==0.1.3` LocalREPL holding live
+  credential-bearing clients. Beside it, a host-independent control plane at `src/repl_sandbox/`
+  (~22 modules against ~22 test files): the frame codec (a declared fuzz target); a transport carrying
+  BOTH the native `Vsock*` pair and the `HybridVsock*` pair the ratified VMM actually provides; the
+  guest-supervisor protocol; the handle table and slice algebra; the DB broker with Postgres/Neo4j
+  backends, a statement inspector (`policy.py`), and a least-privilege role DDL; the LM handler with
+  byte/rate/spend ledgers and a DLP hook; the capability lifecycle; a CID-keyed audit log;
+  `KataREPL(IsolatedEnv)`; and a `KataLauncher` whose four-condition `preflight` drives a real QEMU
+  benchmark — each transport-agnostic, exercised through loopback doubles. Eleven ratified documents.
+  Host-side, driving `ctr` directly: `provision_kata_host.sh`, the S2 and S3 probes, the S3 `[A]`
+  harness (`repl_sandbox_s3_paid.py`), and now the S4 probe.
+- **T3 — with receipts.** **G0 lifted 2026-07-22** by owner (`REPL_SANDBOX_BUILD_PLAN.md` §2, The
+  research-hold gate) under two qualifications: G1 is unsatisfiable on the dev box, and a loopback
+  double is never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3`
+  found **four records marked *(source-confirmed)* that contradict the source**, listed unfixed.
+  `pytest src/repl_sandbox/tests` → ~924 passed, 5 skipped (the skips are `AF_UNIX`-gated on Windows,
+  pass under WSL/Linux). The frame red-team's **seven defects** are closed;
+  `fuzz_frame.py --negative-control` plants **eight** broken readers and **exits 3**. Two upstream
+  pins, never one: **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0**; depth-2 harmful (~96×, external).
+- **T4 — the frontier.** All host-observed on one Hetzner AX41, 2026-07-23, EXCEPT S4 — authored +
+  off-host-tested only. **G1 + S2** passed first (real KVM; a guest holding a namespace across five
+  turns; both upstreams defaulting *away* from the pin, the provisioner converging them). Then **a
+  correction that moved an enforcing surface**: the records specified an `AF_VSOCK` bind reading the
+  guest CID at `accept()`, but Cloud Hypervisor runs **hybrid vsock** — host side `AF_UNIX` at
+  `<uds>_<PORT>`, whose `accept()` carries no peer CID, so "auth by vsock peer CID" is unimplementable
+  here; identity becomes the per-sandbox socket path the host created (property preserved, surface
+  moved — `INTERFACES.md` **§3.1a**). **S3 `[R]` PASSED** (six runs, byte-identical parity); **S3 `[A]`
+  PASSED** ~$0.001, a real `gpt-5.4` over the bridge at flat depth-1; `--cap-halt` proved the
+  session-terminal dollar stop **and** surfaced a residual — the cap is *between-calls*, so the batch
+  that trips it runs and bills **upstream** while the refused-not-committed ledger reads $0. **S4 `[R]`
+  PASSED** the same day: the guest drove `run_query` → opaque handle → `materialize` → the fixture rows
+  against a real Postgres on the **DB port** (`clh.sock_5002` — §3.1a's convention generalising past
+  S3's 5001), witness `accepted=5`; a host-side grep found **no credential in the guest** while the
+  planted canary *was* found (the grep's positive control); the write was denied at **both** layers —
+  broker `inspect_sql`, **and** Postgres itself refusing a direct read-only-role connection; the
+  requirement-9 escape primitives denied; teardown clean and the throwaway role dropped. Its negative
+  control **exits 3** with the witness as the *only* failing claim — after a fix, because the first
+  fake keyed refusals on "starts with `select`" and let `pg_read_file` through, making the control
+  catchable by something other than its detector. The host also **intermittently wedges `ctr task
+  exec`** (~2 in 13 runs), which now reports as "could not run", never as a failed claim. Egress stays
+  honestly **weak** and self-labels — only `plpgsql` installed, but no Trellis NIC boundary lives in
+  merged code (that is GB's).
+- **T5 — future plans.** Immediate next is **S4 `[A]`** — a real model driving the `run_query` facade,
+  the one paid gate this spike still owes. Free and scheduled: a **nested guest** as the virgin
+  instance the provisioner's never-executed install branch is owed; a second *machine* stays
+  **deferred**, re-opening on a kernel-specific finding (vsock the likeliest, the hybrid correction its
+  first evidence). Then **S5**, **S6** (`KataLauncher.boot` still raises), GB, GA-eq, GA-rt. Proposed:
+  doubt-filter Layers 1–2. Open owner calls: `MAX_FRAME_LEN` (ships 2 MiB, unratified against
+  `CONFORMANCE §2.3`'s 16 MiB), handle lifetime, the warm pool, depth-2. The remaining **[A]** halves
+  (S4, S6, GB, GA-eq) are ≤$5 and **unspent**; S3's is **banked**.
 
-*Status ledger:* **control plane shipped; a microVM boots and a frame crosses to it — this is still
-not a sandbox and must not be read as one**, because the broker, the hardening and the launch path are
-absent. Accepted: **SPEC §8 gate 1 (G1), 2026-07-23**; spikes S1, S2 and **S3 (`[R]`+`[A]`)** are dated
-passes that are not gates; gates 2–4 unpassed. Unbuilt: the broker against a real guest,
-Tier-0 hardening, the watchdog, egress policy, the production launch path.
-*Reachability:* closed by `host.py`, `cli.py`, `repl_sandbox_drill.py`, `repl_sandbox_s2_probe.py`,
-`provision_kata_host.sh` and nine `npm` scripts; **no CI job runs any** — `python:check` enumerates
-`src/rlm/*` only, so this class's whole pytest surface is hand-run — and the host probes *cannot* run
-in CI, needing `/dev/kvm`. The hybrid transport's non-test callers are the S3 `[R]` probe and its `[A]`
-harness, which have now run **on one host and nowhere else**; the S3 `[A]` run is also the first call
-to a `*_from_env` factory (`openai_chat_provider_from_env`, host-side, real key), while
-`KataLauncher.boot` and the DB `*_from_env` factory stay uncalled.
+*Status ledger:* **control plane shipped; a microVM boots, a frame crosses to it, and a real database
+query now crosses holding a handle — STILL not a sandbox and must not be read as one** (Tier-0
+hardening, the watchdog, egress policy, and a production launch path are all absent). Accepted:
+**SPEC §8 gate 1 (G1), 2026-07-23**. Dated passes that are not gates: spikes S1, S2, **S3
+(`[R]`+`[A]`)** and **S4 (`[R]` only — its `[A]` is unspent)**. Gates 2–4 unpassed.
+*Reachability:* closed by `host.py`, `cli.py`, the drill, the S2 probe, `provision_kata_host.sh` and
+ten `npm` scripts; **no CI job runs any** — `python:check` enumerates `src/rlm/*` only, so the whole
+pytest surface is hand-run and the host probes *cannot* run in CI (they need `/dev/kvm`). The hybrid
+transport's non-test callers are the S3 `[R]` probe, its `[A]` harness, and the S4 probe — the latter
+the first caller of the DB `postgres_backend_from_env` factory and the `broker_handler` DB-port path
+(5002; S3 exercised only the LM port, 5001), **now run on one host and nowhere else**.
+`KataLauncher.boot` stays uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
-split, but the latter two are **stale against 2026-07-23** — both still read G1 as unsatisfied and
-neither mentions §3.1a, whose correction lives nowhere outside `docs/product/repl-sandbox/`.
-`AGENTS.md` §2 still has no row for `src/repl_sandbox/`. The provisioned host is reached by the local
-alias `ssh trellis-kata` — **the address is deliberately absent from this public tree**
-(BUILD_PLAN §4.1), and the host holds no checkout, so a fact living only there is unrecorded.
-*Cross-links:* [[C1]] (replaces that
-substrate, preserving its contract), [[C5]] (the handle model is the pillar as a slicing API), [[C7]]
-(Layers 1–2 compose the −1 tier), [[C10]] (owns the standing of the probes this class ships).
+split, but the latter two are **stale against 2026-07-23** (both still read G1 as unsatisfied; neither
+mentions §3.1a), and `AGENTS.md` §2 still has no row for `src/repl_sandbox/`. The provisioned host is
+reached by the local alias `ssh trellis-kata` — **the address is deliberately absent from this public
+tree** (BUILD_PLAN §4.1) and the host holds no checkout, so a fact living only there is unrecorded.
+*Cross-links:* [[C1]] (replaces that substrate, preserving its contract), [[C5]] (the handle model is
+the pillar as a slicing API), [[C7]] (Layers 1–2 compose the −1 tier), [[C10]] (owns the standing of
+the probes this class ships).
 
 #### C13 — self-describing surfaces and agent-first discoverability
 *Charter: the machinery and design records by which Trellis explains itself to the agent operating it —

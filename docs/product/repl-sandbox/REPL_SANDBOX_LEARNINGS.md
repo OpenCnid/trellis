@@ -214,6 +214,80 @@ The `[R]` run proved bytes cross the boundary against a $0 stub; the `[A]` run p
   `openai_chat_provider_from_env`. It is named nowhere the process logs, audits, or serialises, and
   nowhere in this repository — the run reports a key *length*, never a value.
 
+## 10c. What the DB broker taught (S4 `[R]` PASSED, July 23, 2026)
+
+Authored, tested off-host, then **run on the AX41 and passed** — exit 0, the guest reading real
+Postgres rows through the broker over a second vsock port with no credential anywhere inside it.
+Building it settled four things, and running it added three more:
+
+- **"Returns rows" and "the guest holds handles, not payloads" are not in tension — the metered sink
+  is the reconciliation.** BUILD_PLAN §5.4 says the query "returns rows"; ARCHITECTURE §3.1 says the
+  guest holds handles. Both hold: `run_query` returns an *opaque handle* plus row count and schema —
+  no row crosses — and the guest reads rows only through `materialize`/`slice`, the bounded, byte-
+  charged materialisation exception (DATA_MODEL §6). The probe's guest does exactly that, so "a real
+  query returns rows" is proved *without* contradicting the exfiltration boundary. A reader who takes
+  SPEC §4.2's `run_query(...) -> rows` shorthand literally would think raw rows cross on the first
+  call; they do not.
+- **A negative claim needs its own positive control, and "zero credential in guest" is a negative
+  claim.** The credential never enters the guest — so a grep of the guest for it trivially "finds
+  nothing" whether the property holds *or the grep is broken*. The probe plants a **canary** (a fake
+  secret the guest *is* given) and asserts the same grep finds it; only then does "no real secret
+  found" mean anything. This is the S2/S3 rule-19(c) discipline applied to a grep rather than a
+  witness. Corollary the design enforces: the real secret is searched for **host-side** over the
+  guest's returned dump, never shipped into the guest to look for — and the assessor records only
+  booleans, never the secret, because the record is printed.
+- **Prove write-denial at the layer the docs call primary, not just the convenient one.**
+  `policy.inspect_sql` refuses an `INSERT` before any backend, and it is cheap to check — but the
+  records are explicit that the *role* is the primary control and the inspector is defense-in-depth.
+  So the probe also connects **directly as the read-only role, no broker in the path**, and watches
+  Postgres itself refuse the write. Asserting only the inspector would have proved the weaker half and
+  called it the whole.
+- **Name the assertion you cannot honestly make.** The `[R]` gate lists "the DB host has no
+  internet/metadata route", but no deny-egress NIC surface exists in the merged code (it is GB's), and
+  a colocated throwaway Postgres has no separate DB-host hop. Rather than fake a boundary, the probe
+  asserts only the SQL-level origination path is closed (`dblink`/`postgres_fdw` absent) and its
+  report says in words that this is **not** a Trellis-built boundary. A gate whose enforcing surface
+  is only prose does not count (BUILD_PLAN §1); the honest move is to scope the claim down and label
+  it, not to dress the weak check as the strong one.
+- **Reuse held: the second chokepoint was a port change, not a build.** The DB seam is
+  `host.broker_handler` on `config.ports.db` (5002) where S3 put `host.lm_handler` on `config.ports.lm`
+  (5001); `Sandbox`, `Witness`, `discover_vsock_uds`, `preconditions`, and the bounded never-raising
+  teardown are imported from the S3 probe unchanged. What the off-host suite could newly prove that
+  S3's could not: the *whole* host chain — broker dispatch, `inspect_sql`, the handle table, the
+  `guest_rpc` translation — end to end over the loopback double, so `run_query` → `materialize`
+  returns the fixture and a write is denied, with no VM anywhere. The one genuinely novel host unknown
+  the suite could not reach was a **`HybridVsockListener` on the DB port (5002) against the `clh.sock`
+  hybrid convention** — S3 only ever exercised the LM port (5001); S4 opens `lm=False` and binds only
+  the DB listener, so this is a different port number on the same VMM socket, not two listeners at
+  once. **The run closed it:** the guest's `AF_VSOCK (2, 5002)` arrived at `clh.sock_5002`, so
+  §3.1a's `<uds>_<port>` convention generalises across ports rather than being a fact about 5001.
+
+**What the run added, none of it visible from the dev box:**
+
+- **The negative control needed sharpening, and only running it showed that.** The fake answered
+  refusals by "does the statement start with `select`" — so `SELECT pg_read_file(...)` slipped through
+  and the control was caught by a *guest-visible* claim as well as by the witness. That is a blunter
+  instrument than it claims to be: the whole design is that **every** guest-visible claim passes and
+  the host-side witness is the *only* thing that can tell. The fake now forges the broker exactly (the
+  one benign read succeeds, everything else refuses), and the second run failed on the witness alone.
+  A negative control that something other than its intended detector can catch has not been shown to
+  work — it has been shown to be noisy.
+- **This host intermittently wedges `ctr task exec`** — the call burns its whole timeout and the run
+  dies — about **twice in thirteen runs**, once during source installation and once on the guest
+  program, so it is a general Kata-shim flake rather than a property of any payload. It is the same
+  class S3 recorded for `destroy()`. Two consequences worth keeping: an exception type that is not
+  `ProbeError` escapes as a raw traceback and *reads like the boundary broke* when nothing about the
+  boundary was exercised (now wrapped, and it says "not a failed claim. Re-run."); and **shipping
+  fewer files is a reliability property, not a tidiness one** — the probe had been reusing S3's
+  `install_sources`, which ships S3's guest probe, control listener and request JSON that S4 never
+  executes, buying extra exec calls and therefore extra windows on the flake.
+- **The credential property was true by construction, and the canary is what makes that checkable.**
+  `ctr task exec` runs with the *container's* environment, not the host caller's, so the broker's
+  `TRELLIS_PG_DSN` was never within reach of the guest — the run confirms a structural fact rather
+  than a lucky one. Which is exactly why the positive control earns its place: a grep over a guest
+  that never could have held the secret returns "nothing found" identically whether the property holds
+  or the grep is broken, and only the planted canary distinguishes them.
+
 ## 11. Meta-learning: the review methods caught the builder's own errors
 
 Worth recording because it validates the house methods (and because I was the self-invested

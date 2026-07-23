@@ -96,7 +96,7 @@ requirement set) then C = acceptance, plus one PROPOSED side-track (the doubt fi
 | **S1** | Close the source-reads | A | G0 | Pinned-source conformance test asserts the 3-method contract + wire schemas + tool-materialization path | **[R]** | precondition for gate 3 |
 | **S2** | Boundary + persistence | A | S1, G1 | Scripted boot-once/keep-state/exec-many → the Kata microVM + `IsolatedEnv` | **[R]** | toward gate 3 |
 | **S3** | `llm_query` over vsock — **[R]+[A] PASSED 2026-07-23** (§5.3) | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
-| **S4** | DB broker minimal proof | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
+| **S4** | DB broker minimal proof — **[R] PASSED 2026-07-23** (§5.4) | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
 | **S5** | Tier-0 in-guest hardening | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest cgroups+seccomp+Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
 | **S6** | Author the `IsolatedEnv` subclass | A | S1–S5 | Unedited load → `execute_code` round-trips as `LocalREPL` → the `KataREPL` backend | **[R+A]** | gate 3 |
 | **GB** | Security hardening to the 12 reqs | B | S3, S4, S5, S6 | Each of the 12 [ARCHITECTURE §7](REPL_SANDBOX_ARCHITECTURE.md) reqs mapped to an enforcing surface (§6) | **[R+A]** | gate 2 |
@@ -472,6 +472,78 @@ handed to the client, and named nowhere this process logs, audits, or serialises
   - **Maps to SPEC §8 gate 2** (no DB creds in guest; DB read-only / no SSRF).
 - **Dependencies:** blocks S5, S6.
 
+**Observed 2026-07-23 — S4 `[R]` PASS.** `python3 scripts/repl_sandbox_s4_probe.py` → **exit 0**
+on the same Hetzner AX41 that passed G1, S2 and S3 (`npm run repl-sandbox:s4-probe`, reached per §4.1;
+the script refuses on any box without `/dev/kvm`). Kata 3.32.0 · Cloud Hypervisor v52.0 · containerd
+2.2.1 · image `python:3.12-slim` · guest kernel **6.18.35** against the host's 6.8.0-134. **The `[A]`
+half — a real model driving the `run_query` facade — is a separate owner-gated run and is unspent.**
+
+| claim | observed |
+|---|---|
+| a real query crosses and the rows are the fixture's | the guest's `run_query` → `materialize` returned **`[[1,'alpha',10],[2,'beta',20],[3,'gamma',30]]`**, equal to the fixture, carried by the shipping path (`guest_rpc.GuestRpc` over `transport.VsockClient`) against a real Postgres the broker held the credential for. The host witness counted **accepted=5, requests=5** — one per RPC (read, materialize, write, two escapes) |
+| the DB seam is a second port on the ratified transport | the guest's `AF_VSOCK (2, 5002)` arrived at **`/run/vc/vm/<sandbox>/clh.sock_5002`**. This is the first host confirmation of the `<uds>_<port>` convention on a port other than S3's 5001 — INTERFACES §3.1a generalises across ports, observed rather than assumed |
+| zero credential in the guest | `secret_found=False` — a host-side grep of the guest's dumped env/argv/globals for the real DSN and password found nothing — and `canary_found=True`, the planted fake secret the same grep *did* find. Without that positive control the first result would be indistinguishable from a broken grep |
+| a write is denied, at both layers | `write_denied=True` (the guest's `INSERT` crossed the bridge and came back a `denied` refusal from `policy.inspect_sql`) **and** `role_denied_write=True` — a direct connection *as the read-only role*, no broker in the path, had **Postgres itself** refuse the same statement. The primary control shown independent of the inspector |
+| requirement-9 escape primitives denied | `pg_read_file` and `COPY … TO PROGRAM` both refused |
+| no SQL-level egress origination | installed extensions were **`['plpgsql']`** only — neither `dblink` nor `postgres_fdw`. The honest weak proxy, not a NIC boundary (see below) |
+| clean teardown | socket node removed, container unlisted, zero surviving Cloud Hypervisor processes; the throwaway read-only role **dropped** (verified absent afterward, so no credential outlives the run) |
+
+**The negative control is the load-bearing half, and it took two passes to make it sharp.**
+`--negative-control` has the guest answer *itself* with canned fixture rows and canned refusals, never
+dialing the DB port. Run that way the run **exits 3, DETECTED**, and after the fix below the **only**
+failing claim is the witness reading `accepted=0` — every guest-visible claim (correct rows, clean
+credential grep, write denied, both escapes denied) still passes, exactly as designed. The first
+attempt was blunter: the fake decided refusals by "does the statement start with `select`", so
+`SELECT pg_read_file(...)` slipped through and the control was caught by a *guest-visible* claim as
+well as by the witness. A control that any claim other than the witness can catch is not testing what
+it says it tests, so the fake now forges the broker's behaviour exactly — the one benign read
+succeeds, everything else is refused.
+
+**Two further defects in the instrument, both found by running it rather than by reading it.** The
+host exhibits an **intermittent `ctr task exec` hang** — the call burns its whole timeout and the run
+dies — observed **twice in about thirteen runs**, once inside source installation and once on the
+guest program itself, so it is a general Kata-shim flake and not specific to any one payload. It is the
+same class S3 recorded for `destroy()`. Unwrapped it surfaced as a bare `subprocess.TimeoutExpired`
+traceback, which reads like the boundary broke when nothing about the boundary was exercised; it is now
+caught and reported as *"could not run … not a failed claim. Re-run."*, preserving the distinction
+`ProbeError` exists for (teardown was never at risk — the raise happens inside the probe's `finally`).
+Separately, the probe had been calling the S3 probe's `install_sources`, which ships S3's guest probe,
+control listener and request JSON — **none of which S4 executes** — buying extra exec calls, and so
+extra windows on that flake, for files it never used. It now ships only the package its guest runs.
+**Replication: about eleven passes and two infrastructure flakes across roughly thirteen runs**; every
+pass reported the same witness count, the same rows, and the same seven verdicts.
+
+**The egress claim stays the weak one, and the run does not strengthen it.** `['plpgsql']` proves the
+SQL-level origination path is closed; it is **not** evidence of a deny-by-default NIC boundary, because
+no such surface exists in the merged code (§6 requirement 6 is "S4 + GB") and the throwaway Postgres is
+colocated with the broker, so there is no separate DB-host hop to test. Recorded as observed fact with
+its scope attached, per §1's rule that a bound with no engine behind it is not a control.
+
+**Provisioning, as actually executed.** With no `TRELLIS_PG_DSN` set the probe installed the
+`postgresql` package, created `trellis_db` with a three-row fixture, and created the least-privilege
+login role from the shipped `backends.postgres_role_ddl` with a random password held host-side only —
+all via `sudo -u postgres psql`. The broker's own client is `psycopg2`, host-side; the host venv needed
+it installed, as the S3 `[A]` run needed `openai`. The database and package remain on the host; the
+role does not.
+
+---
+
+**How the probe is built.** `scripts/repl_sandbox_s4_probe.py`
+(`npm run repl-sandbox:s4-probe`) reuses the S3 probe's boot / hybrid-vsock discovery / host-witness /
+teardown wholesale by import (the `repl_sandbox_s3_paid.py` `_load_probe()` pattern — a second copy of
+that plumbing would be a second thing to keep true) and stands the DB seam up on the **second** vsock
+port `config.ports.db` (5002), serving `host.broker_handler` where S3 served `host.lm_handler`. It
+ships the guest only the package its own program runs (§ the exec-flake finding above).
+
+**Off-host coverage, which is what makes the host run cheap to trust.** The five verdict assessors,
+the credential grep and its canary positive control, and — the strongest check available without KVM —
+the whole shipping host-side chain (broker, `inspect_sql`, handle table, `guest_rpc` translation)
+driven end to end over the loopback double so `run_query` → `materialize` returns the fixture rows and
+a write comes back denied, are under test in `src/repl_sandbox/tests/test_s4_probe.py` (**22 checks**,
+no `/dev/kvm`, no Postgres, green on both the Windows dev box and the host). What that suite
+structurally cannot reach — and what the run above supplied — is a frame crossing a VM boundary,
+hybrid-vsock delivery on the DB port, and a *real* Postgres role refusing a *real* write.
+
 ### 5.5 S5 — Tier-0 in-guest hardening
 
 *Ordering note (§11): [REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §10.4 item 5 was "gVisor inner
@@ -519,7 +591,7 @@ bound with no engine behind it does not count.
 
 | # (ARCH §7) | Enforcing surface (named) | [R] reachability probe (scripted) | [A] adoption probe (paid ≤ $5) | Built in |
 |---|---|---|---|---|
-| 1 Exfil = data-flow; DLP + byte caps on top | Guest holds handles not payloads (broker) + content-DLP + per-session byte caps on `llm_query`/`vector_search`/`answer` | Scripted 100%-injection payload: no secret-bearing payload ever materializes in guest; byte cap trips | Real model steered by a hostile document (red-team) cannot leak a non-materialized secret via a sanctioned crossing; audit confirms | S4 + GB |
+| 1 Exfil = data-flow; DLP + byte caps on top | Guest holds handles not payloads (broker) + content-DLP + per-session byte caps on `llm_query`/`vector_search`/`answer` | **partially met 2026-07-23 (§5.4):** `run_query` returned an opaque handle and no row crossed until the metered `materialize`; a host-side grep found no credential in the guest (canary positive control fired). The scripted 100%-injection payload and the byte-cap trip remain GB's | Real model steered by a hostile document (red-team) cannot leak a non-materialized secret via a sanctioned crossing; audit confirms | S4 + GB |
 | 2 API key host-side only | LM handler holds the provider key | Scripted grep of guest env/namespace/memory for the key returns nothing | — | S3 + GB |
 | 3 Split version pins | Deploy config: Kata ≥ 3.31.0 **AND** Cloud Hypervisor ≥ 52.0, separate feeds | Scripted version-assert on both binaries; two advisory feeds tracked | — | G1/GB |
 | 4 Auth by the listener's session identity | The id `accept()` reports on broker + handler — kernel CID (native) or per-sandbox socket path (hybrid, §5.3) | Scripted forged-payload-id request is rejected; quota keyed to that id | Real model in session A cannot reach session B's scope | S3, S4 + GB |
@@ -527,7 +599,7 @@ bound with no engine behind it does not count.
 | 6 APOC allowlist + DB-host egress deny | Host broker APOC deny-by-default + DB-host has no route | Scripted `apoc.load.json` SSRF attempt denied; no metadata route | — | S4 + GB |
 | 7 `statement_timeout` + cost caps + no unbounded `[*]` | Host broker query governor | Scripted cartesian/`[*]` query is refused or timed out | — | S4 + GB |
 | 8 In-guest cgroups + host watchdog | cgroups (pids/mem/cpu) + watchdog | Scripted fork-bomb capped; wedged VM reaped | — | S5 |
-| 9 Least-privilege Postgres role | NOSUPERUSER, no `pg_read_server_files`/`pg_execute_server_program`/`dblink` | Scripted `COPY TO PROGRAM` / `pg_read_file` denied | — | S4 + GB |
+| 9 Least-privilege Postgres role | NOSUPERUSER, no `pg_read_server_files`/`pg_execute_server_program`/`dblink` | **[R] met 2026-07-23 (§5.4):** `COPY TO PROGRAM` and `pg_read_file` denied by the inspector, **and** a direct `INSERT` as the role refused by Postgres itself | — | S4 + GB |
 | 10 Security-review the vsock bridge | The vsock bridge (loopback-only, unprivileged) | Fuzzed frame parser survives; privilege-drop verified | — | GA-rt |
 | 11 Warm-pool reset policy *(contingency)* | Single-use VM or pre-exec-snapshot + rootfs-hash reset | Scripted reuse shows no state bleed *(only if pooling adopted)* | — | deferred (§10) |
 | 12 Prompt defenses are NOT controls | The tool/network boundary is the only backstop | Scripted audit: no enforcing-surface list counts `trellis_task.verify()`, `_SAFE_BUILTINS`, or the output caps | — | GB (documentation-audit) |
