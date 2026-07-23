@@ -778,7 +778,9 @@ that anything crosses the boundary safely; gates 2–4 unpassed. *Reachability:*
 **no CI job runs any** (the S2 probe *cannot* run in CI — it needs `/dev/kvm` and refuses without it),
 and `KataLauncher.boot`, both vsock classes and every `*_from_env` factory stay uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
-split; `AGENTS.md` §2 still has no row for `src/repl_sandbox/`. *Cross-links:* [[C1]] (replaces that
+split; `AGENTS.md` §2 still has no row for `src/repl_sandbox/`. The provisioned host is reached by the
+local alias `ssh trellis-kata` — **the address is deliberately absent from this public tree**
+(BUILD_PLAN §4.1), and the host holds no checkout, so a fact living only there is unrecorded. *Cross-links:* [[C1]] (replaces that
 substrate, preserving its contract), [[C5]] (the handle model is the pillar as a slicing API), [[C7]]
 (Layers 1–2 compose the −1 tier).
 

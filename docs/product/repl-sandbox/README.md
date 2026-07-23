@@ -56,6 +56,8 @@ Diagrams: [isolation view](repl_sandbox_architecture.svg) · [depth-1 flat fan-o
   io.containerd.kata.v2` boots a guest on kernel 6.18.35 (host: 6.8.0-134-generic) in ~0.7 s to
   first exec, a variable set in turn 1 reads back in turn 5 from one unmoved worker process, and
   teardown leaves no VMM process behind — replicated **five consecutive runs**, 0.629–0.693 s.
+  **Reaching that host:** `ssh trellis-kata` — a local SSH alias, because this repository is public
+  and the address is not in it (BUILD_PLAN §4.1 (Reaching the host)).
   Run it *on the host*: `npm run repl-sandbox:provision` (idempotent; `--verify` mutates nothing)
   then `npm run repl-sandbox:s2-probe` (`--negative-control` exits 3 when the mid-run guest swap is
   caught). **Both results are one host** — a second *machine* is **deferred** (it buys little for a
