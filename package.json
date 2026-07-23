@@ -88,6 +88,7 @@
     "repl-sandbox:s2-probe": "python3 scripts/repl_sandbox_s2_probe.py",
     "repl-sandbox:s3-probe": "python3 scripts/repl_sandbox_s3_probe.py",
     "repl-sandbox:s3-paid": "python3 scripts/repl_sandbox_s3_paid.py",
+    "repl-sandbox:s4-probe": "python3 scripts/repl_sandbox_s4_probe.py",
     "repl-sandbox:provision": "bash scripts/provision_kata_host.sh"
   },
   "keywords": [],
