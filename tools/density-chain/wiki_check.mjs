@@ -38,13 +38,15 @@
 //   --verify   THE CI HALF. Invariants that hold at any history depth: every
 //              visible path routes, every class declares something, every
 //              declared glob matches something, the roster agrees three ways, no
-//              residue rule shadows a declaration. Exit 0 / 1. Safe to gate on.
+//              residue rule shadows a declaration, and every inline <script> in
+//              the HTML render compiles. Exit 0 / 1. Safe to gate on.
 //
 //   (default)  THE SESSION HALF. Per-class staleness. Needs history, and an
 //              in-progress change is legitimately stale, so this reports rather
 //              than gates in CI. Exit 0 fresh, 1 stale, 2 error.
 //
 //   --json / --hook / --list-classes / --explain <path>
+//   --check-html              the render's inline <script> gate, on its own
 //   --print-sections          section ranges and normalized hashes
 //   --emit-class-map          the derived routing table, for review
 //   --negative-control        plants conditions the gate must detect; healthy = exit 3
@@ -54,17 +56,19 @@
 // .claude/settings.json.
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
+import { Script } from 'node:vm';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, '..', '..');
 const RESIDUE_PATH = join(HERE, 'routing-residue.json');
 const INDEX_PATH = join(REPO_ROOT, 'docs', 'density-chain', 'index.json');
 const CHAIN_PATH = 'docs/density-chain/DENSITY-CHAIN.md';
+const RENDER_PATH = 'docs/density-chain/DENSITY-CHAIN.html';
 const SELF_INDEX_HEADING = '## The self-index — where each class lives';
 const SCHEMA_VERSION = 3;
 
@@ -509,6 +513,200 @@ function humanReport(r) {
   return lines.join('\n');
 }
 
+// ------------------------------------------------------- the rendered artifact
+//
+// DENSITY-CHAIN.html carries the same map as the Markdown, but its data lives in
+// an inline <script> as JS array literals, so the render is only as good as that
+// block's syntax. A straight apostrophe inside a single-quoted string literal
+// ('S4's paid half') closed the string early, turned the whole block into one
+// SyntaxError, and blanked the interactive table on master. It went unnoticed
+// twice over: a browser reports a script that failed to compile only to its
+// console, and the gate above validates the OTHER file. Thirteen `charter:`
+// fields still hold single-quoted prose, so the class is live, not historical.
+//
+// Note what the failure was NOT. It was not an encoding problem: the file is
+// UTF-8, was always UTF-8, and U+2019 (’) in that same position would have been
+// harmless — a multi-byte character is not a delimiter. It was a collision in
+// the JS grammar, so the instrument that detects it has to be a JS parser.
+// Nothing short of one generalises: the next break will be a stray backtick, an
+// unbalanced brace, or a trailing comma somewhere no rule anticipated.
+
+const JS_TYPE = /^(?:text|application)\/(?:x-)?(?:java|ecma)script$/i;
+const JSON_TYPE = /^(?:importmap|speculationrules|(?:text|application)\/(?:[\w.-]+\+)?json)$/i;
+
+/** The value of one HTML attribute, quoted either way or bare. */
+function attrValue(attrs, name) {
+  const m = new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, 'i').exec(attrs);
+  if (!m) return null;
+  return (m[1] ?? m[2] ?? m[3] ?? '').trim();
+}
+
+/**
+ * Every `<script>` element in an HTML document, with the line its body starts on.
+ *
+ * A scanner, not a parser, and that is fidelity rather than laziness: the
+ * browser's own rule for classic script content is that the first literal
+ * `</script` ends the element even mid-string-literal. Matching it byte for byte
+ * means what this extracts is what the browser compiles. A cleverer reader that
+ * kept going past an embedded `</script>` would be checking source no engine
+ * ever sees, which is the same shape of mistake as checking the Markdown and
+ * calling the HTML verified.
+ */
+function extractScriptBlocks(html) {
+  const blocks = [];
+  const open = /<script\b([^>]*)>/gi;
+  let m;
+  while ((m = open.exec(html)) !== null) {
+    const bodyStart = m.index + m[0].length;
+    const close = /<\/script\b/i.exec(html.slice(bodyStart));
+    const source = html.slice(bodyStart, close ? bodyStart + close.index : html.length);
+    const type = attrValue(m[1], 'type');
+    blocks.push({
+      index: blocks.length + 1,
+      type,
+      src: attrValue(m[1], 'src'),
+      source,
+      // Body line 1 is the remainder of the `<script>` line itself, so the
+      // offset that maps a compiler's line number back onto the HTML is the
+      // count of newlines before the body.
+      startLine: (html.slice(0, bodyStart).match(/\n/g) ?? []).length + 1,
+      closed: Boolean(close),
+    });
+    open.lastIndex = close ? bodyStart + close.index : html.length;
+  }
+  return blocks;
+}
+
+/** `{ line, message, snippet }` from a V8 compile-error stack or `--check` output. */
+function describeCompileFailure(text, extraOffset = 0) {
+  const lines = String(text).split(/\r?\n/);
+  const head = /:(\d+)$/.exec(lines[0] ?? '');
+  const messageAt = lines.findIndex((l) => /^\w*Error: /.test(l));
+  return {
+    line: head ? Number(head[1]) + extraOffset : null,
+    message: messageAt === -1
+      ? (lines.find((l) => l.trim()) ?? 'unparsed compile failure').trim()
+      : lines[messageAt].replace(/^\w*Error: /, '').trim(),
+    snippet: (lines[1] ?? '').trim(),
+  };
+}
+
+/**
+ * Compile without running. `vm.Script` is the instrument for classic scripts:
+ * in-process, no temp file, and `lineOffset` makes it report the line number of
+ * the HTML file rather than of the extracted fragment. It cannot accept
+ * `import`/`export`, so a `type="module"` block goes through `node --check` on a
+ * temp `.mjs` instead — Node picks the goal symbol from the extension. Handling
+ * the case costs ten lines and buys the promise that a block this gate SAYS it
+ * checked was checked under the grammar the browser would use.
+ */
+function findSyntaxError(source, { module = false, lineOffset = 0 } = {}) {
+  if (!module) {
+    try {
+      new Script(source, { filename: 'density-chain-inline-script', lineOffset });
+      return null;
+    } catch (err) {
+      return describeCompileFailure(err.stack ?? `Error: ${err.message}`);
+    }
+  }
+  const file = join(tmpdir(), `density-chain-script-${process.pid}-${Date.now()}.mjs`);
+  writeFileSync(file, source, 'utf8');
+  try {
+    execFileSync(process.execPath, ['--check', file], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    return null;
+  } catch (err) {
+    return describeCompileFailure(err.stderr || err.stdout || err.message, lineOffset);
+  } finally {
+    try {
+      unlinkSync(file);
+    } catch {
+      /* a leftover temp file is not a verification result */
+    }
+  }
+}
+
+/**
+ * Parse every inline `<script>` in an HTML document.
+ *
+ * Two rules here exist because of how the original break hid rather than because
+ * of the break itself:
+ *
+ *  - A block whose `type` this does not recognise is a PROBLEM, not a quiet
+ *    skip. Silently declining to check something is precisely the state that let
+ *    a blank table sit on master, and the remedy — name the type in the table
+ *    above — is one line.
+ *  - Checking zero blocks is a problem in its own right. A gate that passes
+ *    because it found nothing to test reports the same word as a gate that
+ *    passed on the merits, and only one of them means anything.
+ *
+ * An external `src=` script has no inline body and is genuinely nothing to
+ * parse; that one is a real skip.
+ */
+function checkHtmlScripts(html, { label = RENDER_PATH } = {}) {
+  const blocks = extractScriptBlocks(html);
+  const checked = [];
+  const skipped = [];
+  const problems = [];
+
+  for (const block of blocks) {
+    if (!block.closed) {
+      problems.push({ block: block.index, line: block.startLine, kind: 'unterminated',
+        message: 'the <script> element is never closed', snippet: '' });
+      continue;
+    }
+    if (block.src && !block.source.trim()) {
+      skipped.push({ block: block.index, reason: 'external', detail: block.src });
+      continue;
+    }
+    const type = block.type ?? '';
+    if (JSON_TYPE.test(type)) {
+      try {
+        JSON.parse(block.source);
+        checked.push({ block: block.index, kind: 'json', startLine: block.startLine });
+      } catch (err) {
+        problems.push({ block: block.index, line: block.startLine, kind: 'json',
+          message: err.message, snippet: '' });
+      }
+      continue;
+    }
+    const module = type.toLowerCase() === 'module';
+    if (type !== '' && !module && !JS_TYPE.test(type)) {
+      problems.push({ block: block.index, line: block.startLine, kind: 'unknown-type',
+        message: `type="${type}" is not a type this gate knows how to parse; `
+          + 'add it to JS_TYPE/JSON_TYPE, or give it a `src`',
+        snippet: '' });
+      continue;
+    }
+    const failure = findSyntaxError(block.source, { module, lineOffset: block.startLine - 1 });
+    if (failure) {
+      problems.push({ block: block.index, kind: module ? 'module' : 'script', ...failure });
+    } else {
+      checked.push({ block: block.index, kind: module ? 'module' : 'script', startLine: block.startLine });
+    }
+  }
+
+  // Only when nothing else already failed: a gate that just reported a broken
+  // block has plainly done its job, and saying "nothing was checked" underneath
+  // it would bury the line the author actually needs. The invariant being
+  // defended is narrower — this must never PASS on an empty check.
+  if (checked.length === 0 && problems.length === 0) {
+    problems.push({ block: 0, line: null, kind: 'nothing-checked', snippet: '',
+      message: `no inline script block in ${label} was parsed, so a passing result here `
+        + 'would carry no information (hard rule 19c)' });
+  }
+  return { blocks: blocks.length, checked, skipped, problems };
+}
+
+/** One line, anchored to the HTML file so an editor can jump straight to it. */
+function formatScriptProblem(problem, label = RENDER_PATH) {
+  const at = problem.line === null ? label : `${label}:${problem.line}`;
+  const snippet = problem.snippet ? `  |  ${problem.snippet}` : '';
+  return `${at} — inline <script> #${problem.block} does not parse: ${problem.message}${snippet}`;
+}
+
 // -------------------------------------------------------------------- verify
 
 function runVerify() {
@@ -573,6 +771,16 @@ function runVerify() {
     if (!sections.has(id)) problems.push(`class ${id} has no \`#### ${id}\` section in the map`);
   }
 
+  // The render is the other half of the same map, and it fails silently.
+  const renderAbs = join(REPO_ROOT, RENDER_PATH);
+  let scripts = null;
+  if (!existsSync(renderAbs)) {
+    problems.push(`${RENDER_PATH} is missing; the interactive render has no source`);
+  } else {
+    scripts = checkHtmlScripts(readFileSync(renderAbs, 'utf8'));
+    for (const p of scripts.problems) problems.push(formatScriptProblem(p));
+  }
+
   if (problems.length) {
     process.stdout.write(`density-trellis contract: FAIL (${problems.length} issue(s))\n`);
     for (const p of problems) process.stdout.write(`- ${p}\n`);
@@ -582,7 +790,27 @@ function runVerify() {
     `density-trellis contract: PASS (${visible.length} paths routed; ${router.roster.length} branch classes, ` +
       `roster agrees three ways; ${router.declared.length} declared globs, ` +
       `${(router.residue.heuristic ?? []).length} heuristics, ${(router.residue.fallback ?? []).length} fallbacks; ` +
-      `no stored pins)\n`,
+      `no stored pins; ${scripts.checked.length} inline script block(s) in the render compile)\n`,
+  );
+  return 0;
+}
+
+/** `--check-html`: the render's script gate on its own, for a quick local loop. */
+function runCheckHtml() {
+  const abs = join(REPO_ROOT, RENDER_PATH);
+  if (!existsSync(abs)) {
+    process.stderr.write(`${RENDER_PATH} is missing\n`);
+    return 1;
+  }
+  const r = checkHtmlScripts(readFileSync(abs, 'utf8'));
+  if (r.problems.length) {
+    process.stdout.write(`${RENDER_PATH}: FAIL (${r.problems.length} issue(s))\n`);
+    for (const p of r.problems) process.stdout.write(`- ${formatScriptProblem(p)}\n`);
+    return 1;
+  }
+  process.stdout.write(
+    `${RENDER_PATH}: PASS (${r.checked.length} of ${r.blocks} <script> block(s) compiled`
+      + `${r.skipped.length ? `, ${r.skipped.length} external` : ''})\n`,
   );
   return 0;
 }
@@ -718,7 +946,52 @@ function runNegativeControl() {
     planted.push('no_unresolvable_pin_state_exists');
   }
 
+  // The render's script gate, driven against the SHIPPED file rather than a
+  // fixture, so a control cannot stay green while the real artifact goes
+  // unparsed. The positive control fires first: if the file as committed does
+  // NOT compile, every "we detected the break" below is meaningless.
+  const renderAbs = join(REPO_ROOT, RENDER_PATH);
+  if (existsSync(renderAbs)) {
+    const html = readFileSync(renderAbs, 'utf8');
+    const shipped = checkHtmlScripts(html);
+    if (shipped.problems.length === 0 && shipped.checked.length > 0) {
+      planted.push('render_as_shipped_compiles');
+    }
+
+    // The exact break that blanked the table: an apostrophe inside single quotes.
+    const wounded = html.replace(/charter: '/, "charter: 'S4's ");
+    const apostrophe = checkHtmlScripts(wounded);
+    if (apostrophe.problems.length > 0) planted.push('apostrophe_in_single_quotes_is_caught');
+    // …reported at a line a human can open, not merely "somewhere in the file".
+    const woundedLine = wounded.slice(0, wounded.indexOf("charter: 'S4's ")).split('\n').length;
+    if (apostrophe.problems.some((p) => p.line === woundedLine)) {
+      planted.push('the_offending_line_is_named');
+    }
+    // The general case the parser buys beyond this one break.
+    if (checkHtmlScripts(html.replace('const TIER_COLORS = [', 'const TIER_COLORS = [ {')).problems.length > 0) {
+      planted.push('unbalanced_bracket_is_caught');
+    }
+    // Blindness, in the two shapes that make a pass meaningless.
+    if (checkHtmlScripts('<p>no scripts here</p>').problems.some((p) => p.kind === 'nothing-checked')) {
+      planted.push('a_render_with_nothing_to_check_fails');
+    }
+    if (checkHtmlScripts(html.replace('<script>', '<script type="text/x-template">'))
+      .problems.some((p) => p.kind === 'unknown-type')) {
+      planted.push('an_unparseable_type_is_not_silently_skipped');
+    }
+  }
+  // A JSON data block is validated as JSON, not merely tolerated — the shape the
+  // render would take if its data ever moved out of executable source.
+  if (checkHtmlScripts('<script type="application/json">{"a": 1,}</script>').problems
+    .some((p) => p.kind === 'json')) {
+    planted.push('a_malformed_json_block_is_caught');
+  }
+
   const expected = [
+    'render_as_shipped_compiles', 'apostrophe_in_single_quotes_is_caught',
+    'the_offending_line_is_named', 'unbalanced_bracket_is_caught',
+    'a_render_with_nothing_to_check_fails', 'an_unparseable_type_is_not_silently_skipped',
+    'a_malformed_json_block_is_caught',
     'declaration_drives_routing', 'c8_owns_its_declared_config_file', 'ignores_the_map_itself',
     'flags_a_fallback_route', 'unmapped_path_has_no_route', 'deleted_declaration_drops_its_route',
     'new_heading_extends_the_roster', 'sections_extract_per_class', 'crlf_is_not_an_edit',
@@ -742,6 +1015,7 @@ function main() {
   const argv = process.argv.slice(2);
   if (argv.includes('--hook')) return hookMode();
   if (argv.includes('--verify')) return runVerify();
+  if (argv.includes('--check-html')) return runCheckHtml();
   if (argv.includes('--negative-control')) return runNegativeControl();
 
   if (argv.includes('--list-classes')) {
@@ -802,4 +1076,5 @@ export {
   extractSections, extractRoster, extractDeclarations,
   buildRouter, route, classify,
   sectionVerdict, classVerdicts, lastCodeCommitByClass, report,
+  extractScriptBlocks, findSyntaxError, checkHtmlScripts, formatScriptProblem,
 };

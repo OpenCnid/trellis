@@ -59,13 +59,14 @@ implicated.
 
 | Invocation | Effect |
 |---|---|
-| `npm run wiki:check -- --verify` | **the CI half.** Every visible path routes; every class declares something; every declared glob matches something; the roster agrees three ways; no residue rule shadows a declaration. Exit **0** pass, **1** fail |
+| `npm run wiki:check -- --verify` | **the CI half.** Every visible path routes; every class declares something; every declared glob matches something; the roster agrees three ways; no residue rule shadows a declaration; every inline `<script>` in the HTML render compiles. Exit **0** pass, **1** fail |
 | `npm run wiki:check` | **the session half.** Per-class staleness. Exit **0** current, **1** stale, **2** error |
+| `npm run wiki:check -- --check-html` | the render's script gate alone: compiles every inline `<script>` in `DENSITY-CHAIN.html` without running it, and names the failing **line of the HTML file** |
 | `npm run wiki:check -- --explain <path>` | which classes a path routes to, via which glob, and whether by declaration, heuristic or fallback |
 | `npm run wiki:check -- --emit-class-map` | the derived routing table, for review — never committed |
 | `npm run wiki:check -- --print-sections` | each branch section's line range and normalized hash |
 | `npm run wiki:check -- --json` / `-- --list-classes` | the report as JSON / the roster |
-| `npm run wiki:check -- --negative-control` | the falsifier. Plants **eighteen** conditions the gate must detect; **healthy is exit 3**, matching [`check:repo-surface`](../../tools/repository-surface/cli.ts) and the judge drills |
+| `npm run wiki:check -- --negative-control` | the falsifier. Plants **twenty-five** conditions the gate must detect; **healthy is exit 3**, matching [`check:repo-surface`](../../tools/repository-surface/cli.ts) and the judge drills |
 
 **The split is deliberate.** `--verify` runs in CI because its invariants hold at any history
 depth — and CI checks out shallow, so the staleness diff would silently see nothing there. Staleness
@@ -205,6 +206,43 @@ this session **did not** fix, in the order it should be decided:
 7. **`git log -L` costs a history walk.** One full-history pass to attribute commits to classes (183 ms
    measured over 157 first-parent commits) plus one range query per class. Fine at this size; it grows
    with history, and nothing currently bounds it.
+8. **The render gate compiles; it does not render.** `DENSITY-CHAIN.html` keeps its data as JS array
+   literals inside an inline `<script>`, so a quoting slip is a `SyntaxError` that blanks the whole
+   interactive table and reports it to nothing but a browser console — which is how one shipped to
+   master. `--verify` now parses every inline block with `vm.Script` (`node --check` for a
+   `type="module"` block, `JSON.parse` for a JSON one) and names the offending **line of the HTML
+   file**. What that buys is the *syntax* of the render, and no more: a block that compiles but
+   carries a wrong figure, a broken `<code>` tag or a dropped branch still passes, because those are
+   editorial facts the Markdown gate and a human own. Note also what the original break was **not** —
+   an encoding problem. The file is UTF-8, and `’` (U+2019) in the same position is harmless; the
+   collision was in the JS grammar, which is why the instrument is a parser and not a charset.
+   The durable fix is to stop hand-writing data as executable source at all — see below.
+
+## The render's data is executable source — PROPOSED, not built
+
+A gate detects; it does not prevent. Thirteen `charter:` fields in `DENSITY-CHAIN.html` still hold
+prose inside **single**-quoted string literals, so the next straight apostrophe is another red build
+rather than another blank table — better, but still a trap re-armed each time the map is rewritten.
+
+Three ways to disarm it rather than watch it, cheapest first:
+
+1. **Move the data into `<script type="application/json">`.** The browser never executes that block;
+   the page reads it with `JSON.parse`. JSON has exactly one string delimiter, and `'` is never
+   special inside it, so an apostrophe becomes *unable* to break the page rather than merely observed
+   not to. Cost: a one-time restructure of the data block plus a small reader; the gate already
+   validates JSON blocks, so the check survives the move unchanged.
+2. **Generate the HTML from the Markdown.** The real single-sourcing, and the only option that also
+   ends the two-files-one-map drift the staleness half exists to police. Escaping stops being an
+   authoring concern because `JSON.stringify` does it. Cost: the tier prose currently differs between
+   the two renders by design, so this is a genuine editorial decision, not a refactor.
+3. **House style: `’` (U+2019) in prose.** Typographically right anyway, and the file already does it
+   in most single-quoted rows. But it is a convention, and hard rule 20 asks that a failure class be
+   closed by tooling shape rather than by a sentence someone has to remember.
+
+(1) is the recommendation. None of the three is authorized here: the density-chain **skill** authors
+these bytes, so changing the format means changing the skill, and hard rule 16 puts any session that
+writes prompt bytes through `prompt-engineering` and `hypershot-protocol` first. That is its own
+session, properly framed — not a drive-by on a gate fix.
 
 ## Provenance
 
