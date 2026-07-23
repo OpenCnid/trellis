@@ -491,3 +491,54 @@ kernel-prompt bytes, which this increment is forbidden to do):
    guards (`parse_textedit_bounds`, `parse_textedit_guarded_only`'s
    malformed-value refusal, the root validation) deliberately have no line,
    because they refuse the operator before a run exists.
+
+## 11. Descriptors are a registration, not a schema (dated entry — July 23, 2026, owner, in session)
+
+Proposed by the collaborator (Matt) on reading increment 1's field-set
+question, and approved by the owner (Cnid) in session. It answers §9.3's
+open field-set item by **dissolving** it rather than settling it.
+
+**The argument.** A project whose central iteration is prompt authoring
+cannot afford a descriptor vocabulary that becomes law early. Prompt
+engineering is iterative by nature — unexpected behaviour is discovered,
+not predicted — so the machinery around it must let a field be added,
+renamed, or dropped without a migration. A frozen required-field set buys
+consistency at exactly the cost this project can least pay.
+
+**What is ruled.**
+
+- **The descriptor is a registration, not a validated schema**, while the
+  shape is still being learned. Fields vary per surface; adding one is an
+  edit, not a ceremony. There is no single frozen set to ratify, so §9.3's
+  field-set question is closed as *dissolved* — MASH's `{help, category,
+  aliases, usage}` and §3.2's set are vocabularies to draw from, not
+  competing laws.
+- **Coverage is the enforced property; field shape is not.** The duty worth
+  mechanizing is *every live surface carries a descriptor* — the question
+  that stays stable while the fields move. That is the "ensure all added
+  surfaces get prompts" diagnostic in the proposal's own words, and it is
+  what a registration system exists to make answerable.
+- **The diagnostic informs; it does not refuse.** Consistent with
+  [`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) §12.2: nothing derived
+  from a descriptor may gate anything without its own owner gate.
+- **This amends §3.2.** Its "a surface whose descriptor is missing a
+  required field fails validation" no longer governs descriptor **fields**.
+  Rule 8 is still satisfied by tooling shape — the shape is now a registry
+  plus a coverage report, rather than a required-field schema. Per-surface
+  byte-identity pins (§10) remain the drift check on the bytes themselves.
+
+**What does not change.** `expects` stays guard-derived and code-composed
+(§3.3, §9.1) — one encoding owned by whoever is authoritative for the fact.
+Guard-derivation was never a field-set question, and this ruling does not
+touch it. The strict `ModuleManifestSchema` (`src/config/modules.ts`) is
+untouched: it validates `modules/*/module.json` and has never seen a
+descriptor. Putting descriptor fields into it remains a separate future
+decision, and this ruling makes it the less likely one.
+
+**A correction this exposes.** The session that shipped increment 1
+described the field set as one strict-schema landing away from becoming
+law. That overstated the constraint: the shipped descriptor is a Python
+dict literal with no validator anywhere in the tree, and the strict schema
+it named governs a different artifact class. Changing a field today costs
+one file — the condition this ruling now preserves deliberately rather
+than by accident.
