@@ -631,9 +631,11 @@ the measurement of them.*
   over doubles, eight via that class's composition root — **exit 0**, and `--negative-control` plants
   one break behind each and **exits 3**, all nine detected. New: `scripts/repl_sandbox_s2_probe.py`
   is the first drill that measures **hardware**, not doubles — boundary, five-turn persistence and
-  teardown on a real Kata guest, **exit 0** on the AX41; its `--negative-control` swaps the guest
-  mid-run and **exits 3** on all three signals (namespace, worker pid, guest `boot_id`). **No CI runs
-  either**, and none can run the S2 probe: it needs `/dev/kvm`.
+  teardown on a real Kata guest, **exit 0** five consecutive times on the AX41; its
+  `--negative-control` swaps the guest mid-run and **exits 3** on all three signals (namespace, worker
+  pid, guest `boot_id`). `provision_kata_host.sh` extends the same discipline to *provisioning*: three
+  planted breaks, all named by `--verify` without mutation, all converged by a real run. **No CI runs
+  any**, and none can run the S2 probe: it needs `/dev/kvm`.
 - **T5 — future plans.** Open: the real TREC import (unattempted: it needs a paid annotation pass and
   an unbuilt fetch script); adversarial corpora with contested gold labels; embedding-shortcut corpora;
   10k-question scale sweeps; multi-run variance replacing n=1. Proposed: 2-of-3 consensus writes on
@@ -644,7 +646,8 @@ the measurement of them.*
 **shipped, measured**; the sandbox refusal drill, `fuzz_frame.py` and the S2 probe — **[R] only,
 outside CI**; v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
 *What those three license:* nine refusals and eight planted frame readers are **present and fire** over
-doubles; the S2 probe's three claims fired against a real guest **once, n=1, on one host**. None of
+doubles; the S2 probe's three claims fired against a real guest **five times on one host — n=5 of
+run-to-run variance on identical hardware, which is not a second machine**. None of
 that is a model driving the surface right. Every [[C12]] **[A]** half (S3, S4, S6, GB, GA-eq,
 ≤$5) is **unspent**. Rule 19(c)'s flag now spans **nine** surfaces (`check:repo-surface`, `wiki:check`
 and `upsum` too), none a corpus drill here.
@@ -726,7 +729,9 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   a DLP hook, the capability lifecycle, a CID-keyed audit log, `KataREPL(IsolatedEnv)`, and a
   `KataLauncher` whose four-condition `preflight` drives a real QEMU benchmark — each
   transport-agnostic, exercised through loopback doubles. Eleven ratified documents. Host-side and
-  outside that tree: `scripts/repl_sandbox_s2_probe.py`, which drives `ctr` directly.
+  outside that tree: `scripts/repl_sandbox_s2_probe.py`, which drives `ctr` directly, and
+  `scripts/provision_kata_host.sh`, which rebuilds the host both pins and all three hidden
+  provisioning facts depend on — idempotent, digest-verified, `--verify` mutating nothing.
 - **T3 — with receipts.** **G0 lifted 2026-07-22** by owner instruction, in `REPL_SANDBOX_BUILD_PLAN.md`
   §2 (The research-hold gate), under two qualifications: G1 is unsatisfiable here; a loopback double is
   never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3` found **four
@@ -744,11 +749,14 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   **every** host, and one comment **inverted the operator guidance** the records had right. **S2
   PASSED** — the first microVM anyone has booted here: guest kernel **6.18.35** against the host's
   6.8.0-134, a distinct `boot_id`, a `cloud-hypervisor` process on `/run/vc/vm/<sandbox>/clh-api.sock`,
-  ~**0.7 s** to first exec, and a Python namespace surviving five `ctr task exec` turns on one unmoved
-  worker pid; teardown leaves nothing. **Both upstreams default away from the ratified pin:**
-  `kata-static-3.32.0` bundles Cloud Hypervisor **v51.1**, and `configuration.toml` symlinks to
-  **QEMU** — `kata-runtime check` passes in both states, and the shim is not on containerd's `PATH`
-  at all. Gaps stand: requirement 9's **grant** half is a deployment obligation no Python enforces;
+  **0.629–0.693 s** to first exec across **five consecutive passes**, and a Python namespace surviving
+  five `ctr task exec` turns on one unmoved worker pid; teardown leaves nothing. **Both upstreams
+  default away from the ratified pin:** `kata-static-3.32.0` bundles Cloud Hypervisor **v51.1**, and
+  `configuration.toml` symlinks to **QEMU** — `kata-runtime check` passes in both states, and the shim
+  is not on containerd's `PATH` at all; all three now converge under
+  `provision_kata_host.sh`, whose own planted-break run named and fixed each. **Every number here is
+  one host**: WSL2 cannot be the second (Windows 10 exposes no nested virtualization), so a second
+  machine is an open owner decision. Gaps stand: requirement 9's **grant** half is a deployment obligation no Python enforces;
   `locate`/`get_ast_blocks` **fail closed**; no model allowlist; `MAX_FRAME_LEN` unratified.
 - **T5 — future plans.** Next, now unblocked: **S3** (the `llm_query` frame over vsock — the spike's
   turns cross a guest fifo, not the wire), **S4** (broker), **S5** (Tier-0), **S6** (the real launch
@@ -764,7 +772,8 @@ not a sandbox and must not be read as one.** Unbuilt: the vsock bridge on a real
 against a real guest, Tier-0 in-guest hardening, the production launch path. Accepted: **SPEC §8 gate
 1 (G1) and spike S2, 2026-07-23** — a guest boots and keeps state across turns, which is not the claim
 that anything crosses the boundary safely; gates 2–4 unpassed. *Reachability:* closed by `host.py`,
-`cli.py`, `scripts/repl_sandbox_drill.py`, `scripts/repl_sandbox_s2_probe.py` and six `npm` scripts;
+`cli.py`, `scripts/repl_sandbox_drill.py`, `scripts/repl_sandbox_s2_probe.py`,
+`scripts/provision_kata_host.sh` and seven `npm` scripts;
 **no CI job runs any** (the S2 probe *cannot* run in CI — it needs `/dev/kvm` and refuses without it),
 and `KataLauncher.boot`, both vsock classes and every `*_from_env` factory stay uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary

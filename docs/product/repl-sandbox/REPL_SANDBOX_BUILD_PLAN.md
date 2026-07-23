@@ -158,6 +158,22 @@ v53.0 as the smallest jump from what Kata 3.32.0 was built against. This is
 feeds, never one version checked twice — observed rather than argued. **Kata publishes a
 `versions.yaml` asset naming the bundled Cloud Hypervisor; read it before unpacking.**
 
+**The host is now reproducible: `scripts/provision_kata_host.sh`** (`npm run repl-sandbox:provision`,
+runs on the host as root). It carries the two pins with their observed digests, fetches nothing whose
+digest does not match, installs standalone Cloud Hypervisor over the bundled build while retaining
+the displaced binary, links the shim onto containerd's `PATH`, re-points `configuration.toml` at
+`configuration-clh.toml`, and pulls the guest image **by digest** rather than by its mutable tag.
+`--verify` mutates nothing and exits 1 naming what it would change.
+
+*Its own negative control, observed 2026-07-23:* against the provisioned host it reports `already`
+on every step and exits 0. With three breaks planted — shim unlinked, config symlinked back to QEMU,
+image removed — `--verify` named all three as `WOULD CHANGE` and exited 1 without touching them, a
+plain run converged all three, and a re-verify exited 0. Isolated, the shim break alone fails a boot
+with `fork/exec /usr/local/bin/containerd-shim-kata-v2: no such file or directory`; the same host
+booted 6.18.35 after convergence. **Scope limit: the install paths of steps 1–3 (containerd, the Kata
+tarball, the Cloud Hypervisor binaries) have only run on a host that already had them** — the
+fetch-and-unpack branch is unexercised until a genuinely fresh host runs it.
+
 Neither upstream publishes checksums for these assets, so the digests above are computed after fetch
 over HTTPS, not verified against a published manifest. **Note the two remaining scope limits:** the
 acceleration figure is a *differential* measurement (§ the enforcing surface above), and G1 says the
@@ -228,6 +244,19 @@ so `/opt/kata/bin/containerd-shim-kata-v2` must be linked into `/usr/local/bin`;
 `configuration.toml` ships as a symlink to **`configuration-qemu.toml`**, so a host that installed
 Cloud Hypervisor and never re-pointed it boots the ratified pin's *neighbour* — the symlink was
 moved to `configuration-clh.toml`, which is what the observed run used.
+
+**Replicated 2026-07-23 — five consecutive runs on the reconverged host, all exit 0.** Boot to first
+exec **0.629–0.693 s**; every run one worker pid, one guest `boot_id`, turn 5 reading `42,84`, and a
+teardown leaving nothing listed and no VMM process. `--negative-control` exited 3 again afterward.
+**This is n=5 on one host, not on two** — the variance measured is run-to-run on identical hardware,
+which says nothing about a second machine.
+
+**The WSL2 question this spike was supposed to answer is closed the other way** (RESEARCH §10.4 item
+2 asked whether WSL2 nested-KVM holds): on this repository's development box it cannot. WSL2 exposes
+no `/dev/kvm` there, and enabling nested virtualization requires `nestedVirtualization=true` under
+**Windows 11**, while the dev host is Windows 10 Home build 19045. The blocker is the OS edition, not
+the CPU (GenuineIntel). **A second KVM host therefore has to be a second machine** — see §11 (Open
+ordering calls) for what that costs.
 
 **Scope limits.** The guest holds state across turns *delivered as separate `ctr task exec` calls* —
 this is the boundary and the persistence, not the wire: the turns cross via a guest fifo, **not**
@@ -413,6 +442,30 @@ Each is a ratified contingency, **not** a live component; each names the gate th
 ([ARCHITECTURE §9](REPL_SANDBOX_ARCHITECTURE.md) (Explicitly not adopted)) — it is a parallel alternative,
 not an inner layer; Tier-0 in-guest hardening (S5) is the honest inner layer instead. CubeSandbox and bare
 Firecracker are dropped ([REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §15).
+
+## 11. Open ordering calls
+
+**Hoisting G1 ahead of S2–S5** (§4 (Host provisioning gate)) — an ordering call, taken: the spikes
+that need KVM are not attempted on a host that has not proven it.
+
+**A second KVM host — OPEN, owner's call, costs money.** Everything G1 and S2 record was observed on
+one machine, so both results are `n=5, one host`: nothing yet distinguishes "Kata boots and keeps
+state" from "Kata boots and keeps state *on this AX41*". The development box cannot be the second
+host (§5.2 (S2) — Windows 10 Home, no WSL2 nested virtualization), and `scripts/provision_kata_host.sh`
+cannot exercise its own fetch-and-install branch without one. The ratified host set
+([ARCHITECTURE §8](REPL_SANDBOX_ARCHITECTURE.md) (Deployment)) narrows the options sharply:
+
+| candidate | gives `/dev/kvm`? | shape of the spend |
+|---|---|---|
+| **GCP N2/C2 + nested virtualization** | yes, with the nested-virt licence flag | hourly, an hour or two is enough for G1 + S2 + a fresh provisioning run |
+| AWS C8i/M8i/R8i | **only `.metal`** — ordinary instances do not expose KVM | bare metal, hourly but far dearer |
+| Second Hetzner dedicated | yes | monthly, with a setup fee and provisioning delay |
+| Hetzner Cloud (shared or CCX) | **no** — no nested virtualization | — |
+| DigitalOcean | **never** — excluded by [ARCHITECTURE §8](REPL_SANDBOX_ARCHITECTURE.md) | — |
+
+The cheapest honest answer is a GCP N2 rented for the length of one run. **Nothing has been bought,
+no account has been created, and no host has been ordered** — this is a decision waiting on the
+owner, not a task waiting on a step.
 
 ---
 

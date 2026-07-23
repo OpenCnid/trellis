@@ -151,6 +151,12 @@ Three things the records could not have told us, all of them provisioning facts 
   and stopping there gives a host that boots QEMU guests while the operator believes the ratified
   VMM is in use. This is the same shape as the G1 finding (Kata bundling its own Cloud Hypervisor at
   v51.1): **both upstreams ship a default that quietly disagrees with the pin.**
+- **A provisioning script needs a negative control as much as a probe does.** Running
+  `provision_kata_host.sh` against the host it was written from proves only that it can say
+  "already". Planting the three breaks it exists to fix — and watching `--verify` name all three
+  without touching them, then a real run converge them — is the only version of that run that
+  carries information. Its fetch-and-install branch is *still* unexercised, because a host that
+  already has Kata cannot test installing Kata.
 - **Boot is fast enough that the persistence question is the whole question.** ~0.7 s from `ctr run`
   to first exec means boot cost is not what makes state worth keeping — correctness across turns is.
   The probe therefore asserts the *identity* of the guest (worker pid, guest `boot_id`) alongside
