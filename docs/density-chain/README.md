@@ -183,12 +183,17 @@ this session **did not** fix, in the order it should be decided:
 2. **`routing-residue.json` is authored hand-wiring**, reduced by roughly 70%, not eliminated. It is
    where future ad-hoc rules will try to hide; the `why` requirement and the shadow check are the only
    things holding that.
-3. **Derivation is inverted relative to the record's principle.** `SELF_DESCRIBING_SURFACES.md` says an
-   account must be derived from *the guard that enforces behaviour*. Here the mechanism is derived from
-   the account, because the routing table enforces nothing — it selects which prose to re-check, and
-   the authoritative source for "which branch covers this path" is editorial. Same principle (one
-   encoding, owned by whoever is authoritative for the fact), different kind of fact. The record
-   anticipated only the first kind; a dated addendum drawing that distinction is owed.
+3. ~~**Derivation is inverted relative to the record's principle.**~~ → **Addendum paid, July 23, 2026.**
+   `SELF_DESCRIBING_SURFACES.md` says an account must be derived from *the guard that enforces
+   behaviour*. Here the mechanism is derived from the account, because the routing table enforces
+   nothing — it selects which prose to re-check, and the authoritative source for "which branch covers
+   this path" is editorial. Same principle (one encoding, owned by whoever is authoritative for the
+   fact), different kind of fact. The record anticipated only the first kind; the dated addendum owed
+   here was written into that record on its ratification —
+   [`SELF_DESCRIBING_SURFACES.md`](../architecture/SELF_DESCRIBING_SURFACES.md) §9.1, which states the
+   invariant over both kinds and marks which descriptor fields are guard-derived and which are
+   editorial. Nothing about this checker changes; the distinction it exposed is now recorded where a
+   builder will meet it.
 4. **No mechanism can catch mis-attribution.** `--verify` catches a declaration naming code that does
    not exist. It cannot catch a declaration that is *wrong about which branch should own* an existing
    path. That is editorial and needs a human or a composed judge. The cheapest available strengthening:

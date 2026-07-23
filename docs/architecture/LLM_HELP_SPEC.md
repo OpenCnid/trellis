@@ -1,11 +1,15 @@
 # The `llm_help` Surface & Self-Documenting Descriptors — Specification
 
-**Status: PROPOSED / UNRATIFIED — recorded July 21, 2026. Companion spec to the
+**Status: THE BUILD SPECIFICATION for the authorized Workstream B — July 23,
+2026.** Recorded July 21, 2026 as PROPOSED / UNRATIFIED. Companion spec to the
 design record [`SELF_DESCRIBING_SURFACES.md`](SELF_DESCRIBING_SURFACES.md)
-(concept + the MASH correspondence); this file is the *buildable how*. It
-authorizes NO build** — it sits behind
-[`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) §8's gate, of which `llm_help` is
-the named Workstream B instantiation candidate. Authored under the house
+(concept + the MASH correspondence); this file is the *buildable how*, and it
+**takes its standing from that record** — ratified July 23, 2026 (its §9) —
+rather than carrying independent authority. The build it specifies was
+authorized the same day by [`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md)
+§12, which also states what stays gated; `llm_help` is that record's named
+Workstream B instantiation. **§9 below carries the scope of the
+authorization.** Amended only by dated entry. Authored under the house
 `prompt-engineering` and `hypershot-protocol` protocols (Guardrail 15); the
 schemas and frames below are hypershots — field names are invariant vocabulary,
 values are placeholders, never filled examples.
@@ -188,9 +192,10 @@ the rule-20 carve-out — a fidelity/discrimination test, not a null-baseline A/
 - *Byte-identical-when-absent* still binds: with no modules or tools configured,
   `llm_help()` lists the kernel surfaces only.
 
-**Status: PROPOSED / no build.** A design record and its spec lead implementation
-but bind nothing until the owner ratifies and sequences (`HARNESS_SELF_MODEL.md`
-§8).
+**Status: superseded by §9 — the owner ratified and sequenced this on July 23,
+2026.** The line this paragraph carried until then (*PROPOSED / no build; a
+design record and its spec lead implementation but bind nothing until the owner
+ratifies and sequences*) is preserved here as the state it replaced.
 
 ## 8. Provenance
 
@@ -205,5 +210,36 @@ but bind nothing until the owner ratifies and sequences (`HARNESS_SELF_MODEL.md`
   produce the documentation *of* the surface that would eventually expose the
   house skills.
 - **Standing:** collaborator-seeded (MASH), owner-resolved on the four open
-  questions of the design record; PROPOSED / unratified; subordinate to
-  code > glossary > prose.
+  questions of the design record; **the build specification for the authorized
+  Workstream B since July 23, 2026** (§9), subordinate to its design record and
+  to code > glossary > prose.
+
+## 9. Authorization (dated entry — July 23, 2026, owner, in session)
+
+The design record was **RATIFIED** and **Workstream B authorized** on the
+collaborator's proposal; this spec is what the authorized build builds from.
+The two entries that govern it are
+[`SELF_DESCRIBING_SURFACES.md`](SELF_DESCRIBING_SURFACES.md) §9 and
+[`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) §12 — read those for the full
+scope. What that scope means for *this* file:
+
+- **§1 (the descriptor), §2 (`llm_help`), §3 (guard-derivation), §4 (human-doc
+  generation), §5 (the skills as first worked instance)** are authorized to be
+  built, in §12.1's order: **increment 1 is the `trellis_textedit` descriptor
+  byte-identity test**, not `llm_help` itself.
+- **§6's self-play gate binds before anything relies on the alive catalog**,
+  with the *selected-on-a-lie* cell pre-committed as the falsifier: if ≥1 item
+  lands there, guard-derivation is required rather than optional.
+- **§7's paid-adoption probe is NOT authorized.** It stays behind rule 7 and
+  may not be run as a null baseline (rule 20).
+- **The descriptor field set of §1 is not settled by authorization.** Which
+  fields Trellis adopts against MASH's shipped `{help, category, aliases,
+  usage}` is a build-time decision the design record's §6 leaves open.
+- **§3's mixed authority is the point, not an inconsistency:** `expects` is
+  guard-derived because a guard is authoritative for it; `whenToUse`,
+  `category` and `seeAlso` are editorial and hand-authored once. The invariant
+  over both is *one encoding, owned by whoever is authoritative for the fact*
+  (`SELF_DESCRIBING_SURFACES.md` §9.1).
+- **Honest scope carried forward:** no shipped surface derives its
+  self-description from its guard predicates yet, and no behavior claim attends
+  the authorization.

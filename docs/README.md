@@ -148,13 +148,12 @@ Paths here are markdown links, not backticked strings, so
   is what proves it.
 - **[`SELF_DESCRIBING_SURFACES.md`](architecture/SELF_DESCRIBING_SURFACES.md)**
   and **[`LLM_HELP_SPEC.md`](architecture/LLM_HELP_SPEC.md)** —
-  **PROPOSED / UNRATIFIED (July 21, 2026)**: the program for surfaces
-  that describe themselves to the agent operating them, with the
-  description *derived from the guards that enforce behavior* rather
-  than authored beside them. Prior art credited to MASH
-  (Matthew Murphy). Companion:
+  **RATIFIED July 23, 2026**: the program for surfaces that describe
+  themselves to the agent operating them, with the description *derived
+  from the guards that enforce behavior* rather than authored beside
+  them. Prior art credited to MASH (Matthew Murphy). Companion:
   **[`HARNESS_SELF_MODEL.md`](architecture/HARNESS_SELF_MODEL.md)** —
-  **principle endorsed, implementation not authorized**.
+  **Workstream B authorized**, Workstream A still gated.
 - [`ARCHITECTURE.md`](architecture/ARCHITECTURE.md),
   [`SYSTEM_ARCHITECTURE.md`](architecture/SYSTEM_ARCHITECTURE.md),
   [`TECHNICAL_SPEC.md`](architecture/TECHNICAL_SPEC.md) —

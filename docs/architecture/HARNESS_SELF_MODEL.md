@@ -1,10 +1,13 @@
 # The Harness Self-Model — Design Record
 
-*Status: PRINCIPLE ENDORSED, IMPLEMENTATION NOT AUTHORIZED. Recorded
+*Status: PRINCIPLE ENDORSED (July 19, 2026). **WORKSTREAM B
+IMPLEMENTATION AUTHORIZED — July 23, 2026** (owner, in session, on the
+collaborator's proposal): §12 carries the authorization, its scope, and
+its sequencing, and it supersedes this header's original
+"implementation not authorized" for **Workstream B only**. **Workstream
+A remains gated by §8**, as does every paid measurement. Recorded
 July 19, 2026 from an owner/collaborator design exchange following the
-July 18–19 REPL audit. The owner endorsed the principle and directed that
-the learnings be recorded; **no implementation is authorized by this
-record**, and §8 carries the gate. Sibling of
+July 18–19 REPL audit. Sibling of
 [CODE_MEDIATED_TEXT.md](CODE_MEDIATED_TEXT.md) (whose §2.8 enforcement
 posture this generalizes) and
 [RLM_HARNESS_SCAFFOLDING.md](RLM_HARNESS_SCAFFOLDING.md) (whose §8
@@ -214,6 +217,12 @@ What is missing is uniformity, derivation, and a check.
 future bounded feature starts from a stated design instead of
 re-deriving one (the RESEARCH_NOTES_COLLECTION §5 precedent), and so the
 exchange that produced it is not lost.
+
+> **Amended July 23, 2026 (§12): Workstream B is authorized.** That
+> sentence stands for Workstream A and for every paid measurement below;
+> it no longer holds for B. Everything else in this section — the phase
+> ordering, the separate gates, and B's pre-stated first test — governs
+> the authorized build unchanged.
 
 Two workstreams, deliberately separable, which should NOT ride together:
 
@@ -427,3 +436,92 @@ new-versus-null baseline.
 **Standing.** This entry records a case and the direction already
 ratified in `AGENTS.md` rules 8 and 20. It authorizes no build and
 changes no gate.
+
+## 12. Workstream B authorized (dated entry — July 23, 2026, owner, in session)
+
+The collaborator (Matt) proposed that
+[`SELF_DESCRIBING_SURFACES.md`](SELF_DESCRIBING_SURFACES.md) be ratified
+and this record's implementation authorized, on the argument that these
+surfaces are where the RLM harness earns its keep over a stateless
+recursive baseline — the harness building in intelligence rather than
+inheriting it. The owner (Cnid) approved in session. The design record
+was ratified the same day (its §9); this entry is the build
+authorization, and its scope is narrower than the proposal's wording,
+deliberately.
+
+### 12.1 What is authorized
+
+**Workstream B — the surface-descriptor convention — is authorized**, at
+the scope §8 gives it: descriptors bound at each surface's definition
+site, `expects` derived from that surface's guard predicates, the
+`llm_help` runtime surface, and the human-doc generation that shares the
+descriptors. The buildable specification is
+[`LLM_HELP_SPEC.md`](LLM_HELP_SPEC.md); the concept and the MASH
+correspondence are the design record's.
+
+**Increment 1 is §8's pre-stated first test, unchanged:** give
+`trellis_textedit` the full descriptor shape, derive its addendum from
+it, and pin that the derived bytes **equal the current addendum bytes
+exactly**. It is first because it is the cheap decisive one and because
+it is the only thing that turns guard-derivation from an assertion into
+an observation — today the closest live mechanism,
+`build_textedit_addendum(textedit)` (`src/rlm/trellis_textedit.py`),
+*selects* between two pre-authored constants on one state bool; it
+derives nothing from a predicate (`SELF_DESCRIBING_SURFACES.md` §9.2).
+
+**Observed, and it sharpens the test:** that selector has **two** arms —
+`TEXTEDIT_ADDENDUM` and `TEXTEDIT_ADDENDUM_GUARDED_ONLY` — so increment
+1 owes **two** byte-identity pins, one per arm, not one. The guarded-only
+arm is the more informative of the two: it is the kernel's first
+state-dependent self-description (§9's table), so if a descriptor can
+reproduce it exactly, the descriptor model has already covered the case
+§2.1 was written for. Byte-identity holding means the
+refactor is provably safe and can proceed surface by surface without
+moving a pin; byte-identity failing means the descriptor model is lossy,
+learned before nine surfaces were touched. **Both outcomes are results.**
+Sequencing after that is §8's: surface by surface, then `llm_help`
+itself, whose landing is the pin-moving event.
+
+### 12.2 What is NOT authorized, and why the scope is narrow
+
+- **Workstream A — the trace (read buffer + decision log) — remains
+  gated.** §8's own direction is that the two workstreams are
+  deliberately separable and should NOT ride together; authorizing both
+  because both were named in one proposal would discard that. A is a
+  worthwhile build on its own merits and can be authorized on them,
+  without re-opening this entry.
+- **Phase 0b, the paid adoption probe, stays behind rule 7** — printed
+  estimate, owner gate, $5/run cap — and §10.1 still governs how it may
+  be framed: a zero-paid harness records the script's author, not a
+  model's decision, so adoption is paid or it does not happen. It is not
+  to be run as a new-versus-null baseline (rule 20; §11).
+- **Phase 4 (any gate) is untouched.** Nothing derived from a descriptor
+  or a buffer may refuse anything without its own owner gate and a
+  measured before/after. `llm_help` informs; it does not adjudicate.
+- **No behavior claim attends this authorization** (§8's closing
+  sentence, which stands). Whether a derived self-model changes run
+  quality remains open and unmeasured. What is authorized is the
+  building, not a claim about the result.
+
+### 12.3 What the build owes
+
+- **The bijection (§3) is the acceptance criterion**, per surface it
+  reaches: every line of a composed read maps to a guard that enforces
+  it, and every guard maps to a line. Orphans in either direction are
+  findings.
+- **The drift invariant (§2.1) is the design**, not a preference: one
+  piece of state both refuses and describes. The moment those become two
+  fields, "PREFER THE GUARDED FAMILY" is back.
+- **§4's marking duty.** What is not guard-shaped — protocol, not
+  refusal — must acquire a guard or be **explicitly marked advisory**.
+  An enforced contract and an aspiration written in the same voice is the
+  defect this record exists to name.
+- **Rule 15 (correct ≠ reachable):** name `llm_help`'s non-test caller,
+  or say plainly there is none.
+- **The self-play validation gate** (`LLM_HELP_SPEC.md` §6) binds before
+  anything relies on the alive catalog — discrimination and
+  drift/gaming resistance, with the *selected-on-a-lie* cell
+  pre-committed as the falsifier.
+- **Composition must be total (§5).** A surface × action pair with no
+  composed read gives the agent silent absence, which is the audit's own
+  failure class one level up. The build owes a default and a check.

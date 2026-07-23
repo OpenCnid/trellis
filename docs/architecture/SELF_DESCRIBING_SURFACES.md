@@ -1,12 +1,15 @@
 # Self-Describing Surfaces — Composed Intent & Discoverability — Design Record
 
-**Status: PROPOSED / UNRATIFIED — recorded July 21, 2026 from a collaborator
-design exchange (Matt / Matthew Murphy, from his MASH engine). This record
-authorizes NO build; it develops a concept and maps it onto Trellis.** It is a
-concrete instantiation candidate for
-[`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) Workstream B (which remains
-*principle endorsed, implementation not authorized*, and whose §8 gate governs
-sequencing), and it extends
+**Status: RATIFIED — July 23, 2026 (owner, Cnid, in session), on the
+collaborator's proposal (Matt / Matthew Murphy). Recorded July 21, 2026 as
+PROPOSED from a design exchange out of his MASH engine.** What is ratified is
+the **direction and the design**; the build it describes is authorized
+separately and scoped by [`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) §12,
+which authorized **Workstream B** the same day. **§9 (Ratification) carries
+what is ratified, what stays gated, and the honest scope** — read it before
+treating any section below as a settled result. Amended only by dated entry,
+never by silent edit. This record is the named instantiation of
+[`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) Workstream B, and it extends
 [`WORKSPACE_AND_MODULES.md`](WORKSPACE_AND_MODULES.md) (the module manifest),
 under [`CODE_MEDIATED_TEXT.md`](CODE_MEDIATED_TEXT.md) and
 [`COMPOSITION_FROM_PRIMITIVES.md`](COMPOSITION_FROM_PRIMITIVES.md). The buildable
@@ -204,7 +207,8 @@ property of the component.
 
 - **`HARNESS_SELF_MODEL.md`** — `llm_help` is a concrete instantiation of
   Workstream B (the surface-descriptor convention). This record proposes its
-  shape; the self-model's §8 gate still governs whether and when it is built.
+  shape; the self-model's §8 gate governed whether and when it is built, and
+  §12 (July 23, 2026) opened it for Workstream B only.
 - **`WORKSPACE_AND_MODULES.md`** — additive manifest fields only; *capabilities
   are beliefs* is unaffected, because doc-metadata carries no provenance.
 - **`CODE_MEDIATED_TEXT.md`** — the catalog and the `expects` account are
@@ -214,9 +218,11 @@ property of the component.
 - **`GROUNDED_AUTHORING.md`** — if a module's descriptor is drafted by the RLM,
   it goes through the grounded-authoring mold (harness-pinned), like any addendum.
 
-## 5. Acceptance shape, if ever sequenced — no build authorized
+## 5. Acceptance shape — the rule-20-safe half
 
-Recorded so a future build inherits the right gate, not to authorize one:
+*Written before sequencing, so the build would inherit the right gate. The
+build was authorized July 23, 2026 (§9); this section is now the acceptance it
+inherits, unchanged.*
 
 - The manifest schema and `llm_help` surface are **deterministic**, so a
   **zero-paid drill can verify correctness and reachability**: the fields
@@ -314,6 +320,114 @@ this record's proposals are corrections on top of MASH, not imports of it.
   "collaborator-described" to verified. Kept honest where the clone is silent: the
   referenced `mash_mcp_architecture.md` and `reference_tinymush/` are gitignored
   and absent from the public clone, so anything they add is not represented here.
-- **Status: PROPOSED / UNRATIFIED. Authorizes no build.** It sits behind
-  `HARNESS_SELF_MODEL.md` §8's gate; the owner sequences. A design record leads
-  its implementation but binds nothing until ratified.
+- **Status: RATIFIED July 23, 2026** — see §9. The line this bullet carried
+  until then (*PROPOSED / UNRATIFIED; authorizes no build; sits behind
+  `HARNESS_SELF_MODEL.md` §8's gate*) is superseded by that dated entry, which
+  is also where the build's remaining gates are stated.
+
+## 9. Ratification (dated entry — July 23, 2026, owner, in session)
+
+Proposed for ratification by the collaborator (Matt), on the argument that
+these surfaces are where the RLM harness earns its keep over a stateless
+recursive baseline — *MASH is proof-positive that composite prompts work; this
+is what makes a smarter harness* — and ratified by the owner (Cnid) in the same
+session. The companion authorization is
+[`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) §12, which opened §8's gate
+for **Workstream B only**; the buildable specification is
+[`LLM_HELP_SPEC.md`](LLM_HELP_SPEC.md), which takes its standing from this
+record.
+
+**RATIFIED as direction and design:**
+
+- **§0 — the one line.** Every surface carries its own description, and that
+  self-description does double duty: it composes into the meta-prompt that
+  signals intent, and it is exposed through a discoverability surface. The two
+  halves are one idea from two sides.
+- **§2 — Half A as a discipline, not new machinery.** Each object is
+  responsible for its own contribution; the harness composes those fragments by
+  code. This is the existing prompt composition made per-object, as §6 already
+  recorded the owner deciding.
+- **§3 — Half B: the descriptor and `llm_help`.** Discoverability is enforced
+  by tooling shape (a descriptor missing a required field fails validation),
+  not requested by prose — *one call site, one commitment*. `llm_help` is
+  always present, because a discovery surface that were itself opt-in could not
+  be discovered.
+- **§3.3 — guard-derivation, and the stalemate rule.** The `expects` account is
+  derived from the guard predicates and composed by code, never authored by the
+  model. On a *legitimate stalemate* with a human-authored descriptor the human
+  wins: the user is the domain authority, by the target function's own
+  definition ([`STANDING_MODEL.md`](../product/epistemic-support/STANDING_MODEL.md) §0).
+- **§3.4 — one self-description, two audiences.** Human-facing navigation
+  pointers generate from the same descriptors. In scope for the concept, not a
+  follow-on.
+- **§5 — the acceptance shape**, including the split it names: the
+  deterministic reachability drill is the rule-20-safe half, and whether
+  *exposing* `llm_help` improves model behaviour is a separate paid question.
+- **§7 — MASH is the un-guarded twin.** The proposals here are corrections on
+  top of the prior art, not imports of it. The credit in §8 stands as written.
+
+### 9.1 The addendum owed on kinds of fact — paid here
+
+[`docs/density-chain/README.md`](../density-chain/README.md) (*Still open*,
+item 3) recorded an open item against this record and named a dated addendum as
+owed: its routing table is derived *from* the account rather than the account
+from a guard, because the table enforces nothing — "which branch covers this
+path" is editorial. The record anticipated only the enforced kind. Paid:
+
+> **One encoding, owned by whoever is authoritative for the fact.** Where the
+> **engine** is authoritative — a bound it will actually refuse on — the
+> account is derived from the guard, and no one hand-authors a second copy
+> beside it. Where a **human** is authoritative — intent, grouping, which
+> siblings are worth reading — the human authors it once, and nothing derives a
+> second copy.
+
+Guard-derivation is the instance of that invariant for enforced facts, not the
+whole of it. The descriptor of §3.2 is deliberately mixed: `expects` is
+guard-derived because a guard is authoritative for it, while `whenToUse`,
+`category` and `seeAlso` are editorial — no predicate refuses when they are
+wrong, and no derivation can supply them. A builder who goes looking for the
+predicate behind `seeAlso` will not find one; that is the wrong kind of fact,
+not a gap in the mechanism. The failure class both halves close is identical: a
+second encoding that can disagree with the first.
+
+This is also why §3.3's stalemate resolution is not an exception to
+guard-derivation but the same rule at the other end of the axis.
+
+### 9.2 Honest scope — what ratification does not claim
+
+- **Guard-derivation is specified, not demonstrated.** No shipped surface
+  derives its self-description from its guard predicates today. The closest
+  live thing is `build_textedit_addendum(textedit)`
+  (`src/rlm/trellis_textedit.py`), and read precisely it *selects* between two
+  pre-authored constants on the one `_guarded_only` bool that also makes
+  `splice()` refuse. That honors `HARNESS_SELF_MODEL.md` §2.1's drift invariant
+  for a single bool — one piece of state both refuses and describes — but it
+  derives nothing from a predicate, and the prose in both arms is
+  hand-authored. `HARNESS_SELF_MODEL.md` §8's pre-stated first test is what
+  converts the assertion into an observation, and that is why §12 sequences it
+  as increment 1.
+- **The bijection is not claimed to hold anywhere yet.**
+  `HARNESS_SELF_MODEL.md` §3 is the acceptance criterion for the surfaces a
+  build reaches, not an established property of the current kernel.
+- **No behavior claim attends this ratification** (rule 8; rule 20). Nothing
+  here is measured to improve any outcome. That these surfaces make the harness
+  smarter is the design's argument, not a result — the measurement that would
+  test it is paid and separately gated.
+
+### 9.3 What remains gated
+
+- **Workstream A** of `HARNESS_SELF_MODEL.md` §8 (the trace: read buffer and
+  decision log) is **not** authorized. §8's own direction that the two
+  workstreams should not ride together is the reason.
+- **The paid adoption probe** — whether exposing `llm_help` changes what a
+  model does — stays behind rule 7 (printed estimate, owner gate, $5/run cap)
+  and is not to be run as a new-versus-null baseline (rule 20).
+- **Both composed-prompt sha256 pins move** when `llm_help` lands in the
+  kernel. Recompute both, together, in the same commit, wittingly (`AGENTS.md`
+  §3) — the pin ceremony §8 of the self-model reserves for Workstream B.
+- **§6's two still-open questions** — where `llm_help` composes from at
+  runtime, and the exact descriptor field set against MASH's shipped
+  `{help, category, aliases, usage}` — are **build-time decisions, not
+  ratified answers.** Ratifying the design does not settle them.
+- **The self-play validation gate** (§6, resolved; specified at
+  `LLM_HELP_SPEC.md` §6) binds before anything relies on the alive catalog.
