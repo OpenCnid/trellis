@@ -56,7 +56,7 @@ From outermost-hostile inward to trusted host. The load-bearing boundary is the 
 |---|---|---|---|
 | **U — the namespace** | Model-authored Python + retrieved content; cheap creds-free tools (regex/pandas over text); proxy stubs; `answer`/`llm_query` names | **Hostile** | Language layer is **NOT** a boundary (§7) |
 | **G — the guest** | Kata guest kernel + Tier-0 hardening: cgroups (pids/mem/cpu) + seccomp allowlist + Landlock | **Untrusted, blast-radius-capped** | **Kata microVM (KVM/VT-x)** — the boundary (Tier-1) |
-| **— the two chokepoints —** | vsock port → LM handler; vsock port → DB broker (§3) | Boundary crossings | Kernel vsock CID auth at `accept()` |
+| **— the two chokepoints —** | vsock port → LM handler; vsock port → DB broker (§3) | Boundary crossings | Per-session listener identity at `accept()` (§ note below) |
 | **H — the host** | LM handler, DB broker, egress policy, watchdog, warm pool; the API key + DB credentials + DB network route | **Trusted** | — |
 
 The single load-bearing control is fact #1 of REPL_SANDBOX_ARCHITECTURE.md §2 (Trust model):
@@ -116,7 +116,8 @@ The guarantee must hold when the model does exactly what a hostile document tell
 
 - Reach the host kernel (behind the Kata KVM boundary).
 - Obtain the DB credentials or the API key (never enter the guest).
-- Choose its own identity (the vsock CID is kernel-assigned at `accept()`, unspoofable).
+- Choose its own identity (the session identity comes from the listener at `accept()`, never from the
+  frame — kernel-assigned under native vsock, socket-path-bound under hybrid vsock; [INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md)).
 - Route to the internet or the cloud metadata service (deny-by-default egress; DB host has no
   such route).
 - Reach another session's guest (one microVM per session; never co-tenant).
@@ -139,7 +140,7 @@ carry (register in §8 (Residual-risk register)); "tracked" = gated by a named f
 | **VM-1** | Guest→host escape via VMM / guest-kernel exploit | **Kata microVM (KVM)** + **split version pins** (Kata ≥ 3.31.0, CH ≥ 52.0) closing Kata CVE-2026-24834 (guest-share/guest-root escape, patched Kata 3.27.0), CH CVE-2026-27211 (guest→host file read via QCOW2 header rewrite, fixed CH 50.1), CH CVE-2026-45782 (virtio-block UAF, fixed CH 52.0) | **Accepted / tracked** — a zero-day VMM/kernel escape has **no second independent ring** (gVisor not adopted); single-point-of-failure on the VM boundary, tracked on two advisory feeds (R2, §8) |
 | **VM-2** | Cross-session escape via a co-tenant worker | **One microVM per session**; never co-tenant two adversarial workers (REPL_SANDBOX_ARCHITECTURE.md §6 (Recursion & multiplicity)) | **Accepted** — none by design today; re-opens only if warm-pooling is added (R3, §8) |
 | **BR-1** | Frame-parser exploit in the vsock bridge (new, unbuilt glue; 4-byte-len + JSON) | **Minimal, loopback-only, unprivileged, fuzz-tested bridge**; mandatory security-review before ship | **Tracked** — unbuilt security-critical glue; gated by the red-team pass in REPL_SANDBOX_SPEC.md §8 (Acceptance gates) (R5, §8) |
-| **BR-2** | Identity spoofing / cross-session confused-deputy (IDOR) at a shared broker/handler | **Auth by kernel vsock peer CID** from `accept()`, never a payload-supplied id | **Tracked** — holds iff the bridge preserves the kernel CID end-to-end; a CID-erasing forwarder would break it — an item for the BR-1 review |
+| **BR-2** | Identity spoofing / cross-session confused-deputy (IDOR) at a shared broker/handler | **Auth by the identity the listener supplies** at `accept()`, never a payload-supplied id | **Tracked, and the mechanism moved** — under the ratified VMM's hybrid vsock there is no kernel CID at the host `accept()`; identity is the per-sandbox socket path the host created ([INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md)). The property is preserved, its enforcing surface is the socket path + the VMM directory's mode, and a CID-erasing forwarder is no longer the failure mode to watch — a **mis-bound listener** is. An item for the BR-1 review |
 | **LM-1** | Exfil via `llm_query` / `vector_search` prompt text | **Data-flow boundary** (handles not payloads); **content-DLP + per-session cumulative-byte caps** as defense-in-depth (NOT the boundary) | **Accepted, bounded** — bounded exfil *rate*, not zero (R1, §8) |
 | **LM-2** | Spend / rate / concurrency abuse (rlms caps bypassable) | **Host-side CID-keyed hard ceilings** on the LM handler: in-flight concurrency, req/sec, dollar spend (hard-stop on exhaustion) | **Accepted, bounded** — within-ceiling spend by a hostile worker, capped per session |
 | **LM-3** | Unauthenticated handler reachability (`LMHandler` binds `127.0.0.1`, unauthenticated) | **Never bind `0.0.0.0`**; reach only via the vsock bridge under CID auth | **Tracked** — a misconfigured `0.0.0.0` bind voids it; enforced as a config invariant (REPL_SANDBOX_SPEC.md §3 (Sub-LLM wire contract)) |
@@ -165,7 +166,7 @@ same set of controls; this proves the three sources agree and gives one place to
 | 1 | Exfil is data-flow first; DLP + byte caps are defense-in-depth | 1 | 1 (+§14.2) | Exfil via sanctioned crossings bounded | Broker (handle resolution) + LM handler DLP/caps | LM-1, DB-4, AN-1 |
 | 2 | LLM provider API key host-side only | 2 | 2 | No DB creds / API key in guest | Host LM handler | LM-4 |
 | 3 | Split version pins — Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0 | 3 | 3 (§14.1) | Host escape contained | Kata + Cloud Hypervisor (pinned, two feeds) | VM-1 |
-| 4 | Auth by kernel vsock peer CID, never a guest id | 4 | 4 | Per-session identity unspoofable | Kernel vsock CID at `accept()` | BR-2 |
+| 4 | Auth by the listener's session identity, never a guest id | 4 | 4 | Per-session identity unspoofable | Native: kernel vsock CID at `accept()`. Hybrid (ratified VMM): the per-sandbox socket path ([INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md)) | BR-2 |
 | 5 | Host-side CID-keyed hard ceilings (concurrency/rate/$ spend) | 5 | 5 | No resource-exhaustion host impact | Host LM handler (CID-keyed ledger) | LM-2 |
 | 6 | Neo4j APOC allowlist deny-by-default + DB-host egress denial | 6 | 6 | DB stays read-only / no SSRF | Host broker (APOC allowlist) + egress policy | DB-2 |
 | 7 | `statement_timeout` + query-cost caps + forbid unbounded `[*]` | 7 | 7 | No resource-exhaustion host impact | Host broker (cost caps) | DB-3 |

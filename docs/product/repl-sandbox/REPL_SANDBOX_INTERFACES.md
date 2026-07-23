@@ -33,24 +33,31 @@ defines. Content-DLP and byte caps are defense-in-depth on top, **never** the bo
 
 ## 1. Seam map
 
-Six seams. Ports are `AF_VSOCK`; host CID is `VMADDR_CID_HOST = 2`; guest CID is
-kernel-assigned per microVM and is the session identity anchor
-([LEARNINGS §7 (Identity: the vsock CID)](REPL_SANDBOX_LEARNINGS.md)).
+Six seams. Ports are `AF_VSOCK` **as the guest sees them**; host CID is `VMADDR_CID_HOST = 2`;
+one session identity is anchored per microVM and never read from a frame
+([LEARNINGS §7 (Identity: the vsock CID)](REPL_SANDBOX_LEARNINGS.md)). Under the ratified VMM
+the *host* side of the three data seams is an `AF_UNIX` socket and that anchor is the socket path
+rather than a kernel-assigned CID — §3.1a, which corrects this section as well as §3.1.
 
 | # | Seam | Transport | Framing | Who listens | Auth | § |
 |---|---|---|---|---|---|---|
 | 1 | rlms driver ↔ `KataREPL` backend | in-process (host) | Python calls | — | trusted (host) | §2 |
 | 2 | backend ↔ guest supervisor (exec / load_context / lifecycle) | vsock `CONTROL_PORT` | 4-byte BE len + UTF-8 JSON | **guest** supervisor | guest requires peer CID == 2 (host) | §2, §3 |
-| 3 | vsock bridge (rlms loopback-`AF_INET` ↔ host) | vsock `LM_PORT` | transparent byte pipe of seam-4 frames | host | guest CID at `accept()` | §3 |
-| 4 | guest ↔ LM handler (`llm_query`) | vsock `LM_PORT` | 4-byte BE len + UTF-8 JSON (`LMRequest`/`LMResponse`) | **host** LM handler | guest CID at `accept()` | §4 |
-| 5 | guest ↔ DB broker (`run_query`/`run_cypher`/`slice`) | vsock `DB_PORT` | 4-byte BE len + UTF-8 JSON (Trellis envelope `v1`) | **host** broker | guest CID at `accept()` | §5 |
+| 3 | vsock bridge (rlms loopback-`AF_INET` ↔ host) | vsock `LM_PORT` (host side `AF_UNIX`, §3.1a) | transparent byte pipe of seam-4 frames | host | listener identity at `accept()` (§3.1a) | §3 |
+| 4 | guest ↔ LM handler (`llm_query`) | vsock `LM_PORT` (host side `AF_UNIX`, §3.1a) | 4-byte BE len + UTF-8 JSON (`LMRequest`/`LMResponse`) | **host** LM handler | listener identity at `accept()` (§3.1a) | §4 |
+| 5 | guest ↔ DB broker (`run_query`/`run_cypher`/`slice`) | vsock `DB_PORT` (host side `AF_UNIX`, §3.1a) | 4-byte BE len + UTF-8 JSON (Trellis envelope `v1`) | **host** broker | listener identity at `accept()` (§3.1a) | §5 |
 | 6 | descriptor registration | in-process (host) | `CapabilityDescriptor` | — | trusted host only (never guest) | §6 |
 
 **Asymmetry, deliberate:** on the two host-chokepoint ports (`LM_PORT`, `DB_PORT`) the **host
-listens and the guest connects**, so the host reads the guest CID from `accept()` and gates
-every call by it. On `CONTROL_PORT` the **guest supervisor listens and the trusted host
-connects**; the supervisor accepts only the host CID (2). Seam 1 and seam 6 never cross the
-boundary — they are host-local Python and carry no wire.
+listens and the guest connects**, so the host gates every call by the identity its listener
+reports. On `CONTROL_PORT` the **guest supervisor listens and the trusted host connects**; the
+supervisor accepts only the host CID (2), which under every VMM here is what the guest kernel
+sees. Seam 1 and seam 6 never cross the boundary — they are host-local Python and carry no wire.
+
+**Where that identity comes from is VMM-specific, and the ratified VMM is the exception** — under
+Cloud Hypervisor's hybrid vsock the host side of seams 3–5 is an `AF_UNIX` socket with no peer CID
+to read, and identity is the per-sandbox socket path instead (§3.1a). The guest side of every seam
+is unchanged.
 
 ## 2. Backend contract — `KataREPL(IsolatedEnv)`
 
@@ -89,9 +96,11 @@ class KataREPL(IsolatedEnv):
 **`setup(self) -> None`** — boot/attach the microVM and make the guest reachable. Ordered:
 1. Boot (or claim from the warm pool) one Kata microVM on Cloud Hypervisor for this session
    ([ARCHITECTURE §1 (The ratified stack)](REPL_SANDBOX_ARCHITECTURE.md)). **Enforced boundary:** the microVM (KVM).
-2. Bring up the three vsock channels (§1). The host records the guest **CID from the first
-   `accept()`** and binds `CID → session` in the handler and broker session tables — this is
-   the identity every later call is keyed by. **Enforced by:** kernel vsock CID
+2. Bring up the three vsock channels (§1). The host binds `session id → session` in the handler
+   and broker session tables — this is the identity every later call is keyed by. Under native
+   vsock that id is the guest **CID from the first `accept()`**; under the ratified VMM's hybrid
+   vsock the host **assigns it when it creates that sandbox's listener socket**, before the guest
+   dials (§3.1a). **Enforced by:** the listener, not the frame
    ([LEARNINGS §7 (Identity: the vsock CID)](REPL_SANDBOX_LEARNINGS.md)).
 3. Start the guest-side bridge forwarder (Option A, §3.3) **before** any untrusted worker
    process, privilege-dropped per §3.4.
@@ -166,14 +175,73 @@ bridge, §7.10](REPL_SANDBOX_ARCHITECTURE.md)).
 ### 3.1 vsock addressing
 
 - Host-chokepoint ports: **`LM_PORT`** (→ LM handler) and **`DB_PORT`** (→ broker). The host
-  **listens** on each (`bind` to `VMADDR_CID_ANY`, `accept()` yields the guest CID); the guest
-  **connects** to `(VMADDR_CID_HOST=2, PORT)`. One connection per RPC (matches rlms' connect-
-  per-request client). **Enforced auth surface:** the guest CID read at the host `accept()`,
-  mapped to the session bound at `setup()` — never an id in the payload.
+  **listens** on each; the guest **connects** to `(VMADDR_CID_HOST=2, PORT)`. One connection per
+  RPC (matches rlms' connect-per-request client). **Enforced auth surface:** the session identity
+  the *listener* supplies at `accept()` — never an id in the payload. What supplies it depends on
+  the VMM: see §3.1a, which is a correction to the sentence this bullet used to carry.
 - Control port: **`CONTROL_PORT`**, guest supervisor listens, host connects (§1).
 - **Never bind the handler to `0.0.0.0`.** vsock has no analogue of an all-interfaces bind;
   choosing vsock (not a forwarded `AF_INET` port) is what forecloses the unauthenticated,
   billable, egress-punching exposure the loopback default warns against ([SPEC §3 (Sub-LLM wire contract)](REPL_SANDBOX_SPEC.md)).
+
+### 3.1a Hybrid vsock — what the ratified VMM actually provides *(corrects §3.1, July 23 2026)*
+
+**Status: HOST-CONFIRMED 2026-07-23**, by `npm run repl-sandbox:s3-probe` on the provisioned AX41
+([BUILD_PLAN §5.3 (S3)](REPL_SANDBOX_BUILD_PLAN.md)) — six consecutive passes. It was written from
+upstream documentation first and the run could have refuted it; the section is kept in that order
+because the falsification is the evidence, not the reading. **What was observed:** the sandbox
+directory holds `clh-api.sock`, `clh.sock`, `virtiofsd.sock`; the guest's `AF_VSOCK (2, 5001)` connect
+arrives at **`/run/vc/vm/<sandbox>/clh.sock_5001`**; the host→guest `CONNECT` handshake works and the
+guest sees **`peer_cid = 2`**, so `require_host_cid` holds unchanged. **And the counter-case:** the
+probe's `--native-vsock` mode binds the host on `AF_VSOCK VMADDR_CID_ANY` exactly as §3.1 originally
+specified, and the guest is met with `ECONNRESET` while that listener accepts nothing.
+
+This document was written against **native vhost-vsock**, where the host kernel carries an
+`AF_VSOCK` socket, the host binds `VMADDR_CID_ANY`, and `accept()` returns the guest's CID. Kata
+uses that under QEMU. **The ratified VMM is Cloud Hypervisor, which does not implement it.** Cloud
+Hypervisor (like Firecracker) implements **hybrid vsock**, bridging guest `AF_VSOCK` to host
+`AF_UNIX`:
+
+| direction | guest side | host side |
+|---|---|---|
+| guest → host (`LM_PORT`, `DB_PORT`) | `connect(AF_VSOCK, (2, PORT))` — unchanged | the host **listens on `AF_UNIX` at `<uds>_<PORT>`**; the VMM delivers the connection there |
+| host → guest (`CONTROL_PORT`) | `bind(AF_VSOCK, (VMADDR_CID_ANY, PORT))` — unchanged | the host dials `<uds>` and writes **`CONNECT <PORT>\n`**; the VMM answers `OK <assigned_port>\n`, and the stream follows on the same connection |
+
+`<uds>` is the VMM's launch-time socket. Under Kata it is `/run/vc/vm/<sandbox_id>/clh.sock` — the
+same socket the Kata shim dials its own agent on — inside a root-owned per-sandbox directory.
+
+**Three consequences, of which the second is load-bearing.**
+
+1. **The guest side of every record here is unchanged.** The guest speaks real `AF_VSOCK` to CID 2,
+   so the guest-side client, the supervisor's `AF_VSOCK` listen, and `require_host_cid`'s check of
+   the peer CID it sees (2, kernel-supplied *in the guest*) all stand as written.
+2. **There is no CID at the host `accept()`, because a Unix-socket accept carries none.** The
+   sentence "auth is by kernel vsock peer CID from `accept()`" is **not implementable under this
+   VMM**. What replaces it is narrower and still sufficient: a connection arriving on `<uds>_<PORT>`
+   was put there by the one VMM process that owns `<uds>`, so it came from that sandbox's guest and
+   no other. **Identity is bound to the socket path**, which the host chose when it created the
+   listener for that sandbox — a *host-assigned* session id rather than a kernel-read one
+   (`transport.HybridVsockListener`). The cross-session property the design depends on — session A
+   cannot present as session B — is preserved; its **enforcing surface** is now
+   *the per-sandbox socket path, plus the mode of the VMM's directory holding it*, and every place
+   that said "CID from `accept()`" should be read as "the session id the listener was constructed
+   with." Anything host-side able to open that path is inside the host trust domain already, so the
+   residual is unchanged.
+3. **Two operational rules follow.** One listener per sandbox per port, created before the guest
+   dials (a connection to a path with no listener is refused by the VMM); and a stale socket node
+   may be unlinked **only after** proving nothing is listening on it — unlinking a live one silently
+   hands one sandbox's guest another session's caps, which is why `HybridVsockListener` probes the
+   path before it binds.
+
+**What does not change.** The frame protocol (§3.2), `MAX_FRAME_LEN` and the fail-closed reader,
+the caps, the handle model, and the fuzz + review gate of §3.5 are all transport-independent — the
+bridge carries the same bytes either way, and the host-side frame reader is still the fuzz target.
+Option A vs B (§3.3) is likewise unaffected: both were about *where* the guest-side socket swap
+happens, and the guest side is the half that did not move.
+
+Sources: Cloud Hypervisor `docs/vsock.md` (the `<socket>_<port>` convention and the `CONNECT`
+handshake); Firecracker `docs/vsock.md` (the same hybrid design, stated first); Kata's Cloud
+Hypervisor integration dialing `hvsock` at `/run/vc/vm/<id>/clh.sock`.
 
 ### 3.2 Frame protocol
 
@@ -305,7 +373,8 @@ the residual and neither is the boundary — the boundary is that the guest neve
 refusal on a resolved prompt reports no byte count, so the error channel is not a size oracle for
 host content. **Enforced by:** the host LM handler, keyed by the CID from `accept()`.
 
-**Auth.** The handler keys the request to the session by the **guest CID from `accept()`**,
+**Auth.** The handler keys the request to the session by the **identity its listener reported at
+`accept()`** (§3.1a),
 never by any id in `LMRequest`. Unknown CID ⇒ connection dropped + audited. **Enforced by:** the
 host LM handler at `accept()` ([LEARNINGS §7 (Identity: the vsock CID)](REPL_SANDBOX_LEARNINGS.md)).
 
@@ -366,7 +435,8 @@ slice(h: ResultHandle, span)           -> { rows|text, truncated: bool }   # THE
 - Handle-typed params: a handle may be passed **into** `run_query`/`run_cypher` (the broker
   substitutes host-side), so the guest composes over data it cannot itself read.
 
-**Auth + audit.** Keyed to the session by the **guest CID from `accept()`**; every call logged
+**Auth + audit.** Keyed to the session by the **identity the listener reported at `accept()`**
+(§3.1a); every call logged
 by CID with `op`, an args digest, and returned row/byte counts and the policy decision.
 **Enforced by:** the broker at `accept()` + the broker audit log
 ([LEARNINGS §7 (Identity: the vsock CID)](REPL_SANDBOX_LEARNINGS.md)).

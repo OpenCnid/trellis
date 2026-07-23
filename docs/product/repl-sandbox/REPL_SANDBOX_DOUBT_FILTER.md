@@ -184,7 +184,7 @@ Named at the seam level only:
 | **Layer 1 — authority strip** | LM handler + broker, **request** path | outbound crossing | deny command-authority to a crossing driven solely by untrusted-provenance text — **automatic** (§2) |
 | **Layer 2 — defeater panel** | LM handler (`llm_query` / `answer`), broker (`vector_search`), **request** path | outbound crossing, before release | run the composed panel; attach any `objection`; feed audit; **escalate to the user gate** — never hold/block on its own authority (§4) |
 
-Auth for every seam remains the **kernel vsock peer CID** from `accept()` (ARCHITECTURE §7 req 4;
+Auth for every seam remains the **session identity the listener supplies** at `accept()` ([INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md)) (ARCHITECTURE §7 req 4;
 LEARNINGS §7), never a guest-supplied id — the layers add findings to that identity, they do not
 replace it. Exact provenance-stamp placement (broker vs handler vs `load_context`) depends on the
 INTERFACES seam and is a reconciliation item (§10).

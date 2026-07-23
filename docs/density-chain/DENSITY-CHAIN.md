@@ -626,16 +626,17 @@ the measurement of them.*
 - **T4 — the frontier.** Anti-shortcut corpus v2 is pinned zero-paid with **no paid run** —
   implemented, not accepted. `TRELLIS_CITATION_ENTAIL` ships gated off. Module #2 missed its criterion
   across 50 runs / $2.3981; the citation-discipline module measured unreliable, never landed. Self-edit
-  T2 failed three runs; two more were blocked at $0.0000. Quarantine stays latent. **Headlines remain
-  n=1–2.** Two [[C12]] instruments now ship: `scripts/repl_sandbox_drill.py` drives **nine** refusals
-  over doubles, eight via that class's composition root — **exit 0**, and `--negative-control` plants
-  one break behind each and **exits 3**, all nine detected. New: `scripts/repl_sandbox_s2_probe.py`
-  is the first drill that measures **hardware**, not doubles — boundary, five-turn persistence and
-  teardown on a real Kata guest, **exit 0** five consecutive times on the AX41; its
-  `--negative-control` swaps the guest mid-run and **exits 3** on all three signals (namespace, worker
-  pid, guest `boot_id`). `provision_kata_host.sh` extends the same discipline to *provisioning*: three
-  planted breaks, all named by `--verify` without mutation, all converged by a real run. **No CI runs
-  any**, and none can run the S2 probe: it needs `/dev/kvm`.
+  T2 failed three runs; two more were blocked at $0.0000. **Headlines remain n=1–2.** Four [[C12]]
+  instruments ship, each with its own falsifier. `repl_sandbox_drill.py` drives **nine** refusals over
+  doubles (**exit 0**); its control plants a break behind each and **exits 3**.
+  `repl_sandbox_s2_probe.py` measures **hardware**, not doubles: **exit 0** five consecutive times on
+  the AX41, its control swapping the guest mid-run to **exit 3**. `provision_kata_host.sh` extends the
+  discipline to *provisioning*. Newest, and the **sharpest control of the family**:
+  `repl_sandbox_s3_probe.py`'s has the guest answer *itself* byte-identically, so a host-side witness
+  is the **only** possible detector — and on the AX41 that is exactly what happened, parity holding
+  and latency *improving* while the witness alone caught it (**exit 3**); its default mode passed six
+  consecutive times. **No CI runs any of the four** — CI runs no pytest at all — and no host probe
+  can. `scripts/run_adversarial_tests.ts` has neither alias nor caller.
 - **T5 — future plans.** Open: the real TREC import (unattempted: it needs a paid annotation pass and
   an unbuilt fetch script); adversarial corpora with contested gold labels; embedding-shortcut corpora;
   10k-question scale sweeps; multi-run variance replacing n=1. Proposed: 2-of-3 consensus writes on
@@ -644,10 +645,13 @@ the measurement of them.*
 
 *Status ledger:* OOLONG harness · v1/v2 corpora · update/poison/scale drills · probe runners —
 **shipped, measured**; the sandbox refusal drill, `fuzz_frame.py` and the S2 probe — **[R] only,
-outside CI**; v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
-*What those three license:* nine refusals and eight planted frame readers are **present and fire** over
+outside CI**; the S3 probe — **[R] only, passed 2026-07-23**; v2 paid run · real TREC · adversarial corpora ·
+variance — **queued-proposed**.
+*What those license:* nine refusals and eight planted frame readers are **present and fire** over
 doubles; the S2 probe's three claims fired against a real guest **five times on one host — n=5 of
-run-to-run variance on identical hardware, which is not a second machine**. None of
+run-to-run variance on identical hardware, which is not a second machine**; the S3 probe's six claims
+fired on that same one host, and its falsifier showed the two most trusted of them — parity and
+latency — surviving an uncrossed boundary intact. None of
 that is a model driving the surface right. Every [[C12]] **[A]** half (S3, S4, S6, GB, GA-eq,
 ≤$5) is **unspent**. Rule 19(c)'s flag now spans **nine** surfaces (`check:repo-surface`, `wiki:check`
 and `upsum` too), none a corpus drill here.
@@ -714,75 +718,80 @@ checker is that class's machinery; this class is what it checks).
 chokepoints, the vsock wire, the handle data-flow rule, the threat model, and the gated build plan. Not
 the RLM execution model, the doubts machinery it borrows, or the pillar it realises.*
 
-- **T1 — essence.** Trellis's REPL runs model-authored Python steerable by retrieved text, so this class
-  treats that code as hostile and owns the boundary between it and the operator's secrets. Its
-  invariants: one hardware-isolated unit per session; credentials outside it; one narrow channel to
-  trusted host chokepoints; and, deepest, a data-flow rule — the code may *address* data but never
-  *hold* it. Language-level guards are telemetry, never boundary. **A microVM now boots and holds
-  state, but it is a spike: the control plane and the boundary are not yet connected to each other,
-  so there is still no working sandbox.**
+- **T1 — essence.** Model-authored Python here is retrieval-steerable, so this class treats it as
+  hostile and owns the boundary between it and the operator's secrets. Its invariants: one
+  hardware-isolated unit per session; credentials outside it; one narrow channel to host chokepoints;
+  identity from the *listener*, never a frame; and, deepest, the code may *address* data but never
+  *hold* it. Language-level guards are telemetry, never boundary. **A microVM boots, holds state, and
+  now answers a frame across its own boundary — with no broker and no in-guest hardening, still no
+  working sandbox.** Building that wire cost a correction: **an enforcing surface is only as portable
+  as the mechanism it names.**
 - **T2 — current machinery.** Execution still runs on in-process `rlms==0.1.3` LocalREPL holding live
   credential-bearing clients. Beside it, a host-independent control plane, `src/repl_sandbox/` —
-  21 modules against 19 test files — the frame codec, the vsock transport
-  (identity read from `accept()`), the guest supervisor protocol, the handle table and slice algebra,
-  the DB broker with backends and a statement inspector, the LM handler with byte/rate/spend ledgers and
-  a DLP hook, the capability lifecycle, a CID-keyed audit log, `KataREPL(IsolatedEnv)`, and a
-  `KataLauncher` whose four-condition `preflight` drives a real QEMU benchmark — each
-  transport-agnostic, exercised through loopback doubles. Eleven ratified documents. Host-side and
-  outside that tree: `scripts/repl_sandbox_s2_probe.py`, which drives `ctr` directly, and
-  `scripts/provision_kata_host.sh`, which rebuilds the host both pins and all three hidden
-  provisioning facts depend on — idempotent, digest-verified, `--verify` mutating nothing.
+  22 modules against 20 test files — the frame codec (the declared fuzz target), the transport, now
+  carrying **both** the native `Vsock*` pair and the hybrid `HybridVsock*` pair the ratified VMM
+  actually provides, the guest supervisor protocol, the handle table and slice algebra, the DB broker
+  with backends and a statement inspector, the LM handler with byte/rate/spend ledgers and a DLP hook,
+  the capability lifecycle, a CID-keyed audit log, `KataREPL(IsolatedEnv)`, and a `KataLauncher` whose
+  four-condition `preflight` drives a real QEMU benchmark — each transport-agnostic, exercised through
+  loopback doubles. Eleven ratified documents. Host-side and outside that tree: `provision_kata_host.sh`
+  and the S2 and S3 probes, which drive `ctr` directly.
 - **T3 — with receipts.** **G0 lifted 2026-07-22** by owner instruction, in `REPL_SANDBOX_BUILD_PLAN.md`
   §2 (The research-hold gate), under two qualifications: G1 is unsatisfiable here; a loopback double is
   never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3` found **four
   places where a record marked *(source-confirmed)* contradicts the source**, listed unfixed. Measured
-  this session, not as recorded: `pytest src/repl_sandbox/tests` → **870 passed**, `test_launcher.py`
-  **48** of them (ten new); one conformance assertion, on a **3.13-only** `typing` API, had never run
-  on the 3.12 deployment target until shimmed. The frame red-team's **seven defects** are closed;
-  `fuzz_frame.py --negative-control` plants **eight** broken readers and **exits 3**. Pins, two
-  upstreams: **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0**; depth-2 harmful (~96×, external).
-- **T4 — the frontier.** Two milestones fell on one host, both on 2026-07-23, both on a Hetzner AX41
-  (Ubuntu 24.04, `kvm_amd npt: Y`, Kata **3.32.0**, Cloud Hypervisor **v52.0**). **G1 PASSED** — SPEC
-  §8 gate 1, the first any host has met: the **differential** benchmark (initrd-loaded minus bare,
-  per-side minimum) reads **11.5–14.2×** against a 5.0 floor where a naive quotient, carrying QEMU's
-  ~1 s startup in both halves, read only **3.2×**; before it was wired the gate read *unmeasured* on
-  **every** host, and one comment **inverted the operator guidance** the records had right. **S2
-  PASSED** — the first microVM anyone has booted here: guest kernel **6.18.35** against the host's
-  6.8.0-134, a distinct `boot_id`, a `cloud-hypervisor` process on `/run/vc/vm/<sandbox>/clh-api.sock`,
-  **0.629–0.693 s** to first exec across **five consecutive passes**, and a Python namespace surviving
-  five `ctr task exec` turns on one unmoved worker pid; teardown leaves nothing. **Both upstreams
-  default away from the ratified pin:** `kata-static-3.32.0` bundles Cloud Hypervisor **v51.1**, and
-  `configuration.toml` symlinks to **QEMU** — `kata-runtime check` passes in both states, and the shim
-  is not on containerd's `PATH` at all; all three now converge under
-  `provision_kata_host.sh`, whose own planted-break run named and fixed each. **Every number here is
-  one host** — a second machine is **deferred**, buying little against a deterministic fact, while the
-  provisioner's never-executed install branch is owed to a fresh *instance* and gets one free from the
-  AX41's own `nested: 1`. Gaps stand: requirement 9's **grant** half is a deployment obligation no Python enforces;
-  `locate`/`get_ast_blocks` **fail closed**; no model allowlist; `MAX_FRAME_LEN` unratified.
-- **T5 — future plans.** Next, now unblocked: **S3** (the `llm_query` frame over vsock — the spike's
-  turns cross a guest fifo, not the wire), **S4** (broker), **S5** (Tier-0), **S6** (the real launch
-  path; `KataLauncher.boot` still raises rather than return a handle backed by a hand-driven `ctr`).
-  Proposed: doubt-filter Layers 1–2, owner ratification pending, substrate
-  open. Open: a warm pool behind a proven no-state-bleed reset; depth-2 with a sibling microVM, pending
-  Trellis-specific measurement; the environment-type slot; the Windows dev-host shape; host selection
-  (Hetzner **taken and now load-bearing**, never DigitalOcean). Every **[A]** half (S3, S4, S6, GB,
-  GA-eq) is capped ≤$5 and **unspent**.
+  this session, not as recorded: `pytest src/repl_sandbox/tests` → **886 passed, 5 skipped**; the skips
+  are `AF_UNIX`-gated and pass under WSL, so the hybrid transport is exercised on Linux and nowhere
+  else. The frame red-team's **seven defects** are closed; `fuzz_frame.py --negative-control` plants
+  **eight** broken readers and **exits 3**. Pins, two upstreams: **Kata ≥ 3.31.0 AND Cloud Hypervisor
+  ≥ 52.0**; depth-2 harmful (~96×, external).
+- **T4 — the frontier.** **All host-observed on one Hetzner AX41, 2026-07-23.** **G1** and **S2**
+  passed first — real KVM on a differential benchmark, then a guest holding a namespace across five
+  turns, five consecutive times, its control swapping the guest mid-run to **exit 3**. Both upstreams
+  default *away* from the ratified pin while `kata-runtime check` passes anyway; the provisioner
+  converges them. Then the wire, and **a correction that moved an enforcing surface**: the records
+  specified an `AF_VSOCK` host bind with the guest CID read at `accept()`, which is *native
+  vhost-vsock* and what Kata uses **under QEMU**. Cloud Hypervisor implements **hybrid vsock** — the
+  host side is `AF_UNIX` at `<uds>_<PORT>`, and **a Unix `accept()` carries no peer CID**, so "auth by
+  kernel vsock peer CID" is unimplementable here. Identity becomes the per-sandbox socket path the
+  host created: property preserved, surface moved, written as `INTERFACES.md` **§3.1a**. Read from
+  upstream docs, then **confirmed by its falsifier rather than by the pass** — bound the old way, the
+  guest meets `ECONNRESET` at a listener accepting nothing. **S3 `[R]` PASSED**, six consecutive runs:
+  parity byte-identical both directions, under a millisecond added, `peer_cid = 2` as
+  `require_host_cid` expects, a closed session dropped without an answer. Its control — the guest
+  answering *itself* — kept parity and **improved** latency, and only a host-side witness caught it
+  (**exit 3**). **`[A]` unspent.** Gaps: **GA-rt, fuzz plus a bridge red-team, is owed *before* the
+  bridge ships**; the provisioner installs **no egress policy**, so the guest's missing NIC is a `ctr`
+  default, not the ratified control; `MAX_FRAME_LEN` ships 2 MiB unratified against
+  `CONFORMANCE §2.3`'s 16 MiB.
+- **T5 — future plans.** Next: S3's metered **[A]** fan-out, the first paid run this class will
+  have spent. Free and
+  scheduled: a **nested guest** as the virgin instance the provisioner's never-executed install branch
+  is owed. A second *machine* stays **deferred**, re-opening on a kernel-specific finding — and vsock
+  was named the likeliest such surface, which this correction is the first evidence for. Then
+  **S4**, **S5**, **S6** (`KataLauncher.boot`
+  still raises), GB, GA-eq, GA-rt. Proposed: doubt-filter Layers 1–2. Open owner calls:
+  `MAX_FRAME_LEN`, handle lifetime, the warm pool, depth-2. Every **[A]** half is ≤$5 and **unspent**.
 
-*Status ledger:* **control plane shipped; a prototype microVM boots; the two are not joined — this is
-not a sandbox and must not be read as one.** Unbuilt: the vsock bridge on a real host, the broker
-against a real guest, Tier-0 in-guest hardening, the production launch path. Accepted: **SPEC §8 gate
-1 (G1) and spike S2, 2026-07-23** — a guest boots and keeps state across turns, which is not the claim
-that anything crosses the boundary safely; gates 2–4 unpassed. *Reachability:* closed by `host.py`,
-`cli.py`, `scripts/repl_sandbox_drill.py`, `scripts/repl_sandbox_s2_probe.py`,
-`scripts/provision_kata_host.sh` and seven `npm` scripts;
-**no CI job runs any** (the S2 probe *cannot* run in CI — it needs `/dev/kvm` and refuses without it),
-and `KataLauncher.boot`, both vsock classes and every `*_from_env` factory stay uncalled.
+*Status ledger:* **control plane shipped; a microVM boots and a frame crosses to it — this is still
+not a sandbox and must not be read as one**, because the broker, the hardening and the launch path are
+absent. Accepted: **SPEC §8 gate 1 (G1), 2026-07-23**; spikes S1, S2 and **S3 `[R]`** are dated passes
+that are not gates; gates 2–4 unpassed. Unbuilt: the broker against a real guest,
+Tier-0 hardening, the watchdog, egress policy, the production launch path.
+*Reachability:* closed by `host.py`, `cli.py`, `repl_sandbox_drill.py`, `repl_sandbox_s2_probe.py`,
+`provision_kata_host.sh` and eight `npm` scripts; **no CI job runs any** — `python:check` enumerates
+`src/rlm/*` only, so this class's whole pytest surface is hand-run — and the host probes *cannot* run
+in CI, needing `/dev/kvm`. The hybrid transport's only non-test caller is that probe, which has now run
+**on one host and nowhere else**; `KataLauncher.boot` and every `*_from_env` factory stay uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
-split; `AGENTS.md` §2 still has no row for `src/repl_sandbox/`. The provisioned host is reached by the
-local alias `ssh trellis-kata` — **the address is deliberately absent from this public tree**
-(BUILD_PLAN §4.1), and the host holds no checkout, so a fact living only there is unrecorded. *Cross-links:* [[C1]] (replaces that
+split, but the latter two are **stale against 2026-07-23** — both still read G1 as unsatisfied and
+neither mentions §3.1a, whose correction lives nowhere outside `docs/product/repl-sandbox/`.
+`AGENTS.md` §2 still has no row for `src/repl_sandbox/`. The provisioned host is reached by the local
+alias `ssh trellis-kata` — **the address is deliberately absent from this public tree**
+(BUILD_PLAN §4.1), and the host holds no checkout, so a fact living only there is unrecorded.
+*Cross-links:* [[C1]] (replaces that
 substrate, preserving its contract), [[C5]] (the handle model is the pillar as a slicing API), [[C7]]
-(Layers 1–2 compose the −1 tier).
+(Layers 1–2 compose the −1 tier), [[C10]] (owns the standing of the probes this class ships).
 
 #### C13 — self-describing surfaces and agent-first discoverability
 *Charter: the machinery and design records by which Trellis explains itself to the agent operating it —
@@ -900,7 +909,7 @@ The **Drills and reports** column is prose and script *names*, never paths, and 
 | **C9** | `docs/architecture/RESIDUAL_STREAM_SIDECAR.md` | *(none)* |
 | **C10** | `src/benchmarks/**`, `data/**`, `docs/benchmarks/**`, `docs/product/{BENCHMARK_OOLONG,OOLONG_BENCHMARK_SPEC,VALIDATION_STRATEGY,PRD}.md`, `docs/product/PHASE_*.md`, `docs/operations/OOLONG_BENCHMARK_GUIDE.md` | `oolong:benchmark`, `drill:update`, `drill:poison`, `drill:scale`; `repl-sandbox:drill` (+ `--negative-control`, healthy exit 3) — uncommitted, outside CI |
 | **C11** | `src/api/**`, `src/core/a2a/**`, `src/frontend/**`, `src/rlm/trellis_mcp*`, `src/config/mcp_servers*`, `.env.example`, `AGENTS.md`, `README.md`, `HANDOFF.md`, `.github/**`, `docs/architecture/{MCP_SERVER_SURFACE,SESSION_GOVERNANCE}.md`, `docs/reference/**`, `docs/operations/**` | `test:a2a`, `test:rlm-mcp`, `test:api-hardening` |
-| **C12** | `docs/product/repl-sandbox/**`, `src/repl_sandbox/**`, `scripts/repl_sandbox_drill.py`, `conftest.py`, `pytest.ini` | `test:repl-sandbox` — 797 checks, zero-paid; `repl-sandbox:{preflight,selftest,drill}`; `fuzz_frame.py --negative-control` and `repl_sandbox_drill.py --negative-control` (healthy exit 3 each); `test_rlms_conformance.py` (12, pinned source). **No CI job runs any of them** |
+| **C12** | `docs/product/repl-sandbox/**`, `src/repl_sandbox/**`, `scripts/repl_sandbox_*.py`, `scripts/provision_kata_host.sh`, `conftest.py`, `pytest.ini` | `test:repl-sandbox`, zero-paid; `repl-sandbox:{preflight,selftest,drill,provision,s2-probe,s3-probe}`; `fuzz_frame.py`, `repl_sandbox_drill.py`, both host probes and `provision_kata_host.sh` each carry a falsifier (`--negative-control`, healthy exit 3; or `--verify`, exit 1 naming what it would change); `test_rlms_conformance.py` (pinned source). **No CI job runs any of them**, and the host probes cannot — they need `/dev/kvm` |
 | **C13** | `tools/repository-surface/**`, `tools/density-chain/**`, `.claude/**`, `AGENTS.md`, `README.md`, `.github/**`, `docs/{ORIENTATION,README,GLOSSARY,COLLABORATOR_BRIEFING,RESEARCH_NOTES_COLLECTION}.md`, `docs/architecture/{REPOSITORY_ROOT_CONTRACT,SELF_DESCRIBING_SURFACES,LLM_HELP_SPEC,HARNESS_SELF_MODEL}.md` | `check:repo-surface` (+ `--negative-control`), `wiki:check --verify` |
 
 Two branches may declare the same path — `AGENTS.md` is both a serving-and-governance surface (C11)

@@ -15,7 +15,10 @@ lifecycle, the guest supervisor, and the `KataREPL` backend — plus, since July
 Kata microVM that boots on the provisioned host and keeps a Python namespace alive across turns
 (BUILD_PLAN §5.2 (S2)). The two are **not connected to each other**: the guest in that spike is
 reached by `ctr task exec`, not by the vsock bridge (S3), and it has no broker (S4) and no Tier-0
-in-guest hardening (S5). **This is not yet a sandbox and must not be deployed as one.**
+in-guest hardening (S5). **S3's `[R]` half passed on the host on July 23** — a frame now crosses the
+guest boundary over vsock with byte parity — but the broker, Tier-0 and the production launch path
+are still unbuilt, and S3's paid `[A]` half is unspent.
+**This is not yet a sandbox and must not be deployed as one.**
 `KataLauncher.boot` still refuses rather than returning a handle backed by nothing, and the
 in-process launcher used in tests announces that it provides no isolation.
 
@@ -63,6 +66,23 @@ Diagrams: [isolation view](repl_sandbox_architecture.svg) · [depth-1 flat fan-o
   caught). **Both results are one host** — a second *machine* is **deferred** (it buys little for a
   deterministic fact), while the fresh-*instance* test the provisioner still owes is scheduled on a
   nested guest of the AX41 itself, for free (BUILD_PLAN §11 (Open ordering calls)).
-- **What is not built:** the vsock bridge on a real host, the DB broker against a real guest, Tier-0
-  in-guest hardening, and the real `KataREPL` launch path — S3 through S6. No SPEC §8 acceptance
-  gate has passed, and no paid `[A]` adoption gate has been spent.
+- **S3 `[R]` PASSED on the host** (July 23, 2026, six consecutive runs): the guest's `AF_VSOCK`
+  connect reaches the host bridge, an `llm_query` frame round-trips **byte-identical** to the loopback
+  path in both directions, the bridge adds under a millisecond, and after `close_session` the same
+  guest is dropped without an answer. Run it *on the host*: `npm run repl-sandbox:s3-probe`
+  (`--negative-control` exits 3 when a guest answering *itself* is caught; `--native-vsock` is the
+  falsifier for the correction below). **Only gate 1 has passed** and **no paid `[A]` gate has been
+  spent.**
+- **What is not built:** the DB broker against a real guest, Tier-0 in-guest hardening, and the real
+  `KataREPL` launch path — S4 through S6 — plus the fuzz + red-team pass (GA-rt) that is owed
+  **before** the bridge ships.
+- **One records correction landed July 23, 2026, and it is load-bearing.** These documents specified
+  the host binding `AF_VSOCK` and reading the guest CID at `accept()`. **Cloud Hypervisor — the
+  ratified VMM — does not work that way.** It implements *hybrid vsock*: the guest dials `AF_VSOCK
+  (2, PORT)` unchanged, the host side is an `AF_UNIX` socket at `<uds>_<PORT>`, and a Unix accept
+  carries **no CID**. Session identity is therefore the per-sandbox socket path the host created,
+  not a kernel-read CID — same isolation property, different enforcing surface. Every record now
+  points at [INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md) for it. **Read from
+  upstream documentation, then confirmed on the host the same day:** the bridge listens at
+  `/run/vc/vm/<sandbox>/clh.sock_5001`, and `--native-vsock` — binding the host the way the records
+  originally said — meets the guest with `ECONNRESET` at a listener that accepts nothing.

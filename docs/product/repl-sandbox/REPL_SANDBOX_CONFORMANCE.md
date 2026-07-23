@@ -185,8 +185,20 @@ Listed, not fixed — the records are unedited per the S1 scope.
   deserialise host objects. The RPC-proxy-stub alternative
   ([INTERFACES §6 (CapabilityDescriptor lifecycle)](REPL_SANDBOX_INTERFACES.md)) is unaffected, but
   `modal`/`prime`/`daytona`/`e2b` are unread and still owed before `register_capability` is fixed.
-- **Kata `docs/design/VSocks.md`** — S1's other read. Not reachable from this host (no Kata, no
-  `/dev/kvm`); still open.
+- **Kata `docs/design/VSocks.md`** — S1's other read. **Closed on the documentation, July 23,
+  2026, and it contradicted these records.** Kata's own design note covers only the native
+  vhost-vsock case (host kernel `CONFIG_VHOST_VSOCK`), which is what Kata uses under QEMU. The
+  ratified VMM is **Cloud Hypervisor, which implements hybrid vsock**: the host side is an
+  `AF_UNIX` socket at `<uds>_<port>`, there is no host `AF_VSOCK` socket, and a Unix-socket
+  `accept()` carries **no peer CID** — so the "auth by kernel vsock peer CID" written throughout
+  these records is not implementable on the ratified stack. The correction, and what replaces the
+  CID, is [INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md).
+  **Settled on the host 2026-07-23** — and this is the one item in this file that is no longer only a
+  read. `npm run repl-sandbox:s3-probe` observed the guest's `AF_VSOCK (2, 5001)` arriving at
+  `/run/vc/vm/<sandbox>/clh.sock_5001`, and its `--native-vsock` mode — which binds the host the way
+  §3.1 originally specified — was met with `ECONNRESET` at a listener that accepted nothing
+  ([BUILD_PLAN §5.3 (S3)](REPL_SANDBOX_BUILD_PLAN.md)). The reading was made before the run and the
+  run could have refuted it.
 - **Live behaviour.** All of the above is a zero-paid read plus scripted assertions over installed
   bytes. No model ran, no VM booted; the parity test uses a real local socket pair, which is a
   genuine socket but not the vsock seam.
