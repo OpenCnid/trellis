@@ -66,12 +66,19 @@ class KataREPL(IsolatedEnv):                       # rlms IsolatedEnv = "separat
 - **Bridge requirement:** the guest reaches the host handler over a **vsock bridge**
   (guest-side loopback→vsock forwarder; no rlms modification) or a ~20-line `AF_VSOCK`
   transport patch. **Never bind the handler to `0.0.0.0`.**
+- **Host side of that bridge is `AF_UNIX`, not `AF_VSOCK`.** The ratified VMM implements
+  **hybrid vsock**: the guest dials `AF_VSOCK (2, PORT)` and Cloud Hypervisor delivers it to
+  `<uds>_<PORT>` on the host; the reverse direction is a `CONNECT <PORT>` handshake on `<uds>`
+  ([INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md) — read from upstream docs,
+  pending the S3 host run).
 
 ## 4. Host chokepoint contracts
 
 ### 4.1 LM handler (serves `llm_query`)
 - Holds the **provider API key host-side only**.
-- **Auth:** kernel vsock peer CID from `accept()` — never a payload-supplied id.
+- **Auth:** the session identity the listener supplies at `accept()` — never a payload-supplied
+  id. Native vsock: the kernel-read peer CID. Hybrid vsock (the ratified VMM): the
+  host-assigned id bound to that sandbox's socket path ([INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md)).
 - **Caps (per session, CID-keyed, host-enforced — rlms caps are bypassable):** max in-flight
   concurrency, requests/sec, dollar spend (hard-stop on exhaustion).
 - **Content-DLP** on outbound prompt text; cumulative per-session byte cap.
@@ -79,7 +86,7 @@ class KataREPL(IsolatedEnv):                       # rlms IsolatedEnv = "separat
 ### 4.2 Host broker (serves DB tools)
 - Facade RPC surface (illustrative): `run_query(sql, params) -> rows`,
   `run_cypher(query, params) -> rows`. Model code never holds a raw DB socket or credential.
-- **Auth:** vsock peer CID (per-session). **Audit:** every call logged by CID.
+- **Auth:** the per-session listener identity (§4.1, INTERFACES §3.1a). **Audit:** every call logged by it.
 - **Postgres role:** `NOSUPERUSER`, read-only default; **deny** `pg_read_server_files`,
   `pg_execute_server_program`, `dblink`, `lo_import/export`. Writes = explicit per-tool grant.
 - **Neo4j:** transport `default_access_mode=READ`; **APOC allowlist deny-by-default** (no

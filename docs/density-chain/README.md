@@ -7,7 +7,7 @@ than recalled from prose.
 |---|---|
 | [`DENSITY-CHAIN.md`](DENSITY-CHAIN.md) | **ground truth.** Trunk + 13 subsystem-class branches + cross-link lattice + self-index + constellation |
 | [`DENSITY-CHAIN.html`](DENSITY-CHAIN.html) | the interactive, theme-aware render. Kept in sync; markdown wins on drift |
-| [`index.json`](index.json) | machine index: the pinned `snapshot_commit`, the branch roster, and the connected-repository constellation |
+| [`index.json`](index.json) | machine index: the branch roster and the connected-repository constellation. **No verification state** — schema 3 removed the last stored pin |
 
 ## What a density-trellis is
 
@@ -143,7 +143,7 @@ Then:
    toward T1 only as the *concept* of the subsystem changes. At a fixed per-tier budget, adding means
    compressing or evicting something less salient — and that shows up in the diff.
 2. **Hold the layer test.** Each tier, read alone, must still be true.
-3. **Re-stamp `snapshot_commit`** in `index.json` and re-render the HTML.
+3. **Re-render the HTML.** Nothing in `index.json` is stamped — schema 3 stores no verification state, and the section edit *is* the update (see "What counts as a branch being current"). Add a roster line only when the branch is new.
 4. **Keep volatile counts out.** This file names mechanisms and points at authorities. Anything that
    drifts with the week belongs in observed evidence, not in a map.
 

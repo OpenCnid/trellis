@@ -99,11 +99,23 @@ in-context meta-prompt *or* a TTT-trained tooling-call; robustness is the compos
 substrate), which by DOUBTS_WORKSPACE §7 the engine cannot count as a boundary anyway. Full
 model: [ARCHITECTURE §3.1](REPL_SANDBOX_ARCHITECTURE.md).
 
-## 7. Identity: the vsock CID is a free, unspoofable anchor
+## 7. Identity: the anchor is the listener, and the free version is VMM-specific
 
-Kernel-assigned per guest, not choosable by the guest. The host broker/handler **must**
-attribute quota/scope by the CID from `accept()`, never by an id inside the request payload —
-otherwise a shared broker is a cross-session confused-deputy (session A forges session B).
+Not choosable by the guest, whichever VMM is under it. The host broker/handler **must** attribute
+quota/scope by the identity the *listener* supplies at `accept()`, never by an id inside the
+request payload — otherwise a shared broker is a cross-session confused-deputy (session A forges
+session B).
+
+**Corrected July 23, 2026, and confirmed on the host the same day.** This section used to say the
+anchor was the kernel-assigned vsock CID,
+full stop. That is true under native vhost-vsock (Kata on QEMU) and **false on the ratified stack**:
+Cloud Hypervisor's hybrid vsock puts the host end on an `AF_UNIX` socket, and a Unix accept carries
+no CID. The anchor there is the **per-sandbox socket path the host created**, which is still not
+choosable by the guest and still binds one VM to one session — the property held, the free
+mechanism did not ([INTERFACES §3.1a](REPL_SANDBOX_INTERFACES.md)). **The general lesson is the
+one worth keeping:** "the kernel gives us identity for free" was a claim about a *particular*
+kernel feature, and it was carried in these records as though it were a claim about virtualisation.
+An enforcing surface is only as portable as the mechanism named in it, so name the mechanism.
 
 ## 8. Deployment: the host is load-bearing (the DigitalOcean trap)
 

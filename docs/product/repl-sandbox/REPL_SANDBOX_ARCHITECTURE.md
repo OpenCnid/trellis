@@ -160,7 +160,11 @@ assets, boundaries, per-surface controls, and accepted residual risk — is
 2. **LLM provider API key host-side only** (symmetric with DB credentials).
 3. **Split version pins** — Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0, separate feeds
    (closes Kata CVE-2026-24834 and Cloud Hypervisor CVE-2026-27211 / CVE-2026-45782).
-4. **Auth by kernel vsock peer CID** (from `accept()`), never a guest-supplied id.
+4. **Auth by the session identity the listener supplies at `accept()`**, never a guest-supplied
+   id. Under native vhost-vsock that is the kernel-read peer CID; under the ratified VMM's
+   **hybrid vsock** there is no CID to read and it is the host-assigned id bound to the sandbox's
+   own socket path — same property, different enforcing surface
+   ([INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md)).
 5. **Host-side CID-keyed hard ceilings** on `llm_query` concurrency, rate, and dollar spend.
 6. **Neo4j APOC allowlist (deny-by-default) + DB-host egress denial** — closes the
    `apoc.load.json` SSRF that `READ` access mode does not.

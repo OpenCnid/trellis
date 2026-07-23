@@ -53,7 +53,7 @@ The `kind` tag is the **only** inference the guest gets for free (it selects whi
 |---|---|---|
 | **Opaque** | the guest cannot parse it to learn content | guest-side holder has no content field; the token is a random id, inert without the host table |
 | **Unforgeable** | the guest cannot mint a handle for data it was not given | broker per-`(CID, id)` allocation table, **fail-closed** on miss (§2); unguessable id is a secondary defense |
-| **CID-scoped** | resolves only for the vsock CID it was allocated to | kernel vsock peer CID from `accept()`, matched to the allocation CID (REPL_SANDBOX_SPEC.md §4 (Host chokepoint contracts); REPL_SANDBOX_LEARNINGS.md §7 (Identity: the vsock CID)) |
+| **CID-scoped** | resolves only for the vsock CID it was allocated to | the session identity the listener supplies at `accept()`, matched to the allocation CID (native: the kernel peer CID; hybrid: the per-sandbox socket path — [INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md)) (REPL_SANDBOX_SPEC.md §4 (Host chokepoint contracts); REPL_SANDBOX_LEARNINGS.md §7 (Identity: the vsock CID)) |
 | **Payload-free** | carries zero secret bytes | referent stored host-side; the §4 algebra returns handles; content crosses only via `materialize` (§6) |
 | **Typed** | carries a coarse `kind`, structure not content | set host-side at allocation; reveals shape class, never values |
 

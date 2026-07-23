@@ -95,7 +95,7 @@ requirement set) then C = acceptance, plus one PROPOSED side-track (the doubt fi
 | **G1** | Host provisioning gate — **PASSED 2026-07-23** (§4) | pre-A | G0 | `kata-runtime check` PASS + `qemu -accel kvm -cpu host` near-native → the KVM-capable host | **[R]** | gate 1 |
 | **S1** | Close the source-reads | A | G0 | Pinned-source conformance test asserts the 3-method contract + wire schemas + tool-materialization path | **[R]** | precondition for gate 3 |
 | **S2** | Boundary + persistence | A | S1, G1 | Scripted boot-once/keep-state/exec-many → the Kata microVM + `IsolatedEnv` | **[R]** | toward gate 3 |
-| **S3** | `llm_query` over vsock | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
+| **S3** | `llm_query` over vsock — **[R] PASSED 2026-07-23** (§5.3); `[A]` unspent | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
 | **S4** | DB broker minimal proof | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
 | **S5** | Tier-0 in-guest hardening | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest cgroups+seccomp+Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
 | **S6** | Author the `IsolatedEnv` subclass | A | S1–S5 | Unedited load → `execute_code` round-trips as `LocalREPL` → the `KataREPL` backend | **[R+A]** | gate 3 |
@@ -317,7 +317,9 @@ not make the production launch path (guest CID assignment, supervisor readiness)
 - **Exit acceptance → enforcing surface:**
   - **[R]** a scripted `llm_query` frame round-trips guest→host over vsock with byte parity to the
     loopback path and latency within the session budget. Enforcing surface: the **vsock bridge + LM
-    handler**; auth is by kernel vsock peer CID from `accept()`, never a payload id.
+    handler**; auth is by the session identity the listener supplies at `accept()`, never a
+    payload id (INTERFACES §3.1a — under the ratified VMM that is the per-sandbox socket path,
+    not a kernel-read CID).
   - **[A]** a metered real-model flat fan-out (N parallel completions over slices at `max_depth` 1)
     completes correctly through the bridge — the engine-fidelity check that a model actually uses the
     channel. Capped ≤ $5.
@@ -325,6 +327,87 @@ not make the production launch path (guest CID assignment, supervisor readiness)
     red-teamed).
 - **Dependencies:** blocks S5 (channel-survival check), S6; is the predecessor the bridge red-team
   (GA-rt) reviews.
+
+**Observed 2026-07-23 — S3 [R] PASS.** `python3 scripts/repl_sandbox_s3_probe.py` → **exit 0**, six
+consecutive runs on the same Hetzner AX41 (`npm run repl-sandbox:s3-probe`; reached per §4.1, and the
+script refuses on any box without `/dev/kvm`). Kata 3.32.0 · Cloud Hypervisor v52.0 · containerd
+2.2.1 · image `python:3.12-slim` · guest kernel **6.18.35** against the host's 6.8.0-134.
+**The `[A]` half — a metered real-model fan-out through the bridge — is unspent.**
+
+| claim | observed |
+|---|---|
+| reachability | the guest's own `AF_VSOCK (2, 5001)` connect is delivered to the host listener at **`/run/vc/vm/<sandbox>/clh.sock_5001`**; the host witness counts **12 accepted connections, 12 requests served** per run, and the **shipping** guest path (`guest_rpc.GuestRpc` over `transport.VsockClient`) completes `llm_query` and a 2-wide `llm_query_batched` against the real `LMHandler` |
+| byte parity | request frame `15ba8a0e…fb41` — **identical** to the loopback path's; response frame `26006a67…8fc0` — **identical**. sha256 over the bytes captured on both sides, equal in both directions, every run |
+| latency | vsock p50 **0.202–0.268 ms**, loopback p50 0.140–0.253 ms, added p50 **−0.051 to +0.128 ms** against a 25 ms budget |
+| control seam | the host reached an in-guest `AF_VSOCK` listener through the VMM's `CONNECT` handshake; **the guest observed `peer_cid = 2`** and `require_host_cid` **accepted** it |
+| identity | after `close_session`, the same guest on the same socket is **dropped without an answer** (`connection_denied` ×3 in the audit; the guest sees `FrameError: peer closed the connection without answering`) |
+| teardown | socket node removed, container not listed, **zero** surviving Cloud Hypervisor processes |
+
+**§3.1a is now host-confirmed, and the falsifier is what confirms it.** The sandbox directory holds
+exactly `clh-api.sock`, `clh.sock`, `virtiofsd.sock`, and the bridge listens on `clh.sock_5001` — the
+`<uds>_<port>` convention, observed. Run with **`--native-vsock`**, which binds the host on
+`AF_VSOCK VMADDR_CID_ANY` as the records originally specified, the same guest gets
+**`ConnectionResetError: [Errno 104] Connection reset by peer`** and the host listener accepts
+**nothing** (exit 1, seven named failures). A documentation reading that survives its own falsification
+test on the hardware is a different thing from one that does not, and this one did.
+
+**The negative control is the load-bearing half, and it behaved exactly as designed.**
+`--negative-control` has the guest answer *itself* over in-guest loopback with the byte-identical
+canned reply. **Byte parity still passed** (both digests matched) and **latency improved** (added
+p50 −0.069 ms) — the two claims an observer would most likely trust. The host-side witness read
+**0 accepted, 0 requests** and the run **exited 3, DETECTED**. Two further detectors fired for free:
+the batched call returned 0 of 2 (a canned single completion cannot answer a fan-out), and the
+post-`close_session` request was still served. **A probe whose headline claims all pass while the
+boundary is uncrossed is the failure mode this control exists to catch, and it caught it.**
+
+**Two defects in the instrument, found by running it and fixed before this record was written.**
+Under `--native-vsock` the guest's raw dial raised, the guest script exited non-zero, and the probe
+reported *"could not run"* — the message it owes an infrastructure failure, applied to the far more
+interesting case where the infrastructure is fine and the host is simply unreachable at that address.
+And `Sandbox.destroy()` let a `TimeoutExpired` escape from a `finally` when `ctr task kill` blocked on
+a wedged shim, masking the failure that caused it and leaving a container record and a live VMM
+behind (cleaned by hand). Teardown is now bounded, swallowed, and escalates to killing the shim.
+**Both were found by the falsifier, not by the passing run** — which is the argument for having one.
+
+**The transport finding that forced the build — a records correction.** These records specify the
+host binding `AF_VSOCK` on `VMADDR_CID_ANY` and reading the guest CID at `accept()`. That is
+*native vhost-vsock*, which Kata uses **under QEMU**. The ratified VMM is **Cloud Hypervisor,
+which implements hybrid vsock instead**: the guest dials `AF_VSOCK (2, PORT)` unchanged, but the
+host side is an `AF_UNIX` socket at `<uds>_<PORT>`, and the reverse direction is a `CONNECT <PORT>`
+handshake on `<uds>` — under Kata, `/run/vc/vm/<sandbox_id>/clh.sock`. **A Unix-socket `accept()`
+carries no CID**, so "auth by kernel vsock peer CID" is not implementable on this VMM; identity
+becomes the per-sandbox socket path the host created. The cross-session property survives, its
+enforcing surface moves, and both are written up in
+[INTERFACES §3.1a (Hybrid vsock)](REPL_SANDBOX_INTERFACES.md), which every other record now points
+at. **This was read from Cloud Hypervisor's, Firecracker's, and Kata's own documentation — it is
+upstream-sourced, not host-observed**, which is exactly the status S1 left the Kata vsock read in
+([CONFORMANCE §5](REPL_SANDBOX_CONFORMANCE.md)). The probe's `--native-vsock` mode exists to
+falsify it on the host rather than assume it.
+
+**The six claims the probe asserts,** each with the surface it would indict: (1) *reachability* —
+a guest `AF_VSOCK` connect is delivered to the host listener and the **shipping** guest path
+(`guest_rpc.GuestRpc` over `transport.VsockClient`) completes a real `llm_query` and
+`llm_query_batched` against the real `LMHandler`; (2) *byte parity* — sha256 over the exact bytes
+captured on both sides equals the loopback path's, in both directions; (3) *latency* — the
+bridge's **added** p50 over loopback is within budget (the difference, not the absolute, because a
+scripted provider's absolute number measures the host's interpreter); (4) *the control seam* — the
+host reaches an in-guest listener through the `CONNECT` handshake, and the guest reports which
+peer CID it saw, which is the number `require_host_cid` is written against; (5) *identity is the
+host's* — after `close_session` the same guest on the same socket is dropped without an answer;
+(6) *clean teardown* — socket node, container, and VMM process all gone.
+
+**Its negative control is the load-bearing half.** `--negative-control` has the guest answer
+*itself*: an in-guest loopback responder returns the byte-identical canned reply. Every
+guest-visible claim still passes — the response is right, the digests match, the latency improves
+— and the only thing that can catch it is the host-side witness counting connections that arrived.
+Exit 3 (DETECTED) is the healthy result. This is deliberately sharper than S2's control, where the
+planted break was visible in three independent guest-reported signals.
+
+**Zero-paid.** The provider behind the handler is a scripted stub returning a fixed completion at
+$0.00, so the `[R]` half spends nothing; the metered `[A]` fan-out is a separate owner-gated run.
+The probe's host-side logic — the reference arm, the parity accounting, the witness, and the guest
+program's own byte capture — is under test off-host in `src/repl_sandbox/tests/test_s3_probe.py`,
+so a mistake in it surfaces on a development box rather than mid-way through a host run.
 
 ### 5.4 S4 — DB broker minimal proof
 
@@ -397,7 +480,7 @@ bound with no engine behind it does not count.
 | 1 Exfil = data-flow; DLP + byte caps on top | Guest holds handles not payloads (broker) + content-DLP + per-session byte caps on `llm_query`/`vector_search`/`answer` | Scripted 100%-injection payload: no secret-bearing payload ever materializes in guest; byte cap trips | Real model steered by a hostile document (red-team) cannot leak a non-materialized secret via a sanctioned crossing; audit confirms | S4 + GB |
 | 2 API key host-side only | LM handler holds the provider key | Scripted grep of guest env/namespace/memory for the key returns nothing | — | S3 + GB |
 | 3 Split version pins | Deploy config: Kata ≥ 3.31.0 **AND** Cloud Hypervisor ≥ 52.0, separate feeds | Scripted version-assert on both binaries; two advisory feeds tracked | — | G1/GB |
-| 4 Auth by kernel vsock peer CID | CID from `accept()` on broker + handler | Scripted forged-payload-id request is rejected; quota keyed to CID | Real model in session A cannot reach session B's scope | S3, S4 + GB |
+| 4 Auth by the listener's session identity | The id `accept()` reports on broker + handler — kernel CID (native) or per-sandbox socket path (hybrid, §5.3) | Scripted forged-payload-id request is rejected; quota keyed to that id | Real model in session A cannot reach session B's scope | S3, S4 + GB |
 | 5 Host-side CID-keyed hard ceilings | LM handler caps: concurrency, rate, dollar spend (hard-stop) | Scripted burst exceeds each cap → hard-stop (rlms caps proven bypassable) | Real fan-out run halts at the dollar cap | GB |
 | 6 APOC allowlist + DB-host egress deny | Host broker APOC deny-by-default + DB-host has no route | Scripted `apoc.load.json` SSRF attempt denied; no metadata route | — | S4 + GB |
 | 7 `statement_timeout` + cost caps + no unbounded `[*]` | Host broker query governor | Scripted cartesian/`[*]` query is refused or timed out | — | S4 + GB |

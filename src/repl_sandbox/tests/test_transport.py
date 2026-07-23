@@ -12,6 +12,7 @@ Every wait is bounded. A test that hangs here fails instead of blocking.
 
 from __future__ import annotations
 
+import os
 import socket
 import struct
 import threading
@@ -24,12 +25,17 @@ from repl_sandbox.errors import (
     CapSpendError,
     FrameError,
 )
-from repl_sandbox.frame import encode_frame, read_frame
+from repl_sandbox.frame import buffer_recv, encode_frame, read_frame
 from repl_sandbox.transport import (
+    HybridVsockHostClient,
+    HybridVsockListener,
     LoopbackClient,
     LoopbackListener,
     VsockClient,
     VsockListener,
+    hybrid_connect_command,
+    hybrid_socket_path,
+    read_hybrid_ack,
     require_host_cid,
     serve_connection,
     serve_forever,
@@ -454,3 +460,204 @@ def test_vsock_module_imports_without_af_vsock() -> None:
         VsockListener(5003)
     with pytest.raises(RuntimeError, match="AF_VSOCK is not available"):
         VsockClient(2, 5001)
+
+
+# ---------------------------------------------------------------------------
+# The hybrid-vsock path — what the ratified VMM actually provides
+# ---------------------------------------------------------------------------
+#
+# Cloud Hypervisor and Firecracker bridge guest `AF_VSOCK` to host `AF_UNIX`, so
+# the host side of the ratified stack is a Unix socket and there is no CID to
+# read at `accept()`. The pure-bytes half of that handshake is tested
+# everywhere; the socket half needs `AF_UNIX` and is skipped on Windows, where
+# the VMM does not run either.
+
+needs_af_unix = pytest.mark.skipif(
+    not hasattr(socket, "AF_UNIX"),
+    reason="AF_UNIX is unavailable on this host (Windows); the VMM is Linux-only",
+)
+
+
+def test_hybrid_socket_path_appends_underscore_and_port() -> None:
+    """The path convention is the VMM's: launch socket + `_` + guest-side port."""
+    assert hybrid_socket_path("/run/vc/vm/abc/clh.sock", 5001) == (
+        "/run/vc/vm/abc/clh.sock_5001"
+    )
+
+
+def test_hybrid_connect_command_is_a_newline_terminated_line() -> None:
+    """The newline is load-bearing: a VMM has crashed on its absence."""
+    assert hybrid_connect_command(5003) == b"CONNECT 5003\n"
+
+
+def test_hybrid_ack_stops_at_the_newline_and_leaves_the_frame_alone() -> None:
+    """The handshake and the first frame share a stream; the ack may not over-read.
+
+    This is the whole reason the ack is read a byte at a time. A buffered read
+    would swallow the length prefix and the frame after it would parse as
+    garbage — the failure would look like a codec bug, not a handshake bug.
+    """
+    frame = encode_frame({"op": "ping"}, MAX_FRAME_LEN)
+    recv = buffer_recv(b"OK 1234\n" + frame)
+
+    assert read_hybrid_ack(recv) == 1234
+    assert read_frame(recv, MAX_FRAME_LEN) == {"op": "ping"}
+
+
+def test_hybrid_ack_raises_on_a_refusal() -> None:
+    """No guest listener on that port is a failed connect, not an open stream."""
+    with pytest.raises(FrameError, match="refused"):
+        read_hybrid_ack(buffer_recv(b"connection refused\n"))
+
+
+def test_hybrid_ack_raises_on_an_unterminated_line() -> None:
+    with pytest.raises(FrameError, match="no newline"):
+        read_hybrid_ack(buffer_recv(b"OK " + b"9" * 200))
+
+
+def test_hybrid_ack_raises_when_the_vmm_closes_mid_handshake() -> None:
+    with pytest.raises(FrameError, match="closed"):
+        read_hybrid_ack(buffer_recv(b"OK 12"))
+
+
+def test_hybrid_ack_raises_when_ok_carries_no_port() -> None:
+    with pytest.raises(FrameError, match="no port"):
+        read_hybrid_ack(buffer_recv(b"OK\n"))
+
+
+@contextmanager
+def running_hybrid_server(handler, *, session_cid: int, uds_path: str, port: int = 5001):
+    """`serve_forever` over a `HybridVsockListener`, and prove it stops."""
+    listener = HybridVsockListener(
+        uds_path,
+        port,
+        session_cid,
+        accept_timeout_s=0.05,
+        read_timeout_s=SERVER_READ_TIMEOUT_S,
+    )
+    audit: list[tuple[str, dict]] = []
+
+    def record(event: str, **fields: object) -> None:
+        audit.append((event, fields))
+
+    stop = threading.Event()
+    thread = threading.Thread(
+        target=serve_forever,
+        args=(listener, handler, MAX_FRAME_LEN, record, stop),
+        daemon=True,
+    )
+    thread.start()
+    try:
+        yield listener, audit
+    finally:
+        stop.set()
+        listener.close()
+        thread.join(timeout=JOIN_TIMEOUT_S)
+        assert not thread.is_alive(), "serve_forever did not stop on its stop event"
+
+
+def hybrid_request(path: str, payload: dict) -> dict:
+    """One framed request over the host-side Unix socket, as the VMM delivers it."""
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.settimeout(CLIENT_TIMEOUT_S)
+    try:
+        sock.connect(path)
+        sock.sendall(encode_frame(payload, MAX_FRAME_LEN))
+        response = read_frame(sock.recv, MAX_FRAME_LEN)
+        assert response is not None
+        return response
+    finally:
+        sock.close()
+
+
+@needs_af_unix
+def test_hybrid_listener_reports_the_host_assigned_session_id(tmp_path) -> None:
+    """There is no CID to read, so the id comes from the socket the host created."""
+    uds = str(tmp_path / "clh.sock")
+    with running_hybrid_server(echo_handler, session_cid=7, uds_path=uds) as (listener, audit):
+        assert listener.path == f"{uds}_5001"
+        response = hybrid_request(listener.path, {"op": "ping", "cid": 99, "peer_cid": 99})
+
+    # The id the peer wrote into the frame is ignored here for the same reason it
+    # is on the native transport: identity comes from the listener.
+    assert response["peer_cid"] == 7
+    assert events(audit).count("accepted") == 1
+
+
+@needs_af_unix
+def test_hybrid_listener_reclaims_a_stale_socket(tmp_path) -> None:
+    """A leftover node from a crashed session must not block the next one."""
+    uds = str(tmp_path / "clh.sock")
+    stale = f"{uds}_5001"
+    with open(stale, "wb"):
+        pass
+
+    with running_hybrid_server(echo_handler, session_cid=3, uds_path=uds) as (listener, _a):
+        assert hybrid_request(listener.path, {"op": "ping"})["peer_cid"] == 3
+
+
+@needs_af_unix
+def test_hybrid_listener_refuses_to_steal_a_live_socket(tmp_path) -> None:
+    """Unlinking a live path would hand one sandbox's guest another's caps.
+
+    The negative case of the test above: `_reclaim_path` must tell a corpse from
+    a live listener, or "reclaim the stale socket" becomes "take over the running
+    session's port."
+    """
+    uds = str(tmp_path / "clh.sock")
+    with running_hybrid_server(echo_handler, session_cid=3, uds_path=uds) as (listener, _a):
+        with pytest.raises(RuntimeError, match="live listener"):
+            HybridVsockListener(uds, 5001, 4)
+        # The first listener is untouched and still serving its own session.
+        assert hybrid_request(listener.path, {"op": "ping"})["peer_cid"] == 3
+
+
+@needs_af_unix
+def test_hybrid_listener_removes_its_socket_on_close(tmp_path) -> None:
+    uds = str(tmp_path / "clh.sock")
+    listener = HybridVsockListener(uds, 5002, 3, accept_timeout_s=0.05)
+    path = listener.path
+    assert os.path.exists(path)
+    listener.close()
+    assert not os.path.exists(path)
+
+
+@needs_af_unix
+def test_hybrid_host_client_performs_the_connect_handshake(tmp_path) -> None:
+    """Host→guest: dial the launch socket, `CONNECT <port>`, then frames.
+
+    The fake VMM here answers the handshake and then serves one frame, which is
+    what Cloud Hypervisor does once it has bridged the connection to the guest
+    listener.
+    """
+    uds = str(tmp_path / "clh.sock")
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(uds)
+    server.listen(1)
+    server.settimeout(JOIN_TIMEOUT_S)
+    seen: list[bytes] = []
+
+    def fake_vmm() -> None:
+        conn, _ = server.accept()
+        conn.settimeout(CLIENT_TIMEOUT_S)
+        line = bytearray()
+        while not line.endswith(b"\n"):
+            line += conn.recv(1)
+        seen.append(bytes(line))
+        conn.sendall(b"OK 4242\n")
+        request = read_frame(conn.recv, MAX_FRAME_LEN)
+        conn.sendall(encode_frame({"ok": True, "echo": request}, MAX_FRAME_LEN))
+        conn.close()
+
+    thread = threading.Thread(target=fake_vmm, daemon=True)
+    thread.start()
+    try:
+        client = HybridVsockHostClient(uds, 5003, timeout_s=CLIENT_TIMEOUT_S)
+        response = client.request({"op": "ping"}, MAX_FRAME_LEN)
+    finally:
+        thread.join(timeout=JOIN_TIMEOUT_S)
+        server.close()
+
+    assert seen == [b"CONNECT 5003\n"]
+    assert response == {"ok": True, "echo": {"op": "ping"}}
+    assert client.assigned_port == 4242

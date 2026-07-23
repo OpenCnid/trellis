@@ -5,11 +5,40 @@ Source of truth: docs/product/repl-sandbox/REPL_SANDBOX_INTERFACES.md section 1
 
 Three properties this module exists to hold:
 
-**Identity comes from `accept()`.** The peer CID is read from the accepted
-address by the kernel and handed to the handler as a separate argument. Nothing
-here ever reads an identity out of a frame, because a frame is written by the
-peer and a peer is untrusted until its bytes have parsed
-(INTERFACES section 3.1 — "never an id in the payload").
+**Identity comes from the listener, never from a frame.** The peer identity is
+supplied by whatever accepted the connection and handed to the handler as a
+separate argument. Nothing here ever reads an identity out of a frame, because a
+frame is written by the peer and a peer is untrusted until its bytes have parsed
+(INTERFACES section 3.1 — "never an id in the payload"). *Where* that identity
+comes from depends on the VMM, and the ratified VMM is not the one the record was
+written against — see "Two vsock transports" below.
+
+**Two vsock transports, because the ratified VMM has no host-side AF_VSOCK.**
+
+* `VsockListener` / `VsockClient` are the *native* transport: a host kernel
+  vhost-vsock device, where the host binds `AF_VSOCK` and `accept()` returns the
+  guest CID. Kata uses this under QEMU.
+* `HybridVsockListener` / `HybridVsockHostClient` are the transport the ratified
+  stack actually has. Cloud Hypervisor (and Firecracker) implement **hybrid
+  vsock**: the guest side is real `AF_VSOCK` to `VMADDR_CID_HOST` (2), but the
+  host side is an `AF_UNIX` socket. A guest connection to `(2, PORT)` is
+  delivered to `<uds_path>_<PORT>`, and a host connection *to* a guest listener
+  is made by dialing `<uds_path>` and writing `CONNECT <port>\n`. Kata dials its
+  own agent this way at `/run/vc/vm/<sandbox>/clh.sock`.
+
+  **This changes what `accept()` can tell you.** A Unix-socket accept carries no
+  CID, so under hybrid vsock the host cannot read a guest identity from the
+  kernel — there is nothing to read. What the kernel *does* guarantee is
+  narrower and still sufficient: a connection arriving on `<uds>_<PORT>` was
+  delivered there by the one VMM process that owns `<uds>`, so it came from that
+  VM and no other. Identity is therefore bound to the **socket path**, which the
+  host chose when it created the listener for that sandbox, and
+  `HybridVsockListener` returns that host-assigned session id where
+  `VsockListener` returns a kernel-read CID. The property the handlers depend on
+  — session A cannot present as session B — is preserved; its enforcing surface
+  is the per-sandbox socket path plus the mode of the directory holding it, not
+  a CID read at `accept()`. Anything host-side that can open that path is inside
+  the host trust domain already.
 
 **The asymmetry is deliberate.** On `LM_PORT` and `DB_PORT` the *host* listens
 and the guest connects, so the host gates every call by the CID it read at
@@ -30,6 +59,8 @@ Nothing in this module is the boundary. The boundary is the microVM
 
 from __future__ import annotations
 
+import errno
+import os
 import socket
 import threading
 from typing import Callable, Protocol, runtime_checkable
@@ -190,6 +221,219 @@ class VsockClient:
         sock.settimeout(self.timeout_s)
         try:
             sock.connect((self.cid, self.port))
+            return _request_over(sock, payload, max_frame_len)
+        finally:
+            sock.close()
+
+
+# ---------------------------------------------------------------------------
+# Hybrid vsock — the transport the ratified VMM actually provides
+# ---------------------------------------------------------------------------
+#
+# Cloud Hypervisor's `docs/vsock.md` defines both directions:
+#
+#   guest -> host   the host listens on AF_UNIX at `<uds_path>_<port>`; the guest
+#                   dials AF_VSOCK `(2, port)` and the VMM bridges the two.
+#   host  -> guest  the host dials AF_UNIX `<uds_path>` and writes
+#                   `CONNECT <port>\n`; the VMM answers `OK <assigned_port>\n`
+#                   and everything after that is the stream.
+#
+# Neither direction involves a host-side AF_VSOCK socket, so `vsock_available()`
+# is irrelevant here and this half of the module works on any Linux host.
+
+
+def hybrid_socket_path(uds_path: str, port: int) -> str:
+    """The host-side `AF_UNIX` path a guest connection to `port` is delivered to.
+
+    The convention is the VMM's, not ours: the launch-time socket path with `_`
+    and the guest-side port appended.
+    """
+    return f"{uds_path}_{int(port)}"
+
+
+def hybrid_connect_command(port: int) -> bytes:
+    """The `CONNECT <port>\\n` line that opens a host→guest hybrid connection.
+
+    The trailing newline is not cosmetic: Cloud Hypervisor reads this as a line,
+    and a client that closes without sending it has crashed a VMM before
+    (cloud-hypervisor issue 6798).
+    """
+    return f"CONNECT {int(port)}\n".encode("ascii")
+
+
+#: Bound on the handshake line read back from the VMM. It is `OK <port>\n`; a
+#: peer that sends more than this without a newline is not the VMM answering.
+MAX_HANDSHAKE_BYTES = 64
+
+
+def read_hybrid_ack(recv: Callable[[int], bytes], max_bytes: int = MAX_HANDSHAKE_BYTES) -> int:
+    """Read the VMM's `OK <port>` answer and return the port it assigned.
+
+    Read **one byte at a time up to the newline**, which is the whole reason this
+    is not two lines of code: the handshake and the first frame arrive on the same
+    stream, so a buffered read would swallow the front of the frame and the
+    length prefix would parse as garbage.
+
+    Anything that is not an `OK` line is a failed connect — most often "no
+    listener in the guest on that port" — and raises rather than returning a
+    connection the caller would then write a frame into.
+    """
+    line = bytearray()
+    while len(line) < max_bytes:
+        byte = recv(1)
+        if not byte:
+            raise FrameError(
+                f"the VMM closed the hybrid-vsock connection during the handshake "
+                f"after {bytes(line)!r}"
+            )
+        if byte == b"\n":
+            break
+        line += byte
+    else:
+        raise FrameError(
+            f"no newline in the first {max_bytes} bytes of the hybrid-vsock handshake"
+        )
+
+    text = bytes(line).decode("ascii", "replace").strip()
+    if not text.startswith("OK"):
+        raise FrameError(f"hybrid-vsock handshake refused: {text!r}")
+    parts = text.split()
+    if len(parts) < 2 or not parts[1].isdigit():
+        raise FrameError(f"hybrid-vsock handshake carried no port: {text!r}")
+    return int(parts[1])
+
+
+class HybridVsockListener:
+    """Host-side `AF_UNIX` listener for guest connections to one vsock port.
+
+    Constructed **one per sandbox per port**, because the socket path is the
+    identity: `<uds_path>_<port>` belongs to the VMM process that owns
+    `<uds_path>`, and only that VM's guest can reach it. `session_cid` is what
+    `accept()` reports to the serve loop, and it is a **host-assigned session
+    id**, not a kernel-read CID — under hybrid vsock there is no CID to read (see
+    the module docstring). Every handler keyed "by CID" is keyed by this value,
+    and the caller binds the same number in `SessionTable` when it opens the
+    session.
+
+    **Refuses to steal a live socket.** A stale `AF_UNIX` path must be unlinked
+    before bind, and unlinking one that is *live* would silently take another
+    sandbox's channel — its guest would then reach this host object with this
+    session's caps. So the path is dialed first: a connection that succeeds means
+    a live listener and construction raises; only a refused connect is treated as
+    a leftover and unlinked.
+    """
+
+    def __init__(
+        self,
+        uds_path: str,
+        port: int,
+        session_cid: int,
+        *,
+        backlog: int = 8,
+        accept_timeout_s: float | None = DEFAULT_ACCEPT_TIMEOUT_S,
+        read_timeout_s: float | None = DEFAULT_READ_TIMEOUT_S,
+        mode: int = 0o600,
+    ) -> None:
+        if not hasattr(socket, "AF_UNIX"):
+            raise RuntimeError(
+                "AF_UNIX is not available on this host, so the hybrid-vsock host "
+                "side cannot be bound. This transport is Linux-only, like the VMM."
+            )
+        self.uds_path = uds_path
+        self.port = int(port)
+        self.session_cid = int(session_cid)
+        self.path = hybrid_socket_path(uds_path, port)
+        self.read_timeout_s = read_timeout_s
+
+        self._reclaim_path()
+        self._sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
+            self._sock.bind(self.path)
+            # Narrow the window rather than close it: bind creates the node under
+            # the process umask, and this tightens it immediately after. The real
+            # scoping is the mode of the directory the VMM made, which is
+            # root-owned; this is hygiene on top of that, not the control.
+            os.chmod(self.path, mode)
+            self._sock.listen(backlog)
+            self._sock.settimeout(accept_timeout_s)
+        except BaseException:
+            self._sock.close()
+            raise
+
+    def _reclaim_path(self) -> None:
+        if not os.path.exists(self.path):
+            return
+        probe = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        probe.settimeout(1.0)
+        try:
+            probe.connect(self.path)
+        except OSError as exc:
+            if exc.errno not in (errno.ECONNREFUSED, errno.ENOENT):
+                raise
+            os.unlink(self.path)
+            return
+        finally:
+            probe.close()
+        raise RuntimeError(
+            f"{self.path} already has a live listener; refusing to unlink it. "
+            "Another session owns this sandbox's port."
+        )
+
+    def accept(self) -> tuple[Connection, int]:
+        """Accept one guest connection and report the session id bound at bind."""
+        conn, _addr = self._sock.accept()
+        conn.settimeout(self.read_timeout_s)
+        return conn, self.session_cid
+
+    def close(self) -> None:
+        """Close the listener and remove its socket node.
+
+        The node is removed so the next session for this sandbox binds a fresh
+        one rather than meeting the `_reclaim_path` probe.
+        """
+        try:
+            self._sock.close()
+        finally:
+            try:
+                os.unlink(self.path)
+            except OSError:
+                pass
+
+
+class HybridVsockHostClient:
+    """The host end of a host→guest hybrid-vsock call (the control port).
+
+    Dials the VMM's launch-time `AF_UNIX` socket, performs the `CONNECT <port>`
+    handshake, and then speaks the ordinary frame protocol to whatever is
+    listening on `AF_VSOCK` port `port` *inside* the guest — the guest supervisor
+    (INTERFACES section 1). Connect-per-request, like every other client here.
+
+    The guest sees this connection as coming from `VMADDR_CID_HOST` (2), so the
+    supervisor's `require_host_cid` check still holds on the guest side: that CID
+    *is* kernel-supplied there. The asymmetry is only host-side.
+    """
+
+    def __init__(
+        self,
+        uds_path: str,
+        port: int,
+        *,
+        timeout_s: float | None = DEFAULT_READ_TIMEOUT_S,
+    ) -> None:
+        self.uds_path = uds_path
+        self.port = int(port)
+        self.timeout_s = timeout_s
+        #: The host-side port the VMM assigned on the last successful connect.
+        #: Reported by the handshake; recorded for audit, never routed on.
+        self.assigned_port: int | None = None
+
+    def request(self, payload: dict, max_frame_len: int) -> dict:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.settimeout(self.timeout_s)
+        try:
+            sock.connect(self.uds_path)
+            sock.sendall(hybrid_connect_command(self.port))
+            self.assigned_port = read_hybrid_ack(sock.recv)
             return _request_over(sock, payload, max_frame_len)
         finally:
             sock.close()

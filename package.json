@@ -86,6 +86,7 @@
     "repl-sandbox:config": "cd src && python -m repl_sandbox.cli config",
     "repl-sandbox:drill": "python scripts/repl_sandbox_drill.py",
     "repl-sandbox:s2-probe": "python3 scripts/repl_sandbox_s2_probe.py",
+    "repl-sandbox:s3-probe": "python3 scripts/repl_sandbox_s3_probe.py",
     "repl-sandbox:provision": "bash scripts/provision_kata_host.sh"
   },
   "keywords": [],
