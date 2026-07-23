@@ -835,7 +835,12 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   rulings it honors, so the loop's instructions and its accumulated exceptions are both diffable. It
   reads a document whole, counts with tools, and sorts each repeat by whether an anchor holds it in
   place; **"No edits" is a successful run**, and the positive control it owes is a seeded clean
-  document that must return exactly that. Nothing schedules it yet.
+  document that must return exactly that. Its `SETUP.md` carries the install for any host — the
+  fourteen-command allow-list committed to `.claude/settings.json`, which **travels by checkout**
+  because permission rules are the one settings category that merges across scopes rather than
+  top-winning, and which withholds `gh pr merge` (the owner's gate) and write access to the protected
+  `.claude/**` (a path the ceremony's target set excludes on purpose, so the loop cannot rewrite its
+  own prompt). Nothing schedules it yet.
 - **T5 — future plans.** Proposed only: `llm_help()` as an always-present kernel builtin listing the
   run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
   see-also, with `expects` **guard-derived** and the human winning on stalemate; the module manifest
