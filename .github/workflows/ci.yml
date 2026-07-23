@@ -25,7 +25,10 @@ jobs:
       - run: npm ci
       - run: npm run check:repo-surface
       # Density-trellis contract: every tracked path routes to a branch class,
-      # every class is reachable, and the branch roster is single-sourced.
+      # every class is reachable, the branch roster is single-sourced, and every
+      # inline <script> in the HTML render compiles — that last one because the
+      # render's data is JS source, so a quoting slip blanks the interactive
+      # table and reports it to nothing but a browser console.
       # Deliberately NOT the staleness diff — that needs full history and an
       # in-progress PR is legitimately stale, so staleness is a session-side
       # warning rather than a build failure.

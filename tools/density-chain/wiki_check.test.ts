@@ -9,6 +9,7 @@ import * as wiki from './wiki_check.mjs';
 const {
   globToRegExp, expandBraces, extractSections, extractRoster,
   extractDeclarations, buildRouter, route, classify, sectionVerdict,
+  extractScriptBlocks, checkHtmlScripts,
 } = wiki as {
   globToRegExp: (g: string) => RegExp;
   expandBraces: (g: string) => string[];
@@ -19,6 +20,16 @@ const {
   route: (p: string, r: Router) => { classes: string[]; origin: string; rule: { glob: string } } | null;
   classify: (p: string[], r: Router) => { byClass: Map<string, string[]>; fallback: unknown[]; unmapped: string[] };
   sectionVerdict: (f: Facts) => { verified: boolean; reason: string | null; unknown?: string };
+  extractScriptBlocks: (html: string) => { source: string; startLine: number; closed: boolean }[];
+  checkHtmlScripts: (html: string, o?: { label?: string }) => ScriptReport;
+};
+
+type ScriptProblem = { block: number; line: number | null; kind: string; message: string; snippet: string };
+type ScriptReport = {
+  blocks: number;
+  checked: { block: number; kind: string }[];
+  skipped: { block: number; reason: string }[];
+  problems: ScriptProblem[];
 };
 
 type Router = { classes: Record<string, string>; roster: string[]; declarations: Map<string, string[]> };
@@ -262,6 +273,97 @@ describe('the harness config points at something real', () => {
         `${match![1]} does not exist`,
       ).toBe(true);
     }
+  });
+});
+
+// The HTML render's data lives in an inline <script> as JS array literals, so a
+// quoting slip is a SyntaxError that blanks the interactive table and reports it
+// nowhere but a browser console. These tests are the rule-19c half of that gate:
+// the well-formed case proves it can pass, and the apostrophe case — the exact
+// break that shipped to master — proves it can fail. Only the pair is worth
+// anything; a gate seen only to pass is a gate whose pass carries no information.
+describe('the render’s inline scripts are parsed, not assumed', () => {
+  const wrap = (js: string) => `<!doctype html>\n<body>\n<script>\n${js}\n</script>\n</body>`;
+
+  it('accepts a well-formed block', () => {
+    const r = checkHtmlScripts(wrap("const A = ['x'];\nconst B = { a: 'y' };"));
+    expect(r.problems).toEqual([]);
+    expect(r.checked).toHaveLength(1);
+  });
+
+  it('rejects an unescaped apostrophe inside a single-quoted string', () => {
+    const r = checkHtmlScripts(wrap("const A = ['S4's paid half'];"));
+    expect(r.problems).toHaveLength(1);
+    expect(r.problems[0].kind).toBe('script');
+    expect(r.problems[0].message).toMatch(/Unexpected|Invalid|SyntaxError/i);
+  });
+
+  it('names the line of the offending HTML file, not of the extracted fragment', () => {
+    // doctype 1, <body> 2, <script> 3, `const ok` 4, `const bad` 5. Body line 1
+    // is the remainder of the `<script>` line, which is what makes the offset
+    // land. An offset bug here would still "detect" the break while sending a
+    // reader to the wrong place, which is the failure that wastes the gate.
+    const r = checkHtmlScripts(wrap("const ok = 1;\nconst bad = 'it's';"));
+    expect(r.problems[0].line).toBe(5);
+    expect(r.problems[0].snippet).toContain("'it's'");
+  });
+
+  it('is not fooled by the apostrophe being harmless in the other quoting', () => {
+    // The same character in a double-quoted string is fine, and the curly U+2019
+    // is fine in BOTH. The gate must not degrade into an apostrophe blocklist.
+    expect(checkHtmlScripts(wrap(`const A = ["S4's paid half"];`)).problems).toEqual([]);
+    expect(checkHtmlScripts(wrap("const A = ['S4’s paid half'];")).problems).toEqual([]);
+  });
+
+  it('catches breaks that have nothing to do with quoting', () => {
+    expect(checkHtmlScripts(wrap('const A = [ {;')).problems).toHaveLength(1);
+    expect(checkHtmlScripts(wrap('const = 1;')).problems).toHaveLength(1);
+  });
+
+  it('validates a JSON block as JSON and a module block as a module', () => {
+    expect(checkHtmlScripts('<script type="application/json">{"a":1}</script>').problems).toEqual([]);
+    expect(checkHtmlScripts('<script type="application/json">{"a":1,}</script>').problems)
+      .toHaveLength(1);
+    expect(checkHtmlScripts('<script type="module">export const a = 1;</script>').problems)
+      .toEqual([]);
+    expect(checkHtmlScripts('<script type="module">export const = 1;</script>').problems)
+      .toHaveLength(1);
+  });
+
+  it('refuses to pass while having checked nothing', () => {
+    const r = checkHtmlScripts('<p>a render with no script at all</p>');
+    expect(r.problems.map((p) => p.kind)).toEqual(['nothing-checked']);
+  });
+
+  it('skips an external script but does not count it as checked', () => {
+    const r = checkHtmlScripts('<script src="x.js"></script>');
+    expect(r.skipped).toHaveLength(1);
+    expect(r.problems.map((p) => p.kind)).toEqual(['nothing-checked']);
+  });
+
+  it('reports an unrecognised type instead of silently skipping it', () => {
+    const r = checkHtmlScripts('<script type="text/x-template">{{ not js }}</script>');
+    expect(r.problems.map((p) => p.kind)).toContain('unknown-type');
+  });
+
+  it('ends a block at the first </script>, exactly as a browser does', () => {
+    // The browser's tokenizer closes the element here even though the sequence
+    // sits inside a string literal. Reading past it would compile source no
+    // engine ever runs — the same mistake as checking the Markdown and calling
+    // the HTML verified.
+    const blocks = extractScriptBlocks('<script>const a = "</script>";</script>');
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0].source).toBe('const a = "');
+  });
+
+  it('holds for the shipped render, whose whole point is that it must parse', () => {
+    const html = readFileSync(join(REPO_ROOT, 'docs', 'density-chain', 'DENSITY-CHAIN.html'), 'utf8');
+    const r = checkHtmlScripts(html);
+    expect(
+      r.problems.map((p) => `${p.line}: ${p.message}`),
+      'DENSITY-CHAIN.html has an inline <script> that does not compile',
+    ).toEqual([]);
+    expect(r.checked.length).toBeGreaterThan(0);
   });
 });
 

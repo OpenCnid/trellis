@@ -682,8 +682,8 @@ the write path, or the discoverability program.*
   returning 429. `TRELLIS_A2A_ENABLED` mounts the agent card (pre-auth) and `/a2a/v1` JSON-RPC —
   SendMessage, SendStreamingMessage, GetTask, CancelTask-declined — over TTL-bounded Redis task records.
   Outbound, `trellis_mcp.py` dials operator-configured stdio and Streamable-HTTP servers, counting MCP
-  calls separately from provenance-bearing tool calls. Governance: AGENTS.md's twenty hard rules and
-  §1.5, the session-governance ruling, the root contract and its checker.
+  calls separately from provenance-bearing tool calls. Governance: AGENTS.md's twenty-one hard rules
+  and §1.5, the session-governance ruling, the root contract and its checker.
 - **T3 — with receipts.** `264b007` built A2A hand-rolled with Zod, "zero new dependencies", recording
   `npm test` 468/57 (baseline 419/53), `test:a2a` 46 checks, 9 Compose assertions. `a2119c0` plus
   `c3b4c39` (#36) built the MCP client on `mcp==1.12.4`, spec revision 2025-06-18, `test:rlm-mcp` 86
@@ -715,8 +715,10 @@ the write path, or the discoverability program.*
 *Status ledger:* HTTP/SSE API · A2A server · MCP client — **shipped-pinned, byte-identical when off**;
 inbound MCP server — **design record, zero implementation** (`TRELLIS_MCP_SERVER_ENABLED` has exactly
 one grep hit, inside that record); session-governance scoping and the root contract — **ratified**.
-*Honest note:* no current `npm test` total is recorded anywhere findable at HEAD — the last commits
-carrying counts sit roughly 120 commits back. *Cross-links:* [[C1]] (A2A and the streams are thin
+*Honest note:* no `npm test` total was recorded anywhere findable at HEAD, the last commits carrying
+counts sitting roughly 120 commits back — **closed 2026-07-23 by measurement: 1,387 passed across 118
+files** with this change's eleven render-gate tests, 1,376 without them (the first measured, the second
+subtracted). *Cross-links:* [[C1]] (A2A and the streams are thin
 adapters over the goal loop), [[C4]] (MCP results never mint provenance), [[C13]] (the root contract's
 checker is that class's machinery; this class is what it checks).
 
@@ -893,7 +895,15 @@ module-manifest descriptor fields would still **fail** validation — the schema
 unextended; the shipped descriptor is kernel-side Python whose non-test caller is the
 `trellis_agent.py` prompt seam; the bijection is mechanized only as drill §16's registry↔line checks
 on one surface. `wiki:check --verify` is a CI step and **neither negative control is** — half this
-class's trust precondition rests on operator discipline. *Orphans:* closed 2026-07-23 — both
+class's trust precondition rests on operator discipline. That step now also **compiles the map's own
+HTML render**, whose data is JS source: one straight apostrophe inside a single-quoted string was a
+`SyntaxError` blanking the whole interactive table, reported to nothing but a browser console. It
+shipped and **survived every PR through `a3a5e56`**, one of which edited that very file without
+noticing, because the checker validated the Markdown and merely *inferred* the render — T4's
+**exists-implies-named** gap one level down, in this class's own instrument. `4f945ef` (#176) fixed
+the character by hand, independently and while this gate was being built; what the gate adds is that
+the class cannot recur silently, which is not the same claim as having fixed it. Twenty-five planted
+conditions now, up from eighteen. *Orphans:* closed 2026-07-23 — both
 runtime-half records now carry rows in `docs/ORIENTATION.md` D4. This map's own open item 3 (derivation
 inverted) is **paid**: `SELF_DESCRIBING_SURFACES.md` §9.1 distinguishes guard-derived from editorial
 facts under one invariant — *one encoding, owned by whoever is authoritative for the fact*.
