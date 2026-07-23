@@ -627,10 +627,13 @@ the measurement of them.*
   implemented, not accepted. `TRELLIS_CITATION_ENTAIL` ships gated off. Module #2 missed its criterion
   across 50 runs / $2.3981; the citation-discipline module measured unreliable, never landed. Self-edit
   T2 failed three runs; two more were blocked at $0.0000. Quarantine stays latent. **Headlines remain
-  n=1–2.** New and **uncommitted**: `scripts/repl_sandbox_drill.py` drives **nine** [[C12]] refusals
-  over doubles, eight via that class's composition root; run here **exit 0**, and
-  `--negative-control` plants one break behind each and **exits 3**, all nine detected. Its
-  `repl-sandbox:drill` alias is uncommitted; **no CI runs it**.
+  n=1–2.** Two [[C12]] instruments now ship: `scripts/repl_sandbox_drill.py` drives **nine** refusals
+  over doubles, eight via that class's composition root — **exit 0**, and `--negative-control` plants
+  one break behind each and **exits 3**, all nine detected. New: `scripts/repl_sandbox_s2_probe.py`
+  is the first drill that measures **hardware**, not doubles — boundary, five-turn persistence and
+  teardown on a real Kata guest, **exit 0** on the AX41; its `--negative-control` swaps the guest
+  mid-run and **exits 3** on all three signals (namespace, worker pid, guest `boot_id`). **No CI runs
+  either**, and none can run the S2 probe: it needs `/dev/kvm`.
 - **T5 — future plans.** Open: the real TREC import (unattempted: it needs a paid annotation pass and
   an unbuilt fetch script); adversarial corpora with contested gold labels; embedding-shortcut corpora;
   10k-question scale sweeps; multi-run variance replacing n=1. Proposed: 2-of-3 consensus writes on
@@ -638,10 +641,11 @@ the measurement of them.*
   estimation suite, behavioral criteria only. **None scheduled or funded.**
 
 *Status ledger:* OOLONG harness · v1/v2 corpora · update/poison/scale drills · probe runners —
-**shipped, measured**; the sandbox refusal drill and `fuzz_frame.py` — **[R] only, uncommitted, outside
-CI**; v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
-*What those two license:* nine refusals and eight planted frame readers are **present and fire** over
-doubles — not that a model drives the surface right. Every [[C12]] **[A]** half (S3, S4, S6, GB, GA-eq,
+**shipped, measured**; the sandbox refusal drill, `fuzz_frame.py` and the S2 probe — **[R] only,
+outside CI**; v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
+*What those three license:* nine refusals and eight planted frame readers are **present and fire** over
+doubles; the S2 probe's three claims fired against a real guest **once, n=1, on one host**. None of
+that is a model driving the surface right. Every [[C12]] **[A]** half (S3, S4, S6, GB, GA-eq,
 ≤$5) is **unspent**. Rule 19(c)'s flag now spans **nine** surfaces (`check:repo-surface`, `wiki:check`
 and `upsum` too), none a corpus drill here.
 *Honest note:* "26× at scale" (≈$1,120 vs ≈$40 per 1,000 queries) is an **extrapolation**; no
@@ -711,16 +715,18 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   treats that code as hostile and owns the boundary between it and the operator's secrets. Its
   invariants: one hardware-isolated unit per session; credentials outside it; one narrow channel to
   trusted host chokepoints; and, deepest, a data-flow rule — the code may *address* data but never
-  *hold* it. Language-level guards are telemetry, never boundary. **What exists is the software on both
-  sides of that boundary; the boundary itself is unbuilt — there is no working sandbox.**
+  *hold* it. Language-level guards are telemetry, never boundary. **A microVM now boots and holds
+  state, but it is a spike: the control plane and the boundary are not yet connected to each other,
+  so there is still no working sandbox.**
 - **T2 — current machinery.** Execution still runs on in-process `rlms==0.1.3` LocalREPL holding live
-  credential-bearing clients. New, **uncommitted**: a host-independent control plane,
-  `src/repl_sandbox/` — 21 modules against 19 test files — the frame codec, the vsock transport
+  credential-bearing clients. Beside it, a host-independent control plane, `src/repl_sandbox/` —
+  21 modules against 19 test files — the frame codec, the vsock transport
   (identity read from `accept()`), the guest supervisor protocol, the handle table and slice algebra,
   the DB broker with backends and a statement inspector, the LM handler with byte/rate/spend ledgers and
   a DLP hook, the capability lifecycle, a CID-keyed audit log, `KataREPL(IsolatedEnv)`, and a
-  `KataLauncher` whose four-condition `preflight` now drives a real QEMU benchmark — each
-  transport-agnostic, exercised through loopback doubles. Eleven ratified documents.
+  `KataLauncher` whose four-condition `preflight` drives a real QEMU benchmark — each
+  transport-agnostic, exercised through loopback doubles. Eleven ratified documents. Host-side and
+  outside that tree: `scripts/repl_sandbox_s2_probe.py`, which drives `ctr` directly.
 - **T3 — with receipts.** **G0 lifted 2026-07-22** by owner instruction, in `REPL_SANDBOX_BUILD_PLAN.md`
   §2 (The research-hold gate), under two qualifications: G1 is unsatisfiable here; a loopback double is
   never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3` found **four
@@ -730,30 +736,37 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   on the 3.12 deployment target until shimmed. The frame red-team's **seven defects** are closed;
   `fuzz_frame.py --negative-control` plants **eight** broken readers and **exits 3**. Pins, two
   upstreams: **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0**; depth-2 harmful (~96×, external).
-- **T4 — the frontier.** **G1 PASSED 2026-07-23** — SPEC §8 gate 1, the first any host has met — on a
-  Hetzner AX41 (Ubuntu 24.04, `kvm_amd npt: Y`, `AF_VSOCK`, Kata **3.32.0**, Cloud Hypervisor
-  **v52.0**), unblocking **S2–S5**. Until then no benchmark was injected, so the gate read
-  *unmeasured* on **every** host. A naive quotient carries
-  QEMU's unaccelerated ~1s startup in both halves and read **3.2×** against the 5–35× band; the
-  **differential** — initrd-loaded minus bare, per-side minimum — reads **11.5–14.2×** against a 5.0
-  floor, every unmeasured path reporting `near_native` absent. One comment **inverted the operator
-  guidance**; the records were right. **The split pin paid on first contact:**
-  `kata-static-3.32.0` bundles Cloud Hypervisor **v51.1**, under pin, while `kata-runtime check`
-  passes regardless — caught, named, replaced. Gaps stand: requirement 9's **grant** half is a
-  deployment obligation no Python enforces; `locate`/`get_ast_blocks` **fail closed**; no model
-  allowlist; `MAX_FRAME_LEN` unratified.
-- **T5 — future plans.** Proposed: doubt-filter Layers 1–2, owner ratification pending, substrate
+- **T4 — the frontier.** Two milestones fell on one host, both on 2026-07-23, both on a Hetzner AX41
+  (Ubuntu 24.04, `kvm_amd npt: Y`, Kata **3.32.0**, Cloud Hypervisor **v52.0**). **G1 PASSED** — SPEC
+  §8 gate 1, the first any host has met: the **differential** benchmark (initrd-loaded minus bare,
+  per-side minimum) reads **11.5–14.2×** against a 5.0 floor where a naive quotient, carrying QEMU's
+  ~1 s startup in both halves, read only **3.2×**; before it was wired the gate read *unmeasured* on
+  **every** host, and one comment **inverted the operator guidance** the records had right. **S2
+  PASSED** — the first microVM anyone has booted here: guest kernel **6.18.35** against the host's
+  6.8.0-134, a distinct `boot_id`, a `cloud-hypervisor` process on `/run/vc/vm/<sandbox>/clh-api.sock`,
+  ~**0.7 s** to first exec, and a Python namespace surviving five `ctr task exec` turns on one unmoved
+  worker pid; teardown leaves nothing. **Both upstreams default away from the ratified pin:**
+  `kata-static-3.32.0` bundles Cloud Hypervisor **v51.1**, and `configuration.toml` symlinks to
+  **QEMU** — `kata-runtime check` passes in both states, and the shim is not on containerd's `PATH`
+  at all. Gaps stand: requirement 9's **grant** half is a deployment obligation no Python enforces;
+  `locate`/`get_ast_blocks` **fail closed**; no model allowlist; `MAX_FRAME_LEN` unratified.
+- **T5 — future plans.** Next, now unblocked: **S3** (the `llm_query` frame over vsock — the spike's
+  turns cross a guest fifo, not the wire), **S4** (broker), **S5** (Tier-0), **S6** (the real launch
+  path; `KataLauncher.boot` still raises rather than return a handle backed by a hand-driven `ctr`).
+  Proposed: doubt-filter Layers 1–2, owner ratification pending, substrate
   open. Open: a warm pool behind a proven no-state-bleed reset; depth-2 with a sibling microVM, pending
   Trellis-specific measurement; the environment-type slot; the Windows dev-host shape; host selection
-  (Hetzner taken provisionally, never DigitalOcean). Every **[A]** half (S3, S4, S6, GB, GA-eq) is
-  capped ≤$5 and **unspent**.
+  (Hetzner **taken and now load-bearing**, never DigitalOcean). Every **[A]** half (S3, S4, S6, GB,
+  GA-eq) is capped ≤$5 and **unspent**.
 
-*Status ledger:* **control plane shipped; the boundary it defends is unbuilt — this is not a sandbox
-and must not be read as one.** Unbuilt: the Kata microVM, the vsock bridge on a real host, Tier-0
-in-guest hardening. Accepted: **SPEC §8 gate 1 (G1), 2026-07-23** — the host *can* boot a microVM,
-which is not the claim that one has been booted; gates 2–4 unpassed. *Reachability:* closed by `host.py`,
-`cli.py`, `scripts/repl_sandbox_drill.py` and five `npm` scripts; **no CI job runs any**, and
-`KataLauncher.boot`, both vsock classes and every `*_from_env` factory stay uncalled.
+*Status ledger:* **control plane shipped; a prototype microVM boots; the two are not joined — this is
+not a sandbox and must not be read as one.** Unbuilt: the vsock bridge on a real host, the broker
+against a real guest, Tier-0 in-guest hardening, the production launch path. Accepted: **SPEC §8 gate
+1 (G1) and spike S2, 2026-07-23** — a guest boots and keeps state across turns, which is not the claim
+that anything crosses the boundary safely; gates 2–4 unpassed. *Reachability:* closed by `host.py`,
+`cli.py`, `scripts/repl_sandbox_drill.py`, `scripts/repl_sandbox_s2_probe.py` and six `npm` scripts;
+**no CI job runs any** (the S2 probe *cannot* run in CI — it needs `/dev/kvm` and refuses without it),
+and `KataLauncher.boot`, both vsock classes and every `*_from_env` factory stay uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
 split; `AGENTS.md` §2 still has no row for `src/repl_sandbox/`. *Cross-links:* [[C1]] (replaces that
 substrate, preserving its contract), [[C5]] (the handle model is the pillar as a slicing API), [[C7]]
