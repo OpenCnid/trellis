@@ -6,6 +6,10 @@ repository root:
 
     claude -p "$(cat .claude/ceremonies/dedupe.md)"
 
+[`SETUP.md`](SETUP.md) is the install guide — prerequisites, the permission
+allow-list that travels with the repo, per-OS scheduling, and the per-host
+registry for openclaw, hermes, and any other machine.
+
 Every instruction here is framed positively and stated once — the contract this
 ceremony maintains is the one it is written under. **"No edits" is a successful
 run.**
