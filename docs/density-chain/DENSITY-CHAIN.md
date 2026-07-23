@@ -173,13 +173,16 @@ planner above it. Not what the injected tools reach into, only that they arrive 
   12 runs, $0.7320; the off arm pushed 110,550 tokens through one `llm_query`, 7.6×. `rlms==0.1.3`,
   20,000-char block cap. Bounds `AGENT_MAX_TASKS_PER_GOAL` 8, `…ITERATIONS_PER_GOAL` 4,
   `TASK_WAIT_TTL_MS` 30 min.
-- **T4 — the frontier.** `rlms` LocalREPL still runs model-authored Python in-process on the host with
-  live Neo4j and Postgres credentials in-namespace; the boundary stays [[C12]]'s, and nothing here
-  has moved off it. A pinned read of `rlms==0.1.3` names a live substrate defect: `REPLResult`
-  annotates `llm_calls` but assigns `rlm_calls`, so its generated `repr()` and `==` **raise** on every
-  `execute_code` return. `parseTelemetryLine`'s nine-field allowlist **drops every counter added
-  since Session 20**. `verify()` informs, never gates. S2b `compaction=True` was measured and **never
-  enabled**. `citable()` has **no non-test caller**.
+- **T4 — the frontier.** `rlms` LocalREPL still runs model-authored Python in-process with live Neo4j
+  and Postgres credentials in-namespace; the boundary stays [[C12]]'s and nothing here has moved off
+  it. A sibling in `src/core/runtime/` now decides *which* database a destructive operator script may
+  touch ([[C10]] owns it), and the contrast is the finding: **the REPL path has no equivalent** — an
+  `execute_code` reaching `trellis_neo4j` asserts nothing about its target. A pinned read of
+  `rlms==0.1.3` names a live substrate defect: `REPLResult` annotates `llm_calls` but assigns
+  `rlm_calls`, so its generated `repr()` and `==` **raise** on every `execute_code` return.
+  `parseTelemetryLine`'s nine-field allowlist **drops every counter added since Session 20**.
+  `verify()` informs, never gates. S2b `compaction=True` was measured and **never enabled**.
+  `citable()` has **no non-test caller**.
 - **T5 — future plans.** Proposed and open: replacing this substrate — the ladder, gates and exfil
   doubt-filter are [[C12]]'s. `llm_help` and self-documenting descriptors — Workstream B AUTHORIZED
   July 23, 2026, and the first descriptor shipped byte-identical on [[C5]]'s toolkit, so this seam
@@ -190,10 +193,11 @@ planner above it. Not what the injected tools reach into, only that they arrive 
 
 *Status ledger:* RLM · REPL · `llm_query` · orchestrator · workspace injection · A2A/MCP seam — all
 **shipped-pinned**. Telemetry allowlist gap · `citable()` · `REPLResult` `repr`/`==` · `max_depth` 1
-unenforced **here** — **confirmed open**; the host `depth_ceiling` that now exists guards [[C12]]'s
-channel, not this one. *Cross-links:* [[C4]] (DB tools + the `sourceNodeIds` gate), [[C5]] (the
-toolkit rides the same injection), [[C6]] (workspace/promotion/modules), [[C11]] (A2A/MCP serving),
-[[C12]] (the boundary this class lacks, and does not call).
+unenforced **here** · no target assertion on the REPL's own DB clients — **confirmed open**; the host
+`depth_ceiling` that now exists guards [[C12]]'s channel, not this one. *Cross-links:* [[C4]] (DB
+tools + the `sourceNodeIds` gate), [[C5]] (the toolkit rides the same injection), [[C6]]
+(workspace/promotion/modules), [[C10]] (the drill-target gate that shares this directory), [[C11]]
+(A2A/MCP serving), [[C12]] (the boundary this class lacks, and does not call).
 
 #### C2 — the engineering loop: an out-of-process session controller and its acceptance ledger
 *Charter: the repository-external, protected-state machinery that mechanizes the engineering session
@@ -633,14 +637,21 @@ the measurement of them.*
   T2 failed three runs; two more were blocked at $0.0000. **Headlines remain n=1–2.** Four [[C12]]
   instruments ship, each with its own falsifier. `repl_sandbox_drill.py` drives **nine** refusals over
   doubles (**exit 0**); its control plants a break behind each and **exits 3**.
-  `repl_sandbox_s2_probe.py` measures **hardware**, not doubles: **exit 0** five consecutive times on
-  the AX41, its control swapping the guest mid-run to **exit 3**. `provision_kata_host.sh` extends the
-  discipline to *provisioning*. Newest, and the **sharpest control of the family**:
-  `repl_sandbox_s3_probe.py`'s has the guest answer *itself* byte-identically, so a host-side witness
-  is the **only** possible detector — and on the AX41 that is exactly what happened, parity holding
-  and latency *improving* while the witness alone caught it (**exit 3**); its default mode passed six
-  consecutive times. **No CI runs any of the four** — CI runs no pytest at all — and no host probe
-  can. `scripts/run_adversarial_tests.ts` has neither alias nor caller.
+  `repl_sandbox_s2_probe.py` measures **hardware**, not doubles (**exit 0** five consecutive times on
+  the AX41; its control swaps the guest mid-run to **exit 3**), and `provision_kata_host.sh` extends
+  the discipline to *provisioning*. The family's **sharpest control** is `repl_sandbox_s3_probe.py`'s:
+  the guest answers *itself* byte-identically, so a host-side witness is the **only** possible
+  detector — parity held and latency *improved* while the witness alone caught it (**exit 3**);
+  default mode passed six consecutive times. **No CI runs any of the four** — CI runs no pytest at
+  all — and no host probe can. `scripts/run_adversarial_tests.ts` has neither alias nor caller.
+  **The instruments were themselves ungated:** `oolong:flywheel-prep` and `drill:reset` ran graph-wide
+  `DELETE`s over *every* `DERIVED_INSIGHT` edge, not only the benchmark's, against whatever
+  `NEO4J_URI`/`PG_*` the environment supplied — and `drill:reset` took any doc_key from bare `argv[2]`.
+  `drill_target.ts` now interposes two gates: a database-resident marker (`drill:mark-target`) deciding
+  *which* target, and per-act `--confirm-*` flags deciding *whether*, both refusing exit 2 after
+  echoing a counted plan. `test:drill-gate --negative-control` plants four routes to a wrong database
+  and **exits 3** when all four are refused. **No live-database round-trip has run** — the marker's
+  Cypher and SQL are typechecked only.
 - **T5 — future plans.** Open: the real TREC import (unattempted: it needs a paid annotation pass and
   an unbuilt fetch script); adversarial corpora with contested gold labels; embedding-shortcut corpora;
   10k-question scale sweeps; multi-run variance replacing n=1. Proposed: 2-of-3 consensus writes on
@@ -650,7 +661,8 @@ the measurement of them.*
 *Status ledger:* OOLONG harness · v1/v2 corpora · update/poison/scale drills · probe runners —
 **shipped, measured**; the sandbox refusal drill, `fuzz_frame.py` and the S2 probe — **[R] only,
 outside CI**; the S3 probe — **[R] passed 2026-07-23**, its metered **[A]** fan-out **spent the same
-day** (~$0.001); v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
+day** (~$0.001); the drill-target gate — **[R] against injected readers only, no live-database
+round-trip**; v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
 *What those license:* nine refusals and eight planted frame readers are **present and fire** over
 doubles; the S2 probe's three claims fired against a real guest **five times on one host — n=5 of
 run-to-run variance on identical hardware, which is not a second machine**; the S3 probe's six claims
@@ -658,8 +670,9 @@ fired on that same one host, and its falsifier showed the two most trusted of th
 latency — surviving an uncrossed boundary intact. That was the probe stub, not a model driving the
 surface right — but **S3's `[A]` fan-out then was** (real `gpt-5.4`, 2026-07-23, five slices correct
 across the bridge, metered); the remaining [[C12]] **[A]** halves (S6, GB, GA-eq, ≤$5) stay
-**unspent** now that S4's is banked ($0.011, a real model composing the `run_query` facade). Rule 19(c)'s flag now spans **nine** surfaces (`check:repo-surface`, `wiki:check`
-and `upsum` too), none a corpus drill here.
+**unspent** now that S4's is banked ($0.011, a real model composing the `run_query` facade). Rule
+19(c)'s flag now spans **ten** surfaces (`check:repo-surface`, `wiki:check` and `upsum` too) —
+`test:drill-gate` is the first inside this class, and it guards the drills, not a corpus.
 *Honest note:* "26× at scale" (≈$1,120 vs ≈$40 per 1,000 queries) is an **extrapolation**; no
 external baseline run exists here, and `benchmark_logs/` is gitignored.
 *Cross-links:* [[C4]] · [[C1]] (measured, not owned) · [[C6]] (flywheel economics) · [[C12]] (owns the
@@ -970,7 +983,7 @@ The **Drills and reports** column is prose and script *names*, never paths, and 
 | **C7** | `.claude/skills/**`, `fixtures/doubts_workspace/**`, `docs/product/epistemic-support/STANDING_MODEL.md`, `docs/architecture/{DOUBTS_WORKSPACE,COMPOSITION_FROM_PRIMITIVES}.md` | no engine code — principle only; `fixtures/doubts_workspace/` is the only committed artifact |
 | **C8** | `src/config/index.ts`, `docs/architecture/{MODEL_BACKEND_SEAM,MODEL_BACKEND_HOSTED_ARM,TEST_TIME_TRAINING,REASONING_TEMPLATES}.md` | `rlm_backend.test.ts` (nine groups); no drill |
 | **C9** | `docs/architecture/RESIDUAL_STREAM_SIDECAR.md` | *(none)* |
-| **C10** | `src/benchmarks/**`, `data/**`, `docs/benchmarks/**`, `docs/product/{BENCHMARK_OOLONG,OOLONG_BENCHMARK_SPEC,VALIDATION_STRATEGY,PRD}.md`, `docs/product/PHASE_*.md`, `docs/operations/OOLONG_BENCHMARK_GUIDE.md` | `oolong:benchmark`, `drill:update`, `drill:poison`, `drill:scale`; `repl-sandbox:drill` (+ `--negative-control`, healthy exit 3) — uncommitted, outside CI |
+| **C10** | `src/benchmarks/**`, `src/core/runtime/drill_target*`, `data/**`, `docs/benchmarks/**`, `docs/product/{BENCHMARK_OOLONG,OOLONG_BENCHMARK_SPEC,VALIDATION_STRATEGY,PRD}.md`, `docs/product/PHASE_*.md`, `docs/operations/OOLONG_BENCHMARK_GUIDE.md` | `oolong:benchmark`, `drill:update`, `drill:poison`, `drill:scale`, `test:drill-gate` (+ `--negative-control`, healthy exit 3); `repl-sandbox:drill` — uncommitted, outside CI |
 | **C11** | `src/api/**`, `src/core/a2a/**`, `src/frontend/**`, `src/rlm/trellis_mcp*`, `src/config/mcp_servers*`, `.env.example`, `AGENTS.md`, `README.md`, `HANDOFF.md`, `.github/**`, `docs/architecture/{MCP_SERVER_SURFACE,SESSION_GOVERNANCE}.md`, `docs/reference/**`, `docs/operations/**` | `test:a2a`, `test:rlm-mcp`, `test:api-hardening` |
 | **C12** | `docs/product/repl-sandbox/**`, `src/repl_sandbox/**`, `scripts/repl_sandbox_*.py`, `scripts/provision_kata_host.sh`, `conftest.py`, `pytest.ini` | `test:repl-sandbox`, zero-paid; `repl-sandbox:{preflight,selftest,drill,provision,s2-probe,s3-probe}`; `fuzz_frame.py`, `repl_sandbox_drill.py`, both host probes and `provision_kata_host.sh` each carry a falsifier (`--negative-control`, healthy exit 3; or `--verify`, exit 1 naming what it would change); `test_rlms_conformance.py` (pinned source). **No CI job runs any of them**, and the host probes cannot — they need `/dev/kvm` |
 | **C13** | `tools/repository-surface/**`, `tools/density-chain/**`, `.claude/**`, `AGENTS.md`, `README.md`, `.github/**`, `docs/{ORIENTATION,README,GLOSSARY,COLLABORATOR_BRIEFING,RESEARCH_NOTES_COLLECTION}.md`, `docs/architecture/{REPOSITORY_ROOT_CONTRACT,SELF_DESCRIBING_SURFACES,LLM_HELP_SPEC,HARNESS_SELF_MODEL}.md` | `check:repo-surface` (+ `--negative-control`), `wiki:check --verify` |

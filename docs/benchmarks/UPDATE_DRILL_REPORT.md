@@ -152,14 +152,27 @@ A stateless agent gets this right by brute force (it never remembers anything). 
 
 ## 7. Reproducing
 
+Drills refuse any database that has not been declared expendable. Mark
+the scratch stack once, before the first run:
+
+```bash
+npm run drill:mark-target -- --purpose "update drill scratch stack" --confirm-mark
+```
+
 ```bash
 npm run oolong:ingest          # v1 physical + semantic layers
-npm run oolong:flywheel-prep   # strip annotations; cold cache
+npm run oolong:flywheel-prep -- --confirm-strip   # strip annotations; cold cache
 npx tsx scripts/start_all.ts   # server + workers (needs OPENAI_API_KEY)
 npm run drill:update           # all four acts, unattended (~$1.55)
 
-npm run drill:update -- --acts 2,3   # LLM-free: mutation + diff + sweep + audit
-npm run drill:reset                  # clear registry + drill leftovers to re-run
+npm run drill:update -- --acts 2,3        # LLM-free: mutation + diff + sweep + audit
+npm run drill:reset -- --confirm-reset    # clear registry + drill leftovers to re-run
 ```
+
+Every destructive step prints its target and its plan and exits 2 without
+its `--confirm-*` flag, so running it bare is a safe way to see what it
+would do. See [`src/core/runtime/drill_target.ts`](../../src/core/runtime/drill_target.ts)
+for the two gates, and `npm run test:drill-gate -- --negative-control`
+to watch them refuse.
 
 Artifacts: [update_drill_results.json](artifacts/update_drill_results.json) (metrics + per-query telemetry), [data/update_drill_manifest.json](../../data/update_drill_manifest.json) (the 11 mutations), [data/oolong_pairs_dataset_v2.json](../../data/oolong_pairs_dataset_v2.json) (mutated corpus + recomputed ground truth).

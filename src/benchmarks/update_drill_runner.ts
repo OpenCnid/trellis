@@ -5,6 +5,12 @@ import { QueryTelemetry, cityTruth, executeScoredQuery } from './oolong/scoring'
 import { mutateDataset, DrillManifest } from './oolong/mutate';
 import { reingestDataset, auditInvalidation, InvalidationAudit, ReingestTelemetry, DRILL_DOC_KEY } from './oolong/reingest';
 import { pgPool, neo4jDriver } from '../config/db';
+import {
+  assertDrillTarget,
+  liveMarkerReaders,
+  printTargetBanner,
+  reportRefusal,
+} from '../core/runtime/drill_target';
 
 // Phase 4 Milestone 4: the Update Drill (PHASE_4_PRD.md §Milestone 4).
 //
@@ -124,6 +130,15 @@ async function main(): Promise<void> {
   console.log('======================================================');
   console.log(`OOLONG Update Drill — acts: ${[...acts].sort().join(', ')}`);
   console.log('======================================================\n');
+
+  // This runner calls reingestDataset() directly, so the CLI's gate in
+  // scripts/reingest_oolong_dataset.ts does not cover it.
+  const markers = await assertDrillTarget(
+    ['neo4j', 'postgres'],
+    liveMarkerReaders(neo4jDriver, pgPool)
+  );
+  printTargetBanner(['neo4j', 'postgres'], markers);
+  console.log('');
 
   // ---------------- Act 1: warm-up (LLM) ----------------
   let act1: SequenceResult | null = null;
@@ -256,8 +271,11 @@ main()
     process.exit(0);
   })
   .catch(async err => {
-    console.error(`UPDATE DRILL FAILED: ${err.message}`);
+    const refusalCode = reportRefusal(err);
+    if (refusalCode === null) {
+      console.error(`UPDATE DRILL FAILED: ${err.message}`);
+    }
     await pgPool.end().catch(() => {});
     await neo4jDriver.close().catch(() => {});
-    process.exit(1);
+    process.exit(refusalCode ?? 1);
   });
