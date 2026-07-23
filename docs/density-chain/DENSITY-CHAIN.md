@@ -793,8 +793,15 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
 - **T5 — future plans.** Immediate next is **S5** (Tier-0 in-guest hardening),
   then **S6** — which now carries a prerequisite found by trying to use it:
   `supervisor.GuestSupervisor` imports `rlm.environments.base_env` and **the guest image carries no
-  rlms**, so S4 `[A]` bound the transport hook itself rather than fake that pin with a shim. Also owed
-  there: a paramstyle line in the `run_query` descriptor doc (rule 16 work, so its own change).
+  rlms**, so S4 `[A]` bound the transport hook itself rather than fake that pin with a shim. The
+  closure is now measured rather than feared — `rlm` + `attrs` + `python-dotenv` + `rich`, ≈3.9 MB,
+  all pure Python — **for one frozenset of eight strings**, everything else being convention the
+  supervisor already reimplements. Three options are recorded in BUILD_PLAN §5.6 with the
+  recommendation: have the host read `RESERVED_TOOL_NAMES` from the *real* pinned package and pass it
+  over the control port, which keeps the pin where rlms lives and stops the untrusted guest needing
+  the driver's library at all. Whether it rides on `setup()` or on every `execute_code` waits for the
+  op set S6 defines. Also owed there: a paramstyle line in the `run_query` descriptor doc (rule 16
+  work, so its own change).
   Free and scheduled: a **nested guest** as the virgin
   instance the provisioner's never-executed install branch is owed; a second *machine* stays
   **deferred**, re-opening on a kernel-specific finding (vsock the likeliest, the hybrid correction its

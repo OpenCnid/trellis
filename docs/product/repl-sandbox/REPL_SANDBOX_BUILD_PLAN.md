@@ -656,7 +656,32 @@ inner layer instead. This spike is re-cast to the ratified control; it is not a 
   into vsock proxy stubs ([SPEC §2](REPL_SANDBOX_SPEC.md), §4.3).
 - **Real unknown it closes:** is the sandboxed backend a genuine **drop-in** for the rlms driver — does an
   unedited context load → `execute_code` behave as `LocalREPL` does?
-- **Entry preconditions:** S1–S5 complete (contract, boundary, both chokepoints, hardening).
+- **Entry preconditions:** S1–S5 complete (contract, boundary, both chokepoints, hardening), **plus the
+  rlms-in-the-guest decision below.**
+
+**Open decision S6 must make first: `GuestSupervisor` cannot currently be imported in the guest.**
+Found by S4 `[A]` trying to use it (§5.4). `supervisor.py` does
+`from rlm.environments.base_env import RESERVED_TOOL_NAMES`, and the guest image — stock
+`python:3.12-slim` plus the shipped `repl_sandbox` — has no rlms. Measured rather than assumed: that
+import pulls **`rlm`, `attrs`, `python-dotenv` and `rich`, ≈3.9 MB, all pure Python** (no compiled
+extensions, so shipping is mechanically possible) — and the *only* thing the guest takes from any of
+it is **one frozenset of eight strings**. Everything else `GuestSupervisor` uses from rlms is
+convention it already reimplements (the `REPLResult` field names, the `answer` channel). Three options:
+
+| | approach | cost |
+|---|---|---|
+| **A** | ship/bake rlms into the guest image | 3.9 MB and four packages for eight strings, `rich` included; more `ctr task exec` chunks on a host that intermittently wedges them, against §5.4's "shipping fewer files is a reliability property" |
+| **B** *(recommended)* | host reads `RESERVED_TOOL_NAMES` from the **real** pinned package and passes it in — `GuestSupervisor(reserved_names=…)`, delivered over the control port | a signature plus a control-port payload field. The pin stays enforced where rlms actually lives and [INTERFACES §8](REPL_SANDBOX_INTERFACES.md)'s conformance test still fails first if the set moves. Also the better shape on its own terms: the guest is untrusted and should not need the driver's library |
+| **C** | vendor the eight names into `repl_sandbox`, pinned by a host-side conformance test | simplest, but duplicates a value `supervisor.py`'s own docstring says is "read from the pinned package rather than retyped" |
+
+**B is not the shim S4 `[A]` refused.** That shim would have *faked* the pin — a hand-written `rlm`
+module in the guest asserting eight strings on its own authority, while making a run look as though it
+had exercised the real supervisor. B reads the genuine pinned package host-side and transmits its
+value. The distinction is which side holds the authority, not whether the constant travels.
+
+The one thing S6 should settle with the control port in hand rather than now: whether the names ride
+on `setup()` or on every `execute_code`. That depends on the op set S6 defines, which is why this is
+recorded as S6's decision instead of pre-empted here.
 - **Exit acceptance → enforcing surface:**
   - **[R]** a scripted equivalence harness: an unedited load → `execute_code` round-trips with the same
     observable `REPLResult` shape as `LocalREPL`. Enforcing surface: the **`KataREPL` backend + the rlms
