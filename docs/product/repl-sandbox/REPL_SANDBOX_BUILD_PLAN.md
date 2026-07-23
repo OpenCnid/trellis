@@ -134,6 +134,46 @@ Kata + Cloud Hypervisor **requires real `/dev/kvm`**; a silent QEMU-TCG fallback
 - **Label: [R]** — deterministic host check; no model involved.
 - **Dependencies:** blocks S2–S5.
 
+### 4.1 Reaching the host (read this before re-deriving it)
+
+**This repository is public, so the host's address is not in it.** It is reached through a local SSH
+alias — every command in §4, §4.1 and §5.2 assumes it:
+
+```bash
+ssh trellis-kata           # -> the provisioned AX41, as root, by key
+```
+
+The alias is defined in the operator's own `~/.ssh/config` (`HostName`, `User root`, `IdentityFile`)
+and nowhere else. A session that finds `ssh trellis-kata` failing should assume **the alias is
+missing locally**, not that the host is gone — ask the owner for the address rather than scanning for
+it, and never commit the address, a key, or a `known_hosts` line to this tree.
+
+Two commands orient a new session on the host — each is a check, not a change, and both run against
+files already at `/root/`:
+
+```bash
+ssh trellis-kata 'bash /root/provision_kata_host.sh --verify'   # every step should say "already"
+ssh trellis-kata 'python3 /root/repl_sandbox_s2_probe.py'       # S2, exit 0
+```
+
+**The host carries no checkout of this repository** (as of 2026-07-23 `/root/` holds only the two
+scripts above and the fetched Kata/Cloud-Hypervisor assets). Scripts are `scp`'d over per run, so
+re-running **G1** — which lives in the package, not in a standalone script — means putting a checkout
+there first:
+
+```bash
+ssh trellis-kata 'git clone --depth 1 https://github.com/OpenCnid/trellis /root/trellis \
+  && cd /root/trellis/src && python3 -m repl_sandbox.cli preflight'
+```
+
+Anything a spike leaves behind on that box is a scratch artifact. **The repository is the record, and
+a fact that exists only on the AX41 has not been recorded** — copy the observation into these
+documents in the same session that produces it.
+
+**What that host is provisioned to** is §4's table plus the three facts in
+[REPL_SANDBOX_LEARNINGS.md](REPL_SANDBOX_LEARNINGS.md) §10a; `provision_kata_host.sh` is the
+executable form and should be preferred over re-reading either.
+
 **Observed 2026-07-23 — G1 PASS.** `python -m repl_sandbox.cli preflight` → **exit 0**, all four
 conditions met, run from a clean checkout at `e9a8ff5`. The host: a **Hetzner AX41** dedicated
 (Root) server — from the ratified set — AMD Ryzen 5 3600 (6C/12T, `svm`), 62 GB, 2×477 GB NVMe in
