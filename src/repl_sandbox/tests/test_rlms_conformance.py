@@ -55,6 +55,23 @@ from repl_sandbox.frame import encode_frame, read_frame_from_socket
 PINNED_RLMS_VERSION = "0.1.3"
 
 
+def protocol_members(protocol: type) -> set[str]:
+    """The member names of a `typing.Protocol`, on 3.12 as well as 3.13+.
+
+    `typing.get_protocol_members` is 3.13+. Ubuntu 24.04 - the deployment
+    target this class is provisioned on (BUILD_PLAN section 4) - ships Python
+    3.12, where the same set is only reachable through the private
+    `_get_protocol_attrs`. Reaching for the private name on the older
+    interpreter keeps the assertion running where the code will actually run;
+    skipping instead would have made the conformance claim silently untested
+    on the one platform that matters.
+    """
+    public = getattr(typing, "get_protocol_members", None)
+    if public is not None:
+        return set(public(protocol))
+    return set(typing._get_protocol_attrs(protocol))  # type: ignore[attr-defined]
+
+
 def test_rlms_version_is_pinned() -> None:
     """Everything below is asserted about one version only."""
     assert version("rlms") == PINNED_RLMS_VERSION
@@ -426,7 +443,7 @@ def test_supports_persistence_is_a_runtime_checkable_five_method_protocol() -> N
     """
     assert getattr(SupportsPersistence, "_is_protocol", False) is True
     assert getattr(SupportsPersistence, "_is_runtime_protocol", False) is True
-    assert typing.get_protocol_members(SupportsPersistence) == {
+    assert protocol_members(SupportsPersistence) == {
         "update_handler_address",
         "add_context",
         "get_context_count",
@@ -436,7 +453,7 @@ def test_supports_persistence_is_a_runtime_checkable_five_method_protocol() -> N
 
     signatures = {
         name: str(inspect.signature(getattr(SupportsPersistence, name)))
-        for name in typing.get_protocol_members(SupportsPersistence)
+        for name in protocol_members(SupportsPersistence)
     }
     assert signatures["update_handler_address"] == (
         "(self, address: tuple[str, int]) -> None"
