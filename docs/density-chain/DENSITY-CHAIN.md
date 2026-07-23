@@ -127,7 +127,7 @@ across for one subsystem's arc.
 | **C2 Engineering loop** | a controller outside the worktree that mechanizes the session loop | EL-00…EL-06 accepted; ledger + `el:activate`'s ten commands | EL-10/EL-11 **implemented, not accepted**; EL-07 **blocked**; kernel, prompt compiler, runner, verifier, checker, renderer have **no non-test caller** | EL-08 scheduler/extraction, EL-09 report ingest — each needs a fresh owner proposal |
 | **C3 Epistemic support** | a graded, decaying (b,d,u) opinion of how a belief held up, computed sweep-side, writer-blind | support arithmetic, judge panel, intake, convocation, `judge_explain` render — all zero-paid | four-role cast **demoted to one instance** (S71); live judge constructor exists and has only ever refused; paid queue **ON HOLD** | reopen the paid queue; J3 live gatherer; the metered promotion-cost run (≈$0.02–$0.06/belief) |
 | **C4 Substrate & custody** | provenance-enforced storage: Merkle ASTs plus beliefs bound by `sourceNodeIds` | verified ingest, invalidation sweep, quarantine/recovery, `repo:ingest`, entity resolution — measured | structural chunking pilot **FAILED as worded**, recovered only after the liveness filter; node-level `contested` has no consumer | `ASTRef`/`EVIDENCED_BY` migration (gate closed at 286/1,000 hashes); CRDT; trust decay; docs-corpus extraction |
-| **C5 Code-mediated text** | the pillar: the model never counts, never copies | `trellis_textedit`, `trellis_answer`, `get_ast_blocks`, guarded splice family, retrieval discipline, structural chunking | guarded-only is an **operator gate `buildAgentEnv` neither sets nor strips**, with no dated behavior report; the guarded family's own driver failed three times | engine-resolved-anchor insert; guarded-only as default; `py-tree-sitter` addressing; superseded-embedding sweep |
+| **C5 Code-mediated text** | the pillar: the model never counts, never copies | `trellis_textedit` (addendum descriptor-composed, byte-identity pinned), `trellis_answer`, `get_ast_blocks`, guarded splice family, retrieval discipline, structural chunking | guarded-only is an **operator gate `buildAgentEnv` neither sets nor strips**, with no dated behavior report; the guarded family's own driver failed three times | engine-resolved-anchor insert; guarded-only as default; `py-tree-sitter` addressing; superseded-embedding sweep |
 | **C6 Trust & flywheels** | three tiers; one-way promotion; derive once, cache with custody, reuse | workspace, lineage, promotion, module registry (#0, #1), grounded authoring, anchor gate | module #2 **shipped then retired the same day** on its own control; laundering stays structurally undecidable; no authored module composes by default | per-claim citation mapping; `promote --embed`; entailment as a capability gate; tool-bearing modules (unopened) |
 | **C7 Standing & composition** | signed-ternary standing, user-gated; compose from primitives, no default cast | the nine in-repo skills; the composition-from-primitives lesson | standing model **ratified as principle, no build**; corrosion bound **falsified as written** (positive core survives); `ROLE_DEFINITIONS` is still the cast rule 17 forbids | hash-kind stamp; recorder-plus-gate promotion; §11 repair directions; `affirmation` as an object |
 | **C8 Backend seam & TTT** | make the completion backend a choice; ask whether test-time training helps adherence | the T1 config surface, and one live guard: the ambient `OPENAI_BASE_URL` refusal | T1 **consumer-less**; T2 **failed three straight sessions**, PAUSED on an unbuilt tooling increment; hosted arm is a proposal | R3–R5 rungs; LaCT arms; worker-transport override. **No TTT run or alternate backend has ever executed** |
@@ -135,7 +135,7 @@ across for one subsystem's arc.
 | **C10 Benchmarks & evidence** | a capability claim is a hypothesis until a dated report retires it | OOLONG v1, update/poison/scale drills, effective-context rounds, citation A/B, wall-clock — all dated | anti-shortcut corpus v2 pinned zero-paid with **no paid run**; the uncommitted nine-refusal sandbox drill is **[R]**-only, outside CI | real TREC import; adversarial corpora; 10k sweeps; multi-run variance replacing n=1; consensus writes |
 | **C11 Serving & governance** | narrow, authenticated, admission-bounded doors; a written contract about which record wins | HTTP/SSE API, A2A server, outbound MCP client (byte-identical when off); AGENTS.md, session governance, the root contract | the surface checker is **green again** (`20e94ae` restored the density-chain links); `KNOWN_ROUTES` mislabels two routes | inbound MCP server surface with five open decisions; OAuth posture; the dual client+server role |
 | **C12 REPL sandbox** | treat model-authored Python as hostile and own the boundary between it and the operator's secrets | *(nothing shipped)* — still in-process `rlms==0.1.3` LocalREPL; eleven ratified design documents | G0 lifted 2026-07-22, S1 closed; a 781-test host-independent control plane sits **uncommitted, no non-test caller, no CI**, while G1 is unliftable on this Windows host so S2–S6 and the boundary itself stay unbuilt | doubt-filter Layers 1–2; warm pool; `max_depth` 2; host selection; the paid **[A]** halves, ≤$5, unspent |
-| **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI | the record↔twin asymmetry is structural — the checker proves twin↔tree only; Phase 0 **falsified its own specification**; the kernel's nearest guard-derivation is a switch over two hand-written constants; the runtime half is **authorized and unbuilt**, the fragile third state | `llm_help` and descriptors; the guard-derivation bijection; a human-doc generator; the self-play discrimination gate |
+| **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI; the first shipped descriptor — `trellis_textedit`'s addendum composes, byte-identity pinned per arm | the record↔twin asymmetry is structural — the checker proves twin↔tree only; Phase 0 **falsified its own specification**; a newline-free bijection orphan is pinned in the guarded arm; `llm_help` stays **authorized and unbuilt** | `llm_help`; the remaining eight descriptors (no pin ceremony owed); a human-doc generator; the self-play discrimination gate |
 
 ---
 
@@ -181,8 +181,9 @@ planner above it. Not what the injected tools reach into, only that they arrive 
   since Session 20**. `verify()` informs, never gates. S2b `compaction=True` was measured and **never
   enabled**. `citable()` has **no non-test caller**.
 - **T5 — future plans.** Proposed and open: replacing this substrate — the ladder, gates and exfil
-  doubt-filter are [[C12]]'s. `llm_help` and self-documenting descriptors — PROPOSED, authorizing no
-  build, behind the harness self-model's §8 gate with expectation-to-guard bijection as the audit.
+  doubt-filter are [[C12]]'s. `llm_help` and self-documenting descriptors — Workstream B AUTHORIZED
+  July 23, 2026, and the first descriptor shipped byte-identical on [[C5]]'s toolkit, so this seam
+  consumed it byte-unchanged; `llm_help`'s own landing is what moves both composed-prompt pins.
   Reasoning-templates, not sequenced. Backend T2–T4, the hosted arm, TTT rungs R3–R5 — owner-gated.
   `max_depth` 2 is a contingency. The composed-prompt sha pins are the natural cache key for any
   prefix fast-state.
@@ -369,41 +370,44 @@ the model's attention. Not whether moved bytes are citable, nor whether a belief
   frame: `load`/`lines`/`locate` compute half-open addresses; `splice` and the guarded family —
   `replace_lines`, `insert_lines`, `delete_lines` — stage verified removal manifests, raising
   `AnchorMismatchError` or naming the minimal window; `TRELLIS_TEXTEDIT_GUARDED_ONLY` deletes the raw
-  path; `write_back` refuses on digest mismatch. `trellis_answer.submit(expression_text)` evaluates in
-  the live namespace, refusing bare literals. `get_ast_blocks` serves ordered blocks through
-  `trellis_blocks.py`. Retrieval discipline dedups held hashes, roots and queries under a 64-fetch
-  budget.
-- **T3 — with receipts.** Toolkit `95ff8c7`/#55; answer channel `44ba234`/#60; `get_ast_blocks`
-  `b04ac91`/#62; guarded family `ec3f824`/#83; guarded-only `3bdc0e7`/#135; retrieval discipline
-  `648dc02`/#75. Probe round 1: one off-arm run pushed **110,550** input tokens versus 14,457; the on
-  arm printed 55 and answered 47 — the transcription pathology, caught live. Round 4: **0/36 locate
-  misses versus round 3's 7/30**, 36/36 adoption, $0.9452. **180/180 submits, zero transcription
-  errors.** Session 43: 25/25 correct, 5 dedup refusals, $1.9619. Chunking: structureless TypeScript
-  51.6% → 0.4%, 15 monoliths → 0.
+  path; `write_back` refuses on digest mismatch. Its addendum composes from `TEXTEDIT_DESCRIPTOR`
+  plus the guard-keyed `_TEXTEDIT_GUARD_EXPECTS`, mode-selected by the refusing `_guarded_only` bool.
+  `trellis_answer.submit()` evaluates in the live namespace, refusing bare literals. `get_ast_blocks`
+  serves ordered blocks through `trellis_blocks.py`. Retrieval discipline dedups hashes, roots and
+  queries under a 64-fetch budget.
+- **T3 — with receipts.** Toolkit #55; answer channel #60; `get_ast_blocks` #62; guarded family
+  `ec3f824`/#83; guarded-only #135; retrieval discipline #75; descriptor composition `f82cf51`/#177 —
+  byte-identity on both arms (3,066/3,067 chars), one pin per arm, each seen to fail once
+  (rule 19(c)), composed-prompt shas unmoved. Probe round 1: one off-arm run pushed **110,550** input
+  tokens versus 14,457; the on arm printed 55 and answered 47. Round 4: **0/36 locate misses versus
+  round 3's 7/30**, 36/36 adoption, $0.9452. **180/180 submits, zero transcription errors.**
+  Session 43: 25/25 correct, $1.9619. Chunking: structureless TypeScript 51.6% → 0.4%.
 - **T4 — the frontier.** The guarded family's own driver failed. Sessions 52/53/54 spent
   $1.0888/$0.7139/$0.8163 on three no-landings; the last batched `insert_lines` on pre-staging
   addresses, drawing **`AnchorMismatchError` ×11** and burning 14 of 16 iterations. The owner chose
   tooling shape — an engine-resolved-anchor or batch insert — recommended, design-record-first,
   **unbuilt**. Known-broken residuals stand recorded: raw `splice` reachable by default, because
-  `buildAgentEnv` **neither sets nor strips** `TRELLIS_TEXTEDIT_GUARDED_ONLY` while explicitly deleting
-  every other textedit variable; `write_back`'s TOCTOU narrowed, not eliminated; dedup padding-evadable.
+  `buildAgentEnv` **neither sets nor strips** `TRELLIS_TEXTEDIT_GUARDED_ONLY`; `write_back`'s TOCTOU
+  narrowed, not eliminated; dedup padding-evadable; the guarded arm renders no line for the
+  newline-free contract it enforces — a pinned bijection orphan.
 - **T5 — future plans.** Proposed next: the engine-resolved-anchor insert (a unique substring in, the
   engine computes address and terminator; non-unique refuses) or a batch insert re-resolving drift
   internally — additive, zero-paid, drill-pinned. Open: making guarded-only the default is its own
   behavior-changing increment; `py-tree-sitter` construct addressing carries a recorded revisit
   trigger; the superseded-embedding sweep stays unchosen; error-tolerant ingestion of broken files is
   undecided; prose chunking and wider policy-2 rollout await an owner call. Proposed elsewhere: sandbox
-  handles, `trellis_textedit` descriptors.
+  handles; the remaining surface descriptors ride [[C13]]'s program.
 
 *Status ledger:* the pillar (RATIFIED 2026-07-09) · textedit · answer channel · `get_ast_blocks` ·
-guarded splice · retrieval discipline · structural chunking — **shipped-pinned**. *The honest gap:*
+guarded splice · retrieval discipline · structural chunking · the descriptor-composed addendum —
+**shipped-pinned**. *The honest gap:*
 guarded-only has **no dated behavior report at all** — the record says so outright, and the recorded
 `raw_splices == 0` values in Sessions 50–54 are *choices*, not observed enforcement. The guarded
 family's founding evidence is a **script**, not a model; the only model-behavior evidence is three
 consecutive no-landings. §2.9 (a paraphrase of authority is a retyping) has **no enforcing surface**.
 *Cross-links:* [[C4]] (ingest is already compliant; toolkit ops carry no provenance), [[C6]] (grounded
 authoring is the pillar applied to citations), [[C12]] (the handle model is this pillar realised as a
-slicing API), [[C13]] (`trellis_textedit` is the named first descriptor candidate).
+slicing API), [[C13]] (`trellis_textedit` carries that program's first shipped descriptor).
 
 #### C6 — earned permanence: the three-tier trust pipeline and the two flywheels
 *Charter: the trust gradient, the Tier-3 workspace and its lineage, the operator-gated one-way
@@ -813,69 +817,65 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   refuse, the allowlists that gate — rather than authored separately as prose, because separately
   authored description drifts silently from behavior. Discoverability is then a property of each
   component, not a maintenance chore.
-- **T2 — current machinery.** Only the repository half ships. The root contract is ratified; its
+- **T2 — current machinery.** The root contract is ratified; its
   machine twin fixes **seventeen** permitted root files with byte caps, **ten** top-level directories,
   forbidden artifacts, and deprecation markers. `tools/repository-surface/check.ts` enforces them plus
   Markdown links and environment-example coverage; `cli.ts` runs `npm run check:repo-surface` in CI.
-  `AGENTS.md` is the bounded entrypoint, `HANDOFF.md` a deprecated stub. The runtime half — the
-  guard-derived composed read, `llm_help`, the descriptor convention — is now **ratified and
-  authorized, and still unbuilt**: the standing moved 2026-07-23, no code did.
+  `AGENTS.md` is the bounded entrypoint, `HANDOFF.md` a deprecated stub. The runtime half has its
+  first shipped code: `TEXTEDIT_DESCRIPTOR` plus the guard-keyed `_TEXTEDIT_GUARD_EXPECTS` compose
+  the textedit addendum through `render_textedit_addendum`, mode-selected by the refusing
+  `_guarded_only` bool; `llm_help` itself stays specified, authorized, unbuilt.
 - **T3 — with receipts.** `72ac673` (#156, 2026-07-21) landed the contract, its twin, and the checker —
-  **ten issue codes**, fifteen root files, ten directories, nine forbidden artifacts; the CI step
-  precedes `npm test`. `conftest.py` and `pytest.ini` were admitted 2026-07-22 as class `tool` at
-  4,096-byte caps, twin **and** record §2 together with a dated amendment — the ceremony that the
-  prior edition recorded as skipped was completed. `794aab2` (2026-07-23) ratified
-  `SELF_DESCRIBING_SURFACES.md` and authorized **Workstream B only** of the self-model, records only,
-  no code: `HARNESS_SELF_MODEL.md` §12 carries the authorization and holds Workstream A, rule 7's paid
-  probe, and Phase 4's any-gate shut; `LLM_HELP_SPEC.md` became the build spec with derived, not
-  independent, standing. Measured: checker **PASS (0 issues)**, negative control catching all four
-  planted breaks, `AGENTS.md` at **31,034 bytes against its 32,768 cap** (1,734 headroom, down from
-  eleven before #171 restated the rules positively). Design records: `dc1f55f` (#153), `3a02408`
-  (#154), `3bdc0e7` (#135), `cb12a53` (#136).
-- **T4 — the frontier.** **Authorized is a third state, and it is the fragile one.** A record that says
-  *build this* with nothing built is neither a proposal that can be ignored nor a slice that can be
-  read from code — it decays into either unless a first increment converts it. That increment is
-  pre-stated and sharper than the record first put it: give `trellis_textedit` the descriptor shape,
-  derive its addendum, pin byte-identity — and it owes **two** pins, because
-  `build_textedit_addendum` **selects between two pre-authored constants** on the `_guarded_only`
-  bool rather than deriving anything. The kernel's nearest thing to guard-derivation turns out to be a
-  switch over hand-written prose; the guarded-only arm is the informative pin, being the first
-  state-dependent self-description. **The record↔twin asymmetry is structural, not the closed
-  instance:** the checker proves twin↔tree, never record↔twin, and `AGENTS.md` §2 rows every other
-  top-level `src/` package and [[C12]]'s not at all. **Named-implies-exists is proved;
-  exists-implies-named is not** — the general form of the backticked-row miss that survived `5e7295d`
-  (green again since `20e94ae`). **Confirmed unfixed:** the nine-field telemetry allowlist — now
-  *deliberately* so, since it is Workstream A's Phase 0a and A was held back. **Falsified:** Phase 0,
-  2026-07-19, proved its own specification impossible. **Unscheduled:** `.claude/ceremonies/` — a
-  dedupe ceremony whose prompt is committed beside the rulings it honors, so the loop's instructions
-  and its exceptions are both diffable; **"No edits" is a successful run**, and it owes a seeded-clean
-  positive control. Its `SETUP.md` installs the fourteen-command allow-list into
-  `.claude/settings.json`, which **travels by checkout** because permission rules are the one settings
-  category that merges across scopes rather than top-winning, and which withholds `gh pr merge` and
-  write access to `.claude/**` — so the loop cannot rewrite its own prompt. Nothing schedules it yet.
+  **ten issue codes**; `conftest.py` and `pytest.ini` were admitted 2026-07-22 as class `tool`, twin
+  **and** record together with a dated amendment. `794aab2` (2026-07-23) ratified
+  `SELF_DESCRIBING_SURFACES.md` and authorized **Workstream B only** of the self-model;
+  `f82cf51` (#177, same day) executed increment 1: **byte-identity held on both arms**
+  (3,066/3,067 chars), one pin per arm in `test_textedit.py` §16, each seen to fail once on a planted
+  one-byte perturbation (rule 19(c)), both composed-prompt shas unmoved. Measured: checker
+  **PASS (0 issues)**, negative control catching all four planted breaks, `AGENTS.md` at
+  **31,034 bytes against its 32,768 cap**. Design records: `dc1f55f` (#153), `3a02408` (#154),
+  `3bdc0e7` (#135), `cb12a53` (#136).
+- **T4 — the frontier.** **Increment 1 converted "authorized" into observation, and the honest scope
+  of "derived" is recorded:** the phrase text is still hand-authored once per guard class and pinned;
+  what the engine derives is the selection (the refusing bool) and single-encoding ownership —
+  nothing generates prose from predicate code, and the other eight surfaces are untouched. Findings
+  pinned rather than fixed: the newline-free contract is a **bijection orphan in the guarded arm**;
+  the spec's field set was one slot short (MASH's `usage`, adopted provisionally); the advisory
+  census. **The record↔twin asymmetry is structural:** the checker proves twin↔tree, never
+  record↔twin — **named-implies-exists is proved; exists-implies-named is not** (green again since
+  `20e94ae`). **Confirmed unfixed, deliberately:** the nine-field telemetry allowlist — Workstream A's
+  Phase 0a, and A was held back. **Falsified:** Phase 0, 2026-07-19, proved its own specification
+  impossible. **Unscheduled:** `.claude/ceremonies/` — the dedupe loop whose prompt is committed
+  beside the rulings it honors, whose allow-list travels by checkout, and which cannot rewrite its
+  own prompt; nothing schedules it yet.
 - **T5 — future plans.** Authorized, unbuilt: `llm_help()` as an always-present kernel builtin listing
   the run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
   see-also, with `expects` **guard-derived** and the human winning on stalemate; the module manifest
-  schema extended; one generator emitting human navigation pointers. Gates that bind the build: a
-  zero-paid reachability drill, then a self-play discrimination and drift game whose falsifying cell is
-  *selected-on-a-lie*; the paid adoption probe stays owner-gated; landing `llm_help` moves **both**
-  composed-prompt pins. Open by ratification's own terms, not oversight: where `llm_help` composes from
-  at the injection seam, and which descriptor fields Trellis adopts.
+  schema extended; one generator emitting human navigation pointers. The remaining surfaces proceed
+  descriptor by descriptor **without a pin ceremony** — `llm_help`'s landing is what moves **both**
+  composed-prompt pins. Gates that bind: the self-play discrimination and drift game whose falsifying
+  cell is *selected-on-a-lie*; the paid adoption probe stays owner-gated. Open by ratification's own
+  terms, not oversight: where `llm_help` composes from at the injection seam, and which descriptor
+  fields Trellis adopts — the shipped `usage` field is that decision's first evidence.
 
 *Status ledger:* root contract · machine twin · surface checker · CI wiring — **shipped-pinned**;
 self-describing surfaces — **RATIFIED** (2026-07-23); harness self-model — **principle endorsed,
-Workstream B authorized, A gated**; `llm_help` — **specified, authorized, unbuilt**. *Reachability:*
+Workstream B authorized, A gated**; the textedit descriptor composition — **shipped-pinned,
+byte-identical on both arms** (increment 1); `llm_help` — **specified, authorized, unbuilt**.
+*Reachability:*
 `llm_help` has **no occurrence anywhere** under `src/`, `scripts/`, `modules/` or `tools/`; the
-descriptor fields would **fail** validation — the manifest schema is `.strict()`; the bijection is
-never mechanized. `wiki:check --verify` is a CI step and **neither negative control is** — half this
+module-manifest descriptor fields would still **fail** validation — the schema is `.strict()`,
+unextended; the shipped descriptor is kernel-side Python whose non-test caller is the
+`trellis_agent.py` prompt seam; the bijection is mechanized only as drill §16's registry↔line checks
+on one surface. `wiki:check --verify` is a CI step and **neither negative control is** — half this
 class's trust precondition rests on operator discipline. *Orphans:* closed 2026-07-23 — both
 runtime-half records now carry rows in `docs/ORIENTATION.md` D4. This map's own open item 3 (derivation
 inverted) is **paid**: `SELF_DESCRIBING_SURFACES.md` §9.1 distinguishes guard-derived from editorial
 facts under one invariant — *one encoding, owned by whoever is authoritative for the fact*.
 *Cross-links:* [[C11]] (this class's checker governs that class's surfaces), [[C5]] (the pillar's
-enforcement posture, generalized by the self-model), [[C7]] (the alive catalog is the run's actual
-cover — no default cast), [[C12]] (the package that tested both halves — root files caught, navigation
-map not).
+enforcement posture, generalized by the self-model; its toolkit carries the first shipped
+descriptor), [[C7]] (the alive catalog is the run's actual cover — no default cast), [[C12]] (the
+package that tested both halves — root files caught, navigation map not).
 
 ---
 
