@@ -29,9 +29,11 @@ Two launchers live here and they are not interchangeable:
 from __future__ import annotations
 
 import os
+import platform
 import stat
 import subprocess
 import threading
+import time
 from dataclasses import dataclass, field
 from typing import Callable, Protocol, runtime_checkable
 
@@ -62,16 +64,53 @@ MAX_OUTPUT_CHARS = 2000
 
 #: The acceleration measurement of BUILD_PLAN section 4, as a pair of commands
 #: an operator runs on the candidate host. The comparison is the measurement:
-#: the same boot under `-accel kvm` and under `-accel tcg`, wall-clock. A 5-30x
-#: gap means the `kvm` run silently fell back to emulation.
+#: the same boot under `-accel kvm` and under `-accel tcg`, wall-clock. TCG is
+#: emulation and runs 5-35x slower than hardware KVM (ARCHITECTURE section 8),
+#: so a *large* gap is the healthy result: it is the evidence that the `kvm` run
+#: was hardware-accelerated. Two runs that take roughly the *same* time are the
+#: fallback signature - the `kvm` run was emulating too, and there is no
+#: hardware VM boundary.
 ACCELERATION_COMMAND_KVM = (
     "qemu-system-x86_64 -accel kvm -cpu host -m 1G -nographic -no-reboot "
-    "-kernel <guest-kernel> -append 'console=ttyS0'"
+    "-kernel <guest-kernel> -append 'console=ttyS0 panic=-1'"
 )
 ACCELERATION_COMMAND_TCG = (
     "qemu-system-x86_64 -accel tcg -m 1G -nographic -no-reboot "
-    "-kernel <guest-kernel> -append 'console=ttyS0'"
+    "-kernel <guest-kernel> -append 'console=ttyS0 panic=-1'"
 )
+
+#: The QEMU binary the benchmark drives. Named once so a host that installs it
+#: elsewhere has one place to look.
+QEMU_BIN = "qemu-system-x86_64"
+
+#: The measured speedup at or above which the KVM run counts as hardware
+#: accelerated. Sits at the bottom of the 5-35x band ARCHITECTURE section 8
+#: observes, which the differential measurement below can be held to honestly -
+#: a *total*-time comparison cannot, because QEMU's fixed startup cost is not
+#: accelerated and drags the quotient toward 1 no matter how fast the guest is.
+#: A silent fallback scores ~1.0, so the separation this floor sits in the
+#: middle of is roughly an order of magnitude wide.
+MIN_ACCELERATION_RATIO = 5.0
+
+#: How many times each boot pair is repeated. The per-side minimum across
+#: trials is what gets compared: scheduling noise, page-cache misses, and
+#: neighbouring load can only ever *add* wall time, so the fastest observation
+#: of each side is the one least contaminated by everything that is not the
+#: work being measured.
+BENCHMARK_TRIALS = 3
+
+#: Wall-clock bound per benchmark boot. The TCG side is the slow one by
+#: construction, and it is emulating a full kernel boot, so this is generous.
+#: A boot that cannot finish inside it is not a measurement.
+BENCHMARK_TIMEOUT_S = 300.0
+
+#: Kernel command line for every benchmark boot. `panic=-1` with `-no-reboot`
+#: is what makes a run *terminate*: the kernel panics rather than looping, and
+#: QEMU exits. `rdinit=/bin/false` supplies the panic on the initrd-loaded side
+#: - init exits immediately, the kernel treats that as fatal, and the run ends
+#: without ever reaching a shell that would wait forever on a console nobody is
+#: typing at. The panic is the stopwatch's stop button, not a failure.
+BENCHMARK_APPEND = "console=ttyS0 panic=-1 rdinit=/bin/false"
 
 #: The synthetic CID the in-process double reports. Above the reserved vsock
 #: CIDs (0 hypervisor / 1 local / 2 host) so it satisfies the same range checks
@@ -157,6 +196,206 @@ def probe_kvm_device(path: str = KVM_DEVICE) -> dict:
     observed["char_device"] = stat.S_ISCHR(info.st_mode)
     observed["readable"] = os.access(path, os.R_OK)
     observed["writable"] = os.access(path, os.W_OK)
+    return observed
+
+
+def default_benchmark_kernel() -> str:
+    """The kernel the benchmark boots: this host's own.
+
+    Chosen over shipping a guest image because it is always present, always
+    matches the host architecture, and is identical across every run - and
+    identical-across-runs is the only property the comparison needs. It is never
+    booted as a *guest system*; it is booted as a fixed unit of CPU work.
+    """
+    return f"/boot/vmlinuz-{platform.release()}"
+
+
+def default_benchmark_initrd() -> str:
+    """The initrd whose decompression is the benchmark's measured workload.
+
+    Its only job is to be a few dozen megabytes of CPU-bound work the guest must
+    do *after* QEMU has finished starting - see `qemu_accel_benchmark` for why
+    the measurement needs a workload it can add and subtract.
+    """
+    return f"/boot/initrd.img-{platform.release()}"
+
+
+def _benchmark_argv(accel: str, kernel: str, initrd: str | None = None) -> list[str]:
+    """One benchmark boot's argv. Identical either side but for the accelerator.
+
+    `-cpu host` is passed only on the KVM side because it is meaningless without
+    hardware virtualization - under TCG it forces emulation of host CPU features
+    and would slow that side further, inflating the ratio in the gate's favour.
+    Keeping it off the TCG side makes the comparison *harder* to pass, which is
+    the direction an honest gate errs in.
+    """
+    cpu_flags = ["-cpu", "host"] if accel == "kvm" else []
+    workload = ["-initrd", initrd] if initrd else []
+    return [
+        QEMU_BIN,
+        "-accel", accel,
+        *cpu_flags,
+        "-m", "1G",
+        "-nographic",
+        "-no-reboot",
+        "-kernel", kernel,
+        *workload,
+        "-append", BENCHMARK_APPEND,
+    ]
+
+
+def qemu_accel_benchmark(
+    kernel: str | None = None,
+    initrd: str | None = None,
+    *,
+    run_cmd: Callable[..., object] = subprocess.run,
+    clock: Callable[[], float] = time.perf_counter,
+    timeout_s: float = BENCHMARK_TIMEOUT_S,
+    min_ratio: float = MIN_ACCELERATION_RATIO,
+    trials: int = BENCHMARK_TRIALS,
+) -> dict:
+    """Measure hardware acceleration as a *differential*, and report the ratio.
+
+    The naive measurement - boot once under `-accel kvm`, once under
+    `-accel tcg`, divide - is biased and cannot be held to the 5-35x band
+    ARCHITECTURE section 8 states. QEMU spends a fixed ~1s starting up that no
+    accelerator touches, and that constant sits in both numerator and
+    denominator, dragging the quotient toward 1. Measured on the reference host
+    it reads ~3.2x for a genuinely accelerated boot: still above a fallback's
+    ~1.0, but with so little headroom that ordinary noise would fail a healthy
+    host.
+
+    So each accelerator is timed twice - once booting the kernel alone, once
+    booting it with an initrd whose decompression is real CPU-bound guest work -
+    and what gets compared is the *difference*. The fixed startup cost appears
+    in both terms of each subtraction and cancels:
+
+        ratio = (tcg_with_initrd - tcg_bare) / (kvm_with_initrd - kvm_bare)
+
+    What remains on each side is the guest work alone, which is exactly what
+    hardware virtualization does and does not accelerate. On the reference host
+    this reads ~10-15x, inside the documented band, against ~1.0 for a silent
+    fallback - an order of magnitude of separation for the floor to sit in.
+
+    Each pair is run `trials` times and the per-side *minimum* is taken, because
+    noise can only add wall time; the fastest observation of each side is the
+    least contaminated one.
+
+    Returns the mapping `KataLauncher.preflight` consumes. Never raises for a
+    host condition: a missing binary, an unreadable kernel or initrd, and a
+    refused accelerator are all *measurements that did not happen*, reported
+    with `near_native` absent so the gate's fail-closed check treats them as the
+    failures they are.
+    """
+    kernel = kernel if kernel is not None else default_benchmark_kernel()
+    initrd = initrd if initrd is not None else default_benchmark_initrd()
+    observed: dict = {
+        "kernel": kernel,
+        "initrd": initrd,
+        "min_ratio": min_ratio,
+        "trials": trials,
+        "method": "differential (initrd-loaded minus bare, per accelerator)",
+        "kvm_argv": _benchmark_argv("kvm", kernel, initrd),
+        "tcg_argv": _benchmark_argv("tcg", kernel, initrd),
+    }
+
+    for label, path in (("kernel", kernel), ("initrd", initrd)):
+        if not os.path.isfile(path):
+            observed["error"] = (
+                f"benchmark {label} {path} is not a file; there is nothing to "
+                f"time. Pass an explicit {label} path."
+            )
+            return observed
+        if not os.access(path, os.R_OK):
+            observed["error"] = (
+                f"benchmark {label} {path} is not readable by this user "
+                "(Ubuntu ships /boot/* as root-owned)"
+            )
+            return observed
+
+    def timed(accel: str, workload: str | None) -> dict:
+        """Run one boot and return its wall time, or why it did not run."""
+        argv = _benchmark_argv(accel, kernel, workload)
+        started = clock()
+        try:
+            completed = run_cmd(argv, capture_output=True, text=True, timeout=timeout_s)
+        except FileNotFoundError as exc:
+            return {"error": f"{QEMU_BIN} was not found on PATH: {exc}"}
+        except subprocess.TimeoutExpired:
+            return {"error": f"the -accel {accel} boot exceeded {timeout_s}s"}
+        except OSError as exc:
+            return {"error": f"the -accel {accel} boot could not run: {type(exc).__name__}: {exc}"}
+        elapsed = clock() - started
+        returncode = getattr(completed, "returncode", None)
+        return {
+            "seconds": elapsed,
+            "returncode": returncode if isinstance(returncode, int) else None,
+            "stderr": _clip(getattr(completed, "stderr", "")),
+        }
+
+    # KVM first, bare: when the accelerator is refused outright there is no
+    # reason to spend minutes emulating anything to learn the same thing.
+    probe = timed("kvm", None)
+    if "error" in probe:
+        observed["error"] = probe["error"]
+        return observed
+    # Modern QEMU does not silently downgrade `-accel kvm` - it exits non-zero.
+    # That refusal is a *stronger* signal than any timing, so it is read first.
+    if probe.get("returncode") not in (0, None):
+        observed["error"] = (
+            f"`-accel kvm` exited {probe['returncode']} rather than running: "
+            f"{probe.get('stderr') or '(no stderr)'}. QEMU refuses this accelerator "
+            "rather than falling back, so this is KVM being unavailable, not slow."
+        )
+        return observed
+
+    deltas: dict[str, list[float]] = {"kvm": [], "tcg": []}
+    for _ in range(max(1, trials)):
+        for accel in ("kvm", "tcg"):
+            bare = timed(accel, None)
+            loaded = timed(accel, initrd)
+            for run in (bare, loaded):
+                if "error" in run:
+                    observed["error"] = (
+                        f"{run['error']}; the differential needs both the bare and "
+                        "the initrd-loaded boot on each side, so acceleration "
+                        "stays unproven"
+                    )
+                    return observed
+            deltas[accel].append(loaded["seconds"] - bare["seconds"])
+
+    kvm_delta = min(deltas["kvm"])
+    tcg_delta = min(deltas["tcg"])
+    observed["kvm_workload_seconds"] = kvm_delta
+    observed["tcg_workload_seconds"] = tcg_delta
+    observed["kvm_deltas"] = deltas["kvm"]
+    observed["tcg_deltas"] = deltas["tcg"]
+
+    # A non-positive delta means the initrd-loaded boot came out no slower than
+    # the bare one - the workload did not register, so there is nothing whose
+    # acceleration could be measured. Never a pass.
+    if kvm_delta <= 0.0 or tcg_delta <= 0.0:
+        observed["error"] = (
+            f"the initrd workload did not register as measurable work "
+            f"(kvm delta {kvm_delta:.4f}s, tcg delta {tcg_delta:.4f}s); with no "
+            "workload to accelerate there is nothing to compare"
+        )
+        return observed
+
+    ratio = tcg_delta / kvm_delta
+    observed["ratio"] = ratio
+    observed["near_native"] = ratio >= min_ratio
+    if observed["near_native"]:
+        observed["interpretation"] = (
+            f"the guest workload took {ratio:.2f}x as long emulated as it did under "
+            "KVM, so the KVM run was hardware-accelerated rather than emulating"
+        )
+    else:
+        observed["interpretation"] = (
+            f"the guest workload ran only {ratio:.2f}x slower emulated than under "
+            f"KVM, below the {min_ratio}x floor. A quotient this close to 1 is the "
+            "silent-fallback signature: the -accel kvm run was emulating too."
+        )
     return observed
 
 
@@ -351,8 +590,9 @@ class KataLauncher:
             failures.append(
                 "acceleration is unmeasured, so G1 cannot pass. On the candidate "
                 f"host run `{ACCELERATION_COMMAND_KVM}` and `{ACCELERATION_COMMAND_TCG}` "
-                "and compare boot wall time: a 5-30x gap means the -accel kvm run "
-                "silently fell back to TCG and the hardware VM boundary is absent "
+                "and compare boot wall time: the emulated run should take 5-30x as "
+                "long. Two runs of comparable duration mean the -accel kvm run was "
+                "emulating too and the hardware VM boundary is absent "
                 "(ARCHITECTURE section 8)."
             )
             return {

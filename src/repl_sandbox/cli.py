@@ -41,7 +41,12 @@ from repl_sandbox.dlp import DlpHook
 from repl_sandbox.frame import buffer_recv, encode_frame, read_frame
 from repl_sandbox.guest_rpc import DB_PORT_NAME, LM_PORT_NAME, GuestRpc
 from repl_sandbox.host import TrellisSandboxHost
-from repl_sandbox.launcher import KVM_DEVICE, InProcessLauncher, KataLauncher
+from repl_sandbox.launcher import (
+    KVM_DEVICE,
+    InProcessLauncher,
+    KataLauncher,
+    qemu_accel_benchmark,
+)
 from repl_sandbox.lm_handler import PromptValue
 from repl_sandbox.transport import Handler, vsock_available
 
@@ -136,9 +141,17 @@ class InProcessRpcClient:
 # ---------------------------------------------------------------------------
 
 
-def command_preflight(config: SandboxConfig, verbose: bool) -> int:
-    """Run gate G1 against this host and report it. Non-zero when it fails."""
-    launcher = KataLauncher(config)
+def command_preflight(config: SandboxConfig, verbose: bool, measure_accel: bool = True) -> int:
+    """Run gate G1 against this host and report it. Non-zero when it fails.
+
+    The acceleration benchmark boots a kernel twice and costs minutes, so it is
+    skippable - but skipping it cannot pass the gate, only shorten the report.
+    An unmeasured condition stays a failure (BUILD_PLAN section 4).
+    """
+    launcher = KataLauncher(
+        config,
+        accel_benchmark=qemu_accel_benchmark if measure_accel else None,
+    )
     result = launcher.preflight()
 
     print("Trellis REPL sandbox - host provisioning gate G1")
@@ -442,6 +455,14 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument(
         "--verbose", action="store_true", help="print every probe's observed output"
     )
+    preflight.add_argument(
+        "--skip-accel-benchmark",
+        action="store_true",
+        help=(
+            "do not run the two timed boots (minutes); the acceleration condition "
+            "then reports as unmeasured, which is still a gate FAILURE"
+        ),
+    )
 
     sub.add_parser(
         "selftest",
@@ -458,7 +479,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     config = SandboxConfig()
 
     if args.command == "preflight":
-        return command_preflight(config, args.verbose)
+        return command_preflight(
+            config, args.verbose, measure_accel=not args.skip_accel_benchmark
+        )
     if args.command == "selftest":
         return command_selftest(config)
     if args.command == "config":

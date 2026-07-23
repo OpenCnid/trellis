@@ -23,11 +23,14 @@ from repl_sandbox.errors import SandboxError
 from repl_sandbox.launcher import (
     ACCELERATION_COMMAND_KVM,
     ACCELERATION_COMMAND_TCG,
+    MIN_ACCELERATION_RATIO,
     GuestHandle,
     InProcessLauncher,
     KataLauncher,
     PreflightResult,
+    _benchmark_argv,
     probe_kvm_device,
+    qemu_accel_benchmark,
 )
 
 # ---------------------------------------------------------------------------
@@ -75,7 +78,11 @@ def kvm_present() -> dict:
 
 
 def near_native() -> dict:
-    return {"near_native": True, "kvm_boot_s": 0.9, "tcg_boot_s": 1.1, "ratio": 1.2}
+    # The ratio is `tcg_seconds / kvm_seconds`, so an accelerated host reports a
+    # LARGE one - the emulated side is the slow side. A fixture reading ~1.0
+    # here would encode the fallback signature while claiming to be the healthy
+    # case, and teach the inversion to whoever reads it next.
+    return {"near_native": True, "kvm_seconds": 0.9, "tcg_seconds": 11.2, "ratio": 12.4}
 
 
 def launcher(
@@ -406,3 +413,246 @@ def test_in_process_guest_shutdown_is_idempotent() -> None:
     guest.install_scaffold("")
     guest.shutdown()
     guest.shutdown()
+
+
+# ---------------------------------------------------------------------------
+# The real acceleration benchmark (BUILD_PLAN section 4)
+#
+# The benchmark is the one probe that turns G1 from a three-of-four report into
+# a gate that can actually pass, so its failure modes matter more than its
+# success. The condition it exists to catch is a *silent fallback*: QEMU running
+# the `-accel kvm` side under emulation anyway, which looks like a healthy boot
+# and reports nothing. Its only signature is that emulating the guest workload
+# costs about what accelerating it did.
+#
+# The measurement is differential - each accelerator boots twice, bare and with
+# an initrd workload, and the *differences* are compared - because QEMU's fixed
+# startup cost is not accelerated and would otherwise sit in both halves of the
+# quotient and bias it toward 1. Every test below therefore drives five boots
+# per trial: one refusal probe, then bare/loaded on each side.
+# ---------------------------------------------------------------------------
+
+
+def fake_clock(*durations: float):
+    """A `perf_counter` stand-in that makes each timed boot take a set duration.
+
+    `qemu_accel_benchmark` reads the clock twice per boot, so each duration is
+    served as a (start, end) pair. Injecting time keeps the test honest about
+    what it measures: the differential arithmetic and the thresholding, never
+    the machine the suite happens to run on.
+    """
+    ticks: list[float] = []
+    now = 0.0
+    for duration in durations:
+        ticks.extend([now, now + duration])
+        now += duration + 1.0
+    return iter(ticks).__next__
+
+
+def boot_durations(kvm_bare, kvm_loaded, tcg_bare, tcg_loaded, *, probe=1.0):
+    """Durations in the order one trial's boots actually happen."""
+    return fake_clock(probe, kvm_bare, kvm_loaded, tcg_bare, tcg_loaded)
+
+
+def qemu_responses(kernel: str, initrd: str, *, kvm=(0, "", ""), tcg=(0, "", "")) -> dict:
+    """Keyed responses for all four boot shapes."""
+    return {
+        " ".join(_benchmark_argv("kvm", kernel)): kvm,
+        " ".join(_benchmark_argv("kvm", kernel, initrd)): kvm,
+        " ".join(_benchmark_argv("tcg", kernel)): tcg,
+        " ".join(_benchmark_argv("tcg", kernel, initrd)): tcg,
+    }
+
+
+@pytest.fixture
+def kernel(tmp_path) -> str:
+    """A stand-in for `/boot/vmlinuz-*`. Never booted - only stat'd and passed."""
+    path = tmp_path / "vmlinuz-test"
+    path.write_bytes(b"\x00")
+    return str(path)
+
+
+@pytest.fixture
+def initrd(tmp_path) -> str:
+    """A stand-in for `/boot/initrd.img-*`."""
+    path = tmp_path / "initrd.img-test"
+    path.write_bytes(b"\x00")
+    return str(path)
+
+
+def bench(kernel: str, initrd: str, clock, *, responses=None, **kwargs) -> dict:
+    """Drive the benchmark with every clock and subprocess injected."""
+    return qemu_accel_benchmark(
+        kernel,
+        initrd,
+        run_cmd=fake_run_cmd(
+            responses if responses is not None else qemu_responses(kernel, initrd)
+        ),
+        clock=clock,
+        trials=kwargs.pop("trials", 1),
+        **kwargs,
+    )
+
+
+def test_an_accelerated_workload_separates_by_an_order_of_magnitude(kernel, initrd) -> None:
+    """The healthy case: emulating the workload costs 10x what KVM charged."""
+    observed = bench(kernel, initrd, boot_durations(1.0, 1.2, 3.0, 5.0))
+    assert observed["kvm_workload_seconds"] == pytest.approx(0.2)
+    assert observed["tcg_workload_seconds"] == pytest.approx(2.0)
+    assert observed["ratio"] == pytest.approx(10.0)
+    assert observed["near_native"] is True
+    assert "hardware-accelerated" in observed["interpretation"]
+
+
+def test_the_fixed_startup_cost_cancels_out(kernel, initrd) -> None:
+    """The whole reason the measurement is differential.
+
+    Both sides here carry a large, identical, unaccelerated startup cost. A
+    total-time comparison would read (10+2)/(10+0.2) = 1.18x and fail a host
+    whose workload is genuinely accelerated 10x. The subtraction removes it.
+    """
+    observed = bench(kernel, initrd, boot_durations(10.0, 10.2, 10.0, 12.0))
+    assert observed["ratio"] == pytest.approx(10.0)
+    assert observed["near_native"] is True
+
+
+def test_comparable_workload_costs_are_the_silent_fallback_signature(kernel, initrd) -> None:
+    """The condition the gate exists for: `-accel kvm` was emulating too.
+
+    Every boot succeeds and QEMU reports nothing wrong. The only evidence is
+    that the workload cost both sides about the same.
+    """
+    observed = bench(kernel, initrd, boot_durations(3.0, 4.9, 3.0, 5.0))
+    assert observed["near_native"] is False
+    assert "silent-fallback" in observed["interpretation"]
+
+
+def test_the_ratio_floor_is_the_boundary_between_the_two(kernel, initrd) -> None:
+    """Exactly at the floor passes; a hair under does not."""
+    at_floor = bench(
+        kernel, initrd, boot_durations(1.0, 2.0, 1.0, 1.0 + MIN_ACCELERATION_RATIO)
+    )
+    under = bench(
+        kernel, initrd, boot_durations(1.0, 2.0, 1.0, 0.9 + MIN_ACCELERATION_RATIO)
+    )
+    assert at_floor["near_native"] is True
+    assert under["near_native"] is False
+
+
+def test_the_per_side_minimum_across_trials_is_what_counts(kernel, initrd) -> None:
+    """Noise only ever adds time, so the fastest observation is the truest one.
+
+    Trial 2's KVM side is contaminated by a slow neighbour (delta 1.0 rather
+    than 0.2). Taking the minimum discards it; taking a mean would drag the
+    ratio from 10x down to ~3.3x and fail a healthy host.
+    """
+    observed = bench(
+        kernel,
+        initrd,
+        fake_clock(1.0, 1.0, 1.2, 3.0, 5.0, 1.0, 2.0, 3.0, 5.0),
+        trials=2,
+    )
+    assert observed["kvm_deltas"] == [pytest.approx(0.2), pytest.approx(1.0)]
+    assert observed["kvm_workload_seconds"] == pytest.approx(0.2)
+    assert observed["ratio"] == pytest.approx(10.0)
+
+
+def test_a_refused_kvm_accelerator_is_read_before_any_timing(kernel, initrd) -> None:
+    """QEMU exits non-zero rather than downgrading, and that outranks the clock.
+
+    Nothing else must run: the verdict is already known.
+    """
+    run_cmd = fake_run_cmd(
+        qemu_responses(kernel, initrd, kvm=(1, "", "Could not access KVM kernel module"))
+    )
+    observed = qemu_accel_benchmark(
+        kernel, initrd, run_cmd=run_cmd, clock=fake_clock(0.2), trials=1
+    )
+    assert "near_native" not in observed
+    assert "KVM being unavailable, not slow" in observed["error"]
+    assert [argv for argv in run_cmd.calls if "tcg" in argv] == []
+
+
+def test_a_workload_that_does_not_register_is_not_a_measurement(kernel, initrd) -> None:
+    """A zero delta means nothing was measured, however fast the boots looked."""
+    observed = bench(kernel, initrd, boot_durations(1.0, 1.0, 3.0, 5.0))
+    assert "near_native" not in observed
+    assert "did not register as measurable work" in observed["error"]
+
+
+def test_a_missing_kernel_is_a_measurement_that_did_not_happen(tmp_path, initrd) -> None:
+    observed = qemu_accel_benchmark(str(tmp_path / "absent"), initrd)
+    assert "near_native" not in observed
+    assert "benchmark kernel" in observed["error"]
+    assert "is not a file" in observed["error"]
+
+
+def test_a_missing_initrd_is_reported_as_the_initrd(kernel, tmp_path) -> None:
+    """Named separately: the operator fix differs from a missing kernel."""
+    observed = qemu_accel_benchmark(kernel, str(tmp_path / "absent"))
+    assert "near_native" not in observed
+    assert "benchmark initrd" in observed["error"]
+
+
+def test_a_missing_qemu_is_reported_as_itself(kernel, initrd) -> None:
+    def run_cmd(argv, **kwargs):
+        raise FileNotFoundError(2, "No such file or directory")
+
+    observed = qemu_accel_benchmark(kernel, initrd, run_cmd=run_cmd)
+    assert "near_native" not in observed
+    assert "was not found on PATH" in observed["error"]
+
+
+def test_a_tcg_timeout_leaves_acceleration_unproven(kernel, initrd) -> None:
+    """No emulated baseline, no comparison - and unproven is never a pass."""
+    responses = qemu_responses(kernel, initrd)
+    responses[" ".join(_benchmark_argv("tcg", kernel))] = subprocess.TimeoutExpired(
+        cmd="qemu", timeout=300.0
+    )
+    observed = bench(
+        kernel, initrd, boot_durations(1.0, 1.2, 0.0, 0.0), responses=responses
+    )
+    assert "near_native" not in observed
+    assert "stays unproven" in observed["error"]
+
+
+def test_cpu_host_is_passed_only_to_the_kvm_side(kernel, initrd) -> None:
+    """Asymmetric on purpose, in the direction that makes passing harder.
+
+    `-cpu host` under TCG forces feature emulation and would slow that side,
+    inflating the ratio toward a pass the host may not deserve.
+    """
+    kvm_argv = _benchmark_argv("kvm", kernel, initrd)
+    tcg_argv = _benchmark_argv("tcg", kernel, initrd)
+    assert "-cpu" in kvm_argv and "host" in kvm_argv
+    assert "-cpu" not in tcg_argv
+    # Identical in every other respect, or the two sides are not the same work.
+    assert [a for a in kvm_argv if a not in ("-cpu", "host", "kvm")] == [
+        a for a in tcg_argv if a != "tcg"
+    ]
+
+
+def test_both_sides_run_the_same_workload(kernel, initrd) -> None:
+    """The initrd must appear on both accelerators, or the deltas differ in kind."""
+    assert "-initrd" in _benchmark_argv("kvm", kernel, initrd)
+    assert "-initrd" in _benchmark_argv("tcg", kernel, initrd)
+    assert "-initrd" not in _benchmark_argv("kvm", kernel)
+
+
+def test_the_benchmark_result_flows_through_the_gate(kernel, initrd) -> None:
+    """End to end: a real benchmark mapping satisfies `preflight`'s condition."""
+    result = launcher(
+        accel=lambda: bench(kernel, initrd, boot_durations(1.0, 1.2, 3.0, 5.0))
+    ).preflight()
+    assert result.ok is True
+    assert result.observed["acceleration"]["measured"] is True
+    assert result.observed["acceleration"]["ratio"] == pytest.approx(10.0)
+
+
+def test_an_unproven_benchmark_fails_the_gate_with_its_own_reason(tmp_path, initrd) -> None:
+    """The error text reaches the operator rather than a generic refusal."""
+    result = launcher(
+        accel=lambda: qemu_accel_benchmark(str(tmp_path / "absent"), initrd)
+    ).preflight()
+    assert result.ok is False
+    assert "is not a file" in only(result.failures)

@@ -715,45 +715,47 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   sides of that boundary; the boundary itself is unbuilt — there is no working sandbox.**
 - **T2 — current machinery.** Execution still runs on in-process `rlms==0.1.3` LocalREPL holding live
   credential-bearing clients. New, **uncommitted**: a host-independent control plane,
-  `src/repl_sandbox/` — 19 modules / 8,080 lines against 18 test files / 9,533 lines — the frame
-  codec, the vsock transport (identity read from `accept()`), the guest supervisor protocol, the handle
-  table and slice algebra, the DB broker with backends and a lexical statement inspector, the LM handler
-  with byte/rate/spend ledgers and a DLP hook, the capability lifecycle, a CID-keyed audit log, the
-  error taxonomy, `KataREPL(IsolatedEnv)` and `KataLauncher` — each transport-agnostic, exercised
-  through loopback doubles. Eleven ratified documents, conformance new.
-- **T3 — with receipts.** **G0 lifted 2026-07-22** by owner instruction, in
-  `REPL_SANDBOX_BUILD_PLAN.md` §2 (The research-hold gate), under two qualifications: G1 is
-  unsatisfiable here; a loopback double is never a boundary. **S1 closed** — a 12-test conformance
-  pass over the installed `rlms==0.1.3` found **four places where a record marked
-  *(source-confirmed)* contradicts the source**, listed unfixed. Observed:
-  `python -m pytest src/repl_sandbox/tests -q` → **781 passed**. The frame red-team found **seven
-  defects**, all closed; `fuzz_frame.py --negative-control` plants **eight** broken readers and
-  **exits 3** when all are caught. Pins hold: **Kata ≥ 3.31.0 AND Cloud Hypervisor
-  ≥ 52.0**; no-KVM fallback 5–35× slower; depth-2 harmful (~96×, external).
-- **T4 — the frontier.** **G1 is unlifted and unliftable from this host** — Windows, no `/dev/kvm` —
-  so **S2–S6, everything needing a booted Kata guest, stay blocked**. `KataLauncher.boot` gates first
-  and raises rather than return a handle backed by nothing; an *unmeasured* acceleration benchmark
-  reports **failure**, never a pass. Named gaps: requirement 9's **grant** half (role exists,
-  `NOSUPERUSER`, no `pg_read_server_files`) is a **deployment obligation no Python can enforce** — the
-  DDL ships, the claim does not; `locate` and `get_ast_blocks` **fail closed** for want of a host-side
-  referent evaluator; the LM handler type-checks a guest-supplied model name but enforces **no
-  allowlist**; `MAX_FRAME_LEN` is unratified; rlms' modal/prime/daytona/e2b materialisation paths unread.
+  `src/repl_sandbox/` — 21 modules against 19 test files — the frame codec, the vsock transport
+  (identity read from `accept()`), the guest supervisor protocol, the handle table and slice algebra,
+  the DB broker with backends and a statement inspector, the LM handler with byte/rate/spend ledgers and
+  a DLP hook, the capability lifecycle, a CID-keyed audit log, `KataREPL(IsolatedEnv)`, and a
+  `KataLauncher` whose four-condition `preflight` now drives a real QEMU benchmark — each
+  transport-agnostic, exercised through loopback doubles. Eleven ratified documents.
+- **T3 — with receipts.** **G0 lifted 2026-07-22** by owner instruction, in `REPL_SANDBOX_BUILD_PLAN.md`
+  §2 (The research-hold gate), under two qualifications: G1 is unsatisfiable here; a loopback double is
+  never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3` found **four
+  places where a record marked *(source-confirmed)* contradicts the source**, listed unfixed. Measured
+  this session, not as recorded: `pytest src/repl_sandbox/tests` → **870 passed**, `test_launcher.py`
+  **48** of them (ten new benchmark tests). The frame red-team's **seven defects** are closed;
+  `fuzz_frame.py --negative-control` plants **eight** broken readers and **exits 3**. Pins, two
+  upstreams: **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0**; depth-2 harmful (~96×, external).
+- **T4 — the frontier.** **G1 is unlifted but no longer unliftable**: a provisioned Hetzner AX41
+  (Ubuntu 24.04, `kvm_amd npt: Y`, `AF_VSOCK`) passes the `/dev/kvm` and acceleration conditions,
+  failing only the two uninstalled binaries — **S2–S6 stay blocked**; the Windows dev host stays
+  unsatisfiable. Until now no benchmark was injected, so the gate read *unmeasured* on **every host**.
+  A naive quotient carries QEMU's unaccelerated ~1s startup in both halves and read only **3.2×**
+  against the 5–35× band; the **differential** — initrd-loaded minus bare, per accelerator, three
+  trials, per-side minimum — reads **10.76×** against a 5.0 floor. Every unmeasured path reports
+  `near_native` absent. One comment **inverted the operator guidance**, reading a healthy gap as
+  fallback; the records were right. Gaps stand: requirement 9's **grant** half is a deployment
+  obligation no Python enforces; `locate`/`get_ast_blocks` **fail closed**; no model allowlist;
+  `MAX_FRAME_LEN` unratified.
 - **T5 — future plans.** Proposed: doubt-filter Layers 1–2, owner ratification pending, substrate
   open. Open: a warm pool behind a proven no-state-bleed reset; depth-2 with a sibling microVM, pending
   Trellis-specific measurement; the environment-type slot; the Windows dev-host shape; host selection
-  (three options, never DigitalOcean). Every **[A]** half (S3, S4, S6, GB, GA-eq) is capped ≤$5 and
-  **unspent**.
+  (Hetzner taken provisionally, never DigitalOcean). Every **[A]** half (S3, S4, S6, GB, GA-eq) is
+  capped ≤$5 and **unspent**.
 
 *Status ledger:* **control plane implemented in-tree and uncommitted; the boundary it defends is
 unbuilt — this is not a sandbox and must not be read as one.** Unbuilt: the Kata microVM, the vsock
-bridge on a real host, Tier-0 in-guest hardening. Accepted: nothing — no SPEC §8 gate passed.
-*Reachability:* closed by `host.py` + `cli.py` + `scripts/repl_sandbox_drill.py` and five `npm`
-scripts; **no CI job runs any of them**, and `KataLauncher.boot`, both vsock classes and every
-`*_from_env` factory stay uncalled by construction. *Discoverability:* `AGENTS.md`,
-`docs/README.md` and `docs/ORIENTATION.md` now carry the built/boundary split; `AGENTS.md` §2 still
-has no row for `src/repl_sandbox/`. *Cross-links:* [[C1]] (replaces that substrate, preserving its
-contract), [[C5]] (the handle model is the pillar as a slicing API), [[C7]] (Layers 1–2 compose from
-the −1 tier wholesale).
+bridge on a real host, Tier-0 in-guest hardening. Accepted: nothing — no SPEC §8 gate passed; the Linux
+host's copy was **scp'd, not pulled** — drifted, untracked. *Reachability:* closed by `host.py`,
+`cli.py`, `scripts/repl_sandbox_drill.py` and five `npm` scripts; **no CI job runs any**, and
+`KataLauncher.boot`, both vsock classes and every `*_from_env` factory stay uncalled.
+*Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
+split; `AGENTS.md` §2 still has no row for `src/repl_sandbox/`. *Cross-links:* [[C1]] (replaces that
+substrate, preserving its contract), [[C5]] (the handle model is the pillar as a slicing API), [[C7]]
+(Layers 1–2 compose the −1 tier).
 
 #### C13 — self-describing surfaces and agent-first discoverability
 *Charter: the machinery and design records by which Trellis explains itself to the agent operating it —
