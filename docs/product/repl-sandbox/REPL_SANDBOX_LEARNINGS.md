@@ -181,6 +181,39 @@ Three things the records could not have told us, all of them provisioning facts 
   The probe therefore asserts the *identity* of the guest (worker pid, guest `boot_id`) alongside
   the namespace, and the negative control fires all three.
 
+## 10b. What the first real model taught (S3 `[A]`, July 23, 2026)
+
+The `[R]` run proved bytes cross the boundary against a $0 stub; the `[A]` run put a real
+`gpt-5.4` behind the same bridge and let it answer a fan-out. What it added, past "a socket works":
+
+- **The provider seam was the whole cost, and it was already paid.** Standing up a real model was
+  not new backend code — `lm_handler.ChatCompletionsProvider` + `openai_chat_provider_from_env`
+  already existed, env-driven, key-read-host-side, tested against a stub. The `[A]` harness reused the
+  `[R]` probe's boot/bridge/witness/teardown wholesale and changed exactly two things: the provider
+  and the guest program. **When the seam is right, adoption is a wiring exercise, not a build.** The
+  reused negative-control shape (the host-side witness) still did the load-bearing work — correct
+  answers alone never prove a crossing.
+- **Make "correct" decidable without a judge, or the grader eats the thing under test.** The fan-out
+  slices are arithmetic with one known answer each, checked by extracting the first integer. An
+  LLM-graded check would have folded the model being tested into its own grader. `391, 133, 863, 42,
+  60` are unforgeable in a way `S3-OK` is not, and cheap to verify in-script.
+- **A $0 charge is a failure, not a pass.** The adoption run asserts `spend_ledger.spent > 0`: a real
+  model must actually be *billed*, because a stub answering, or a provider under-reporting cost, both
+  produce correct-looking text at $0. The dollar ledger being *positive* is part of the evidence that
+  a model ran, not just an accounting side-effect.
+- **The spend cap is between-calls, and the tripping call is unrecorded — found only by tripping it.**
+  `--cap-halt` set the cap below the first charge and proved the session halts (`cap_spend`, then the
+  next call refused in 0.5 ms). But it also surfaced that `SpendLedger.charge` refuses a cap-crossing
+  amount *without committing it*: the batch that trips the cap runs to completion (its API calls
+  execute and bill **upstream**) before the cap is evaluated, and the ledger then reads `$0.00` while
+  OpenAI billed ~one batch. The cap bounds the *ledger* between calls, not the *upstream* spend inside
+  the tripping batch. Real for GB req 5, invisible to a run that only ever passes. (Fix options:
+  pre-estimate charge, commit-then-halt, or bound batch cost ahead — BUILD_PLAN §5.3.)
+- **The key never touches the operator's hands or the record.** The credential was placed by the
+  owner in a root-only host file (`umask 077`), sourced into the run's environment, and read only at
+  `openai_chat_provider_from_env`. It is named nowhere the process logs, audits, or serialises, and
+  nowhere in this repository — the run reports a key *length*, never a value.
+
 ## 11. Meta-learning: the review methods caught the builder's own errors
 
 Worth recording because it validates the house methods (and because I was the self-invested

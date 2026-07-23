@@ -645,15 +645,16 @@ the measurement of them.*
 
 *Status ledger:* OOLONG harness · v1/v2 corpora · update/poison/scale drills · probe runners —
 **shipped, measured**; the sandbox refusal drill, `fuzz_frame.py` and the S2 probe — **[R] only,
-outside CI**; the S3 probe — **[R] only, passed 2026-07-23**; v2 paid run · real TREC · adversarial corpora ·
-variance — **queued-proposed**.
+outside CI**; the S3 probe — **[R] passed 2026-07-23**, its metered **[A]** fan-out **spent the same
+day** (~$0.001); v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
 *What those license:* nine refusals and eight planted frame readers are **present and fire** over
 doubles; the S2 probe's three claims fired against a real guest **five times on one host — n=5 of
 run-to-run variance on identical hardware, which is not a second machine**; the S3 probe's six claims
 fired on that same one host, and its falsifier showed the two most trusted of them — parity and
-latency — surviving an uncrossed boundary intact. None of
-that is a model driving the surface right. Every [[C12]] **[A]** half (S3, S4, S6, GB, GA-eq,
-≤$5) is **unspent**. Rule 19(c)'s flag now spans **nine** surfaces (`check:repo-surface`, `wiki:check`
+latency — surviving an uncrossed boundary intact. That was the probe stub, not a model driving the
+surface right — but **S3's `[A]` fan-out then was** (real `gpt-5.4`, 2026-07-23, five slices correct
+across the bridge, metered); the remaining [[C12]] **[A]** halves (S4, S6, GB, GA-eq, ≤$5) stay
+**unspent**. Rule 19(c)'s flag now spans **nine** surfaces (`check:repo-surface`, `wiki:check`
 and `upsum` too), none a corpus drill here.
 *Honest note:* "26× at scale" (≈$1,120 vs ≈$40 per 1,000 queries) is an **extrapolation**; no
 external baseline run exists here, and `benchmark_logs/` is gitignored.
@@ -725,24 +726,25 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   hardware-isolated unit per session; credentials outside it; one narrow channel to host chokepoints;
   identity from the *listener*, never a frame; and, deepest, the code may *address* data but never
   *hold* it. Language-level guards are telemetry, never boundary. **A microVM boots, holds state, and
-  now answers a frame across its own boundary — with no broker and no in-guest hardening, still no
-  working sandbox.** Building that wire cost a correction: **an enforcing surface is only as portable
-  as the mechanism it names.**
+  now a real model answers a fan-out across its own boundary — with no broker and no in-guest
+  hardening, still no working sandbox.** Building that wire cost a correction: **an enforcing surface
+  is only as portable as the mechanism it names.**
 - **T2 — current machinery.** Execution still runs on in-process `rlms==0.1.3` LocalREPL holding live
   credential-bearing clients. Beside it, a host-independent control plane, `src/repl_sandbox/` —
-  22 modules against 20 test files — the frame codec (the declared fuzz target), the transport, now
+  22 modules against 21 test files — the frame codec (the declared fuzz target), the transport, now
   carrying **both** the native `Vsock*` pair and the hybrid `HybridVsock*` pair the ratified VMM
   actually provides, the guest supervisor protocol, the handle table and slice algebra, the DB broker
   with backends and a statement inspector, the LM handler with byte/rate/spend ledgers and a DLP hook,
   the capability lifecycle, a CID-keyed audit log, `KataREPL(IsolatedEnv)`, and a `KataLauncher` whose
   four-condition `preflight` drives a real QEMU benchmark — each transport-agnostic, exercised through
-  loopback doubles. Eleven ratified documents. Host-side and outside that tree: `provision_kata_host.sh`
-  and the S2 and S3 probes, which drive `ctr` directly.
+  loopback doubles. Eleven ratified documents. Host-side and outside that tree: `provision_kata_host.sh`,
+  the S2 and S3 probes, and the S3 `[A]` harness (`repl_sandbox_s3_paid.py`, a metered sibling reusing
+  the probe's plumbing behind a real provider), which drive `ctr` directly.
 - **T3 — with receipts.** **G0 lifted 2026-07-22** by owner instruction, in `REPL_SANDBOX_BUILD_PLAN.md`
   §2 (The research-hold gate), under two qualifications: G1 is unsatisfiable here; a loopback double is
   never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3` found **four
   places where a record marked *(source-confirmed)* contradicts the source**, listed unfixed. Measured
-  this session, not as recorded: `pytest src/repl_sandbox/tests` → **886 passed, 5 skipped**; the skips
+  this session, not as recorded: `pytest src/repl_sandbox/tests` → **902 passed, 5 skipped**; the skips
   are `AF_UNIX`-gated and pass under WSL, so the hybrid transport is exercised on Linux and nowhere
   else. The frame red-team's **seven defects** are closed; `fuzz_frame.py --negative-control` plants
   **eight** broken readers and **exits 3**. Pins, two upstreams: **Kata ≥ 3.31.0 AND Cloud Hypervisor
@@ -762,29 +764,38 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   parity byte-identical both directions, under a millisecond added, `peer_cid = 2` as
   `require_host_cid` expects, a closed session dropped without an answer. Its control — the guest
   answering *itself* — kept parity and **improved** latency, and only a host-side witness caught it
-  (**exit 3**). **`[A]` unspent.** Gaps: **GA-rt, fuzz plus a bridge red-team, is owed *before* the
+  (**exit 3**). Then **S3 `[A]` PASSED** the same day, ~$0.001: a real `gpt-5.4` drove a flat
+  `max_depth 1` fan-out across the bridge — batched `391,133,863,42` plus a single `60`, every slice
+  correct against a pre-known answer (never the stub's `S3-OK`), the witness counting the two
+  crossings a self-answering guest can't forge, `spend_ledger` metering $0.00055. `--cap-halt` proved
+  the session-terminal dollar stop (`cap_spend`, next call refused in 0.5 ms) **and** surfaced a
+  residual for GB: the cap is *between-calls*, so the batch that trips it runs and bills **upstream**
+  while the refused-not-committed ledger reads $0. Gaps: **GA-rt, fuzz plus a bridge red-team, is owed *before* the
   bridge ships**; the provisioner installs **no egress policy**, so the guest's missing NIC is a `ctr`
   default, not the ratified control; `MAX_FRAME_LEN` ships 2 MiB unratified against
   `CONFORMANCE §2.3`'s 16 MiB.
-- **T5 — future plans.** Next: S3's metered **[A]** fan-out, the first paid run this class will
-  have spent. Free and
+- **T5 — future plans.** S3 `[A]` was the first paid run this class has spent (~$0.001); next is
+  **S4**, the DB broker against a real guest, reusing the S3 vsock bridge on a second port. Free and
   scheduled: a **nested guest** as the virgin instance the provisioner's never-executed install branch
   is owed. A second *machine* stays **deferred**, re-opening on a kernel-specific finding — and vsock
-  was named the likeliest such surface, which this correction is the first evidence for. Then
-  **S4**, **S5**, **S6** (`KataLauncher.boot`
+  was named the likeliest such surface, which the hybrid correction is the first evidence for. Then
+  **S5**, **S6** (`KataLauncher.boot`
   still raises), GB, GA-eq, GA-rt. Proposed: doubt-filter Layers 1–2. Open owner calls:
-  `MAX_FRAME_LEN`, handle lifetime, the warm pool, depth-2. Every **[A]** half is ≤$5 and **unspent**.
+  `MAX_FRAME_LEN`, handle lifetime, the warm pool, depth-2. The remaining **[A]** halves (S4, S6, GB,
+  GA-eq) are ≤$5 and **unspent**; S3's is **banked**.
 
 *Status ledger:* **control plane shipped; a microVM boots and a frame crosses to it — this is still
 not a sandbox and must not be read as one**, because the broker, the hardening and the launch path are
-absent. Accepted: **SPEC §8 gate 1 (G1), 2026-07-23**; spikes S1, S2 and **S3 `[R]`** are dated passes
-that are not gates; gates 2–4 unpassed. Unbuilt: the broker against a real guest,
+absent. Accepted: **SPEC §8 gate 1 (G1), 2026-07-23**; spikes S1, S2 and **S3 (`[R]`+`[A]`)** are dated
+passes that are not gates; gates 2–4 unpassed. Unbuilt: the broker against a real guest,
 Tier-0 hardening, the watchdog, egress policy, the production launch path.
 *Reachability:* closed by `host.py`, `cli.py`, `repl_sandbox_drill.py`, `repl_sandbox_s2_probe.py`,
-`provision_kata_host.sh` and eight `npm` scripts; **no CI job runs any** — `python:check` enumerates
+`provision_kata_host.sh` and nine `npm` scripts; **no CI job runs any** — `python:check` enumerates
 `src/rlm/*` only, so this class's whole pytest surface is hand-run — and the host probes *cannot* run
-in CI, needing `/dev/kvm`. The hybrid transport's only non-test caller is that probe, which has now run
-**on one host and nowhere else**; `KataLauncher.boot` and every `*_from_env` factory stay uncalled.
+in CI, needing `/dev/kvm`. The hybrid transport's non-test callers are the S3 `[R]` probe and its `[A]`
+harness, which have now run **on one host and nowhere else**; the S3 `[A]` run is also the first call
+to a `*_from_env` factory (`openai_chat_provider_from_env`, host-side, real key), while
+`KataLauncher.boot` and the DB `*_from_env` factory stay uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
 split, but the latter two are **stale against 2026-07-23** — both still read G1 as unsatisfied and
 neither mentions §3.1a, whose correction lives nowhere outside `docs/product/repl-sandbox/`.

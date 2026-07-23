@@ -95,7 +95,7 @@ requirement set) then C = acceptance, plus one PROPOSED side-track (the doubt fi
 | **G1** | Host provisioning gate — **PASSED 2026-07-23** (§4) | pre-A | G0 | `kata-runtime check` PASS + `qemu -accel kvm -cpu host` near-native → the KVM-capable host | **[R]** | gate 1 |
 | **S1** | Close the source-reads | A | G0 | Pinned-source conformance test asserts the 3-method contract + wire schemas + tool-materialization path | **[R]** | precondition for gate 3 |
 | **S2** | Boundary + persistence | A | S1, G1 | Scripted boot-once/keep-state/exec-many → the Kata microVM + `IsolatedEnv` | **[R]** | toward gate 3 |
-| **S3** | `llm_query` over vsock — **[R] PASSED 2026-07-23** (§5.3); `[A]` unspent | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
+| **S3** | `llm_query` over vsock — **[R]+[A] PASSED 2026-07-23** (§5.3) | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
 | **S4** | DB broker minimal proof | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
 | **S5** | Tier-0 in-guest hardening | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest cgroups+seccomp+Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
 | **S6** | Author the `IsolatedEnv` subclass | A | S1–S5 | Unedited load → `execute_code` round-trips as `LocalREPL` → the `KataREPL` backend | **[R+A]** | gate 3 |
@@ -332,7 +332,7 @@ not make the production launch path (guest CID assignment, supervisor readiness)
 consecutive runs on the same Hetzner AX41 (`npm run repl-sandbox:s3-probe`; reached per §4.1, and the
 script refuses on any box without `/dev/kvm`). Kata 3.32.0 · Cloud Hypervisor v52.0 · containerd
 2.2.1 · image `python:3.12-slim` · guest kernel **6.18.35** against the host's 6.8.0-134.
-**The `[A]` half — a metered real-model fan-out through the bridge — is unspent.**
+**The `[A]` half — a metered real-model fan-out through the bridge — is recorded below.**
 
 | claim | observed |
 |---|---|
@@ -409,6 +409,48 @@ The probe's host-side logic — the reference arm, the parity accounting, the wi
 program's own byte capture — is under test off-host in `src/repl_sandbox/tests/test_s3_probe.py`,
 so a mistake in it surfaces on a development box rather than mid-way through a host run.
 
+**Observed 2026-07-23 — S3 `[A]` PASS, ~$0.001 spent.** `npm run repl-sandbox:s3-paid --json`
+(`scripts/repl_sandbox_s3_paid.py`) on the same Hetzner AX41, reached per §4.1, against the **real**
+`ChatCompletionsProvider` reaching `gpt-5.4-2026-03-05` at `https://api.openai.com/v1`. The harness
+reuses the `[R]` probe's boot / hybrid-vsock bridge / host-witness / teardown wholesale and changes
+exactly two things: the provider ($0 stub → the env-driven real client, key read host-side from
+`TRELLIS_LM_API_KEY` and never logged) and the guest program (a canned round-trip → a real fan-out
+over four arithmetic slices with one checkable answer each). This is the engine-fidelity check the
+`[R]` run structurally cannot be: a **real model actually drove the `llm_query` channel across the
+boundary**.
+
+| claim | observed |
+|---|---|
+| a real model answered, over the bridge | the flat fan-out `llm_query_batched` returned **`391, 133, 863, 42`** (17×23, 128+5, 900−37, 6×7) and the single `llm_query` returned **`60`** (48+12) — every slice correct against its pre-known answer, none the scripted `S3-OK`. The **shipping** guest path (`guest_rpc.GuestRpc` over `transport.VsockClient`) carried both |
+| the crossing is real, not a guest talking to itself | the host witness counted **2 accepted, 2 requests** — one per RPC call (the 4-wide batch, then the single); the audit read `accepted · peer_closed` twice. This host-side count is the one thing the `[R]` negative control proved a self-answering guest cannot forge |
+| the fan-out is flat at `max_depth` 1 | four slices went out as **one** batched call (width = the shipped `max_in_flight` 4, admitted without raising), plus one singleton — the shape rlms drives at `depth 1`. No child REPL |
+| the dollar ledger is real | `spend_ledger.spent` = **$0.00055**, positive (a real model was billed, not the $0 stub) and a rounding error under the $5 cap. Batched fan-out 8.7 s (four sequential real completions), single 1.0 s |
+| genuine VM boundary | guest kernel **6.18.35** vs host 6.8.0-134, distinct `boot_id`, clean teardown (socket node gone, container unlisted, zero surviving VMM) |
+
+**Requirement 5's `[A]` was banked in the same session for one more sub-cent call.** `--cap-halt`
+sets the spend cap below the first charge; the batched fan-out came back
+**`CapSpendError: cap_spend: session halted`** and the *next* call (the single) was refused in **0.5 ms**
+by the `session_exhausted` path — a real fan-out halted at the dollar cap (BUILD_PLAN §6 req 5 `[A]`).
+
+**Two honest residuals the cap-halt run surfaced — for GB (req 5 hardening), not defects in S3.** S3's
+`[A]` asked only whether a real fan-out halts at the cap, and it does. But `SpendLedger.charge`
+(`ledger.py`) evaluates the cap *between* calls and **refuses a cap-crossing charge without committing
+it**, so: (a) the batch that trips the cap runs to completion — its API calls execute and are billed
+**upstream** — before the charge is evaluated, so the cap bounds the *ledger* between calls, not the
+*upstream* spend within the tripping batch; and (b) because the tripping charge is refused-not-committed,
+the ledger read **`$0.00`** while OpenAI actually billed ~one batch (the cap-halt run's real spend,
+~$0.0003–0.0005, is unmetered by design — hence "~$0.001 total" this session). Hardening options for
+GB req 5: charge a pre-estimate before the call, or commit-then-halt so the ledger reflects reality, or
+bound batch cost ahead of the call. Recorded here because the enforcing surface's shape is only as
+honest as the residual named beside it.
+
+**Zero surprises off-host.** The harness's verdict logic — the deterministic slice check, the provider
+env handling, and the two assessors that turn a guest report into a pass/fail — is under test in
+`src/repl_sandbox/tests/test_s3_paid.py` (16 checks, no `/dev/kvm`, no key, no network), so a mistake
+in *what counts as a pass* surfaces on a development box rather than after money is spent. The one
+credential-reading call site is `lm_handler.openai_chat_provider_from_env`; the key is read there,
+handed to the client, and named nowhere this process logs, audits, or serialises.
+
 ### 5.4 S4 — DB broker minimal proof
 
 - **Objective:** a host-side broker holds the real Postgres/Neo4j clients + credentials, terminates the
@@ -481,7 +523,7 @@ bound with no engine behind it does not count.
 | 2 API key host-side only | LM handler holds the provider key | Scripted grep of guest env/namespace/memory for the key returns nothing | — | S3 + GB |
 | 3 Split version pins | Deploy config: Kata ≥ 3.31.0 **AND** Cloud Hypervisor ≥ 52.0, separate feeds | Scripted version-assert on both binaries; two advisory feeds tracked | — | G1/GB |
 | 4 Auth by the listener's session identity | The id `accept()` reports on broker + handler — kernel CID (native) or per-sandbox socket path (hybrid, §5.3) | Scripted forged-payload-id request is rejected; quota keyed to that id | Real model in session A cannot reach session B's scope | S3, S4 + GB |
-| 5 Host-side CID-keyed hard ceilings | LM handler caps: concurrency, rate, dollar spend (hard-stop) | Scripted burst exceeds each cap → hard-stop (rlms caps proven bypassable) | Real fan-out run halts at the dollar cap | GB |
+| 5 Host-side CID-keyed hard ceilings | LM handler caps: concurrency, rate, dollar spend (hard-stop) | Scripted burst exceeds each cap → hard-stop (rlms caps proven bypassable) | **[A] banked 2026-07-23 (§5.3):** real fan-out `--cap-halt` → `cap_spend` refusal + `session_exhausted`. Residual for GB: cap is between-calls, not intra-batch/upstream-pre-emptive | GB |
 | 6 APOC allowlist + DB-host egress deny | Host broker APOC deny-by-default + DB-host has no route | Scripted `apoc.load.json` SSRF attempt denied; no metadata route | — | S4 + GB |
 | 7 `statement_timeout` + cost caps + no unbounded `[*]` | Host broker query governor | Scripted cartesian/`[*]` query is refused or timed out | — | S4 + GB |
 | 8 In-guest cgroups + host watchdog | cgroups (pids/mem/cpu) + watchdog | Scripted fork-bomb capped; wedged VM reaped | — | S5 |
