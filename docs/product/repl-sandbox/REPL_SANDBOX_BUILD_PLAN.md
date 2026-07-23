@@ -64,12 +64,14 @@ study the documentation and review it. Then start the building of the repl."* Th
 discharged and Phase A is open. Two facts qualify what that unblocks, and neither reopens a
 decision:
 
-- **G1 is not satisfied and cannot be from the dev host.** The development machine is Windows with
-  no `/dev/kvm`, so S2–S5 — every milestone that needs a booted Kata guest — remain blocked on a
-  KVM-capable Linux host (§4). Work proceeding under this lift is the host-independent control
-  plane: the wire, the handle/ledger state layer, both host chokepoints, the capability lifecycle,
-  the guest supervisor protocol, and the backend contract, each transport-agnostic and exercised
-  through a loopback test double.
+- **G1 could not be satisfied from the dev host, and still cannot be.** The development machine is
+  Windows with no `/dev/kvm`. That never made G1 unsatisfiable *as such* — only unsatisfiable
+  *there* — and it was **PASSED on a provisioned Hetzner AX41 on 2026-07-23** (§4), which unblocks
+  S2–S5. The Windows host remains a place where no launcher will pretend a boundary exists. Work
+  that proceeded under this lift before that date is the host-independent control plane: the wire,
+  the handle/ledger state layer, both host chokepoints, the capability lifecycle, the guest
+  supervisor protocol, and the backend contract, each transport-agnostic and exercised through a
+  loopback test double.
 - **A loopback double is never a boundary.** The microVM is the boundary; nothing built ahead of
   G1 substitutes for it, and no in-process launcher may be reachable from a deployment path.
 
@@ -90,7 +92,7 @@ requirement set) then C = acceptance, plus one PROPOSED side-track (the doubt fi
 | ID | Milestone / Spike | Phase | Blocks on | Exit gate → enforcing surface | Label | SPEC §8 map |
 |---|---|---|---|---|---|---|
 | **G0** | Research-hold lifted | — | — | Owner ratification (dated) | owner gate | — |
-| **G1** | Host provisioning gate | pre-A | G0 | `kata-runtime check` PASS + `qemu -accel kvm -cpu host` near-native → the KVM-capable host | **[R]** | gate 1 |
+| **G1** | Host provisioning gate — **PASSED 2026-07-23** (§4) | pre-A | G0 | `kata-runtime check` PASS + `qemu -accel kvm -cpu host` near-native → the KVM-capable host | **[R]** | gate 1 |
 | **S1** | Close the source-reads | A | G0 | Pinned-source conformance test asserts the 3-method contract + wire schemas + tool-materialization path | **[R]** | precondition for gate 3 |
 | **S2** | Boundary + persistence | A | S1, G1 | Scripted boot-once/keep-state/exec-many → the Kata microVM + `IsolatedEnv` | **[R]** | toward gate 3 |
 | **S3** | `llm_query` over vsock | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
@@ -120,10 +122,46 @@ Kata + Cloud Hypervisor **requires real `/dev/kvm`**; a silent QEMU-TCG fallback
   AWS C8i/M8i/R8i / GCP N2/C2**, **never DigitalOcean** ([REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md)
   §8). The Windows dev host runs this against a Linux server or nested-virt cloud VM.
 - **Exit acceptance → enforcing surface:** `kata-runtime check` PASS **and** a `qemu -accel kvm -cpu host`
-  smoke test benchmarks near-native (5–30× slow = silent TCG fallback = FAIL). Enforcing surface: the
-  KVM-capable host + Kata's own validator. Maps to **SPEC §8 gate 1**.
+  benchmark showing acceleration is real. Enforcing surface: the KVM-capable host + Kata's own
+  validator + `repl_sandbox.launcher.qemu_accel_benchmark`. Maps to **SPEC §8 gate 1**.
+  **Read the ratio in the right direction:** TCG is the *slow* side, so the emulated run taking 5–30×
+  as long is the **healthy** result. A KVM run that has silently fallen back is doing the same
+  emulated work as the TCG run, so the two come out *comparable* — a quotient near 1.0 is the failure
+  signature, never a large one. (The same numerals appear in §8 of
+  [REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md) attached to the other side of the
+  comparison — the KVM boot being *itself* 5–35× slower than it should be. Both readings are correct;
+  conflating them is not, and a code comment did exactly that until `e9a8ff5`.)
 - **Label: [R]** — deterministic host check; no model involved.
 - **Dependencies:** blocks S2–S5.
+
+**Observed 2026-07-23 — G1 PASS.** `python -m repl_sandbox.cli preflight` → **exit 0**, all four
+conditions met, run from a clean checkout at `e9a8ff5`. The host: a **Hetzner AX41** dedicated
+(Root) server — from the ratified set — AMD Ryzen 5 3600 (6C/12T, `svm`), 62 GB, 2×477 GB NVMe in
+software RAID1, **Ubuntu 24.04.4 LTS**, kernel 6.8.0-134.
+
+| condition | observed |
+|---|---|
+| `/dev/kvm` | present, character device, r/w; `kvm_amd` loaded, `npt: Y` |
+| `kata-runtime check` | exit 0 — "System is capable of running Kata Containers / System can currently create Kata Containers" |
+| Kata pin ≥ 3.31.0 | **3.32.0** (`kata-static-3.32.0-amd64.tar.zst`, `sha256:1449ecea…1b01`, unpacked to `/opt/kata`) |
+| Cloud Hypervisor pin ≥ 52.0 | **v52.0** (`cloud-hypervisor-static`, `sha256:829af01f…1ee9`) |
+| acceleration | **11.5–14.2×** across runs, floor 5.0, `near_native: True` |
+
+**The split pin earned its keep on the first real host.** `kata-static-3.32.0` *bundles its own*
+`cloud-hypervisor` **at v51.1** — below the pin. Installing Kata alone therefore leaves the host one
+version short on the upstream that actually provides the VM boundary, and `kata-runtime check`
+passes in that state without complaint. The gate caught it and named it exactly:
+`cloud-hypervisor cloud-hypervisor v51.1 is below the pin 52.0`. Standalone v52.0 was installed over
+it (the bundled binary retained as `cloud-hypervisor-bundled-v51.1`), v52.0 chosen over the newer
+v53.0 as the smallest jump from what Kata 3.32.0 was built against. This is
+[REPL_SANDBOX_ARCHITECTURE.md](REPL_SANDBOX_ARCHITECTURE.md) §7 requirement 3 — two upstreams, two
+feeds, never one version checked twice — observed rather than argued. **Kata publishes a
+`versions.yaml` asset naming the bundled Cloud Hypervisor; read it before unpacking.**
+
+Neither upstream publishes checksums for these assets, so the digests above are computed after fetch
+over HTTPS, not verified against a published manifest. **Note the two remaining scope limits:** the
+acceleration figure is a *differential* measurement (§ the enforcing surface above), and G1 says the
+host can boot a Kata microVM — **it is not a claim that one has been booted**. That is S2.
 
 ## 5. The six prototype spikes (Phase A — elevated)
 

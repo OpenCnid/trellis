@@ -726,30 +726,32 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3` found **four
   places where a record marked *(source-confirmed)* contradicts the source**, listed unfixed. Measured
   this session, not as recorded: `pytest src/repl_sandbox/tests` → **870 passed**, `test_launcher.py`
-  **48** of them (ten new benchmark tests). The frame red-team's **seven defects** are closed;
+  **48** of them (ten new); one conformance assertion, on a **3.13-only** `typing` API, had never run
+  on the 3.12 deployment target until shimmed. The frame red-team's **seven defects** are closed;
   `fuzz_frame.py --negative-control` plants **eight** broken readers and **exits 3**. Pins, two
   upstreams: **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0**; depth-2 harmful (~96×, external).
-- **T4 — the frontier.** **G1 is unlifted but no longer unliftable**: a provisioned Hetzner AX41
-  (Ubuntu 24.04, `kvm_amd npt: Y`, `AF_VSOCK`) passes the `/dev/kvm` and acceleration conditions,
-  failing only the two uninstalled binaries — **S2–S6 stay blocked**; the Windows dev host stays
-  unsatisfiable. Until now no benchmark was injected, so the gate read *unmeasured* on **every host**.
-  A naive quotient carries QEMU's unaccelerated ~1s startup in both halves and read only **3.2×**
-  against the 5–35× band; the **differential** — initrd-loaded minus bare, per accelerator, three
-  trials, per-side minimum — reads **10.76×** against a 5.0 floor. Every unmeasured path reports
-  `near_native` absent. One comment **inverted the operator guidance**, reading a healthy gap as
-  fallback; the records were right. Gaps stand: requirement 9's **grant** half is a deployment
-  obligation no Python enforces; `locate`/`get_ast_blocks` **fail closed**; no model allowlist;
-  `MAX_FRAME_LEN` unratified.
+- **T4 — the frontier.** **G1 PASSED 2026-07-23** — SPEC §8 gate 1, the first any host has met — on a
+  Hetzner AX41 (Ubuntu 24.04, `kvm_amd npt: Y`, `AF_VSOCK`, Kata **3.32.0**, Cloud Hypervisor
+  **v52.0**), unblocking **S2–S5**. Until then no benchmark was injected, so the gate read
+  *unmeasured* on **every** host. A naive quotient carries
+  QEMU's unaccelerated ~1s startup in both halves and read **3.2×** against the 5–35× band; the
+  **differential** — initrd-loaded minus bare, per-side minimum — reads **11.5–14.2×** against a 5.0
+  floor, every unmeasured path reporting `near_native` absent. One comment **inverted the operator
+  guidance**; the records were right. **The split pin paid on first contact:**
+  `kata-static-3.32.0` bundles Cloud Hypervisor **v51.1**, under pin, while `kata-runtime check`
+  passes regardless — caught, named, replaced. Gaps stand: requirement 9's **grant** half is a
+  deployment obligation no Python enforces; `locate`/`get_ast_blocks` **fail closed**; no model
+  allowlist; `MAX_FRAME_LEN` unratified.
 - **T5 — future plans.** Proposed: doubt-filter Layers 1–2, owner ratification pending, substrate
   open. Open: a warm pool behind a proven no-state-bleed reset; depth-2 with a sibling microVM, pending
   Trellis-specific measurement; the environment-type slot; the Windows dev-host shape; host selection
   (Hetzner taken provisionally, never DigitalOcean). Every **[A]** half (S3, S4, S6, GB, GA-eq) is
   capped ≤$5 and **unspent**.
 
-*Status ledger:* **control plane implemented in-tree and uncommitted; the boundary it defends is
-unbuilt — this is not a sandbox and must not be read as one.** Unbuilt: the Kata microVM, the vsock
-bridge on a real host, Tier-0 in-guest hardening. Accepted: nothing — no SPEC §8 gate passed; the Linux
-host's copy was **scp'd, not pulled** — drifted, untracked. *Reachability:* closed by `host.py`,
+*Status ledger:* **control plane shipped; the boundary it defends is unbuilt — this is not a sandbox
+and must not be read as one.** Unbuilt: the Kata microVM, the vsock bridge on a real host, Tier-0
+in-guest hardening. Accepted: **SPEC §8 gate 1 (G1), 2026-07-23** — the host *can* boot a microVM,
+which is not the claim that one has been booted; gates 2–4 unpassed. *Reachability:* closed by `host.py`,
 `cli.py`, `scripts/repl_sandbox_drill.py` and five `npm` scripts; **no CI job runs any**, and
 `KataLauncher.boot`, both vsock classes and every `*_from_env` factory stay uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
