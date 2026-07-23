@@ -542,3 +542,16 @@ dict literal with no validator anywhere in the tree, and the strict schema
 it named governs a different artifact class. Changing a field today costs
 one file — the condition this ruling now preserves deliberately rather
 than by accident.
+
+**A second overstatement from the same session, corrected here because it
+governs sequencing.** §10's findings were described as needing `llm_help`'s
+pin ceremony before they could be fixed. They do not. Both composed-prompt
+sha256 pins hash `trellis_agent.SYSTEM_PROMPT`, and the textedit addendum
+is **not part of it** — verified: that string contains neither the addendum
+banner nor the substring `trellis_textedit`. The addendum is appended into
+the run's `dynamic_system_prompt` at injection time. So addendum bytes are
+pinned by `npm run test:textedit` alone; the composed-prompt pins move only
+when the **base** prompt changes, which is why `llm_help` — an
+always-present kernel builtin taught in the base TOOLS manifest — is the
+pin-moving event while a conditional addendum is not. Fixing §10's findings
+is a drill-pinned edit, and nothing in it waits on `llm_help`.
