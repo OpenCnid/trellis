@@ -135,7 +135,7 @@ across for one subsystem's arc.
 | **C10 Benchmarks & evidence** | a capability claim is a hypothesis until a dated report retires it | OOLONG v1, update/poison/scale drills, effective-context rounds, citation A/B, wall-clock — all dated | anti-shortcut corpus v2 pinned zero-paid with **no paid run**; the uncommitted nine-refusal sandbox drill is **[R]**-only, outside CI | real TREC import; adversarial corpora; 10k sweeps; multi-run variance replacing n=1; consensus writes |
 | **C11 Serving & governance** | narrow, authenticated, admission-bounded doors; a written contract about which record wins | HTTP/SSE API, A2A server, outbound MCP client (byte-identical when off); AGENTS.md, session governance, the root contract | the surface checker is **green again** (`20e94ae` restored the density-chain links); `KNOWN_ROUTES` mislabels two routes | inbound MCP server surface with five open decisions; OAuth posture; the dual client+server role |
 | **C12 REPL sandbox** | treat model-authored Python as hostile and own the boundary between it and the operator's secrets | *(nothing shipped)* — still in-process `rlms==0.1.3` LocalREPL; eleven ratified design documents | G0 lifted 2026-07-22, S1 closed; a 781-test host-independent control plane sits **uncommitted, no non-test caller, no CI**, while G1 is unliftable on this Windows host so S2–S6 and the boundary itself stay unbuilt | doubt-filter Layers 1–2; warm pool; `max_depth` 2; host selection; the paid **[A]** halves, ≤$5, unspent |
-| **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI | the twin gained two root files the ratified record's §2 still omits, undetectably — the checker proves twin↔tree, never record↔twin; Phase 0 **falsified its own specification**; the telemetry allowlist gap is confirmed and unfixed; both records stay orphans | `llm_help` and descriptors; the guard-derivation bijection; a human-doc generator; the self-play discrimination gate |
+| **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI | the record↔twin asymmetry is structural — the checker proves twin↔tree only; Phase 0 **falsified its own specification**; the kernel's nearest guard-derivation is a switch over two hand-written constants; the runtime half is **authorized and unbuilt**, the fragile third state | `llm_help` and descriptors; the guard-derivation bijection; a human-doc generator; the self-play discrimination gate |
 
 ---
 
@@ -822,55 +822,64 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   forbidden artifacts, and deprecation markers. `tools/repository-surface/check.ts` enforces them plus
   Markdown links and environment-example coverage; `cli.ts` runs `npm run check:repo-surface` in CI.
   `AGENTS.md` is the bounded entrypoint, `HANDOFF.md` a deprecated stub. The runtime half — the
-  guard-derived composed read, the self-describing-surfaces record, the `llm_help` and descriptor
-  spec — is design record only, **unbuilt**.
+  guard-derived composed read, `llm_help`, the descriptor convention — is now **ratified and
+  authorized, and still unbuilt**: the standing moved 2026-07-23, no code did.
 - **T3 — with receipts.** `72ac673` (#156, 2026-07-21) landed the contract, its twin, and the checker —
   **ten issue codes**, fifteen root files, ten directories, nine forbidden artifacts; the CI step
-  precedes `npm test`. Uncommitted 2026-07-22: twin entries `conftest.py` and `pytest.ini`, class
-  `tool`, 4,096-byte caps — the Python analogues of `vitest.config.ts` and `tsconfig.build.json`, at
-  root because pytest anchors rootdir and conftest discovery there. Measured this session, not as
-  recorded: checker **PASS (0 issues)**, negative control catching all four planted breaks, and
-  `AGENTS.md` at **32,757 on-disk bytes against its 32,768 cap** — eleven bytes of headroom on a CRLF
-  checkout, 535 on LF. Design records: `dc1f55f` (#153), `3a02408` (#154), `3bdc0e7` (#135), `cb12a53`
-  (#136).
-- **T4 — the frontier.** **The gate fired; the ceremony did not.** Undeclared root files raise
-  `unexpected_root_file`, so the two were declared — but `REPOSITORY_ROOT_CONTRACT.md` §7 (Changing the
-  contract) requires prose record and twin to move together, §2 (The permitted root files) lists
-  neither, and nothing detects it: the checker proves twin↔tree, never record↔twin. Same asymmetry one
-  level down — `AGENTS.md` §2 (Navigation map) rows every other top-level `src/` package and [[C12]]'s
-  new one not at all, while the contract governs repository-root names only. **Named-implies-exists is
-  proved; exists-implies-named is not** — the general form of the backticked-row miss that survived
-  `5e7295d` (green again since `20e94ae`). **Confirmed unfixed:** the nine-field telemetry allowlist.
-  **Falsified:** Phase 0, 2026-07-19, proved its own specification impossible. **New surface,
-  unscheduled:** `.claude/ceremonies/` — a dedupe ceremony whose prompt is committed beside the
-  rulings it honors, so the loop's instructions and its accumulated exceptions are both diffable. It
-  reads a document whole, counts with tools, and sorts each repeat by whether an anchor holds it in
-  place; **"No edits" is a successful run**, and the positive control it owes is a seeded clean
-  document that must return exactly that. Its `SETUP.md` carries the install for any host — the
-  fourteen-command allow-list committed to `.claude/settings.json`, which **travels by checkout**
-  because permission rules are the one settings category that merges across scopes rather than
-  top-winning, and which withholds `gh pr merge` (the owner's gate) and write access to the protected
-  `.claude/**` (a path the ceremony's target set excludes on purpose, so the loop cannot rewrite its
-  own prompt). Nothing schedules it yet.
-- **T5 — future plans.** Proposed only: `llm_help()` as an always-present kernel builtin listing the
-  run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
+  precedes `npm test`. `conftest.py` and `pytest.ini` were admitted 2026-07-22 as class `tool` at
+  4,096-byte caps, twin **and** record §2 together with a dated amendment — the ceremony that the
+  prior edition recorded as skipped was completed. `794aab2` (2026-07-23) ratified
+  `SELF_DESCRIBING_SURFACES.md` and authorized **Workstream B only** of the self-model, records only,
+  no code: `HARNESS_SELF_MODEL.md` §12 carries the authorization and holds Workstream A, rule 7's paid
+  probe, and Phase 4's any-gate shut; `LLM_HELP_SPEC.md` became the build spec with derived, not
+  independent, standing. Measured: checker **PASS (0 issues)**, negative control catching all four
+  planted breaks, `AGENTS.md` at **31,034 bytes against its 32,768 cap** (1,734 headroom, down from
+  eleven before #171 restated the rules positively). Design records: `dc1f55f` (#153), `3a02408`
+  (#154), `3bdc0e7` (#135), `cb12a53` (#136).
+- **T4 — the frontier.** **Authorized is a third state, and it is the fragile one.** A record that says
+  *build this* with nothing built is neither a proposal that can be ignored nor a slice that can be
+  read from code — it decays into either unless a first increment converts it. That increment is
+  pre-stated and sharper than the record first put it: give `trellis_textedit` the descriptor shape,
+  derive its addendum, pin byte-identity — and it owes **two** pins, because
+  `build_textedit_addendum` **selects between two pre-authored constants** on the `_guarded_only`
+  bool rather than deriving anything. The kernel's nearest thing to guard-derivation turns out to be a
+  switch over hand-written prose; the guarded-only arm is the informative pin, being the first
+  state-dependent self-description. **The record↔twin asymmetry is structural, not the closed
+  instance:** the checker proves twin↔tree, never record↔twin, and `AGENTS.md` §2 rows every other
+  top-level `src/` package and [[C12]]'s not at all. **Named-implies-exists is proved;
+  exists-implies-named is not** — the general form of the backticked-row miss that survived `5e7295d`
+  (green again since `20e94ae`). **Confirmed unfixed:** the nine-field telemetry allowlist — now
+  *deliberately* so, since it is Workstream A's Phase 0a and A was held back. **Falsified:** Phase 0,
+  2026-07-19, proved its own specification impossible. **Unscheduled:** `.claude/ceremonies/` — a
+  dedupe ceremony whose prompt is committed beside the rulings it honors, so the loop's instructions
+  and its exceptions are both diffable; **"No edits" is a successful run**, and it owes a seeded-clean
+  positive control. Its `SETUP.md` installs the fourteen-command allow-list into
+  `.claude/settings.json`, which **travels by checkout** because permission rules are the one settings
+  category that merges across scopes rather than top-winning, and which withholds `gh pr merge` and
+  write access to `.claude/**` — so the loop cannot rewrite its own prompt. Nothing schedules it yet.
+- **T5 — future plans.** Authorized, unbuilt: `llm_help()` as an always-present kernel builtin listing
+  the run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
   see-also, with `expects` **guard-derived** and the human winning on stalemate; the module manifest
-  schema extended; one generator emitting human navigation pointers. Proposed gates: a zero-paid
-  reachability drill, then a self-play discrimination and drift game whose falsifying cell is
-  *selected-on-a-lie*; the paid adoption probe stays owner-gated. Open: where `llm_help` composes from
+  schema extended; one generator emitting human navigation pointers. Gates that bind the build: a
+  zero-paid reachability drill, then a self-play discrimination and drift game whose falsifying cell is
+  *selected-on-a-lie*; the paid adoption probe stays owner-gated; landing `llm_help` moves **both**
+  composed-prompt pins. Open by ratification's own terms, not oversight: where `llm_help` composes from
   at the injection seam, and which descriptor fields Trellis adopts.
 
 *Status ledger:* root contract · machine twin · surface checker · CI wiring — **shipped-pinned**;
-harness self-model, self-describing surfaces, `llm_help` — **PROPOSED / principle endorsed,
-implementation not authorized**. *Reachability:* `llm_help` has **no occurrence anywhere** under `src/`,
-`scripts/`, `modules/` or `tools/`; the descriptor fields would **fail** validation — the manifest
-schema is `.strict()`; the bijection is never mechanized. `wiki:check --verify` is a CI step and
-**neither negative control is** — half this class's trust precondition rests on operator discipline.
-*Orphans:* both runtime-half records are missing from `docs/ORIENTATION.md`; `AGENTS.md` backticks one
-and links neither. *Cross-links:* [[C11]] (this class's checker governs that class's surfaces), [[C5]]
-(the pillar's enforcement posture, generalized by the self-model), [[C7]] (the alive catalog is the
-run's actual cover — no default cast), [[C12]] (the package that tested both halves — root files
-caught, navigation map not).
+self-describing surfaces — **RATIFIED** (2026-07-23); harness self-model — **principle endorsed,
+Workstream B authorized, A gated**; `llm_help` — **specified, authorized, unbuilt**. *Reachability:*
+`llm_help` has **no occurrence anywhere** under `src/`, `scripts/`, `modules/` or `tools/`; the
+descriptor fields would **fail** validation — the manifest schema is `.strict()`; the bijection is
+never mechanized. `wiki:check --verify` is a CI step and **neither negative control is** — half this
+class's trust precondition rests on operator discipline. *Orphans:* closed 2026-07-23 — both
+runtime-half records now carry rows in `docs/ORIENTATION.md` D4. This map's own open item 3 (derivation
+inverted) is **paid**: `SELF_DESCRIBING_SURFACES.md` §9.1 distinguishes guard-derived from editorial
+facts under one invariant — *one encoding, owned by whoever is authoritative for the fact*.
+*Cross-links:* [[C11]] (this class's checker governs that class's surfaces), [[C5]] (the pillar's
+enforcement posture, generalized by the self-model), [[C7]] (the alive catalog is the run's actual
+cover — no default cast), [[C12]] (the package that tested both halves — root files caught, navigation
+map not).
 
 ---
 
