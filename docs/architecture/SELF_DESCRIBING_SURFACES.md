@@ -431,3 +431,63 @@ guard-derivation but the same rule at the other end of the axis.
   ratified answers.** Ratifying the design does not settle them.
 - **The self-play validation gate** (§6, resolved; specified at
   `LLM_HELP_SPEC.md` §6) binds before anything relies on the alive catalog.
+
+## 10. Increment 1 executed — the descriptor model is lossless on trellis_textedit (dated entry — July 23, 2026)
+
+[`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) §12.1's pre-stated first test
+ran and **byte-identity holds on both arms**: the addendum composed from a
+descriptor plus guard-derived expectations equals the hand-authored constants
+exactly — `TEXTEDIT_ADDENDUM` (3,066 chars) and
+`TEXTEDIT_ADDENDUM_GUARDED_ONLY` (3,067 chars), one pin per arm
+(`scripts/test_textedit.py` §16, *descriptor-composed addendum*). Each pin was
+made to fail once on a planted one-byte perturbation and named the first
+divergent byte before being restored (rule 19(c)); the perturbed live path was
+also caught independently by the pre-existing constants-equality checks. The
+refactor can proceed surface by surface without a pin ceremony: the
+composed-prompt sha256 pins did not move, because the composition ships bytes
+identical to the constants.
+
+**What shipped.** `TEXTEDIT_DESCRIPTOR` carries the editorial fields
+(`LLM_HELP_SPEC.md` §1 vocabulary); `_TEXTEDIT_GUARD_EXPECTS` owns every
+guard-backed sentence, one phrase per guard class, keyed by the guard;
+`render_textedit_addendum` is the invariant frame and contributes no prose;
+`build_textedit_addendum` now ships the composition, so its non-test caller is
+the kernel-prompt seam in `src/rlm/trellis_agent.py`. The mode account is
+selected by the same `_guarded_only` bool that makes `splice()` refuse — §2.1
+of the self-model, now an observation. This supersedes §9.2's first bullet
+**for this surface**: `trellis_textedit` no longer selects between two
+pre-authored constants. Honest scope of "derived": the phrase *text* is still
+human-authored once per guard class and pinned; what the engine derives is the
+selection (from the refusing state) and the single-encoding ownership (a
+guard-backed sentence exists in exactly one place, enforced by a drill check).
+Nothing generates prose from predicate code, and the other eight surfaces are
+untouched.
+
+**Findings, recorded rather than fixed** (fixing any of them moves
+kernel-prompt bytes, which this increment is forbidden to do):
+
+1. **A bijection orphan in the guarded arm.** `_require_guarded_lines`
+   enforces the newline-free line contract on `expected_lines`/`new_lines`,
+   but the guarded arm renders no line for it — the phrase rides only the raw
+   `splice()` bullet. Pinned as a finding in the drill.
+2. **The §3.2/§1 field set had no slot for cross-cutting protocol lines**
+   (the JSON-return convention, the raw-arm PREFER bullet, the provenance
+   HARD RULE). MASH's `usage` field was adopted **provisionally** to carry
+   them. This is evidence for §9.3's open field-set decision, not its
+   settlement.
+3. **The advisory census** (`HARNESS_SELF_MODEL.md` §4's marking duty): the
+   lines no predicate on this surface enforces are the JSON-return
+   convention, the LOCATE-NEVER-COUNT tail, "Addresses are transient", the
+   raw-arm PREFER bullet, "Re-loading refreshes … DISCARDS", diff's display
+   truncation, and the provenance HARD RULE (enforced by the database write
+   path, a different surface). They are marked advisory as descriptor
+   metadata; the rendered bytes cannot carry the marking until a pin-moving
+   pass is authorized.
+4. **The banner qualifier "(CODE-MEDIATED, HASH-GUARDED)" restates two
+   guard-backed properties inside an editorial field** — a mild §9.1 tension:
+   the second encoding it forbids, at one-word scale, in the grouping label.
+5. **Bijection granularity is the guard class, not the raise site.** One
+   digest line accounts for the whole `StaleFileError` family; operator-facing
+   guards (`parse_textedit_bounds`, `parse_textedit_guarded_only`'s
+   malformed-value refusal, the root validation) deliberately have no line,
+   because they refuse the operator before a run exists.

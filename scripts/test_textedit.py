@@ -39,7 +39,14 @@
 #       refuses with the minimal window named, the Session 37 run-2
 #       manifest shape STAGES (the honest-scope pin), the decomposed
 #       minimal edit lands with neighbors byte-intact, and guarded
-#       activity is counted separately from raw splices.
+#       activity is counted separately from raw splices,
+#  [15] guarded-only mode (the July 19, 2026 pass) — the explicit
+#       off-switch: raw splice refused, guarded family intact, the
+#       addendum follows the mode, defensive flag parsing,
+#  [16] the self-describing descriptor (Workstream B increment 1,
+#       HARNESS_SELF_MODEL.md §12.1) — the composed addendum reproduces
+#       both hand-authored constants byte-exactly, one pin per arm; the
+#       guard-expectation registry maps onto the rendered lines.
 import ast
 import hashlib
 import json
@@ -59,8 +66,12 @@ from trellis_textedit import (  # noqa: E402
     RawSpliceDisabledError,
     TEXTEDIT_ADDENDUM,
     TEXTEDIT_ADDENDUM_GUARDED_ONLY,
+    TEXTEDIT_DESCRIPTOR,
     _TEXTEDIT_ADDENDUM_HEAD,
     _TEXTEDIT_ADDENDUM_TAIL,
+    _TEXTEDIT_GUARD_EXPECTS,
+    derive_textedit_expects,
+    render_textedit_addendum,
     TEXTEDIT_SLICE_MAX_LINES,
     TEXTEDIT_LOCATE_MAX_HITS,
     TEXTEDIT_DIFF_MAX_LINES,
@@ -916,6 +927,104 @@ check("a malformed off-switch value raises rather than defaulting to unsafe",
       all(malformed_raised))
 expect_raises("the constructor refuses a non-bool guarded_only",
               lambda: TrellisTextEdit(go_root, guarded_only="1"), ValueError)
+
+# --- 16. The self-describing descriptor (Workstream B increment 1) ---------
+# HARNESS_SELF_MODEL.md §12.1's pre-stated first test: the addendum is
+# composed from TEXTEDIT_DESCRIPTOR (editorial) plus the guard-derived
+# expectations, and the composition must reproduce the hand-authored
+# constants byte-exactly — one pin per arm. The constants are the
+# targets; a divergence means the descriptor model is lossy, and the
+# pin names the first divergent byte so the loss is inspectable.
+print("\n[16] descriptor-composed addendum: byte-identity per arm")
+
+
+def first_divergence(got, want):
+    n = min(len(got), len(want))
+    for i in range(n):
+        if got[i] != want[i]:
+            return (f"first divergence at char {i}: "
+                    f"got {got[max(0, i - 40):i + 40]!r} "
+                    f"want {want[max(0, i - 40):i + 40]!r}")
+    longer = got if len(got) > n else want
+    return f"length {len(got)} vs {len(want)}; tail {longer[n:n + 80]!r}"
+
+
+rendered_default = render_textedit_addendum(
+    TEXTEDIT_DESCRIPTOR, derive_textedit_expects(default_mode))
+check("PIN default arm: composed bytes equal TEXTEDIT_ADDENDUM exactly",
+      rendered_default == TEXTEDIT_ADDENDUM,
+      first_divergence(rendered_default, TEXTEDIT_ADDENDUM))
+
+rendered_guarded = render_textedit_addendum(
+    TEXTEDIT_DESCRIPTOR, derive_textedit_expects(go))
+check("PIN guarded arm: composed bytes equal TEXTEDIT_ADDENDUM_GUARDED_ONLY exactly",
+      rendered_guarded == TEXTEDIT_ADDENDUM_GUARDED_ONLY,
+      first_divergence(rendered_guarded, TEXTEDIT_ADDENDUM_GUARDED_ONLY))
+
+# The live path ships the composition (trellis_agent.py holds the
+# non-test caller), so section 15's constants-equality checks above
+# already exercised the renderer end to end; re-state it explicitly.
+check("build_textedit_addendum ships the composition on both arms",
+      build_textedit_addendum(default_mode) == rendered_default
+      and build_textedit_addendum(go) == rendered_guarded)
+
+# One state refuses AND describes (HARNESS_SELF_MODEL.md §2.1): the arm
+# selection reads the same _guarded_only bool splice() refuses on — the
+# refusal itself was pinned in section 15 on these same holders.
+check("the mode account derives from the refusing bool itself",
+      derive_textedit_expects(go)["guarded_only"] is True
+      and derive_textedit_expects(default_mode)["guarded_only"] is False)
+
+# The registry→line half of the bijection (HARNESS_SELF_MODEL.md §3 /
+# §12.3): every guard-owned phrase renders into the arm(s) it belongs
+# to, and the shared anchor-guard phrase reaches BOTH arms from ONE
+# encoding — the two arms cannot drift apart on it.
+_raw_only_keys = {"newline_free"}
+_guarded_only_keys = {"guarded_mode_active", "raw_disabled"}
+_shared_keys = set(_TEXTEDIT_GUARD_EXPECTS) - _raw_only_keys - _guarded_only_keys
+check("every shared guard phrase renders in both arms",
+      all(_TEXTEDIT_GUARD_EXPECTS[k] in rendered_default
+          and _TEXTEDIT_GUARD_EXPECTS[k] in rendered_guarded
+          for k in _shared_keys))
+check("the mode-specific phrases render only in their own arm",
+      _TEXTEDIT_GUARD_EXPECTS["newline_free"] in rendered_default
+      and all(_TEXTEDIT_GUARD_EXPECTS[k] in rendered_guarded
+              and _TEXTEDIT_GUARD_EXPECTS[k] not in rendered_default
+              for k in _guarded_only_keys))
+check("the anchor-guard expectation is one encoding rendered once per arm",
+      rendered_default.count(_TEXTEDIT_GUARD_EXPECTS["anchor_guard"]) == 1
+      and rendered_guarded.count(_TEXTEDIT_GUARD_EXPECTS["anchor_guard"]) == 1)
+
+# Recorded orphan (a bijection finding made loud, not fixed): the
+# guarded arm enforces the newline-free line contract on
+# expected_lines/new_lines (_require_guarded_lines) but renders no line
+# for it — adding one would move kernel-prompt bytes, which increment 1
+# is forbidden to do (the composed-prompt sha pins must not move).
+check("FINDING pinned: the newline-free contract is an orphan in the guarded arm",
+      _TEXTEDIT_GUARD_EXPECTS["newline_free"] not in rendered_guarded)
+
+# The guard-expectation inventory is closed and pre-stated: a key
+# added or dropped without touching this pin is drift.
+check("the guard-expectation inventory is exactly the pre-stated set",
+      set(_TEXTEDIT_GUARD_EXPECTS) == {
+          "containment", "addressing", "slice_bound", "locate_bound",
+          "newline_free", "anchor_guard", "replace_match", "over_wide",
+          "insert_anchor", "delete_verified", "digest_guard", "budgets",
+          "guarded_mode_active", "raw_disabled"})
+
+# One encoding, enforced both ways: no guard-owned phrase may be
+# restated inside the descriptor's editorial strings (the second-copy
+# failure class SELF_DESCRIBING_SURFACES.md §9.1 exists to close).
+_editorial_bits = [TEXTEDIT_DESCRIPTOR["purpose"], TEXTEDIT_DESCRIPTOR["category"]]
+_editorial_bits += list(TEXTEDIT_DESCRIPTOR["usage"].values())
+for _e in TEXTEDIT_DESCRIPTOR["exposes"]:
+    for _g in ([_e] if "group" not in _e else _e["group"]):
+        _editorial_bits += [p for p in _g.get("doc", []) if isinstance(p, str)]
+check("no guard-owned phrase is restated in an editorial field",
+      not any(phrase in bit
+              for phrase in _TEXTEDIT_GUARD_EXPECTS.values()
+              if len(phrase) >= 30
+              for bit in _editorial_bits))
 
 # ---------------------------------------------------------------------------
 for stale_root in temp_roots:
