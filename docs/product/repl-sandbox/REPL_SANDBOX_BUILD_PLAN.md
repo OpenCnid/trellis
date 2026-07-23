@@ -204,6 +204,37 @@ build** — each closes one unknown and leaves a durable artifact for S6 to inte
 - **Label: [R]** — scripted state probe.
 - **Dependencies:** blocks S3, S4, S5.
 
+**Observed 2026-07-23 — S2 PASS.** `python3 scripts/repl_sandbox_s2_probe.py` → **exit 0** on the
+same Hetzner AX41 that passed G1 (`npm run repl-sandbox:s2-probe`; the script runs *on the host* and
+refuses on any box without `/dev/kvm`). Kata 3.32.0 · Cloud Hypervisor v52.0 · containerd 2.2.1 ·
+image `docker.io/library/python:3.12-slim`.
+
+| claim | observed |
+|---|---|
+| boot | `ctr run -d --runtime io.containerd.kata.v2` → 0.60–0.65 s to detach, 0.68 s to first exec |
+| boundary | guest kernel **6.18.35** vs host **6.8.0-134-generic**; distinct `boot_id`; host carries `/opt/kata/bin/cloud-hypervisor --api-socket /run/vc/vm/<sandbox>/clh-api.sock` |
+| persistence | `x = 41` (turn 1) → `x += 1` (2) → read `42` (3) → `y = x * 2` (4) → read `42,84` (**turn 5**), one worker process (`pid 12`) and one guest `boot_id` across all five turns |
+| teardown | after `task kill`/`task delete`/`container delete`: not listed by containerd, **zero** surviving Cloud Hypervisor processes for the sandbox |
+| negative control | `--negative-control` destroys and re-boots the guest between turns 2 and 3, everything else identical → **exit 3, DETECTED**: `NameError: name 'x' is not defined`, two pids, two boot ids |
+
+**The negative control is the load-bearing half.** A persistence probe that cannot distinguish a
+live guest from a fresh one proves nothing (AGENTS.md §4 (Hard rules) rule 19(c)), and the three
+independent signals — the namespace, the worker pid, the guest boot id — all fired on the planted
+break rather than one of them carrying the result alone.
+
+**Two host provisioning facts this spike established** (neither was in place after G1, and
+`kata-runtime check` passes without them): containerd finds the Kata shim by name on its own `PATH`,
+so `/opt/kata/bin/containerd-shim-kata-v2` must be linked into `/usr/local/bin`; and Kata's
+`configuration.toml` ships as a symlink to **`configuration-qemu.toml`**, so a host that installed
+Cloud Hypervisor and never re-pointed it boots the ratified pin's *neighbour* — the symlink was
+moved to `configuration-clh.toml`, which is what the observed run used.
+
+**Scope limits.** The guest holds state across turns *delivered as separate `ctr task exec` calls* —
+this is the boundary and the persistence, not the wire: the turns cross via a guest fifo, **not**
+vsock (S3), and the worker is an `execute_code` skeleton with no capabilities, no broker, and no
+Tier-0 hardening. `KataLauncher.boot` still raises: the spike proves the `ctr` path works, it does
+not make the production launch path (guest CID assignment, supervisor readiness) exist.
+
 ### 5.3 S3 — `llm_query` over vsock
 
 - **Objective:** carry the sub-LLM channel across the guest boundary — swap loopback `AF_INET` for

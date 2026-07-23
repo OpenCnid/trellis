@@ -137,6 +137,25 @@ never stacked. Google defaults to gVisor (its own hardened runtime); the *self-h
 warm-pool/claim/per-unit-identity *pattern* is worth borrowing (with the state-reset caveat) if
 pooling is ever added.
 
+## 10a. What the first real microVM taught (S2, July 23, 2026)
+
+Three things the records could not have told us, all of them provisioning facts that a *passing*
+`kata-runtime check` hides:
+
+- **A validated host is not a wired host.** G1 passed with the Kata shim sitting in `/opt/kata/bin`,
+  which is not on containerd's `PATH`; `ctr run --runtime io.containerd.kata.v2` fails there while
+  every G1 condition still reports green. The gate proves capability, not reachability — the house
+  distinction (correct ≠ reachable) showing up in infrastructure.
+- **The default config points at the neighbour of the ratified pin.** Kata ships
+  `configuration.toml` as a symlink to `configuration-qemu.toml`. Installing Cloud Hypervisor v52.0
+  and stopping there gives a host that boots QEMU guests while the operator believes the ratified
+  VMM is in use. This is the same shape as the G1 finding (Kata bundling its own Cloud Hypervisor at
+  v51.1): **both upstreams ship a default that quietly disagrees with the pin.**
+- **Boot is fast enough that the persistence question is the whole question.** ~0.7 s from `ctr run`
+  to first exec means boot cost is not what makes state worth keeping — correctness across turns is.
+  The probe therefore asserts the *identity* of the guest (worker pid, guest `boot_id`) alongside
+  the namespace, and the negative control fires all three.
+
 ## 11. Meta-learning: the review methods caught the builder's own errors
 
 Worth recording because it validates the house methods (and because I was the self-invested

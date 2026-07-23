@@ -647,8 +647,12 @@ class KataLauncher:
 
         # Everything above this line is built and probes a real host. What
         # follows it — minting the guest image, launching Cloud Hypervisor with
-        # a chosen guest CID, and waiting for the supervisor to listen — is
-        # BUILD_PLAN section 5.2 (S2) and is not built. Raising here is the
+        # a chosen guest CID, and waiting for the supervisor to listen — is not
+        # built. The S2 spike (BUILD_PLAN section 5.2, PASS 2026-07-23) proved
+        # the `ctr run --runtime io.containerd.kata.v2` path boots a stateful
+        # guest and showed which host provisioning facts it needs, but a spike
+        # driving `ctr` by hand is not this launch path; see
+        # scripts/repl_sandbox_s2_probe.py. Raising here is the
         # whole of the honesty: a launcher that returned a handle backed by
         # nothing would be indistinguishable from a working one until the first
         # exec, and would have already been counted as a boundary by then.

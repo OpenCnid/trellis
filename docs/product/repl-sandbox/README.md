@@ -1,7 +1,8 @@
 # Trellis REPL Sandbox — Documentation Index
 
-**Status: decisions owner-ratified July 20–21, 2026. G0 lifted July 22, 2026 — a host-independent
-control plane is built and tested in-tree; THE BOUNDARY ITSELF IS NOT BUILT.**
+**Status: decisions owner-ratified July 20–21, 2026. G0 lifted July 22, 2026. G1 and S2 passed on a
+Hetzner AX41 July 23, 2026 — a real Kata microVM boots and holds state across turns. THE PRODUCTION
+BOUNDARY IS STILL NOT WIRED: the guest has no vsock channel, no broker, and no Tier-0 hardening.**
 
 This folder replaces `rlms`' in-process `LocalREPL` with a real, self-hostable trust boundary while
 keeping RLM compatibility. The records led implementation (document-driven design) and continue to
@@ -10,12 +11,13 @@ assuming either.
 
 **Read this before reading anything else as a security property.** What exists is the software on
 *both sides* of the boundary — the wire, the handle model, both host chokepoints, the capability
-lifecycle, the guest supervisor, and the `KataREPL` backend. What does not exist is the boundary:
-no Kata microVM, no vsock bridge on a real host, no Tier-0 in-guest hardening. **This is not yet a
-sandbox and must not be deployed as one.** G1 (a KVM-capable Linux host) is unsatisfied, so every
-milestone from S2 onward is blocked; `KataLauncher.boot` refuses rather than returning a handle
-backed by nothing, and the in-process launcher used in tests announces that it provides no
-isolation.
+lifecycle, the guest supervisor, and the `KataREPL` backend — plus, since July 23, a **prototype**
+Kata microVM that boots on the provisioned host and keeps a Python namespace alive across turns
+(BUILD_PLAN §5.2 (S2)). The two are **not connected to each other**: the guest in that spike is
+reached by `ctr task exec`, not by the vsock bridge (S3), and it has no broker (S4) and no Tier-0
+in-guest hardening (S5). **This is not yet a sandbox and must not be deployed as one.**
+`KataLauncher.boot` still refuses rather than returning a handle backed by nothing, and the
+in-process launcher used in tests announces that it provides no isolation.
 
 ## Reading order
 
@@ -49,6 +51,13 @@ Diagrams: [isolation view](repl_sandbox_architecture.svg) · [depth-1 flat fan-o
   lifecycle, `KataREPL` and the G1 preflight. Run it: `npm run repl-sandbox:preflight` (fails on any
   host without `/dev/kvm`, by design), `npm run repl-sandbox:selftest`, `npm run repl-sandbox:drill`
   (`--negative-control` exits 3 when every planted break is caught), `npm test:repl-sandbox`.
-- **What is not built:** the Kata microVM, the vsock bridge on a real host, Tier-0 in-guest
-  hardening — S2 through S6, all blocked on G1. No SPEC §8 acceptance gate has passed, and no paid
-  `[A]` adoption gate has been spent.
+- **What was proved on the host** (July 23, 2026, Hetzner AX41): **G1** — real KVM, Kata 3.32.0,
+  Cloud Hypervisor v52.0, 11.5–14.2× acceleration differential. **S2** — `ctr run --runtime
+  io.containerd.kata.v2` boots a guest on kernel 6.18.35 (host: 6.8.0-134-generic) in ~0.7 s to
+  first exec, a variable set in turn 1 reads back in turn 5 from one unmoved worker process, and
+  teardown leaves no VMM process behind. Run it *on the host*:
+  `npm run repl-sandbox:s2-probe` (`--negative-control` exits 3 when the mid-run guest swap is
+  caught).
+- **What is not built:** the vsock bridge on a real host, the DB broker against a real guest, Tier-0
+  in-guest hardening, and the real `KataREPL` launch path — S3 through S6. No SPEC §8 acceptance
+  gate has passed, and no paid `[A]` adoption gate has been spent.
