@@ -222,14 +222,44 @@ def test_empty_registry_still_materialises_a_parseable_module():
 
 
 def test_stub_arguments_forward_the_parameter_names():
+    """Required args are sent unconditionally; optional ones are guarded.
+
+    The stub builds `args` in a local rather than as one literal, because an
+    optional parameter the caller left unset must be *absent* from the map and
+    not present carrying a null — every host op reads its optionals with
+    `args.get(name, default)`, and `.get` hands back the null rather than the
+    default when the key exists. Pinned structurally here (this module does not
+    execute generated source); the behaviour it buys — `run_query(sql)` reaching
+    the broker as `{'sql': ...}` and succeeding — is driven end to end against
+    the real broker in `test_s4_paid.py`.
+    """
     registry = CapabilityRegistry()
     registry.register(GUEST_CID, make_run_query(), "DB_PORT")
 
-    defs = function_defs(registry.materialise(GUEST_CID))
-    args_dict = defs["run_query"].body[-1].value.args[1].values[-1]
-    assert isinstance(args_dict, ast.Dict)
-    assert [k.value for k in args_dict.keys] == ["sql", "params", "limit"]
-    assert [v.id for v in args_dict.values] == ["sql", "params", "limit"]
+    body = function_defs(registry.materialise(GUEST_CID))["run_query"].body
+
+    # The args map starts as a literal of the required parameters only.
+    assign = body[1]
+    assert isinstance(assign, ast.Assign)
+    local = assign.targets[0].id
+    assert isinstance(assign.value, ast.Dict)
+    assert [k.value for k in assign.value.keys] == ["sql"]
+    assert [v.id for v in assign.value.values] == ["sql"]
+
+    # Each optional parameter is added only when the caller set it.
+    guarded = {}
+    for node in body[2:-1]:
+        assert isinstance(node, ast.If)
+        assert isinstance(node.test, ast.Compare)
+        assert isinstance(node.test.ops[0], ast.IsNot)
+        assert node.test.comparators[0].value is None
+        subscript = node.body[0].targets[0]
+        assert subscript.value.id == local
+        guarded[node.test.left.id] = subscript.slice.value
+    assert guarded == {"params": "params", "limit": "limit"}
+
+    # ...and that same local is what the envelope carries.
+    assert body[-1].value.args[1].values[-1].id == local
 
 
 # ---------------------------------------------------------------------------
