@@ -243,3 +243,22 @@ scope. What that scope means for *this* file:
 - **Honest scope carried forward:** no shipped surface derives its
   self-description from its guard predicates yet, and no behavior claim attends
   the authorization.
+
+## 10. Increment 1 landed — what the next surface builds from (dated entry — July 23, 2026)
+
+The `trellis_textedit` descriptor shipped and its composed addendum is pinned
+byte-identical to both hand-authored constants
+([`SELF_DESCRIBING_SURFACES.md`](SELF_DESCRIBING_SURFACES.md) §10 carries the
+result and findings). Two facts a builder starting from this spec needs:
+
+- **§1's field set was exercised and came up one slot short.** The addendum
+  carries cross-cutting protocol lines (a return-format convention, a
+  mode-specific preference bullet, a cross-surface HARD RULE) that fit none of
+  §1's seven fields. `TEXTEDIT_DESCRIPTOR` adopts MASH's **`usage`** field for
+  them, **provisionally** — the field-set decision of §9 remains open and
+  owner's to make; treat the shipped descriptor as its first evidence.
+- **§3's derivation, as landed:** expectation phrases live in a guard-keyed
+  registry beside the descriptor (`_TEXTEDIT_GUARD_EXPECTS`), one encoding per
+  guard class, with mode selection read from the refusing state itself. The
+  drill enforces that no guard-owned phrase is restated in an editorial field.
+  That is the shape the next surface should copy.
