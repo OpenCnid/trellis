@@ -373,7 +373,9 @@ inside the same file.
 | `docs/RESEARCH_NOTES_COLLECTION.md` §3.1 | **RATIFIED** (July 19, 2026) — consultation and repair for external sources |
 | `docs/architecture/SESSION_GOVERNANCE.md` | **ADOPTED AND APPLIED** (July 17, 2026) — live instruction vs committed record; scoped to the coding-agent session contract only |
 | `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` | **FOUNDATIONAL LESSON** (July 19, 2026) — no default instances; authorizes no build |
-| `docs/architecture/HARNESS_SELF_MODEL.md` | **PRINCIPLE ENDORSED, IMPLEMENTATION NOT AUTHORIZED** (July 19, 2026); §11 carries the case behind `AGENTS.md` rule 20 |
+| `docs/architecture/HARNESS_SELF_MODEL.md` | **PRINCIPLE ENDORSED** (July 19, 2026); **Workstream B IMPLEMENTATION AUTHORIZED** (July 23, 2026, §12) — Workstream A and every paid probe stay gated by §8; §11 carries the case behind `AGENTS.md` rule 20 |
+| `docs/architecture/SELF_DESCRIBING_SURFACES.md` | **RATIFIED** (July 23, 2026, §9) — surfaces that describe themselves, and `llm_help`; direction and design, with the build's remaining gates in §9.3 |
+| `docs/architecture/LLM_HELP_SPEC.md` | **BUILD SPECIFICATION** for the authorized Workstream B (July 23, 2026, §9) — standing derives from `SELF_DESCRIBING_SURFACES.md`, never independent |
 | `docs/architecture/DOUBTS_WORKSPACE.md` | **DESIGN — PROPOSED** (July 20, 2026) — the −1 tier; nothing built, nothing authorized |
 | `docs/architecture/RLM_HARNESS_SCAFFOLDING.md` | **DESIGN RECORD** (July 13, 2026) — S1/S3 and UPSUM implemented; §8.6 carries the landed document-UPSUM CLI. Further increments owner-gated per run |
 | `docs/architecture/REPOSITORY_ROOT_CONTRACT.md` | **RATIFIED** (July 21, 2026) — the root surface and its machine twin; §7 is the ceremony for changing a governed byte budget |

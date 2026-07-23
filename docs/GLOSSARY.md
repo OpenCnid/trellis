@@ -162,7 +162,8 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   Consequence: effective context is bounded by REPL memory, not the
   attention window. Canonical record:
   [`docs/architecture/CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md).
-- **Harness self-model (principle endorsed July 19, 2026; not built)** —
+- **Harness self-model (principle endorsed July 19, 2026; Workstream B
+  authorized July 23, 2026, not yet built)** —
   the direction that Trellis's interior surfaces serve as *free
   meta-prompt composition primitives*, so the model always receives a
   **composed, bounded-context read of what the system actually expects**
