@@ -62,10 +62,9 @@ stop at T1 — so read §4 in full regardless of where you stop climbing.
 **T1 — the gate.** You are an agent opening Trellis, OpenCnid's
 Recursive Language Model runtime: a model operating a persistent Python
 REPL over a provenance-enforced substrate. Your objective comes from the
-collaborator's live task — never from a branch name, the deprecated
-`HANDOFF.md`, or your own selection. Do not go from task to
-implementation: orient, retrieve the record that governs the task, then
-design. The two doctrines above govern the substrate. The twenty-one
+collaborator's live task (rule 1). Orient, retrieve the record that
+governs the task, then design. The two doctrines above govern the
+substrate. The twenty-one
 hard rules in §4 are mandatory and appear at no other density.
 
 **T2 — the routing.** Read this file whole, then the live task, then
@@ -108,12 +107,10 @@ so discovery reads live blocks only.
 ## 1. Study protocol (read in this order)
 
 1. **This file, fully.** The navigation tables below are the map.
-2. **The collaborator's live task.** It is the current objective. Do not
-   recover an objective from the deprecated [`HANDOFF.md`](HANDOFF.md), the archived
-   technical roadmap, a branch name, or an old progress entry. If no
-   live task exists, the un-tool is the whole move: ask exactly one
-   clarifying question in the chat channel and select no work of your
-   own (rule 21).
+2. **The collaborator's live task.** It is the current objective and the
+   only source of one (rule 1); §1.5 carries the standing of everything
+   else. With no live task, ask one clarifying question in the chat
+   channel and wait (rule 21).
 3. **[`docs/GLOSSARY.md`](docs/GLOSSARY.md)** — one-line canonical definitions for every
    load-bearing term (RLM, contested, promotion, module, workspace,
    quarantine, standing, …). Read before any prose that uses them.
@@ -295,28 +292,30 @@ below are attention aids; they establish no precedence among the rules.
 1. **Take the objective only from the collaborator's live task.** Read
    this file, orient at the shallowest `ORIENTATION.md` density that
    answers your question (D3 before designing anything), and retrieve
-   the task's governing records before deciding or editing. The
-   deprecated handoff and archived roadmap never select work.
+   the task's governing records before deciding or editing. The live
+   task and the governing records select the work; §1.5 carries the
+   standing of everything else.
 
-**B. Substrate and text-path invariants — never weaken**
+**B. Substrate and text-path invariants — hold at full strength**
 
-2. **Address AST nodes by content; write new nodes rather than changing
-   old ones.** Identity is the SHA-256 Merkle preimage. Never mutate an
-   AST node; never persist positional identity.
+2. **Address AST nodes by content; write a new node for every change.**
+   Identity is the SHA-256 Merkle preimage, and it stays that: content
+   identity is the only kind persisted.
 3. **Correct entities with overlay beliefs.** Equivalence is an overlay
-   belief; a wrong entity is contested or retired. Never merge, rename,
-   or delete Entity nodes.
+   belief; a wrong entity is contested or retired. The Entity node
+   itself stays as written.
 4. **Provenance is enforced, not asked for**: every `sourceNodeIds`
-   element must be a real, existing AST hash — and, on agent research
-   runs, one the run actually retrieved. Never weaken the write path.
+   element resolves to a real, existing AST hash — and, on agent
+   research runs, to one the run actually retrieved. The write path
+   keeps that strength.
 5. **Code-mediated text is doctrine**
    (`docs/architecture/CODE_MEDIATED_TEXT.md`): locations
    engine-computed, existing bytes moved by code, hash-guarded writes,
-   answers by reference. Never make the model count or retype.
-6. **The rlms prompt contract**: EXTEND `RLM_SYSTEM_PROMPT`, never
-   replace it; no literal curly braces in anything rlms formats
-   (`.format()` runs over it — escape by doubling; module addenda are
-   brace-free with `<<TRELLIS_RUBRIC>>` as the only substitution).
+   answers by reference. The engine counts; the model addresses.
+6. **The rlms prompt contract**: EXTEND `RLM_SYSTEM_PROMPT` and keep the
+   original intact. `.format()` runs over it, so double every literal
+   brace; module addenda stay brace-free with `<<TRELLIS_RUBRIC>>` as
+   the only substitution.
 
 **C. Spend, enforcement, and boundaries**
 
@@ -325,28 +324,28 @@ below are attention aids; they establish no precedence among the rules.
    after. Zero-paid drills prove wiring before any spend. Check for
    stale queue consumers before any paid enqueue.
 8. **Tooling shape closes behavioral failure classes; prompt text only
-   reinforces** (owner doctrine). Never reward citation counts or low
-   tool-call counts; report calls and correctness together.
+   reinforces** (owner doctrine). Reward correctness, and report tool
+   calls alongside it — both numbers, together.
 9. **Validate at every boundary**: completions cross
    `parseLlmResponse`; new job fields are optional and bounded with
    legacy behavior byte-pinned; operator gates (env allowlists,
-   budgets, confirmation flags) are kernel, never model-writable.
+   budgets, confirmation flags) live in the kernel, writable by the
+   operator alone.
 
 **D. What you emit: attribution, reporting, branches**
 
-10. **Write commits, PRs, and code as plain engineering prose.** No AI
-    attribution anywhere — no Co-Authored-By trailers, no
-    generated-with footers.
+10. **Write commits, PRs, and code as plain engineering prose, authored
+    under the committer's own name.** Trailers and footers carry human
+    authorship only.
 11. **Report honestly**: publish counts and raw numbers; a null or
-    surprising result is a finding — **but only once a positive control
-    has fired**: a control that never discriminates means the test was
-    blind, so the result is noise, not a null (the positive-control
-    duty, `docs/architecture/TEST_TIME_TRAINING.md` §6). Re-run outliers
-    before believing them.
-12. **One feature branch, one PR to `master`.** Record durable decisions
-    in the owning design/product record, measured claims in the owning
-    report, and exact verification in the PR. Do not revive the
-    deprecated global handoff/roadmap loop.
+    surprising result is a finding **once a positive control has
+    fired** — rule 19(c) applied to experiments (the positive-control
+    duty, `docs/architecture/TEST_TIME_TRAINING.md` §6). Re-run
+    outliers before believing them.
+12. **One feature branch, one PR to `master`.** Durable decisions go to
+    the owning design/product record, measured claims to the owning
+    report, exact verification to the PR. Those three are the whole
+    record.
 
 **E. Standing of state: what is searchable, what a pause blocks, what counts as delivered**
 
@@ -354,28 +353,25 @@ below are attention aids; they establish no precedence among the rules.
     direction, July 13, 2026): any default-discovery retrieval
     surface — present or future — reads LIVE blocks only (members of
     some document's current version). Superseded content is reachable
-    solely by explicit address (hash/id) when a caller deliberately
-    asks for history. Reference semantics: the `search_ast_nodes`
-    EXISTS join / the stage-2 checker's `gatherHashEvidence` bridge.
+    by explicit address (hash/id), when a caller deliberately asks for
+    history. Reference semantics: the `search_ast_nodes` EXISTS join /
+    the stage-2 checker's `gatherHashEvidence` bridge.
 14. **A protected pause refuses the effect it names, and nothing
     more.** An owner gate on a paid run, a push, a merge, or an
-    acceptance record withholds THAT effect. It is not authorization
-    to stand down unblocked work, to renegotiate the developer's
-    direction outside that effect, or to self-sequence adjacent
-    engineering. Discharge every unprotected preparatory step and
-    specify the request in full; refuse only on a failed provenance or
-    scope predicate, never on the absence of your preferred artifact.
+    acceptance record withholds THAT effect; unblocked work, the
+    developer's direction, and adjacent engineering stay live.
+    Discharge every unprotected preparatory step and specify the
+    request in full. Refuse on a failed provenance or scope predicate.
     Surface a discovered defect with a proposed fix and let the owner
-    sequence it: the gate withholds an effect, never the chat channel,
-    and one question about scope costs less than self-sequencing around
-    it (rule 21).
-15. **Correct is not the same claim as reachable.** A passing suite
-    says the code is right, never that anything can invoke it. Before
-    calling a capability delivered, name its non-test caller — a
-    process entrypoint, a package script — and if there is none, say
-    so plainly. This repo has shipped the same defect three times, most
-    recently `StateStore.open()` with no caller outside tests behind
-    1,161 green tests.
+    sequence it: the gate withholds an effect and leaves the chat
+    channel open (rule 21).
+15. **Correct is a different claim from reachable.** A passing suite
+    establishes that the code is right; a named caller establishes that
+    something can invoke it. Before calling a capability delivered,
+    name its non-test caller — a process entrypoint, a package
+    script — and say plainly when there is none. This repo has shipped
+    the same defect three times, most recently `StateStore.open()`
+    behind 1,161 green tests.
 
 **F. Authoring: prompts and composition**
 
@@ -385,102 +381,86 @@ below are attention aids; they establish no precedence among the rules.
     instruction, an extraction or classification prompt, an output
     schema, a hypershot frame, a judge rubric or anchor item — MUST
     FIRST invoke BOTH the `prompt-engineering` and `hypershot-protocol`
-    skills and author against their loaded guidance. A process gate
-    checked before the bytes are written, never a claim made in prose
-    after. Judge-shaped work adds `judge-composition`.
-17. **Compose from primitives; never encode a default instance.**
-    Harness functions compose per context from parameter registries.
-    Frames are invariant (schema shapes, field names, role slots and
-    the blindness each buys); instances are not (selections,
-    orientations, closed taxonomies, names). An instance that reaches
-    a wire schema, a byte-pin, a registration, or an operator
-    checklist has silently become law. The tell: if a second instance
-    would need a second registration under a different name, the first
-    was never a frame. Full record with the case that produced it:
+    skills and author against their loaded guidance. The gate is the
+    invocation, checked before the bytes are written. Judge-shaped work
+    adds `judge-composition`.
+17. **Compose from primitives; select every instance per context.**
+    Harness functions compose from parameter registries. Frames stay
+    invariant (schema shapes, field names, role slots and the blindness
+    each buys); instances vary (selections, orientations, closed
+    taxonomies, names). An instance that reaches a wire schema, a
+    byte-pin, a registration, or an operator checklist has silently
+    become law. The tell: if a second instance would need a second
+    registration under a different name, the first was never a frame.
+    Full record with the case that produced it:
     `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md`.
 
 **G. Before you decide, mutate, or measure**
 
-18. **Retrieve before you decide or claim.** A derived representation
-    never satisfies an obligation to its source on a load-bearing act.
-    Use an orientation compression, a design record, a skill, or a
-    memory **to do the work**; **retrieve and quote the source** to
-    decide what work to do, or to state what a record establishes. The
-    tell: you cannot name the file and section you actually retrieved
-    *this session*. A lossy summary reads exactly like a faithful one
-    from the inside, so nothing prompts the retrieval that would
-    correct it — and in a documents-lead repo the result is a green
-    suite around the wrong object. Session 71 built the wrong object
-    after following a stale compression without retrieving the ratified
-    record; the remedy is source retrieval, not another global prompt.
+18. **Retrieve before you decide or claim.** Use an orientation
+    compression, a design record, a skill, or a memory **to do the
+    work**; **retrieve and quote the source** to decide what work to do,
+    or to state what a record establishes — a load-bearing act rests on
+    its source. The tell: you cannot name the file and section you
+    retrieved *this session*. A lossy summary reads exactly like a
+    faithful one from the inside, so retrieval is what corrects it.
     This is `docs/architecture/CODE_MEDIATED_TEXT.md` §2.9 (the pillar
-    applied to authority) and generalizes the rule already ratified for
-    papers in `docs/RESEARCH_NOTES_COLLECTION.md` §3. See §1.5
-    (Authority ordering) above for the chain it depends on.
+    applied to authority) and generalizes the rule ratified for papers
+    in `docs/RESEARCH_NOTES_COLLECTION.md` §3. See §1.5 (Authority
+    ordering) for the chain it depends on; Session 71 is the case.
 19. **Observe before you mutate; verify before you describe; and prove
-    the check can fail.** Three habits, one root — acting on a belief
-    about state instead of an observation of it.
+    the check can fail.** Three habits, one root — act on an
+    observation of state.
     (a) **Observe shared state first.** Look at what is already
     running, present, or registered before starting or creating
-    anything in it. §1.5's instruction to observe current Git, test,
-    prompt-pin, and database state rather than assume applies to
-    containers, databases, and stores equally.
+    anything in it. §1.5's observation duty extends to containers,
+    databases, and stores.
     (b) **Verify before you describe.** A commit message is a claim.
-    Check it against the diff before making it; never write that
-    something was done and then not do it.
-    (c) **A verification you have not seen fail is not a
-    verification.** The judge-program drills (`test:judge-intake`,
-    `test:judge-panel`, `test:judge-convocation`, `test:support-oracle`)
-    each ship a `--negative-control` that exits 3 when every planted
-    break is detected, for exactly this reason. Before trusting a check
-    that passed, know what would make it fail — a check that cannot
-    fail reports success on anything, including bytes about to become
-    registration hashes.
-20. **Instructions are specifications, not hypotheses — measure one
-    only against a stated engineering target, or probe it for failure
-    modes (leak, over-trigger, break); if no target is stated, set
-    one.** Never test that a prompt moves behavior, and never validate
-    a prompt, skill, or agent instruction by baseline comparison ("with
-    vs without", "does it help") — do not substitute a comparison for a
-    target. A well-engineered instruction constrains the model to its
-    spec; that it differs from, or beats, an unspecified base-model
-    response is *entailed* by what an instruction is, not an open
-    question, and re-proving it burns credits (rule 8, applied to
-    testing). Measurement harnesses are for tooling interventions,
-    never for proving prompts. The tell: you are about to run a test
-    whose outcome is entailed, because a familiar comparison was easier
-    to reach for than naming the target — the **nearby-attractor**
-    trap. Reachability checks and functional-equivalence or regression
-    comparisons between two versions remain permitted: they are the
-    rule-20-safe half (`docs/architecture/SELF_DESCRIBING_SURFACES.md`
-    §5), and what is barred is the new-versus-null baseline. The case
-    that produced this rule: `docs/architecture/HARNESS_SELF_MODEL.md`
-    §11.
-21. **The cheapest available move is not a tool call — put the question
-    to the collaborator in the chat channel** (the un-tool;
-    owner-directed July 22, 2026). Declining to call anything and
-    asking is a move, not the absence of one: no schema, no install, no
-    recurring cost, and the only move that resolves an underdetermined
-    instruction at its source instead of routing around it. Reach for
-    it BEFORE any lever that installs permanent configuration — a
-    permission rule, an MCP server, a new skill or memory file, a
-    sub-agent, a module addendum — and before guessing through a values
-    or scope call only the collaborator can make. The one-question cap
-    still binds: ask it in the same turn that discharges every
-    preparatory step you can already take (rule 14), then **stop and
-    wait** — asking and then proceeding on your own guess spends the
-    collaborator's attention and discards the answer (owner ruling,
-    July 22, 2026, recorded in `SESSION_GOVERNANCE.md` §2). Stopping is
-    not standing down: the preparatory work is already done and
-    reported when the question is put. Asking resolves ambiguity in an
-    instruction; it never
-    closes a behavioral failure class, which still takes tooling shape
-    (rule 8). The corpus survey found no lever toward *more*
-    interruption — an artifact of enumerating only moves that have a
-    surface. A move with no surface stays invisible until named; this
-    rule is that name. Construction:
-    `.claude/skills/spark-steering/SKILL.md` § *Ask first — the
-    un-tool* (derived; §1.5).
+    Check it against the diff before making it.
+    (c) **A check earns the name `verification` by having been seen to
+    fail.** The
+    judge-program drills (`test:judge-intake`, `test:judge-panel`,
+    `test:judge-convocation`, `test:support-oracle`) each ship a
+    `--negative-control` that exits 3 when every planted break is
+    detected, for exactly this reason. Before trusting a check that
+    passed, know what would make it fail — a check that can fail is the
+    only one whose success carries information.
+20. **Instructions are specifications: every test of one names a target
+    or a failure mode.** Measure against a stated engineering target,
+    or probe for failure modes (leak, over-trigger, break); when no
+    target is stated, set one. A
+    well-engineered instruction constrains the model to its spec, so
+    that it differs from an unspecified base-model response is
+    *entailed* by what an instruction is (rule 8, applied to testing).
+    Measurement harnesses serve tooling interventions. Reachability
+    checks and functional-equivalence or regression comparisons between
+    two versions stay in scope — the rule-20-safe half
+    (`docs/architecture/SELF_DESCRIBING_SURFACES.md` §5); the target is
+    what a test names. The tell: you are about to run a test whose
+    outcome is entailed, because a familiar comparison was easier to
+    reach for than naming the target — the **nearby-attractor** trap.
+    The case that produced this rule:
+    `docs/architecture/HARNESS_SELF_MODEL.md` §11.
+21. **Ask the collaborator — the cheapest available move is a question
+    in the chat channel** (the un-tool; owner-directed July 22, 2026).
+    Declining to call anything and asking is a move: no schema, no
+    install, no recurring cost, and the only one that resolves an
+    underdetermined instruction at its source. Reach for it BEFORE any
+    lever that installs permanent configuration — a permission rule, an
+    MCP server, a new skill or memory file, a sub-agent, a module
+    addendum — and before a values or scope call only the collaborator
+    can make. The one-question cap still binds: ask in the same turn
+    that discharges rule 14's preparatory steps, then **stop and
+    wait** — the answer is what you asked for, so let it arrive (owner
+    ruling, July 22, 2026, recorded in `SESSION_GOVERNANCE.md` §2).
+    Stopping is not standing down: the preparatory work is already done
+    and reported when the question is put. Asking resolves ambiguity in
+    an instruction; closing a
+    behavioral failure class takes tooling shape (rule 8). The corpus
+    survey found levers only where a surface exists, so a move with no
+    surface stays invisible until named; this rule is that name.
+    Construction: `.claude/skills/spark-steering/SKILL.md` § *Ask
+    first — the un-tool* (derived; §1.5).
 
 ## 5. Working protocol (commands)
 

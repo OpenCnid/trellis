@@ -1,0 +1,51 @@
+{
+  "generated_by": "fixtures/dedupe_ceremony/build.py",
+  "grading": [
+    "found",
+    "missed",
+    "invented",
+    "held"
+  ],
+  "note": "An invented finding costs more than a miss: a missed dupe survives to the next firing, an invented one deletes text a human put there on purpose.",
+  "fixtures": {
+    "superfluous_log.md": {
+      "expected_outcome": "edits",
+      "plants": [
+        {
+          "kind": "superfluous",
+          "anchor": null,
+          "why": "A standing fact about retrieval, dropped into a timestamped run log. The paragraph before it closes on the sweep and the one after opens on the sweep completing \u2014 the seams already met."
+        }
+      ]
+    },
+    "ceremonious_manual.md": {
+      "expected_outcome": "No edits",
+      "plants": [
+        {
+          "kind": "ceremonious",
+          "anchor": "Labeled 'Restating the rule, because this is the procedure that depends on it', with \u00a71 leading in, \u00a73 referring back, and \u00a74 routing readers to \u00a71.",
+          "why": "Both seams carry and the restatement is declared. Removing it breaks \u00a73's dependency and \u00a74's routing."
+        }
+      ]
+    },
+    "mixed_source.py": {
+      "expected_outcome": "edits",
+      "plants": [
+        {
+          "kind": "superfluous",
+          "anchor": null,
+          "why": "`reset` clears state and charges nothing, so the sentence about bounding a charge rate attaches to neither seam."
+        },
+        {
+          "kind": "ceremonious",
+          "anchor": "The class docstring declares the repetition and states its reason.",
+          "why": "Two charge functions carry it because a reader arriving at either one needs it; the class docstring names that intent."
+        }
+      ]
+    },
+    "clean_record.md": {
+      "expected_outcome": "No edits",
+      "plants": []
+    }
+  }
+}
