@@ -894,8 +894,9 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   the run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
   see-also, with `expects` **guard-derived** and the human winning on stalemate; the module manifest
   schema extended; one generator emitting human navigation pointers. The remaining surfaces proceed
-  descriptor by descriptor **without a pin ceremony** — `llm_help`'s landing is what moves **both**
-  composed-prompt pins. Gates that bind: the self-play discrimination and drift game whose falsifying
+  descriptor by descriptor **without a pin ceremony**: the pins hash the BASE prompt, which
+  conditional addenda never enter, so `llm_help` — a kernel builtin taught in the base manifest — is
+  the pin-moving event and an addendum edit is not. Gates that bind: the self-play discrimination and drift game whose falsifying
   cell is *selected-on-a-lie*; the paid adoption probe stays owner-gated. Both of ratification's open
   questions closed 2026-07-23: **descriptors are a registration, not a schema** — the field set is
   *dissolved* rather than settled, because a vocabulary that becomes law early cannot survive the
