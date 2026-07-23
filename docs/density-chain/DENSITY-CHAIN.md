@@ -693,8 +693,10 @@ the write path, or the discoverability program.*
   recurred: `AGENTS.md` §2 (Navigation map) rows every top-level `src/` package except [[C12]]'s new
   `src/repl_sandbox/`, and nothing detects an omission — the contract governs repository-root names,
   never navigation completeness. The same shape one level up is [[C13]]'s record↔twin gap.
-  **`AGENTS.md` now sits 11 bytes under its 32,768 cap on a CRLF checkout** (535 on LF), so the byte
-  gate is platform-dependent at the margin. `normalizeRoute`'s known-route table omits two live routes,
+  **`AGENTS.md` sat 11 bytes under its 32,768 cap and now holds 2,238 free**: every rule was reframed
+  to state what to do rather than what to avoid, and one claim — where the objective comes from — was
+  returned from five substantive homes to one. The cap stays platform-dependent at the margin, with
+  the margin no longer thin. `normalizeRoute`'s known-route table omits two live routes,
   labelling both `unmatched`. The engineering-loop controller is preserved, explicitly not claimed
   adopted. `CancelTask` is permanently declined.
 - **T5 — future plans.** PROPOSED, unsequenced: an inbound MCP server surface letting external hosts
@@ -828,7 +830,12 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   new one not at all, while the contract governs repository-root names only. **Named-implies-exists is
   proved; exists-implies-named is not** — the general form of the backticked-row miss that survived
   `5e7295d` (green again since `20e94ae`). **Confirmed unfixed:** the nine-field telemetry allowlist.
-  **Falsified:** Phase 0, 2026-07-19, proved its own specification impossible.
+  **Falsified:** Phase 0, 2026-07-19, proved its own specification impossible. **New surface,
+  unscheduled:** `.claude/ceremonies/` — a dedupe ceremony whose prompt is committed beside the
+  rulings it honors, so the loop's instructions and its accumulated exceptions are both diffable. It
+  reads a document whole, counts with tools, and sorts each repeat by whether an anchor holds it in
+  place; **"No edits" is a successful run**, and the positive control it owes is a seeded clean
+  document that must return exactly that. Nothing schedules it yet.
 - **T5 — future plans.** Proposed only: `llm_help()` as an always-present kernel builtin listing the
   run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
   see-also, with `expects` **guard-derived** and the human winning on stalemate; the module manifest
