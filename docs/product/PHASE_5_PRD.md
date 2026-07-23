@@ -46,7 +46,7 @@ The strategic insight that makes this phase cheap: **Phase 4 already built the h
 The quiet-failure benchmark from critique §3.3, structured like the Update Drill:
 
 1. **Warm-up:** seed a fully-verified-state cache (real Act-1 run, or the LLM-free seeded cache for dress rehearsals).
-2. **Poison:** flip ~11 cached `has_category` labels in place via direct Cypher — valid provenance, *high* stored confidence (worst case), unchanged bytes. Manifest records every poisoned edge. This is undetectable by Phase 4 by construction.
+2. **Poison:** flip ~11 cached `has_category` labels in place via direct Cypher — valid provenance, *high* stored confidence (worst case), unchanged bytes. Manifest records every poisoned edge. This is undetectable by Phase 4 by construction. Because a poisoned belief in a real graph would therefore be permanent, both the runner and the standalone CLI refuse a graph carrying no drill-target marker, and the CLI additionally refuses without `--confirm-poison` ([drill_target.ts](../../src/core/runtime/drill_target.ts)).
 3. **Detect:** run verifier sweeps under policies (mandatory-only / p=5% / p=10%); a dress-rehearsal mode swaps the sub-LLM for a ground-truth oracle so detection *mechanics* are testable LLM-free.
 4. **Recover:** run the standard 20-query sequence; contested poisons must re-derive and F1 must return to 1.000.
 

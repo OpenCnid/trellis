@@ -164,16 +164,29 @@ Three queries across this drill scored F1 < 1.000 for reasons **unconnected to c
 
 ## 7. Reproducing
 
+Drills refuse any database that has not been declared expendable. Mark
+the scratch stack once, before the first run:
+
+```bash
+npm run drill:mark-target -- --purpose "poisoning drill scratch stack" --confirm-mark
+```
+
 ```bash
 npm run oolong:ingest          # v1 physical + semantic layers (if not already ingested)
-npm run oolong:flywheel-prep   # strip annotations; cold cache
+npm run oolong:flywheel-prep -- --confirm-strip   # strip annotations; cold cache
 npx tsx scripts/start_all.ts   # server + workers (needs OPENAI_API_KEY) — run exactly ONE instance
 npm run drill:poison           # real run, all 3 policies, unattended (~$3.27)
 
 npm run drill:poison -- --rehearsal              # LLM-free: ground-truth oracle, $0.00
 npm run drill:poison -- --rehearsal --policies p=0.10   # single policy, faster iteration
-npm run drill:poison-cache -- --count 11 --seed 4242     # standalone poison injection, no drill
+npm run drill:poison-cache -- --count 11 --seed 4242 --confirm-poison  # standalone injection
 ```
+
+Every destructive step prints its target and its plan and exits 2 without
+its `--confirm-*` flag, so running it bare is a safe way to see what it
+would do. See [`src/core/runtime/drill_target.ts`](../../src/core/runtime/drill_target.ts)
+for the two gates, and `npm run test:drill-gate -- --negative-control`
+to watch them refuse.
 
 **A note on the real run's first attempt:** it initially hit intermittent crashes traced to a *stale* `start_all.ts` process left running from an earlier session, still consuming the same Redis `rlm_queue` and racing the fresh worker to spawn Python subprocesses (Windows `STATUS_DLL_INIT_FAILED`). Before reproducing a real run, confirm exactly one `start_all.ts` (or equivalent worker set) is alive: `Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Select ProcessId, CommandLine` on Windows, or `ps aux | grep start_all` elsewhere.
 

@@ -37,6 +37,12 @@ import { fetchEntitySnippets } from '../src/core/graph/alias_resolution';
 import type { CandidatePair, AliasEntity } from '../src/core/graph/alias_candidates';
 import type { Entity } from '../src/core/graph/schemas';
 import { sweepOrphanedProvenance } from '../src/core/graph/invalidation';
+import {
+  assertDrillTarget,
+  liveMarkerReaders,
+  printTargetBanner,
+  reportRefusal,
+} from '../src/core/runtime/drill_target';
 
 const DEFAULT_RESULTS_PATH = path.resolve(
   'docs',
@@ -741,6 +747,18 @@ async function cleanup(
 
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
+
+  // Which database, not whether: every write this drill makes is confined
+  // to a per-run namespace and removed by cleanup(), which asserts zero
+  // residue and that no pre-existing row was touched. So it carries the
+  // target marker check but no confirmation flag — there is no
+  // destructive act here to confirm, only a wrong host to rule out.
+  const markers = await assertDrillTarget(
+    ['neo4j', 'postgres'],
+    liveMarkerReaders(neo4jDriver, pgPool)
+  );
+  printTargetBanner(['neo4j', 'postgres'], markers);
+
   const runToken = `${Date.now()}-${process.pid}`;
   const namespace = `trellis-scale-s7-${runToken}`;
   const corpus = buildScaleCorpus({
@@ -1092,12 +1110,15 @@ main()
     await neo4jDriver.close();
   })
   .catch(async error => {
-    console.error(error instanceof Error ? error.stack : String(error));
+    const refusalCode = reportRefusal(error);
+    if (refusalCode === null) {
+      console.error(error instanceof Error ? error.stack : String(error));
+    }
     try {
       await pgPool.end();
       await neo4jDriver.close();
     } catch {
       // Preserve the original failure.
     }
-    process.exit(1);
+    process.exit(refusalCode ?? 1);
   });

@@ -64,6 +64,8 @@
     "test:agent-loop": "tsx scripts/test_agent_loop.ts",
     "test:a2a": "tsx scripts/test_a2a.ts",
     "test:benchmark-hardening": "tsx scripts/test_benchmark_hardening.ts",
+    "drill:mark-target": "tsx scripts/mark_drill_target.ts",
+    "test:drill-gate": "tsx scripts/test_drill_gate.ts",
     "drill:mutate": "tsx scripts/mutate_oolong_dataset.ts",
     "drill:reingest": "tsx scripts/reingest_oolong_dataset.ts",
     "drill:update": "tsx src/benchmarks/update_drill_runner.ts",

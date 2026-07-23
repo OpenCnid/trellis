@@ -4,6 +4,12 @@ import { parseMarkdownToAST, ASTNode } from '../src/core/ast/parser';
 import { buildCorpus, BoundRecord, BoundPassage, flattenAST } from '../src/benchmarks/oolong/corpus';
 import { resolveDatasetPath, loadDataset } from '../src/benchmarks/oolong/dataset_cli';
 import { withRetry } from '../src/benchmarks/oolong/retry';
+import {
+  assertDrillTarget,
+  liveMarkerReaders,
+  printTargetBanner,
+  reportRefusal,
+} from '../src/core/runtime/drill_target';
 
 // Task 1c: Ingestion-as-a-Loop.
 //
@@ -356,6 +362,18 @@ async function main(): Promise<void> {
   console.log('Task 1c: OOLONG-Pairs Full Ingestion Verification Loop');
   console.log('======================================================');
 
+  // Which database, not whether: ingest is additive and idempotent (every
+  // write is a MERGE or ON CONFLICT DO NOTHING) and it is the documented
+  // recovery path out of flywheel-prep and drill:reset, so it carries the
+  // target marker check but no confirmation flag — gating the restore
+  // path would make recovery harder than the destruction it undoes.
+  const markers = await assertDrillTarget(
+    ['neo4j', 'postgres'],
+    liveMarkerReaders(neo4jDriver, pgPool)
+  );
+  printTargetBanner(['neo4j', 'postgres'], markers);
+  console.log('');
+
   // Boundary validation (Architecture Invariant 3)
   const dataset = loadDataset(DATASET_PATH);
   const passages = dataset.distractor_passages ?? [];
@@ -475,8 +493,11 @@ main()
     process.exit(0);
   })
   .catch(async (err) => {
-    console.error(`\nINGESTION ABORTED: ${err.message}`);
+    const refusalCode = reportRefusal(err);
+    if (refusalCode === null) {
+      console.error(`\nINGESTION ABORTED: ${err instanceof Error ? err.message : err}`);
+    }
     await pgPool.end().catch(() => {});
     await neo4jDriver.close().catch(() => {});
-    process.exit(1);
+    process.exit(refusalCode ?? 1);
   });
