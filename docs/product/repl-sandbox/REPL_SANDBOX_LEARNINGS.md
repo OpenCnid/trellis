@@ -157,6 +157,13 @@ Three things the records could not have told us, all of them provisioning facts 
   without touching them, then a real run converge them — is the only version of that run that
   carries information. Its fetch-and-install branch is *still* unexercised, because a host that
   already has Kata cannot test installing Kata.
+- **Replication is not a universal instrument.** "n=1 is weak" is a rule about *stochastic* claims —
+  model behavior, where variance is the thing being averaged out. Applied to a deterministic
+  infrastructure fact it buys almost nothing: five S2 runs differ by 64 ms of boot time and in
+  nothing else, and a sixth on different silicon would print the same `42,84`. The gap the "second
+  host" instinct was really pointing at was a **never-executed install path**, which needs a fresh OS
+  instance, not fresh hardware — and a host with `nested: 1` makes one for free. Ask what instrument
+  would have caught the error before reaching for the one the house rule names.
 - **Boot is fast enough that the persistence question is the whole question.** ~0.7 s from `ctr run`
   to first exec means boot cost is not what makes state worth keeping — correctness across turns is.
   The probe therefore asserts the *identity* of the guest (worker pid, guest `boot_id`) alongside

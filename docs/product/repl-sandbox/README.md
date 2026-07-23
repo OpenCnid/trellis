@@ -58,9 +58,9 @@ Diagrams: [isolation view](repl_sandbox_architecture.svg) · [depth-1 flat fan-o
   teardown leaves no VMM process behind — replicated **five consecutive runs**, 0.629–0.693 s.
   Run it *on the host*: `npm run repl-sandbox:provision` (idempotent; `--verify` mutates nothing)
   then `npm run repl-sandbox:s2-probe` (`--negative-control` exits 3 when the mid-run guest swap is
-  caught). **Both results are one host.** The dev box cannot be the second — Windows 10 has no WSL2
-  nested virtualization — so a second machine is an open owner decision (BUILD_PLAN §11 (Open
-  ordering calls)).
+  caught). **Both results are one host** — a second *machine* is **deferred** (it buys little for a
+  deterministic fact), while the fresh-*instance* test the provisioner still owes is scheduled on a
+  nested guest of the AX41 itself, for free (BUILD_PLAN §11 (Open ordering calls)).
 - **What is not built:** the vsock bridge on a real host, the DB broker against a real guest, Tier-0
   in-guest hardening, and the real `KataREPL` launch path — S3 through S6. No SPEC §8 acceptance
   gate has passed, and no paid `[A]` adoption gate has been spent.

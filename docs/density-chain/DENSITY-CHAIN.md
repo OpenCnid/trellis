@@ -755,8 +755,9 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   `configuration.toml` symlinks to **QEMU** — `kata-runtime check` passes in both states, and the shim
   is not on containerd's `PATH` at all; all three now converge under
   `provision_kata_host.sh`, whose own planted-break run named and fixed each. **Every number here is
-  one host**: WSL2 cannot be the second (Windows 10 exposes no nested virtualization), so a second
-  machine is an open owner decision. Gaps stand: requirement 9's **grant** half is a deployment obligation no Python enforces;
+  one host** — a second machine is **deferred**, buying little against a deterministic fact, while the
+  provisioner's never-executed install branch is owed to a fresh *instance* and gets one free from the
+  AX41's own `nested: 1`. Gaps stand: requirement 9's **grant** half is a deployment obligation no Python enforces;
   `locate`/`get_ast_blocks` **fail closed**; no model allowlist; `MAX_FRAME_LEN` unratified.
 - **T5 — future plans.** Next, now unblocked: **S3** (the `llm_query` frame over vsock — the spike's
   turns cross a guest fifo, not the wire), **S4** (broker), **S5** (Tier-0), **S6** (the real launch

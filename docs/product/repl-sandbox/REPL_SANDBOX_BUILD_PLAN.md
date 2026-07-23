@@ -448,24 +448,39 @@ Firecracker are dropped ([REPL_SANDBOX_RESEARCH.md](REPL_SANDBOX_RESEARCH.md) §
 **Hoisting G1 ahead of S2–S5** (§4 (Host provisioning gate)) — an ordering call, taken: the spikes
 that need KVM are not attempted on a host that has not proven it.
 
-**A second KVM host — OPEN, owner's call, costs money.** Everything G1 and S2 record was observed on
-one machine, so both results are `n=5, one host`: nothing yet distinguishes "Kata boots and keeps
-state" from "Kata boots and keeps state *on this AX41*". The development box cannot be the second
-host (§5.2 (S2) — Windows 10 Home, no WSL2 nested virtualization), and `scripts/provision_kata_host.sh`
-cannot exercise its own fetch-and-install branch without one. The ratified host set
-([ARCHITECTURE §8](REPL_SANDBOX_ARCHITECTURE.md) (Deployment)) narrows the options sharply:
+**A second KVM host — DEFERRED, not open.** An earlier edition of this section left it standing as a
+decision waiting on the owner. That framing was wrong, and correcting it is worth more than the
+question was: it conflated **fresh hardware** with **a fresh OS instance**, and only the second is
+actually owed.
 
-| candidate | gives `/dev/kvm`? | shape of the spend |
+Three risks were bundled under "one host". They separate cleanly:
+
+| risk | what a second machine buys | standing |
 |---|---|---|
-| **GCP N2/C2 + nested virtualization** | yes, with the nested-virt licence flag | hourly, an hour or two is enough for G1 + S2 + a fresh provisioning run |
-| AWS C8i/M8i/R8i | **only `.metal`** — ordinary instances do not expose KVM | bare metal, hourly but far dearer |
-| Second Hetzner dedicated | yes | monthly, with a setup fee and provisioning delay |
-| Hetzner Cloud (shared or CCX) | **no** — no nested virtualization | — |
-| DigitalOcean | **never** — excluded by [ARCHITECTURE §8](REPL_SANDBOX_ARCHITECTURE.md) | — |
+| S2's result is an artifact of *this* hardware | little. KVM + Cloud Hypervisor + a Linux guest holding process memory is the most heavily deployed configuration in the microVM ecosystem; a break on Intel VMX rather than AMD SVM would be an upstream bug, not a Trellis finding | **low — deferred** |
+| `provision_kata_host.sh` only works where it was written | the real gap: steps 1–3 (containerd, the Kata tarball, the Cloud Hypervisor binaries) have never executed, because every run so far met hosts that already satisfied them | **owed — and it needs a fresh *instance*, not fresh silicon** |
+| Trellis can only deploy on this box | a genuine answer, to a question nothing is currently asking | **deferred until a deployment decision exists** |
 
-The cheapest honest answer is a GCP N2 rented for the length of one run. **Nothing has been bought,
-no account has been created, and no host has been ordered** — this is a decision waiting on the
-owner, not a task waiting on a step.
+**The owed half costs nothing.** The AX41 reports `kvm_amd nested: 1` with QEMU present, 62 GB and 12
+threads, so it can host a virgin Ubuntu 24.04 guest whose own `/dev/kvm` works — enough to run the
+provisioner's untaken install branch, `kata-runtime check`, G1 and the S2 probe inside it. Nested
+Kata will be slower and the G1 differential may land differently; **that is itself the rehearsal for
+ever running this on a cloud VM**, and it is scheduled alongside S3 rather than sold as its own
+milestone.
+
+The measurement discipline this section originally leaned on (a null needs a positive control,
+headlines at n=1–2 are weak — AGENTS.md §4 (Hard rules) rule 11) exists because **model behavior is
+stochastic**. It transfers poorly to a deterministic infrastructure fact: the five S2 runs differ by
+64 ms of boot time and in nothing else, and a sixth run on different silicon would report the same
+`42,84`. Replication is not the instrument that would have caught a wrong S2.
+
+*If it re-opens:* the trigger is a deployment decision or a finding that smells CPU- or
+kernel-specific — vsock behaviour (S3) is far likelier to be host-dependent than "a VM boots". The
+ratified host set ([ARCHITECTURE §8](REPL_SANDBOX_ARCHITECTURE.md) (Deployment)) narrows the options
+then: **GCP N2/C2 with the nested-virt licence flag** is the cheap hourly answer; ordinary AWS
+C8i/M8i/R8i instances **do not** expose KVM (only `.metal`, far dearer); a second Hetzner dedicated
+is monthly with a setup fee; **Hetzner Cloud has no nested virtualization**; DigitalOcean stays
+excluded. **Nothing has been bought, no account created, no host ordered.**
 
 ---
 
