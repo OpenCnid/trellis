@@ -289,3 +289,28 @@ iteration prompt authoring requires. For this file:
   each surface's own definition site, is what the alive catalog and the
   coverage diagnostic both read. Building it is the next increment; nothing
   of it exists yet.
+
+## 12. The registry exists — what `llm_help` builds on (dated entry — July 23, 2026)
+
+Increments 2 and 3 landed (`SELF_DESCRIBING_SURFACES.md` §12). The line
+above — *nothing of it exists yet* — is superseded: the registry is built,
+and `llm_help` should be written against it rather than inventing a second
+lookup.
+
+- **`src/rlm/trellis_surfaces.py` is the composition source §6 asked for.**
+  `registry()` returns the run-independent map of surface name →
+  descriptor; `descriptor_for(name)` is the per-surface lookup §2's
+  `llm_help("{name}")` frame needs. What the registry does *not* know is
+  which surfaces are live in a given run — that is the `custom_tools` dict
+  at the injection seam, and the **alive** catalog is the intersection of
+  the two. Composing that intersection is `llm_help`'s own work.
+- **`expects` is still per-surface.** `trellis_textedit` derives its
+  expectations from its own guards (`derive_textedit_expects`); the
+  registry deliberately does not standardize that, because each surface's
+  guards are its own. §2's frame renders whatever the surface supplies.
+- **Coverage is answerable now**, via `npm run check:surfaces`: it derives
+  injected names by AST from the seam and reports which carry descriptors.
+  `llm_help` inherits that derivation rather than duplicating it.
+- **Field shape is still not validated** (§11), and `llm_help` must not
+  become the thing that validates it by assuming fields are present.
+  Render what a descriptor carries; omit what it does not.

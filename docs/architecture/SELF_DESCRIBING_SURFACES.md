@@ -555,3 +555,64 @@ when the **base** prompt changes, which is why `llm_help` — an
 always-present kernel builtin taught in the base TOOLS manifest — is the
 pin-moving event while a conditional addendum is not. Fixing §10's findings
 is a drill-pinned edit, and nothing in it waits on `llm_help`.
+
+## 12. Increments 2 and 3 — the registry, the coverage diagnostic, and the orphan closed (dated entry — July 23, 2026)
+
+Built on the owner's approval of the §11 plan, in the order recommended and
+approved: registry first, then the duplicate encoding retired, then the
+orphan fixed. All zero-paid. Neither composed-prompt sha pin moved, for the
+reason §11 records.
+
+**Increment 2a — the surface registry.** `src/rlm/trellis_surfaces.py`
+holds `register_surface(descriptor)` / `registry()` / `descriptor_for(name)`.
+A surface binds its descriptor at its own definition site — MASH's *one
+call site, one commitment* — and `trellis_textedit` now does. Faithful to
+§11, the registry validates **no field set**: a descriptor may carry any
+fields, and only a non-empty `name` is required, because that is the key
+rather than a validated field. Drilled both ways: a descriptor with
+invented fields registers, a nameless one refuses.
+
+**Increment 2b — the coverage diagnostic.** `npm run check:surfaces`
+answers *which injected surfaces carry a descriptor*. The roster is
+**derived from the injecting code** — the `custom_tools` construction in
+`trellis_agent.py`, read by AST at diagnostic time — so it cannot drift
+from the seam the way a hand-kept list would, the same move the
+density-chain checker makes on its own routing table. Dynamic
+contributions it cannot enumerate statically (`scaffold_helpers`,
+`build_author_tools`) are **named in the output** rather than dropped,
+because silent absence is `HARNESS_SELF_MODEL.md` §5's failure class.
+First run: **1 of 9 injected surfaces described.** It reports and refuses
+nothing; its exit code mirrors `wiki:check`'s staleness half and is
+deliberately not wired into CI.
+
+**Increment 2c — the duplicate encoding retired.** `TEXTEDIT_ADDENDUM`,
+`TEXTEDIT_ADDENDUM_GUARDED_ONLY` and their four fragments are **deleted**.
+Increment 1 proved the composition reproduces them byte-for-byte; keeping
+both afterwards shipped two encodings of one set of bytes, which is §9.1's
+failure class sitting inside the artifact built to demonstrate it. Drift is
+now caught by a sha256 pin per arm in `scripts/test_textedit.py`, **seeded
+with the retired constants' own digests**, so the pins inherit increment
+1's proof rather than restating it. A drill check holds the constants
+retired, since a second copy returning is the regression that matters.
+
+**Increment 3 — the bijection orphan closed.** The guarded-only arm now
+states the line contract `_require_guarded_lines` enforces: a guarded-only
+run is no longer refused for a rule it was never told. One bullet,
+rendered from the **same** guard-owned phrase the default arm already
+carried, so the two arms cannot drift apart on it. The guarded arm's pin
+moved wittingly (`27cc00b2…2835` → `c673f0a0…f124`, 3,067 → 3,139 chars)
+with its history recorded at the pin; the **default arm's sha is
+unchanged**, which is the evidence the fix reached exactly the arm that
+lacked the line. Each pin was seen to fail on a planted one-byte
+perturbation and restored (rule 19(c)), and the drill's
+`--negative-control` detects 7/7 planted conditions, exiting 3.
+
+**What remains open, unchanged.** The advisory-marking duty
+(`HARNESS_SELF_MODEL.md` §4) is deliberately still open: how an account
+marks enforced-versus-aspirational is a presentation convention that
+should be settled once across every surface, and deciding it for one
+surface would make an instance into law by accident (rule 17). It belongs
+with `llm_help`'s frame. The banner-qualifier tension (§10, finding 4) and
+guard-class granularity (finding 5) stand as recorded; eight surfaces still
+carry no descriptor, which the diagnostic now reports rather than leaving
+to memory.
