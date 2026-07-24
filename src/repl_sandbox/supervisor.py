@@ -170,6 +170,18 @@ class GuestSupervisor:
                 "reserved_names must be a frozenset supplied by the host from the "
                 f"pinned rlms package, got {type(reserved_names).__name__}"
             )
+        if not reserved_names:
+            # An empty set is the one wrong *content* this module can refuse
+            # without asserting what the right content is. It pins nothing, so
+            # `_restore_scaffold` becomes a no-op and model code keeps a name it
+            # rebound into the next turn — the property this class leads with,
+            # gone silently. Every other wrong set still constructs: validating
+            # further would mean the guest deciding what the names are, which is
+            # exactly the authority option B moves to the host.
+            raise DeniedError(
+                "reserved_names is empty; re-pinning would be a no-op and model code "
+                "could shadow the scaffold for the next turn"
+            )
         self._reserved_names = reserved_names
         self.config = config
         self.marshal_caps = marshal_caps or config.marshal_caps

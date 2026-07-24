@@ -754,9 +754,15 @@ What landed:
 
 - `supervisor.py` no longer imports rlms at all — the one guest-side `rlm`-rooted import in the whole
   transitive closure of the modules the guest loads. `reserved_names` is a **required keyword-only
-  argument with no default**, so a supervisor cannot be constructed against a guess; a default would
-  have been this module asserting the set on its own authority, which is the shim S4 `[A]` refused,
-  reached by omission instead of by decision.
+  argument with no default**: a default would have been this module asserting the set on its own
+  authority, which is the shim S4 `[A]` refused, reached by omission instead of by decision.
+  **What that guard does and does not deliver, stated exactly, because the first draft of this line
+  overclaimed and a review caught it:** it refuses *absence*, a wrong container type, and the empty
+  set. It does **not** refuse a wrong-content frozenset, and it cannot — checking the contents would
+  mean the guest deciding what the names are, which is the authority option B moves to the host. The
+  empty set earns its own refusal because it is the one wrong content nameable without that
+  authority: it pins nothing, so `_restore_scaffold` becomes a no-op and model code keeps a name it
+  rebound into the next turn, with no error anywhere.
 - `kata_repl.py` is the host-side authority read, because it is the one module already depending on
   rlms for the contract it implements. `InProcessLauncher` defaults to the pinned value via a
   function-local import — correct *there* and wrong in the supervisor, because that double runs in

@@ -223,10 +223,10 @@ sequence against each, and compare **field by field** — never with `==`, and n
 | field | claim | why not more |
 |---|---|---|
 | `stdout` | byte-equal on every block | the model reads it; nothing about the seam should change it |
-| `stderr` | equal after normalising to the final non-empty line | `LocalREPL` emits no traceback (`local_repl.py:571`); the guest emits a full one (`supervisor.py:307`). Byte equality would promote a *deficiency* of the baseline into the spec, and bake host paths and line numbers into an assertion |
+| `stderr` | equal after normalising to the final non-empty line | `LocalREPL` emits no traceback (`local_repl.py:571`); the guest emits a full one (`supervisor.py:322`). Byte equality would promote a *deficiency* of the baseline into the spec, and bake host paths and line numbers into an assertion |
 | `locals` | key sets equal **after** removing reserved names and load artifacts | `LocalREPL` returns live objects (`local_repl.py:579`); the guest returns reprs, which [§2.2](#22-replresultlocals-marshalling--closed-reprs-at-to_dict-time-only) ratifies. Values cannot be compared across a JSON-only seam without undoing the boundary |
 | `final_answer` | equal, with `content` assigned **before** `ready` | the two capture at different moments; see 6.2 item 5 |
-| `rlm_calls` | `== []` on both, in a no-LM run only | the guest hard-codes `[]` (`supervisor.py:321`) because the LM channel is host-side and CID-keyed |
+| `rlm_calls` | `== []` on both, in a no-LM run only | the guest hard-codes `[]` (`supervisor.py:336`) because the LM channel is host-side and CID-keyed |
 | `execution_time` | numeric and positive on both | two clocks on two machines, measuring spans with different start points. Equality would redden every honest run and train a reader to ignore reds |
 | `llm_calls` | **not a claim in either direction** | never assigned by any backend; touching it raises |
 
@@ -259,7 +259,7 @@ compared against, and why byte equality is or is not the admissible claim.
    **after** removing reserved names and load artifacts, and never a raw key-set equality.
 4. **`answer` starts at a different value** — *observed*: `LocalREPL` binds
    `{'content': '', 'ready': False}`, the shape rlms' own system prompt documents
-   (`utils/prompts.py:135`). The guest binds `{}` (`supervisor.py:220`), so `answer['ready']` raises
+   (`utils/prompts.py:135`). The guest binds `{}` (`supervisor.py:235`), so `answer['ready']` raises
    `KeyError` on a read the prompt invites.
 5. **`final_answer` captures at different moments** — *observed*: `LocalREPL` snapshots `content` the
    instant `ready` flips truthy (`local_repl.py:43`), so setting `ready` **before** `content` yields
@@ -275,7 +275,7 @@ compared against, and why byte equality is or is not the admissible claim.
 7. **`llm_query` returns a dict in the guest, a string in `LocalREPL`** (`local_repl.py:278` vs
    `guest_rpc.py:365`), and fails by raising rather than by returning an `"Error: …"` string.
 8. **The `history` alias is never bound** — `SupportsPersistence` requires it and the backend records
-   `backend.history_alias_unbound` instead (`kata_repl.py:523`).
+   `backend.history_alias_unbound` instead (`kata_repl.py:543`).
 9. **`_SAFE_BUILTINS` makes some equivalence unreachable** — *observed*: `eval('1+1')` raises
    `TypeError: 'NoneType' object is not callable` under `LocalREPL`, which nulls `eval`/`exec`/
    `compile`; the guest runs with full builtins. The block set must stay inside `_SAFE_BUILTINS`, and
