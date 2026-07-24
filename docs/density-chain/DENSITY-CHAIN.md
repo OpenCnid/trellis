@@ -160,39 +160,38 @@ planner above it. Not what the injected tools reach into, only that they arrive 
 - **T2 — current machinery.** One Python process per task: `rlm_worker.ts` spawns `trellis_agent.py`
   per `rlm_queue` job, which composes `RLM_SYSTEM_PROMPT` + TRELLIS_ADDENDUM + selected modules and
   calls `rlm.completion()` on one stateful `rlms` LocalREPL. `custom_tools` injects `trellis_neo4j`,
-  `trellis_postgres`, `trellis_answer`, `trellis_task`, `trellis_upsum`, plus gated workspace,
-  textedit, MCP and S3 helpers; `llm_query` fans sub-calls over slices. stdout streams to Redis,
-  watched by two scanners. Above, `agent_worker.ts` runs `runGoalLoop` over tool-free
-  dispatch/finish/fail decisions. Zero tool calls prints `TRELLIS_PROTOCOL_VIOLATION`. Neither queue
-  retries.
+  `trellis_postgres`, `trellis_answer`, `trellis_task`, `trellis_upsum`, plus gated
+  workspace/textedit/MCP/S3 helpers; `llm_query` fans sub-calls over slices. stdout streams to Redis,
+  watched by two scanners. Above, `agent_worker.ts` runs `runGoalLoop` over tool-free dispatch/finish/
+  fail decisions from `decision_source.ts`, crossing the shared `parseLlmResponse` boundary
+  (`src/core/llm/boundary.ts`); a thrown `LlmResponseError` there is an unretried `decision_error`.
+  Zero tool calls prints `TRELLIS_PROTOCOL_VIOLATION`; neither queue retries.
 - **T3 — with receipts.** PR #95 (`1878e89`) landed S1/S3; #98 (`74c3b48`) UPSUM; #135 (`3bdc0e7`)
-  made it enforce — `commit()` refuses over `UPSUM_BUDGET = 2000`, `UPSUM_MAX_DOMAIN_KEYS = 12`. Pins:
+  made `commit()` refuse over `UPSUM_BUDGET = 2000`, `UPSUM_MAX_DOMAIN_KEYS = 12`. Pins:
   `COMPOSED_SYSTEM_PROMPT_SHA256 = ee5bfca6…1200`, omit-arm `322cbe5d…45ae`;
   `trellis_scaffold.test.ts` pins `{upsum_commits: 1, upsum_budget_refusals: 1,
-  upsum_shape_refusals: 5}`. Motivating run: **402,781 input tokens by iteration 14**. Probe round 1:
-  12 runs, $0.7320; the off arm pushed 110,550 tokens through one `llm_query`, 7.6×. `rlms==0.1.3`,
-  20,000-char block cap. Bounds `AGENT_MAX_TASKS_PER_GOAL` 8, `…ITERATIONS_PER_GOAL` 4,
-  `TASK_WAIT_TTL_MS` 30 min.
-- **T4 — the frontier.** `rlms` LocalREPL still runs model-authored Python in-process on the host with
-  live Neo4j and Postgres credentials in-namespace; the boundary stays [[C12]]'s, and nothing here
-  has moved off it. A pinned read of `rlms==0.1.3` names a live substrate defect: `REPLResult`
-  annotates `llm_calls` but assigns `rlm_calls`, so its generated `repr()` and `==` **raise** on every
-  `execute_code` return. `parseTelemetryLine`'s nine-field allowlist **drops every counter added
-  since Session 20**. `verify()` informs, never gates. S2b `compaction=True` was measured and **never
-  enabled**. `citable()` has **no non-test caller**.
+  upsum_shape_refusals: 5}`. Motivating run: **402,781 input tokens by iteration 14**; probe round 1:
+  12 runs, $0.7320, off arm 110,550 tokens/call (7.6×). Bounds
+  `AGENT_MAX_TASKS_PER_GOAL` 8, `…ITERATIONS_PER_GOAL` 4, `TASK_WAIT_TTL_MS` 30 min.
+- **T4 — the frontier.** `rlms` LocalREPL still runs model-authored Python in-process, host-side, with
+  live Neo4j/Postgres credentials in-namespace, untouched — the boundary stays [[C12]]'s. A pinned
+  read of `rlms==0.1.3` names a live substrate defect: `REPLResult` annotates
+  `llm_calls` but assigns `rlm_calls`, so `repr()`/`==` **raise** on every `execute_code` return.
+  `parseTelemetryLine`'s nine-field allowlist **drops every counter added since Session 20**.
+  `verify()` informs, never gates. S2b `compaction=True` was measured and **never enabled**.
+  `citable()` has **no non-test caller**.
 - **T5 — future plans.** Proposed and open: replacing this substrate — the ladder, gates and exfil
   doubt-filter are [[C12]]'s. `llm_help` and self-documenting descriptors — PROPOSED, authorizing no
   build, behind the harness self-model's §8 gate with expectation-to-guard bijection as the audit.
-  Reasoning-templates, not sequenced. Backend T2–T4, the hosted arm, TTT rungs R3–R5 — owner-gated.
-  `max_depth` 2 is a contingency. The composed-prompt sha pins are the natural cache key for any
-  prefix fast-state.
+  Reasoning-templates, not sequenced. Backend T2–T4, hosted arm, TTT rungs R3–R5 — owner-gated.
+  `max_depth` 2 is a contingency. Composed-prompt sha pins are a natural fast-state cache key.
 
 *Status ledger:* RLM · REPL · `llm_query` · orchestrator · workspace injection · A2A/MCP seam — all
 **shipped-pinned**. Telemetry allowlist gap · `citable()` · `REPLResult` `repr`/`==` · `max_depth` 1
-unenforced **here** — **confirmed open**; the host `depth_ceiling` that now exists guards [[C12]]'s
-channel, not this one. *Cross-links:* [[C4]] (DB tools + the `sourceNodeIds` gate), [[C5]] (the
-toolkit rides the same injection), [[C6]] (workspace/promotion/modules), [[C11]] (A2A/MCP serving),
-[[C12]] (the boundary this class lacks, and does not call).
+unenforced **here** — **confirmed open**; a host `depth_ceiling` now guards [[C12]]'s channel, not
+this one. *Cross-links:* [[C4]] (DB tools + the `sourceNodeIds` gate), [[C5]] (the toolkit rides the
+same injection), [[C6]] (workspace/promotion/modules), [[C11]] (A2A/MCP serving), [[C12]] (the
+boundary this class lacks and never calls).
 
 #### C2 — the engineering loop: an out-of-process session controller and its acceptance ledger
 *Charter: the repository-external, protected-state machinery that mechanizes the engineering session
@@ -678,7 +677,7 @@ the write path, or the discoverability program.*
   returning 429. `TRELLIS_A2A_ENABLED` mounts the agent card (pre-auth) and `/a2a/v1` JSON-RPC —
   SendMessage, SendStreamingMessage, GetTask, CancelTask-declined — over TTL-bounded Redis task records.
   Outbound, `trellis_mcp.py` dials operator-configured stdio and Streamable-HTTP servers, counting MCP
-  calls separately from provenance-bearing tool calls. Governance: AGENTS.md's twenty hard rules and
+  calls separately from provenance-bearing tool calls. Governance: AGENTS.md's twenty-one hard rules and
   §1.5, the session-governance ruling, the root contract and its checker.
 - **T3 — with receipts.** `264b007` built A2A hand-rolled with Zod, "zero new dependencies", recording
   `npm test` 468/57 (baseline 419/53), `test:a2a` 46 checks, 9 Compose assertions. `a2119c0` plus
@@ -690,10 +689,11 @@ the write path, or the discoverability program.*
 - **T4 — the frontier.** **Green again**, and the durable lesson outlived the outage: `5e7295d`
   (#159) deleted `docs/density-chain/` while leaving two inbound links, which the
   ratified `broken_markdown_link` rule caught — but `AGENTS.md`'s row was stale in plain backticks,
-  which the checker would **not** have caught even then. That asymmetry is still live and just
-  recurred: `AGENTS.md` §2 (Navigation map) rows every top-level `src/` package except [[C12]]'s new
-  `src/repl_sandbox/`, and nothing detects an omission — the contract governs repository-root names,
-  never navigation completeness. The same shape one level up is [[C13]]'s record↔twin gap.
+  which the checker would **not** have caught even then. That asymmetry recurred once already:
+  `AGENTS.md` §2 (Navigation map) omitted [[C12]]'s `src/repl_sandbox/` from the top-level `src/`
+  package rows until a manual fix restored it — nothing detects an omission, because the contract
+  governs repository-root names, never navigation completeness. The same shape one level up is
+  [[C13]]'s record↔twin gap.
   **`AGENTS.md` sat 11 bytes under its 32,768 cap and now holds 2,238 free**: every rule was reframed
   to state what to do rather than what to avoid, and one claim — where the objective comes from — was
   returned from five substantive homes to one. The cap stays platform-dependent at the margin, with
@@ -795,7 +795,7 @@ the first caller of the DB `postgres_backend_from_env` factory and the `broker_h
 `KataLauncher.boot` stays uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
 split, but the latter two are **stale against 2026-07-23** (both still read G1 as unsatisfied; neither
-mentions §3.1a), and `AGENTS.md` §2 still has no row for `src/repl_sandbox/`. The provisioned host is
+mentions §3.1a); `AGENTS.md` §2 now has a row for `src/repl_sandbox/`, added since this note was written. The provisioned host is
 reached by the local alias `ssh trellis-kata` — **the address is deliberately absent from this public
 tree** (BUILD_PLAN §4.1) and the host holds no checkout, so a fact living only there is unrecorded.
 *Cross-links:* [[C1]] (replaces that substrate, preserving its contract), [[C5]] (the handle model is
@@ -827,11 +827,11 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   prior edition recorded as skipped was completed. `794aab2` (2026-07-23) ratified
   `SELF_DESCRIBING_SURFACES.md` and authorized **Workstream B only** of the self-model, records only,
   no code: `HARNESS_SELF_MODEL.md` §12 carries the authorization and holds Workstream A, rule 7's paid
-  probe, and Phase 4's any-gate shut; `LLM_HELP_SPEC.md` became the build spec with derived, not
+  probe, and Phase 4's any-gate shut; `LLM_HELP_SPEC.md` became the build spec — derived, not
   independent, standing. Measured: checker **PASS (0 issues)**, negative control catching all four
-  planted breaks, `AGENTS.md` at **31,034 bytes against its 32,768 cap** (1,734 headroom, down from
-  eleven before #171 restated the rules positively). Design records: `dc1f55f` (#153), `3a02408`
-  (#154), `3bdc0e7` (#135), `cb12a53` (#136).
+  planted breaks, `AGENTS.md` at **31,345 bytes against its 32,768 cap** (1,423 headroom — eleven
+  before #171, 1,734 before this session's own repair). Design records: `dc1f55f` (#153),
+  `3a02408` (#154), `3bdc0e7` (#135), `cb12a53` (#136).
 - **T4 — the frontier.** **Authorized is a third state, and it is the fragile one.** A record that says
   *build this* with nothing built is neither a proposal that can be ignored nor a slice that can be
   read from code — it decays into either unless a first increment converts it. That increment is
@@ -841,18 +841,19 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   bool rather than deriving anything. The kernel's nearest thing to guard-derivation turns out to be a
   switch over hand-written prose; the guarded-only arm is the informative pin, being the first
   state-dependent self-description. **The record↔twin asymmetry is structural, not the closed
-  instance:** the checker proves twin↔tree, never record↔twin, and `AGENTS.md` §2 rows every other
-  top-level `src/` package and [[C12]]'s not at all. **Named-implies-exists is proved;
-  exists-implies-named is not** — the general form of the backticked-row miss that survived `5e7295d`
-  (green again since `20e94ae`). **Confirmed unfixed:** the nine-field telemetry allowlist — now
-  *deliberately* so, since it is Workstream A's Phase 0a and A was held back. **Falsified:** Phase 0,
-  2026-07-19, proved its own specification impossible. **Unscheduled:** `.claude/ceremonies/` — a
-  dedupe ceremony whose prompt is committed beside the rulings it honors, so the loop's instructions
-  and its exceptions are both diffable; **"No edits" is a successful run**, and it owes a seeded-clean
-  positive control. Its `SETUP.md` installs the fourteen-command allow-list into
-  `.claude/settings.json`, which **travels by checkout** because permission rules are the one settings
-  category that merges across scopes rather than top-winning, and which withholds `gh pr merge` and
-  write access to `.claude/**` — so the loop cannot rewrite its own prompt. Nothing schedules it yet.
+  instance:** the checker proves twin↔tree, never record↔twin — `AGENTS.md` §2 omitted [[C12]]'s
+  `src/repl_sandbox/` row until an editorial, not CI-caught, fix restored it this session.
+  **Named-implies-exists is proved; exists-implies-named is not** — the shape that let the
+  density-chain row read "11" in plain backticks, uncheckable until linked. **Confirmed
+  unfixed:** the nine-field telemetry allowlist — now *deliberately* so, since it is Workstream A's
+  Phase 0a and A was held back. **Falsified:** Phase 0, 2026-07-19, proved its own specification
+  impossible. **Unscheduled:** `.claude/ceremonies/` — a dedupe ceremony whose prompt is committed
+  beside the rulings it honors, so the loop's instructions and its exceptions are both diffable;
+  **"No edits" is a successful run**, and it owes a seeded-clean positive control. Its `SETUP.md`
+  installs the fourteen-command allow-list into `.claude/settings.json`, which **travels by checkout**
+  because permission rules are the one settings category that merges across scopes rather than
+  top-winning, and which withholds `gh pr merge` and write access to `.claude/**` — so the loop cannot
+  rewrite its own prompt. Nothing schedules it yet.
 - **T5 — future plans.** Authorized, unbuilt: `llm_help()` as an always-present kernel builtin listing
   the run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
   see-also, with `expects` **guard-derived** and the human winning on stalemate; the module manifest
@@ -874,10 +875,7 @@ inverted) is **paid**: `SELF_DESCRIBING_SURFACES.md` §9.1 distinguishes guard-d
 facts under one invariant — *one encoding, owned by whoever is authoritative for the fact*.
 *Cross-links:* [[C11]] (this class's checker governs that class's surfaces), [[C5]] (the pillar's
 enforcement posture, generalized by the self-model), [[C7]] (the alive catalog is the run's actual
-cover — no default cast), [[C12]] (the package that tested both halves — root files caught, navigation
-map not).
-
----
+cover — no default cast), [[C12]] (the package whose row this asymmetry cost).
 
 ## The cross-link lattice
 
@@ -1059,12 +1057,14 @@ listed in the folder [`README.md`](README.md).
   session then **ran it and confirmed exactly those two**, and confirmed that returning this file
   clears them (`check:repo-surface` → **PASS, 0 issues**). Its falsifier was observed too:
   `--negative-control` exits **3**, naming all four planted breaks.
-- **`AGENTS.md`'s navigation row for this folder says "11 subsystem-class branches."** There are now
-  thirteen; that row is stale and, being plain backticks rather than a link, the checker cannot catch
-  it.
-- **Two classes are unreachable from the repository's own navigation map** — the REPL sandbox
-  (`docs/product/repl-sandbox/`) is referenced by no entrypoint document, and the self-describing
-  records are orphans. Both are findings of the classes themselves.
+- **`AGENTS.md`'s navigation row for this folder read "11 subsystem-class branches" in plain backticks
+  when this was written.** Fixed since: the row is now a markdown link reading "13 subsystem-class
+  branches," so the checker can resolve it.
+- **The two classes once unreachable from the repository's own navigation map are now wired in.** The
+  REPL sandbox was reachable only through `docs/product/repl-sandbox/`, missing its code directory
+  (`src/repl_sandbox/`); both rows now exist in `AGENTS.md` §2. The self-describing records
+  (`SELF_DESCRIBING_SURFACES.md`, `HARNESS_SELF_MODEL.md`) are cited from `docs/ORIENTATION.md` D4,
+  `docs/GLOSSARY.md`, and `AGENTS.md` rule 20.
 - **Several documents disagree with the log.** Phase numbering post-dates the code it labels; the
   archive's session range exceeds anything the log names; PR order and merge order diverge (the
   density-chain removal merged *before* two later PRs, so it is not the final act it looks like); and

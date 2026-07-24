@@ -187,7 +187,7 @@ contents and stay backticked; a path that is a destination is a link.
 | [`src/core/agent/`](src/core/agent/) | The orchestrator: decision schema, prompt, transcript, goal loop — pure decision-maker, no tools |
 | [`src/core/authoring/`](src/core/authoring/) | Grounded authoring: corpus seeding, byte-pinned template, anchor gate, assembly |
 | [`src/core/a2a/`](src/core/a2a/), [`src/api/`](src/api/) | External surfaces: A2A protocol, HTTP API (thin delegates over core) |
-| [`src/core/llm/`](src/core/llm/) | `parseLlmResponse` — the boundary EVERY worker-consumed completion crosses |
+| [`src/core/llm/`](src/core/llm/) | `parseLlmResponse` — the boundary EVERY completion crosses, in workers and in `src/core/graph/` and `src/core/agent/` alike |
 | [`src/core/observability/`](src/core/observability/) | pino logging + per-process Prometheus registries (bounded labels only) |
 | [`src/config/`](src/config/) | Env validation (Zod), module/MCP-server loaders (Node twins of the Python validators) |
 | [`src/workers/`](src/workers/) | BullMQ consumers; pure job-parsing/prompt-selection modules beside each worker (`extraction_job.ts` holds both extraction prompts) |
@@ -202,6 +202,7 @@ contents and stay backticked; a path that is a destination is a link.
 | [`docs/reference/`](docs/reference/) | HTTP, SSE, and external protocol references |
 | [`docs/product/`](docs/product/) | PRDs, benchmark specs, and active programs. Standing and reading order for the epistemic-support records: §2.1 |
 | [`docs/product/repl-sandbox/`](docs/product/repl-sandbox/) | Isolation program for the RLM's Python REPL — threat model, handle data model, build plan, PROPOSED doubt filter. Control plane built; **the boundary is not** |
+| [`src/repl_sandbox/`](src/repl_sandbox/) | The isolation program's own code: frame codec, transport, guest supervisor, handle table and algebra, both host chokepoints (DB broker, LM handler + DLP), the capability lifecycle, `KataREPL`, and the G1 preflight |
 | [`docs/density-chain/`](docs/density-chain/), [`tools/density-chain/`](tools/density-chain/) | Branching chain-of-density map — trunk + 13 subsystem-class branches — and the checker that keeps it honest. Orientation aid only, subordinate to this file and [`docs/ORIENTATION.md`](docs/ORIENTATION.md). The checker stores nothing: routing derives from the map, currency from git |
 | [`.claude/skills/`](.claude/skills/) | Project skills auto-loaded by Claude Code and inventoried for every harness. Roster and triggers: [`.claude/skills/README.md`](.claude/skills/README.md) — read it before assuming no skill covers the task. The record each skill derives from is canonical over it |
 | [`docs/archive/`](docs/archive/) | Preserved history (verbatim, never edited) |
