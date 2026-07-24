@@ -135,7 +135,7 @@ across for one subsystem's arc.
 | **C10 Benchmarks & evidence** | a capability claim is a hypothesis until a dated report retires it | OOLONG v1, update/poison/scale drills, effective-context rounds, citation A/B, wall-clock — all dated | anti-shortcut corpus v2 pinned zero-paid with **no paid run**; the uncommitted nine-refusal sandbox drill is **[R]**-only, outside CI | real TREC import; adversarial corpora; 10k sweeps; multi-run variance replacing n=1; consensus writes |
 | **C11 Serving & governance** | narrow, authenticated, admission-bounded doors; a written contract about which record wins | HTTP/SSE API, A2A server, outbound MCP client (byte-identical when off); AGENTS.md, session governance, the root contract | the surface checker is **green again** (`20e94ae` restored the density-chain links); `KNOWN_ROUTES` mislabels two routes | inbound MCP server surface with five open decisions; OAuth posture; the dual client+server role |
 | **C12 REPL sandbox** | treat model-authored Python as hostile and own the boundary between it and the operator's secrets | the host-independent control plane, merged with CI and npm callers; on one Hetzner AX41: **G1, S2, S3 `[R]`+`[A]`, S4 `[R]`+`[A]`** — a microVM boots, a frame crosses, a real model drives `llm_query` and composes the `run_query` facade against a real Postgres holding only a handle | **still not a sandbox and must not be read as one**: Tier-0 hardening (S5), the watchdog, NIC egress policy and a production launch path are all absent, `KataLauncher.boot` still raises, and the guest image carries no rlms so `GuestSupervisor` cannot run in it. Egress self-labels **weak**; the spend cap is between-calls, not intra-batch | S5, S6, GB, GA-eq, GA-rt; doubt-filter Layers 1–2; warm pool; `max_depth` 2; a paramstyle line in the `run_query` doc; the remaining **[A]** halves (S6, GB, GA-eq), ≤$5, unspent |
-| **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI; the first shipped descriptor — `trellis_textedit`'s addendum composes, byte-identity pinned per arm | the record↔twin asymmetry is structural — the checker proves twin↔tree only; Phase 0 **falsified its own specification**; a newline-free bijection orphan is pinned in the guarded arm; `llm_help` stays **authorized and unbuilt** | `llm_help`; the remaining eight descriptors (no pin ceremony owed); a human-doc generator; the self-play discrimination gate |
+| **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI; the first shipped descriptor — `trellis_textedit`'s addendum composes, byte-identity pinned per arm | the record↔twin asymmetry is structural — the checker proves twin↔tree only; Phase 0 **falsified its own specification**; a newline-free bijection orphan is pinned in the guarded arm; `llm_help` stays **authorized and unbuilt** | `llm_help`; the surface registry and its coverage diagnostic; the remaining eight descriptors (no pin ceremony owed); a human-doc generator; the self-play discrimination gate |
 
 ---
 
@@ -184,12 +184,13 @@ planner above it. Not what the injected tools reach into, only that they arrive 
   `verify()` informs, never gates. S2b `compaction=True` was measured and **never enabled**.
   `citable()` has **no non-test caller**.
 - **T5 — future plans.** Proposed and open: replacing this substrate — the ladder, gates and exfil
-  doubt-filter are [[C12]]'s. `llm_help` and self-documenting descriptors — Workstream B AUTHORIZED
-  July 23, 2026, and the first descriptor shipped byte-identical on [[C5]]'s toolkit, so this seam
-  consumed it byte-unchanged; `llm_help`'s own landing is what moves both composed-prompt pins.
-  Reasoning-templates, not sequenced. Backend T2–T4, the hosted arm, TTT rungs R3–R5 — owner-gated.
-  `max_depth` 2 is a contingency. The composed-prompt sha pins are the natural cache key for any
-  prefix fast-state.
+  doubt-filter are [[C12]]'s. Descriptors — Workstream B AUTHORIZED 2026-07-23, the first shipped
+  byte-identical on [[C5]]'s toolkit, so this seam consumed it byte-unchanged. Next, unbuilt: a
+  **surface registry** — a registration, not a schema — populated at each definition site and read at
+  THIS class's `custom_tools` seam, plus a coverage diagnostic naming live surfaces carrying no
+  descriptor; `llm_help`'s landing moves both composed-prompt pins, which stay the natural cache key
+  for any prefix fast-state. Reasoning-templates, not sequenced. Backend T2–T4, the hosted arm, TTT
+  rungs R3–R5 — owner-gated. `max_depth` 2 is a contingency.
 
 *Status ledger:* RLM · REPL · `llm_query` · orchestrator · workspace injection · A2A/MCP seam — all
 **shipped-pinned**. Telemetry allowlist gap · `citable()` · `REPLResult` `repr`/`==` · `max_depth` 1
@@ -400,7 +401,8 @@ the model's attention. Not whether moved bytes are citable, nor whether a belief
   behavior-changing increment; `py-tree-sitter` construct addressing carries a recorded revisit
   trigger; the superseded-embedding sweep stays unchosen; error-tolerant ingestion of broken files is
   undecided; prose chunking and wider policy-2 rollout await an owner call. Proposed elsewhere: sandbox
-  handles; the remaining surface descriptors ride [[C13]]'s program.
+  handles; the remaining surface descriptors ride [[C13]]'s program, registration-shaped by the
+  2026-07-23 ruling, so this toolkit's fields stay editable without a migration.
 
 *Status ledger:* the pillar (RATIFIED 2026-07-09) · textedit · answer channel · `get_ast_blocks` ·
 guarded splice · retrieval discipline · structural chunking · the descriptor-composed addendum —
@@ -892,11 +894,15 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   the run's alive catalog, `llm_help(name)` returning purpose, when-to-use, exposes, expects, example,
   see-also, with `expects` **guard-derived** and the human winning on stalemate; the module manifest
   schema extended; one generator emitting human navigation pointers. The remaining surfaces proceed
-  descriptor by descriptor **without a pin ceremony** — `llm_help`'s landing is what moves **both**
-  composed-prompt pins. Gates that bind: the self-play discrimination and drift game whose falsifying
-  cell is *selected-on-a-lie*; the paid adoption probe stays owner-gated. Open by ratification's own
-  terms, not oversight: where `llm_help` composes from at the injection seam, and which descriptor
-  fields Trellis adopts — the shipped `usage` field is that decision's first evidence.
+  descriptor by descriptor **without a pin ceremony**: the pins hash the BASE prompt, which
+  conditional addenda never enter, so `llm_help` — a kernel builtin taught in the base manifest — is
+  the pin-moving event and an addendum edit is not. Gates that bind: the self-play discrimination and drift game whose falsifying
+  cell is *selected-on-a-lie*; the paid adoption probe stays owner-gated. Both of ratification's open
+  questions closed 2026-07-23: **descriptors are a registration, not a schema** — the field set is
+  *dissolved* rather than settled, because a vocabulary that becomes law early cannot survive the
+  iteration prompt authoring needs — and that registry, populated at each surface's definition site,
+  is also where `llm_help` composes from. Next increment, unbuilt: the registry and a **coverage**
+  diagnostic that reports which live surfaces carry no descriptor, and never refuses.
 
 *Status ledger:* root contract · machine twin · surface checker · CI wiring — **shipped-pinned**;
 self-describing surfaces — **RATIFIED** (2026-07-23); harness self-model — **principle endorsed,
@@ -904,10 +910,12 @@ Workstream B authorized, A gated**; the textedit descriptor composition — **sh
 byte-identical on both arms** (increment 1); `llm_help` — **specified, authorized, unbuilt**.
 *Reachability:*
 `llm_help` has **no occurrence anywhere** under `src/`, `scripts/`, `modules/` or `tools/`; the
-module-manifest descriptor fields would still **fail** validation — the schema is `.strict()`,
-unextended; the shipped descriptor is kernel-side Python whose non-test caller is the
-`trellis_agent.py` prompt seam; the bijection is mechanized only as drill §16's registry↔line checks
-on one surface. `wiki:check --verify` is a CI step and **neither negative control is** — half this
+shipped descriptor is kernel-side Python — a dict literal **no validator anywhere reads**, whose
+non-test caller is the `trellis_agent.py` prompt seam; `ModuleManifestSchema` stays `.strict()` and
+descriptor-free, a different artifact class the §11 ruling makes it less likely to enter; the
+bijection is mechanized only as drill §16's registry↔line checks on one surface, and **no coverage
+diagnostic exists yet** — nothing today can answer which live surfaces lack a descriptor.
+`wiki:check --verify` is a CI step and **neither negative control is** — half this
 class's trust precondition rests on operator discipline. That step now also **compiles the map's own
 HTML render**, whose data is JS source: one straight apostrophe inside a single-quoted string was a
 `SyntaxError` blanking the whole interactive table, reported to nothing but a browser console. It

@@ -916,13 +916,16 @@ TEXTEDIT_ADDENDUM_GUARDED_ONLY = (
 # class, and nowhere else; the editorial teaching prose lives in
 # TEXTEDIT_DESCRIPTOR; the renderer carries structure only.
 #
-# Field names are LLM_HELP_SPEC.md §1 vocabulary. `expects` is
-# deliberately absent from the descriptor (that spec's rule): it is
-# derived by derive_textedit_expects(), never authored beside the
-# fields. `usage` is MASH's shipped field, adopted PROVISIONALLY
-# because the §1 set has no slot for cross-cutting protocol lines —
-# the field-set decision stays open (SELF_DESCRIBING_SURFACES.md §9.3)
-# and this descriptor is evidence for it, not its settlement.
+# Field names draw on LLM_HELP_SPEC.md §1's vocabulary plus MASH's
+# `usage`, which carries the cross-cutting protocol lines §1 has no slot
+# for. Nothing validates this shape and nothing should: descriptors are
+# a REGISTRATION, not a schema (SELF_DESCRIBING_SURFACES.md §11, owner,
+# July 23, 2026) — a field vocabulary that becomes law early cannot
+# survive the iteration prompt authoring needs, so fields vary per
+# surface and adding one is an edit. What a diagnostic will check is
+# COVERAGE — that every live surface carries a descriptor at all —
+# never field shape. `expects` is deliberately absent: it is derived by
+# derive_textedit_expects() from the guards, never authored here.
 TEXTEDIT_DESCRIPTOR = {
     "name": "trellis_textedit",
     "purpose": "edits files under the operator-configured edit root.",

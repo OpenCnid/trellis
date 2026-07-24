@@ -262,3 +262,30 @@ result and findings). Two facts a builder starting from this spec needs:
   guard class, with mode selection read from the refusing state itself. The
   drill enforces that no guard-owned phrase is restated in an editorial field.
   That is the shape the next surface should copy.
+
+## 11. Registration, not schema — what this changes for the build (dated entry — July 23, 2026)
+
+[`SELF_DESCRIBING_SURFACES.md`](SELF_DESCRIBING_SURFACES.md) §11 (owner, in
+session, on the collaborator's proposal) rules that descriptors are a
+**registration, not a validated schema** while the shape is being learned,
+because a field vocabulary that becomes law early is incompatible with the
+iteration prompt authoring requires. For this file:
+
+- **§1's enforcement clause is amended.** "A descriptor missing a required
+  field fails validation" no longer governs the field set. The enforced
+  property is **coverage** — every live surface carries a descriptor — and a
+  diagnostic *reports* the gaps rather than refusing them.
+- **§1's seven fields are a vocabulary, not a contract.** Draw from them and
+  add what a surface needs. `trellis_textedit` carries `usage` for
+  cross-cutting protocol lines: a fact about one surface, needing no
+  ratification and freezing nothing. The "provisionally adopted" framing of
+  §10 is superseded — under a registration there is no probationary state to
+  be in.
+- **§3 is untouched.** `expects` stays guard-derived and code-composed — the
+  one part of the account that is not editorial, and so not subject to
+  field-set flexibility.
+- **The registration is also the answer to §6's other open question** (where
+  `llm_help` composes from): a registry keyed by surface name, populated at
+  each surface's own definition site, is what the alive catalog and the
+  coverage diagnostic both read. Building it is the next increment; nothing
+  of it exists yet.
