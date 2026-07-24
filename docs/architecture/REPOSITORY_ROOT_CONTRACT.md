@@ -100,13 +100,43 @@ root `AGENTS.md` is the single repository-wide authority.
 4. local Markdown links outside the immutable archive;
 5. complete `.env.example` coverage of the keys declared by `EnvSchema`, with
    a small explicit allowlist for externally consumed keys;
-6. the absence of forbidden root result-artifact names.
+6. the absence of forbidden root result-artifact names, whether or not git
+   lists the artifact;
+7. the byte budgets the machine twin's `documentUpsum.paths` sets for governed
+   documents outside the root, so that `npm run upsum` and this checker cannot
+   disagree about whether one is within contract.
 
-`npm run check:repo-surface -- --negative-control` constructs an isolated
-temporary repository surface containing an unexpected root file, an oversized
-entrypoint, a broken link, and a missing environment key. It must exit `3` and
-name every planted break. A passing normal check is trusted only after this
-falsifier is observed.
+`npm run check:repo-surface -- --negative-control` constructs two isolated
+temporary repository surfaces from one shared fixture
+(`tools/repository-surface/fixture.ts`), under one contract that does not move
+between them.
+
+The **positive control** runs first: the contract meets a repaired tree and
+must report nothing. A falsifier that has only ever seen failures cannot
+distinguish detecting a break from reporting everything, so a detection is
+uninformative until this is observed. It also pins the blindness the contract
+buys on purpose — a dangling link inside `docs/archive/` is planted in both
+trees and must stay unreported in both.
+
+The **negative control** then breaks the same tree in eleven ways, one per
+`SurfaceIssue` code, at one path each. It must exit `3` and name every planted
+break. A passing normal check is trusted only after both are observed.
+
+Eleven, and not the four planted before July 23, 2026, is the finding. The
+fixture had declared `deprecatedSurfaces`, `forbiddenRootFiles` and
+`documentUpsum.paths` empty, so those branches were never entered and seven of
+eleven codes gated a merge without ever having been seen to fail — including
+`oversized_document`, the only merge-gating enforcement the machine twin's
+`documentUpsum.paths` budgets have. The durable fix is not the count.
+`PLANTED_CODES` in the fixture is a table typed against the `SurfaceIssue`
+union, so a twelfth code cannot reach `check.ts` without either a plant or a
+deliberate deletion of the table; `npm run build` refuses the mismatch.
+
+That is the same *shape* §8 (Amendments) names — a declaration nothing checks
+against its twin — closed here by tooling shape rather than by discipline. It is
+not the same instance: §8's gap is `rootFiles` against the §2 table, which
+remains unbuilt and unaffected by this. What is closed is `SurfaceIssue` against
+the fixture that is supposed to falsify it.
 
 The checker does not decide product architecture, validate external URLs, edit
 files, or generate documentation. It verifies only the ratified repository

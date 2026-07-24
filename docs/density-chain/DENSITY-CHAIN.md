@@ -867,6 +867,10 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   machine twin fixes **seventeen** permitted root files with byte caps, **ten** top-level directories,
   forbidden artifacts, and deprecation markers. `tools/repository-surface/check.ts` enforces them plus
   Markdown links and environment-example coverage; `cli.ts` runs `npm run check:repo-surface` in CI.
+  Its `--negative-control` shares one fixture with the unit pins and runs a positive control first —
+  one contract over a repaired tree must report nothing — then breaks the same tree **eleven** ways,
+  one per issue code, at one path each; the code table is typed against the `SurfaceIssue` union, so
+  the build refuses a code that arrives without a plant.
   The runtime half ships: `trellis_surfaces.py` holds the **registry** — `register_surface` bound at
   each surface's own definition site, validating a key and no field set — and `check:surfaces`
   reports which injected surfaces carry descriptors, deriving the roster by AST from the
@@ -874,8 +878,12 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   toolkit's addendum, mode-selected by the refusing `_guarded_only` bool. `llm_help` stays
   specified, authorized, unbuilt.
 - **T3 — with receipts.** `72ac673` (#156, 2026-07-21) landed the contract, its twin, and the checker —
-  **ten issue codes**; `conftest.py` and `pytest.ini` were admitted 2026-07-22 as class `tool`, twin
-  **and** record together with a dated amendment. `794aab2` (2026-07-23) ratified
+  **ten issue codes**, of which the negative control planted **four**. That gap was closed 2026-07-23:
+  seven of the now-eleven codes had gated a merge without ever having been seen to fail, because the
+  fixture declared `deprecatedSurfaces`, `forbiddenRootFiles` and `documentUpsum.paths` empty and
+  never entered those branches — `oversized_document`, the only merge-gating enforcement of the
+  governed-document byte budgets, among them (rule 19(c)). `conftest.py` and `pytest.ini` were
+  admitted 2026-07-22 as class `tool`, twin **and** record together with a dated amendment. `794aab2` (2026-07-23) ratified
   `SELF_DESCRIBING_SURFACES.md` and authorized **Workstream B only** of the self-model;
   `f82cf51` (#177, same day) executed increment 1: **byte-identity held on both arms**
   (3,066/3,067 chars), one pin per arm, each seen to fail once on a planted one-byte perturbation
