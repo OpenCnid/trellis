@@ -51,6 +51,7 @@
   ],
   "documentUpsum": {
     "defaultMaxBytes": 32768,
+    "nearBudgetRatio": 0.1,
     "paths": [
       { "path": "docs/ORIENTATION.md", "maxBytes": 32768 },
       { "path": "docs/GLOSSARY.md", "maxBytes": 24576 },
