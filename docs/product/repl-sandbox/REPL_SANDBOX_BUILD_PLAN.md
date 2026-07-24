@@ -797,6 +797,55 @@ identical.
 | `--in-process` | the microVM — `InProcessLauncher` substituted, with its `rpc_hook` dialing the real host listener so the crossing is forged as convincingly as possible | "the compared round-trips crossed the Kata boundary" | a boot identity (`/proc/sys/kernel/random/boot_id` plus `uname -r`) returned *through* `execute_code` and cross-read out-of-band from the same sandbox. `boot_id` supplies per-run freshness, so a replayed identity cannot satisfy it |
 | `--mutate-guest=<defect>` | one declared observable from the guest's reply, on the wire, KataREPL side only — swept over `drop-final-answer`, `blank-stderr`, `empty-locals`, `wrong-local-value`, `no-restore-scaffold`, `nonnumeric-execution-time`, `drop-context-binding`, `amnesia` | "the comparator can tell same from different at cell X" | the comparator, reddening at **exactly one** cell. Zero cells means X is vacuous; more than one means the cells are coupled. Both are failures of the arm |
 
+**The boot procedure, transcribed from the probes that already perform it.** The launch path is not
+research — S2 through S5 boot real microVMs on the AX41 every run, and the whole of it is *one*
+`ctr` form plus discovery of what containerd's shim already built. The probes never invoke
+`cloud-hypervisor` directly and never call `kata-runtime` except for `--version`.
+
+```
+ctr run -d --runtime io.containerd.kata.v2 <image> <name> sleep infinity
+ctr task exec --exec-id <id> [-d] <name> sh -c <script>
+ctr task kill -s SIGKILL -a <name>   ·   ctr task delete -f <name>   ·   ctr container delete <name>
+```
+
+Ordered: mint a sandbox name (it is simultaneously the container name, the `pgrep` filter, the
+`/run/vc/vm/<id>` directory and the shim-kill pattern) → `ctr run -d` → **discover** the vsock UDS by
+parsing the VMM's own argv for a `/run/**/vm/**` token and taking the one non-`api` socket in its
+dirname → bind the host end at `<uds>_<port>` *before* any guest code runs → ship the package →
+start the guest listener → dial `<uds>` with `CONNECT <port>\n` and read the `OK <port>\n` ack **one
+byte at a time**, because the ack and the first frame share a stream and a buffered read swallows the
+frame's length prefix.
+
+Two details are load-bearing and easy to lose. `ctr run -d` returning is **not** a boot — the probes
+record the elapsed time separately to keep that distinction visible, and readiness is the first
+`ctr task exec` that returns. And the UDS path is *discovered rather than assumed*, because a probe
+that hard-codes it "would report 'no bridge' when what it means is 'no socket where I looked'".
+
+**What a shipping launcher needs that no probe performs** — this is the actual S6 build, and it is
+short because the boot itself is solved:
+
+1. **A guest whose entrypoint is the supervisor.** Probes run `sleep infinity` and drive each turn
+   with a fresh `ctr task exec`; a launcher's guest must come up already listening on the control
+   port. No probe constructs a `GuestSupervisor` in a guest at all.
+2. **The scaffold before any untrusted worker.** The supervisor takes it at construction and no
+   control op installs one, so materialising capabilities is something the *launcher* does to the
+   guest — which is also the channel the reserved names now ride (settled above).
+3. **Real readiness polling.** Every probe uses a fixed sleep (1.0 s, 1.5 s, 2.0 s). A launcher needs
+   a bounded retry against the `CONNECT` handshake, which already raises usefully when nothing is
+   listening.
+4. **Refusing a shim that returned 0 without creating a VM.** The probes check the exit code and then
+   *assert* a boundary; a launcher must turn "no `cloud-hypervisor` process carries this id" into a
+   refusal.
+5. **Per-session identity.** `GUEST_CID = 3` is a module constant in every probe, which is sound for
+   one sandbox on an idle host and not for a launcher keying ledgers, rate buckets and `SessionTable`.
+6. **Image pull, and a `ctr` namespace.** Probes assume the provisioner already pulled the digest, and
+   none passes `-n`, so everything lands in containerd's `default` namespace — which is why leaked
+   cgroups appear at `/sys/fs/cgroup/default/kata_<id>`. **Observed on the host 2026-07-24: four such
+   directories survive from earlier runs.** No probe removes them; S5 only counts them.
+7. **Egress.** `provision_kata_host.sh` states plainly that the guest has no interfaces as a
+   `ctr`-without-CNI *default*, explicitly **not** as an enforced control. Requirement 6 is GB's, and
+   a launcher that claimed containment on today's behaviour would be claiming an accident.
+
 Rejected, with reasons worth keeping: a canned-reply `--negative-control` in the S3/S5 sense is
 **strictly dominated here** — it is caught by the witness *and* by the comparator the moment any
 block leaves the canned set, which is S4 `[R]`'s "starts with select" leak in a new costume;
