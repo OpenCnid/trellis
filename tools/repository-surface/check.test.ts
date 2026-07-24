@@ -60,6 +60,21 @@ describe('the negative control', () => {
     const extras = issues.filter(issue => issue.code === 'environment_example_extra');
     expect(extras.map(issue => issue.message)).toEqual(['key is neither in EnvSchema nor allowedExampleOnly: UNDECLARED_KEY']);
   });
+
+  it('keeps an archive-excluded broken link silent, so the link plant means something', () => {
+    const root = temporaryRoot();
+    const fixture = plantNegativeControl(root);
+    const links = checkRepositorySurface(root, fixture.contract, fixture.files)
+      .filter(issue => issue.code === 'broken_markdown_link');
+
+    // Two identical dangling links, siblings under `docs/`, one of them a
+    // directory deeper inside the excluded prefix. Only the unexcluded one
+    // may be reported. The pair pins the prefix from both sides: an
+    // exclusion matching nothing reports both, and one gone too broad
+    // reports neither — and either failure would otherwise leave a
+    // directory silently unchecked with the checker green.
+    expect(links.map(issue => issue.path)).toEqual(['docs/LEGACY.md:3']);
+  });
 });
 
 // Rule 15: correct is a different claim from reachable. The ranking in

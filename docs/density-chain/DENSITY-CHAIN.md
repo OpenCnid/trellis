@@ -912,7 +912,11 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   eleven** — three of the seven unplanted could not have fired at all, their contract arrays being
   empty — each break now asserted **by path**, the code list itself runtime data so a twelfth cannot
   land unplanted, and the whole seen to fail three ways, including the deprecation-marker branch
-  reduced to an existence check with the fixture untouched. First headroom run: `docs/README.md`
+  reduced to an existence check with the fixture untouched. The exclusion that fixture still set to
+  `[]` — the `docs/archive/` exemption the record has always claimed — is now planted too, as a
+  **silent** pair rather than an expected break: a dangling link in the archive beside an identical
+  one in a `docs/` sibling, so widening the prefix loses the sibling and narrowing it fires the
+  archive. First headroom run: `docs/README.md`
   **45 bytes** under its 20,480 cap, `docs/ORIENTATION.md` **352** under 32,768. Checker
   **PASS (0 issues)**.
 - **T4 — the frontier.** **The honest scope of "derived" is recorded:** phrase text is still
