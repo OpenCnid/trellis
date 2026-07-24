@@ -169,8 +169,10 @@ answers questions *about* gigabyte contexts by reading slices and composing a de
 artifact** over several turns, extracting no more than it needs. `materialize` is the exception path,
 which [DATA_MODEL §6](REPL_SANDBOX_DATA_MODEL.md) — titled *The bounded materialisation exception* — already states: *prefer by-reference sinks;
 `materialize` is only for when the model itself must compute over the bytes.* When bulk content must
-reach an answer it goes `answer.submit(H)` — resolved host-side, out through the audited egress,
-never through the guest namespace and so never through this bound at all.
+reach an answer it was meant to go `answer.submit(H)` — **an op that does not exist.**
+`trellis_answer.submit` takes an expression string and renders a *value*; there is no handle argument
+and no host-side resolution. Recorded here because this record is one of the two that route bulk
+through it (RESPONSE_ARTIFACT.md section 4).
 
 So `max_result_bytes` is sized against **one computation's working set**, and the arithmetic
 "a corpus takes N calls at this size" is a tell that the model is being treated as the transport. It

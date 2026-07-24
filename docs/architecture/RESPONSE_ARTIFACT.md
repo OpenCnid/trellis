@@ -49,7 +49,7 @@ The mechanisms ship. This is not an aspiration record.
 |---|---|---|
 | `trellis_answer.submit` | Refuses a **bare literal** by `ast.parse` — an expression referencing no REPL state is a retyped literal. Structural, not advisory. | `src/rlm/trellis_answer.py` |
 | Handles, not payloads | The corpus never enters the guest; the algebra is handle-in / handle-out and crosses no content. | [REPL_SANDBOX_DATA_MODEL.md](../product/repl-sandbox/REPL_SANDBOX_DATA_MODEL.md) §4, §5 |
-| By-reference sinks | `llm_query(context=[H])` and `answer.submit(H)` resolve host-side. *"Prefer by-reference sinks; `materialize` is only for when the model itself must compute over the bytes."* | same, §6 — titled **The bounded materialisation exception** |
+| By-reference sink (one of two) | `llm_query(context=[H])` resolves host-side; its `context` slot is typed `Handle` so a string does not fit. *"Prefer by-reference sinks; `materialize` is only for when the model itself must compute over the bytes."* **The answer-side twin, `answer.submit(H)`, is documented in two records and does not exist** — see §4. | same, §6 — titled **The bounded materialisation exception** |
 | `locate` / `lines` | Query for an address; read a bounded slice. *"the model queries for a location, it never counts lines."* | `src/rlm/trellis_textedit.py` |
 | Workspace index/segment | `read()` returns the index and **never** contents; a segment is a deliberate pull. | `src/rlm/trellis_workspace.py` |
 | MCP capture | External results are captured mechanically; the model receives a stub with a preview. Harness-guaranteed, not model discipline. | `src/rlm/trellis_mcp.py` |
