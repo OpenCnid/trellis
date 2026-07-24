@@ -1,9 +1,19 @@
 # Trellis Engine
 
-Trellis is OpenCnid's Recursive Language Model runtime: a model operating a
-persistent Python REPL over a provenance-enforced knowledge substrate. Source
-bytes become immutable Merkle ASTs, derived beliefs cite those bytes, and stale
-evidence contests rather than silently deletes the beliefs that depend on it.
+Trellis is an agentic harness that lets a language model work over a corpus far
+larger than its context window, and keeps what the model works out. It is
+OpenCnid's **Recursive Language Model** runtime: the model reaches its data by
+writing code in a persistent Python REPL and calling itself over slices, instead
+of reading everything into context, where context rot sets in. In one
+twenty-query benchmark run, sub-LLM calls went from 5 on the first query to 0 on
+all 19 that followed — understanding derived once, then reused.
+
+Kept is not the same as trusted. Source bytes are immutable content-addressed
+blocks; derived beliefs carry the exact block hashes they came from, so any
+claim traces to the bytes behind it. Nothing moves up a trust tier without a
+human running a gated promotion command, and when a source changes, a Merkle
+diff marks every belief that depended on the dead bytes contested — quarantined
+and auditable rather than quietly wrong.
 
 > **Agents, LLMs, and coding harnesses start at [`AGENTS.md`](AGENTS.md).** It
 > carries the project basis, the annotated file tree, and an index that fans out
@@ -25,6 +35,9 @@ evidence contests rather than silently deletes the beliefs that depend on it.
    write path.
 6. The model never counts and never copies: locations are engine-computed and
    existing bytes move through guarded code operations.
+7. The system's own operating instructions are versioned modules governed as
+   beliefs: they cite promoted sources and are contested by the same sweep when
+   that evidence dies.
 
 ## Fast path
 
