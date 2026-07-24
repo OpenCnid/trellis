@@ -233,9 +233,15 @@ sequence against each, and compare **field by field** — never with `==`, and n
 ### 6.2 Clauses predicted FALSE today
 
 A target that everything already satisfies measures nothing. These are read from source and, where
-marked *observed*, run against the pinned install on the Windows dev box. Each is a real divergence
-S6 must either close or record as a ratified difference — **the list is the spike's expected yield,
-not a defect log against it.**
+marked *observed*, run against the pinned install on the Windows dev box — **eight of the twelve**,
+the rest being guest-side and reachable only from the Kata host. Each is a real divergence S6 must
+either close or record as a ratified difference — **the list is the spike's expected yield, not a
+defect log against it.**
+
+Read them in one direction only: an *observed* clause states what `LocalREPL` does, which is the
+baseline half of the comparison. The guest half of every clause stays unobserved until the launch
+path exists, so no clause here claims to have seen `KataREPL` diverge — each says what it will be
+compared against, and why byte equality is or is not the admissible claim.
 
 1. **A raising block persists no bindings in `LocalREPL`** — *observed*: after `x = 1; raise
    ValueError`, `'x' in dir()` is `False`, because the namespace copy-back sits inside the `try`
@@ -243,15 +249,24 @@ not a defect log against it.**
    atomicity is a semantic difference a model would feel.**
 2. **`stderr` shape** — *observed*: `LocalREPL` returns exactly `'\nValueError: boom'`, leading
    newline included, no traceback.
-3. **`locals` key sets diverge in both directions on the same turn** — the guest skips reserved and
-   scaffold names, so `answer` and `context` are absent; `LocalREPL` additionally carries `f` and
-   `json`, artifacts of implementing context loading by executing generated code.
+3. **`locals` key sets diverge in both directions on the same turn** — *observed*: after
+   `load_context({...})` a `LocalREPL` turn returns keys
+   `['answer', 'context', 'context_0', 'f', 'json', …]`, and with a string payload
+   `['answer', 'context', 'context_0', 'f', …]`. `f` is a *closed* file handle and `json` a live
+   module — both artifacts of implementing context loading by executing generated code
+   (`local_repl.py:419-436`). The guest skips reserved and scaffold names, so `answer` and `context`
+   are absent there. Neither side is a superset of the other, which is why the claim is key sets
+   **after** removing reserved names and load artifacts, and never a raw key-set equality.
 4. **`answer` starts at a different value** — *observed*: `LocalREPL` binds
    `{'content': '', 'ready': False}`, the shape rlms' own system prompt documents
    (`utils/prompts.py:135`). The guest binds `{}` (`supervisor.py:220`), so `answer['ready']` raises
    `KeyError` on a read the prompt invites.
-5. **`final_answer` captures at different moments** — `LocalREPL` snapshots `content` the instant
-   `ready` flips truthy (`local_repl.py:43`); the guest reads the namespace after the block.
+5. **`final_answer` captures at different moments** — *observed*: `LocalREPL` snapshots `content` the
+   instant `ready` flips truthy (`local_repl.py:43`), so setting `ready` **before** `content` yields
+   `final_answer == ''` while the reverse order yields the content. The guest reads the namespace
+   after the block and would return the content either way. This is why the predicate fixes the
+   assignment order rather than asserting on it: matching the baseline under the adversarial order
+   would mean reproducing a callback-timing artifact.
 6. **`SHOW_VARS` and `rlm_query` do not exist in the guest** — *observed present* in `LocalREPL` as a
    bound method. The registry refuses them by name (`capabilities.py:529`) and `_restore_scaffold`
    removes any reserved name it has no pin for. `rlm_query`'s absence follows from ratified
@@ -269,8 +284,11 @@ not a defect log against it.**
     (`local_repl.py:194`); `KataREPL` does not, so the first `execute_code` meets `_require_live()`.
 11. **A prompt over 256 KiB trips the inbound cap** (`config.py:133`) — which is the normal case for
     the workload RLM exists to serve. `LocalREPL.add_context` has no cap.
-12. **`compaction=True` silently does nothing** — the driver gates every compaction step on
-    `hasattr(environment, "append_compaction_entry")` (`rlm.py:366`), which `KataREPL` lacks.
+12. **`compaction=True` silently does nothing** — *observed*: `LocalREPL` carries
+    `append_compaction_entry`; `KataREPL` does not. The driver gates every compaction step on
+    `hasattr(environment, "append_compaction_entry")` (five references in `rlm.py`), so a
+    compaction-configured run degrades to no compaction with no error and no log line, while the
+    system prompt still tells the model its history is in `history` — which is also unbound (item 8).
 
 ### 6.3 The self-comparison trap
 
