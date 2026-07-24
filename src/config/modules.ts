@@ -29,6 +29,18 @@ export const DEFAULT_MODULE_SELECTION = ['spatial-flywheel'] as const;
 // with the escape-doubled rubric.
 export const MODULE_RUBRIC_TOKEN = '<<TRELLIS_RUBRIC>>';
 
+/**
+ * The one command that accepts a module, derived from its name.
+ *
+ * Exported so the schema's equality check, the authoring assembler, the
+ * lifecycle drill's fixtures, and the drill itself all read the string from
+ * one place. A criterion restated in several files is the defect this whole
+ * guard exists to close, one level up: an invariant stated twice can drift.
+ */
+export function moduleAcceptanceCommand(name: string): string {
+  return `npm run test:module -- ${name}`;
+}
+
 const ModuleNameSchema = z
   .string()
   .min(1)
@@ -77,16 +89,23 @@ const ModuleManifestSchema = z
   // schema rather than the registration CLI because it must hold zero-paid
   // with no databases, and readModuleManifest is the single seam every path —
   // composition, authoring, registration, the per-module drill — goes through.
+  //
+  // Equality, not containment. Containment left two holes: a module named
+  // `test` satisfied it with the very constant this rule exists to reject,
+  // and any command naming the module passed even when no such script exists
+  // (`npm run bogus -- <name>`). Equality against the one command the drill
+  // actually answers to closes both, and makes the recorded criterion
+  // copy-pasteable — what the manifest says is what runs.
   .superRefine((manifest, ctx) => {
     const zeroPaid = manifest.acceptance?.zeroPaid;
-    if (typeof zeroPaid === 'string' && !zeroPaid.includes(manifest.name)) {
+    const expected = moduleAcceptanceCommand(manifest.name);
+    if (typeof zeroPaid === 'string' && zeroPaid !== expected) {
       ctx.addIssue({
         code: 'custom',
         path: ['acceptance', 'zeroPaid'],
         message:
-          `acceptance.zeroPaid must name the module it accepts: expected a command containing ` +
-          `'${manifest.name}' (canonical: "npm run test:module -- ${manifest.name}"), got ` +
-          `${JSON.stringify(zeroPaid)}.`,
+          `acceptance.zeroPaid must be the drill that accepts this module: expected ` +
+          `${JSON.stringify(expected)}, got ${JSON.stringify(zeroPaid)}.`,
       });
     }
   });

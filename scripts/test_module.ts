@@ -11,7 +11,12 @@
 // than keeping a second copy of those rules in sync.
 import fs from 'fs';
 import path from 'path';
-import { listModuleNames, loadModules, readModuleManifest } from '../src/config/modules';
+import {
+  listModuleNames,
+  loadModules,
+  moduleAcceptanceCommand,
+  readModuleManifest,
+} from '../src/config/modules';
 
 const MODULES_DIR = path.resolve('modules');
 
@@ -73,12 +78,13 @@ try {
 //    when run standalone against a checkout whose schema has drifted.
 //    A criterion identical across every module discriminates nothing.
 const zeroPaid = manifest.acceptance?.zeroPaid;
+const expectedCommand = moduleAcceptanceCommand(manifest.name);
 check(
-  'acceptance.zeroPaid references this module by name',
-  typeof zeroPaid === 'string' && zeroPaid.includes(manifest.name),
+  'acceptance.zeroPaid is exactly the drill that accepts this module',
+  zeroPaid === expectedCommand,
   zeroPaid === undefined
     ? 'manifest declares no acceptance criterion'
-    : `'${zeroPaid}' does not contain '${manifest.name}'`
+    : `expected '${expectedCommand}', got '${zeroPaid}'`
 );
 
 if (manifest.status !== 'active') {

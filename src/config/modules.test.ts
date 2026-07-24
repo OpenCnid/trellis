@@ -211,14 +211,14 @@ describe('loadModule (defect rejection)', () => {
       'x\n'
     );
     expect(() => readModuleManifest('testmod', dir)).toThrow(
-      /acceptance\.zeroPaid must name the module it accepts/
+      /acceptance\.zeroPaid must be the drill that accepts this module/
     );
-    // The operator is told the module, the canonical form, and what they wrote.
+    // The operator is told exactly what to write and what they wrote.
     expect(() => readModuleManifest('testmod', dir)).toThrow(
-      /expected a command containing 'testmod' \(canonical: "npm run test:module -- testmod"\), got "npm run test:modules"/
+      /expected "npm run test:module -- testmod", got "npm run test:modules"/
     );
     // Composition refuses it too — the guard is not registration-only.
-    expect(() => loadModule('testmod', dir)).toThrow(/must name the module it accepts/);
+    expect(() => loadModule('testmod', dir)).toThrow(/must be the drill that accepts this module/);
   });
 
   it('rejects a zeroPaid criterion naming a DIFFERENT module (criteria do not travel on copy-paste)', () => {
@@ -226,7 +226,31 @@ describe('loadModule (defect rejection)', () => {
       { ...VALID, acceptance: { zeroPaid: 'npm run test:module -- spatial-flywheel' } },
       'x\n'
     );
-    expect(() => loadModule('testmod', dir)).toThrow(/must name the module it accepts/);
+    expect(() => loadModule('testmod', dir)).toThrow(/must be the drill that accepts this module/);
+  });
+
+  // Equality closes two holes containment left open. Both are regressions
+  // against the substring rule this replaced, so both are pinned.
+  it('rejects a criterion naming a script that does not exist (containment let this pass)', () => {
+    const dir = writeModule(
+      { ...VALID, acceptance: { zeroPaid: 'npm run bogus -- testmod' } },
+      'x\n'
+    );
+    expect(() => readModuleManifest('testmod', dir)).toThrow(
+      /expected "npm run test:module -- testmod", got "npm run bogus -- testmod"/
+    );
+  });
+
+  it('rejects the old shared constant for a module literally named `test` (the substring hole)', () => {
+    // 'test' is a substring of 'test:modules', so containment accepted this —
+    // the one input on which the previous rule failed to discriminate at all.
+    const dir = writeModule(
+      { ...VALID, name: 'test', acceptance: { zeroPaid: 'npm run test:modules' } },
+      'x\n'
+    );
+    expect(() => readModuleManifest('test', dir)).toThrow(
+      /expected "npm run test:module -- test", got "npm run test:modules"/
+    );
   });
 
   it('rejects an empty zeroPaid string (the sub-schema bound still holds)', () => {

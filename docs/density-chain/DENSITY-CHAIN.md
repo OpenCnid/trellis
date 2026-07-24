@@ -451,9 +451,9 @@ authoring, and the two flywheels. Not the Merkle substrate it promotes into.*
 - **T4 — the frontier.** `reasoning-templates` sits **contested**: an 8,335-byte addendum, empty
   `research.sourceNodeIds`; non-active, so it never composes; the drill skips, not fails.
   `estimation-discipline` was **retired on its own pre-stated criterion**, its doctrine (*failure
-  classes close by tooling shape, not prompt modules*) is now AGENTS.md rule 8. Containment, not
-  equality: a module named `test` still passes the old constant; the Python reader
-  `trellis_modules.py` deliberately mirrors nothing. `TRELLIS_CITATION_ENTAIL` is prototyped, off;
+  classes close by tooling shape, not prompt modules*) is now AGENTS.md rule 8. Equality replaced
+  containment: both prior holes closed; the Python reader `trellis_modules.py` deliberately mirrors
+  nothing; addendum quality stays structurally unobservable. `TRELLIS_CITATION_ENTAIL` is prototyped, off;
   kernel edition 1 rejects tool-bearing modules. **No authored module composes by default.**
 - **T5 — future plans.** Open: per-claim citation mapping, deferred until a class needs it; v2
   embedding similarity, blocked because promotion policy `none` leaves blocks embedding-less — **0 of

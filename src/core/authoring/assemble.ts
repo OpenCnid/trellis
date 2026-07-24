@@ -1,5 +1,6 @@
 import {
   MODULE_ADDENDUM_MAX_BYTES_DEFAULT,
+  moduleAcceptanceCommand,
   type ModuleManifest,
 } from '../../config/modules.js';
 import type { DraftEnvelope } from '../observability/rlm_draft.js';
@@ -83,7 +84,7 @@ export function buildManifest(args: ManifestBuildArgs): ModuleManifest {
     addendum: AUTHORED_ADDENDUM_FILENAME,
     tools: [],
     bounds: { addendumMaxBytes },
-    acceptance: { zeroPaid: `npm run test:module -- ${args.moduleName}` },
+    acceptance: { zeroPaid: moduleAcceptanceCommand(args.moduleName) },
     status: 'active',
     kernelCompat: 1,
   };
