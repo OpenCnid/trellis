@@ -24,6 +24,7 @@ function manifestOf(overrides: Partial<ModuleManifest> = {}): ModuleManifest {
     addendum: 'addendum.txt',
     tools: [],
     bounds: { addendumMaxBytes: 8192 },
+    acceptance: { zeroPaid: 'npm run test:module -- research-mod' },
     status: 'active',
     kernelCompat: 1,
     ...overrides,

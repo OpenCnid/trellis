@@ -184,6 +184,11 @@ function writeModuleDir(
     addendum: 'addendum.txt',
     tools: [],
     bounds: { addendumMaxBytes: 1024 },
+    // Named per module because the schema refuses a criterion that does not
+    // contain its own module name — a criterion shared across modules
+    // discriminates nothing. Before `...overrides` so a case can still
+    // override it to exercise the refusal.
+    acceptance: { zeroPaid: `npm run test:module -- ${name}` },
     status: 'active',
     kernelCompat: 1,
     ...overrides,

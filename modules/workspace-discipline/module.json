@@ -43,7 +43,7 @@
     "addendumMaxBytes": 8192
   },
   "acceptance": {
-    "zeroPaid": "npm run test:modules"
+    "zeroPaid": "npm run test:module -- workspace-discipline"
   },
   "status": "active",
   "kernelCompat": 1

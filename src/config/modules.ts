@@ -63,11 +63,33 @@ const ModuleManifestSchema = z
           .default(MODULE_ADDENDUM_MAX_BYTES_DEFAULT),
       })
       .default({ addendumMaxBytes: MODULE_ADDENDUM_MAX_BYTES_DEFAULT }),
-    acceptance: z.object({ zeroPaid: z.string().min(1) }).optional(),
+    acceptance: z.object({ zeroPaid: z.string().min(1) }),
     status: z.enum(['active', 'contested', 'retired']),
     kernelCompat: z.literal(1),
   })
-  .strict();
+  .strict()
+  // A criterion every module shares discriminates nothing: all four modules on
+  // disk declared the same `npm run test:modules`, which pins the
+  // cross-language loader contract and would pass unchanged if a module's
+  // addendum were lorem ipsum. So the drill has to name the module it accepts.
+  // The check reads a sibling field (`name`), hence a whole-object refinement
+  // rather than a rule inside the `acceptance` sub-schema; it sits in the
+  // schema rather than the registration CLI because it must hold zero-paid
+  // with no databases, and readModuleManifest is the single seam every path —
+  // composition, authoring, registration, the per-module drill — goes through.
+  .superRefine((manifest, ctx) => {
+    const zeroPaid = manifest.acceptance?.zeroPaid;
+    if (typeof zeroPaid === 'string' && !zeroPaid.includes(manifest.name)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['acceptance', 'zeroPaid'],
+        message:
+          `acceptance.zeroPaid must name the module it accepts: expected a command containing ` +
+          `'${manifest.name}' (canonical: "npm run test:module -- ${manifest.name}"), got ` +
+          `${JSON.stringify(zeroPaid)}.`,
+      });
+    }
+  });
 
 export type ModuleManifest = z.infer<typeof ModuleManifestSchema>;
 
