@@ -13,7 +13,7 @@ row is the work.
 
 **How to read the status column.** `shipped` — built with a non-test caller. `built, unreachable` —
 built with no non-test caller, which is not delivered ([rule 15](../../AMBIENT.md)). `partial` —
-serves one case of a general capability. `absent` — nothing stands in for it.
+serves one case of a general capability. `absent` — nothing stands in for it. **`PLACEHOLDER`** — deferred by the owner and the collaborator pending a capability Trellis does not have (typically a model connection); the seam is roughed in so the shape exists, and the capability lands later.
 
 ---
 
@@ -56,7 +56,7 @@ is not a string.
 | 3.1 | **Response artifact object** | A durable, addressable, Trellis-side object a run composes and the orchestrator links. Not a rendering — the thing itself | **absent** |
 | 3.2 | **Artifact sink** | A by-reference write path: the model names parts, the engine assembles. Distinct from `answer.submit`, which renders one value | **absent** — `answer.submit(H)` is documented in two records and was never built |
 | 3.3 | **Output location** | A run-scoped place to create files. `TRELLIS_EDIT_ROOT` is an *edit* root and `load` refuses a non-existent file | **absent** |
-| 3.4 | **Non-text artifact types** | Spreadsheet, PDF with chart, slide deck, text with illustration | **absent** — no `openpyxl`/`matplotlib`/`reportlab`/`pptx`-class dependency exists |
+| 3.4 | **Non-text artifact types** | Spreadsheet, PDF with chart, slide deck, text with illustration | **absent, PLACEHOLDER** — no `openpyxl`/`matplotlib`/`reportlab`/`pptx`-class dependency exists. Rough in the seam; some types need model connections that do not exist yet |
 | 3.5 | **Artifact provenance** | Which slices composed which deliverable, resolvable to source bytes | **absent** — the system's own value proposition, unapplied to its output |
 | 3.6 | Artifact receipt | The submitted string names the artifact rather than restating it | partial — `submit` is the right shape for a receipt and is currently doing both jobs |
 | 3.7 | Repository as artifact | For code editing, the write is the deliverable | **partial** — `trellis_textedit` + `stage2_selfedit_check.ts` are a working loop; missing file *creation*, a link from run outcome to write, and any byte telling the worker the write was the point |
@@ -72,7 +72,7 @@ as a research intake.
 | 4.2 | Harness-guaranteed capture | Results captured to workspace segments; model sees a stub | shipped |
 | 4.3 | **MCP available to the orchestrator** | Rule 24 names MCP as the orchestrator's toolbox | **absent** — no MCP reference anywhere in `src/core/agent/`; it is injected into the RLM worker only |
 | 4.4 | **Action semantics** | A tool call that *does* something, with a result that carries standing | **wrong shape** — `EXTERNAL CONTENT CONTRACT (HARD RULE): MCP results are research context ONLY` |
-| 4.5 | **Non-text tool results** | Images and embedded resources the protocol already carries | **absent** — flattened to the literal string `[non-text content: <type>]` at the boundary |
+| 4.5 | **Non-text tool results** | Images and embedded resources the protocol already carries | **absent, PLACEHOLDER** — flattened to the literal string `[non-text content: <type>]` at the boundary. An image tool needs a model connection Trellis does not have; rough in the seam and defer the capability |
 | 4.6 | Action authorization | Which side effects need a human gate, and how that is asked | **absent** — the allowlist is the only control, and it is configuration, not consent |
 
 ## 5. Serves peers — A2A inbound
@@ -89,7 +89,19 @@ Peer agents query Trellis as a human would, without knowing its internals.
 
 ## 6. Forms beliefs and doubts
 
-The epistemic layer. Built, and gated on decisions rather than on code.
+The epistemic layer. **The gate everyone has been respecting is on a *removal*, and the thing that is
+wanted is an *addition* — those were conflated, which is why this has sat.**
+
+`STANDING_MODEL.md` was ratified July 20, 2026 and its status line says it "authorizes **no build**."
+Its §3 says exactly what the withheld authorization covers: if the panel never moves standing, the
+promotion machinery reduces to a findings recorder plus a user gate, and *"**that reduction removes
+shipped engine surface**"* — so deleting or rewriting shipped disposition code needs its own owner
+dated entry and drills. **The gate is on deleting code.**
+
+Surfacing `doubts` / `beliefs` / `facts` as REPL state spaces is not that. It is an addition, it is
+already designed — [DATA_MODEL §7](repl-sandbox/REPL_SANDBOX_DATA_MODEL.md) specifies three
+**pre-allocated root handles** at `setup`, `kind = graph-view`, sliced by the algebra and never
+materialised whole — and **no gate covers it.** It was never scheduled, not never approved.
 
 | # | feature | what it means | status |
 |---|---|---|---|
@@ -148,17 +160,29 @@ It exists so a security pass has a fixed surface to harden against.
 
 ## Open questions for the owner
 
-1. **Is the artifact a Trellis-side object with A2A as one rendering?** This list assumes yes (3.1
-   before 5.4). The alternative — the artifact *is* the A2A envelope — would make peer agents the
-   privileged consumer and the human UI the adapter, which seems backwards but is not absurd.
-2. **Does an artifact need a principal before it can exist**, or can a single-tenant artifact ship
-   first and gain ownership later? 1.6 is a large prerequisite to put in front of 3.1.
-3. **How much of §6 is in scope for the first artifact-capable release?** Beliefs and doubts are
-   ratified as principle with no build, and a deliverable that carries standing is a different object
-   from one that carries content.
-4. **Does `TEST_TIME_TRAINING` §12.2 stand?** It holds that large REPL dumps are the expected
-   workload, which rule 24's second sentence now contradicts. Dated owner correction; only the owner
-   retires it.
+**Answered by the collaborator, July 24, 2026.**
+
+1. **The artifact is a Trellis-side object; A2A is one rendering.** Confirmed. 3.1 precedes 5.4, and
+   the human UI and a peer agent are two views of one thing.
+2. **An artifact carries standing.** It is filed as a **fact, a belief, or a doubt**, depending on
+   its purpose and what it carries — so §3 and §6 are one subject, not two, and 3.5 rides the
+   provenance machinery that already exists rather than needing a new structure.
+   [DATA_MODEL §7](repl-sandbox/REPL_SANDBOX_DATA_MODEL.md) already designs the shape: `doubts`,
+   `beliefs` and `facts` as three **pre-allocated root handles** at `setup`, `kind = graph-view`,
+   sliced by the algebra and never materialised whole. *(My original question meant multi-tenant
+   owner identity — still open as 1.6, and a smaller question than it looked, since ownership is now
+   a property of a filed artifact rather than a prerequisite for having one.)*
+3. **`TEST_TIME_TRAINING` §12.2 needed no adjudication.** It was misread. §12 is a
+   literature-applicability analysis; §12.2 argues that LaCT's long-context results *do* transfer,
+   which is a claim about research relevance and not about desired behaviour. **TTT is the mechanism
+   for rule 24's second sentence** — the harness composes a prompt from internal primitives, the
+   composed prompt sets the mode, the model self-plays over REPL data, and **properly filtered
+   programmatic slicing is the rewarded behaviour**, scored by RLVCG (arXiv:2607.19044). It targets a
+   local open-weights model that does not exist yet (§7 R3; `TRELLIS_RLM_BACKEND` is root-agent only,
+   worker transport not configurable), which is why it reads as forward-looking rather than current.
+
+**Still open for the owner:** 1.6, whether a single-tenant artifact ships before multi-tenant
+identity exists.
 
 *Siblings: [AMBIENT.md rule 24](../../AMBIENT.md) (what is being built) ·
 [RESPONSE_ARTIFACT.md](../architecture/RESPONSE_ARTIFACT.md) (the doctrine and the audit) ·

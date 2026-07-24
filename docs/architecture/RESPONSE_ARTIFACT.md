@@ -106,12 +106,23 @@ this record makes.
 
 ### 3.3 Records that state the opposite
 
-- **[TEST_TIME_TRAINING.md](TEST_TIME_TRAINING.md) §12.2** holds that *"large REPL dumps ARE
-  long-context modeling in practice"*, re-reading the pillar as a rule against *retyping* only while
-  explicitly conceding reading, and concluding the effective-context thesis *"survives only in narrow
-  form."* It is a dated owner correction from July 13, 2026, and the July 24 doctrine post-dates it.
-  **This needs re-adjudication by the owner, not a silent edit** — it is load-bearing for that
-  record's argument that long-context results apply to Trellis directly.
+- **[TEST_TIME_TRAINING.md](TEST_TIME_TRAINING.md) §12.2 — LISTED HERE IN ERROR, withdrawn
+  2026-07-24.** It was read as doctrine holding that large REPL dumps are the intended workload. It
+  is not: §12 is a **literature-applicability** analysis, and §12.2 asks whether LaCT's long-context
+  results transfer to Trellis. The first draft argued they do *not*, because the RLM keeps the corpus
+  out of attention; the owner's correction overturned that — per-run token flow is genuine
+  long-context load, **so those results apply here directly**. That is an argument about whether a
+  research finding is relevant, not a statement of desired behaviour, and reading the second as the
+  first is the error.
+
+  **TTT is a mechanism for rule 24's second sentence, not a counterweight to it.** It targets an
+  open-weights model served locally (§7 R3), which does not exist yet — `TRELLIS_RLM_BACKEND` is
+  root-agent only and worker transport is explicitly not configurable. Its shape, from the
+  collaborator: the harness composes a prompt from internal primitives, the composed prompt **sets
+  the mode**, and the model self-plays over REPL data with **properly filtered programmatic slicing
+  as the rewarded behaviour**, scored by RLVCG (arXiv:2607.19044). Slice discipline is what TTT pays
+  for. Nothing here needs re-adjudication.
+
 - **[REASONING_TEMPLATES.md](REASONING_TEMPLATES.md) §17** gives all eight reasoning modes the same
   out-port, `answer`, and the locked port vocabulary offers no artifact type. `construction` — *"Build
   or modify a file artifact in the edit root"* — routes `write_back` as a mid-flow node and terminates
@@ -150,8 +161,8 @@ different ledger from the exfil residual, with the provenance of its parts intac
 - **No engine change.** Every item in §3 is a finding. The budget's metering, the missing corpus
   `locate`, `fetch_texts`, the iteration budget, and the module selection are each a separate change
   with its own gate.
-- **No re-adjudication of TEST_TIME_TRAINING §12.2.** That is a dated owner correction and only the
-  owner retires it.
+- **Nothing about TEST_TIME_TRAINING.** §12.2 was listed in §3.3 in error and is withdrawn there;
+  it needed no adjudication, because it never said what it was read as saying.
 
 **Reachability, stated rather than implied:** this record has no enforcing surface. Nothing refuses a
 wholesale print, no guard couples a decisive step to a bounded read, and the term "response artifact"
