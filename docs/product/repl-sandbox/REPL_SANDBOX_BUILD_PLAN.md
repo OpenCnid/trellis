@@ -797,6 +797,29 @@ identical.
 | `--in-process` | the microVM — `InProcessLauncher` substituted, with its `rpc_hook` dialing the real host listener so the crossing is forged as convincingly as possible | "the compared round-trips crossed the Kata boundary" | a boot identity (`/proc/sys/kernel/random/boot_id` plus `uname -r`) returned *through* `execute_code` and cross-read out-of-band from the same sandbox. `boot_id` supplies per-run freshness, so a replayed identity cannot satisfy it |
 | `--mutate-guest=<defect>` | one declared observable from the guest's reply, on the wire, KataREPL side only — swept over `drop-final-answer`, `blank-stderr`, `empty-locals`, `wrong-local-value`, `no-restore-scaffold`, `nonnumeric-execution-time`, `drop-context-binding`, `amnesia` | "the comparator can tell same from different at cell X" | the comparator, reddening at **exactly one** cell. Zero cells means X is vacuous; more than one means the cells are coupled. Both are failures of the arm |
 
+**The guest entry point is BUILT (`src/repl_sandbox/guest_main.py`), and has no non-test caller.**
+Half of the missing seam, and the half that does not need the host to author. It reads a
+launcher-placed payload, builds the RPC hook, binds the control port, constructs the supervisor,
+applies Tier-0, and serves — in that order, each position forced by something a later one would
+break. `KataLauncher.boot` is its only intended caller and still raises, so **nothing in a
+deployment path reaches this module today** (rule 15: correct and reachable are independent claims).
+26 checks in `tests/test_guest_main.py`; `pytest` 1,007 → 1,034.
+
+One choice inside it is worth naming because getting it wrong would have been invisible: **the
+listener is native `AF_VSOCK`, never `HybridVsockListener`.** §3.1a's correction moved the *host*
+side to an `AF_UNIX` socket at `<uds>_<port>`; the guest side is unchanged and still binds
+`AF_VSOCK` on `VMADDR_CID_ANY`, so **the guest keeps exactly what the host lost — a peer CID the
+kernel supplies at `accept()`**, which is why S3 observed `peer_cid = 2` from inside. Reaching for
+the hybrid class here would have handed `require_host_cid` a number this process chose itself,
+turning the one authentication the guest can genuinely perform into a self-assertion. It would have
+passed every functional test. `transport.VsockListener`'s docstring says it is "used host-side on
+`LM_PORT` and `DB_PORT`" — that describes its only caller before now, not what the class does, and a
+reader taking it as a type statement is exactly how the wrong class gets picked.
+
+The property that made this necessary is checked by **simulating the guest** rather than reading
+import lines: a subprocess blocks the `rlm` root outright and imports the module for real, because
+the transitive closure is what failed before and a line-scan cannot see it.
+
 **The boot procedure, transcribed from the probes that already perform it.** The launch path is not
 research — S2 through S5 boot real microVMs on the AX41 every run, and the whole of it is *one*
 `ctr` form plus discovery of what containerd's shim already built. The probes never invoke
