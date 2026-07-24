@@ -2,7 +2,7 @@
 
 **Status: orientation artifact, reverse-engineered 2026-07-21/22 at commit `2b937e8`.** PROPOSED /
 unratified. Subordinate to everything it summarizes: the authority order **code > glossary > prose**
-binds here with extra force, and [`AGENTS.md`](../../AGENTS.md) §1.5 (Authority ordering) refines it —
+binds here with extra force, and [`docs/ORIENTATION.md`](../ORIENTATION.md) (D4, the per-record standing index) refines it —
 ratified record → adopted doctrine → design record → orientation compression → skill, memory. This
 file sits at the *orientation compression* rung. If any sentence disagrees with
 [`docs/GLOSSARY.md`](../GLOSSARY.md), a design record, or code, the other source wins and this file
@@ -56,7 +56,7 @@ are at the end ([Provenance & method](#provenance--method)).
    `implemented, not accepted` ≠ `adopted / ratified-as-principle (no build)` ≠ `proposed /
    design-record` ≠ `recorded-research` ≠ `rolled back / retired`. Blurring them is the failure this
    house has paid for repeatedly.
-4. **Reachability is reported separately from correctness.** `AGENTS.md` hard rule 15 — *correct is
+4. **Reachability is reported separately from correctness.** `AMBIENT.md` rule 15 — *correct is
    not the same claim as reachable*. Each branch carries a **no non-test caller** list. Those are
    findings, not accusations.
 5. **Every number here is *as recorded*, never re-run** — with one dated carve-out. No sub-agent has
@@ -451,7 +451,7 @@ authoring, and the two flywheels. Not the Merkle substrate it promotes into.*
 - **T4 — the frontier.** `reasoning-templates` sits **contested**: an 8,335-byte addendum, empty
   `research.sourceNodeIds`; non-active, so it never composes; the drill skips, not fails.
   `estimation-discipline` was **retired on its own pre-stated criterion**, its doctrine (*failure
-  classes close by tooling shape, not prompt modules*) is now AGENTS.md rule 8. Equality replaced
+  classes close by tooling shape, not prompt modules*) is now `.claude/rules/measurement-and-reporting.md` rule 8. Equality replaced
   containment: both prior holes closed; the Python reader `trellis_modules.py` deliberately mirrors
   nothing; addendum quality stays structurally unobservable. `TRELLIS_CITATION_ENTAIL` is prototyped, off;
   kernel edition 1 rejects tool-bearing modules. **No authored module composes by default.**
@@ -488,7 +488,7 @@ beneath it.*
   keys on those modes. Defeat is a boolean — `contested`/`contestedReason`/`contestedAt`, spread across
   forty files. `judge_explain.ts` prints "doubt-dominant", but that is subjective-logic disbelief, not
   the tier. User gates ship as CLI `--confirm` flags on `promote_segment.ts` and `judge_ratify.ts` —
-  custody gates, not standing moves. Nine `.claude/skills/` and AGENTS.md rule 17 carry the composition
+  custody gates, not standing moves. Nine `.claude/skills/` and `.claude/rules/composed-evaluators.md` rule 17 carry the composition
   law.
 - **T3 — with receipts.** `e5e7844` (#138, 2026-07-20) ratified the standing model and the doubts
   workspace **as principle** — 179 and 575 lines, **zero `src/` changes**; `8926e12` (#137) adopted
@@ -704,8 +704,7 @@ the write path, or the discoverability program.*
   returning 429. `TRELLIS_A2A_ENABLED` mounts the agent card (pre-auth) and `/a2a/v1` JSON-RPC —
   SendMessage, SendStreamingMessage, GetTask, CancelTask-declined — over TTL-bounded Redis task records.
   Outbound, `trellis_mcp.py` dials operator-configured stdio and Streamable-HTTP servers, counting MCP
-  calls separately from provenance-bearing tool calls. Governance: the twenty-three hard rules (now in AMBIENT.md and .claude/rules/)
-  and §1.5, the session-governance ruling, the root contract and its checker.
+  calls separately from provenance-bearing tool calls. Governance: the twenty-three hard rules — five ambient in `AMBIENT.md`, the rest across nine task-type files in `.claude/rules/` — the trunk's authority ordering, the session-governance ruling, the root contract and its checker.
 - **T3 — with receipts.** `264b007` built A2A hand-rolled with Zod, "zero new dependencies", recording
   `npm test` 468/57 (baseline 419/53), `test:a2a` 46 checks, 9 Compose assertions. `a2119c0` plus
   `c3b4c39` (#36) built the MCP client on `mcp==1.12.4`, spec revision 2025-06-18, `test:rlm-mcp` 86
@@ -716,16 +715,16 @@ the write path, or the discoverability program.*
 - **T4 — the frontier.** **Green again**, and the durable lesson outlived the outage: `5e7295d`
   (#159) deleted `docs/density-chain/` while leaving two inbound links, which the
   ratified `broken_markdown_link` rule caught — but `AGENTS.md`'s row was stale in plain backticks,
-  which the checker would **not** have caught even then. That asymmetry is still live and just
-  recurred: `AGENTS.md` §2 (Navigation map) rows every top-level `src/` package except [[C12]]'s new
-  `src/repl_sandbox/`, and nothing detects an omission — the contract governs repository-root names,
-  never navigation completeness. The same shape one level up is [[C13]]'s record↔twin gap.
-  **`AGENTS.md` sat 11 bytes under its 32,768 cap, then held 2,238 free, and holds 1,677 now**: every
-  rule was reframed to state what to do rather than what to avoid, and one claim — where the objective
-  comes from — was returned from five substantive homes to one. The margin is no longer thin, and no
-  longer measured by hand: [[C13]]'s checker reports every governed document's headroom on every run
-  and ranks the heaviest sections of any that is close, so a governing document nearing its cap
-  surfaces before it refuses rather than at the refusal.
+  which the checker would **not** have caught even then. `11335e7` (#187) then restructured `AGENTS.md`
+  into a slim trunk — a directory tree plus a rules/skills/records index routing to `AMBIENT.md` and the
+  nine `.claude/rules/` leaves — whose tree now rows `src/repl_sandbox/`, closing the omission this
+  section once flagged. The **asymmetry survives the fix**: the contract governs repository-root names,
+  never navigation completeness, so nothing detects the *next* missing tree row — the same shape one
+  level up is [[C13]]'s record↔twin gap. **The byte margin is no longer thin:** the restructure moved
+  every rule out of `AGENTS.md`, which now sits at **7,659 bytes, 25,109 free** under its 32,768 cap,
+  and headroom is no longer measured by hand: [[C13]]'s checker reports every governed document's
+  headroom on every run and ranks the heaviest sections of any that is close, so a governing document
+  nearing its cap surfaces before it refuses rather than at the refusal.
   `normalizeRoute`'s known-route table omits two live routes,
   labelling both `unmatched`. The engineering-loop controller is preserved, explicitly not claimed
   adopted. `CancelTask` is permanently declined.
@@ -870,7 +869,7 @@ the first caller of the DB `postgres_backend_from_env` factory and the `broker_h
 `KataLauncher.boot` stays uncalled.
 *Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
 split, but the latter two are **stale against 2026-07-23** (both still read G1 as unsatisfied; neither
-mentions §3.1a), and `AGENTS.md` §2 still has no row for `src/repl_sandbox/`. The provisioned host is
+mentions §3.1a); `AGENTS.md`'s tree now rows `src/repl_sandbox/` since the #187 restructure, closing the gap this class flagged. The provisioned host is
 reached by the local alias `ssh trellis-kata` — **the address is deliberately absent from this public
 tree** (BUILD_PLAN §4.1) and the host holds no checkout, so a fact living only there is unrecorded.
 *Cross-links:* [[C1]] (replaces that substrate, preserving its contract), [[C5]] (the handle model is
@@ -889,7 +888,7 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   authored description drifts silently from behavior. Discoverability is then a property of each
   component, not a maintenance chore.
 - **T2 — current machinery.** The root contract is ratified; its
-  machine twin fixes **seventeen** permitted root files with byte caps, **ten** top-level directories,
+  machine twin fixes **eighteen** permitted root files with byte caps (`AMBIENT.md` joined in the #187 restructure), **ten** top-level directories,
   forbidden artifacts, deprecation markers, and one near-cap ratio. `tools/repository-surface/check.ts`
   enforces them plus Markdown links and environment-example coverage through **eleven issue codes held
   as a runtime list**, and every `npm run check:repo-surface` — a CI step — also prints governed byte
@@ -1153,8 +1152,8 @@ listed in the folder [`README.md`](README.md).
   timing and cost above is *as recorded* in a committed report or commit message. Treat them as of
   `2b937e8`.
 - **No current `npm test` total was recorded anywhere at HEAD.** Two independent branches searched and
-  found none; the highest recorded totals sit in the deprecated archived roadmap, which `AGENTS.md`
-  §1.5 forbids as a source of current state. So this session *observed* one rather than quoting one:
+  found none; the highest recorded totals sit in the deprecated archived roadmap, which `AMBIENT.md`
+  rule 1 and the trunk's authority ordering forbid as a source of current state. So this session *observed* one rather than quoting one:
   **`npm test` → 1,342 tests across 117 files, 2026-07-22**, on a clean `npm ci` at this commit.
   Fourteen of those are this map's own new pin, so the pre-existing baseline is **1,328 across 116**.
   Treat both as a dated observation of one machine, not as a pin.
@@ -1168,9 +1167,11 @@ listed in the folder [`README.md`](README.md).
   session then **ran it and confirmed exactly those two**, and confirmed that returning this file
   clears them (`check:repo-surface` → **PASS, 0 issues**). Its falsifier was observed too:
   `--negative-control` exits **3**, naming all four planted breaks.
-- **`AGENTS.md`'s navigation row for this folder says "11 subsystem-class branches."** There are now
-  thirteen; that row is stale and, being plain backticks rather than a link, the checker cannot catch
-  it.
+- **`AGENTS.md`'s stale "11 subsystem-class branches" row is gone.** The #187 restructure replaced the
+  counted navigation row with an index line stating no count (*to see the whole system, branch by
+  branch — `docs/density-chain/`*), so the drift this item recorded — there are thirteen branches — can
+  no longer accrue; the general gap it showed, a wrong figure in plain backticks escaping the checker,
+  stands.
 - **Two classes are unreachable from the repository's own navigation map** — the REPL sandbox
   (`docs/product/repl-sandbox/`) is referenced by no entrypoint document, and the self-describing
   records are orphans. Both are findings of the classes themselves.
