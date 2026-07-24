@@ -87,9 +87,22 @@ BYTES_PER_TOKEN_ESTIMATE = 4
 #: as though it protected the context would repeat, one layer over, the error that
 #: produced the correction.
 #:
-#: Raising this is the single lever for bulk transfer: a corpus arrives in
-#: `ceil(bytes / max_result_bytes)` round trips, so 2 MiB is ~500 calls per GB.
-#: `DEFAULT_MAX_FRAME_LEN` follows it and must be re-derived with it.
+#: **This is not a bulk-transfer bound, because there is no bulk transfer.** The
+#: worker does not move a corpus through itself; it answers questions *about* one
+#: by reading slices and composing a derived response artifact over several turns.
+#: `materialize` is the exception path — DATA_MODEL section 6, whose title is
+#: *The bounded materialisation exception*: *prefer by-reference sinks;
+#: `materialize` is only for when the model itself must compute over the bytes.*
+#: A gigabyte reaching an answer goes `answer.submit(H)`,
+#: resolved host-side and leaving by the audited egress, never through this
+#: constant and never through the guest namespace.
+#:
+#: So the number to size against is **one computation's working set**, not a
+#: corpus divided by anything. Arithmetic of the form "a corpus takes N calls at
+#: this size" is the tell that the model is being treated as the transport, which
+#: it never is (`docs/architecture/CODE_MEDIATED_TEXT.md` — the model never counts
+#: and never copies, so bulk movement is the engine's job).
+#: `DEFAULT_MAX_FRAME_LEN` follows this constant and must be re-derived with it.
 DEFAULT_MAX_RESULT_BYTES = 2 * 1024 * 1024
 
 #: Hard cap on the declared length of a single wire frame. **Derived from the

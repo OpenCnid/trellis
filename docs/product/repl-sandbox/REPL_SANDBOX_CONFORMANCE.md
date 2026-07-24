@@ -144,19 +144,38 @@ wrong layer, and it had two consequences:
 
 | what is bounded | question it answers | constant |
 |---|---|---|
-| REPL namespace | how large a corpus may the model work over? | `Tier0Limits.address_space_bytes` (1 GiB) |
-| one slice | how much moves host store → guest namespace per call? | `BrokerCaps.max_result_bytes` (2 MiB) |
+| the corpus | how large a body may the model reason over? | **nothing here** — it is host-side, behind handles |
+| the working set | how much may the model hold in the namespace at once? | `Tier0Limits.address_space_bytes` (1 GiB) |
+| one materialisation | how much crosses host store → guest namespace per call? | `BrokerCaps.max_result_bytes` (2 MiB) |
 | model attention | how much reaches the transcript? | `MarshalCaps` (20 KiB stdout, 64 KiB answer) |
 | one wire message | how large may a single frame be? | `DEFAULT_MAX_FRAME_LEN` (4 MiB) |
 
-**The REPL is meant to be large — potentially gigabytes — and read in slices.** No bound in this
-table constrains that; the ceiling on the corpus is address space. The token derivation survives as
+**The corpus is unbounded by anything in this table, because it never enters the guest.** An earlier
+edition of this row asked "how large a corpus may the model work over?" and answered with the guest's
+own `RLIMIT_AS` — which locates the corpus *inside* the namespace, the one place the handle model says
+it never is ([DATA_MODEL §8](REPL_SANDBOX_DATA_MODEL.md): *no row of the user's knowledge is ever
+placed in the guest as a payload*). It also contradicted its own next sentence, since "potentially
+gigabytes" does not fit in 1 GiB of address space. Address space bounds **what the model itself
+materialised and is computing over** — the working set — and nothing else. The token derivation
+survives as
 the way `max_result_bytes` is *chosen* — "about what one model pass could consider" — and is recorded
 as a **sizing convention, not an enforcing bound**, because treating it as enforcing is exactly the
 error above.
 
-**The cost, stated:** a 2 MiB slice means a corpus arrives in ~500 round trips per GB. If bulk
-transfer needs to be cheaper, `max_result_bytes` is the single lever and `max_frame_len` follows it.
+**What this bound is *not*, corrected 2026-07-24.** An earlier edition of this section costed it as
+"~500 round trips per GB", as though `max_result_bytes` were the throughput lever for moving a corpus
+into the worker. **There is no such operation.** The worker never works with gigabytes at a time — it
+answers questions *about* gigabyte contexts by reading slices and composing a derived **response
+artifact** over several turns, extracting no more than it needs. `materialize` is the exception path,
+which [DATA_MODEL §6](REPL_SANDBOX_DATA_MODEL.md) — titled *The bounded materialisation exception* — already states: *prefer by-reference sinks;
+`materialize` is only for when the model itself must compute over the bytes.* When bulk content must
+reach an answer it goes `answer.submit(H)` — resolved host-side, out through the audited egress,
+never through the guest namespace and so never through this bound at all.
+
+So `max_result_bytes` is sized against **one computation's working set**, and the arithmetic
+"a corpus takes N calls at this size" is a tell that the model is being treated as the transport. It
+never is: the model supplies addresses and the engine moves the bytes
+([CODE_MEDIATED_TEXT.md](../../architecture/CODE_MEDIATED_TEXT.md)).
 
 **The DoS property is independent of all of this and always held:** `frame.read_frame` compares the
 declared length against the bound *before* reading a body, so a frame declaring 4 GiB is refused for
