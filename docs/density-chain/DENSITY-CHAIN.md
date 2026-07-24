@@ -134,7 +134,7 @@ across for one subsystem's arc.
 | **C9 Mechinterp sidecar** | read and steer a served model's functional-affect state in the residual stream | *(nothing)* — one 288-line docs-only record | entirely prerequisite: hosted arm → local backend → sidecar, and step one is a proposal | instrument/actuator/mixture ladder M1–M4; percolative-Ising controller; the judge-actuation hazard, held outside the repo |
 | **C10 Benchmarks & evidence** | a capability claim is a hypothesis until a dated report retires it | OOLONG v1, update/poison/scale drills, effective-context rounds, citation A/B, wall-clock — all dated | anti-shortcut corpus v2 pinned zero-paid with **no paid run**; the uncommitted nine-refusal sandbox drill is **[R]**-only, outside CI | real TREC import; adversarial corpora; 10k sweeps; multi-run variance replacing n=1; consensus writes |
 | **C11 Serving & governance** | narrow, authenticated, admission-bounded doors; a written contract about which record wins | HTTP/SSE API, A2A server, outbound MCP client (byte-identical when off); AGENTS.md, session governance, the root contract | the surface checker is **green again** (`20e94ae` restored the density-chain links); `KNOWN_ROUTES` mislabels two routes | inbound MCP server surface with five open decisions; OAuth posture; the dual client+server role |
-| **C12 REPL sandbox** | treat model-authored Python as hostile and own the boundary between it and the operator's secrets | the host-independent control plane, merged with CI and npm callers; on one Hetzner AX41: **G1, S2, S3 `[R]`+`[A]`, S4 `[R]`+`[A]`** — a microVM boots, a frame crosses, a real model drives `llm_query` and composes the `run_query` facade against a real Postgres holding only a handle | **still not a sandbox and must not be read as one**: Tier-0 hardening (S5), the watchdog, NIC egress policy and a production launch path are all absent, `KataLauncher.boot` still raises, and the guest image carries no rlms so `GuestSupervisor` cannot run in it. Egress self-labels **weak**; the spend cap is between-calls, not intra-batch | S5, S6, GB, GA-eq, GA-rt; doubt-filter Layers 1–2; warm pool; `max_depth` 2; a paramstyle line in the `run_query` doc; the remaining **[A]** halves (S6, GB, GA-eq), ≤$5, unspent |
+| **C12 REPL sandbox** | treat model-authored Python as hostile and own the boundary between it and the operator's secrets | the host-independent control plane, merged with CI and npm callers; on one Hetzner AX41: **G1, S2, S3 `[R]`+`[A]`, S4 `[R]`+`[A]`, S5 `[R]`** — a microVM boots, a frame crosses, a real model drives `llm_query` and composes the `run_query` facade against a real Postgres holding only a handle, and Tier-0 now caps a fork bomb and denies a syscall and a write while both channels still cross | **still not a sandbox and must not be read as one**: the NIC egress policy and a production launch path are absent, `KataLauncher.boot` still raises, and the guest image carries no rlms so `GuestSupervisor` cannot run in it. Egress self-labels **weak**; the spend cap is between-calls, not intra-batch; the watchdog is unproven against real shim wedges | S6, GB, GA-eq, GA-rt; doubt-filter Layers 1–2; warm pool; `max_depth` 2; a paramstyle line in the `run_query` doc; the remaining **[A]** halves (S6, GB, GA-eq), ≤$5, unspent |
 | **C13 Self-describing surfaces** | the account a system gives of itself must be derived from whatever enforces its behavior | the root contract, its machine twin, and the deterministic surface checker in CI; the first shipped descriptor — `trellis_textedit`'s addendum composes, byte-identity pinned per arm | the record↔twin asymmetry is structural — the checker proves twin↔tree only; Phase 0 **falsified its own specification**; a newline-free bijection orphan is pinned in the guarded arm; `llm_help` stays **authorized and unbuilt** | `llm_help`; the surface registry and its coverage diagnostic; the remaining eight descriptors (no pin ceremony owed); a human-doc generator; the self-play discrimination gate |
 
 ---
@@ -757,9 +757,10 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   *listener*, never a frame; and deepest — the code may *address* data but never *hold* it (the handle
   data-flow rule). Language-level guards are telemetry, never a boundary. Status: a microVM boots,
   holds state, a real model answers a fan-out across the boundary, and a real database query now
-  crosses it holding a handle rather than a payload — but the hardening and the launch path are absent,
-  so this is still not a working sandbox and must not be read as one. Building the wire cost a lesson:
-  an enforcing surface is only as portable as the mechanism it names.
+  crosses it holding a handle rather than a payload, and Tier-0 now caps the worker from inside — but
+  the launch path is absent, so this is still not a working sandbox and must not be read as one.
+  Building it cost the same lesson **twice**: an enforcing surface is only as portable as the mechanism
+  it names — first the vsock peer CID, then in-guest cgroups.
 - **T2 — current machinery.** Execution still runs in-process on `rlms==0.1.3` LocalREPL holding live
   credential-bearing clients. Beside it, a host-independent control plane at `src/repl_sandbox/`
   (~22 modules against ~22 test files): the frame codec (a declared fuzz target); a transport carrying
@@ -815,9 +816,25 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   its own rendered signature invites — came back `denied: params must be a list, got NoneType`,
   affecting five of ten capabilities; fixed at `capabilities._stub_source`, the rule `guest_rpc`
   already applied on the LM port. **A "for the model" rendering that no model has consumed is
-  unexercised code, however green its tests.**
-- **T5 — future plans.** Immediate next is **S5** (Tier-0 in-guest hardening),
-  then **S6** — which now carries a prerequisite found by trying to use it:
+  unexercised code, however green its tests.** **S5 `[R]` PASSED** the same day (five consecutive
+  runs, zero flake) and repeated the program's central lesson on a *second* surface: the records named
+  **in-guest cgroups** for requirement 8, and the guest has no cgroupfs mounted, cannot mount one
+  (`EPERM`, no `CAP_SYS_ADMIN`), and the host-side cgroup Kata builds for the VM carries neither
+  `memory.max` nor `pids.max`. The property survives on a different mechanism — `setrlimit` after a
+  privilege drop, **the drop being load-bearing because root is exempt from `RLIMIT_NPROC`** — and the
+  correction is `ARCHITECTURE.md` **§2.1**, which the probe re-derives every run so the record's basis
+  stays executable. Observed: a fork bomb refused at **23 of 24** against **200 uncapped** in the
+  baseline arm; `unshare` `EPERM` with `Seccomp: 2` read back; a write `EACCES` while reads and the
+  in-namespace tools survived; **both listeners open at once** (witness `accepted=3`), closing a scope
+  limit S3 and S4 each carried; a `SIGSTOP`-frozen VM detected in 19.2 s and reaped. **Two** falsifier
+  arms, both exit 3, because S5 makes two kinds of claim — `--no-harden` removes the enforcement,
+  `--negative-control` removes the crossing. Recon before authoring is what produced the design; the
+  sharpest failure was a run that hardened *correctly* and could not prove it, because Landlock had not
+  granted `/proc` and the read-back of `/proc/self/status` was denied by the ruleset it was verifying.
+  The shipped filter is a **denylist** where the records said allowlist — recorded, because a true
+  allowlist for a CPython worker running arbitrary model code is not maintainable.
+- **T5 — future plans.** Immediate next is **S6** — which carries a prerequisite found by trying to
+  use it:
   `supervisor.GuestSupervisor` imports `rlm.environments.base_env` and **the guest image carries no
   rlms**, so S4 `[A]` bound the transport hook itself rather than fake that pin with a shim. The
   closure is now measured rather than feared — `rlm` + `attrs` + `python-dotenv` + `rich`, ≈3.9 MB,
@@ -831,7 +848,9 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   Free and scheduled: a **nested guest** as the virgin
   instance the provisioner's never-executed install branch is owed; a second *machine* stays
   **deferred**, re-opening on a kernel-specific finding (vsock the likeliest, the hybrid correction its
-  first evidence). Then **S5**, **S6** (`KataLauncher.boot` still raises), GB, GA-eq, GA-rt. Proposed:
+  first evidence, the cgroup correction its second). Then **S6** (`KataLauncher.boot` still raises),
+  GB — which inherits S5's residuals: the watchdog is unproven against a real shim wedge, and the
+  seccomp/allowlist divergence is recorded rather than resolved — GA-eq, GA-rt. Proposed:
   doubt-filter Layers 1–2. Open owner calls: `MAX_FRAME_LEN` (ships 2 MiB, unratified against
   `CONFORMANCE §2.3`'s 16 MiB), handle lifetime, the warm pool, depth-2. The remaining **[A]** halves
   (S6, GB, GA-eq) are ≤$5 and **unspent**; S3's and S4's are **banked**.
@@ -1022,7 +1041,7 @@ The **Drills and reports** column is prose and script *names*, never paths, and 
 | **C9** | `docs/architecture/RESIDUAL_STREAM_SIDECAR.md` | *(none)* |
 | **C10** | `src/benchmarks/**`, `src/core/runtime/drill_target*`, `data/**`, `docs/benchmarks/**`, `docs/product/{BENCHMARK_OOLONG,OOLONG_BENCHMARK_SPEC,VALIDATION_STRATEGY,PRD}.md`, `docs/product/PHASE_*.md`, `docs/operations/OOLONG_BENCHMARK_GUIDE.md` | `oolong:benchmark`, `drill:update`, `drill:poison`, `drill:scale`, `test:drill-gate` (+ `--negative-control`, healthy exit 3); `repl-sandbox:drill` — uncommitted, outside CI |
 | **C11** | `src/api/**`, `src/core/a2a/**`, `src/frontend/**`, `src/rlm/trellis_mcp*`, `src/config/mcp_servers*`, `.env.example`, `AGENTS.md`, `README.md`, `HANDOFF.md`, `.github/**`, `docs/architecture/{MCP_SERVER_SURFACE,SESSION_GOVERNANCE}.md`, `docs/reference/**`, `docs/operations/**` | `test:a2a`, `test:rlm-mcp`, `test:api-hardening` |
-| **C12** | `docs/product/repl-sandbox/**`, `src/repl_sandbox/**`, `scripts/repl_sandbox_*.py`, `scripts/provision_kata_host.sh`, `conftest.py`, `pytest.ini` | `test:repl-sandbox`, zero-paid; `repl-sandbox:{preflight,selftest,drill,provision,s2-probe,s3-probe}`; `fuzz_frame.py`, `repl_sandbox_drill.py`, both host probes and `provision_kata_host.sh` each carry a falsifier (`--negative-control`, healthy exit 3; or `--verify`, exit 1 naming what it would change); `test_rlms_conformance.py` (pinned source). **No CI job runs any of them**, and the host probes cannot — they need `/dev/kvm` |
+| **C12** | `docs/product/repl-sandbox/**`, `src/repl_sandbox/**`, `scripts/repl_sandbox_*.py`, `scripts/provision_kata_host.sh`, `conftest.py`, `pytest.ini` | `test:repl-sandbox`, zero-paid; `repl-sandbox:{preflight,selftest,drill,provision,s2-probe,s3-probe,s3-paid,s4-probe,s4-paid,s5-probe}`; `fuzz_frame.py`, `repl_sandbox_drill.py`, every host probe and `provision_kata_host.sh` each carry a falsifier (`--negative-control`, healthy exit 3 — S5 carries a second, `--no-harden`, because it makes two kinds of claim; or `--verify`, exit 1 naming what it would change); `test_rlms_conformance.py` (pinned source). **No CI job runs any of them**, and the host probes cannot — they need `/dev/kvm` |
 | **C13** | `tools/repository-surface/**`, `tools/density-chain/**`, `.claude/**`, `AGENTS.md`, `README.md`, `.github/**`, `docs/{ORIENTATION,README,GLOSSARY,COLLABORATOR_BRIEFING,RESEARCH_NOTES_COLLECTION}.md`, `docs/architecture/{REPOSITORY_ROOT_CONTRACT,SELF_DESCRIBING_SURFACES,LLM_HELP_SPEC,HARNESS_SELF_MODEL}.md`, `src/rlm/trellis_surfaces*`, `scripts/check_surface_coverage.py`, `scripts/test_surfaces.py` | `check:repo-surface` (+ `--negative-control`), `wiki:check --verify`, `check:surfaces`, `test:surfaces` (+ `--negative-control`) |
 
 Two branches may declare the same path — `AGENTS.md` is both a serving-and-governance surface (C11)

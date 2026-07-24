@@ -97,7 +97,7 @@ requirement set) then C = acceptance, plus one PROPOSED side-track (the doubt fi
 | **S2** | Boundary + persistence | A | S1, G1 | Scripted boot-once/keep-state/exec-many → the Kata microVM + `IsolatedEnv` | **[R]** | toward gate 3 |
 | **S3** | `llm_query` over vsock — **[R]+[A] PASSED 2026-07-23** (§5.3) | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
 | **S4** | DB broker minimal proof — **[R]+[A] PASSED 2026-07-23** (§5.4) | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
-| **S5** | Tier-0 in-guest hardening | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest cgroups+seccomp+Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
+| **S5** | Tier-0 in-guest hardening — **[R] PASSED 2026-07-23** (§5.5) | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest rlimits-after-privilege-drop + seccomp + Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
 | **S6** | Author the `IsolatedEnv` subclass | A | S1–S5 | Unedited load → `execute_code` round-trips as `LocalREPL` → the `KataREPL` backend | **[R+A]** | gate 3 |
 | **GB** | Security hardening to the 12 reqs | B | S3, S4, S5, S6 | Each of the 12 [ARCHITECTURE §7](REPL_SANDBOX_ARCHITECTURE.md) reqs mapped to an enforcing surface (§6) | **[R+A]** | gate 2 |
 | **GA-eq** | Equivalence acceptance | C | S6, GB | Scripted equivalence **and** a metered real-model equivalence run | **[R+A]** | gate 3 |
@@ -649,6 +649,56 @@ inner layer instead. This spike is re-cast to the ratified control; it is not a 
 - **Label: [R]** — scripted resource/syscall/filesystem probes.
 - **Dependencies:** blocks S6.
 
+**Observed — PASSED on the host 2026-07-23** (`npm run repl-sandbox:s5-probe`; five
+consecutive runs, exit 0, zero infrastructure flake). Built:
+`src/repl_sandbox/hardening.py`, `scripts/repl_sandbox_s5_probe.py`, and 44 off-host checks
+in `src/repl_sandbox/tests/test_s5_probe.py` (pytest 960 → 1004).
+
+**The spike's real finding is that its own ratified control did not exist on the ratified
+stack.** cgroups are not reachable from the worker; the property is held by `setrlimit`
+after a privilege drop. Authoritative: [ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md),
+which corrects §1, §4, §7 requirement 8, THREAT_MODEL G-2, and this section in one place.
+The probe re-derives the finding on every run, so the record's basis stays checkable
+instead of resting on one session's transcript.
+
+Observed in the passing run:
+
+| Claim | Observed |
+|---|---|
+| 1 — the unhardened baseline is dangerous (positive control) | forbidden write succeeded, `unshare` permitted, **200 processes forked uncapped** |
+| 2 — cgroups unavailable | `cgroupfs_mounted: false`, `/proc/self/cgroup` `0::/`, Landlock ABI 7, guest kernel 6.18.35 |
+| 3 — fork bomb capped | **refused at 23** of a 24 limit, as uid 65534 |
+| 4 — syscall denied | `EPERM`, with `Seccomp: 2` / `Seccomp_filters: 1` read back from `/proc/self/status` |
+| 5 — write denied, sandbox still usable | `EACCES`; reads and the in-namespace regex/stdlib tools still work |
+| 6 — **both channels survive, both listeners open at once** | witness `accepted=3` of 3 expected (1 LM + 2 DB); LM returned its completion, DB returned the fixture rows |
+| 7 — watchdog reaps a wedged VM | `alive_before=true` → `SIGSTOP` the VMM → `alive_after_freeze=false` in 19.2 s → reaped, no VMM survived |
+| 8 — clean teardown | no container, no VMM, no listener socket, no cgroup directory for this sandbox |
+
+**Claim 6 closes a scope limit S4 carried honestly.** S3 opened only the LM listener and S4
+only the DB one, so neither said anything about two at once; S5 runs both against one
+sandbox and one witness.
+
+**Both falsifier arms fire (exit 3).** `--no-harden` — with Tier-0 removed the enforcement
+claims fail, as they must; a pass there would mean the probe measures something that was
+already true. `--negative-control` — the guest answers itself with canned replies and every
+guest-visible claim still passes, caught only by the host witness. Two arms because S5 makes
+two kinds of claim, and one arm cannot falsify both.
+
+**Three defects the run found that reading did not.** (1) The guest program hard-coded its
+own directory while `GUEST_DIR` is S3's inherited `/run/s3`; it is now self-locating from
+`__file__`, so the two cannot drift. (2) Landlock was not granting `/proc`, so the worker
+could not read `/proc/self/status` — every control applied correctly and the probe reported
+`Seccomp: -1`, i.e. **a run that hardened properly and could not prove it.** (3) The LM text
+was read from the wrong field of `LMResponse`. All three were invisible to a green off-host
+suite.
+
+**Scope limits, carried:** the watchdog's unresponsive state is produced by `SIGSTOP` on the
+VMM, which is a faithful symptom and *not* the shim wedge this host throws about twice in
+thirteen runs — that one cannot be summoned on demand, so the reaper is unproven against
+shim states it has not met. The seccomp filter is a denylist and the records said allowlist
+(ARCHITECTURE §2.1). Host-side cgroup residue from earlier S3/S4 sessions is still present;
+S5 leaves none of its own and now checks.
+
 ### 5.6 S6 — Author the `IsolatedEnv` subclass
 
 - **Objective:** wrap S2–S5 behind the three-method contract as the real `KataREPL(IsolatedEnv)`
@@ -708,7 +758,7 @@ bound with no engine behind it does not count.
 | 5 Host-side CID-keyed hard ceilings | LM handler caps: concurrency, rate, dollar spend (hard-stop) | Scripted burst exceeds each cap → hard-stop (rlms caps proven bypassable) | **[A] banked 2026-07-23 (§5.3):** real fan-out `--cap-halt` → `cap_spend` refusal + `session_exhausted`. Residual for GB: cap is between-calls, not intra-batch/upstream-pre-emptive | GB |
 | 6 APOC allowlist + DB-host egress deny | Host broker APOC deny-by-default + DB-host has no route | Scripted `apoc.load.json` SSRF attempt denied; no metadata route | — | S4 + GB |
 | 7 `statement_timeout` + cost caps + no unbounded `[*]` | Host broker query governor | Scripted cartesian/`[*]` query is refused or timed out | — | S4 + GB |
-| 8 In-guest cgroups + host watchdog | cgroups (pids/mem/cpu) + watchdog | Scripted fork-bomb capped; wedged VM reaped | — | S5 |
+| 8 In-guest process/memory caps + host watchdog | rlimits after a privilege drop + watchdog ([ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md) — cgroups are unreachable from the worker) | **[R] met 2026-07-23 (§5.5):** fork bomb refused at 23 of a 24 limit as uid 65534, against 200 uncapped in the baseline arm; a `SIGSTOP`-frozen VM detected in 19.2 s and reaped with no VMM surviving | — | S5 |
 | 9 Least-privilege Postgres role | NOSUPERUSER, no `pg_read_server_files`/`pg_execute_server_program`/`dblink` | **[R] met 2026-07-23 (§5.4):** `COPY TO PROGRAM` and `pg_read_file` denied by the inspector, **and** a direct `INSERT` as the role refused by Postgres itself | — | S4 + GB |
 | 10 Security-review the vsock bridge | The vsock bridge (loopback-only, unprivileged) | Fuzzed frame parser survives; privilege-drop verified | — | GA-rt |
 | 11 Warm-pool reset policy *(contingency)* | Single-use VM or pre-exec-snapshot + rootfs-hash reset | Scripted reuse shows no state bleed *(only if pooling adopted)* | — | deferred (§10) |
