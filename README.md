@@ -4,9 +4,10 @@ Trellis is an agentic harness that lets a language model work over a corpus far
 larger than its context window, and keeps what the model works out. It is
 OpenCnid's **Recursive Language Model** runtime: the model reaches its data by
 writing code in a persistent Python REPL and calling itself over slices, instead
-of reading everything into context, where context rot sets in. In one
-twenty-query benchmark run, sub-LLM calls went from 5 on the first query to 0 on
-all 19 that followed — understanding derived once, then reused.
+of reading everything into context, where context rot sets in. On a twenty-query
+benchmark it scored F1 1.000 on every query, twice over in independent runs: the
+opening queries paid for classification, the rest answered from cached facts with
+no sub-LLM calls at all, for $0.81–$0.87 across the whole run.
 
 Kept is not the same as trusted. Source bytes are immutable content-addressed
 blocks; derived beliefs carry the exact block hashes they came from, so any
@@ -76,6 +77,7 @@ which the operator manual below installs.
 | orient at the shallowest depth that answers you | [`docs/ORIENTATION.md`](docs/ORIENTATION.md) — the whole system five times over, D0 one sentence through D4 the index |
 | settle what a load-bearing term means | [`docs/GLOSSARY.md`](docs/GLOSSARY.md) |
 | find the record that governs a topic | [`docs/README.md`](docs/README.md) |
+| check a measured claim, and read what it does not prove | [`docs/benchmarks/`](docs/benchmarks/) — dated reports, with [`CRITIQUE_AND_FUTURE.md`](docs/benchmarks/CRITIQUE_AND_FUTURE.md) as the honest ledger |
 | deploy, operate, or recover the stack | [`docs/operations/OPERATOR_MANUAL.md`](docs/operations/OPERATOR_MANUAL.md) and [`docs/operations/RUNBOOK.md`](docs/operations/RUNBOOK.md) |
 | call the HTTP and SSE surfaces | [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) |
 | contribute code | [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) |
