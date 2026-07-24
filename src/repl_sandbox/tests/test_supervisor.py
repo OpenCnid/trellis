@@ -11,17 +11,20 @@ result that is made of strings rather than filtered objects.
 from __future__ import annotations
 
 import json
+import pathlib
 import socket
 import threading
 
 import pytest
+from rlm.environments.base_env import RESERVED_TOOL_NAMES
+
+from repl_sandbox import supervisor as supervisor_module
 
 from repl_sandbox.config import VMADDR_CID_HOST, MarshalCaps, SandboxConfig
 from repl_sandbox.errors import AuthError, DeniedError
 from repl_sandbox.frame import encode_frame
 from repl_sandbox.supervisor import (
     DEFAULT_VALUE_REPR_BYTES,
-    RESERVED_NAMES,
     GuestSupervisor,
     marshal_value,
 )
@@ -30,11 +33,92 @@ from repl_sandbox.transport import LoopbackListener, serve_forever
 MAX_FRAME_LEN = 1 << 20
 JOIN_TIMEOUT_S = 5.0
 
+#: What the host passes in — read from the pinned package, because in this suite
+#: *this file plays the host's role*: it is what constructs the supervisor, so it
+#: reads the value the same way `kata_repl` does. Tests are excluded from the
+#: guest tarball and run host-side, where rlms is installed.
+#:
+#: An earlier draft wrote the eight names out as a literal here, reasoning that
+#: the suite exercises a guest module which no longer has rlms. That was the
+#: wrong side of the seam: it silently converted
+#: `test_reserved_names_are_the_pinned_rlms_set` below — a live pin in every
+#: revision before this one — into a literal compared to a literal, under a name
+#: still claiming it pinned the package. Worse, a set that moved upstream would
+#: have left all 25-odd tests routed through `make_supervisor` exercising the
+#: stale names, green.
+RESERVED_NAMES: frozenset[str] = RESERVED_TOOL_NAMES
+
 
 def make_supervisor(stub_source: str = "", **caps: int) -> GuestSupervisor:
     config = SandboxConfig(max_frame_len=MAX_FRAME_LEN)
     marshal_caps = MarshalCaps(**caps) if caps else None
-    return GuestSupervisor(config, stub_source=stub_source, marshal_caps=marshal_caps)
+    return GuestSupervisor(
+        config,
+        stub_source=stub_source,
+        marshal_caps=marshal_caps,
+        reserved_names=RESERVED_NAMES,
+    )
+
+
+def test_the_supervisor_refuses_to_construct_without_the_host_supplied_names() -> None:
+    """Option B's whole point: no default, so no guess.
+
+    A supervisor that fell back to a module-level constant when the host
+    forgot to supply one would be asserting the set on its own authority —
+    which is the shim S4 `[A]` refused, arrived at by omission instead of by
+    decision.
+    """
+    config = SandboxConfig(max_frame_len=MAX_FRAME_LEN)
+    with pytest.raises(TypeError):
+        GuestSupervisor(config)  # type: ignore[call-arg]
+    with pytest.raises(DeniedError):
+        GuestSupervisor(config, reserved_names={"answer"})  # type: ignore[arg-type]
+
+
+def test_an_empty_reserved_set_is_refused_because_it_pins_nothing() -> None:
+    """The one wrong *content* the guest can refuse without asserting authority.
+
+    An empty frozenset passes a type check and makes `_restore_scaffold` a no-op,
+    so model code keeps a name it rebound into the next turn — the property the
+    module leads with, gone with no error anywhere. Every other wrong set still
+    constructs, because validating further would mean the guest deciding what the
+    names are, which is the authority option B moves to the host.
+    """
+    config = SandboxConfig(max_frame_len=MAX_FRAME_LEN)
+    with pytest.raises(DeniedError, match="empty"):
+        GuestSupervisor(config, reserved_names=frozenset())
+
+
+def test_a_supervisor_repins_a_reserved_name_a_turn_rebound() -> None:
+    """The property the empty-set guard exists to protect, exercised directly.
+
+    Without this the guard is an argument about what would happen rather than an
+    observation of it.
+    """
+    supervisor = make_supervisor()
+    run(supervisor, "context = 'pwned'")
+    assert supervisor.namespace().get("context") != "pwned"
+
+
+def test_the_guest_module_no_longer_imports_rlms() -> None:
+    """The one import that made `GuestSupervisor` unconstructible in the guest.
+
+    Found by S4 `[A]` trying to use it: the guest image is stock
+    `python:3.12-slim` plus the shipped package and carries no rlms, so this
+    import raised `ModuleNotFoundError` before any op could arrive.
+
+    Matched after stripping indentation, so a deferred `from rlm ...` inside a
+    function is caught too: it raises the same `ModuleNotFoundError` at the same
+    construction site, just later. A column-0-only scan would have missed it.
+    """
+    source = pathlib.Path(supervisor_module.__file__).read_text(encoding="utf-8")
+    offending = [
+        line
+        for line in source.splitlines()
+        if line.lstrip().startswith(("import rlm", "from rlm"))
+        and not line.lstrip().startswith(("import rlm_", "from rlm_"))
+    ]
+    assert offending == []
 
 
 def run(supervisor: GuestSupervisor, code: str) -> dict:

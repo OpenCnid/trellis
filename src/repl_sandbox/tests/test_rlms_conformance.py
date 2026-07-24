@@ -49,8 +49,10 @@ from rlm.environments.base_env import (
     SupportsPersistence,
 )
 
+from repl_sandbox.capabilities import RESERVED_NAMES as CAPABILITY_RESERVED_NAMES
 from repl_sandbox.config import DEFAULT_MAX_FRAME_LEN
 from repl_sandbox.frame import encode_frame, read_frame_from_socket
+from repl_sandbox.kata_repl import RESERVED_NAMES as KATA_RESERVED_NAMES
 
 PINNED_RLMS_VERSION = "0.1.3"
 
@@ -214,6 +216,26 @@ def test_reserved_tool_names_are_the_eight_recorded_names() -> None:
     )
     assert isinstance(RESERVED_TOOL_NAMES, frozenset)
     assert len(RESERVED_TOOL_NAMES) == 8
+
+
+def test_every_in_repo_copy_of_the_reserved_names_tracks_the_pinned_package() -> None:
+    """The two copies are host-side authority and guest-side validation.
+
+    `kata_repl.RESERVED_NAMES` is the pinned value itself, read here and carried
+    inward to a guest that has no rlms (BUILD_PLAN section 5.6, option B).
+    `capabilities.RESERVED_NAMES` is a second, hand-typed copy that must ship
+    into the guest, because capability *registration* is validated there and
+    refusing a name needs the names.
+
+    Before S6 nothing tied the second copy to the package at all: both were
+    compared against their own hand-written literals, so a set that moved
+    upstream would have reddened this file while `capabilities.py` drifted
+    silently. This is the assertion that makes "the conformance test fails
+    first" true of every copy rather than of one.
+    """
+    assert CAPABILITY_RESERVED_NAMES == RESERVED_TOOL_NAMES
+    assert KATA_RESERVED_NAMES == RESERVED_TOOL_NAMES
+    assert KATA_RESERVED_NAMES is RESERVED_TOOL_NAMES
 
 
 # ---------------------------------------------------------------------------

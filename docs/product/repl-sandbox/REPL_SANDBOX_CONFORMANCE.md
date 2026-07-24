@@ -203,6 +203,102 @@ Listed, not fixed — the records are unedited per the S1 scope.
   bytes. No model ran, no VM booted; the parity test uses a real local socket pair, which is a
   genuine socket but not the vsock seam.
 
+## 6. The S6 equivalence target — stated before the run
+
+[BUILD_PLAN §5.6 (S6)](REPL_SANDBOX_BUILD_PLAN.md) sets the `[R]` gate as "an unedited load →
+`execute_code` round-trips with the same observable `REPLResult` shape as `LocalREPL`". That is a
+comparison, not yet a threshold. This section fixes the threshold **before the harness exists**,
+because a target chosen after the numbers are in is a description of the run
+(`.claude/rules/measurement-and-reporting.md` rule 20 — the target comes first).
+
+This comparison sits inside rule 20's carve-out: both arms are shipped artifacts carrying their own
+spec, which is functional equivalence, not a new-versus-null baseline.
+
+### 6.1 The predicate
+
+Construct `LocalREPL()` and `KataREPL()` with no LM handler and no custom tools, run the same block
+sequence against each, and compare **field by field** — never with `==`, and never `%r`-logged
+(§3 item 1). Fields, and the claim admissible on each:
+
+| field | claim | why not more |
+|---|---|---|
+| `stdout` | byte-equal on every block | the model reads it; nothing about the seam should change it |
+| `stderr` | equal after normalising to the final non-empty line | `LocalREPL` emits no traceback (`local_repl.py:571`); the guest emits a full one (`supervisor.py:322`). Byte equality would promote a *deficiency* of the baseline into the spec, and bake host paths and line numbers into an assertion |
+| `locals` | key sets equal **after** removing reserved names and load artifacts | `LocalREPL` returns live objects (`local_repl.py:579`); the guest returns reprs, which [§2.2](#22-replresultlocals-marshalling--closed-reprs-at-to_dict-time-only) ratifies. Values cannot be compared across a JSON-only seam without undoing the boundary |
+| `final_answer` | equal, with `content` assigned **before** `ready` | the two capture at different moments; see 6.2 item 5 |
+| `rlm_calls` | `== []` on both, in a no-LM run only | the guest hard-codes `[]` (`supervisor.py:336`) because the LM channel is host-side and CID-keyed |
+| `execution_time` | numeric and positive on both | two clocks on two machines, measuring spans with different start points. Equality would redden every honest run and train a reader to ignore reds |
+| `llm_calls` | **not a claim in either direction** | never assigned by any backend; touching it raises |
+
+### 6.2 Clauses predicted FALSE today
+
+A target that everything already satisfies measures nothing. These are read from source and, where
+marked *observed*, run against the pinned install on the Windows dev box — **eight of the twelve**,
+the rest being guest-side and reachable only from the Kata host. Each is a real divergence S6 must
+either close or record as a ratified difference — **the list is the spike's expected yield, not a
+defect log against it.**
+
+Read them in one direction only: an *observed* clause states what `LocalREPL` does, which is the
+baseline half of the comparison. The guest half of every clause stays unobserved until the launch
+path exists, so no clause here claims to have seen `KataREPL` diverge — each says what it will be
+compared against, and why byte equality is or is not the admissible claim.
+
+1. **A raising block persists no bindings in `LocalREPL`** — *observed*: after `x = 1; raise
+   ValueError`, `'x' in dir()` is `False`, because the namespace copy-back sits inside the `try`
+   (`local_repl.py:561`). The guest execs straight into `self._ns`, so `x` survives. **Rebinding
+   atomicity is a semantic difference a model would feel.**
+2. **`stderr` shape** — *observed*: `LocalREPL` returns exactly `'\nValueError: boom'`, leading
+   newline included, no traceback.
+3. **`locals` key sets diverge in both directions on the same turn** — *observed*: after
+   `load_context({...})` a `LocalREPL` turn returns keys
+   `['answer', 'context', 'context_0', 'f', 'json', …]`, and with a string payload
+   `['answer', 'context', 'context_0', 'f', …]`. `f` is a *closed* file handle and `json` a live
+   module — both artifacts of implementing context loading by executing generated code
+   (`local_repl.py:419-436`). The guest skips reserved and scaffold names, so `answer` and `context`
+   are absent there. Neither side is a superset of the other, which is why the claim is key sets
+   **after** removing reserved names and load artifacts, and never a raw key-set equality.
+4. **`answer` starts at a different value** — *observed*: `LocalREPL` binds
+   `{'content': '', 'ready': False}`, the shape rlms' own system prompt documents
+   (`utils/prompts.py:135`). The guest binds `{}` (`supervisor.py:235`), so `answer['ready']` raises
+   `KeyError` on a read the prompt invites.
+5. **`final_answer` captures at different moments** — *observed*: `LocalREPL` snapshots `content` the
+   instant `ready` flips truthy (`local_repl.py:43`), so setting `ready` **before** `content` yields
+   `final_answer == ''` while the reverse order yields the content. The guest reads the namespace
+   after the block and would return the content either way. This is why the predicate fixes the
+   assignment order rather than asserting on it: matching the baseline under the adversarial order
+   would mean reproducing a callback-timing artifact.
+6. **`SHOW_VARS` and `rlm_query` do not exist in the guest** — *observed present* in `LocalREPL` as a
+   bound method. The registry refuses them by name (`capabilities.py:529`) and `_restore_scaffold`
+   removes any reserved name it has no pin for. `rlm_query`'s absence follows from ratified
+   `max_depth` 1; **`SHOW_VARS` is not covered by that decision** and the rlms system prompt
+   advertises it unconditionally.
+7. **`llm_query` returns a dict in the guest, a string in `LocalREPL`** (`local_repl.py:278` vs
+   `guest_rpc.py:365`), and fails by raising rather than by returning an `"Error: …"` string.
+8. **The `history` alias is never bound** — `SupportsPersistence` requires it and the backend records
+   `backend.history_alias_unbound` instead (`kata_repl.py:543`).
+9. **`_SAFE_BUILTINS` makes some equivalence unreachable** — *observed*: `eval('1+1')` raises
+   `TypeError: 'NoneType' object is not callable` under `LocalREPL`, which nulls `eval`/`exec`/
+   `compile`; the guest runs with full builtins. The block set must stay inside `_SAFE_BUILTINS`, and
+   that is a **declared scope limit on the PASS line**, not an unstated one.
+10. **The driver never calls `setup()`** — `LocalREPL` self-calls it in `__init__`
+    (`local_repl.py:194`); `KataREPL` does not, so the first `execute_code` meets `_require_live()`.
+11. **A prompt over 256 KiB trips the inbound cap** (`config.py:133`) — which is the normal case for
+    the workload RLM exists to serve. `LocalREPL.add_context` has no cap.
+12. **`compaction=True` silently does nothing** — *observed*: `LocalREPL` carries
+    `append_compaction_entry`; `KataREPL` does not. The driver gates every compaction step on
+    `hasattr(environment, "append_compaction_entry")` (five references in `rlm.py`), so a
+    compaction-configured run degrades to no compaction with no error and no log line, while the
+    system prompt still tells the model its history is in `history` — which is also unbound (item 8).
+
+### 6.3 The self-comparison trap
+
+`repr()` on a `REPLResult` raises (§3 item 1), and so does `==` **between two distinct results** —
+*observed*: `AttributeError: 'REPLResult' object has no attribute 'llm_calls'`. But CPython 3.13's
+generated dataclass `__eq__` carries an `if self is other: return True` fast path, so `result ==
+result` returns `True` without touching a field. **A sanity check written as `assert result ==
+result` therefore passes and proves nothing**, while the comparison a harness actually performs
+raises. Compare field by field.
+
 ---
 
 *Pinned by: `src/repl_sandbox/tests/test_rlms_conformance.py`. Siblings:

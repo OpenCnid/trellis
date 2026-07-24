@@ -28,6 +28,7 @@ from repl_sandbox.capabilities import (
     BROKER_ENVELOPE_VERSION,
     PORT_NAMES,
     PRE_REGISTERED,
+    RESERVED_NAMES as CAPABILITY_RESERVED_NAMES,
     TRANSPORT_HOOK,
     CapabilityDescriptor,
     CapabilityRegistry,
@@ -594,6 +595,7 @@ def supervisor_with(rpc: GuestRpc | None, registry: CapabilityRegistry) -> Guest
         SandboxConfig(max_frame_len=MAX_FRAME_LEN),
         stub_source=registry.materialise(GUEST_CID),
         rpc_hook=rpc,
+        reserved_names=CAPABILITY_RESERVED_NAMES,
     )
 
 

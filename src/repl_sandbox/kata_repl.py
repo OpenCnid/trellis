@@ -44,7 +44,7 @@ import uuid
 from typing import Any
 
 from rlm.core.types import REPLResult, RLMChatCompletion
-from rlm.environments.base_env import IsolatedEnv
+from rlm.environments.base_env import RESERVED_TOOL_NAMES, IsolatedEnv
 
 from repl_sandbox.audit import AuditLog
 from repl_sandbox.capabilities import PRE_REGISTERED, CapabilityRegistry
@@ -80,6 +80,14 @@ ALLOWED_HANDLER_HOSTS: frozenset[str] = frozenset(
 #: Module-private name the delivered scaffold snippets import `json` under. The
 #: leading underscore keeps it out of the marshalled `locals` the model reads.
 _JSON_ALIAS = "_trellis_json"
+
+#: The rlms reserved namespace names, read here from the pinned package and
+#: carried inward to the guest supervisor, which has no rlms to read them from
+#: (BUILD_PLAN section 5.6, option B — settled by S6). This is the host-side
+#: authority: the value is the installed package's own, so
+#: `tests/test_rlms_conformance.py` still fails first if the set moves, and no
+#: guest-side module asserts the eight strings on its own authority.
+RESERVED_NAMES: frozenset[str] = RESERVED_TOOL_NAMES
 
 
 def is_handle(value: object) -> bool:
@@ -198,7 +206,17 @@ class KataREPL(IsolatedEnv):
         #: The launcher default is the real one. A caller who forgets to pass a
         #: launcher gets a Kata boot attempt that refuses on a host without KVM
         #: — never the in-process test double, which no default reaches.
-        self.launcher = launcher if launcher is not None else KataLauncher(self.config)
+        #:
+        #: This class is where the reserved names are read, because it is the
+        #: one module that already depends on rlms for the contract it
+        #: implements. The launcher carries the value inward to the supervisor;
+        #: a caller supplying their own launcher constructs it with the value
+        #: themselves (BUILD_PLAN section 5.6, option B).
+        self.launcher = (
+            launcher
+            if launcher is not None
+            else KataLauncher(self.config, reserved_names=RESERVED_NAMES)
+        )
         #: The grant table for this session. A registry the trusted driver
         #: supplies decides what the guest may reach; denial is the absence of a
         #: registration, so an empty one is a session with only the two

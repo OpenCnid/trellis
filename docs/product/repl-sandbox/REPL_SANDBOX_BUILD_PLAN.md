@@ -732,6 +732,161 @@ value. The distinction is which side holds the authority, not whether the consta
 The one thing S6 should settle with the control port in hand rather than now: whether the names ride
 on `setup()` or on every `execute_code`. That depends on the op set S6 defines, which is why this is
 recorded as S6's decision instead of pre-empted here.
+
+**SETTLED 2026-07-24 — option B taken, and it rides with the scaffold rather than over the control
+port.** The sub-question above turned out to have a forced answer, and the forcing is worth more than
+the choice. The reserved names are consumed in `GuestSupervisor.__init__`, which builds `self._pins`
+and calls `_restore_scaffold()` before returning. The four control ops — `ping`, `load_context`,
+`exec`, `shutdown` — can only arrive at a supervisor that already exists. **So the control port
+cannot carry the names in time:** a value delivered on the first `exec` would find the pins already
+built, empty. What actually constructs the supervisor is `install_scaffold`, the launcher's
+out-of-band channel (`launcher.py`, `GuestHandle`), which is already the thing that carries
+construction-time material and has the same ordering constraint. The names travel with it.
+
+This is the third instance of one shape: **the record named a mechanism that cannot carry the
+property, and the property is preserved on a different surface** — after S3's peer CID (a claim about
+native vsock, carried as a claim about virtualisation) and S5's cgroups (a claim about containers on
+a host kernel, same). The phrase "delivered over the control port" above is the artifact; option B
+itself stands unchanged, because option B was never about the channel. It was about which side holds
+the authority.
+
+What landed:
+
+- `supervisor.py` no longer imports rlms at all — the one guest-side `rlm`-rooted import in the whole
+  transitive closure of the modules the guest loads. `reserved_names` is a **required keyword-only
+  argument with no default**: a default would have been this module asserting the set on its own
+  authority, which is the shim S4 `[A]` refused, reached by omission instead of by decision.
+  **What that guard does and does not deliver, stated exactly, because the first draft of this line
+  overclaimed and a review caught it:** it refuses *absence*, a wrong container type, and the empty
+  set. It does **not** refuse a wrong-content frozenset, and it cannot — checking the contents would
+  mean the guest deciding what the names are, which is the authority option B moves to the host. The
+  empty set earns its own refusal because it is the one wrong content nameable without that
+  authority: it pins nothing, so `_restore_scaffold` becomes a no-op and model code keeps a name it
+  rebound into the next turn, with no error anywhere.
+- `kata_repl.py` is the host-side authority read, because it is the one module already depending on
+  rlms for the contract it implements. `InProcessLauncher` defaults to the pinned value via a
+  function-local import — correct *there* and wrong in the supervisor, because that double runs in
+  the host interpreter where rlms is installed.
+- **A latent drift closed, found while tracing this.** `capabilities.py` carries a second,
+  hand-typed copy of the eight names, and it legitimately must ship into the guest, because
+  capability *registration* is validated guest-side and refusing a name needs the names. Nothing tied
+  that copy to the pinned package: both copies were compared against their own hand-written literals,
+  so a set that moved upstream would have reddened `test_rlms_conformance.py` while `capabilities.py`
+  drifted silently. `test_every_in_repo_copy_of_the_reserved_names_tracks_the_pinned_package` now
+  makes "the conformance test fails first" true of every copy rather than of one.
+- Each of the three new checks was **watched failing against planted breakage** before being trusted
+  (rule 19(c)): a drifted name in `capabilities.py`, the guest-side rlms import restored, and a
+  default given to `reserved_names`. `pytest` 1,004 → 1,007.
+
+**The equivalence target is fixed in [CONFORMANCE §6](REPL_SANDBOX_CONFORMANCE.md), before the
+harness exists**, with twelve clauses predicted FALSE today — the spike's expected yield, not a
+defect log against it.
+
+**S6's remaining half, and why it is not a probe-authoring job.** `KataLauncher.boot` raises
+`NotImplementedError` after the G1 gate passes: guest-image mint, Cloud Hypervisor launch with an
+assigned CID, and supervisor readiness are unbuilt, and the package has no guest entry point — the
+only `GuestSupervisor` construction is inside `InProcessGuest`, a host-side double that provides no
+isolation. S2 proved the `ctr run --runtime io.containerd.kata.v2` path boots a stateful guest, but a
+spike driving `ctr` by hand is not that launch path. Until it exists, an S6 PASS would be a claim
+about `KataREPL` and not yet about `KataLauncher`, and the equivalence harness has nothing to point
+at but the double. **That is the next build, and it is the one place where a harness would otherwise
+reach for `InProcessLauncher` and quietly measure the host talking to itself** — which is exactly
+what the `--in-process` arm below exists to catch.
+
+**Falsifier arms, designed against how a PASS could lie.** Two, because S6 makes two structurally
+different kinds of claim, and the equivalence comparator is a *sameness* detector that can never be
+its own falsifier's detector — the better the boundary works, the more it wants both sides to look
+identical.
+
+| flag | removes | claim it falsifies | detected solely by |
+|---|---|---|---|
+| `--in-process` | the microVM — `InProcessLauncher` substituted, with its `rpc_hook` dialing the real host listener so the crossing is forged as convincingly as possible | "the compared round-trips crossed the Kata boundary" | a boot identity (`/proc/sys/kernel/random/boot_id` plus `uname -r`) returned *through* `execute_code` and cross-read out-of-band from the same sandbox. `boot_id` supplies per-run freshness, so a replayed identity cannot satisfy it |
+| `--mutate-guest=<defect>` | one declared observable from the guest's reply, on the wire, KataREPL side only — swept over `drop-final-answer`, `blank-stderr`, `empty-locals`, `wrong-local-value`, `no-restore-scaffold`, `nonnumeric-execution-time`, `drop-context-binding`, `amnesia` | "the comparator can tell same from different at cell X" | the comparator, reddening at **exactly one** cell. Zero cells means X is vacuous; more than one means the cells are coupled. Both are failures of the arm |
+
+**The guest entry point is BUILT (`src/repl_sandbox/guest_main.py`), and has no non-test caller.**
+Half of the missing seam, and the half that does not need the host to author. It reads a
+launcher-placed payload, builds the RPC hook, binds the control port, constructs the supervisor,
+applies Tier-0, and serves — in that order, each position forced by something a later one would
+break. `KataLauncher.boot` is its only intended caller and still raises, so **nothing in a
+deployment path reaches this module today** (rule 15: correct and reachable are independent claims).
+26 checks in `tests/test_guest_main.py`; `pytest` 1,007 → 1,034.
+
+One choice inside it is worth naming because getting it wrong would have been invisible: **the
+listener is native `AF_VSOCK`, never `HybridVsockListener`.** §3.1a's correction moved the *host*
+side to an `AF_UNIX` socket at `<uds>_<port>`; the guest side is unchanged and still binds
+`AF_VSOCK` on `VMADDR_CID_ANY`, so **the guest keeps exactly what the host lost — a peer CID the
+kernel supplies at `accept()`**, which is why S3 observed `peer_cid = 2` from inside. Reaching for
+the hybrid class here would have handed `require_host_cid` a number this process chose itself,
+turning the one authentication the guest can genuinely perform into a self-assertion. It would have
+passed every functional test. `transport.VsockListener`'s docstring says it is "used host-side on
+`LM_PORT` and `DB_PORT`" — that describes its only caller before now, not what the class does, and a
+reader taking it as a type statement is exactly how the wrong class gets picked.
+
+The property that made this necessary is checked by **simulating the guest** rather than reading
+import lines: a subprocess blocks the `rlm` root outright and imports the module for real, because
+the transitive closure is what failed before and a line-scan cannot see it.
+
+**The boot procedure, transcribed from the probes that already perform it.** The launch path is not
+research — S2 through S5 boot real microVMs on the AX41 every run, and the whole of it is *one*
+`ctr` form plus discovery of what containerd's shim already built. The probes never invoke
+`cloud-hypervisor` directly and never call `kata-runtime` except for `--version`.
+
+```
+ctr run -d --runtime io.containerd.kata.v2 <image> <name> sleep infinity
+ctr task exec --exec-id <id> [-d] <name> sh -c <script>
+ctr task kill -s SIGKILL -a <name>   ·   ctr task delete -f <name>   ·   ctr container delete <name>
+```
+
+Ordered: mint a sandbox name (it is simultaneously the container name, the `pgrep` filter, the
+`/run/vc/vm/<id>` directory and the shim-kill pattern) → `ctr run -d` → **discover** the vsock UDS by
+parsing the VMM's own argv for a `/run/**/vm/**` token and taking the one non-`api` socket in its
+dirname → bind the host end at `<uds>_<port>` *before* any guest code runs → ship the package →
+start the guest listener → dial `<uds>` with `CONNECT <port>\n` and read the `OK <port>\n` ack **one
+byte at a time**, because the ack and the first frame share a stream and a buffered read swallows the
+frame's length prefix.
+
+Two details are load-bearing and easy to lose. `ctr run -d` returning is **not** a boot — the probes
+record the elapsed time separately to keep that distinction visible, and readiness is the first
+`ctr task exec` that returns. And the UDS path is *discovered rather than assumed*, because a probe
+that hard-codes it "would report 'no bridge' when what it means is 'no socket where I looked'".
+
+**What a shipping launcher needs that no probe performs** — this is the actual S6 build, and it is
+short because the boot itself is solved:
+
+1. **A guest whose entrypoint is the supervisor.** Probes run `sleep infinity` and drive each turn
+   with a fresh `ctr task exec`; a launcher's guest must come up already listening on the control
+   port. No probe constructs a `GuestSupervisor` in a guest at all.
+2. **The scaffold before any untrusted worker.** The supervisor takes it at construction and no
+   control op installs one, so materialising capabilities is something the *launcher* does to the
+   guest — which is also the channel the reserved names now ride (settled above).
+3. **Real readiness polling.** Every probe uses a fixed sleep (1.0 s, 1.5 s, 2.0 s). A launcher needs
+   a bounded retry against the `CONNECT` handshake, which already raises usefully when nothing is
+   listening.
+4. **Refusing a shim that returned 0 without creating a VM.** The probes check the exit code and then
+   *assert* a boundary; a launcher must turn "no `cloud-hypervisor` process carries this id" into a
+   refusal.
+5. **Per-session identity.** `GUEST_CID = 3` is a module constant in every probe, which is sound for
+   one sandbox on an idle host and not for a launcher keying ledgers, rate buckets and `SessionTable`.
+6. **Image pull, and a `ctr` namespace.** Probes assume the provisioner already pulled the digest, and
+   none passes `-n`, so everything lands in containerd's `default` namespace — which is why leaked
+   cgroups appear at `/sys/fs/cgroup/default/kata_<id>`. **Observed on the host 2026-07-24: four such
+   directories survive from earlier runs.** No probe removes them; S5 only counts them.
+7. **Egress.** `provision_kata_host.sh` states plainly that the guest has no interfaces as a
+   `ctr`-without-CNI *default*, explicitly **not** as an enforced control. Requirement 6 is GB's, and
+   a launcher that claimed containment on today's behaviour would be claiming an accident.
+
+Rejected, with reasons worth keeping: a canned-reply `--negative-control` in the S3/S5 sense is
+**strictly dominated here** — it is caught by the witness *and* by the comparator the moment any
+block leaves the canned set, which is S4 `[R]`'s "starts with select" leak in a new costume;
+`--in-process` is the better forgery on the same claim precisely because it runs the real
+`GuestSupervisor` and so answers arbitrary blocks correctly. `--no-context` fires nothing, because it
+removes an input from *both* arms and the table stays green — repaired into
+`--mutate-guest=drop-context-binding`, which removes the binding on one side only and therefore has
+something to disagree with. `--no-harden` can only ever report DID NOT FIRE, since Tier-0 changes no
+observable the table reads. One construction constraint follows from the first arm: the probe must
+**not** gate on `launcher.preflight()`, because `InProcessLauncher.preflight()` never returns ok and
+would catch the arm before the provenance signal could — giving it a second detector and making it
+noisy.
 - **Exit acceptance → enforcing surface:**
   - **[R]** a scripted equivalence harness: an unedited load → `execute_code` round-trips with the same
     observable `REPLResult` shape as `LocalREPL`. Enforcing surface: the **`KataREPL` backend + the rlms
