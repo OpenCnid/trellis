@@ -12,7 +12,7 @@ import {
   serializeModuleSelection,
 } from './modules.js';
 
-// Single source of truth for runtime configuration (AGENTS.md hard rule 9).
+// Single source of truth for runtime configuration (.claude/rules/boundaries.md hard rule 9).
 // The environment is read exactly
 // once here, validated, and consumed everywhere else through the
 // exported `config` object. Defaults match the docker-compose.yml

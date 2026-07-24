@@ -156,7 +156,7 @@ it works* — the discovery surface is validated in a clean room before anything
 relies on it, using the [`self-play`](../../.claude/skills/self-play/SKILL.md)
 skill. **Framed correctly (its own rule):** self-play tests *uncertain,
 stake-corruptible* outcomes, **never** "does `llm_help` help vs nothing" (that
-outcome is entailed by what a good spec is — AGENTS.md rule 20). The uncertain
+outcome is entailed by what a good spec is — `.claude/rules/measurement-and-reporting.md` rule 20). The uncertain
 outcomes worth a clean room here are two:
 
 - **Discrimination.** Given a task and an alive catalog, does an agent select the

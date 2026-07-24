@@ -149,7 +149,7 @@ Then:
    drifts with the week belongs in observed evidence, not in a map.
 
 Prompt bytes for those agents are authored under `prompt-engineering` and `hypershot-protocol` first —
-[`AGENTS.md`](../../AGENTS.md) hard rule 16, no exceptions, checked before the bytes are written.
+[`prompt-authoring.md`](../../.claude/rules/prompt-authoring.md) hard rule 16, no exceptions, checked before the bytes are written.
 
 ## Open items (raised by review, not yet closed)
 

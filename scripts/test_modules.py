@@ -113,7 +113,7 @@ def expect_raises(name, fn, needle=""):
 #     so instruction-shaped data is ruled on by the engine rather than by
 #     the model's reading. trellis_upsum joins the TOOLS manifest as
 #     item 5. Authored under the prompt-engineering + hypershot-protocol
-#     skills (Guardrail 15). Rationale: AGENTS.md rule 8 — tooling shape
+#     skills (Guardrail 15). Rationale: .claude/rules/measurement-and-reporting.md rule 8 — tooling shape
 #     closes a failure class, prompt text only reinforces; both of these
 #     were reinforcement with nothing behind it.
 COMPOSED_SYSTEM_PROMPT_SHA256 = "ee5bfca69a8da64c3ba78e4e6d02c9c81ac921274166e871648786c0ff241200"

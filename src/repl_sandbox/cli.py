@@ -17,7 +17,7 @@ Nothing here constructs a real database client, a real provider client, or reads
 an API key. `selftest` runs entirely against in-process doubles and spends no
 money.
 
-House rule (AGENTS.md section 4, rule 15): a passing suite says the code is
+House rule (AMBIENT.md rule 15): a passing suite says the code is
 right, never that anything can invoke it. This module is the invoker for
 `repl_sandbox.host`, `repl_sandbox.launcher`, and `repl_sandbox.config`; the
 drill at `scripts/repl_sandbox_drill.py` is the invoker for the refusals.

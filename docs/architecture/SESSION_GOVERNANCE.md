@@ -21,7 +21,7 @@ the first place*, which is the adjacent failure and has its own home:
 [`CODE_MEDIATED_TEXT.md`](CODE_MEDIATED_TEXT.md) §2.9 (a derivation
 never discharges an obligation to its source on a load-bearing act),
 with the internal authority ordering at `AGENTS.md` §1.5 and the
-operational rule at `AGENTS.md` 18. The two compose: §1.5 tells you
+operational rule at `AMBIENT.md` 18. The two compose: §1.5 tells you
 which record governs, §2.9 tells you to go read it rather than recall
 it.
 

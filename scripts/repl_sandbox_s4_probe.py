@@ -6,7 +6,7 @@ proves that S3 could not: a *real Postgres query completes from inside the guest
 with zero credential material ever in the guest*, through the host-side DB broker,
 over a **second** vsock port (`config.ports.db`, 5002) - reusing the exact
 hybrid-vsock bridge S3 stood up on `config.ports.lm` (5001). Entrypoint:
-`npm run repl-sandbox:s4-probe` (the non-test caller, AGENTS.md section 4 rule 15).
+`npm run repl-sandbox:s4-probe` (the non-test caller, AMBIENT.md rule 15).
 
 **This script only runs on the provisioned Linux host**, as root. It shells out to
 `ctr`, reads `/dev/kvm`, binds a Unix socket in the VMM's per-sandbox directory,
@@ -32,7 +32,7 @@ which are secret-free by construction - and the host greps that dump for the rea
 DSN and password. The secret is never sent into the guest to look for it. A
 planted **canary** is the grep's positive control: a fake secret the guest *is*
 given, which the same grep must find, so a grep that silently matches nothing
-cannot pass the real claim by being broken (AGENTS.md section 4 rule 19(c)).
+cannot pass the real claim by being broken (.claude/rules/measurement-and-reporting.md rule 19(c)).
 
 **Write denial is proven at both layers, and the docs are explicit about which is
 primary.** The primary control is the Postgres role: a `NOSUPERUSER` role whose

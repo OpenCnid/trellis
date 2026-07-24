@@ -19,7 +19,7 @@ Modes:
                       the drill DETECTS it. Healthy behaviour is detection:
                       exit 3 with all nine named. Exit 1 (absorbed) means the
                       drill cannot fail and therefore proves nothing
-                      (AGENTS.md section 4 rule 19(c)).
+                      (.claude/rules/measurement-and-reporting.md rule 19(c)).
   --verbose           print each refusal's message as well as its code
 
 **What this drill is not.** It exercises the host-side control plane. The

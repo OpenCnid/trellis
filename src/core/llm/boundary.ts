@@ -3,16 +3,17 @@ import { z } from 'zod';
 // Guideline 2 (Schema Invariant): raw LLM completions are untrusted input.
 // zodResponseFormat constrains the *request*, but nothing about the
 // transport guarantees the *response* parses — truncated completions,
-// refusals, and schema drift all reach the worker as strings. Every worker
-// that consumes a completion must cross this boundary instead of calling
-// JSON.parse directly.
+// refusals, and schema drift all reach the caller as strings. Every
+// consumer of a completion must cross this boundary instead of calling
+// JSON.parse directly — BullMQ workers (`src/workers/`) and the graph and
+// agent decision paths (`src/core/graph/`, `src/core/agent/`) alike.
 //
-// Failures throw LlmResponseError. Workers let it propagate so BullMQ's
-// retry flow re-dispatches the job: completions are sampled, so a fresh
-// attempt usually yields a parsable payload. The error carries the failure
-// stage and a bounded snippet of the raw payload so a permanently failing
-// job is diagnosable from its final failure log (Guideline 1: no silent
-// data loss).
+// Failures throw LlmResponseError. Worker callers let it propagate so
+// BullMQ's retry flow re-dispatches the job: completions are sampled, so a
+// fresh attempt usually yields a parsable payload. The error carries the
+// failure stage and a bounded snippet of the raw payload so a permanently
+// failing call is diagnosable from its final failure log (Guideline 1: no
+// silent data loss).
 
 export type LlmResponseFailureStage = 'empty' | 'json' | 'schema';
 

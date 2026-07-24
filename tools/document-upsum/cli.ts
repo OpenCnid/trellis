@@ -1,4 +1,4 @@
-// Document UPSUM entrypoint — the non-test caller (AGENTS.md rule 15).
+// Document UPSUM entrypoint — the non-test caller (AMBIENT.md rule 15).
 //
 //   npm run upsum -- <path> [--budget N]
 //   npm run upsum -- --negative-control

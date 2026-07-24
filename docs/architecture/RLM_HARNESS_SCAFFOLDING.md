@@ -256,7 +256,7 @@ The mechanism is unchanged from §3: persistent REPL locals, printed at decisive
 (M. Murphy), owner-approved the same day.** This section records a
 posture correction, not a new capability: two disciplines this record
 already specified were landed as *prompt text with nothing behind them*,
-and AGENTS.md rule 8 says tooling shape closes a failure class while
+and `.claude/rules/measurement-and-reporting.md` rule 8 says tooling shape closes a failure class while
 prompt text only reinforces. They are now surfaces.
 
 ### 8.1 What was wrong

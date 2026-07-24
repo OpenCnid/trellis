@@ -97,7 +97,7 @@ TASK_DOC_KEY_PREFIX_DEFAULT = "repo:trellis:"
 # the July 19, 2026 harness-invariants pass (collaborator direction, owner-approved): the budget was an
 # ADVISORY int and the check lived only in prompt prose — the model was
 # asked to compute len(str(upsum)) and self-correct. That is precisely
-# the posture AGENTS.md rule 8 forbids (tooling shape closes a failure
+# the posture .claude/rules/measurement-and-reporting.md rule 8 forbids (tooling shape closes a failure
 # class; prompt text only reinforces), and it sat in a bounds table
 # whose every other entry RAISES. The measurement is now engine-side and
 # the over-budget state is refused by `trellis_upsum` below; the

@@ -156,7 +156,7 @@ before building anything judge-shaped.
   addendum and RESEARCH_MAP §4.10 (**the externality principle**, the
   program's unifying frame: Trellis as an engineering practice of
   external J-spaces — typed, execution-parallel summary streams).
-- **The prompt-protocol mandate is enforced at root.** `AGENTS.md` rule 16
+- **The prompt-protocol mandate is enforced at root.** `.claude/rules/prompt-authoring.md` rule 16
   requires the Prompt-Engineering and Hypershot protocols before authoring any
   prompt-like artifact; the project skill distillations live under
   `.claude/skills/`. The source curriculum remains uncommitted (Lexideck
@@ -212,7 +212,7 @@ before building anything judge-shaped.
 
 1. **DDD**: documents lead; no implementation without a separately
    authorized bounded feature naming its non-test entrypoint
-   (`AGENTS.md` rule 15).
+   (`AMBIENT.md` rule 15).
 2. **Zero-paid first**, always; paid runs are owner-gated with printed
    estimates (repo rule; the program's costs are bounded by existing
    telemetry — entailment sweep $0.0093/25 pairs, est-suite ~$2.40/50
@@ -229,7 +229,7 @@ before building anything judge-shaped.
    coverage-derived → primary-verified happened once already; the
    upgrade pattern is in the S8 row and R-20/R-21 history).
 7. The sister-lab session's commits carried an AI-attribution trailer
-   convention conflicting with `AGENTS.md` rule 10; the conflict was
+   convention conflicting with `.claude/rules/commit-and-pr.md` rule 10; the conflict was
    disclosed and the owner resolved it at merge review (July 16, 2026)
    by squash merge — the trailers never reach `master`, and rule 10
    stands unchanged for all future program work.

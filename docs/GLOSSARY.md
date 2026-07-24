@@ -267,7 +267,7 @@ context: [docs/architecture/WORKSPACE_AND_MODULES.md](architecture/WORKSPACE_AND
   loss; the resulting work passes every check because the checks derive
   from the same misreading. Canonical record:
   [`docs/architecture/CODE_MEDIATED_TEXT.md`](architecture/CODE_MEDIATED_TEXT.md) §2.9; operational rule
-  [`AGENTS.md`](../AGENTS.md) 18; authority ordering [`AGENTS.md`](../AGENTS.md) §1.5.
+  [`AMBIENT.md`](../AMBIENT.md) 18; authority ordering [`AGENTS.md`](../AGENTS.md) §1.5.
 - **Composition ceremony** — the per-candidate sequence that judges one
   promotion: ratify the candidate, characterize the REPL's fact and
   belief spaces, compose each seat and its anchors for that pool, run

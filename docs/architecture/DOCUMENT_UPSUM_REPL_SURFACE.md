@@ -6,7 +6,7 @@ document-UPSUM "in depth and great detail so that it can be
 reproduced." This record specifies; it authorizes no build. Two gates
 stand above it: `RLM_HARNESS_SCAFFOLDING.md` header (*"Further
 increments owner-gated per run"*) and, for any paid probe,
-`AGENTS.md` rule 7.
+`.claude/rules/spend-and-live-infrastructure.md` rule 7.
 
 **Relationship to the record that owns the family.** The CLI form landed
 July 22, 2026 and is recorded at `RLM_HARNESS_SCAFFOLDING.md` §8.6 (The
@@ -19,7 +19,7 @@ which §8.6 and `tools/document-upsum/upsum.ts` already settle (`code >
 prose`). Retrieve those there.
 
 **Authored under** `prompt-engineering` and `hypershot-protocol`
-(Guardrail 15, `AGENTS.md` rule 16), because §7 below contains proposed
+(Guardrail 15, `.claude/rules/prompt-authoring.md` rule 16), because §7 below contains proposed
 addendum bytes.
 
 ---
@@ -254,14 +254,14 @@ authorized; this is what the work would be.
    `_count_tool_call` (`:951`). This is what keeps the surface out of
    the provenance path.
 9. **A `--negative-control`, and a decision about where it lives.**
-   `AGENTS.md` rule 19(c) requires one; healthy exit is **3**, absorbed
+   `.claude/rules/measurement-and-reporting.md` rule 19(c) requires one; healthy exit is **3**, absorbed
    is 1. **No Python drill in this repository ships one today** — the
    convention exists only in four `scripts/test_*.ts` drills and two
    `tools/*/cli.ts` entrypoints. So this surface either establishes the
    Python precedent or carries its control on the TypeScript side of the
    battery. That choice belongs in this record, and it is left **open**
    for the owner (§10).
-10. **Name the non-test caller** (`AGENTS.md` rule 15). For a REPL
+10. **Name the non-test caller** (`AMBIENT.md` rule 15). For a REPL
     surface the caller is the injection expression in
     `trellis_agent.py`'s `custom_tools`, pinned by step 8 — not an npm
     script. State it plainly rather than implying an entrypoint exists.
@@ -284,7 +284,7 @@ authorized; this is what the work would be.
   non-empty `tools` list (`trellis_modules.py:104`,
   `src/config/modules.ts:55`). A REPL surface is a kernel change.
 - **Never be validated by a with/without baseline.** Barred by
-  `AGENTS.md` rule 20 and `HARNESS_SELF_MODEL.md` §11. Zero-paid
+  `.claude/rules/measurement-and-reporting.md` rule 20 and `HARNESS_SELF_MODEL.md` §11. Zero-paid
   reachability and parity are permitted; a paid adoption probe is
   separately gated under rule 7.
 

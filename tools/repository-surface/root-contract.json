@@ -6,6 +6,7 @@
     { "path": ".gitattributes", "class": "tool", "maxBytes": 4096 },
     { "path": ".gitignore", "class": "tool", "maxBytes": 4096 },
     { "path": "AGENTS.md", "class": "agent", "maxBytes": 32768 },
+    { "path": "AMBIENT.md", "class": "agent", "maxBytes": 8192 },
     { "path": "conftest.py", "class": "tool", "maxBytes": 4096 },
     { "path": "docker-compose.yml", "class": "tool", "maxBytes": 16384 },
     { "path": "Dockerfile", "class": "tool", "maxBytes": 8192 },

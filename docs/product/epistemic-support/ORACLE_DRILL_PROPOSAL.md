@@ -210,7 +210,7 @@ green; exit nonzero with named findings otherwise.
 | Fixtures | `fixtures/support_oracle/` |
 | **Non-test entrypoint** | **package script `test:support-oracle`** in `package.json`, invoking the drill script — the same reachability pattern as the existing `test:promotion` / `test:textedit` drills |
 
-Per `AGENTS.md` §4 rule 15 the module's *production* (non-drill)
+Per `AMBIENT.md` rule 15 the module's *production* (non-drill)
 reachability is deliberately out of scope here and is named as the
 boundary in §16: `support.ts` gains its production caller only when a
 `support_sweep` job name lands on the shared verification queue as its
