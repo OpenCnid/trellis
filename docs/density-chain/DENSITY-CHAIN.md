@@ -174,15 +174,17 @@ planner above it. Not what the injected tools reach into, only that they arrive 
   20,000-char block cap. Bounds `AGENT_MAX_TASKS_PER_GOAL` 8, `…ITERATIONS_PER_GOAL` 4,
   `TASK_WAIT_TTL_MS` 30 min.
 - **T4 — the frontier.** `rlms` LocalREPL still runs model-authored Python in-process with live Neo4j
-  and Postgres credentials in-namespace; the boundary stays [[C12]]'s and nothing here has moved off
-  it. A sibling in `src/core/runtime/` now decides *which* database a destructive operator script may
-  touch ([[C10]] owns it), and the contrast is the finding: **the REPL path has no equivalent** — an
-  `execute_code` reaching `trellis_neo4j` asserts nothing about its target. A pinned read of
-  `rlms==0.1.3` names a live substrate defect: `REPLResult` annotates `llm_calls` but assigns
-  `rlm_calls`, so its generated `repr()` and `==` **raise** on every `execute_code` return.
+  and Postgres credentials in-namespace; the boundary stays [[C12]]'s, unmoved. A sibling in
+  `src/core/runtime/` decides *which* database a destructive operator script may
+  touch ([[C10]]'s); the contrast is the finding — **the REPL path has no equivalent**, an
+  `execute_code` reaching `trellis_neo4j` asserting nothing about its target. A pinned
+  `rlms==0.1.3` defect stands: `REPLResult` annotates `llm_calls` but assigns
+  `rlm_calls`, so `repr()` and `==` **raise** on every `execute_code` return.
   `parseTelemetryLine`'s nine-field allowlist **drops every counter added since Session 20**.
   `verify()` informs, never gates. S2b `compaction=True` was measured and **never enabled**.
-  `citable()` has **no non-test caller**.
+  `citable()` has **no non-test caller**; §8.6's document transposition of UPSUM had none either
+  until the repository-surface checker became one, while the REPL form that would measure a *staged*
+  frame stays proposed — the CLI reads disk, never the frame in flight.
 - **T5 — future plans.** Proposed and open: replacing this substrate — the ladder, gates and exfil
   doubt-filter are [[C12]]'s. Descriptors — Workstream B AUTHORIZED 2026-07-23, the first shipped
   byte-identical on [[C5]]'s toolkit, so this seam consumed it byte-unchanged. The **surface
@@ -717,10 +719,13 @@ the write path, or the discoverability program.*
   recurred: `AGENTS.md` §2 (Navigation map) rows every top-level `src/` package except [[C12]]'s new
   `src/repl_sandbox/`, and nothing detects an omission — the contract governs repository-root names,
   never navigation completeness. The same shape one level up is [[C13]]'s record↔twin gap.
-  **`AGENTS.md` sat 11 bytes under its 32,768 cap and now holds 2,238 free**: every rule was reframed
-  to state what to do rather than what to avoid, and one claim — where the objective comes from — was
-  returned from five substantive homes to one. The cap stays platform-dependent at the margin, with
-  the margin no longer thin. `normalizeRoute`'s known-route table omits two live routes,
+  **`AGENTS.md` sat 11 bytes under its 32,768 cap, then held 2,238 free, and holds 1,677 now**: every
+  rule was reframed to state what to do rather than what to avoid, and one claim — where the objective
+  comes from — was returned from five substantive homes to one. The margin is no longer thin, and no
+  longer measured by hand: [[C13]]'s checker reports every governed document's headroom on every run
+  and ranks the heaviest sections of any that is close, so a governing document nearing its cap
+  surfaces before it refuses rather than at the refusal.
+  `normalizeRoute`'s known-route table omits two live routes,
   labelling both `unmatched`. The engineering-loop controller is preserved, explicitly not claimed
   adopted. `CancelTask` is permanently declined.
 - **T5 — future plans.** PROPOSED, unsequenced: an inbound MCP server surface letting external hosts
@@ -865,8 +870,10 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   component, not a maintenance chore.
 - **T2 — current machinery.** The root contract is ratified; its
   machine twin fixes **seventeen** permitted root files with byte caps, **ten** top-level directories,
-  forbidden artifacts, and deprecation markers. `tools/repository-surface/check.ts` enforces them plus
-  Markdown links and environment-example coverage; `cli.ts` runs `npm run check:repo-surface` in CI.
+  forbidden artifacts, deprecation markers, and one near-cap ratio. `tools/repository-surface/check.ts`
+  enforces them plus Markdown links and environment-example coverage through **eleven issue codes held
+  as a runtime list**, and every `npm run check:repo-surface` — a CI step — also prints governed byte
+  headroom tightest-first, calling `tools/document-upsum`'s section ranking for anything near its cap.
   The runtime half ships: `trellis_surfaces.py` holds the **registry** — `register_surface` bound at
   each surface's own definition site, validating a key and no field set — and `check:surfaces`
   reports which injected surfaces carry descriptors, deriving the roster by AST from the
@@ -874,16 +881,21 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   toolkit's addendum, mode-selected by the refusing `_guarded_only` bool. `llm_help` stays
   specified, authorized, unbuilt.
 - **T3 — with receipts.** `72ac673` (#156, 2026-07-21) landed the contract, its twin, and the checker —
-  **ten issue codes**; `conftest.py` and `pytest.ini` were admitted 2026-07-22 as class `tool`, twin
-  **and** record together with a dated amendment. `794aab2` (2026-07-23) ratified
+  **ten issue codes**; `conftest.py`/`pytest.ini` were admitted 2026-07-22 as class `tool`, twin
+  **and** record together. `794aab2` (2026-07-23) ratified
   `SELF_DESCRIBING_SURFACES.md` and authorized **Workstream B only** of the self-model;
   `f82cf51` (#177, same day) executed increment 1: **byte-identity held on both arms**
-  (3,066/3,067 chars), one pin per arm, each seen to fail once on a planted one-byte perturbation
-  (rule 19(c)). Increments 2–3 followed: the registry and diagnostic — first run **1 of 9 injected
-  surfaces described** — the hand-authored constants **retired**, and the guarded arm's pin moved
-  wittingly (`27cc00b2…2835` → `c673f0a0…f124`) to close the orphan while the default arm's sha
-  held. `test:surfaces --negative-control` detects **7/7**. Both composed-prompt shas unmoved
-  throughout. Checker **PASS (0 issues)**; `AGENTS.md` at **31,034 bytes against its 32,768 cap**.
+  (3,066/3,067 chars), one pin per arm, each seen to fail on a planted one-byte perturbation
+  (19(c)). Increments 2–3: registry and diagnostic — **1 of 9 described** — constants **retired**,
+  the guarded arm's pin moved wittingly (`27cc00b2…2835` → `c673f0a0…f124`) to close the orphan,
+  the default arm's sha held. `test:surfaces --negative-control` detects **7/7**; both
+  composed-prompt shas unmoved throughout. The repository control then went **four planted codes to
+  eleven** — three of the seven unplanted could not have fired at all, their contract arrays being
+  empty — each break now asserted **by path**, the code list itself runtime data so a twelfth cannot
+  land unplanted, and the whole seen to fail three ways, including the deprecation-marker branch
+  reduced to an existence check with the fixture untouched. First headroom run: `docs/README.md`
+  **45 bytes** under its 20,480 cap, `docs/ORIENTATION.md` **352** under 32,768. Checker
+  **PASS (0 issues)**.
 - **T4 — the frontier.** **The honest scope of "derived" is recorded:** phrase text is still
   hand-authored once per guard class and pinned; what the engine derives is the selection (the
   refusing bool), single-encoding ownership, and now the injected-name roster — nothing generates
@@ -913,7 +925,8 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   now BUILT. What remains unbuilt: `llm_help` itself, the eight further descriptors, the human-doc
   generator, and the advisory-marking convention that belongs with `llm_help`'s frame.
 
-*Status ledger:* root contract · machine twin · surface checker · CI wiring — **shipped-pinned**;
+*Status ledger:* root contract · machine twin · surface checker · its governed-headroom report · CI
+wiring — **shipped-pinned**;
 self-describing surfaces — **RATIFIED** (2026-07-23); harness self-model — **principle endorsed,
 Workstream B authorized, A gated**; the textedit descriptor composition, the surface registry, and
 the coverage diagnostic — **shipped-pinned** (increments 1–3), the hand-authored addendum constants
@@ -926,15 +939,20 @@ non-test caller is the `trellis_agent.py` prompt seam; the registry's is that sa
 same reasoning that keeps `wiki:check`'s staleness half out. `ModuleManifestSchema` stays
 `.strict()` and descriptor-free, a different artifact class the §11 ruling makes it less likely to
 enter; the bijection is mechanized as drill §16's registry↔line checks on **one** surface.
-`wiki:check --verify` is a CI step and **neither negative control is** — half this
-class's trust precondition rests on operator discipline. That step now also **compiles the map's own
+`wiki:check --verify` is a CI step and **neither negative-control entrypoint is** — but the
+repository control's fixture now lives in `negative-control.ts` and is shared with the unit battery,
+so its **eleven plants run inside `npm test`**; the exit-3 convention still rests on operator
+discipline, the plants no longer do. `npm run upsum` was this class's own rule-15 defect — a correct
+entrypoint with **no automatic caller**, zero hits in `ci.yml` and no hook — closed by making the
+surface check invoke the ranking itself, so the tool that says *where* the bytes are is reached
+without being asked and before a cap is crossed. `--verify` also **compiles the map's own
 HTML render**, whose data is JS source: one straight apostrophe inside a single-quoted string was a
 `SyntaxError` blanking the whole interactive table, reported to nothing but a browser console. It
-shipped and **survived every PR through `a3a5e56`**, one of which edited that very file without
-noticing, because the checker validated the Markdown and merely *inferred* the render — T4's
+**survived every PR through `a3a5e56`**, one of which edited that file without noticing, the checker
+having validated the Markdown and merely *inferred* the render — T4's
 **exists-implies-named** gap one level down, in this class's own instrument. `4f945ef` (#176) fixed
-the character by hand, independently and while this gate was being built; what the gate adds is that
-the class cannot recur silently, which is not the same claim as having fixed it. Twenty-five planted
+the character by hand while this gate was built; the gate adds only that the class cannot recur
+silently — not the same claim as having fixed it. Twenty-five planted
 conditions now, up from eighteen. *Orphans:* closed 2026-07-23 — both
 runtime-half records now carry rows in `docs/ORIENTATION.md` D4. This map's own open item 3 (derivation
 inverted) is **paid**: `SELF_DESCRIBING_SURFACES.md` §9.1 distinguishes guard-derived from editorial

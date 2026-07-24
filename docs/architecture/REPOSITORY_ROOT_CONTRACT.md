@@ -95,18 +95,38 @@ root `AGENTS.md` is the single repository-wide authority.
 
 1. the exact repository-visible root-file and top-level-directory allowlists
    (tracked plus unignored untracked files, with working-tree deletions removed);
-2. byte caps for every permitted root file;
+2. byte caps for every permitted root file, and for every governed document
+   named in `documentUpsum.paths`;
 3. required deprecation markers and archived-surface presence;
 4. local Markdown links outside the immutable archive;
 5. complete `.env.example` coverage of the keys declared by `EnvSchema`, with
    a small explicit allowlist for externally consumed keys;
 6. the absence of forbidden root result-artifact names.
 
+Eleven issue codes carry those checks. They are declared as a runtime list
+(`SURFACE_ISSUE_CODES` in `check.ts`) and not a union type alone, because a
+type is invisible at runtime and a code that exists only in one could never be
+counted as uncovered by the falsifier below.
+
+Every run also prints **governed byte headroom**: each capped path measured
+against its cap, tightest first, and — for any path at or under
+`documentUpsum.nearBudgetRatio` — its sections ranked largest-first, computed by
+calling `tools/document-upsum` directly. This is what gives the ranking a
+non-test caller (`AGENTS.md` rule 15) and what makes growth visible *before* a
+cap is crossed rather than at it. The report changes no exit code: being near a
+cap is not a violation, and the caps themselves are gated by the checks above,
+which is where a bound belongs.
+
 `npm run check:repo-surface -- --negative-control` constructs an isolated
-temporary repository surface containing an unexpected root file, an oversized
-entrypoint, a broken link, and a missing environment key. It must exit `3` and
-name every planted break. A passing normal check is trusted only after this
-falsifier is observed.
+temporary repository surface broken in exactly eleven ways, one per issue code.
+The fixture lives in `tools/repository-surface/negative-control.ts` and is
+shared with the unit battery, so the operator falsifier and the copy CI runs
+cannot drift apart. Each break is asserted BY PATH and not by code alone — a
+code firing somewhere tolerates a checker that reports the right kind of
+problem about the wrong file. It must exit `3`, and it refuses when a code has
+no plant, when a planted break goes undetected, or when a break fires that
+nobody planted. A passing normal check is trusted only after this falsifier is
+observed.
 
 The checker does not decide product architecture, validate external URLs, edit
 files, or generate documentation. It verifies only the ratified repository
@@ -120,6 +140,45 @@ machine twin together, run both normal and negative-control checks, and update
 all affected paths in the same commit. Convenience alone is not sufficient.
 
 ## 8. Amendments
+
+**July 23, 2026 — the falsifier covers every code, and the checker names WHERE.**
+Two defects in this tooling, each an instance of a house rule the tooling was
+built to embody.
+
+*Rule 19(c) — a check earns the name `verification` by having been seen to
+fail.* The negative control planted four of the eleven issue codes. Worse, the
+fixture set `deprecatedSurfaces`, `forbiddenRootFiles`, and
+`documentUpsum.paths` empty, so three of the seven unplanted codes could not
+have fired even in principle. Seven codes had never been seen to fail, and
+their green carried no information about them. The fixture now plants all
+eleven, carries the contract rows each needs, and asserts every break by path;
+it moved to `negative-control.ts` so the unit battery shares it, which puts the
+falsifier in `npm test` and therefore CI instead of leaving it to an operator's
+memory. The control refuses when a code has no plant, so a twelfth code cannot
+be added without planting a break for it. Observed failing three ways before
+being trusted: a code with its plant removed, a plant moved to the wrong path,
+and — fixture untouched — the deprecation-marker branch reduced to an existence
+check, which the control caught as `deprecated_marker_missing@docs/LEGACY.md`
+undetected.
+
+*Rule 15 — correct is a different claim from reachable.* `npm run upsum` had no
+automatic caller: no CI step, no hook, nothing but a human's keyboard
+(`grep -c upsum .github/workflows/ci.yml` returned 0). Meanwhile the checker
+reported a governed document's total and nothing else, and only once the cap
+was already broken. The headroom report in §6 closes both halves with one
+seam — the surface check now invokes `measureDocument`/`rankedSections`
+directly, so the ranking is reached without being asked for, and an author
+learns *where* the bytes are before the crossing. It earned its keep on the
+first run: `docs/README.md` stood **45 bytes** under its 20,480-byte cap and
+`docs/ORIENTATION.md` **352** under its 32,768 — two documents one edit away
+from a refusal that nothing was going to mention until it happened.
+
+Machine twin: one new field, `documentUpsum.nearBudgetRatio` (`0.1`). It lives
+in the contract rather than in `headroom.ts` for the same reason
+`defaultMaxBytes` does — a number a tool remembers is a bound nothing can
+audit — and a unit pin asserts that moving the field moves the report, which is
+what distinguishes a read value from a decorative one. No cap was changed, no
+root entry added or removed, and no exit code now depends on the new field.
 
 **July 22, 2026 — `conftest.py` and `pytest.ini` admitted as tool discovery.**
 The REPL-sandbox package (`src/repl_sandbox/`) is Python, and pytest resolves

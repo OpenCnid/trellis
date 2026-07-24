@@ -280,7 +280,7 @@ start. Worked instances of the frame:
 | Editing toolkit (`trellis_textedit.py`) | `npm run test:textedit` (containment, digest guard, splice semantics) |
 | Answer channel (`trellis_answer.py`) | `npm run test:answer-channel` (incl. kernel-prompt substring checks) |
 | Module registry (`trellis_modules.py` + `src/config/modules.ts`) | Twin validators, `npm run test:modules` |
-| Governed-document size (`root-contract.json` `maxBytes`) | `npm run check:repo-surface` refuses at the boundary; `npm run upsum -- <path>` names the heaviest sections so compression is computed, not eyeballed (`tools/document-upsum/upsum.test.ts`) |
+| Governed-document size (`root-contract.json` `maxBytes`) | `npm run check:repo-surface` refuses at the boundary AND ranks the heaviest sections of anything near its cap before it, so growth is seen early; `npm run upsum -- <path>` takes one path to subsection depth (`tools/document-upsum/upsum.test.ts`) |
 
 ## 4. Hard rules (permanent — survive every session)
 
