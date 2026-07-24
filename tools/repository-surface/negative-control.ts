@@ -41,13 +41,12 @@ export function breakKey(planted: { code: string; path: string }): string {
  * exactly eleven ways, and return the contract to check it against.
  */
 export function plantNegativeControl(fixtureRoot: string): NegativeControlFixture {
-  mkdirSync(path.join(fixtureRoot, 'docs'), { recursive: true });
+  mkdirSync(path.join(fixtureRoot, 'docs', 'archive'), { recursive: true });
   mkdirSync(path.join(fixtureRoot, 'src', 'config'), { recursive: true });
   mkdirSync(path.join(fixtureRoot, 'tools'), { recursive: true });
 
-  // oversized_root_file (22 bytes against a 1-byte cap) and
-  // broken_markdown_link (the target is never written).
-  writeFileSync(path.join(fixtureRoot, 'README.md'), '[missing](missing.md)\n');
+  // oversized_root_file: 10 bytes against a 1-byte cap.
+  writeFileSync(path.join(fixtureRoot, 'README.md'), '# Fixture\n');
 
   // environment_example_missing: REQUIRED_KEY is declared by the schema
   // below and absent here. environment_example_extra: UNDECLARED_KEY is
@@ -83,7 +82,25 @@ export function plantNegativeControl(fixtureRoot: string): NegativeControlFixtur
   // deprecated_marker_missing: the file EXISTS, so only reading its bytes
   // catches the absent marker. A fixture that simply omitted the file
   // would leave the content branch unproven.
-  writeFileSync(path.join(fixtureRoot, 'docs', 'LEGACY.md'), '# Legacy\n\nno marker here\n');
+  //
+  // It also carries broken_markdown_link, and carries it from INSIDE
+  // `docs/` — a sibling of the excluded archive rather than a file at
+  // root. That placement is what makes the exclusion below falsifiable in
+  // the direction that matters: a prefix gone too broad swallows this
+  // link, and the control reports a planted break it failed to detect.
+  writeFileSync(path.join(fixtureRoot, 'docs', 'LEGACY.md'), '# Legacy\n\n[missing](missing.md)\n');
+
+  // The SAME break, one directory deeper, inside the excluded prefix, and
+  // it must stay SILENT. §6 claims the checker reads links "outside the
+  // immutable archive"; that exemption is a deliberate blindness over a
+  // whole directory, so it earns the treatment the allowlisted env key
+  // already gets. Nothing lists it in `expected`: the control compares
+  // planted against detected in BOTH directions, so an exclusion that
+  // matched nothing surfaces here as an unplanted break.
+  //
+  // The pair pins the prefix precisely. Widen it and `docs/LEGACY.md`
+  // goes missing; narrow it to nothing and this file gets reported.
+  writeFileSync(path.join(fixtureRoot, 'docs', 'archive', 'RETIRED.md'), '[missing](missing.md)\n');
 
   const contract: RootContract = {
     version: 1,
@@ -95,7 +112,7 @@ export function plantNegativeControl(fixtureRoot: string): NegativeControlFixtur
     ],
     // missing_root_directory: `reports` is contracted and never created.
     rootDirectories: ['docs', 'reports', 'src'],
-    markdownLinks: { excludePrefixes: [] },
+    markdownLinks: { excludePrefixes: ['docs/archive/'] },
     environment: {
       schemaPath: 'src/config/index.ts',
       examplePath: '.env.example',
@@ -114,6 +131,7 @@ export function plantNegativeControl(fixtureRoot: string): NegativeControlFixtur
     '.env.example',
     'README.md',
     'docs/LEGACY.md',
+    'docs/archive/RETIRED.md',
     'docs/OVERSIZE.md',
     'src/config/index.ts',
     'tools/orphan.ts',
@@ -121,7 +139,7 @@ export function plantNegativeControl(fixtureRoot: string): NegativeControlFixtur
   ];
 
   const expected: PlantedBreak[] = [
-    { code: 'broken_markdown_link', path: 'README.md:1' },
+    { code: 'broken_markdown_link', path: 'docs/LEGACY.md:3' },
     { code: 'deprecated_marker_missing', path: 'docs/LEGACY.md' },
     { code: 'environment_example_extra', path: '.env.example' },
     { code: 'environment_example_missing', path: '.env.example' },

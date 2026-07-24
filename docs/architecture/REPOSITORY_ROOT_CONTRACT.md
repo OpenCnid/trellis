@@ -128,6 +128,15 @@ no plant, when a planted break goes undetected, or when a break fires that
 nobody planted. A passing normal check is trusted only after this falsifier is
 observed.
 
+Two plants are deliberately **silent** rather than expected, because a check
+also has to be seen not to fire: an allowlisted `.env.example` key, and a
+dangling Markdown link inside `docs/archive/`. The archive exemption in item 4
+is a blindness over an entire directory, and a blindness nothing exercises is
+indistinguishable from a checker that skips the file. So the archive link is
+paired with an identical one in a `docs/` sibling: widen the prefix and the
+sibling goes undetected, narrow it to nothing and the archive link fires as
+unplanted. Both were observed, one per direction.
+
 The checker does not decide product architecture, validate external URLs, edit
 files, or generate documentation. It verifies only the ratified repository
 surface described here.
