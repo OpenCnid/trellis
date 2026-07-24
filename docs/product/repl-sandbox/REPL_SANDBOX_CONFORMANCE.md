@@ -121,7 +121,51 @@ written**; host-side `REPLResult.locals` holds reprs only. Two consequences:
   `CodeBlock.to_dict()` (`core/types.py:204-205`) into the logger. Interposing costs no driver
   compatibility.
 
-### 2.3 `MAX_FRAME_LEN` — evidence for the owner decision (NOT closed here)
+### 2.3 `MAX_FRAME_LEN` — CLOSED 2026-07-24 by owner ruling; the evidence that produced it follows
+
+**Ruling: `max_result_bytes` = 2 MiB, `max_frame_len` = 4 MiB, and the frame bound is derived from
+the slice bound rather than from the model's context window.** The invariant
+`max_frame_len >= 2 * max_result_bytes` is asserted in `src/repl_sandbox/tests/test_config.py`.
+
+**What the ruling corrects.** A previous edition derived `MAX_FRAME_LEN` from the worker's context
+window — half of `gpt-5.4`'s 1,050,000 tokens at ~4 bytes each, giving 2 MiB — on the theory that no
+single frame should context-saturate the worker it lands in. That is the right rule applied at the
+wrong layer, and it had two consequences:
+
+1. **It protected nothing.** A slice does not reach the model's attention by landing in the guest
+   namespace. `MarshalCaps` holds that property independently and an order of magnitude lower —
+   demonstrated: a **12 MiB** value in the namespace produces a **~4 KB** `exec` reply, because the
+   marshaller describes the value (4 KiB repr, spill handle) rather than carrying it.
+2. **It broke a live path.** It left the frame cap (2 MiB) *below* `max_result_bytes` (8 MiB), so a
+   result the broker considered legal could not cross the wire at all. Both numbers were individually
+   plausible; only their relationship was wrong, and nothing compared them.
+
+**The layering the ruling installs.** Four bounds, four questions, each with its own home:
+
+| what is bounded | question it answers | constant |
+|---|---|---|
+| REPL namespace | how large a corpus may the model work over? | `Tier0Limits.address_space_bytes` (1 GiB) |
+| one slice | how much moves host store → guest namespace per call? | `BrokerCaps.max_result_bytes` (2 MiB) |
+| model attention | how much reaches the transcript? | `MarshalCaps` (20 KiB stdout, 64 KiB answer) |
+| one wire message | how large may a single frame be? | `DEFAULT_MAX_FRAME_LEN` (4 MiB) |
+
+**The REPL is meant to be large — potentially gigabytes — and read in slices.** No bound in this
+table constrains that; the ceiling on the corpus is address space. The token derivation survives as
+the way `max_result_bytes` is *chosen* — "about what one model pass could consider" — and is recorded
+as a **sizing convention, not an enforcing bound**, because treating it as enforcing is exactly the
+error above.
+
+**The cost, stated:** a 2 MiB slice means a corpus arrives in ~500 round trips per GB. If bulk
+transfer needs to be cheaper, `max_result_bytes` is the single lever and `max_frame_len` follows it.
+
+**The DoS property is independent of all of this and always held:** `frame.read_frame` compares the
+declared length against the bound *before* reading a body, so a frame declaring 4 GiB is refused for
+four bytes and a hostile peer must actually send whatever it claims. Frame size was never protecting
+memory; it protects nothing but the wire.
+
+---
+
+**Evidence gathered before the ruling (the original §2.3, preserved):**
 
 This is an owner ratification, not a source read. The evidence:
 
@@ -144,8 +188,17 @@ with any single value. It is attached only when a child logger is configured
 2. Keep child trajectories and accept that no static cap is derivable; the frame must then be
    chunked or handle-addressed rather than sized.
 
-Recommendation: **(1)**, ratify 16 MiB. Either way the cap is enforced before allocation by
-`repl_sandbox/frame.py:142-143`, which is already built and tested.
+Recommendation *(as written 2026-07-22; **superseded** by the ruling above)*: **(1)**, ratify 16 MiB.
+Either way the cap is enforced before allocation by `repl_sandbox/frame.py`, which is already built
+and tested.
+
+**How this evidence reads after the ruling.** Its *method* was right and is what the ruling adopts —
+size the frame off the largest legitimate slice, times a margin. Only its inputs moved: the slice is
+2 MiB rather than 8 MiB, so the frame is 4 MiB rather than 16 MiB. Two figures above are stale as
+absolute values and are kept because the reasoning needs them: `BrokerCaps.max_result_bytes` was
+8 MiB when this was written, and the shipped `DEFAULT_MAX_FRAME_LEN` it cites as 16 MiB had already
+been changed to 2 MiB by the time the contradiction was found — which is how a record can be
+internally sound and still describe a tree that has moved underneath it.
 
 ## 3. Load-bearing hazards found while reading
 

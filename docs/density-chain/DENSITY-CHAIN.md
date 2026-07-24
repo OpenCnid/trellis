@@ -859,9 +859,15 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   it exists an S6 pass would be a claim about `KataREPL` and not about `KataLauncher`. Then
   GB — which inherits S5's residuals: the watchdog is unproven against a real shim wedge, and the
   seccomp/allowlist divergence is recorded rather than resolved — GA-eq, GA-rt. Proposed:
-  doubt-filter Layers 1–2. Open owner calls: `MAX_FRAME_LEN` (ships 2 MiB, unratified against
-  `CONFORMANCE §2.3`'s 16 MiB), handle lifetime, the warm pool, depth-2. The remaining **[A]** halves
-  (S6, GB, GA-eq) are ≤$5 and **unspent**; S3's and S4's are **banked**.
+  doubt-filter Layers 1–2. **`MAX_FRAME_LEN` RATIFIED 2026-07-24** — slice 2 MiB, frame 4 MiB, frame
+  derived from slice, invariant `frame ≥ 2 × slice` asserted in `test_config.py`. The ruling corrected
+  a *layer*, not a number: a context-window derivation had been applied to the frame bound, where it
+  protects nothing (a 12 MiB namespace value returns a ~4 KB reply — `MarshalCaps` holds attention,
+  independently) while leaving the frame **below** `max_result_bytes`, so a legal broker result could
+  not cross the wire. The token rule now sizes the **slice**, as a sizing convention and never an
+  enforcing bound. **The REPL is meant to be gigabytes read in slices; the corpus ceiling is
+  `RLIMIT_AS`, not any wire number.** Still open: handle lifetime, the warm pool, depth-2. The
+  remaining **[A]** halves (S6, GB, GA-eq) are ≤$5 and **unspent**; S3's and S4's are **banked**.
 
 *Status ledger:* **control plane shipped; a microVM boots, a frame crosses to it, a real database
 query crosses holding a handle, and Tier-0 caps the worker from inside — STILL not a sandbox and must

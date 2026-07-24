@@ -560,21 +560,27 @@ reads exactly like an enforced one.
    crosses as `repr`/JSON-safe values or via pickle. The seam requires value-reprs so **no live
    object or pickle-gadget can ride back across the boundary** (§2); if rlms pickles, the backend
    must interpose a repr/JSON marshaller. Source-read gated ([RESEARCH §8 (Open items to close before any build) item 1](REPL_SANDBOX_RESEARCH.md)).
-3. **`MAX_FRAME_LEN` value** (§3.2) — **derivation rule settled July 22, 2026; the shipped number
-   remains owner-gated.** The original framing here ("large enough for the biggest legitimate frame
-   plus headroom") had no derivable answer: the source read found the largest legitimate frame is an
-   `LMResponse` carrying a child run's whole trajectory, which grows with iteration count, so no
-   static cap follows from it ([CONFORMANCE §3](REPL_SANDBOX_CONFORMANCE.md)).
+3. **`MAX_FRAME_LEN` value** (§3.2) — **RATIFIED July 24, 2026: `max_result_bytes` 2 MiB,
+   `max_frame_len` 4 MiB, the frame derived from the slice.** Full ruling and the evidence behind it:
+   [CONFORMANCE §2.3](REPL_SANDBOX_CONFORMANCE.md).
 
-   The rule adopted instead sizes the cap off **the worker's context window**, which makes it a
-   structural guarantee rather than only a DoS bound: **no single frame can context-saturate the
-   worker it lands in.** Derivation — a 1,050,000-token window × 50% × ~4 bytes/token ≈ 2.1 MB →
-   **2 MiB**, set as `config.DEFAULT_MAX_FRAME_LEN` with `MODEL_CONTEXT_WINDOW_TOKENS` recorded
-   beside it so the number is re-derived, not re-guessed, when the model pin changes. This sits
-   above `ByteLedgerCaps.inbound_per_call`, so the two bounds stack; and the handle model keeps the
-   context load small by carrying tokens rather than payloads. The DoS property is unchanged — the
-   reader still rejects an over-length declaration **before** allocating. A ratified number is still
-   required before the bridge ships.
+   The original framing here ("large enough for the biggest legitimate frame plus headroom") had no
+   derivable answer, because the largest frame rlms can produce is an `LMResponse` carrying a child
+   run's whole trajectory, which grows with iteration count. A July 22 rule sized the cap off **the
+   worker's context window** instead — 1,050,000 tokens × 50% × ~4 bytes/token ≈ 2.1 MB → 2 MiB — on
+   the theory that no single frame should context-saturate its worker.
+
+   **That rule was right and its layer was wrong, and the correction is the point worth keeping.** A
+   slice does not enter the model's attention by landing in the guest namespace: `MarshalCaps` holds
+   that, independently and far lower — a 12 MiB namespace value returns a ~4 KB `exec` reply. So a
+   context-derived *frame* cap protected nothing, while leaving the frame bound **below**
+   `BrokerCaps.max_result_bytes`, so a result the broker considered legal could not cross the wire.
+   The token derivation now sizes the **slice** (`DEFAULT_MAX_RESULT_BYTES`), where "about what one
+   model pass could consider" is a sound way to choose a number — recorded there as a sizing
+   convention, never as an enforcing bound. The frame follows it at 2×, and
+   `tests/test_config.py` asserts `max_frame_len >= 2 * max_result_bytes` so the pair cannot diverge
+   silently again. The DoS property is unchanged and independent: the reader rejects an over-length
+   declaration **before** allocating.
 
 ---
 

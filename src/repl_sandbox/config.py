@@ -46,41 +46,73 @@ def version_at_least(observed: str, minimum: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Frame bound
+# Slice bound, and the frame bound that follows it
 # ---------------------------------------------------------------------------
+#
+# Four different things get bounded in this system and they are easy to collapse
+# into one number. Keeping them apart is the point of this block:
+#
+#   REPL namespace     the corpus the model works over   `Tier0Limits.address_space_bytes`
+#   one slice          host store -> guest namespace     `BrokerCaps.max_result_bytes`
+#   model attention    what reaches the transcript       `MarshalCaps` (this file)
+#   one wire message   a single frame                    `DEFAULT_MAX_FRAME_LEN`
+#
+# **The REPL is meant to be large — potentially gigabytes — and read in slices.**
+# None of the bounds below constrain that; the namespace ceiling is the rlimit.
+# A 12 MiB value in the namespace returns a ~4 KB exec reply, because the
+# marshalling caps describe it rather than carrying it.
 
-#: Hard cap on the declared length of a single wire frame.
-#:
-#: Derivation rule proposed by the collaborator (Matt) July 22, 2026, with the
-#: window he supplied; **the shipped value is still owner-gated** per INTERFACES
-#: section 9 item 3, which requires a ratified number before the bridge ships.
-#: Nothing ships yet (G1 is unmet), so this is the derived default, not the
-#: ratification.
-#:
-#: The rule: size the cap off the worker's context window, not off the largest
-#: frame the plumbing might carry. That converts it from a DoS bound into a
-#: structural guarantee — **no single frame can context-saturate the worker it
-#: lands in.**
-#:
-#: Derivation: `gpt-5.4-2026-03-05` carries 1,050,000 tokens; half of that is
-#: 525,000; at ~4 bytes per token that is ~2.1 MB, which is 2 MiB. Re-derive this
-#: constant whenever the model pin changes — the window is the input, and it is
-#: recorded here because it exists nowhere else in the repo.
-#:
-#: The DoS property still holds and is why the reader checks the declared length
-#: *before* allocating: the 4-byte prefix admits 4 GiB and a hostile guest will
-#: send it. This bound sits above `ByteLedgerCaps.inbound_per_call`, so the two
-#: stack rather than contradict, and the handle model keeps the historically
-#: largest frame (a context load) small by carrying tokens instead of payloads.
-DEFAULT_MAX_FRAME_LEN = 2 * 1024 * 1024
-
-#: The context window the frame cap is derived from, in tokens. Recorded so the
-#: derivation above can be re-run rather than re-guessed.
+#: The context window a slice is sized against, in tokens. Recorded so the
+#: derivation below can be re-run rather than re-guessed.
 MODEL_CONTEXT_WINDOW_TOKENS = 1_050_000
-#: Fraction of the window one frame may occupy.
-FRAME_CONTEXT_FRACTION = 0.5
+#: Fraction of the window one slice may occupy.
+SLICE_CONTEXT_FRACTION = 0.5
 #: Bytes per token used to convert the token budget into a byte bound.
 BYTES_PER_TOKEN_ESTIMATE = 4
+
+#: Largest single `materialize` / `slice` return: one unit of content moving from
+#: the host store into the guest namespace.
+#:
+#: Derivation rule proposed by the collaborator (Matt) July 22, 2026 with the
+#: window he supplied, and **re-homed onto this constant July 24, 2026** after it
+#: was found applied to the frame bound instead. `gpt-5.4-2026-03-05` carries
+#: 1,050,000 tokens; half is 525,000; at ~4 bytes per token that is ~2.1 MB, so
+#: 2 MiB. Re-derive whenever the model pin changes.
+#:
+#: **Read this as a sizing convention, not an enforcing bound** — the distinction
+#: the July 24 correction turned on. A slice does not reach the model's attention
+#: by landing in the namespace; `MarshalCaps` holds that, independently and at a
+#: far smaller number. So "about what one model pass could consider" is a sound
+#: way to *choose* this value and is not a property it *enforces*. Writing it here
+#: as though it protected the context would repeat, one layer over, the error that
+#: produced the correction.
+#:
+#: Raising this is the single lever for bulk transfer: a corpus arrives in
+#: `ceil(bytes / max_result_bytes)` round trips, so 2 MiB is ~500 calls per GB.
+#: `DEFAULT_MAX_FRAME_LEN` follows it and must be re-derived with it.
+DEFAULT_MAX_RESULT_BYTES = 2 * 1024 * 1024
+
+#: Hard cap on the declared length of a single wire frame. **Derived from the
+#: slice bound, never from the context window** (July 24, 2026 — owner ruling).
+#:
+#: The largest legitimate frame is a slice plus its envelope, so the frame cap is
+#: the slice times a margin. JSON escaping can inflate a payload well past its raw
+#: size, which is what the margin buys; 2x is the figure CONFORMANCE section 2.3
+#: reasoned to and it is kept.
+#:
+#: The history is worth carrying, because the shape recurs: this constant was
+#: briefly derived from the model context window on the theory that no single
+#: frame should context-saturate its worker. That protects nothing the marshal
+#: caps do not already hold, and it left the shipped frame cap (2 MiB) *below*
+#: `max_result_bytes` (8 MiB) — so a maximal legitimate result could not cross the
+#: wire at all. The invariant that forecloses it is asserted in
+#: `tests/test_config.py`: **`max_frame_len >= 2 * max_result_bytes`.**
+#:
+#: The DoS property is independent of the number and always held: `frame.read_frame`
+#: compares the declared length to this bound *before* reading a body, so a frame
+#: declaring 4 GiB is refused for the cost of four bytes and a hostile peer must
+#: actually send whatever it claims.
+DEFAULT_MAX_FRAME_LEN = 2 * DEFAULT_MAX_RESULT_BYTES
 
 
 @dataclass(frozen=True)
@@ -144,7 +176,10 @@ class BrokerCaps:
     statement_timeout_ms: int = 15_000
     bolt_timeout_ms: int = 15_000
     max_rows: int = 10_000
-    max_result_bytes: int = 8 * 1024 * 1024
+    #: One slice, host store -> guest namespace. See `DEFAULT_MAX_RESULT_BYTES`
+    #: for the derivation and for why it is a sizing convention rather than a
+    #: bound on the model's attention.
+    max_result_bytes: int = DEFAULT_MAX_RESULT_BYTES
 
 
 @dataclass(frozen=True)
