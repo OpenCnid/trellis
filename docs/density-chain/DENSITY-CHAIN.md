@@ -185,11 +185,12 @@ planner above it. Not what the injected tools reach into, only that they arrive 
   `citable()` has **no non-test caller**.
 - **T5 — future plans.** Proposed and open: replacing this substrate — the ladder, gates and exfil
   doubt-filter are [[C12]]'s. Descriptors — Workstream B AUTHORIZED 2026-07-23, the first shipped
-  byte-identical on [[C5]]'s toolkit, so this seam consumed it byte-unchanged. Next, unbuilt: a
-  **surface registry** — a registration, not a schema — populated at each definition site and read at
-  THIS class's `custom_tools` seam, plus a coverage diagnostic naming live surfaces carrying no
-  descriptor; `llm_help`'s landing moves both composed-prompt pins, which stay the natural cache key
-  for any prefix fast-state. Reasoning-templates, not sequenced. Backend T2–T4, the hosted arm, TTT
+  byte-identical on [[C5]]'s toolkit, so this seam consumed it byte-unchanged. The **surface
+  registry** now reads THIS class's seam: a coverage diagnostic AST-derives the injected names from
+  the `custom_tools` construction itself and reports **1 of 9** described, naming
+  `scaffold_helpers` and `build_author_tools` as the two it cannot enumerate statically.
+  `llm_help`'s landing moves both composed-prompt pins, which stay the natural cache key for any
+  prefix fast-state. Reasoning-templates, not sequenced. Backend T2–T4, the hosted arm, TTT
   rungs R3–R5 — owner-gated. `max_depth` 2 is a contingency.
 
 *Status ledger:* RLM · REPL · `llm_query` · orchestrator · workspace injection · A2A/MCP seam — all
@@ -376,7 +377,9 @@ the model's attention. Not whether moved bytes are citable, nor whether a belief
   `replace_lines`, `insert_lines`, `delete_lines` — stage verified removal manifests, raising
   `AnchorMismatchError` or naming the minimal window; `TRELLIS_TEXTEDIT_GUARDED_ONLY` deletes the raw
   path; `write_back` refuses on digest mismatch. Its addendum composes from `TEXTEDIT_DESCRIPTOR`
-  plus the guard-keyed `_TEXTEDIT_GUARD_EXPECTS`, mode-selected by the refusing `_guarded_only` bool.
+  plus the guard-keyed `_TEXTEDIT_GUARD_EXPECTS`, mode-selected by the refusing `_guarded_only` bool
+  — the **sole** encoding since the hand-authored constants were retired, drift caught by a sha per
+  arm.
   `trellis_answer.submit()` evaluates in the live namespace, refusing bare literals. `get_ast_blocks`
   serves ordered blocks through `trellis_blocks.py`. Retrieval discipline dedups hashes, roots and
   queries under a 64-fetch budget.
@@ -393,8 +396,9 @@ the model's attention. Not whether moved bytes are citable, nor whether a belief
   tooling shape — an engine-resolved-anchor or batch insert — recommended, design-record-first,
   **unbuilt**. Known-broken residuals stand recorded: raw `splice` reachable by default, because
   `buildAgentEnv` **neither sets nor strips** `TRELLIS_TEXTEDIT_GUARDED_ONLY`; `write_back`'s TOCTOU
-  narrowed, not eliminated; dedup padding-evadable; the guarded arm renders no line for the
-  newline-free contract it enforces — a pinned bijection orphan.
+  narrowed, not eliminated; dedup padding-evadable. The guarded arm's bijection orphan — a line
+  contract enforced but never stated — was **closed** 2026-07-23, its pin moved wittingly while the
+  default arm's held.
 - **T5 — future plans.** Proposed next: the engine-resolved-anchor insert (a unique substring in, the
   engine computes address and terminator; non-unique refuses) or a batch insert re-resolving drift
   internally — additive, zero-paid, drill-pinned. Open: making guarded-only the default is its own
@@ -863,27 +867,31 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   machine twin fixes **seventeen** permitted root files with byte caps, **ten** top-level directories,
   forbidden artifacts, and deprecation markers. `tools/repository-surface/check.ts` enforces them plus
   Markdown links and environment-example coverage; `cli.ts` runs `npm run check:repo-surface` in CI.
-  `AGENTS.md` is the bounded entrypoint, `HANDOFF.md` a deprecated stub. The runtime half has its
-  first shipped code: `TEXTEDIT_DESCRIPTOR` plus the guard-keyed `_TEXTEDIT_GUARD_EXPECTS` compose
-  the textedit addendum through `render_textedit_addendum`, mode-selected by the refusing
-  `_guarded_only` bool; `llm_help` itself stays specified, authorized, unbuilt.
+  The runtime half ships: `trellis_surfaces.py` holds the **registry** — `register_surface` bound at
+  each surface's own definition site, validating a key and no field set — and `check:surfaces`
+  reports which injected surfaces carry descriptors, deriving the roster by AST from the
+  `custom_tools` seam itself. `TEXTEDIT_DESCRIPTOR` plus guard-keyed expectations compose that
+  toolkit's addendum, mode-selected by the refusing `_guarded_only` bool. `llm_help` stays
+  specified, authorized, unbuilt.
 - **T3 — with receipts.** `72ac673` (#156, 2026-07-21) landed the contract, its twin, and the checker —
   **ten issue codes**; `conftest.py` and `pytest.ini` were admitted 2026-07-22 as class `tool`, twin
   **and** record together with a dated amendment. `794aab2` (2026-07-23) ratified
   `SELF_DESCRIBING_SURFACES.md` and authorized **Workstream B only** of the self-model;
   `f82cf51` (#177, same day) executed increment 1: **byte-identity held on both arms**
-  (3,066/3,067 chars), one pin per arm in `test_textedit.py` §16, each seen to fail once on a planted
-  one-byte perturbation (rule 19(c)), both composed-prompt shas unmoved. Measured: checker
-  **PASS (0 issues)**, negative control catching all four planted breaks, `AGENTS.md` at
-  **31,034 bytes against its 32,768 cap**. Design records: `dc1f55f` (#153), `3a02408` (#154),
-  `3bdc0e7` (#135), `cb12a53` (#136).
-- **T4 — the frontier.** **Increment 1 converted "authorized" into observation, and the honest scope
-  of "derived" is recorded:** the phrase text is still hand-authored once per guard class and pinned;
-  what the engine derives is the selection (the refusing bool) and single-encoding ownership —
-  nothing generates prose from predicate code, and the other eight surfaces are untouched. Findings
-  pinned rather than fixed: the newline-free contract is a **bijection orphan in the guarded arm**;
-  the spec's field set was one slot short (MASH's `usage`, adopted provisionally); the advisory
-  census. **The record↔twin asymmetry is structural:** the checker proves twin↔tree, never
+  (3,066/3,067 chars), one pin per arm, each seen to fail once on a planted one-byte perturbation
+  (rule 19(c)). Increments 2–3 followed: the registry and diagnostic — first run **1 of 9 injected
+  surfaces described** — the hand-authored constants **retired**, and the guarded arm's pin moved
+  wittingly (`27cc00b2…2835` → `c673f0a0…f124`) to close the orphan while the default arm's sha
+  held. `test:surfaces --negative-control` detects **7/7**. Both composed-prompt shas unmoved
+  throughout. Checker **PASS (0 issues)**; `AGENTS.md` at **31,034 bytes against its 32,768 cap**.
+- **T4 — the frontier.** **The honest scope of "derived" is recorded:** phrase text is still
+  hand-authored once per guard class and pinned; what the engine derives is the selection (the
+  refusing bool), single-encoding ownership, and now the injected-name roster — nothing generates
+  prose from predicate code. **Eight of nine injected surfaces still carry no descriptor**, which
+  the diagnostic reports rather than leaving to memory, and the two dynamic seams
+  (`scaffold_helpers`, `build_author_tools`) are named as unenumerable rather than dropped. The
+  guarded-arm orphan is **closed**; the advisory-marking duty is deliberately still open, because
+  settling it for one surface would make an instance into law (rule 17). **The record↔twin asymmetry is structural:** the checker proves twin↔tree, never
   record↔twin — **named-implies-exists is proved; exists-implies-named is not** (green again since
   `20e94ae`). **Confirmed unfixed, deliberately:** the nine-field telemetry allowlist — Workstream A's
   Phase 0a, and A was held back. **Falsified:** Phase 0, 2026-07-19, proved its own specification
@@ -901,20 +909,23 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   questions closed 2026-07-23: **descriptors are a registration, not a schema** — the field set is
   *dissolved* rather than settled, because a vocabulary that becomes law early cannot survive the
   iteration prompt authoring needs — and that registry, populated at each surface's definition site,
-  is also where `llm_help` composes from. Next increment, unbuilt: the registry and a **coverage**
-  diagnostic that reports which live surfaces carry no descriptor, and never refuses.
+  is also where `llm_help` composes from — and that registry, with its **coverage** diagnostic, is
+  now BUILT. What remains unbuilt: `llm_help` itself, the eight further descriptors, the human-doc
+  generator, and the advisory-marking convention that belongs with `llm_help`'s frame.
 
 *Status ledger:* root contract · machine twin · surface checker · CI wiring — **shipped-pinned**;
 self-describing surfaces — **RATIFIED** (2026-07-23); harness self-model — **principle endorsed,
-Workstream B authorized, A gated**; the textedit descriptor composition — **shipped-pinned,
-byte-identical on both arms** (increment 1); `llm_help` — **specified, authorized, unbuilt**.
+Workstream B authorized, A gated**; the textedit descriptor composition, the surface registry, and
+the coverage diagnostic — **shipped-pinned** (increments 1–3), the hand-authored addendum constants
+**retired** so the descriptor is the sole encoding; `llm_help` — **specified, authorized, unbuilt**.
 *Reachability:*
 `llm_help` has **no occurrence anywhere** under `src/`, `scripts/`, `modules/` or `tools/`; the
 shipped descriptor is kernel-side Python — a dict literal **no validator anywhere reads**, whose
-non-test caller is the `trellis_agent.py` prompt seam; `ModuleManifestSchema` stays `.strict()` and
-descriptor-free, a different artifact class the §11 ruling makes it less likely to enter; the
-bijection is mechanized only as drill §16's registry↔line checks on one surface, and **no coverage
-diagnostic exists yet** — nothing today can answer which live surfaces lack a descriptor.
+non-test caller is the `trellis_agent.py` prompt seam; the registry's is that same seam through
+`trellis_textedit`, and the diagnostic's is `npm run check:surfaces`, which is **not in CI** by the
+same reasoning that keeps `wiki:check`'s staleness half out. `ModuleManifestSchema` stays
+`.strict()` and descriptor-free, a different artifact class the §11 ruling makes it less likely to
+enter; the bijection is mechanized as drill §16's registry↔line checks on **one** surface.
 `wiki:check --verify` is a CI step and **neither negative control is** — half this
 class's trust precondition rests on operator discipline. That step now also **compiles the map's own
 HTML render**, whose data is JS source: one straight apostrophe inside a single-quoted string was a
@@ -994,7 +1005,7 @@ The **Drills and reports** column is prose and script *names*, never paths, and 
 | **C10** | `src/benchmarks/**`, `src/core/runtime/drill_target*`, `data/**`, `docs/benchmarks/**`, `docs/product/{BENCHMARK_OOLONG,OOLONG_BENCHMARK_SPEC,VALIDATION_STRATEGY,PRD}.md`, `docs/product/PHASE_*.md`, `docs/operations/OOLONG_BENCHMARK_GUIDE.md` | `oolong:benchmark`, `drill:update`, `drill:poison`, `drill:scale`, `test:drill-gate` (+ `--negative-control`, healthy exit 3); `repl-sandbox:drill` — uncommitted, outside CI |
 | **C11** | `src/api/**`, `src/core/a2a/**`, `src/frontend/**`, `src/rlm/trellis_mcp*`, `src/config/mcp_servers*`, `.env.example`, `AGENTS.md`, `README.md`, `HANDOFF.md`, `.github/**`, `docs/architecture/{MCP_SERVER_SURFACE,SESSION_GOVERNANCE}.md`, `docs/reference/**`, `docs/operations/**` | `test:a2a`, `test:rlm-mcp`, `test:api-hardening` |
 | **C12** | `docs/product/repl-sandbox/**`, `src/repl_sandbox/**`, `scripts/repl_sandbox_*.py`, `scripts/provision_kata_host.sh`, `conftest.py`, `pytest.ini` | `test:repl-sandbox`, zero-paid; `repl-sandbox:{preflight,selftest,drill,provision,s2-probe,s3-probe}`; `fuzz_frame.py`, `repl_sandbox_drill.py`, both host probes and `provision_kata_host.sh` each carry a falsifier (`--negative-control`, healthy exit 3; or `--verify`, exit 1 naming what it would change); `test_rlms_conformance.py` (pinned source). **No CI job runs any of them**, and the host probes cannot — they need `/dev/kvm` |
-| **C13** | `tools/repository-surface/**`, `tools/density-chain/**`, `.claude/**`, `AGENTS.md`, `README.md`, `.github/**`, `docs/{ORIENTATION,README,GLOSSARY,COLLABORATOR_BRIEFING,RESEARCH_NOTES_COLLECTION}.md`, `docs/architecture/{REPOSITORY_ROOT_CONTRACT,SELF_DESCRIBING_SURFACES,LLM_HELP_SPEC,HARNESS_SELF_MODEL}.md` | `check:repo-surface` (+ `--negative-control`), `wiki:check --verify` |
+| **C13** | `tools/repository-surface/**`, `tools/density-chain/**`, `.claude/**`, `AGENTS.md`, `README.md`, `.github/**`, `docs/{ORIENTATION,README,GLOSSARY,COLLABORATOR_BRIEFING,RESEARCH_NOTES_COLLECTION}.md`, `docs/architecture/{REPOSITORY_ROOT_CONTRACT,SELF_DESCRIBING_SURFACES,LLM_HELP_SPEC,HARNESS_SELF_MODEL}.md`, `src/rlm/trellis_surfaces*`, `scripts/check_surface_coverage.py`, `scripts/test_surfaces.py` | `check:repo-surface` (+ `--negative-control`), `wiki:check --verify`, `check:surfaces`, `test:surfaces` (+ `--negative-control`) |
 
 Two branches may declare the same path — `AGENTS.md` is both a serving-and-governance surface (C11)
 and a discoverability surface (C13) — and the derivation merges them into one multi-class route rather
