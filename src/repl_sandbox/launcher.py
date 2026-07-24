@@ -426,11 +426,17 @@ class KataLauncher:
         accel_benchmark: Callable[[], dict] | None = None,
         audit: AuditLog | None = None,
         probe_timeout_s: float = DEFAULT_PROBE_TIMEOUT_S,
+        reserved_names: frozenset[str] | None = None,
     ) -> None:
         self.config = config
         self.run_cmd = run_cmd
         self.audit = audit
         self.probe_timeout_s = probe_timeout_s
+        #: Carried for the guest supervisor this launcher will construct once
+        #: the microVM launch path exists. Optional here and required there:
+        #: `boot` refuses before reaching a supervisor, so a launcher built
+        #: without it can still run the G1 gate, which is all it does today.
+        self.reserved_names = reserved_names
         self._kvm_probe = kvm_probe if kvm_probe is not None else probe_kvm_device
         #: Supplied by an operator or a host-side harness that can actually run
         #: the measurement. `None` means the acceleration condition is unproven,
@@ -692,6 +698,7 @@ class InProcessLauncher:
         cid: int = IN_PROCESS_CID,
         audit: AuditLog | None = None,
         rpc_hook: Callable[[str, dict], dict] | None = None,
+        reserved_names: frozenset[str] | None = None,
     ) -> None:
         self.config = config
         #: Scaffold source the guest image would have carried. The capabilities
@@ -703,6 +710,23 @@ class InProcessLauncher:
         #: call. Without it the scaffold defines stubs that raise `NameError`
         #: the first time model code uses one.
         self.rpc_hook = rpc_hook
+        #: The rlms reserved names, handed to the supervisor at construction.
+        #: They travel with the scaffold rather than over the control port
+        #: because the pins are taken in `GuestSupervisor.__init__` — an op
+        #: arriving later would find them already built (BUILD_PLAN section 5.6,
+        #: settled by S6).
+        #:
+        #: Defaulting to the pinned package is correct *here* and would be wrong
+        #: in the supervisor. This double runs in the host interpreter, where
+        #: rlms is installed, so the default is the genuine value rather than a
+        #: guess. The import is function-local because this module must stay
+        #: importable in a guest that has no rlms (the same reason `cli.py`
+        #: defers its `kata_repl` import).
+        if reserved_names is None:
+            from rlm.environments.base_env import RESERVED_TOOL_NAMES
+
+            reserved_names = RESERVED_TOOL_NAMES
+        self.reserved_names = reserved_names
 
     def preflight(self) -> PreflightResult:
         """Always FAIL. There is nothing here for a provisioning gate to pass.
@@ -730,6 +754,7 @@ class InProcessLauncher:
             base_stub_source=self.stub_source,
             audit=self.audit,
             rpc_hook=self.rpc_hook,
+            reserved_names=self.reserved_names,
         )
 
 
@@ -751,11 +776,15 @@ class InProcessGuest:
         base_stub_source: str = "",
         audit: AuditLog | None = None,
         rpc_hook: Callable[[str, dict], dict] | None = None,
+        *,
+        reserved_names: frozenset[str],
     ) -> None:
         self.config = config
         self.cid = cid
         self.audit = audit
         self._base_stub_source = base_stub_source
+        #: Handed to the supervisor at construction. See `InProcessLauncher`.
+        self._reserved_names = reserved_names
         #: What the materialised stubs call. A stub body names
         #: `capabilities.TRANSPORT_HOOK`, so a namespace without it raises
         #: `NameError` on the first tool call model code makes. Optional because
@@ -800,7 +829,10 @@ class InProcessGuest:
             raise SandboxError("the guest scaffold is already installed")
         source = "\n".join(part for part in (self._base_stub_source, stub_source) if part)
         self.supervisor = GuestSupervisor(
-            self.config, stub_source=source, rpc_hook=self._rpc_hook
+            self.config,
+            stub_source=source,
+            rpc_hook=self._rpc_hook,
+            reserved_names=self._reserved_names,
         )
         self._thread = threading.Thread(
             target=serve_forever,

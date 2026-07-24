@@ -11,17 +11,19 @@ result that is made of strings rather than filtered objects.
 from __future__ import annotations
 
 import json
+import pathlib
 import socket
 import threading
 
 import pytest
+
+from repl_sandbox import supervisor as supervisor_module
 
 from repl_sandbox.config import VMADDR_CID_HOST, MarshalCaps, SandboxConfig
 from repl_sandbox.errors import AuthError, DeniedError
 from repl_sandbox.frame import encode_frame
 from repl_sandbox.supervisor import (
     DEFAULT_VALUE_REPR_BYTES,
-    RESERVED_NAMES,
     GuestSupervisor,
     marshal_value,
 )
@@ -30,11 +32,65 @@ from repl_sandbox.transport import LoopbackListener, serve_forever
 MAX_FRAME_LEN = 1 << 20
 JOIN_TIMEOUT_S = 5.0
 
+#: What the host passes in. Written out here rather than imported from rlms
+#: because this suite exercises the *guest* module, which no longer has rlms to
+#: import from — that is the whole of option B. The tie between this literal and
+#: the pinned package is `test_rlms_conformance.py`, which is where it belongs:
+#: if the set moves, that test fails first and this one follows.
+RESERVED_NAMES: frozenset[str] = frozenset(
+    {
+        "SHOW_VARS",
+        "answer",
+        "context",
+        "history",
+        "llm_query",
+        "llm_query_batched",
+        "rlm_query",
+        "rlm_query_batched",
+    }
+)
+
 
 def make_supervisor(stub_source: str = "", **caps: int) -> GuestSupervisor:
     config = SandboxConfig(max_frame_len=MAX_FRAME_LEN)
     marshal_caps = MarshalCaps(**caps) if caps else None
-    return GuestSupervisor(config, stub_source=stub_source, marshal_caps=marshal_caps)
+    return GuestSupervisor(
+        config,
+        stub_source=stub_source,
+        marshal_caps=marshal_caps,
+        reserved_names=RESERVED_NAMES,
+    )
+
+
+def test_the_supervisor_refuses_to_construct_without_the_host_supplied_names() -> None:
+    """Option B's whole point: no default, so no guess.
+
+    A supervisor that fell back to a module-level constant when the host
+    forgot to supply one would be asserting the set on its own authority —
+    which is the shim S4 `[A]` refused, arrived at by omission instead of by
+    decision.
+    """
+    config = SandboxConfig(max_frame_len=MAX_FRAME_LEN)
+    with pytest.raises(TypeError):
+        GuestSupervisor(config)  # type: ignore[call-arg]
+    with pytest.raises(DeniedError):
+        GuestSupervisor(config, reserved_names={"answer"})  # type: ignore[arg-type]
+
+
+def test_the_guest_module_no_longer_imports_rlms() -> None:
+    """The one import that made `GuestSupervisor` unconstructible in the guest.
+
+    Found by S4 `[A]` trying to use it: the guest image is stock
+    `python:3.12-slim` plus the shipped package and carries no rlms, so this
+    import raised `ModuleNotFoundError` before any op could arrive.
+    """
+    source = pathlib.Path(supervisor_module.__file__).read_text(encoding="utf-8")
+    offending = [
+        line
+        for line in source.splitlines()
+        if line.startswith(("import rlm", "from rlm"))
+    ]
+    assert offending == []
 
 
 def run(supervisor: GuestSupervisor, code: str) -> dict:

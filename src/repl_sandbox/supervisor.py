@@ -23,6 +23,15 @@ What the supervisor *does* hold, and is tested for:
   prove.
 * **Reserved-name re-pinning.** The eight rlms reserved names are restored after
   every execution, so model code cannot shadow the scaffold for a later turn.
+  The names arrive as a constructor argument rather than an import: this module
+  runs in a guest that has no rlms, and `from rlm.environments.base_env import
+  RESERVED_TOOL_NAMES` made it unimportable there. The host reads the genuine
+  value from the pinned package and passes it in (BUILD_PLAN section 5.6,
+  option B). What that preserves is *which side holds the authority* — the pin
+  stays where rlms actually lives, and INTERFACES section 8's conformance test
+  still fails first if the set moves. A hand-written `rlm` module in the guest
+  asserting eight strings on its own authority would be the shim S4 `[A]`
+  refused, because it fakes the pin rather than transmitting it.
 * **Repr-only marshaling.** `locals` crosses the seam as value reprs. A live
   socket, client, or credential-bearing object cannot ride back across, because
   the outgoing struct is built out of strings rather than filtered.
@@ -44,17 +53,10 @@ import uuid
 from contextlib import redirect_stderr, redirect_stdout
 from typing import Any, Callable
 
-from rlm.environments.base_env import RESERVED_TOOL_NAMES
-
 from repl_sandbox.capabilities import TRANSPORT_HOOK
 from repl_sandbox.config import MarshalCaps, SandboxConfig
 from repl_sandbox.errors import DeniedError
 from repl_sandbox.transport import require_host_cid
-
-#: The rlms reserved namespace names, read from the pinned package rather than
-#: retyped. INTERFACES section 8 pins the contract to `rlms==0.1.3`; if the set
-#: moves, the conformance test fails before anything here does.
-RESERVED_NAMES: frozenset[str] = RESERVED_TOOL_NAMES
 
 #: Per-value ceiling on a marshalled `locals` entry, in bytes.
 #:
@@ -155,7 +157,20 @@ class GuestSupervisor:
         stub_source: str = "",
         marshal_caps: MarshalCaps | None = None,
         rpc_hook: Callable[[str, dict], dict] | None = None,
+        *,
+        reserved_names: frozenset[str],
     ) -> None:
+        #: The rlms reserved namespace names, supplied by the host from the
+        #: pinned package. Required and keyword-only, with no default: a default
+        #: would be this module asserting the set on its own authority, which is
+        #: the one property option B exists to avoid. A guest constructed without
+        #: it fails at construction rather than re-pinning against a guess.
+        if not isinstance(reserved_names, frozenset):
+            raise DeniedError(
+                "reserved_names must be a frozenset supplied by the host from the "
+                f"pinned rlms package, got {type(reserved_names).__name__}"
+            )
+        self._reserved_names = reserved_names
         self.config = config
         self.marshal_caps = marshal_caps or config.marshal_caps
         self.value_repr_bytes = DEFAULT_VALUE_REPR_BYTES
@@ -189,7 +204,7 @@ class GuestSupervisor:
 
         #: Reserved-name values restored after every turn.
         self._pins: dict[str, Any] = {
-            name: self._ns[name] for name in RESERVED_NAMES if name in self._ns
+            name: self._ns[name] for name in self._reserved_names if name in self._ns
         }
         self._restore_scaffold()
 
@@ -215,7 +230,7 @@ class GuestSupervisor:
         `answer` is rebound to a fresh empty dict each turn after its content is
         captured, so a turn's answer cannot leak into the next one.
         """
-        for name in RESERVED_NAMES:
+        for name in self._reserved_names:
             if name == "answer":
                 self._ns["answer"] = {}
             elif name in self._pins:
@@ -346,7 +361,11 @@ class GuestSupervisor:
         out: dict[str, dict] = {}
         remaining = self.locals_total_bytes
         for name, value in list(self._ns.items()):
-            if name.startswith("_") or name in RESERVED_NAMES or name in self._scaffold_names:
+            if (
+                name.startswith("_")
+                or name in self._reserved_names
+                or name in self._scaffold_names
+            ):
                 continue
             budget = min(self.value_repr_bytes, max(0, remaining))
             handle = f"spill:{uuid.uuid4().hex}"

@@ -732,6 +732,83 @@ value. The distinction is which side holds the authority, not whether the consta
 The one thing S6 should settle with the control port in hand rather than now: whether the names ride
 on `setup()` or on every `execute_code`. That depends on the op set S6 defines, which is why this is
 recorded as S6's decision instead of pre-empted here.
+
+**SETTLED 2026-07-24 — option B taken, and it rides with the scaffold rather than over the control
+port.** The sub-question above turned out to have a forced answer, and the forcing is worth more than
+the choice. The reserved names are consumed in `GuestSupervisor.__init__`, which builds `self._pins`
+and calls `_restore_scaffold()` before returning. The four control ops — `ping`, `load_context`,
+`exec`, `shutdown` — can only arrive at a supervisor that already exists. **So the control port
+cannot carry the names in time:** a value delivered on the first `exec` would find the pins already
+built, empty. What actually constructs the supervisor is `install_scaffold`, the launcher's
+out-of-band channel (`launcher.py`, `GuestHandle`), which is already the thing that carries
+construction-time material and has the same ordering constraint. The names travel with it.
+
+This is the third instance of one shape: **the record named a mechanism that cannot carry the
+property, and the property is preserved on a different surface** — after S3's peer CID (a claim about
+native vsock, carried as a claim about virtualisation) and S5's cgroups (a claim about containers on
+a host kernel, same). The phrase "delivered over the control port" above is the artifact; option B
+itself stands unchanged, because option B was never about the channel. It was about which side holds
+the authority.
+
+What landed:
+
+- `supervisor.py` no longer imports rlms at all — the one guest-side `rlm`-rooted import in the whole
+  transitive closure of the modules the guest loads. `reserved_names` is a **required keyword-only
+  argument with no default**, so a supervisor cannot be constructed against a guess; a default would
+  have been this module asserting the set on its own authority, which is the shim S4 `[A]` refused,
+  reached by omission instead of by decision.
+- `kata_repl.py` is the host-side authority read, because it is the one module already depending on
+  rlms for the contract it implements. `InProcessLauncher` defaults to the pinned value via a
+  function-local import — correct *there* and wrong in the supervisor, because that double runs in
+  the host interpreter where rlms is installed.
+- **A latent drift closed, found while tracing this.** `capabilities.py` carries a second,
+  hand-typed copy of the eight names, and it legitimately must ship into the guest, because
+  capability *registration* is validated guest-side and refusing a name needs the names. Nothing tied
+  that copy to the pinned package: both copies were compared against their own hand-written literals,
+  so a set that moved upstream would have reddened `test_rlms_conformance.py` while `capabilities.py`
+  drifted silently. `test_every_in_repo_copy_of_the_reserved_names_tracks_the_pinned_package` now
+  makes "the conformance test fails first" true of every copy rather than of one.
+- Each of the three new checks was **watched failing against planted breakage** before being trusted
+  (rule 19(c)): a drifted name in `capabilities.py`, the guest-side rlms import restored, and a
+  default given to `reserved_names`. `pytest` 1,004 → 1,007.
+
+**The equivalence target is fixed in [CONFORMANCE §6](REPL_SANDBOX_CONFORMANCE.md), before the
+harness exists**, with twelve clauses predicted FALSE today — the spike's expected yield, not a
+defect log against it.
+
+**S6's remaining half, and why it is not a probe-authoring job.** `KataLauncher.boot` raises
+`NotImplementedError` after the G1 gate passes: guest-image mint, Cloud Hypervisor launch with an
+assigned CID, and supervisor readiness are unbuilt, and the package has no guest entry point — the
+only `GuestSupervisor` construction is inside `InProcessGuest`, a host-side double that provides no
+isolation. S2 proved the `ctr run --runtime io.containerd.kata.v2` path boots a stateful guest, but a
+spike driving `ctr` by hand is not that launch path. Until it exists, an S6 PASS would be a claim
+about `KataREPL` and not yet about `KataLauncher`, and the equivalence harness has nothing to point
+at but the double. **That is the next build, and it is the one place where a harness would otherwise
+reach for `InProcessLauncher` and quietly measure the host talking to itself** — which is exactly
+what the `--in-process` arm below exists to catch.
+
+**Falsifier arms, designed against how a PASS could lie.** Two, because S6 makes two structurally
+different kinds of claim, and the equivalence comparator is a *sameness* detector that can never be
+its own falsifier's detector — the better the boundary works, the more it wants both sides to look
+identical.
+
+| flag | removes | claim it falsifies | detected solely by |
+|---|---|---|---|
+| `--in-process` | the microVM — `InProcessLauncher` substituted, with its `rpc_hook` dialing the real host listener so the crossing is forged as convincingly as possible | "the compared round-trips crossed the Kata boundary" | a boot identity (`/proc/sys/kernel/random/boot_id` plus `uname -r`) returned *through* `execute_code` and cross-read out-of-band from the same sandbox. `boot_id` supplies per-run freshness, so a replayed identity cannot satisfy it |
+| `--mutate-guest=<defect>` | one declared observable from the guest's reply, on the wire, KataREPL side only — swept over `drop-final-answer`, `blank-stderr`, `empty-locals`, `wrong-local-value`, `no-restore-scaffold`, `nonnumeric-execution-time`, `drop-context-binding`, `amnesia` | "the comparator can tell same from different at cell X" | the comparator, reddening at **exactly one** cell. Zero cells means X is vacuous; more than one means the cells are coupled. Both are failures of the arm |
+
+Rejected, with reasons worth keeping: a canned-reply `--negative-control` in the S3/S5 sense is
+**strictly dominated here** — it is caught by the witness *and* by the comparator the moment any
+block leaves the canned set, which is S4 `[R]`'s "starts with select" leak in a new costume;
+`--in-process` is the better forgery on the same claim precisely because it runs the real
+`GuestSupervisor` and so answers arbitrary blocks correctly. `--no-context` fires nothing, because it
+removes an input from *both* arms and the table stays green — repaired into
+`--mutate-guest=drop-context-binding`, which removes the binding on one side only and therefore has
+something to disagree with. `--no-harden` can only ever report DID NOT FIRE, since Tier-0 changes no
+observable the table reads. One construction constraint follows from the first arm: the probe must
+**not** gate on `launcher.preflight()`, because `InProcessLauncher.preflight()` never returns ok and
+would catch the arm before the provenance signal could — giving it a second detector and making it
+noisy.
 - **Exit acceptance → enforcing surface:**
   - **[R]** a scripted equivalence harness: an unedited load → `execute_code` round-trips with the same
     observable `REPLResult` shape as `LocalREPL`. Enforcing surface: the **`KataREPL` backend + the rlms
