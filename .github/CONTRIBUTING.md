@@ -4,10 +4,12 @@ Welcome to the Trellis Engine. This project relies on extremely strict, non-trad
 To avoid corrupting the determinism of the pipeline, all contributors must adhere to the following rules.
 
 > Working with a coding agent, CLI, or harness? Its entry point is
-> [`AGENTS.md`](../AGENTS.md) at the repository root — the study protocol,
-> the navigation map, and the permanent hard rules (which include and
-> extend the rules below). The collaborator's live task supplies the current
-> objective; `HANDOFF.md` is a deprecated compatibility stub.
+> [`AGENTS.md`](../AGENTS.md) at the repository root — the project basis, the
+> annotated file tree, and the index that fans out to [`AMBIENT.md`](../AMBIENT.md),
+> which binds every session, and to [`.claude/rules/`](../.claude/rules/), one file
+> per kind of work (they include and extend the rules below). The collaborator's
+> live task supplies the current objective; `HANDOFF.md` is a deprecated
+> compatibility stub.
 
 ## 1. Modifying Graph Schemas
 The Trellis LLM extraction pipeline enforces structure using strictly typed JSON (via Zod). 

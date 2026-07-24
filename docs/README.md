@@ -17,10 +17,10 @@ Paths here are markdown links, not backticked strings, so
 ### 1. Orientation (start here)
 
 - **Root [`AGENTS.md`](../AGENTS.md)** — the entry point for coding agents, CLIs, and
-  harnesses: the study protocol, the navigation map (which directory
-  owns what; where each behavior's enforcement and pins live), and the
-  permanent hard rules. Deliberately invariant-only; the collaborator's
-  live task supplies volatile objective and scope.
+  harnesses: the project basis, the annotated file tree, and the index that
+  fans out to [`AMBIENT.md`](../AMBIENT.md), binding every session, and to
+  [`.claude/rules/`](../.claude/rules/), one file per kind of work. The
+  collaborator's live task supplies objective and scope.
 - **Root [`README.md`](../README.md)** — the bounded repository router and fast path.
 - **[`operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md)** —
   the full system explanation and operator manual formerly housed at root.
