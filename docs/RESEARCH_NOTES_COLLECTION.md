@@ -3,7 +3,7 @@
 **Status: living pointer record; ingestion contract PROPOSED.**
 July 18, 2026. Docs only — nothing in this file authorizes
 implementation. Any consumer of the collection is its own bounded
-feature under the DDD rule (root `AGENTS.md` rule 15: no implementation
+feature under the DDD rule (root `AMBIENT.md` rule 15: no implementation
 without a separately authorized bounded feature naming its non-test
 entrypoint).
 

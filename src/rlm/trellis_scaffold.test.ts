@@ -60,7 +60,7 @@ describe('S2a: the UPSUM budget constant', () => {
 
 // the July 19, 2026 harness-invariants pass (collaborator direction, owner-approved). The budget was
 // advisory: a bare int plus prose asking the model to compute
-// len(str(upsum)) and self-correct. AGENTS.md rule 8 says tooling shape
+// len(str(upsum)) and self-correct. .claude/rules/measurement-and-reporting.md rule 8 says tooling shape
 // closes a failure class and prompt text only reinforces, so the check
 // moved into the engine.
 describe('S2a: the UPSUM commit gate (the July 19, 2026 pass)', () => {

@@ -274,7 +274,7 @@ image `docker.io/library/python:3.12-slim`.
 | negative control | `--negative-control` destroys and re-boots the guest between turns 2 and 3, everything else identical → **exit 3, DETECTED**: `NameError: name 'x' is not defined`, two pids, two boot ids |
 
 **The negative control is the load-bearing half.** A persistence probe that cannot distinguish a
-live guest from a fresh one proves nothing (AGENTS.md §4 (Hard rules) rule 19(c)), and the three
+live guest from a fresh one proves nothing (.claude/rules/measurement-and-reporting.md rule 19(c)), and the three
 independent signals — the namespace, the worker pid, the guest boot id — all fired on the planted
 break rather than one of them carrying the result alone.
 
@@ -706,7 +706,7 @@ ever running this on a cloud VM**, and it is scheduled alongside S3 rather than 
 milestone.
 
 The measurement discipline this section originally leaned on (a null needs a positive control,
-headlines at n=1–2 are weak — AGENTS.md §4 (Hard rules) rule 11) exists because **model behavior is
+headlines at n=1–2 are weak — .claude/rules/measurement-and-reporting.md rule 11) exists because **model behavior is
 stochastic**. It transfers poorly to a deterministic infrastructure fact: the five S2 runs differ by
 64 ms of boot time and in nothing else, and a sixth run on different silicon would report the same
 `42,84`. Replication is not the instrument that would have caught a wrong S2.

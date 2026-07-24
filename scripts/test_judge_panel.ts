@@ -5,7 +5,7 @@
  * over FOUR_JUDGE_DESIGN.md §6–§7 (drills 1–3: panel-composition
  * oracle with the no-global-section section, blindness, judge-contest).
  * Entrypoint: `npm run test:judge-panel` (the non-test caller,
- * AGENTS.md rule 15).
+ * AMBIENT.md rule 15).
  *
  * Modes:
  *   default                      run sections; exit 0 iff all green

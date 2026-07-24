@@ -48,7 +48,7 @@ spawn only when isolation or context economy earns it.
 **Also do not use self-play to prove an engineered instruction moves behavior** —
 to A/B a prompt, skill, or agent instruction against a base-model baseline
 ("does it help"). That outcome is *entailed* by what an instruction is, not
-uncertain, so the run measures nothing and burns credits (AGENTS.md rule 20).
+uncertain, so the run measures nothing and burns credits (`.claude/rules/measurement-and-reporting.md` rule 20).
 Self-play is for *uncertain* outcomes — a subjective or stake-corruptible
 **output**, or a failure mode — never for confirming that a well-engineered spec
 constrains behavior. Measure an instruction against its engineering target, never

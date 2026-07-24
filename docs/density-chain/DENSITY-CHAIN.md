@@ -56,7 +56,7 @@ are at the end ([Provenance & method](#provenance--method)).
    `implemented, not accepted` ≠ `adopted / ratified-as-principle (no build)` ≠ `proposed /
    design-record` ≠ `recorded-research` ≠ `rolled back / retired`. Blurring them is the failure this
    house has paid for repeatedly.
-4. **Reachability is reported separately from correctness.** `AGENTS.md` hard rule 15 — *correct is
+4. **Reachability is reported separately from correctness.** `AMBIENT.md` hard rule 15 — *correct is
    not the same claim as reachable*. Each branch carries a **no non-test caller** list. Those are
    findings, not accusations.
 5. **Every number here is *as recorded*, never re-run** — with one dated carve-out. No sub-agent has
@@ -434,7 +434,7 @@ authoring, and the two flywheels. Not the Merkle substrate it promotes into.*
   `research.sourceNodeIds`; the loader refuses non-active, so it never composes.
   `estimation-discipline` was **retired the same day it was measured**, on its own pre-stated
   criterion; its doctrine — *behavioral failure classes close by tooling shape, not prompt modules* —
-  became retrieval discipline's held-state dedup and budgets, default-on, and later AGENTS.md rule 8.
+  became retrieval discipline's held-state dedup and budgets, default-on, and later `.claude/rules/measurement-and-reporting.md` rule 8.
   `TRELLIS_CITATION_ENTAIL` is prototyped, off. Tool-bearing modules are rejected by kernel edition 1.
   **No authored module composes by default.**
 - **T5 — future plans.** Open: per-claim citation mapping, deferred until a class needs it; v2
@@ -470,7 +470,7 @@ beneath it.*
   keys on those modes. Defeat is a boolean — `contested`/`contestedReason`/`contestedAt`, spread across
   forty files. `judge_explain.ts` prints "doubt-dominant", but that is subjective-logic disbelief, not
   the tier. User gates ship as CLI `--confirm` flags on `promote_segment.ts` and `judge_ratify.ts` —
-  custody gates, not standing moves. Nine `.claude/skills/` and AGENTS.md rule 17 carry the composition
+  custody gates, not standing moves. Nine `.claude/skills/` and `.claude/rules/composed-evaluators.md` rule 17 carry the composition
   law.
 - **T3 — with receipts.** `e5e7844` (#138, 2026-07-20) ratified the standing model and the doubts
   workspace **as principle** — 179 and 575 lines, **zero `src/` changes**; `8926e12` (#137) adopted
@@ -1064,7 +1064,7 @@ listed in the folder [`README.md`](README.md).
   REPL sandbox was reachable only through `docs/product/repl-sandbox/`, missing its code directory
   (`src/repl_sandbox/`); both rows now exist in `AGENTS.md` §2. The self-describing records
   (`SELF_DESCRIBING_SURFACES.md`, `HARNESS_SELF_MODEL.md`) are cited from `docs/ORIENTATION.md` D4,
-  `docs/GLOSSARY.md`, and `AGENTS.md` rule 20.
+  `docs/GLOSSARY.md`, and `.claude/rules/measurement-and-reporting.md` rule 20.
 - **Several documents disagree with the log.** Phase numbering post-dates the code it labels; the
   archive's session range exceeds anything the log names; PR order and merge order diverge (the
   density-chain removal merged *before* two later PRs, so it is not the final act it looks like); and

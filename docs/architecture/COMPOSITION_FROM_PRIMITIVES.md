@@ -169,7 +169,7 @@ governing record instead of retrieving the record, on a load-bearing
 act. It is the pillar's "never copies" applied to authority rather than
 bytes, and it is stated normatively in
 [`CODE_MEDIATED_TEXT.md`](CODE_MEDIATED_TEXT.md) §2.9, with the
-operational rule at `AGENTS.md` 18 and the authority ordering it
+operational rule at `AMBIENT.md` 18 and the authority ordering it
 depends on at `AGENTS.md` §1.5. It occurred three times in this one
 session; the instances below are the first and second.
 
@@ -192,7 +192,7 @@ Three failures made it reachable:
 
 The generalization worth keeping: **a green suite proves the instance
 was built correctly and says nothing about whether it should exist.**
-The house already knows correct ≠ reachable (`AGENTS.md` rule 15); this
+The house already knows correct ≠ reachable (`AMBIENT.md` rule 15); this
 adds correct ≠ *the right kind of thing*.
 
 ## 6. What is owed, and by whom

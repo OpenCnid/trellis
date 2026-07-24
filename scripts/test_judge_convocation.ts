@@ -5,7 +5,7 @@
  * §6 (behavior → enforcement → pin; every row maps to a section) and §7
  * (drill shape), in the test_judge_intake.ts mold.
  * Entrypoint: `npm run test:judge-convocation` (the non-test caller,
- * AGENTS.md rule 15).
+ * AMBIENT.md rule 15).
  *
  * Modes:
  *   default                      run sections; exit 0 iff all green

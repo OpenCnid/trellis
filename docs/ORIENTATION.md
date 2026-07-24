@@ -278,7 +278,7 @@ the authority.*
 | Merkle AST | content-addressed tree; identity is the SHA-256 preimage | [`docs/architecture/MATHEMATICAL_FOUNDATIONS.md`](architecture/MATHEMATICAL_FOUNDATIONS.md) |
 | Verified ingest | persist → read-back re-hash → membership → Merkle diff, one transaction | [`src/core/ingestion/`](../src/core/ingestion/) |
 | sourceNodeIds | the only values with provenance standing; 64-hex, must exist | `GLOSSARY.md`, [`src/rlm/trellis_tools.py`](../src/rlm/trellis_tools.py) |
-| Live-by-default retrieval | discovery reads current-version blocks only; history by explicit hash | [`AGENTS.md`](../AGENTS.md) §4 rule 13 |
+| Live-by-default retrieval | discovery reads current-version blocks only; history by explicit hash | `.claude/rules/substrate-writes.md` rule 13 |
 | Repository ingestion | per-file documents, snapshots, tombstones; paid extraction gated | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md), [`docs/benchmarks/REPOSITORY_INGESTION_REPORT.md`](benchmarks/REPOSITORY_INGESTION_REPORT.md) |
 | Structural chunking | cAST-style size-budgeted syntax-aligned code blocks | [`docs/architecture/STRUCTURAL_CHUNKING.md`](architecture/STRUCTURAL_CHUNKING.md) |
 
@@ -288,7 +288,7 @@ the authority.*
 |---|---|---|
 | Contested / quarantine | evidence died → excluded, audited, recoverable | `GLOSSARY.md`, [`src/core/graph/`](../src/core/graph/) |
 | Invalidation sweep | Merkle diff → contest exactly the dependent beliefs | [`docs/benchmarks/UPDATE_DRILL_REPORT.md`](benchmarks/UPDATE_DRILL_REPORT.md) |
-| Entity identity | immutable; equivalence is a `SAME_AS` overlay belief | [`AGENTS.md`](../AGENTS.md) §4 rule 3 |
+| Entity identity | immutable; equivalence is a `SAME_AS` overlay belief | `.claude/rules/substrate-writes.md` rule 3 |
 | Write path | `write_derived_insight`, the single agentic mutation | [`src/rlm/trellis_tools.py`](../src/rlm/trellis_tools.py) |
 | Retrieval-membership gate | cite only what this run actually retrieved | [`docs/architecture/PROVENANCE_THREADING.md`](architecture/PROVENANCE_THREADING.md) |
 
@@ -309,7 +309,7 @@ the authority.*
 | Module | manifest + brace-free addendum; sha-pinned composition | [`modules/`](../modules/), [`src/rlm/trellis_modules.py`](../src/rlm/trellis_modules.py) |
 | Grounded authoring | scoped corpus, harness-pinned citations, derivation gate | [`docs/architecture/GROUNDED_AUTHORING.md`](architecture/GROUNDED_AUTHORING.md) |
 | Provenance laundering | real-but-unrelated hashes under a count incentive; entailment catches it | [`docs/benchmarks/PROVENANCE_CITATION_AB_REPORT.md`](benchmarks/PROVENANCE_CITATION_AB_REPORT.md) |
-| Tooling over prompts | failure classes close by tooling shape; prompts reinforce | [`AGENTS.md`](../AGENTS.md) §4 rule 8 |
+| Tooling over prompts | failure classes close by tooling shape; prompts reinforce | `.claude/rules/measurement-and-reporting.md` rule 8 |
 
 ### The text discipline
 
@@ -344,8 +344,8 @@ the authority.*
 | Engineering loop | the session loop mechanized; status in the acceptance ledger only | [`docs/architecture/ENGINEERING_LOOP.md`](architecture/ENGINEERING_LOOP.md), [`tools/engineering-loop/SPEC.md`](../tools/engineering-loop/SPEC.md) |
 | Change triple | behavior → enforcing tooling → drift-detecting pin | [`AGENTS.md`](../AGENTS.md) §3 |
 | Byte-identical-when-absent | unconfigured feature = byte-identical prompt and behavior, pinned | `GLOSSARY.md` |
-| Correct ≠ reachable | name the non-test caller or say there is none | [`AGENTS.md`](../AGENTS.md) §4 rule 15 |
-| Protected pause | refuses the named effect and nothing more | [`AGENTS.md`](../AGENTS.md) §4 rule 14 |
+| Correct ≠ reachable | name the non-test caller or say there is none | `AMBIENT.md` rule 15 |
+| Protected pause | refuses the named effect and nothing more | `AMBIENT.md` rule 14 |
 | Owner gates | promotion, registration, paid spend, edit root, merges | [`docs/operations/OPERATOR_MANUAL.md`](operations/OPERATOR_MANUAL.md) |
 | Honest ledger | open critiques and unproven claims, kept current | [`docs/benchmarks/CRITIQUE_AND_FUTURE.md`](benchmarks/CRITIQUE_AND_FUTURE.md) |
 | Agent-first authoring canon | every document is a prompt for a reader who cannot ask | [`docs/product/epistemic-support/IEG_TEACHINGS.md`](product/epistemic-support/IEG_TEACHINGS.md) §6 |
@@ -373,7 +373,7 @@ inside the same file.
 | `docs/RESEARCH_NOTES_COLLECTION.md` §3.1 | **RATIFIED** (July 19, 2026) — consultation and repair for external sources |
 | `docs/architecture/SESSION_GOVERNANCE.md` | **ADOPTED AND APPLIED** (July 17, 2026) — live instruction vs committed record; scoped to the coding-agent session contract only |
 | `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` | **FOUNDATIONAL LESSON** (July 19, 2026) — no default instances; authorizes no build |
-| `docs/architecture/HARNESS_SELF_MODEL.md` | **PRINCIPLE ENDORSED** (July 19, 2026); **Workstream B IMPLEMENTATION AUTHORIZED** (July 23, 2026, §12) — Workstream A and every paid probe stay gated by §8; §11 carries the case behind `AGENTS.md` rule 20 |
+| `docs/architecture/HARNESS_SELF_MODEL.md` | **PRINCIPLE ENDORSED** (July 19, 2026); **Workstream B IMPLEMENTATION AUTHORIZED** (July 23, 2026, §12) — Workstream A and every paid probe stay gated by §8; §11 carries the case behind `.claude/rules/measurement-and-reporting.md` rule 20 |
 | `docs/architecture/SELF_DESCRIBING_SURFACES.md` | **RATIFIED** (July 23, 2026, §9) — surfaces that describe themselves, and `llm_help`; direction and design, with the build's remaining gates in §9.3 |
 | `docs/architecture/LLM_HELP_SPEC.md` | **BUILD SPECIFICATION** for the authorized Workstream B (July 23, 2026, §9) — standing derives from `SELF_DESCRIBING_SURFACES.md`, never independent |
 | `docs/architecture/DOUBTS_WORKSPACE.md` | **DESIGN — PROPOSED** (July 20, 2026) — the −1 tier; nothing built, nothing authorized |

@@ -342,7 +342,7 @@ the record nor the code said plainly is that the *raw* path stayed fully
 reachable: `splice(relpath, start, end, new_lines)` took a bare index
 pair with no anchor, no verification, and no way for an operator to
 remove it. The preference lived in the addendum ("PREFER THE GUARDED
-FAMILY"), which under AGENTS.md rule 8 is reinforcement, not closure.
+FAMILY"), which under `.claude/rules/measurement-and-reporting.md` rule 8 is reinforcement, not closure.
 
 The `textedit_raw_splices` / `textedit_guarded_ops` split (§8) was built
 so an acceptance criterion could pre-state "a guarded-only run is

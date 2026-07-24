@@ -47,7 +47,7 @@ partial, and the guarantee does not weaken.
 ## 1. Origin
 
 The July 18–19, 2026 audit of the whole REPL construction found
-AGENTS.md rule 8 — *tooling shape closes a failure class; prompt text
+`.claude/rules/measurement-and-reporting.md` rule 8 — *tooling shape closes a failure class; prompt text
 only reinforces* — violated in three places inside the harness that
 states it: an advisory `UPSUM_BUDGET`, a raw `splice()` reachable with
 the guarded family merely "preferred", and task precedence taught as a
@@ -280,7 +280,7 @@ quality is open and unmeasured; the probe-round mold would answer it.
 | STRUCTURAL_SPLICE.md §9 | the guarded-only mode is the first state-dependent self-description in the kernel — §2.1's worked example |
 | PROVENANCE_THREADING.md | `_retrieved_addresses` is the existing single-surface read buffer §6 generalizes; T1/T2 taxonomy bounds what the buffer can catch |
 | GROUNDED_AUTHORING.md | §7's verification tiers cover the semantic residual §6.1 deliberately leaves |
-| AGENTS.md rules 8 and 15 | the law is rule 8 made checkable; §4's voice-collapse defect is rule 15's shape applied to prompt claims rather than capabilities |
+| `.claude/rules/measurement-and-reporting.md` rule 8 and `AMBIENT.md` rule 15 | the law is rule 8 made checkable; §4's voice-collapse defect is rule 15's shape applied to prompt claims rather than capabilities |
 
 ## 10. Phase 0 executed — what it found, and what it corrected
 
@@ -390,10 +390,10 @@ Not authorized by this section. It is a bounded feature and wants its own
 authorization, like everything else in §8 (Scope, sequencing, and the
 authorization gate).
 
-## 11. The case behind AGENTS.md rule 20 (dated entry — July 20, 2026)
+## 11. The case behind .claude/rules/measurement-and-reporting.md rule 20 (dated entry — July 20, 2026)
 
 Recorded July 22, 2026 at owner direction, because the rule it grounds
-had no in-repo record: `AGENTS.md` rule 20 cited this case, and the only
+had no in-repo record: `.claude/rules/measurement-and-reporting.md` rule 20 cited this case, and the only
 corroborating text was `.claude/skills/self-play/SKILL.md`, which cites
 rule 20 back. A rule whose sole support is a derived artifact citing the
 rule is circular, and rule 18 forbids exactly that substitution.
@@ -402,7 +402,7 @@ rule is circular, and rule 18 forbids exactly that substitution.
 authored `self-play` skill by running it against a no-skill baseline —
 a with-skill/without-skill comparison asking whether the skill improved
 the output. The run re-violated the owner's July 11, 2026
-tooling-over-prompts direction (`AGENTS.md` rule 8), which had already
+tooling-over-prompts direction (`.claude/rules/measurement-and-reporting.md` rule 8), which had already
 ruled that "prove the prompt moves behavior" is anti-useful work:
 measurement harnesses close *tooling* failure classes, and prompt text
 only reinforces.
@@ -434,7 +434,7 @@ the new version still does what the old one did. What is barred is the
 new-versus-null baseline.
 
 **Standing.** This entry records a case and the direction already
-ratified in `AGENTS.md` rules 8 and 20. It authorizes no build and
+ratified in `.claude/rules/measurement-and-reporting.md` rules 8 and 20. It authorizes no build and
 changes no gate.
 
 ## 12. Workstream B authorized (dated entry — July 23, 2026, owner, in session)

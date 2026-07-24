@@ -59,7 +59,7 @@ Modes:
                       DETECTED (exit 3) is the healthy result; a pass means this
                       probe cannot tell a crossed boundary from a guest talking
                       to itself, and therefore proves nothing about the bridge
-                      (AGENTS.md section 4 rule 19(c)).
+                      (.claude/rules/measurement-and-reporting.md rule 19(c)).
   --native-vsock      bind the host listener with `AF_VSOCK` on `VMADDR_CID_ANY`
                       instead of the hybrid Unix socket. Expected to fail to
                       receive anything under Cloud Hypervisor; run it to check

@@ -34,7 +34,7 @@ Modes:
                       FAIL and this script must SAY SO: exit 3 is the healthy
                       result. Exit 0 means the probe cannot tell a persistent
                       guest from a fresh one and therefore proves nothing
-                      (AGENTS.md section 4 rule 19(c)).
+                      (.claude/rules/measurement-and-reporting.md rule 19(c)).
   --keep              leave the sandbox running (skips the teardown claim)
   --json              emit the observation record as JSON on stdout
 """

@@ -16,7 +16,7 @@ the conversation.
 track whose local-model phase is this project's instrument
 prerequisite), `MODEL_BACKEND_SEAM.md` + `MODEL_BACKEND_HOSTED_ARM.md`
 (the A/B machinery this project inherits), the tooling-over-prompts
-direction (`AGENTS.md` §4 rule 8), and the register mold
+direction (`.claude/rules/measurement-and-reporting.md` rule 8), and the register mold
 (`docs/product/epistemic-support/RESEARCH_MAP.md` — claims carry
 evidence classes and falsifiers).
 

@@ -4,7 +4,7 @@
  * Specification: docs/product/epistemic-support/ORACLE_DRILL_PROPOSAL.md
  * Normative arithmetic: docs/architecture/EPISTEMIC_SUPPORT.md §3–§4.
  * Entrypoint: `npm run test:support-oracle` (the non-test caller,
- * AGENTS.md rule 15).
+ * AMBIENT.md rule 15).
  *
  * Modes:
  *   default                      run sections; exit 0 iff all green
