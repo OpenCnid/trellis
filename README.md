@@ -15,6 +15,12 @@ human running a gated promotion command, and when a source changes, a Merkle
 diff marks every belief that depended on the dead bytes contested — quarantined
 and auditable rather than quietly wrong.
 
+The same rule turns on the system itself. Trellis writes its own extensions as
+modules, and each one lands the way a belief does: carrying research provenance,
+gated by an operator, and contested by that same sweep when the evidence under
+it dies. Two modules are active today, one has been retired, and one is
+contested — a capability here is held to the standard its knowledge is.
+
 > **Agents, LLMs, and coding harnesses start at [`AGENTS.md`](AGENTS.md).** It
 > carries the project basis, the annotated file tree, and an index that fans out
 > to [`AMBIENT.md`](AMBIENT.md), which binds every session whatever the task,
@@ -35,9 +41,6 @@ and auditable rather than quietly wrong.
    write path.
 6. The model never counts and never copies: locations are engine-computed and
    existing bytes move through guarded code operations.
-7. The system's own operating instructions are versioned modules governed as
-   beliefs: they cite promoted sources and are contested by the same sweep when
-   that evidence dies.
 
 ## Fast path
 
