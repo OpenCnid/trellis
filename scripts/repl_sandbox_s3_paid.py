@@ -14,7 +14,7 @@ engine-fidelity check the house calls adoption. Entrypoint:
 fan-out slice, and reports the dollars the engine actually charged. The house cap
 is $5/run and it is not merely documented here: `LMCaps.spend_usd` is a
 session-terminal hard-stop inside the LM handler, so the boundary itself bounds the
-bill. Estimate before, report after (AGENTS.md section 4).
+bill. Estimate before, report after (.claude/rules/spend-and-live-infrastructure.md rule 7).
 
 **Why this reuses the `[R]` probe rather than re-deriving it.** The boot, the
 hybrid-vsock bridge discovery, the host-side witness, the source shipment and the

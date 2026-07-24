@@ -30,8 +30,8 @@ else. Your job is to return each claim to one home while leaving intact every
 repetition that earns its place.
 
 The governed set is the root contract's files plus `docs/architecture/`,
-`docs/product/`, and the directory-scoped `AGENTS.md` files. `AGENTS.md` §4
-carries the rules that bind this work; `docs/architecture/` carries the records
+`docs/product/`, and the directory-scoped `AGENTS.md` files. `AMBIENT.md` and `.claude/rules/`
+carry the rules that bind this work; `docs/architecture/` carries the records
 that own the facts.
 </context>
 

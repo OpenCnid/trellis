@@ -5,7 +5,7 @@ This session is building a judge, rubric, panel, defeater, or sub-agent.
 `docs/architecture/COMPOSITION_FROM_PRIMITIVES.md` and the ceremony is
 `docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md`. Rule 16
 governs these bytes, rule 8 governs how a failure class gets closed, and
-rule 21 is the cheapest move when a composition is underdetermined.
+rule 21(a) is the cheapest move when a composition is underdetermined.
 
 ## What the repository holds, and what a run holds
 

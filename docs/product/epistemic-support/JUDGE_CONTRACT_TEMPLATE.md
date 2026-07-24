@@ -46,7 +46,7 @@ content, `{...}` harness-resolved components, `[...]` collections,
 **Brace caveat.** These contracts are intended for the worker path
 (structured completion + `parseLlmResponse`), where literal braces are
 safe. If any frame is ever composed into an rlms-formatted prompt, the
-brace-freedom contract applies (`AGENTS.md` §4 rule 6) and the frame
+brace-freedom contract applies (`.claude/rules/prompt-authoring.md` rule 6) and the frame
 must be re-encoded first — do not paste these into module addenda.
 
 > **Dated correction (July 21, 2026) — the one taxonomy exception the

@@ -677,7 +677,7 @@ the write path, or the discoverability program.*
   returning 429. `TRELLIS_A2A_ENABLED` mounts the agent card (pre-auth) and `/a2a/v1` JSON-RPC —
   SendMessage, SendStreamingMessage, GetTask, CancelTask-declined — over TTL-bounded Redis task records.
   Outbound, `trellis_mcp.py` dials operator-configured stdio and Streamable-HTTP servers, counting MCP
-  calls separately from provenance-bearing tool calls. Governance: AGENTS.md's twenty-one hard rules and
+  calls separately from provenance-bearing tool calls. Governance: the twenty-three hard rules (now in AMBIENT.md and .claude/rules/) and
   §1.5, the session-governance ruling, the root contract and its checker.
 - **T3 — with receipts.** `264b007` built A2A hand-rolled with Zod, "zero new dependencies", recording
   `npm test` 468/57 (baseline 419/53), `test:a2a` 46 checks, 9 Compose assertions. `a2119c0` plus

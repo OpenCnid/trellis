@@ -4,7 +4,7 @@
 without having asked for it — a permission rule, an MCP server, a hook, a
 skill, a memory file, a sub-agent definition, a module addendum, a scheduled
 job.
-**Standing:** `AGENTS.md` §4 rule 21(b), carried here in full. 21(a) — the
+**Standing:** `AGENTS.md` rule 21(b), carried here in full. 21(a) — the
 question the collaborator alone can answer, and the one-question cap that
 governs it — keeps its text in `AGENTS.md` and is cited from here rather than
 restated; both letters stay citable and rule numbers stay append-only. Rule 8

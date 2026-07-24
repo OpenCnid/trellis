@@ -70,7 +70,7 @@ the totals were real and the *run's* totals were not.
 
 ### Binds rule 7 leans on that live outside this file
 
-- **The paid gate outranks a live instruction.** `AGENTS.md` §1.5
+- **The paid gate outranks a live instruction.** `docs/architecture/SESSION_GOVERNANCE.md`
   (Authority ordering) grants a collaborator's current session instruction
   authority over the committed record, then names what that ruling leaves
   untouched: `docs/architecture/SESSION_GOVERNANCE.md` §1.6 exempts the
@@ -80,7 +80,7 @@ the totals were real and the *run's* totals were not.
   withholds *that effect only*. Every unprotected preparatory step is
   discharged in the same turn the request is put — plan echo, drill,
   consumer enumeration, cost basis — and the request is specified in full.
-- **How the question is asked** is rule 21: one question in the chat
+- **How the question is asked** is rule 21(a): one question in the chat
   channel, in that same turn, then stop and wait for the answer.
 - **What a paid run may be for** is rules 11 and 20: a null counts as a
   finding only once a positive control has fired, and a test measures
@@ -103,7 +103,7 @@ session's true statement, a runbook's default, and a memory of last week are
 each beliefs; a command run now is an observation.
 
 1. **The observation covers four state kinds, plus the live ones.**
-   `AGENTS.md` §1.5 fixes the set a session observes rather than assumes:
+   `docs/architecture/SESSION_GOVERNANCE.md` fixes the set a session observes rather than assumes:
    **current Git, test, prompt-pin, and database state** — and it applies
    with equal force to containers, queues, volumes, and stores. Prompt-pin
    state earns its place: §5c's stale worker was dangerous precisely

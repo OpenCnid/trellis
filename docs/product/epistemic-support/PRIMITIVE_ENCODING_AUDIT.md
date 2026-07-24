@@ -34,7 +34,7 @@ a record that specified it.
 Every finding is re-checkable. Run the command; do not rely on this
 record's compression of the result — that is the derived-source
 substitution this program has already paid for twice
-(`CODE_MEDIATED_TEXT.md` §2.9, `AGENTS.md` 18).
+(`CODE_MEDIATED_TEXT.md` §2.9, `AMBIENT.md` 18).
 
 ## Finding 1 — `orientation` is specified in a ratified record and absent from the engine
 
@@ -185,7 +185,7 @@ and this finding never asked it.
 
 **This is derived-source substitution** — acting on a compression of a
 governing record instead of retrieving the record
-(`CODE_MEDIATED_TEXT.md` §2.9, `AGENTS.md` 18). Committed inside an
+(`CODE_MEDIATED_TEXT.md` §2.9, `AMBIENT.md` 18). Committed inside an
 audit whose subject is encodings drifting from the records they
 implement, by an author who had cited that failure class twice in the
 same session.

@@ -8,9 +8,9 @@ document states claims about the repository and lives under a measured
 `maxBytes` ceiling that `npm run check:repo-surface` refuses past. Rule 22
 keeps those claims true as the repository moves; rule 23 keeps an edit's
 own reach evidenced. The two numbers are new here and append-only, cited
-from the restructure. Rules 12, 18 and 19 keep their own text in
-`AGENTS.md` and apply to this work too; editing `AGENTS.md` itself writes
-prompt bytes, so rule 16 binds that edit.
+from the restructure. Rules 12 (`commit-and-pr.md`), 18 (`AMBIENT.md`), and 19 (split across the
+spend, commit, and measurement leaves) apply to this work too; editing
+`AGENTS.md` itself writes prompt bytes, so rule 16 binds that edit.
 
 ## 22. The document's claims about the repository
 

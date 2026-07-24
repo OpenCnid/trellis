@@ -97,4 +97,4 @@ its control state visible:
 A claim whose control field reads `silent` publishes as noise. A run that
 found no target stated publishes the target it set before running. Rule 18
 governs retrieving the record a target is read from; where the target is
-underdetermined by the task, rule 21 is the cheaper move than inventing one.
+underdetermined by the task, rule 21(a) is the cheaper move than inventing one.

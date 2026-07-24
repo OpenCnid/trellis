@@ -127,4 +127,4 @@ stream in before the Redis subscriber and the paid Python process exist.
 `isValidApiKey` compares with `crypto.timingSafeEqual` and short-circuits on a
 length mismatch. With no key configured the API stays open and logs a warning: a
 documented local-development state, so tightening it is a behavior change to put
-to the collaborator (rule 21) rather than a defect to fix in passing.
+to the collaborator (rule 21(a)) rather than a defect to fix in passing.

@@ -5,8 +5,8 @@ content-addressed store, the provenance it carries, or the surface that
 retrieves it. Each states something that is true of Trellis: an edit that
 makes one of these sentences false has corrupted the substrate rather than
 changed it. The numbers are cited from code and from other records and stay
-as they are. Rules 9, 18 and 19 keep their own text in `AGENTS.md` and apply
-to this work too.
+as they are. Rules 9 (`boundaries.md`), 18 (`AMBIENT.md`), and 19 (split across the
+spend, commit, and measurement leaves) apply to this work too.
 
 ## 2. Content addressing; a node is final at write time
 

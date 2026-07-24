@@ -52,11 +52,13 @@ docs/
   reference/               external protocol references
   density-chain/           the branching whole-system map
   archive/                 preserved history, never edited
+  README.md                the docs entrypoint and reading order
   GLOSSARY.md              canonical definitions of every load-bearing term
   ORIENTATION.md           the system at five densities, and the per-record standing index
   COLLABORATOR_BRIEFING.md · RESEARCH_NOTES_COLLECTION.md   collaborator context and research notes
 
 .claude/
+  README.md                what the harness surfaces are, and how the hooks route
   skills/                  the project skills, each firing on its kind of task
   rules/                   the per-task-type rule files, each firing on its kind of work
   ceremonies/              scheduled maintenance

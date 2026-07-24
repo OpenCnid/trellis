@@ -15,7 +15,7 @@ command run, bytes written. These five wait for nothing. A session has
 an objective, sits under whatever gates the collaborator has set, claims
 things are delivered, rests those claims on records, and can ask. That
 is the whole trigger. Numbers are append-only and cite exactly as they
-did in `AGENTS.md` §4. Rule 21 is split: 21(a) is here, and 21(b) —
+did before the restructure. Rule 21 is split: 21(a) is here, and 21(b) —
 asking before installing standing configuration — has a detectable
 trigger and lives with the task-type files.
 
@@ -72,7 +72,7 @@ a faithful one from the inside, so retrieval is what corrects it.
 `docs/architecture/CODE_MEDIATED_TEXT.md` §2.9 (the pillar applied to
 authority) generalizes the rule ratified for papers in
 `docs/RESEARCH_NOTES_COLLECTION.md` §3; Session 71 is the case;
-`AGENTS.md` §1.5 (Authority ordering) is the chain it rests on.
+`docs/architecture/SESSION_GOVERNANCE.md` and the trunk's authority ordering (code > glossary > prose, a live instruction outranking all three) are the chain it rests on.
 
 ## Rule 21(a) — ask the collaborator
 
@@ -93,4 +93,4 @@ put. Asking resolves ambiguity in an instruction; the whole of what
 closes a behavioral failure class is tooling shape (rule 8). A move with
 no surface stays invisible until it is named, and this rule is that
 name. Construction: `.claude/skills/spark-steering/SKILL.md` § *Ask
-first — the un-tool* (derived; `AGENTS.md` §1.5).
+first — the un-tool* (derived; `docs/architecture/SESSION_GOVERNANCE.md`).

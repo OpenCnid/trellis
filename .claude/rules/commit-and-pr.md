@@ -3,7 +3,7 @@
 **Covers:** sessions that write a commit message, open or update a pull
 request, or decide where a durable decision or a measured claim comes to
 rest.
-**Standing:** `AGENTS.md` §4 rules 10, 12 and 19(b), carried here in
+**Standing:** `AGENTS.md` rules 10, 12 and 19(b), carried here in
 full. Rule numbers are cited from code and from other records and are
 append-only. 19(b) is one lettered clause of rule 19; its siblings (a)
 and (c) are carried in the files for their own task types and the whole
@@ -30,7 +30,7 @@ different position.
 The count holds when a live instruction outranks the committed record.
 `docs/architecture/SESSION_GOVERNANCE.md` §1.6 (*What this does not
 touch*) names rule 10 among the invariants that ruling leaves standing,
-so no session-level direction moves it (`AGENTS.md` §1.5).
+so no session-level direction moves it (`docs/architecture/SESSION_GOVERNANCE.md`).
 
 ## Rule 12 — one branch, one PR, three resting places
 
