@@ -428,32 +428,33 @@ authoring, and the two flywheels. Not the Merkle substrate it promotes into.*
 
 - **T1 — essence.** Trust descends in three tiers and permanence ascends only through one gate.
   Verified bytes ground provenance-carrying beliefs; ephemeral working state holds process — plans,
-  notes, fetched results — origin-stamped, bounded, structurally unable to masquerade as provenance.
-  External material earns citability solely by an operator-approved crossing into verified ingest. The
-  system's own instructions are governed as beliefs: authored from a fixed corpus, cited by the harness
-  rather than the model, contested when their basis dies. Two flywheels compound — facts derived once,
-  capabilities built once — and verification is the bearing they spin on.
+  notes, fetched results — origin-stamped, bounded, never masquerading as provenance. External
+  material earns citability only by operator-approved crossing into ingest. The system's own
+  instructions are governed as beliefs: authored from a fixed corpus, cited by the harness not the
+  model, each naming its own falsifier, contested when their basis dies. Two flywheels compound —
+  facts derived once, capabilities built once — and verification is the bearing they spin on.
 - **T2 — current machinery.** Tier 1 `ast_nodes`, Tier 2 Neo4j beliefs, Tier 3 `TrellisWorkspace` —
-  uuid segments, wrapper-owned origin stamps, 500-char stubs, 128-segment / 4 MB bounds — serialized,
-  parked at `scratch:goal:<id>:task:<id>`, seeded forward by `seed_from_snapshot`. `npm run promote`
-  plans via `plan_promotion.ts`, refuses truncated or empty segments, runs the **unmodified** ingest,
-  stamps `documents.origin`. `modules/<name>/module.json` plus brace-free addenda compose under
-  `TRELLIS_MODULES`; `modules:register` MERGEs manifests as ordinary graph entities so the unchanged
-  sweep contests them. `--mode author` sees only the seeded corpus.
-- **T3 — with receipts.** Shipped: `9f25a5b` (#40) workspace, `eb1069f` (#42) lineage, `4bea09a` (#43)
-  promotion, `9a4e01f` (#44) registration, `5d9102d` (#50) grounded authoring. Probes measured **8
-  versus 4** repeated external calls and **0 versus 4** cross-task re-derivations. Module #1 laundered
-  **all 24 true citations** — every hash existed, none supported its claim; `ANCHOR_COVERAGE_THRESHOLD
-  = 0.3` against derived 0.69–0.83 versus corpus-blind 0.0. The A/B sweep: baseline 0% / **100%** / 67%
-  laundered by min-cite pressure, entailment 0% everywhere, readership blind in every cell. Module #2's
-  control: 50 runs, $2.3981, 25/25 both arms.
-- **T4 — the frontier.** `reasoning-templates` sits **contested** — an 8,335-byte addendum with empty
-  `research.sourceNodeIds`; the loader refuses non-active, so it never composes.
-  `estimation-discipline` was **retired the same day it was measured**, on its own pre-stated
-  criterion; its doctrine — *behavioral failure classes close by tooling shape, not prompt modules* —
-  became retrieval discipline's held-state dedup and budgets, default-on, and later AGENTS.md rule 8.
-  `TRELLIS_CITATION_ENTAIL` is prototyped, off. Tool-bearing modules are rejected by kernel edition 1.
-  **No authored module composes by default.**
+  origin-stamped segments parked at `scratch:goal:<id>:task:<id>`, seeded by `seed_from_snapshot`.
+  `npm run promote` refuses truncated segments, runs the **unmodified** ingest, stamps
+  `documents.origin`. `modules/<name>/module.json` plus brace-free addenda compose under
+  `TRELLIS_MODULES`; `modules:register` MERGEs manifests as entities the sweep contests.
+  `acceptance.zeroPaid` must contain its module's `name` — a `superRefine` inside
+  `readModuleManifest`, the one seam — so `npm run test:module -- <name>` is derived. `--mode author`
+  sees only the seeded corpus.
+- **T3 — with receipts.** Shipped: `9f25a5b` workspace, `eb1069f` lineage, `4bea09a` promotion,
+  `9a4e01f` registration, `5d9102d` grounded authoring. Probes: **8 versus 4** external calls, **0
+  versus 4** re-derivations. Module #1 laundered **all 24 true citations**, hashes real, none
+  supporting; `ANCHOR_COVERAGE_THRESHOLD = 0.3` against 0.69–0.83 derived, 0.0 corpus-blind. A/B
+  sweep: 0% / **100%** / 67% laundered under min-cite pressure, entailment 0%, readership blind;
+  module #2's control 50 runs, $2.3981, 25/25. All four manifests shared `npm run test:modules`, a
+  loader criterion nothing read, that lorem ipsum passes; a positive control confirms the refusal.
+- **T4 — the frontier.** `reasoning-templates` sits **contested**: an 8,335-byte addendum, empty
+  `research.sourceNodeIds`; non-active, so it never composes; the drill skips, not fails.
+  `estimation-discipline` was **retired on its own pre-stated criterion**, its doctrine (*failure
+  classes close by tooling shape, not prompt modules*) is now AGENTS.md rule 8. Equality replaced
+  containment: both prior holes closed; the Python reader `trellis_modules.py` deliberately mirrors
+  nothing; addendum quality stays structurally unobservable. `TRELLIS_CITATION_ENTAIL` is prototyped, off;
+  kernel edition 1 rejects tool-bearing modules. **No authored module composes by default.**
 - **T5 — future plans.** Open: per-claim citation mapping, deferred until a class needs it; v2
   embedding similarity, blocked because promotion policy `none` leaves blocks embedding-less — **0 of
   50** module #1 nodes were embedded — so `promote --embed` is proposed; v3 entailment as a derivation
@@ -461,14 +462,14 @@ authoring, and the two flywheels. Not the Merkle substrate it promotes into.*
   arXiv sources to earn active. Auto-landing remains proposed; v3 shipped belief-side only, never
   capability-side; **the operator gate is declared non-negotiable**.
 
-*Status ledger:* three-tier trust · workspace · lineage · promotion · module registry (#0, #1) ·
-grounded authoring · anchor gate — **shipped-pinned**; module #2 — **shipped then retired**;
-`reasoning-templates` — **contested**; laundering — **structurally undecidable, recorded residual**.
+*Status ledger:* workspace · lineage · promotion · registry (#0, #1) · grounded authoring · anchor
+gate — **shipped-pinned**; acceptance self-naming — **implemented, not accepted**;
+`estimation-discipline` — **shipped then retired**; `reasoning-templates` — **contested**; laundering
+— **undecidable, recorded residual**.
 *Cross-links:* [[C4]] (promotion writes through verified ingest; the sweep contests registered
 modules), [[C5]] (grounded authoring is the pillar applied to citations), [[C10]] (flywheel economics
 measured), [[C7]] ("autonomous promotion, operator gate is absolute" is the shipped ancestor of the
 user gate).
-
 #### C7 — standing, the user gate, and composition from primitives
 *Charter: the signed-ternary standing axis, the user gate and meet rule that move it, the
 doubt/objection/defeater tier with its corrosion bound and its `affirmation` mirror, and the law that

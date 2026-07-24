@@ -62,6 +62,7 @@
     "test:surfaces": "python scripts/test_surfaces.py",
     "test:answer-channel": "tsx scripts/test_answer_channel.ts",
     "test:modules": "tsx scripts/test_modules.ts",
+    "test:module": "tsx scripts/test_module.ts",
     "test:api-hardening": "tsx scripts/test_api_hardening.ts",
     "test:agent-loop": "tsx scripts/test_agent_loop.ts",
     "test:a2a": "tsx scripts/test_a2a.ts",

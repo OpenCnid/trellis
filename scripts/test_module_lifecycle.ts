@@ -7,7 +7,7 @@ import util from 'util';
 import IORedis from 'ioredis';
 import { pgPool, neo4jDriver } from '../src/config/db';
 import { config } from '../src/config/index';
-import { loadModule } from '../src/config/modules';
+import { loadModule, moduleAcceptanceCommand } from '../src/config/modules';
 import { parseMarkdownToAST } from '../src/core/ast/parser';
 import { flattenAST, collectExtractionBlocks, nodeText } from '../src/core/ast/traverse';
 import { findGloballyOrphanedAstNodeIds } from '../src/core/ast/registry';
@@ -184,6 +184,10 @@ function writeModuleDir(
     addendum: 'addendum.txt',
     tools: [],
     bounds: { addendumMaxBytes: 1024 },
+    // Derived from the one exported builder because the schema refuses any
+    // criterion that is not exactly the drill accepting this module. Before
+    // `...overrides` so a case can still override it to exercise the refusal.
+    acceptance: { zeroPaid: moduleAcceptanceCommand(name) },
     status: 'active',
     kernelCompat: 1,
     ...overrides,

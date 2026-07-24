@@ -75,6 +75,28 @@ describe('buildManifest', () => {
     expect(manifest.kernelCompat).toBe(1);
     expect(manifest.addendum).toBe(AUTHORED_ADDENDUM_FILENAME);
   });
+
+  it('derives acceptance.zeroPaid from the module name, so no two modules share a criterion', () => {
+    const pinned = pinnedSourceNodeIds(CORPUS);
+    const build = (moduleName: string) =>
+      buildManifest({ moduleName, purpose: DRAFT.purpose, sourceNodeIds: pinned });
+
+    expect(build('demo').acceptance.zeroPaid).toBe('npm run test:module -- demo');
+    // The criterion names its own module: the schema rule, and the reason
+    // the old constant was a defect — it was identical for every module.
+    expect(build('spatial-flywheel').acceptance.zeroPaid).toContain('spatial-flywheel');
+    expect(build('demo').acceptance.zeroPaid).not.toBe(build('other').acceptance.zeroPaid);
+  });
+
+  it('refuses to assemble a module that cannot name its own drill', () => {
+    const pinned = pinnedSourceNodeIds(CORPUS);
+    expect(() =>
+      buildManifest({ moduleName: '', purpose: DRAFT.purpose, sourceNodeIds: pinned })
+    ).toThrow(/no name/);
+    expect(() =>
+      buildManifest({ moduleName: '   ', purpose: DRAFT.purpose, sourceNodeIds: pinned })
+    ).toThrow(/no name/);
+  });
 });
 
 describe('buildResearchDoc', () => {
@@ -109,6 +131,9 @@ describe('assembled directory passes the module loader', () => {
 
     const read = readModuleManifest(moduleName, outDir);
     expect(read.research.sourceNodeIds).toEqual(pinned);
+    // The derived criterion survives the schema, which requires zeroPaid
+    // to contain the manifest's own name — an assembled module registers.
+    expect(read.acceptance.zeroPaid).toBe(`npm run test:module -- ${moduleName}`);
     const loaded = loadModule(moduleName, outDir);
     expect(loaded.addendumText).toContain('WORKSPACE DISCIPLINE PROTOCOL');
     expect(loaded.addendumText).not.toMatch(/[{}]/);
