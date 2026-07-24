@@ -97,6 +97,12 @@ TRANSPORT_HOOK = "_trellis_rpc"
 #: the way of model code by the leading underscore.
 UUID_ALIAS = "_trellis_uuid"
 
+#: Local name a generated stub builds its `args` map in before sending. Safe to
+#: interpolate beside parameter names because `_validate_identifier` refuses a
+#: leading underscore on every capability and property name, so no parameter can
+#: ever collide with it.
+ARGS_LOCAL = "_args"
+
 #: Guest CIDs are kernel-assigned per microVM; 0/1/2 are the reserved vsock CIDs
 #: (hypervisor / local / host), so a registration keyed below 3 is a host bug.
 FIRST_GUEST_CID = 3
@@ -573,23 +579,54 @@ class CapabilityRegistry:
 
     @staticmethod
     def _stub_source(descriptor: CapabilityDescriptor, port: str) -> str:
-        """One proxy stub. Every interpolation is a validated name or a `repr`."""
+        """One proxy stub. Every interpolation is a validated name or a `repr`.
+
+        **An optional parameter the caller left unset is omitted from `args`
+        rather than sent as an explicit null**, which is the same rule
+        `guest_rpc.lm_request_from_envelope` already applies on the LM port
+        ("a `model` of `None` is dropped rather than sent as null"). The DB port
+        had no equivalent, and the omission was a live defect rather than a
+        stylistic gap: every host-side op reads its optionals with
+        `args.get(name, default)`, and `.get` returns the *null*, not the
+        default, when the key is present carrying one. So the natural call the
+        rendered signature invites — `run_query(sql)`, with `params` left at its
+        `None` default — reached `Broker._op_run_query` as `params: None` and was
+        refused `denied: params must be a list, got NoneType`. Five of the ten
+        broker/algebra capabilities declare an optional parameter and every one
+        of them was reachable only by passing a value the signature says is
+        optional. Omitting the key here closes the whole class at one point,
+        rather than obliging each op to re-handle a null it never asked for.
+
+        A *required* parameter is always sent, `None` included: a missing
+        required argument is the host's to refuse, and dropping it would turn a
+        precise refusal into a vaguer one.
+        """
         params = _parameters(descriptor.typed_signature)
-        args = ", ".join(f"{param.name!r}: {param.name}" for param in params)
-        return "\n".join(
-            [
-                "",
-                descriptor.signature_source(),
-                descriptor.docstring_source(),
-                f"    return {TRANSPORT_HOOK}({port!r}, {{",
-                "        'v': _TRELLIS_ENVELOPE_VERSION,",
-                f"        'req_id': {UUID_ALIAS}.uuid4().hex,",
-                f"        'op': {descriptor.name!r},",
-                f"        'args': {{{args}}},",
-                "    })",
-                "",
-            ]
-        )
+        required = [param for param in params if param.default_source is None]
+        optional = [param for param in params if param.default_source is not None]
+
+        lines = [
+            "",
+            descriptor.signature_source(),
+            descriptor.docstring_source(),
+            "    {local} = {{{pairs}}}".format(
+                local=ARGS_LOCAL,
+                pairs=", ".join(f"{param.name!r}: {param.name}" for param in required),
+            ),
+        ]
+        for param in optional:
+            lines.append(f"    if {param.name} is not None:")
+            lines.append(f"        {ARGS_LOCAL}[{param.name!r}] = {param.name}")
+        lines += [
+            f"    return {TRANSPORT_HOOK}({port!r}, {{",
+            "        'v': _TRELLIS_ENVELOPE_VERSION,",
+            f"        'req_id': {UUID_ALIAS}.uuid4().hex,",
+            f"        'op': {descriptor.name!r},",
+            f"        'args': {ARGS_LOCAL},",
+            "    })",
+            "",
+        ]
+        return "\n".join(lines)
 
     # -- rendering 2: render (composer -> prompt) ---------------------------
 

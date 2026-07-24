@@ -6,7 +6,7 @@
   "addendum": "addendum.txt",
   "tools": [],
   "bounds": { "addendumMaxBytes": 8192 },
-  "acceptance": { "zeroPaid": "npm run test:modules" },
+  "acceptance": { "zeroPaid": "npm run test:module -- spatial-flywheel" },
   "status": "active",
   "kernelCompat": 1
 }

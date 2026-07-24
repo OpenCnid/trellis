@@ -288,6 +288,114 @@ Building it settled four things, and running it added three more:
   that never could have held the secret returns "nothing found" identically whether the property holds
   or the grep is broken, and only the planted canary distinguishes them.
 
+## 10d. What the first model to *use* the facade taught (S4 `[A]` PASSED, July 23, 2026)
+
+S3 `[A]` put a real model at the *end* of a channel; S4 `[A]` put one at the *wheel*. The model was
+shown `CapabilityRegistry.render`'s stubs and nothing else, and had to compose `run_query` →
+`materialize` itself against a question whose answer only the database held. It did, in two attempts,
+for $0.00706.
+
+- **A rendering nobody has coded against has not been tested.** The two renderings
+  (INTERFACES §6 — CapabilityDescriptor lifecycle) had been merged, unit-tested and read many times.
+  Neither S3 `[A]` nor S4 `[R]` used either: both hand-wrote their envelopes, because their authors
+  already knew the wire. The first thing that actually composed a call against the rendering found
+  that **`run_query(sql)` — the natural call the rendered signature invites — was refused**,
+  `denied: params must be a list, got NoneType`. The stub emitted every declared parameter, so an
+  unset optional crossed as an explicit null, and every host op reads optionals with
+  `args.get(name, default)`, which returns the null and not the default. Five of ten capabilities were
+  affected. **The generalizable form: a "for the model" artifact that no model has consumed is
+  unexercised code, however green its tests** — and the exercise is cheap, because a loopback double
+  driving `render → block → materialise → broker` found this at $0, before the host was touched.
+- **The fix belonged at the generator, and the precedent was already in the repo.**
+  `guest_rpc.lm_request_from_envelope` had documented the rule for the LM port — "a `model` of `None`
+  is dropped rather than sent as null" — so the DB port's missing equivalent was drift, not an open
+  design question. Closing it at `_stub_source` fixed all five at once; coercing null→default in each
+  op would have been five fixes and a sixth waiting for the next optional parameter.
+- **The ergonomics number is an attempt count, and the failing attempt is the informative half.**
+  Attempt 1 got the composition right immediately and died on one thing: it wrote the bound-parameter
+  placeholder as `?`, the DBAPI qmark style, where psycopg2 wants `%s`. **The descriptor doc says what
+  the call does and never says what paramstyle it speaks**, so the guess was reasonable and the doc
+  line is the cheapest place to end it. Behind that sits a real trade the run made visible: the
+  broker's error is deliberately terse (`SyntaxError from the postgres driver`, the driver's own
+  message withheld), and that redaction is precisely what forced a guess instead of a read.
+  **Error-text redaction and self-debug ergonomics pull against each other** — worth deciding
+  deliberately in GB rather than rediscovering.
+- **The self-debug loop is load-bearing, not decoration.** INTERFACES §7 says a host refusal reaches
+  the model as a Python traceback in `stderr`. Feeding that stderr back verbatim is the entire
+  difference between this run failing and passing. A design that swallowed refusals into a return code
+  would have cost the run.
+- **`--no-db` is what makes a correct answer mean anything.** The fixture is built so both plausible
+  shortcuts name a different author (most documents: okonkwo; most words overall: vasquez; the answer:
+  delacroix). Asked the same question with the tools removed and pressed for a number, the model said
+  it could not know and answered 0. Without that arm, "the model returned the right value" is
+  compatible with "the value was guessable from the schema" — the null would have looked identical.
+- **The negative control came out textbook, which is how you know it is aimed right.** With the guest
+  answering itself from canned rows, *every* model-visible claim still passed — correct answer, clean
+  credential grep, clean teardown, first-try — and the only failure was the host witness reading
+  `accepted=0`. This is the shape S4 `[R]` had to be sharpened twice to reach: a control that anything
+  other than its intended detector can catch is noisy, not working.
+- **The shipping supervisor is not runnable in the guest yet, and that is an S6 prerequisite.**
+  `supervisor.GuestSupervisor` imports `rlm.environments.base_env`; the guest image is
+  `python:3.12-slim` plus the shipped package and carries no rlms. The honest options were to ship
+  rlms into the image or to re-implement the small part S4 needed; a hand-written `rlm` shim was
+  refused outright, because it would fake the very pin the supervisor exists to hold while making the
+  run *look* like it had exercised the real thing. **The guest image must carry rlms before S6's
+  equivalence harness can run** — found by trying to use the supervisor, not by planning around it.
+
+## 10e. What Tier-0 taught (S5 `[R]` PASSED, July 23, 2026)
+
+**A ratified control named a mechanism that does not exist on the ratified stack — for the
+second time.** The records said in-guest cgroups. The guest has no cgroup filesystem mounted and
+cannot mount one (`EPERM`, no `CAP_SYS_ADMIN`); the host-side cgroup Kata creates for the VM
+carries no `memory.max` or `pids.max` at all. The property survives via `setrlimit` after a
+privilege drop, and the correction is [ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md).
+
+This is structurally identical to S3's hybrid-vsock finding, and the pair is the lesson:
+
+- S3: "the host reads the guest CID at `accept()`" was true of *native* vsock, carried as though
+  it were true of virtualisation.
+- S5: "in-guest cgroups cap the worker" was true of *containers on a host kernel*, carried as
+  though it were true of containers in a microVM.
+
+**An enforcing surface is only as portable as the mechanism named in it.** Both were written
+confidently, reviewed, ratified, and wrong in the same way — a mechanism observed in one context
+generalised to another without being re-observed. The cheap defence is what S5 now does: the
+probe **re-derives the finding on every run**, so the record's basis is executable rather than
+a transcript somebody has to trust.
+
+**Reconnaissance before authoring cost four boots and saved the design.** The first thing S5 did
+was boot a guest and look, rather than write a module against the record. Everything the module
+became — the uid drop, rlimits instead of cgroups, ABI-7 Landlock, ctypes seccomp — came out of
+those four runs. Writing first would have produced a `hardening.py` full of cgroup writes that
+fail with `ENOENT`, and the finding would have arrived as a confusing host failure instead of a
+design correction.
+
+**The most useful failure: hardened correctly, and could not prove it.** Landlock was not
+granting `/proc`, so the worker could not read `/proc/self/status` after restricting itself.
+Every control was genuinely applied — the fork bomb *was* capped, the syscall *was* denied — and
+the probe reported `Seccomp: -1` and failed the run. The read-back was denied by the ruleset it
+was trying to verify. **Evidence-gathering is inside the blast radius of the thing it measures**,
+and a control that removes its own witness looks exactly like a control that did not apply.
+
+**A denylist, where the record said allowlist — recorded, not papered over.** A true syscall
+allowlist for a CPython worker running arbitrary model code is not maintainable: the reachable
+set is large, version-dependent, and a miss is a crash in ordinary use rather than a caught
+attack. The forwarder of [INTERFACES §3.4](REPL_SANDBOX_INTERFACES.md) keeps its allowlist,
+because ten kinds of call *can* be enumerated. Same word, two processes, different answers.
+
+**Two falsifier arms, because there were two kinds of claim.** `--no-harden` falsifies the
+in-guest enforcement claims by removing the enforcement; `--negative-control` falsifies the
+crossing claim by removing the crossing. S4 established that a correct-looking result and a
+broken instrument are indistinguishable without the arm that must fail — S5 needed two of them,
+and a single arm would have left half the claims ungrounded.
+
+**Root is exempt from `RLIMIT_NPROC`, and that is the whole spike in one fact.** Set the limit
+without dropping privileges and every call returns success, the report reads clean, and a fork
+bomb runs to 200. `Tier0Report.processes_capped` is therefore a conjunction — non-root **and**
+limited — so the two can never be reported apart.
+
+---
+
 ## 11. Meta-learning: the review methods caught the builder's own errors
 
 Worth recording because it validates the house methods (and because I was the self-invested
@@ -301,6 +409,13 @@ claimant throughout):
   the exfil-via-sanctioned-crossings gap the prose glossed.
 - A plain **render check** caught a rendering bug I'd shipped repeatedly (the artifact's inline
   diagrams had undefined color tokens → black text; verified via computed style, then fixed).
+- **Running the generated artifact through a parser** caught the same class again, one layer down:
+  `docs/density-chain/DENSITY-CHAIN.html` carries its data as an inline JS array, and the S4 `[R]`
+  session had written `'S4's paid half'` — a straight apostrophe inside a single-quoted literal — so
+  the whole script had been a **`SyntaxError` on master**, silently blanking the interactive table.
+  Prose review cannot see it and `wiki:check` reads the Markdown, not the render. `node --check` on
+  the extracted block finds it in a second. **A hand-maintained artifact that carries executable data
+  needs a syntax gate, not a proofread.**
 
 **Lesson:** the builder's own read is not trustworthy evidence. Clean-room judges, an adversarial
 red-team, and an actual render/verify step each caught a class of error the builder could not see

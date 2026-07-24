@@ -431,3 +431,188 @@ guard-derivation but the same rule at the other end of the axis.
   ratified answers.** Ratifying the design does not settle them.
 - **The self-play validation gate** (§6, resolved; specified at
   `LLM_HELP_SPEC.md` §6) binds before anything relies on the alive catalog.
+
+## 10. Increment 1 executed — the descriptor model is lossless on trellis_textedit (dated entry — July 23, 2026)
+
+[`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) §12.1's pre-stated first test
+ran and **byte-identity holds on both arms**: the addendum composed from a
+descriptor plus guard-derived expectations equals the hand-authored constants
+exactly — `TEXTEDIT_ADDENDUM` (3,066 chars) and
+`TEXTEDIT_ADDENDUM_GUARDED_ONLY` (3,067 chars), one pin per arm
+(`scripts/test_textedit.py` §16, *descriptor-composed addendum*). Each pin was
+made to fail once on a planted one-byte perturbation and named the first
+divergent byte before being restored (rule 19(c)); the perturbed live path was
+also caught independently by the pre-existing constants-equality checks. The
+refactor can proceed surface by surface without a pin ceremony: the
+composed-prompt sha256 pins did not move, because the composition ships bytes
+identical to the constants.
+
+**What shipped.** `TEXTEDIT_DESCRIPTOR` carries the editorial fields
+(`LLM_HELP_SPEC.md` §1 vocabulary); `_TEXTEDIT_GUARD_EXPECTS` owns every
+guard-backed sentence, one phrase per guard class, keyed by the guard;
+`render_textedit_addendum` is the invariant frame and contributes no prose;
+`build_textedit_addendum` now ships the composition, so its non-test caller is
+the kernel-prompt seam in `src/rlm/trellis_agent.py`. The mode account is
+selected by the same `_guarded_only` bool that makes `splice()` refuse — §2.1
+of the self-model, now an observation. This supersedes §9.2's first bullet
+**for this surface**: `trellis_textedit` no longer selects between two
+pre-authored constants. Honest scope of "derived": the phrase *text* is still
+human-authored once per guard class and pinned; what the engine derives is the
+selection (from the refusing state) and the single-encoding ownership (a
+guard-backed sentence exists in exactly one place, enforced by a drill check).
+Nothing generates prose from predicate code, and the other eight surfaces are
+untouched.
+
+**Findings, recorded rather than fixed** (fixing any of them moves
+kernel-prompt bytes, which this increment is forbidden to do):
+
+1. **A bijection orphan in the guarded arm.** `_require_guarded_lines`
+   enforces the newline-free line contract on `expected_lines`/`new_lines`,
+   but the guarded arm renders no line for it — the phrase rides only the raw
+   `splice()` bullet. Pinned as a finding in the drill.
+2. **The §3.2/§1 field set had no slot for cross-cutting protocol lines**
+   (the JSON-return convention, the raw-arm PREFER bullet, the provenance
+   HARD RULE). MASH's `usage` field was adopted **provisionally** to carry
+   them. This is evidence for §9.3's open field-set decision, not its
+   settlement.
+3. **The advisory census** (`HARNESS_SELF_MODEL.md` §4's marking duty): the
+   lines no predicate on this surface enforces are the JSON-return
+   convention, the LOCATE-NEVER-COUNT tail, "Addresses are transient", the
+   raw-arm PREFER bullet, "Re-loading refreshes … DISCARDS", diff's display
+   truncation, and the provenance HARD RULE (enforced by the database write
+   path, a different surface). They are marked advisory as descriptor
+   metadata; the rendered bytes cannot carry the marking until a pin-moving
+   pass is authorized.
+4. **The banner qualifier "(CODE-MEDIATED, HASH-GUARDED)" restates two
+   guard-backed properties inside an editorial field** — a mild §9.1 tension:
+   the second encoding it forbids, at one-word scale, in the grouping label.
+5. **Bijection granularity is the guard class, not the raise site.** One
+   digest line accounts for the whole `StaleFileError` family; operator-facing
+   guards (`parse_textedit_bounds`, `parse_textedit_guarded_only`'s
+   malformed-value refusal, the root validation) deliberately have no line,
+   because they refuse the operator before a run exists.
+
+## 11. Descriptors are a registration, not a schema (dated entry — July 23, 2026, owner, in session)
+
+Proposed by the collaborator (Matt) on reading increment 1's field-set
+question, and approved by the owner (Cnid) in session. It answers §9.3's
+open field-set item by **dissolving** it rather than settling it.
+
+**The argument.** A project whose central iteration is prompt authoring
+cannot afford a descriptor vocabulary that becomes law early. Prompt
+engineering is iterative by nature — unexpected behaviour is discovered,
+not predicted — so the machinery around it must let a field be added,
+renamed, or dropped without a migration. A frozen required-field set buys
+consistency at exactly the cost this project can least pay.
+
+**What is ruled.**
+
+- **The descriptor is a registration, not a validated schema**, while the
+  shape is still being learned. Fields vary per surface; adding one is an
+  edit, not a ceremony. There is no single frozen set to ratify, so §9.3's
+  field-set question is closed as *dissolved* — MASH's `{help, category,
+  aliases, usage}` and §3.2's set are vocabularies to draw from, not
+  competing laws.
+- **Coverage is the enforced property; field shape is not.** The duty worth
+  mechanizing is *every live surface carries a descriptor* — the question
+  that stays stable while the fields move. That is the "ensure all added
+  surfaces get prompts" diagnostic in the proposal's own words, and it is
+  what a registration system exists to make answerable.
+- **The diagnostic informs; it does not refuse.** Consistent with
+  [`HARNESS_SELF_MODEL.md`](HARNESS_SELF_MODEL.md) §12.2: nothing derived
+  from a descriptor may gate anything without its own owner gate.
+- **This amends §3.2.** Its "a surface whose descriptor is missing a
+  required field fails validation" no longer governs descriptor **fields**.
+  Rule 8 is still satisfied by tooling shape — the shape is now a registry
+  plus a coverage report, rather than a required-field schema. Per-surface
+  byte-identity pins (§10) remain the drift check on the bytes themselves.
+
+**What does not change.** `expects` stays guard-derived and code-composed
+(§3.3, §9.1) — one encoding owned by whoever is authoritative for the fact.
+Guard-derivation was never a field-set question, and this ruling does not
+touch it. The strict `ModuleManifestSchema` (`src/config/modules.ts`) is
+untouched: it validates `modules/*/module.json` and has never seen a
+descriptor. Putting descriptor fields into it remains a separate future
+decision, and this ruling makes it the less likely one.
+
+**A correction this exposes.** The session that shipped increment 1
+described the field set as one strict-schema landing away from becoming
+law. That overstated the constraint: the shipped descriptor is a Python
+dict literal with no validator anywhere in the tree, and the strict schema
+it named governs a different artifact class. Changing a field today costs
+one file — the condition this ruling now preserves deliberately rather
+than by accident.
+
+**A second overstatement from the same session, corrected here because it
+governs sequencing.** §10's findings were described as needing `llm_help`'s
+pin ceremony before they could be fixed. They do not. Both composed-prompt
+sha256 pins hash `trellis_agent.SYSTEM_PROMPT`, and the textedit addendum
+is **not part of it** — verified: that string contains neither the addendum
+banner nor the substring `trellis_textedit`. The addendum is appended into
+the run's `dynamic_system_prompt` at injection time. So addendum bytes are
+pinned by `npm run test:textedit` alone; the composed-prompt pins move only
+when the **base** prompt changes, which is why `llm_help` — an
+always-present kernel builtin taught in the base TOOLS manifest — is the
+pin-moving event while a conditional addendum is not. Fixing §10's findings
+is a drill-pinned edit, and nothing in it waits on `llm_help`.
+
+## 12. Increments 2 and 3 — the registry, the coverage diagnostic, and the orphan closed (dated entry — July 23, 2026)
+
+Built on the owner's approval of the §11 plan, in the order recommended and
+approved: registry first, then the duplicate encoding retired, then the
+orphan fixed. All zero-paid. Neither composed-prompt sha pin moved, for the
+reason §11 records.
+
+**Increment 2a — the surface registry.** `src/rlm/trellis_surfaces.py`
+holds `register_surface(descriptor)` / `registry()` / `descriptor_for(name)`.
+A surface binds its descriptor at its own definition site — MASH's *one
+call site, one commitment* — and `trellis_textedit` now does. Faithful to
+§11, the registry validates **no field set**: a descriptor may carry any
+fields, and only a non-empty `name` is required, because that is the key
+rather than a validated field. Drilled both ways: a descriptor with
+invented fields registers, a nameless one refuses.
+
+**Increment 2b — the coverage diagnostic.** `npm run check:surfaces`
+answers *which injected surfaces carry a descriptor*. The roster is
+**derived from the injecting code** — the `custom_tools` construction in
+`trellis_agent.py`, read by AST at diagnostic time — so it cannot drift
+from the seam the way a hand-kept list would, the same move the
+density-chain checker makes on its own routing table. Dynamic
+contributions it cannot enumerate statically (`scaffold_helpers`,
+`build_author_tools`) are **named in the output** rather than dropped,
+because silent absence is `HARNESS_SELF_MODEL.md` §5's failure class.
+First run: **1 of 9 injected surfaces described.** It reports and refuses
+nothing; its exit code mirrors `wiki:check`'s staleness half and is
+deliberately not wired into CI.
+
+**Increment 2c — the duplicate encoding retired.** `TEXTEDIT_ADDENDUM`,
+`TEXTEDIT_ADDENDUM_GUARDED_ONLY` and their four fragments are **deleted**.
+Increment 1 proved the composition reproduces them byte-for-byte; keeping
+both afterwards shipped two encodings of one set of bytes, which is §9.1's
+failure class sitting inside the artifact built to demonstrate it. Drift is
+now caught by a sha256 pin per arm in `scripts/test_textedit.py`, **seeded
+with the retired constants' own digests**, so the pins inherit increment
+1's proof rather than restating it. A drill check holds the constants
+retired, since a second copy returning is the regression that matters.
+
+**Increment 3 — the bijection orphan closed.** The guarded-only arm now
+states the line contract `_require_guarded_lines` enforces: a guarded-only
+run is no longer refused for a rule it was never told. One bullet,
+rendered from the **same** guard-owned phrase the default arm already
+carried, so the two arms cannot drift apart on it. The guarded arm's pin
+moved wittingly (`27cc00b2…2835` → `c673f0a0…f124`, 3,067 → 3,139 chars)
+with its history recorded at the pin; the **default arm's sha is
+unchanged**, which is the evidence the fix reached exactly the arm that
+lacked the line. Each pin was seen to fail on a planted one-byte
+perturbation and restored (rule 19(c)), and the drill's
+`--negative-control` detects 7/7 planted conditions, exiting 3.
+
+**What remains open, unchanged.** The advisory-marking duty
+(`HARNESS_SELF_MODEL.md` §4) is deliberately still open: how an account
+marks enforced-versus-aspirational is a presentation convention that
+should be settled once across every surface, and deciding it for one
+surface would make an instance into law by accident (rule 17). It belongs
+with `llm_help`'s frame. The banner-qualifier tension (§10, finding 4) and
+guard-class granularity (finding 5) stand as recorded; eight surfaces still
+carry no descriptor, which the diagnostic now reports rather than leaving
+to memory.

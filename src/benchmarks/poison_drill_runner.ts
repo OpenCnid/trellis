@@ -27,6 +27,12 @@ import {
 } from '../core/graph/verification';
 import { PRICE_PER_M_INPUT, PRICE_PER_M_OUTPUT } from './oolong/scoring';
 import { pgPool, neo4jDriver } from '../config/db';
+import {
+  assertDrillTarget,
+  liveMarkerReaders,
+  printTargetBanner,
+  reportRefusal,
+} from '../core/runtime/drill_target';
 import { config } from '../config/index';
 
 // Phase 5 Milestone 4: the Poisoning Drill (PHASE_5_PRD.md §Milestone 4).
@@ -441,6 +447,16 @@ async function main(): Promise<void> {
   console.log(`Corpus: ${dataset.name} (${dataset.records.length} questions) | policies: ${policies.map(p => p.name).join(', ')}`);
   console.log('======================================================');
 
+  // This runner calls poisonCache() directly, so the CLI's gate in
+  // scripts/poison_oolong_cache.ts does not cover it. The target marker
+  // is asserted here for the same reason it is asserted there.
+  const markers = await assertDrillTarget(
+    ['neo4j', 'postgres'],
+    liveMarkerReaders(neo4jDriver, pgPool)
+  );
+  printTargetBanner(['neo4j', 'postgres'], markers);
+  console.log('');
+
   // Real mode: one paid cold warm-up, snapshotted, then reused as the
   // identical Act-1 starting point for every policy (see
   // runRealColdWarmup's docstring for why — avoids re-paying for a
@@ -514,8 +530,11 @@ main()
     process.exit(0);
   })
   .catch(async err => {
-    console.error(`POISONING DRILL FAILED: ${err.stack ?? err.message}`);
+    const refusalCode = reportRefusal(err);
+    if (refusalCode === null) {
+      console.error(`POISONING DRILL FAILED: ${err.stack ?? err.message}`);
+    }
     await pgPool.end().catch(() => {});
     await neo4jDriver.close().catch(() => {});
-    process.exit(1);
+    process.exit(refusalCode ?? 1);
   });

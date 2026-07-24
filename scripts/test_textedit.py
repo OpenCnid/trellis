@@ -39,7 +39,14 @@
 #       refuses with the minimal window named, the Session 37 run-2
 #       manifest shape STAGES (the honest-scope pin), the decomposed
 #       minimal edit lands with neighbors byte-intact, and guarded
-#       activity is counted separately from raw splices.
+#       activity is counted separately from raw splices,
+#  [15] guarded-only mode (the July 19, 2026 pass) — the explicit
+#       off-switch: raw splice refused, guarded family intact, the
+#       addendum follows the mode, defensive flag parsing,
+#  [16] the self-describing descriptor (Workstream B increment 1,
+#       HARNESS_SELF_MODEL.md §12.1) — the composed addendum reproduces
+#       both hand-authored constants byte-exactly, one pin per arm; the
+#       guard-expectation registry maps onto the rendered lines.
 import ast
 import hashlib
 import json
@@ -57,10 +64,10 @@ from trellis_textedit import (  # noqa: E402
     StaleFileError,
     AnchorMismatchError,
     RawSpliceDisabledError,
-    TEXTEDIT_ADDENDUM,
-    TEXTEDIT_ADDENDUM_GUARDED_ONLY,
-    _TEXTEDIT_ADDENDUM_HEAD,
-    _TEXTEDIT_ADDENDUM_TAIL,
+    TEXTEDIT_DESCRIPTOR,
+    _TEXTEDIT_GUARD_EXPECTS,
+    derive_textedit_expects,
+    render_textedit_addendum,
     TEXTEDIT_SLICE_MAX_LINES,
     TEXTEDIT_LOCATE_MAX_HITS,
     TEXTEDIT_DIFF_MAX_LINES,
@@ -70,6 +77,7 @@ from trellis_textedit import (  # noqa: E402
     parse_textedit_bounds,
     parse_textedit_guarded_only,
 )
+import trellis_textedit as trellis_textedit_module  # noqa: E402
 from trellis_tools import get_tool_call_count  # noqa: E402
 
 failures = 0
@@ -110,6 +118,36 @@ def expect_raises(name, fn, exc_type, needle=""):
         check(name, needle.lower() in str(e).lower(), f"message lacked {needle!r}: {e}")
     except Exception as e:  # noqa: BLE001
         check(name, False, f"expected {exc_type.__name__}, got {type(e).__name__}: {e}")
+
+
+# --- The addendum byte pins, one per mode arm --------------------------------
+# The addendum is composed from TEXTEDIT_DESCRIPTOR plus the guard-derived
+# expectations; these shas are what stops that composition from drifting.
+# They do NOT touch the composed-prompt pins in scripts/test_modules.py:
+# trellis_agent.SYSTEM_PROMPT, which those hash, does not contain this
+# addendum — it is appended into the run's dynamic_system_prompt at
+# injection time (SELF_DESCRIBING_SURFACES.md §11).
+#
+# HISTORY (append-only; recompute wittingly, never to make a test pass):
+#   6b6db443…8948 / 27cc00b2…2835 — Workstream B increment 2, July 23,
+#     2026: the seed values. These are the sha256 of the retired
+#     TEXTEDIT_ADDENDUM and TEXTEDIT_ADDENDUM_GUARDED_ONLY constants
+#     exactly as increment 1 proved the composition reproduces them, so
+#     the pins inherit that proof rather than restating it. The
+#     constants were retired in the same commit because keeping them
+#     beside the descriptor shipped two encodings of one set of bytes —
+#     SELF_DESCRIBING_SURFACES.md §9.1's failure class.
+#   guarded arm → c673f0a0…f124 — increment 3, July 23, 2026: the
+#     bijection orphan increment 1 recorded is CLOSED. The guarded-only
+#     arm now states the line contract `_require_guarded_lines`
+#     enforces, so a guarded-only run is no longer refused for a rule it
+#     was never told. One bullet added, from the guard-owned
+#     `newline_free` phrase the default arm already carried; the
+#     DEFAULT arm's sha is unchanged, which is the check that the fix
+#     reached exactly the arm that lacked the line. Neither
+#     composed-prompt pin moves: this addendum is not in SYSTEM_PROMPT.
+TEXTEDIT_ADDENDUM_SHA256 = "6b6db443e754561dee72d5815ea569c32b8ba1c0270225b37ed995b7e3638948"
+TEXTEDIT_ADDENDUM_GUARDED_ONLY_SHA256 = "c673f0a07d8bd9c5c70cea729b8bfb13580c714ac53763ac280c82316a98f124"
 
 
 # --- 1. Defensive bounds re-validation (twins of textedit_bounds.test.ts) ---
@@ -421,7 +459,8 @@ check("no toolkit means an empty addendum (byte-identical gated-off prompt)",
       == trellis_agent.SYSTEM_PROMPT)
 
 addendum = build_textedit_addendum(ted)
-check("the toolkit addendum is exactly the kernel constant", addendum == TEXTEDIT_ADDENDUM)
+check("the toolkit addendum matches the recorded default-arm pin",
+      hashlib.sha256(addendum.encode("utf-8")).hexdigest() == TEXTEDIT_ADDENDUM_SHA256)
 check("addendum has no braces at all (rlms .format() safety)",
       "{" not in addendum and "}" not in addendum)
 check("addendum teaches the discipline: locate, splice, re-locate, digest, atomic",
@@ -668,6 +707,12 @@ check("re-load refreshes from disk and discards staged splices (documented seman
 # Audit #8: the no-git/no-subprocess guarantee held by inspection only —
 # pin it statically. The import set is exact: a future subprocess or git
 # surface fails this check before any reviewer has to catch it.
+#
+# Increment 2 widened it by exactly one first-party name,
+# `trellis_surfaces`, so the toolkit can register its descriptor at its
+# own definition site. That module is stdlib-only (ast, os) and holds a
+# dict, so the no-subprocess/no-git guarantee is unchanged; the widening
+# is recorded here rather than left to a reader to infer.
 with open(tt_module.__file__, "r", encoding="utf-8") as f:
     toolkit_source = f.read()
 imported = set()
@@ -677,7 +722,7 @@ for node in ast.walk(ast.parse(toolkit_source)):
     elif isinstance(node, ast.ImportFrom):
         imported.add((node.module or "").split(".")[0])
 allowed_imports = {"hashlib", "json", "os", "posixpath", "re", "stat",
-                   "tempfile", "threading", "difflib"}
+                   "tempfile", "threading", "difflib", "trellis_surfaces"}
 check("toolkit imports stay inside the pinned stdlib set",
       bool(imported) and imported <= allowed_imports,
       f"unexpected imports: {sorted(imported - allowed_imports)}")
@@ -830,10 +875,11 @@ check("the over-budget guarded call staged nothing",
 g_stats = gted.stats()
 check("guarded activity is counted separately from raw splices",
       g_stats["textedit_guarded_ops"] >= 4 and g_stats["textedit_raw_splices"] == 0)
+_default_arm = build_textedit_addendum(TrellisTextEdit(g_root))
 check("addendum teaches the guarded family and its anchor rule",
-      "replace_lines" in TEXTEDIT_ADDENDUM and "insert_lines" in TEXTEDIT_ADDENDUM
-      and "delete_lines" in TEXTEDIT_ADDENDUM and "AnchorMismatchError" in TEXTEDIT_ADDENDUM
-      and "GUARDED FAMILY" in TEXTEDIT_ADDENDUM)
+      "replace_lines" in _default_arm and "insert_lines" in _default_arm
+      and "delete_lines" in _default_arm and "AnchorMismatchError" in _default_arm
+      and "GUARDED FAMILY" in _default_arm)
 
 # --- 15. Guarded-only mode: the explicit off-switch (the July 19, 2026 pass) -------------
 # Session 41 built the guarded family but left raw splice() reachable with
@@ -879,21 +925,26 @@ check("raw splice still works when the switch is off (default)",
       and default_mode.stats()["textedit_guarded_only"] is False)
 
 # The addendum follows the mode: a run is never taught a call that refuses.
+_guarded_arm = build_textedit_addendum(go)
+_raw_arm = build_textedit_addendum(default_mode)
 check("guarded-only swaps the addendum, never teaching the raw path",
-      build_textedit_addendum(go) == TEXTEDIT_ADDENDUM_GUARDED_ONLY
-      and "GUARDED-ONLY MODE IS ACTIVE" in TEXTEDIT_ADDENDUM_GUARDED_ONLY
-      and "RawSpliceDisabledError" in TEXTEDIT_ADDENDUM_GUARDED_ONLY
-      and build_textedit_addendum(default_mode) == TEXTEDIT_ADDENDUM
+      "GUARDED-ONLY MODE IS ACTIVE" in _guarded_arm
+      and "RawSpliceDisabledError" in _guarded_arm
+      and "new_lines)` stages the replacement" not in _guarded_arm
+      and "new_lines)` stages the replacement" in _raw_arm
       and build_textedit_addendum(None) == "")
 check("both addendum arms stay brace-free (rlms .format() safety)",
-      "{" not in TEXTEDIT_ADDENDUM_GUARDED_ONLY
-      and "}" not in TEXTEDIT_ADDENDUM_GUARDED_ONLY)
-# The two arms differ ONLY in the mode block: same head, same tail.
-check("the two addendum arms share head and tail exactly",
-      TEXTEDIT_ADDENDUM.startswith(_TEXTEDIT_ADDENDUM_HEAD)
-      and TEXTEDIT_ADDENDUM_GUARDED_ONLY.startswith(_TEXTEDIT_ADDENDUM_HEAD)
-      and TEXTEDIT_ADDENDUM.endswith(_TEXTEDIT_ADDENDUM_TAIL)
-      and TEXTEDIT_ADDENDUM_GUARDED_ONLY.endswith(_TEXTEDIT_ADDENDUM_TAIL))
+      "{" not in _guarded_arm and "}" not in _guarded_arm
+      and "{" not in _raw_arm and "}" not in _raw_arm)
+# The two arms differ ONLY in the mode block. With the hand-authored
+# fragments retired, the property is asserted on the RENDERED arms: they
+# share the header block and every family bullet, diverging only between.
+_head_end = "\n- `trellis_textedit.load"
+_tail_start = "- `trellis_textedit.replace_lines"
+check("the two addendum arms share header and family bullets exactly",
+      _raw_arm[:_raw_arm.index(_head_end)] == _guarded_arm[:_guarded_arm.index(_head_end)]
+      and _raw_arm[_raw_arm.index(_tail_start):]
+      == _guarded_arm[_guarded_arm.index(_tail_start):])
 
 # The operator switch parses defensively: a misspelled safety flag must
 # never silently resolve to the unsafe default.
@@ -916,6 +967,111 @@ check("a malformed off-switch value raises rather than defaulting to unsafe",
       all(malformed_raised))
 expect_raises("the constructor refuses a non-bool guarded_only",
               lambda: TrellisTextEdit(go_root, guarded_only="1"), ValueError)
+
+# --- 16. The self-describing descriptor (Workstream B increments 1-2) ------
+# Increment 1 (HARNESS_SELF_MODEL.md §12.1's pre-stated first test) proved
+# the composition reproduces the hand-authored constants byte-exactly on
+# both arms. Increment 2 retired those constants — keeping them beside the
+# descriptor shipped two encodings of one set of bytes, which is
+# SELF_DESCRIBING_SURFACES.md §9.1's failure class — so the pins are now
+# sha256 over the RENDERED arms, seeded with the retired constants' own
+# digests. The claim they carry: these bytes are still the bytes
+# increment 1 validated, and the descriptor is the only place they live.
+print("\n[16] descriptor-composed addendum: sha256 pin per arm")
+
+
+def sha_of(text):
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+rendered_default = render_textedit_addendum(
+    TEXTEDIT_DESCRIPTOR, derive_textedit_expects(default_mode))
+check("PIN default arm: rendered bytes match the recorded sha256",
+      sha_of(rendered_default) == TEXTEDIT_ADDENDUM_SHA256,
+      f"got {sha_of(rendered_default)} over {len(rendered_default)} chars")
+
+rendered_guarded = render_textedit_addendum(
+    TEXTEDIT_DESCRIPTOR, derive_textedit_expects(go))
+check("PIN guarded arm: rendered bytes match the recorded sha256",
+      sha_of(rendered_guarded) == TEXTEDIT_ADDENDUM_GUARDED_ONLY_SHA256,
+      f"got {sha_of(rendered_guarded)} over {len(rendered_guarded)} chars")
+
+# The descriptor is now the SOLE encoding of these bytes: the retired
+# constants must not come back, because a second copy beside the
+# descriptor is precisely what §9.1 forbids.
+check("the retired constants stay retired (one encoding, not two)",
+      not hasattr(trellis_textedit_module, "TEXTEDIT_ADDENDUM")
+      and not hasattr(trellis_textedit_module, "TEXTEDIT_ADDENDUM_GUARDED_ONLY")
+      and not hasattr(trellis_textedit_module, "_TEXTEDIT_ADDENDUM_HEAD"))
+
+# The live path ships the composition (trellis_agent.py holds the
+# non-test caller), so section 15's constants-equality checks above
+# already exercised the renderer end to end; re-state it explicitly.
+check("build_textedit_addendum ships the composition on both arms",
+      build_textedit_addendum(default_mode) == rendered_default
+      and build_textedit_addendum(go) == rendered_guarded)
+
+# One state refuses AND describes (HARNESS_SELF_MODEL.md §2.1): the arm
+# selection reads the same _guarded_only bool splice() refuses on — the
+# refusal itself was pinned in section 15 on these same holders.
+check("the mode account derives from the refusing bool itself",
+      derive_textedit_expects(go)["guarded_only"] is True
+      and derive_textedit_expects(default_mode)["guarded_only"] is False)
+
+# The registry→line half of the bijection (HARNESS_SELF_MODEL.md §3 /
+# §12.3): every guard-owned phrase renders into the arm(s) it belongs
+# to, and the shared anchor-guard phrase reaches BOTH arms from ONE
+# encoding — the two arms cannot drift apart on it.
+# Increment 3 moved `newline_free` from raw-only to shared: closing the
+# orphan is exactly that key gaining a line in the guarded arm.
+_guarded_only_keys = {"guarded_mode_active", "raw_disabled"}
+_shared_keys = set(_TEXTEDIT_GUARD_EXPECTS) - _guarded_only_keys
+check("every shared guard phrase renders in both arms",
+      all(_TEXTEDIT_GUARD_EXPECTS[k] in rendered_default
+          and _TEXTEDIT_GUARD_EXPECTS[k] in rendered_guarded
+          for k in _shared_keys))
+check("the mode-specific phrases render only in their own arm",
+      all(_TEXTEDIT_GUARD_EXPECTS[k] in rendered_guarded
+          and _TEXTEDIT_GUARD_EXPECTS[k] not in rendered_default
+          for k in _guarded_only_keys))
+check("the anchor-guard expectation is one encoding rendered once per arm",
+      rendered_default.count(_TEXTEDIT_GUARD_EXPECTS["anchor_guard"]) == 1
+      and rendered_guarded.count(_TEXTEDIT_GUARD_EXPECTS["anchor_guard"]) == 1)
+
+# The orphan increment 1 recorded, now CLOSED (increment 3): the guarded
+# arm enforces the newline-free line contract through
+# _require_guarded_lines, and now states it, so a guarded-only run is not
+# refused for a rule it was never told. Held from BOTH sides — the line
+# is present, and it comes from the same single encoding the default arm
+# renders, so the two arms cannot drift apart on it.
+check("the newline-free contract now has a line in the guarded arm",
+      _TEXTEDIT_GUARD_EXPECTS["newline_free"] in rendered_guarded)
+check("that line is the guarded family's own contract, stated once",
+      rendered_guarded.count("expected_lines and new_lines are each") == 1
+      and rendered_guarded.count(_TEXTEDIT_GUARD_EXPECTS["newline_free"]) == 1)
+
+# The guard-expectation inventory is closed and pre-stated: a key
+# added or dropped without touching this pin is drift.
+check("the guard-expectation inventory is exactly the pre-stated set",
+      set(_TEXTEDIT_GUARD_EXPECTS) == {
+          "containment", "addressing", "slice_bound", "locate_bound",
+          "newline_free", "anchor_guard", "replace_match", "over_wide",
+          "insert_anchor", "delete_verified", "digest_guard", "budgets",
+          "guarded_mode_active", "raw_disabled"})
+
+# One encoding, enforced both ways: no guard-owned phrase may be
+# restated inside the descriptor's editorial strings (the second-copy
+# failure class SELF_DESCRIBING_SURFACES.md §9.1 exists to close).
+_editorial_bits = [TEXTEDIT_DESCRIPTOR["purpose"], TEXTEDIT_DESCRIPTOR["category"]]
+_editorial_bits += list(TEXTEDIT_DESCRIPTOR["usage"].values())
+for _e in TEXTEDIT_DESCRIPTOR["exposes"]:
+    for _g in ([_e] if "group" not in _e else _e["group"]):
+        _editorial_bits += [p for p in _g.get("doc", []) if isinstance(p, str)]
+check("no guard-owned phrase is restated in an editorial field",
+      not any(phrase in bit
+              for phrase in _TEXTEDIT_GUARD_EXPECTS.values()
+              if len(phrase) >= 30
+              for bit in _editorial_bits))
 
 # ---------------------------------------------------------------------------
 for stale_root in temp_roots:

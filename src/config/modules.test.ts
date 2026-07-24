@@ -87,8 +87,17 @@ describe('loadModule (defect rejection)', () => {
     addendum: 'addendum.txt',
     tools: [],
     bounds: { addendumMaxBytes: 1024 },
+    acceptance: { zeroPaid: 'npm run test:module -- testmod' },
     status: 'active',
     kernelCompat: 1,
+  };
+
+  // Name and criterion move together, so the directory-name check is what
+  // fires below and not the acceptance guard sitting beside it.
+  const RENAMED = {
+    ...VALID,
+    name: 'othername',
+    acceptance: { zeroPaid: 'npm run test:module -- othername' },
   };
 
   it('accepts a minimal valid protocol module', () => {
@@ -107,7 +116,7 @@ describe('loadModule (defect rejection)', () => {
   });
 
   it('rejects a manifest whose name differs from its directory', () => {
-    const dir = writeModule({ ...VALID, name: 'othername' }, 'x\n');
+    const dir = writeModule(RENAMED, 'x\n');
     fs.renameSync(path.join(dir, 'othername'), path.join(dir, 'testmod'));
     expect(() => loadModule('testmod', dir)).toThrow(/must equal its directory name/);
   });
@@ -135,7 +144,7 @@ describe('loadModule (defect rejection)', () => {
     const dir = writeModule({ ...VALID, hotPatch: true }, 'x\n');
     expect(() => readModuleManifest('testmod', dir)).toThrow(/invalid/);
     fs.rmSync(dir, { recursive: true, force: true });
-    const dir2 = writeModule({ ...VALID, name: 'othername' }, 'x\n');
+    const dir2 = writeModule(RENAMED, 'x\n');
     fs.renameSync(path.join(dir2, 'othername'), path.join(dir2, 'testmod'));
     expect(() => readModuleManifest('testmod', dir2)).toThrow(/must equal its directory name/);
   });
@@ -180,6 +189,73 @@ describe('loadModule (defect rejection)', () => {
   it('rejects manifests with unknown fields (strict schema)', () => {
     const dir = writeModule({ ...VALID, hotPatch: true }, 'x\n');
     expect(() => loadModule('testmod', dir)).toThrow(/invalid/);
+  });
+
+  it('accepts a zeroPaid criterion that names its own module, and surfaces it', () => {
+    const dir = writeModule(VALID, 'x\n');
+    expect(readModuleManifest('testmod', dir).acceptance.zeroPaid).toBe(
+      'npm run test:module -- testmod'
+    );
+  });
+
+  it('rejects a manifest with no acceptance criterion at all (no longer optional)', () => {
+    const { acceptance: _omitted, ...noAcceptance } = VALID;
+    const dir = writeModule(noAcceptance, 'x\n');
+    expect(() => readModuleManifest('testmod', dir)).toThrow(/invalid/);
+    expect(() => readModuleManifest('testmod', dir)).toThrow(/acceptance/);
+  });
+
+  it('rejects a zeroPaid criterion that does not name its module (the shared-criterion defect)', () => {
+    const dir = writeModule(
+      { ...VALID, acceptance: { zeroPaid: 'npm run test:modules' } },
+      'x\n'
+    );
+    expect(() => readModuleManifest('testmod', dir)).toThrow(
+      /acceptance\.zeroPaid must be the drill that accepts this module/
+    );
+    // The operator is told exactly what to write and what they wrote.
+    expect(() => readModuleManifest('testmod', dir)).toThrow(
+      /expected "npm run test:module -- testmod", got "npm run test:modules"/
+    );
+    // Composition refuses it too — the guard is not registration-only.
+    expect(() => loadModule('testmod', dir)).toThrow(/must be the drill that accepts this module/);
+  });
+
+  it('rejects a zeroPaid criterion naming a DIFFERENT module (criteria do not travel on copy-paste)', () => {
+    const dir = writeModule(
+      { ...VALID, acceptance: { zeroPaid: 'npm run test:module -- spatial-flywheel' } },
+      'x\n'
+    );
+    expect(() => loadModule('testmod', dir)).toThrow(/must be the drill that accepts this module/);
+  });
+
+  // Equality closes two holes containment left open. Both are regressions
+  // against the substring rule this replaced, so both are pinned.
+  it('rejects a criterion naming a script that does not exist (containment let this pass)', () => {
+    const dir = writeModule(
+      { ...VALID, acceptance: { zeroPaid: 'npm run bogus -- testmod' } },
+      'x\n'
+    );
+    expect(() => readModuleManifest('testmod', dir)).toThrow(
+      /expected "npm run test:module -- testmod", got "npm run bogus -- testmod"/
+    );
+  });
+
+  it('rejects the old shared constant for a module literally named `test` (the substring hole)', () => {
+    // 'test' is a substring of 'test:modules', so containment accepted this —
+    // the one input on which the previous rule failed to discriminate at all.
+    const dir = writeModule(
+      { ...VALID, name: 'test', acceptance: { zeroPaid: 'npm run test:modules' } },
+      'x\n'
+    );
+    expect(() => readModuleManifest('test', dir)).toThrow(
+      /expected "npm run test:module -- test", got "npm run test:modules"/
+    );
+  });
+
+  it('rejects an empty zeroPaid string (the sub-schema bound still holds)', () => {
+    const dir = writeModule({ ...VALID, acceptance: { zeroPaid: '' } }, 'x\n');
+    expect(() => readModuleManifest('testmod', dir)).toThrow(/invalid/);
   });
 
   it('rejects research provenance that is not AST-hash shaped', () => {

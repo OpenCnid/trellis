@@ -34,6 +34,13 @@ const RootContractSchema = z.strictObject({
   // checker; the default is a measuring stick, never a gate.
   documentUpsum: z.strictObject({
     defaultMaxBytes: z.number().int().positive(),
+    // Fraction of its cap a governed path must still have free to be
+    // reported as comfortable. At or below it, the surface report ranks
+    // the document's sections without being asked, so growth is visible
+    // BEFORE the crossing. The threshold lives here for the same reason
+    // the default above does: a number the tool remembered would be a
+    // bound nothing can audit.
+    nearBudgetRatio: z.number().gt(0).lt(1),
     paths: z.array(z.strictObject({
       path: z.string().min(1).max(256),
       maxBytes: z.number().int().positive(),
@@ -43,19 +50,28 @@ const RootContractSchema = z.strictObject({
 
 export type RootContract = z.infer<typeof RootContractSchema>;
 
+// The codes are a runtime list and not only a type, so the negative
+// control can be held to covering all of them. Rule 19(c) asks that a
+// check have been SEEN to fail; a union type is invisible at runtime, so
+// a code added to it alone could never be counted as uncovered.
+export const SURFACE_ISSUE_CODES = [
+  'broken_markdown_link',
+  'deprecated_marker_missing',
+  'environment_example_extra',
+  'environment_example_missing',
+  'forbidden_root_file',
+  'missing_root_directory',
+  'missing_root_file',
+  'oversized_document',
+  'oversized_root_file',
+  'unexpected_root_directory',
+  'unexpected_root_file',
+] as const;
+
+export type SurfaceIssueCode = (typeof SURFACE_ISSUE_CODES)[number];
+
 export interface SurfaceIssue {
-  code:
-    | 'broken_markdown_link'
-    | 'deprecated_marker_missing'
-    | 'environment_example_extra'
-    | 'environment_example_missing'
-    | 'forbidden_root_file'
-    | 'missing_root_directory'
-    | 'missing_root_file'
-    | 'oversized_document'
-    | 'oversized_root_file'
-    | 'unexpected_root_directory'
-    | 'unexpected_root_file';
+  code: SurfaceIssueCode;
   path: string;
   message: string;
 }

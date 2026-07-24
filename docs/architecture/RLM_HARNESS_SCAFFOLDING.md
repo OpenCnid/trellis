@@ -462,6 +462,20 @@ A document that should be bounded permanently still earns a contract
 row. The default is what you measure against while deciding whether it
 deserves one.
 
+**The ranking gets an automatic caller (July 23, 2026).** `npm run upsum`
+was the entrypoint rule 15 asks for, and nothing invoked it — no CI step,
+no hook, no caller but an author who already knew to type it. Correct and
+unreachable is the defect this rule names, and it had landed in the
+tooling meant to enforce the contract. `npm run check:repo-surface` now
+measures every contracted cap on each run, prints the governed paths
+tightest-first, and calls `measureDocument`/`rankedSections` from this
+module for any path at or under `documentUpsum.nearBudgetRatio`. The
+per-section ranking is therefore reached without being asked for, and
+reached *before* a cap is crossed rather than after. Recorded in full at
+[REPOSITORY_ROOT_CONTRACT.md](REPOSITORY_ROOT_CONTRACT.md) §6 (What the
+checker proves) and §8 (Amendments). The CLI remains the surface for a
+single path, a `--budget` question, and subsection depth.
+
 **The REPL form is NOT covered by this entry.** Everything above is a
 Node operator CLI measuring a file on disk. A third form — the surface
 an RLM run would use to measure the document it is editing, including

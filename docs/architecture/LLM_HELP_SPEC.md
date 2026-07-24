@@ -243,3 +243,74 @@ scope. What that scope means for *this* file:
 - **Honest scope carried forward:** no shipped surface derives its
   self-description from its guard predicates yet, and no behavior claim attends
   the authorization.
+
+## 10. Increment 1 landed — what the next surface builds from (dated entry — July 23, 2026)
+
+The `trellis_textedit` descriptor shipped and its composed addendum is pinned
+byte-identical to both hand-authored constants
+([`SELF_DESCRIBING_SURFACES.md`](SELF_DESCRIBING_SURFACES.md) §10 carries the
+result and findings). Two facts a builder starting from this spec needs:
+
+- **§1's field set was exercised and came up one slot short.** The addendum
+  carries cross-cutting protocol lines (a return-format convention, a
+  mode-specific preference bullet, a cross-surface HARD RULE) that fit none of
+  §1's seven fields. `TEXTEDIT_DESCRIPTOR` adopts MASH's **`usage`** field for
+  them, **provisionally** — the field-set decision of §9 remains open and
+  owner's to make; treat the shipped descriptor as its first evidence.
+- **§3's derivation, as landed:** expectation phrases live in a guard-keyed
+  registry beside the descriptor (`_TEXTEDIT_GUARD_EXPECTS`), one encoding per
+  guard class, with mode selection read from the refusing state itself. The
+  drill enforces that no guard-owned phrase is restated in an editorial field.
+  That is the shape the next surface should copy.
+
+## 11. Registration, not schema — what this changes for the build (dated entry — July 23, 2026)
+
+[`SELF_DESCRIBING_SURFACES.md`](SELF_DESCRIBING_SURFACES.md) §11 (owner, in
+session, on the collaborator's proposal) rules that descriptors are a
+**registration, not a validated schema** while the shape is being learned,
+because a field vocabulary that becomes law early is incompatible with the
+iteration prompt authoring requires. For this file:
+
+- **§1's enforcement clause is amended.** "A descriptor missing a required
+  field fails validation" no longer governs the field set. The enforced
+  property is **coverage** — every live surface carries a descriptor — and a
+  diagnostic *reports* the gaps rather than refusing them.
+- **§1's seven fields are a vocabulary, not a contract.** Draw from them and
+  add what a surface needs. `trellis_textedit` carries `usage` for
+  cross-cutting protocol lines: a fact about one surface, needing no
+  ratification and freezing nothing. The "provisionally adopted" framing of
+  §10 is superseded — under a registration there is no probationary state to
+  be in.
+- **§3 is untouched.** `expects` stays guard-derived and code-composed — the
+  one part of the account that is not editorial, and so not subject to
+  field-set flexibility.
+- **The registration is also the answer to §6's other open question** (where
+  `llm_help` composes from): a registry keyed by surface name, populated at
+  each surface's own definition site, is what the alive catalog and the
+  coverage diagnostic both read. Building it is the next increment; nothing
+  of it exists yet.
+
+## 12. The registry exists — what `llm_help` builds on (dated entry — July 23, 2026)
+
+Increments 2 and 3 landed (`SELF_DESCRIBING_SURFACES.md` §12). The line
+above — *nothing of it exists yet* — is superseded: the registry is built,
+and `llm_help` should be written against it rather than inventing a second
+lookup.
+
+- **`src/rlm/trellis_surfaces.py` is the composition source §6 asked for.**
+  `registry()` returns the run-independent map of surface name →
+  descriptor; `descriptor_for(name)` is the per-surface lookup §2's
+  `llm_help("{name}")` frame needs. What the registry does *not* know is
+  which surfaces are live in a given run — that is the `custom_tools` dict
+  at the injection seam, and the **alive** catalog is the intersection of
+  the two. Composing that intersection is `llm_help`'s own work.
+- **`expects` is still per-surface.** `trellis_textedit` derives its
+  expectations from its own guards (`derive_textedit_expects`); the
+  registry deliberately does not standardize that, because each surface's
+  guards are its own. §2's frame renders whatever the surface supplies.
+- **Coverage is answerable now**, via `npm run check:surfaces`: it derives
+  injected names by AST from the seam and reports which carry descriptors.
+  `llm_help` inherits that derivation rather than duplicating it.
+- **Field shape is still not validated** (§11), and `llm_help` must not
+  become the thing that validates it by assuming fields are present.
+  Render what a descriptor carries; omit what it does not.

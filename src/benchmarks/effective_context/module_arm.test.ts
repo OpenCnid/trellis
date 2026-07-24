@@ -33,6 +33,7 @@ function fixtureRegistry(status: 'active' | 'contested'): string {
       research: { sourceNodeIds: [] },
       addendum: 'addendum.txt',
       tools: [],
+      acceptance: { zeroPaid: 'npm run test:module -- fixture-module' },
       status,
       kernelCompat: 1,
     })

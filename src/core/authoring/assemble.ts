@@ -1,5 +1,6 @@
 import {
   MODULE_ADDENDUM_MAX_BYTES_DEFAULT,
+  moduleAcceptanceCommand,
   type ModuleManifest,
 } from '../../config/modules.js';
 import type { DraftEnvelope } from '../observability/rlm_draft.js';
@@ -60,8 +61,20 @@ export interface ManifestBuildArgs {
  * (readModuleManifest validates the written file); status is `active`
  * and kernelCompat stays 1 (no schema change this session). The pinned
  * research hashes are the ONLY provenance — the model contributed none.
+ *
+ * `acceptance.zeroPaid` is DERIVED from the module name, never constant:
+ * a criterion every module shares discriminates nothing, which is why
+ * the manifest schema now refuses a zeroPaid that does not contain the
+ * manifest's own name. The name is therefore load-bearing here — there
+ * is no default, because a module that cannot name its own drill has no
+ * acceptance criterion and must not assemble.
  */
 export function buildManifest(args: ManifestBuildArgs): ModuleManifest {
+  if (args.moduleName.trim().length === 0) {
+    throw new Error(
+      'Cannot assemble a module with no name: acceptance.zeroPaid is derived from it.'
+    );
+  }
   const addendumMaxBytes = args.addendumMaxBytes ?? MODULE_ADDENDUM_MAX_BYTES_DEFAULT;
   return {
     name: args.moduleName,
@@ -71,7 +84,7 @@ export function buildManifest(args: ManifestBuildArgs): ModuleManifest {
     addendum: AUTHORED_ADDENDUM_FILENAME,
     tools: [],
     bounds: { addendumMaxBytes },
-    acceptance: { zeroPaid: 'npm run test:modules' },
+    acceptance: { zeroPaid: moduleAcceptanceCommand(args.moduleName) },
     status: 'active',
     kernelCompat: 1,
   };

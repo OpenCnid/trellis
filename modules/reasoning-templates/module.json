@@ -6,7 +6,7 @@
   "addendum": "addendum.txt",
   "tools": [],
   "bounds": { "addendumMaxBytes": 12288 },
-  "acceptance": { "zeroPaid": "npm run test:modules" },
+  "acceptance": { "zeroPaid": "npm run test:module -- reasoning-templates" },
   "status": "contested",
   "kernelCompat": 1
 }

@@ -55,7 +55,7 @@ From outermost-hostile inward to trusted host. The load-bearing boundary is the 
 | Zone | Contents | Trust | Boundary *out* of this zone |
 |---|---|---|---|
 | **U — the namespace** | Model-authored Python + retrieved content; cheap creds-free tools (regex/pandas over text); proxy stubs; `answer`/`llm_query` names | **Hostile** | Language layer is **NOT** a boundary (§7) |
-| **G — the guest** | Kata guest kernel + Tier-0 hardening: cgroups (pids/mem/cpu) + seccomp allowlist + Landlock | **Untrusted, blast-radius-capped** | **Kata microVM (KVM/VT-x)** — the boundary (Tier-1) |
+| **G — the guest** | Kata guest kernel + Tier-0 hardening: rlimits after a privilege drop + seccomp denylist + Landlock ([ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md)) | **Untrusted, blast-radius-capped** | **Kata microVM (KVM/VT-x)** — the boundary (Tier-1) |
 | **— the two chokepoints —** | vsock port → LM handler; vsock port → DB broker (§3) | Boundary crossings | Per-session listener identity at `accept()` (§ note below) |
 | **H — the host** | LM handler, DB broker, egress policy, watchdog, warm pool; the API key + DB credentials + DB network route | **Trusted** | — |
 
@@ -135,7 +135,7 @@ carry (register in §8 (Residual-risk register)); "tracked" = gated by a named f
 | ID | Attack surface / action | Enforcing control (surface) | Residual risk |
 |---|---|---|---|
 | **G-1** | Language-level escape: `__import__` → `import os/subprocess/socket/ctypes`, MRO walks, hook removal | **None at the language layer — it is credited with zero enforcement.** Contained one layer out by the **Kata microVM** + Tier-0 (seccomp/Landlock) | **Accepted** — escape is *expected*; the model is designed to survive it (§7) |
-| **G-2** | Fork/thread bomb, memory/PID exhaustion (rlms caps bypassable via raw threads) | **In-guest cgroups (pids/mem/cpu)** applied at worker startup + **host watchdog** reaps/replaces wedged VMs | **Accepted, bounded** — self-DoS of the session's *own* VM until the watchdog reaps; no host/cross-session impact |
+| **G-2** | Fork/thread bomb, memory/PID exhaustion (rlms caps bypassable via raw threads) | **In-guest `setrlimit` after a privilege drop** (`RLIMIT_NPROC`/`AS`/`NOFILE`/`FSIZE`) applied at worker startup + **host watchdog** reaps/replaces wedged VMs. **Not cgroups** — unreachable from the worker on this stack, see [ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md); verified S5, fork bomb refused at 23 of a 24 limit | **Accepted, bounded** — self-DoS of the session's *own* VM until the watchdog reaps; no host/cross-session impact |
 | **G-3** | Read a secret out of the guest namespace | **Data-flow boundary**: guest holds handles, not payloads; creds + API key never materialised in-guest | **Accepted** — cheap in-namespace tools are creds-free by construction; a secret that is never present cannot be read |
 | **VM-1** | Guest→host escape via VMM / guest-kernel exploit | **Kata microVM (KVM)** + **split version pins** (Kata ≥ 3.31.0, CH ≥ 52.0) closing Kata CVE-2026-24834 (guest-share/guest-root escape, patched Kata 3.27.0), CH CVE-2026-27211 (guest→host file read via QCOW2 header rewrite, fixed CH 50.1), CH CVE-2026-45782 (virtio-block UAF, fixed CH 52.0) | **Accepted / tracked** — a zero-day VMM/kernel escape has **no second independent ring** (gVisor not adopted); single-point-of-failure on the VM boundary, tracked on two advisory feeds (R2, §8) |
 | **VM-2** | Cross-session escape via a co-tenant worker | **One microVM per session**; never co-tenant two adversarial workers (REPL_SANDBOX_ARCHITECTURE.md §6 (Recursion & multiplicity)) | **Accepted** — none by design today; re-opens only if warm-pooling is added (R3, §8) |
@@ -170,7 +170,7 @@ same set of controls; this proves the three sources agree and gives one place to
 | 5 | Host-side CID-keyed hard ceilings (concurrency/rate/$ spend) | 5 | 5 | No resource-exhaustion host impact | Host LM handler (CID-keyed ledger) | LM-2 |
 | 6 | Neo4j APOC allowlist deny-by-default + DB-host egress denial | 6 | 6 | DB stays read-only / no SSRF | Host broker (APOC allowlist) + egress policy | DB-2 |
 | 7 | `statement_timeout` + query-cost caps + forbid unbounded `[*]` | 7 | 7 | No resource-exhaustion host impact | Host broker (cost caps) | DB-3 |
-| 8 | In-guest cgroups (pids/mem/cpu) + host watchdog | 8 | 8 | No resource-exhaustion host impact | In-guest cgroups + host watchdog | G-2 |
+| 8 | In-guest process/memory caps + host watchdog | 8 | 8 | No resource-exhaustion host impact | In-guest rlimits after a privilege drop + host watchdog ([ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md)) | G-2 |
 | 9 | Least-privilege Postgres role (`NOSUPERUSER`, deny escape procs) | 9 | 9 | DB stays read-only / no SSRF | Host broker (Postgres role) | DB-1 |
 | 10 | Security-review the vsock bridge before ship | 10 | 10 | (gate — SPEC §8) | Pre-ship red-team / fuzz gate | BR-1 |
 | 11 | Warm-pool reset policy (if pooling) | 11 | 11 | (contingency) | Single-use / snapshot+hash reset | WP-1 |

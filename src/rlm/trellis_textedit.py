@@ -63,6 +63,8 @@ import stat
 import tempfile
 import threading
 
+from trellis_surfaces import register_surface
+
 # Bounds: defaults and hard caps (must mirror src/config/index.ts).
 TEXTEDIT_MAX_FILE_BYTES_DEFAULT = 4 * 1024 * 1024
 TEXTEDIT_MAX_FILE_BYTES_CAP = 32 * 1024 * 1024
@@ -852,53 +854,314 @@ class TrellisTextEdit:
 # injected. rlms runs .format() over the system prompt, so this text is
 # brace-free (the workspace addendum idiom).
 #
-# July 19, 2026 (harness-invariants pass): the text is composed HEAD + <mode block> + TAIL so the
-# raw-splice bullet is not taught to a run that would refuse it. The
-# default (raw-allowed) composition is byte-identical to the
-# pre-Session-69 constant — only the guarded-only arm is new text.
-_TEXTEDIT_ADDENDUM_HEAD = """
+# July 19, 2026 (harness-invariants pass): the text composes as
+# header + <mode block> + family bullets, so the raw-splice bullet is
+# not taught to a run that would refuse it.
+#
+# July 23, 2026 (Workstream B increment 2): the hand-authored constants
+# TEXTEDIT_ADDENDUM and TEXTEDIT_ADDENDUM_GUARDED_ONLY, and the four
+# fragments they were built from, are RETIRED. Increment 1 proved the
+# descriptor composition reproduces them byte-for-byte on both arms;
+# keeping both after that proof meant shipping two encodings of the same
+# bytes, which is the exact failure class
+# SELF_DESCRIBING_SURFACES.md §9.1 exists to close — *one encoding,
+# owned by whoever is authoritative for the fact* — sitting inside the
+# artifact built to demonstrate it. The descriptor below is now the sole
+# encoding; drift is caught by a sha256 pin per arm in
+# scripts/test_textedit.py, whose recorded values ARE the bytes the
+# retired constants held, so the lineage back to the pre-Session-69
+# prose is unbroken.
 
-=== TEXT EDITING (CODE-MEDIATED, HASH-GUARDED) ===
-`trellis_textedit` edits files under the operator-configured edit root. Paths are relative to the root; nothing outside it is reachable. Every method returns a JSON STRING — wrap results in json.loads(...). Line addresses are 0-based and half-open, exactly Python slice semantics.
-- `trellis_textedit.load(relpath)` reads a file into a held frame and returns its lineCount, bytes, and content digest. Re-loading refreshes from disk and DISCARDS staged edits.
-- `trellis_textedit.lines(relpath, start, end)` returns the slice [start, end) as pairs of line index and text (bounded per call).
-- `trellis_textedit.locate(relpath, pattern, regex=False)` returns engine-computed line addresses for a content query: bounded hits plus the total count. LOCATE, NEVER COUNT: query for every address; never estimate a line number by reading the file.
-"""
 
-# Raw-allowed mode (default): the pre-Session-69 bullets, verbatim.
-_TEXTEDIT_ADDENDUM_RAW_MODE = """- `trellis_textedit.splice(relpath, start, end, new_lines)` stages the replacement of lines start..end with new_lines, a LIST of newline-free strings. Author only genuinely NEW lines; move existing text by slicing it out of the frame in code — never retype lines that already exist. Addresses are transient: re-locate after every splice.
-- PREFER THE GUARDED FAMILY for every edit. Each guarded call states the exact bytes it removes or inserts beside, and the engine verifies that statement against the frame BEFORE staging; a divergence raises AnchorMismatchError and stages nothing — re-read with lines() and re-derive, never retype from memory.
-"""
+# --- The surface descriptor (Workstream B increment 1, July 23, 2026) -
 
-# Guarded-only mode: the raw path does not exist for this run, so it is
-# described as absent rather than discouraged. Positive framing — the
-# text says which calls to make, not which to avoid.
-_TEXTEDIT_ADDENDUM_GUARDED_MODE = """- *** GUARDED-ONLY MODE IS ACTIVE FOR THIS RUN. *** Every edit goes through the guarded family below. Each guarded call states the exact bytes it removes or inserts beside, and the engine verifies that statement against the frame BEFORE staging; a divergence raises AnchorMismatchError and stages nothing — re-read with lines() and re-derive, never retype from memory.
-- The raw `trellis_textedit.splice(relpath, start, end, new_lines)` path is DISABLED and raises RawSpliceDisabledError. A bare index pair states no belief about which bytes it removes, so a drifted window deletes neighbors silently. State your bytes and let the engine check them.
-"""
+# HARNESS_SELF_MODEL.md §12.1's pre-stated first test: the addendum is
+# COMPOSED from a descriptor plus guard-derived expectations, and the
+# composition is pinned byte-identical to the hand-authored constants
+# above, one pin per arm (npm run test:textedit [15]). The constants
+# stay the targets; the composition is what build_textedit_addendum
+# ships to the kernel prompt (trellis_agent.py, the non-test caller).
+#
+# Ownership follows SELF_DESCRIBING_SURFACES.md §9.1 — one encoding,
+# owned by whoever is authoritative for the fact: every sentence a
+# guard enforces lives in _TEXTEDIT_GUARD_EXPECTS, keyed by its guard
+# class, and nowhere else; the editorial teaching prose lives in
+# TEXTEDIT_DESCRIPTOR; the renderer carries structure only.
+#
+# Field names draw on LLM_HELP_SPEC.md §1's vocabulary plus MASH's
+# `usage`, which carries the cross-cutting protocol lines §1 has no slot
+# for. Nothing validates this shape and nothing should: descriptors are
+# a REGISTRATION, not a schema (SELF_DESCRIBING_SURFACES.md §11, owner,
+# July 23, 2026) — a field vocabulary that becomes law early cannot
+# survive the iteration prompt authoring needs, so fields vary per
+# surface and adding one is an edit. What a diagnostic will check is
+# COVERAGE — that every live surface carries a descriptor at all —
+# never field shape. `expects` is deliberately absent: it is derived by
+# derive_textedit_expects() from the guards, never authored here.
+TEXTEDIT_DESCRIPTOR = {
+    "name": "trellis_textedit",
+    "purpose": "edits files under the operator-configured edit root.",
+    # llm_help-facing editorial fields, NOT rendered into the addendum
+    # and therefore not constrained by the byte-identity pins; they
+    # wait for the llm_help surface, whose landing is the pin-moving
+    # event (SELF_DESCRIBING_SURFACES.md §9.3).
+    "whenToUse": ("the task needs to read or change files on disk; the "
+                  "toolkit exists only when the operator set "
+                  "TRELLIS_EDIT_ROOT"),
+    "example": ("shape = json.loads(trellis_textedit.load('a.md')); "
+                "hits = json.loads(trellis_textedit.locate('a.md', 'title'))"),
+    "seeAlso": ["trellis_workspace"],
+    # The banner is an editorial grouping label (MASH's category). Its
+    # qualifier restates two guard-backed properties as editorial text
+    # — a recorded §9.1 tension, left as-is because rewording it moves
+    # kernel-prompt bytes.
+    "category": "TEXT EDITING (CODE-MEDIATED, HASH-GUARDED)",
+    # Cross-cutting protocol lines (MASH's `usage`). All three are
+    # ADVISORY in HARNESS_SELF_MODEL.md §4's sense — no predicate on
+    # THIS surface refuses when they are ignored; "provenance" is
+    # enforced by the database write path, a different surface.
+    "usage": {
+        "returns": ("Every method returns a JSON STRING — wrap results "
+                    "in json.loads(...)."),
+        "prefer_guarded": "PREFER THE GUARDED FAMILY for every edit.",
+        # The lead-in that carries the guarded family's line contract
+        # into the guarded-only arm (increment 3). Editorial connective
+        # only — the contract itself is the guard-owned `newline_free`
+        # phrase, so it still has exactly one encoding.
+        "guarded_lines": "expected_lines and new_lines are each",
+        "provenance": ("HARD RULE: toolkit operations have NO provenance "
+                       "standing — they never count as database tool "
+                       "calls, and file content is NEVER sourceNodeIds; "
+                       "database provenance stays mandatory for every "
+                       "answer and every cached insight."),
+    },
+    # One entry per model-visible method, in render order. Plain
+    # strings are editorial teaching prose; ("expects", key) slots pull
+    # the guard-owned phrase from the derived expectations, so no
+    # guard-backed sentence is encoded twice.
+    "exposes": [
+        {
+            "call": "trellis_textedit.load(relpath)",
+            "doc": ["reads a file into a held frame and returns its "
+                    "lineCount, bytes, and content digest. Re-loading "
+                    "refreshes from disk and DISCARDS staged edits."],
+        },
+        {
+            "call": "trellis_textedit.lines(relpath, start, end)",
+            "doc": ["returns the slice [start, end) as pairs of line "
+                    "index and text ", ("expects", "slice_bound"), "."],
+        },
+        {
+            "call": "trellis_textedit.locate(relpath, pattern, regex=False)",
+            # The LOCATE, NEVER COUNT tail is advisory doctrine (the
+            # pillar's read half): nothing refuses an estimated line
+            # number that happens to land in range.
+            "doc": ["returns engine-computed line addresses for a "
+                    "content query: ", ("expects", "locate_bound"),
+                    ". LOCATE, NEVER COUNT: query for every address; "
+                    "never estimate a line number by reading the file."],
+        },
+        {
+            # The raw path, taught only to a run that can actually call
+            # it: in guarded-only mode the renderer replaces this entry
+            # with the guard-derived mode account, so the composed read
+            # never teaches a call that would refuse.
+            "mode": "raw-only",
+            "call": "trellis_textedit.splice(relpath, start, end, new_lines)",
+            # "Addresses are transient" is advisory: a stale in-range
+            # index is accepted and stages the wrong window.
+            "doc": ["stages the replacement of lines start..end with "
+                    "new_lines, ", ("expects", "newline_free"),
+                    ". Author only genuinely NEW lines; move existing "
+                    "text by slicing it out of the frame in code — never "
+                    "retype lines that already exist. Addresses are "
+                    "transient: re-locate after every splice."],
+        },
+        {
+            "call": ("trellis_textedit.replace_lines(relpath, start, end, "
+                     "expected_lines, new_lines)"),
+            "doc": ["replaces exactly [start, end): ",
+                    ("expects", "replace_match"), " ",
+                    ("expects", "over_wide")],
+        },
+        {
+            "call": ("trellis_textedit.insert_lines(relpath, at, new_lines, "
+                     "anchor_before=None, anchor_after=None)"),
+            "doc": ["inserts at index `at` and removes nothing. ",
+                    ("expects", "insert_anchor")],
+        },
+        {
+            "call": ("trellis_textedit.delete_lines(relpath, start, end, "
+                     "expected_lines)"),
+            "doc": [("expects", "delete_verified")],
+        },
+        {
+            # Three review affordances share one bullet; "bounded" on
+            # diff is display truncation with a reported flag, not a
+            # refusal, so the fragment stays editorial.
+            "group": [
+                {"call": "trellis_textedit.diff(relpath)",
+                 "doc": ["shows a bounded unified diff of staged edits"]},
+                {"call": "trellis_textedit.revert(relpath)",
+                 "doc": ["discards them"]},
+                {"call": "trellis_textedit.drop(relpath)",
+                 "doc": ["frees a frame slot"]},
+            ],
+        },
+        {
+            "call": "trellis_textedit.write_back(relpath)",
+            "doc": [("expects", "digest_guard")],
+        },
+    ],
+}
 
-_TEXTEDIT_ADDENDUM_TAIL = """- `trellis_textedit.replace_lines(relpath, start, end, expected_lines, new_lines)` replaces exactly [start, end): expected_lines must byte-match the removed lines. A window sharing an unchanged leading or trailing line with new_lines is refused as over-wide and the refusal names the minimal window — keep unchanged neighbors OUTSIDE the window.
-- `trellis_textedit.insert_lines(relpath, at, new_lines, anchor_before=None, anchor_after=None)` inserts at index `at` and removes nothing. At least one anchor — the expected full text of the neighboring line — is required and verified.
-- `trellis_textedit.delete_lines(relpath, start, end, expected_lines)` removes exactly the verified lines: deletion is an explicit declaration, never a retype side effect.
-- `trellis_textedit.diff(relpath)` shows a bounded unified diff of staged edits; `trellis_textedit.revert(relpath)` discards them; `trellis_textedit.drop(relpath)` frees a frame slot.
-- `trellis_textedit.write_back(relpath)` verifies the disk bytes still match the load-time digest, then writes the staged frame atomically. A digest mismatch RAISES and writes nothing: the file changed since load — re-load and re-derive your edits by query; never reconstruct them from memory.
-Budgets are bounded; over-budget operations raise with current usage. HARD RULE: toolkit operations have NO provenance standing — they never count as database tool calls, and file content is NEVER sourceNodeIds; database provenance stays mandatory for every answer and every cached insight.
-"""
+# Guard-owned expectation phrases: ONE encoding per guard class, keyed
+# by the guard that is authoritative for it, rendered only through
+# render_textedit_addendum. Granularity is the guard CLASS, not the
+# raise site — digest_guard accounts for the whole StaleFileError
+# family, budgets for both TextEditBudgetError sites. Operator-facing
+# guards that fire before a run exists (parse_textedit_bounds,
+# parse_textedit_guarded_only's malformed-value refusal, the
+# TRELLIS_EDIT_ROOT validation) have no phrase on purpose: the composed
+# read is addressed to the model, and those guards refuse the operator.
+_TEXTEDIT_GUARD_EXPECTS = {
+    # _resolve: absolute paths, '..' components, and symlink escapes
+    # are refused before any I/O (strict containment, Guardrail 4).
+    "containment": ("Paths are relative to the root; nothing outside it "
+                    "is reachable."),
+    # _require_index_pair: a range that is not 0-based, half-open, and
+    # in bounds raises with the remedy (re-run locate()).
+    "addressing": ("Line addresses are 0-based and half-open, exactly "
+                   "Python slice semantics."),
+    # lines(): a slice wider than TEXTEDIT_SLICE_MAX_LINES raises.
+    "slice_bound": "(bounded per call)",
+    # locate(): hits cap at TEXTEDIT_LOCATE_MAX_HITS; the listing
+    # reports totalHits and capped so the model narrows its query.
+    "locate_bound": "bounded hits plus the total count",
+    # splice() / _require_guarded_lines: a line entry containing "\n"
+    # raises — the frame delimiter never rides inside a line. Rendered
+    # in the raw arm only; in the guarded arm the same contract is
+    # enforced on expected_lines/new_lines but currently has no line
+    # (a recorded orphan — see test:textedit [15]).
+    "newline_free": "a LIST of newline-free strings",
+    # _verify_anchor_lines: stated bytes diverging from the held frame
+    # raise AnchorMismatchError and stage nothing. One phrase, rendered
+    # into BOTH mode arms, so the arms cannot drift apart on it.
+    "anchor_guard": ("Each guarded call states the exact bytes it removes "
+                     "or inserts beside, and the engine verifies that "
+                     "statement against the frame BEFORE staging; a "
+                     "divergence raises AnchorMismatchError and stages "
+                     "nothing — re-read with lines() and re-derive, never "
+                     "retype from memory."),
+    # replace_lines / delete_lines: expected_lines must state exactly
+    # the removed window (length check + _verify_anchor_lines).
+    "replace_match": "expected_lines must byte-match the removed lines.",
+    # replace_lines: shared unchanged leading/trailing lines refuse as
+    # over-wide with the minimal window named.
+    "over_wide": ("A window sharing an unchanged leading or trailing line "
+                  "with new_lines is refused as over-wide and the refusal "
+                  "names the minimal window — keep unchanged neighbors "
+                  "OUTSIDE the window."),
+    # insert_lines: at least one anchor is required, each verified
+    # byte-exactly via _verify_anchor_lines.
+    "insert_anchor": ("At least one anchor — the expected full text of "
+                      "the neighboring line — is required and verified."),
+    # delete_lines: removal only after expected_lines verification.
+    "delete_verified": ("removes exactly the verified lines: deletion is "
+                        "an explicit declaration, never a retype side "
+                        "effect."),
+    # write_back (the StaleFileError family): the disk bytes are
+    # re-hashed against the load-time digest; a mismatch writes nothing.
+    "digest_guard": ("verifies the disk bytes still match the load-time "
+                     "digest, then writes the staged frame atomically. A "
+                     "digest mismatch RAISES and writes nothing: the file "
+                     "changed since load — re-load and re-derive your "
+                     "edits by query; never reconstruct them from memory."),
+    # TextEditBudgetError (per-file bytes and frame count): raises with
+    # current usage.
+    "budgets": ("Budgets are bounded; over-budget operations raise with "
+                "current usage."),
+    # The _guarded_only state (parse_textedit_guarded_only →
+    # RawSpliceDisabledError): the two phrases below render only when
+    # the SAME bool that makes splice() refuse is True.
+    "guarded_mode_active": ("*** GUARDED-ONLY MODE IS ACTIVE FOR THIS "
+                            "RUN. *** Every edit goes through the guarded "
+                            "family below."),
+    "raw_disabled": ("The raw `trellis_textedit.splice(relpath, start, "
+                     "end, new_lines)` path is DISABLED and raises "
+                     "RawSpliceDisabledError. A bare index pair states no "
+                     "belief about which bytes it removes, so a drifted "
+                     "window deletes neighbors silently. State your bytes "
+                     "and let the engine check them."),
+}
 
-# The default composition, byte-identical to the pre-Session-69
-# constant. Kept as a module-level name because the drills and the
-# addendum-identity pins address it directly.
-TEXTEDIT_ADDENDUM = (
-    _TEXTEDIT_ADDENDUM_HEAD
-    + _TEXTEDIT_ADDENDUM_RAW_MODE
-    + _TEXTEDIT_ADDENDUM_TAIL
-)
 
-TEXTEDIT_ADDENDUM_GUARDED_ONLY = (
-    _TEXTEDIT_ADDENDUM_HEAD
-    + _TEXTEDIT_ADDENDUM_GUARDED_MODE
-    + _TEXTEDIT_ADDENDUM_TAIL
-)
+# One call site, one commitment (MASH's register_command precedent):
+# the descriptor is bound to its surface HERE, where the surface is
+# defined, so a coverage diagnostic — and later llm_help — can find it
+# without anything being wired by hand elsewhere.
+register_surface(TEXTEDIT_DESCRIPTOR)
+
+
+def derive_textedit_expects(textedit):
+    """The guard-derived half of the composed read (HARNESS_SELF_MODEL.md
+    §2: the same code that refuses is the code that explains). Static
+    guards contribute their phrase unconditionally; the mode account is
+    selected by the SAME `_guarded_only` bool that makes splice()
+    refuse, so the description and the refusal cannot drift apart
+    (§2.1). Composed by code, never authored by the model."""
+    expects = dict(_TEXTEDIT_GUARD_EXPECTS)
+    expects["guarded_only"] = bool(getattr(textedit, "_guarded_only", False))
+    return expects
+
+
+def render_textedit_addendum(descriptor, expects) -> str:
+    """Composes the addendum from the two owned encodings: editorial
+    bytes from the descriptor, guard-backed bytes from the derived
+    expectations. The renderer itself is the invariant frame — banner,
+    bullets, separators — and contributes no prose. Pinned
+    byte-identical to TEXTEDIT_ADDENDUM (default arm) and
+    TEXTEDIT_ADDENDUM_GUARDED_ONLY (guarded arm) by
+    npm run test:textedit [15]."""
+
+    def piece(p):
+        return expects[p[1]] if isinstance(p, tuple) else p
+
+    def entry(e):
+        return "`" + e["call"] + "` " + "".join(piece(p) for p in e["doc"])
+
+    usage = descriptor["usage"]
+    out = [
+        "\n\n=== " + descriptor["category"] + " ===\n"
+        + "`" + descriptor["name"] + "` " + descriptor["purpose"]
+        + " " + expects["containment"]
+        + " " + usage["returns"]
+        + " " + expects["addressing"] + "\n"
+    ]
+    for e in descriptor["exposes"]:
+        if e.get("mode") == "raw-only":
+            if expects["guarded_only"]:
+                out.append("- " + expects["guarded_mode_active"] + " "
+                           + expects["anchor_guard"] + "\n")
+                out.append("- " + expects["raw_disabled"] + "\n")
+                # Increment 3 closes the bijection orphan increment 1
+                # recorded: _require_guarded_lines refuses a line list
+                # carrying a newline, and until now the guarded-only arm
+                # stated no such expectation — a run could be refused for
+                # a rule it was never told. The default arm already
+                # carries the same phrase on the splice bullet.
+                out.append("- " + usage["guarded_lines"] + " "
+                           + expects["newline_free"] + ".\n")
+            else:
+                out.append("- " + entry(e) + "\n")
+                out.append("- " + usage["prefer_guarded"] + " "
+                           + expects["anchor_guard"] + "\n")
+        elif "group" in e:
+            out.append("- " + "; ".join(entry(g) for g in e["group"]) + ".\n")
+        else:
+            out.append("- " + entry(e) + "\n")
+    out.append(expects["budgets"] + " " + usage["provenance"] + "\n")
+    return "".join(out)
 
 
 def build_textedit_addendum(textedit) -> str:
@@ -906,11 +1169,15 @@ def build_textedit_addendum(textedit) -> str:
     system prompt stays byte-identical (the build_mcp_addendum /
     build_workspace_addendum precedent, pinned by test).
 
-    When the toolkit runs in guarded-only mode the addendum describes
-    the guarded family as the whole surface and names the raw path as
-    disabled — a run is never taught a call that would refuse it."""
+    Since the July 23, 2026 increment the addendum is composed —
+    descriptor plus guard-derived expectations — rather than selected
+    between the two hand-authored constants. The constants remain the
+    byte-identity targets, pinned per arm, so this composition cannot
+    move the kernel prompt unnoticed. In guarded-only mode the composed
+    read describes the guarded family as the whole surface and names
+    the raw path as disabled — a run is never taught a call that would
+    refuse it."""
     if textedit is None:
         return ""
-    if getattr(textedit, "_guarded_only", False):
-        return TEXTEDIT_ADDENDUM_GUARDED_ONLY
-    return TEXTEDIT_ADDENDUM
+    return render_textedit_addendum(
+        TEXTEDIT_DESCRIPTOR, derive_textedit_expects(textedit))

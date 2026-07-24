@@ -96,8 +96,8 @@ requirement set) then C = acceptance, plus one PROPOSED side-track (the doubt fi
 | **S1** | Close the source-reads | A | G0 | Pinned-source conformance test asserts the 3-method contract + wire schemas + tool-materialization path | **[R]** | precondition for gate 3 |
 | **S2** | Boundary + persistence | A | S1, G1 | Scripted boot-once/keep-state/exec-many → the Kata microVM + `IsolatedEnv` | **[R]** | toward gate 3 |
 | **S3** | `llm_query` over vsock — **[R]+[A] PASSED 2026-07-23** (§5.3) | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
-| **S4** | DB broker minimal proof — **[R] PASSED 2026-07-23** (§5.4) | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
-| **S5** | Tier-0 in-guest hardening | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest cgroups+seccomp+Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
+| **S4** | DB broker minimal proof — **[R]+[A] PASSED 2026-07-23** (§5.4) | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
+| **S5** | Tier-0 in-guest hardening — **[R] PASSED 2026-07-23** (§5.5) | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest rlimits-after-privilege-drop + seccomp + Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
 | **S6** | Author the `IsolatedEnv` subclass | A | S1–S5 | Unedited load → `execute_code` round-trips as `LocalREPL` → the `KataREPL` backend | **[R+A]** | gate 3 |
 | **GB** | Security hardening to the 12 reqs | B | S3, S4, S5, S6 | Each of the 12 [ARCHITECTURE §7](REPL_SANDBOX_ARCHITECTURE.md) reqs mapped to an enforcing surface (§6) | **[R+A]** | gate 2 |
 | **GA-eq** | Equivalence acceptance | C | S6, GB | Scripted equivalence **and** a metered real-model equivalence run | **[R+A]** | gate 3 |
@@ -476,7 +476,7 @@ handed to the client, and named nowhere this process logs, audits, or serialises
 on the same Hetzner AX41 that passed G1, S2 and S3 (`npm run repl-sandbox:s4-probe`, reached per §4.1;
 the script refuses on any box without `/dev/kvm`). Kata 3.32.0 · Cloud Hypervisor v52.0 · containerd
 2.2.1 · image `python:3.12-slim` · guest kernel **6.18.35** against the host's 6.8.0-134. **The `[A]`
-half — a real model driving the `run_query` facade — is a separate owner-gated run and is unspent.**
+half — a real model driving the `run_query` facade — is recorded below and PASSED the same day.**
 
 | claim | observed |
 |---|---|
@@ -535,6 +535,82 @@ that plumbing would be a second thing to keep true) and stands the DB seam up on
 port `config.ports.db` (5002), serving `host.broker_handler` where S3 served `host.lm_handler`. It
 ships the guest only the package its own program runs (§ the exec-flake finding above).
 
+---
+
+**Observed 2026-07-23 — S4 `[A]` PASS, $0.011 spent across three runs.**
+`npm run repl-sandbox:s4-paid --json` (`scripts/repl_sandbox_s4_paid.py`) on the same Hetzner AX41,
+against the real `ChatCompletionsProvider` reaching `gpt-5.4-2026-03-05` at `https://api.openai.com/v1`.
+**A real model, shown nothing but the rendered stubs, composed `run_query` → `materialize` itself and
+answered a question whose answer was only in the database.**
+
+| claim | observed |
+|---|---|
+| model-authored code drove the real facade | the block the model wrote ran in the guest against `capabilities.materialise` stubs, dialed `AF_VSOCK (2, 5002)`, and came back with rows from the real Postgres the broker held the credential for. Witness **accepted=4, requests=4**. The granted ops `run_query`/`resolve_meta`/`materialize` all materialised as callable stubs |
+| the answer is right, and only the database had it | the model submitted, on the `answer` channel, *"Among the documents tagged 'research', delacroix has the greatest total word_count with 9140."* — the value this harness fixed in advance. **Neither shortcut reaches it**: most documents overall is okonkwo, highest total word_count overall is vasquez |
+| the answer was not guessable — the falsifier fired | **`--no-db` → DETECTED (exit 3)**, $0.00093. Asked the same question with the tools removed and pressed for a specific number, the model answered *"I don't have the actual row data … total word_count of 0"*. Without this the correct answer above would be no evidence about the facade at all |
+| ergonomics: **two attempts**, and the first failure is the finding | attempt 1 composed the query and the handle→materialize sequence **correctly on the first try** and failed on one thing only: it wrote the parameter placeholder as `?` and got `UpstreamError: SyntaxError from the postgres driver`. Attempt 2 changed it to `%s` and passed. See the paramstyle finding below |
+| the error surfacing is what fixed it | the refusal reached the model as a Python traceback inside the guest ([INTERFACES §7](REPL_SANDBOX_INTERFACES.md) (Error model)) and the harness fed that stderr back verbatim. The self-debug loop is not decoration here — it is what turned a failed run into a passing one |
+| zero credential in the guest | `secret_found=False` with `canary_found=True`, the same host-side grep and positive control the `[R]` run used, now applied to a namespace containing model-authored code |
+| the bill is real and bounded | `spend_ledger.spent` = **$0.00706** for the main run (positive, so a real model was billed; a stub answers at $0), against the $5.00 cap. Attempt 1 $0.00297, attempt 2 $0.00409 |
+| genuine VM boundary, clean teardown | guest kernel **6.18.35** vs host 6.8.0-134; socket node removed, container unlisted, zero surviving VMM, throwaway read-only role **dropped** |
+
+**The negative control is the sharp one, and it came out exactly as designed.** `--negative-control`
+has the guest answer itself with canned rows, never dialing the DB port. Run that way the harness
+**exits 3, DETECTED**, and the *only* failing claim is the witness reading `accepted=0` — the model
+still wrote good code, the answer still read `delacroix … 9140`, the credential grep was still clean,
+teardown was still clean, `first_try` was still true. Every model-visible claim passes and the
+host-side connection count is the one thing a self-answering guest cannot forge.
+
+**The finding: the `params` slot documents no paramstyle, and that cost an attempt.** The rendered
+stub says `run_query(sql: str, params: list | None = None)` and the doc line says what the call
+*does*, but neither says that the bound-parameter placeholder is psycopg2's `%s`. The model guessed
+`?`, which is the DBAPI qmark style and the reasonable guess. It recovered from the traceback, so the
+facade is usable — but a documented paramstyle would have made this a first-attempt pass, and the doc
+string is the cheapest possible place to put it. Recorded rather than fixed here: the descriptor docs
+are prompt-facing bytes, so editing them is [AGENTS.md §4](../../../AGENTS.md) rule 16 work and belongs
+in its own change, not appended to a run that has already been observed. There is a second, milder
+tension behind it: the broker's error text is deliberately terse (`SyntaxError from the postgres
+driver`, with the driver's own message withheld), and that terseness is what made the model guess
+rather than read. Redaction and self-debug ergonomics pull against each other, and the trade is worth
+naming where it was observed rather than discovering it again in GB.
+
+**The defect this harness's authoring found, off-host, before a cent was spent.** `run_query(sql)` —
+the natural call, with `params` left at the default the rendered signature offers — **was refused by
+the broker**: `denied: params must be a list, got NoneType`. `capabilities._stub_source` emitted every
+declared parameter into `args`, so an unset optional crossed as an explicit `null`, and every host op
+reads its optionals with `args.get(name, default)`, which returns the null rather than the default
+when the key is present. **Five of the ten broker/algebra capabilities declare an optional parameter**
+(`run_query.params`, `run_cypher.params`, `search.limit`, `locate.limit`, `narrow.start`/`end`) and
+each was reachable only by passing a value its signature says is optional. Fixed at the one point that
+closes the class: the generated stub now builds `args` from the required parameters and adds an
+optional one only when the caller set it, which is the rule
+[`guest_rpc.lm_request_from_envelope`](../../../src/repl_sandbox/guest_rpc.py) already applied on the
+LM port ("a `model` of `None` is dropped rather than sent as null"). Pinned by
+`test_capabilities.py::test_stub_arguments_forward_the_parameter_names` and, behaviourally, by
+`test_s4_paid.py::test_the_natural_call_reaches_the_broker_without_a_null_params`. **This is what the
+`[A]` half is for**: `[R]` hand-wrote its envelopes and so could not have found it, and no amount of
+re-reading `capabilities.py` did either — it took something composing a call against the rendering.
+
+**Scope limits carried honestly.** (1) The run does **not** exercise `supervisor.GuestSupervisor`: it
+imports `rlm.environments.base_env`, and the guest image (`python:3.12-slim` plus the shipped package)
+carries no rlms, so the guest program binds the transport hook and execs the materialised stubs
+itself. Shipping a hand-written `rlm` shim would have faked the very pin the supervisor exists to
+hold. **The guest image must carry rlms before S6 can run its equivalence harness** — a real S6
+prerequisite, found by trying to use the supervisor rather than by planning around it. Nothing here
+claims namespace persistence, reserved-name re-pinning, or `locals` marshaling. (2) Each attempt is a
+fresh guest process, so the model is told its block must be self-contained; cross-turn persistence is
+S2's result and S6's contract, not this run's. (3) The authoring calls are host-side, as rlms' own
+driver makes them, and the guest is opened `lm=False` — so this run drives **one** listener, the DB
+one, and says nothing about two at once. (4) `annotations`, from the generated module's
+`from __future__` line, is visible in the model's namespace alongside the stubs; harmless here, worth
+a tidy when the supervisor's scaffold-name exclusion takes over in S6.
+
+**Replication and cost.** Three runs, all first-try on the infrastructure (no `ctr task exec` flake
+this session): `--no-db` $0.00093 → DETECTED, the default run $0.00706 → PASS, `--negative-control`
+$0.00301 → DETECTED. **$0.011 total**, against an estimate of ~$0.02 and the house $5 cap.
+
+---
+
 **Off-host coverage, which is what makes the host run cheap to trust.** The five verdict assessors,
 the credential grep and its canary positive control, and — the strongest check available without KVM —
 the whole shipping host-side chain (broker, `inspect_sql`, handle table, `guest_rpc` translation)
@@ -543,6 +619,15 @@ a write comes back denied, are under test in `src/repl_sandbox/tests/test_s4_pro
 no `/dev/kvm`, no Postgres, green on both the Windows dev box and the host). What that suite
 structurally cannot reach — and what the run above supplied — is a frame crossing a VM boundary,
 hybrid-vsock delivery on the DB port, and a *real* Postgres role refusing a *real* write.
+
+The `[A]` half carries its own off-host suite, `src/repl_sandbox/tests/test_s4_paid.py`
+(**36 checks**, no `/dev/kvm`, no key, no network): every assessor, the code extractor, the prompt
+builder — including a check that no row value and no author name ever reaches the prompt, so the run
+cannot be measuring reading comprehension — a derivation of the expected answer *from* the fixture
+rather than an assertion beside it, a proof that both shortcuts name a different author, and the whole
+shipping host-side chain (`render` → a model-shaped block → `materialise` → `GuestRpc` → `Broker` →
+handle table) driven over the loopback double. **That last one is where the `params: None` defect
+surfaced**, at $0, before the host was touched.
 
 ### 5.5 S5 — Tier-0 in-guest hardening
 
@@ -564,6 +649,56 @@ inner layer instead. This spike is re-cast to the ratified control; it is not a 
 - **Label: [R]** — scripted resource/syscall/filesystem probes.
 - **Dependencies:** blocks S6.
 
+**Observed — PASSED on the host 2026-07-23** (`npm run repl-sandbox:s5-probe`; five
+consecutive runs, exit 0, zero infrastructure flake). Built:
+`src/repl_sandbox/hardening.py`, `scripts/repl_sandbox_s5_probe.py`, and 44 off-host checks
+in `src/repl_sandbox/tests/test_s5_probe.py` (pytest 960 → 1004).
+
+**The spike's real finding is that its own ratified control did not exist on the ratified
+stack.** cgroups are not reachable from the worker; the property is held by `setrlimit`
+after a privilege drop. Authoritative: [ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md),
+which corrects §1, §4, §7 requirement 8, THREAT_MODEL G-2, and this section in one place.
+The probe re-derives the finding on every run, so the record's basis stays checkable
+instead of resting on one session's transcript.
+
+Observed in the passing run:
+
+| Claim | Observed |
+|---|---|
+| 1 — the unhardened baseline is dangerous (positive control) | forbidden write succeeded, `unshare` permitted, **200 processes forked uncapped** |
+| 2 — cgroups unavailable | `cgroupfs_mounted: false`, `/proc/self/cgroup` `0::/`, Landlock ABI 7, guest kernel 6.18.35 |
+| 3 — fork bomb capped | **refused at 23** of a 24 limit, as uid 65534 |
+| 4 — syscall denied | `EPERM`, with `Seccomp: 2` / `Seccomp_filters: 1` read back from `/proc/self/status` |
+| 5 — write denied, sandbox still usable | `EACCES`; reads and the in-namespace regex/stdlib tools still work |
+| 6 — **both channels survive, both listeners open at once** | witness `accepted=3` of 3 expected (1 LM + 2 DB); LM returned its completion, DB returned the fixture rows |
+| 7 — watchdog reaps a wedged VM | `alive_before=true` → `SIGSTOP` the VMM → `alive_after_freeze=false` in 19.2 s → reaped, no VMM survived |
+| 8 — clean teardown | no container, no VMM, no listener socket, no cgroup directory for this sandbox |
+
+**Claim 6 closes a scope limit S4 carried honestly.** S3 opened only the LM listener and S4
+only the DB one, so neither said anything about two at once; S5 runs both against one
+sandbox and one witness.
+
+**Both falsifier arms fire (exit 3).** `--no-harden` — with Tier-0 removed the enforcement
+claims fail, as they must; a pass there would mean the probe measures something that was
+already true. `--negative-control` — the guest answers itself with canned replies and every
+guest-visible claim still passes, caught only by the host witness. Two arms because S5 makes
+two kinds of claim, and one arm cannot falsify both.
+
+**Three defects the run found that reading did not.** (1) The guest program hard-coded its
+own directory while `GUEST_DIR` is S3's inherited `/run/s3`; it is now self-locating from
+`__file__`, so the two cannot drift. (2) Landlock was not granting `/proc`, so the worker
+could not read `/proc/self/status` — every control applied correctly and the probe reported
+`Seccomp: -1`, i.e. **a run that hardened properly and could not prove it.** (3) The LM text
+was read from the wrong field of `LMResponse`. All three were invisible to a green off-host
+suite.
+
+**Scope limits, carried:** the watchdog's unresponsive state is produced by `SIGSTOP` on the
+VMM, which is a faithful symptom and *not* the shim wedge this host throws about twice in
+thirteen runs — that one cannot be summoned on demand, so the reaper is unproven against
+shim states it has not met. The seccomp filter is a denylist and the records said allowlist
+(ARCHITECTURE §2.1). Host-side cgroup residue from earlier S3/S4 sessions is still present;
+S5 leaves none of its own and now checks.
+
 ### 5.6 S6 — Author the `IsolatedEnv` subclass
 
 - **Objective:** wrap S2–S5 behind the three-method contract as the real `KataREPL(IsolatedEnv)`
@@ -571,7 +706,32 @@ inner layer instead. This spike is re-cast to the ratified control; it is not a 
   into vsock proxy stubs ([SPEC §2](REPL_SANDBOX_SPEC.md), §4.3).
 - **Real unknown it closes:** is the sandboxed backend a genuine **drop-in** for the rlms driver — does an
   unedited context load → `execute_code` behave as `LocalREPL` does?
-- **Entry preconditions:** S1–S5 complete (contract, boundary, both chokepoints, hardening).
+- **Entry preconditions:** S1–S5 complete (contract, boundary, both chokepoints, hardening), **plus the
+  rlms-in-the-guest decision below.**
+
+**Open decision S6 must make first: `GuestSupervisor` cannot currently be imported in the guest.**
+Found by S4 `[A]` trying to use it (§5.4). `supervisor.py` does
+`from rlm.environments.base_env import RESERVED_TOOL_NAMES`, and the guest image — stock
+`python:3.12-slim` plus the shipped `repl_sandbox` — has no rlms. Measured rather than assumed: that
+import pulls **`rlm`, `attrs`, `python-dotenv` and `rich`, ≈3.9 MB, all pure Python** (no compiled
+extensions, so shipping is mechanically possible) — and the *only* thing the guest takes from any of
+it is **one frozenset of eight strings**. Everything else `GuestSupervisor` uses from rlms is
+convention it already reimplements (the `REPLResult` field names, the `answer` channel). Three options:
+
+| | approach | cost |
+|---|---|---|
+| **A** | ship/bake rlms into the guest image | 3.9 MB and four packages for eight strings, `rich` included; more `ctr task exec` chunks on a host that intermittently wedges them, against §5.4's "shipping fewer files is a reliability property" |
+| **B** *(recommended)* | host reads `RESERVED_TOOL_NAMES` from the **real** pinned package and passes it in — `GuestSupervisor(reserved_names=…)`, delivered over the control port | a signature plus a control-port payload field. The pin stays enforced where rlms actually lives and [INTERFACES §8](REPL_SANDBOX_INTERFACES.md)'s conformance test still fails first if the set moves. Also the better shape on its own terms: the guest is untrusted and should not need the driver's library |
+| **C** | vendor the eight names into `repl_sandbox`, pinned by a host-side conformance test | simplest, but duplicates a value `supervisor.py`'s own docstring says is "read from the pinned package rather than retyped" |
+
+**B is not the shim S4 `[A]` refused.** That shim would have *faked* the pin — a hand-written `rlm`
+module in the guest asserting eight strings on its own authority, while making a run look as though it
+had exercised the real supervisor. B reads the genuine pinned package host-side and transmits its
+value. The distinction is which side holds the authority, not whether the constant travels.
+
+The one thing S6 should settle with the control port in hand rather than now: whether the names ride
+on `setup()` or on every `execute_code`. That depends on the op set S6 defines, which is why this is
+recorded as S6's decision instead of pre-empted here.
 - **Exit acceptance → enforcing surface:**
   - **[R]** a scripted equivalence harness: an unedited load → `execute_code` round-trips with the same
     observable `REPLResult` shape as `LocalREPL`. Enforcing surface: the **`KataREPL` backend + the rlms
@@ -591,14 +751,14 @@ bound with no engine behind it does not count.
 
 | # (ARCH §7) | Enforcing surface (named) | [R] reachability probe (scripted) | [A] adoption probe (paid ≤ $5) | Built in |
 |---|---|---|---|---|
-| 1 Exfil = data-flow; DLP + byte caps on top | Guest holds handles not payloads (broker) + content-DLP + per-session byte caps on `llm_query`/`vector_search`/`answer` | **partially met 2026-07-23 (§5.4):** `run_query` returned an opaque handle and no row crossed until the metered `materialize`; a host-side grep found no credential in the guest (canary positive control fired). The scripted 100%-injection payload and the byte-cap trip remain GB's | Real model steered by a hostile document (red-team) cannot leak a non-materialized secret via a sanctioned crossing; audit confirms | S4 + GB |
+| 1 Exfil = data-flow; DLP + byte caps on top | Guest holds handles not payloads (broker) + content-DLP + per-session byte caps on `llm_query`/`vector_search`/`answer` | **partially met 2026-07-23 (§5.4):** `run_query` returned an opaque handle and no row crossed until the metered `materialize`; a host-side grep found no credential in the guest (canary positive control fired). **Reproduced 2026-07-23 under the `[A]` run with model-authored code in the namespace** — same clean grep, same canary — which is a stronger statement than the scripted probe alone, though still not an adversarial one. The scripted 100%-injection payload and the byte-cap trip remain GB's | Real model steered by a hostile document (red-team) cannot leak a non-materialized secret via a sanctioned crossing; audit confirms | S4 + GB |
 | 2 API key host-side only | LM handler holds the provider key | Scripted grep of guest env/namespace/memory for the key returns nothing | — | S3 + GB |
 | 3 Split version pins | Deploy config: Kata ≥ 3.31.0 **AND** Cloud Hypervisor ≥ 52.0, separate feeds | Scripted version-assert on both binaries; two advisory feeds tracked | — | G1/GB |
 | 4 Auth by the listener's session identity | The id `accept()` reports on broker + handler — kernel CID (native) or per-sandbox socket path (hybrid, §5.3) | Scripted forged-payload-id request is rejected; quota keyed to that id | Real model in session A cannot reach session B's scope | S3, S4 + GB |
 | 5 Host-side CID-keyed hard ceilings | LM handler caps: concurrency, rate, dollar spend (hard-stop) | Scripted burst exceeds each cap → hard-stop (rlms caps proven bypassable) | **[A] banked 2026-07-23 (§5.3):** real fan-out `--cap-halt` → `cap_spend` refusal + `session_exhausted`. Residual for GB: cap is between-calls, not intra-batch/upstream-pre-emptive | GB |
 | 6 APOC allowlist + DB-host egress deny | Host broker APOC deny-by-default + DB-host has no route | Scripted `apoc.load.json` SSRF attempt denied; no metadata route | — | S4 + GB |
 | 7 `statement_timeout` + cost caps + no unbounded `[*]` | Host broker query governor | Scripted cartesian/`[*]` query is refused or timed out | — | S4 + GB |
-| 8 In-guest cgroups + host watchdog | cgroups (pids/mem/cpu) + watchdog | Scripted fork-bomb capped; wedged VM reaped | — | S5 |
+| 8 In-guest process/memory caps + host watchdog | rlimits after a privilege drop + watchdog ([ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md) — cgroups are unreachable from the worker) | **[R] met 2026-07-23 (§5.5):** fork bomb refused at 23 of a 24 limit as uid 65534, against 200 uncapped in the baseline arm; a `SIGSTOP`-frozen VM detected in 19.2 s and reaped with no VMM surviving | — | S5 |
 | 9 Least-privilege Postgres role | NOSUPERUSER, no `pg_read_server_files`/`pg_execute_server_program`/`dblink` | **[R] met 2026-07-23 (§5.4):** `COPY TO PROGRAM` and `pg_read_file` denied by the inspector, **and** a direct `INSERT` as the role refused by Postgres itself | — | S4 + GB |
 | 10 Security-review the vsock bridge | The vsock bridge (loopback-only, unprivileged) | Fuzzed frame parser survives; privilege-drop verified | — | GA-rt |
 | 11 Warm-pool reset policy *(contingency)* | Single-use VM or pre-exec-snapshot + rootfs-hash reset | Scripted reuse shows no state bleed *(only if pooling adopted)* | — | deferred (§10) |

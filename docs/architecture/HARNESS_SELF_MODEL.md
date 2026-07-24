@@ -525,3 +525,22 @@ itself, whose landing is the pin-moving event.
 - **Composition must be total (§5).** A surface × action pair with no
   composed read gives the agent silent absence, which is the audit's own
   failure class one level up. The build owes a default and a check.
+
+## 13. Increment 1 executed — byte-identity holds on both arms (dated entry — July 23, 2026)
+
+§12.1's pre-stated first test ran the same day. The `trellis_textedit`
+addendum composed from its descriptor plus guard-derived expectations equals
+the hand-authored constants **byte-exactly on both arms** — default and
+guarded-only — pinned one per arm in `scripts/test_textedit.py` §16, and each
+pin was made to fail once on a planted perturbation before being restored
+(rule 19(c)). The composition ships on the live path
+(`build_textedit_addendum` → the `trellis_agent.py` prompt seam), and both
+composed-prompt sha256 pins are unmoved, because the shipped bytes are
+identical. Guard-derivation is now an observation on this surface, not an
+assertion: the mode account is selected by the same `_guarded_only` bool that
+makes `splice()` refuse (§2.1), and every guard-backed sentence has exactly
+one encoding, drill-enforced. Per §12.1's own terms, the refactor is provably
+safe and proceeds surface by surface without moving a pin. Full result and
+the five recorded findings — including a bijection orphan in the guarded arm
+— are the dated §10 entry of
+[`SELF_DESCRIBING_SURFACES.md`](SELF_DESCRIBING_SURFACES.md).
