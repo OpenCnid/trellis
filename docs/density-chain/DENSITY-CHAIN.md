@@ -878,8 +878,9 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   toolkit's addendum, mode-selected by the refusing `_guarded_only` bool. `llm_help` stays
   specified, authorized, unbuilt.
 - **T3 — with receipts.** `72ac673` (#156, 2026-07-21) landed the contract, its twin, and the checker —
-  **ten issue codes**, of which the negative control planted **four**. That gap was closed 2026-07-23:
-  seven of the now-eleven codes had gated a merge without ever having been seen to fail, because the
+  **ten issue codes**, of which the negative control planted **four**. `abfefd2` (#184, 2026-07-23)
+  closed that gap: seven of the now-eleven codes had gated a merge without ever having been seen to
+  fail — the control itself was the unfalsified check — because the
   fixture declared `deprecatedSurfaces`, `forbiddenRootFiles` and `documentUpsum.paths` empty and
   never entered those branches — `oversized_document`, the only merge-gating enforcement of the
   governed-document byte budgets, among them (rule 19(c)). `conftest.py` and `pytest.ini` were
