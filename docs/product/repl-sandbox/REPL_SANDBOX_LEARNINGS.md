@@ -342,6 +342,60 @@ for $0.00706.
   run *look* like it had exercised the real thing. **The guest image must carry rlms before S6's
   equivalence harness can run** — found by trying to use the supervisor, not by planning around it.
 
+## 10e. What Tier-0 taught (S5 `[R]` PASSED, July 23, 2026)
+
+**A ratified control named a mechanism that does not exist on the ratified stack — for the
+second time.** The records said in-guest cgroups. The guest has no cgroup filesystem mounted and
+cannot mount one (`EPERM`, no `CAP_SYS_ADMIN`); the host-side cgroup Kata creates for the VM
+carries no `memory.max` or `pids.max` at all. The property survives via `setrlimit` after a
+privilege drop, and the correction is [ARCHITECTURE §2.1](REPL_SANDBOX_ARCHITECTURE.md).
+
+This is structurally identical to S3's hybrid-vsock finding, and the pair is the lesson:
+
+- S3: "the host reads the guest CID at `accept()`" was true of *native* vsock, carried as though
+  it were true of virtualisation.
+- S5: "in-guest cgroups cap the worker" was true of *containers on a host kernel*, carried as
+  though it were true of containers in a microVM.
+
+**An enforcing surface is only as portable as the mechanism named in it.** Both were written
+confidently, reviewed, ratified, and wrong in the same way — a mechanism observed in one context
+generalised to another without being re-observed. The cheap defence is what S5 now does: the
+probe **re-derives the finding on every run**, so the record's basis is executable rather than
+a transcript somebody has to trust.
+
+**Reconnaissance before authoring cost four boots and saved the design.** The first thing S5 did
+was boot a guest and look, rather than write a module against the record. Everything the module
+became — the uid drop, rlimits instead of cgroups, ABI-7 Landlock, ctypes seccomp — came out of
+those four runs. Writing first would have produced a `hardening.py` full of cgroup writes that
+fail with `ENOENT`, and the finding would have arrived as a confusing host failure instead of a
+design correction.
+
+**The most useful failure: hardened correctly, and could not prove it.** Landlock was not
+granting `/proc`, so the worker could not read `/proc/self/status` after restricting itself.
+Every control was genuinely applied — the fork bomb *was* capped, the syscall *was* denied — and
+the probe reported `Seccomp: -1` and failed the run. The read-back was denied by the ruleset it
+was trying to verify. **Evidence-gathering is inside the blast radius of the thing it measures**,
+and a control that removes its own witness looks exactly like a control that did not apply.
+
+**A denylist, where the record said allowlist — recorded, not papered over.** A true syscall
+allowlist for a CPython worker running arbitrary model code is not maintainable: the reachable
+set is large, version-dependent, and a miss is a crash in ordinary use rather than a caught
+attack. The forwarder of [INTERFACES §3.4](REPL_SANDBOX_INTERFACES.md) keeps its allowlist,
+because ten kinds of call *can* be enumerated. Same word, two processes, different answers.
+
+**Two falsifier arms, because there were two kinds of claim.** `--no-harden` falsifies the
+in-guest enforcement claims by removing the enforcement; `--negative-control` falsifies the
+crossing claim by removing the crossing. S4 established that a correct-looking result and a
+broken instrument are indistinguishable without the arm that must fail — S5 needed two of them,
+and a single arm would have left half the claims ungrounded.
+
+**Root is exempt from `RLIMIT_NPROC`, and that is the whole spike in one fact.** Set the limit
+without dropping privileges and every call returns success, the report reads clean, and a fork
+bomb runs to 200. `Tier0Report.processes_capped` is therefore a conjunction — non-root **and**
+limited — so the two can never be reported apart.
+
+---
+
 ## 11. Meta-learning: the review methods caught the builder's own errors
 
 Worth recording because it validates the house methods (and because I was the self-invested

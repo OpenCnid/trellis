@@ -35,7 +35,7 @@ hostile document tells it to.
 | **DB tools** | **Host broker, read-only by default** (writes require an explicit per-tool grant); credentials never enter the guest. |
 | **Egress** | Deny-by-default at the host / VMM NIC; **vsock is the only channel out**. |
 | **Deployment** | A KVM-capable Linux host (Hetzner dedicated / AWS C8i / GCP N2). **Not DigitalOcean** (§8). |
-| **In-guest hardening** | **Tier-0**: cgroups (pids/mem/cpu) + seccomp allowlist + Landlock — cheap, independent defense-in-depth. |
+| **In-guest hardening** | **Tier-0**: process/memory caps + seccomp + Landlock — cheap, independent defense-in-depth. **Mechanism corrected by §2.1** (rlimits after a privilege drop, not cgroups; denylist, not allowlist). |
 
 ## 2. Trust model
 
@@ -44,8 +44,10 @@ Three concentric facts:
 1. **The Kata microVM is the boundary.** A hardware KVM/VT-x guest kernel per session
    contains host escape. This is the load-bearing control (Tier-1).
 2. **In-guest hardening limits blast radius** (Tier-0): even before a hostile worker reaches
-   the guest kernel, cgroups cap CPU/mem/PIDs (no fork-bomb), seccomp shrinks the syscall
-   surface, Landlock scopes the filesystem. Failure modes are independent of the VMM.
+   the guest kernel, the process is capped so it cannot fork-bomb, seccomp shrinks the
+   syscall surface, Landlock scopes the filesystem. Failure modes are independent of the
+   VMM. **The mechanism that does the capping is `setrlimit` after a privilege drop, not
+   cgroups — see §2.1, which is authoritative and corrects every other mention.**
 3. **Credentials and the LLM API key live only on the host.** The guest holds *no* DB
    credentials and *no* provider API key. It can *ask* the host to act; it can never *be*
    the host.
@@ -53,6 +55,56 @@ Three concentric facts:
 Language-level restriction (audit hooks, `_SAFE_BUILTINS`) is **NOT a boundary** — it is
 telemetry only (Tier-2). The guest's `__import__` is reachable, so `import os/threading/
 subprocess` is available to hostile code; only the OS/VM layers contain it.
+
+### 2.1 Tier-0 as measured — cgroups are not reachable from the worker *(S5, July 23, 2026)*
+
+**This section is authoritative for Tier-0's mechanism.** Every other mention of "in-guest
+cgroups" in this document set — §1's table, fact 2 above, §4's Root worker row, §7
+requirement 8, [THREAT_MODEL](REPL_SANDBOX_THREAT_MODEL.md) G-2 and its requirement-8 row,
+[BUILD_PLAN §5.5](REPL_SANDBOX_BUILD_PLAN.md) — is corrected by it rather than edited in
+place, so there is one place to read and one place to change.
+
+Measured on the provisioned host (Kata 3.32.0, Cloud Hypervisor, containerd defaults, guest
+kernel 6.18.35), re-derived by `repl_sandbox.hardening.observe_environment` on every S5 run:
+
+| Named in the records | Observed |
+|---|---|
+| in-guest cgroups (pids/mem/cpu), applied at worker startup | **Not reachable.** No cgroup filesystem is mounted in the guest — `/proc/mounts` carries no cgroup line, `/proc/self/cgroup` reads `0::/` — and the guest cannot mount one: `mount -t cgroup2` returns `EPERM`, because the container's capability set (`a80425fb`) has no `CAP_SYS_ADMIN`. |
+| the fork bomb it exists to stop | **Open, and demonstrated:** an unhardened worker forked 200 processes against no resistance. |
+| a host-side cgroup around the VM | Kata does create one (`/default/kata_<id>`, plus `/kata_overhead/<id>`), but it carries **no `memory.max` and no `pids.max`** — the controller files are absent, and `ctr run --memory-limit` did not produce them or shrink what the guest sees. |
+| seccomp | **Available.** Installable from pure `ctypes`; `/proc/self/status` reports `Seccomp: 2`, and a denied call returns `EPERM` with the worker still running. |
+| Landlock | **Available at ABI 7** — richer than assumed. Read-only roots deny writes (`EACCES`) while reads continue. |
+
+**The property is preserved; the mechanism moved.** Requirement 8 wants "a hostile worker
+cannot exhaust the guest." That is held by **`setrlimit` (`RLIMIT_NPROC`, `RLIMIT_AS`,
+`RLIMIT_NOFILE`, `RLIMIT_FSIZE`) applied after dropping to a non-root uid** — no privilege,
+no mount, and no controller required. Measured: uid 65534 under `RLIMIT_NPROC` 24 was
+refused at 23.
+
+**The privilege drop is load-bearing, not hygiene.** Root is exempt from `RLIMIT_NPROC`, so
+a limit set while still uid 0 is a number with no enforcement behind it — which is exactly
+what the uid-0 fork test produced. `hardening.Tier0Report.processes_capped` encodes the
+conjunction so the two cannot be reported apart.
+
+**Also diverged, and recorded rather than papered over:** §1 and §7 say "seccomp
+**allowlist**". The shipped filter is a **denylist** of 37 escape and privilege-manipulation
+syscalls. A true allowlist for a CPython worker running arbitrary model-authored code and
+importing pandas is not maintainable — the reachable set is large, version-dependent, and a
+miss is a crash in ordinary use rather than a caught attack. The forwarder of
+[INTERFACES §3.4](REPL_SANDBOX_INTERFACES.md) *is* allowlistable and keeps its allowlist;
+that is a different process with ten kinds of call.
+
+**Unchanged by any of this:** Tier-0 is blast radius, never the boundary. The microVM is the
+boundary, and nothing above migrates into an "Enforced by" column that the VM is not already
+holding.
+
+**The generalisable lesson, and it is the second instance:** S3 found that "the host reads
+the guest CID at `accept()`" was a claim about *native* vsock carried as though it were a
+claim about virtualisation ([INTERFACES §3.1a](REPL_SANDBOX_INTERFACES.md)). This is the
+same shape — "in-guest cgroups" was a claim about *containers on a host kernel* carried as
+though it were a claim about containers in a microVM. **An enforcing surface is only as
+portable as the mechanism named in it**, and a design record that names a mechanism should
+be re-checked against the stack before the mechanism is relied on.
 
 ## 3. Data plane — what crosses, and how
 
@@ -169,7 +221,8 @@ assets, boundaries, per-surface controls, and accepted residual risk — is
 6. **Neo4j APOC allowlist (deny-by-default) + DB-host egress denial** — closes the
    `apoc.load.json` SSRF that `READ` access mode does not.
 7. **`statement_timeout` + query-cost caps + forbid unbounded `[*]` Cypher paths.**
-8. **In-guest cgroups (pids/mem/cpu) + host watchdog** (Tier-0).
+8. **In-guest process/memory caps + host watchdog** (Tier-0) — mechanism per §2.1
+   (`setrlimit` after a privilege drop; cgroups are not reachable from the worker).
 9. **Least-privilege Postgres role** — `NOSUPERUSER`, no `pg_read_server_files` /
    `pg_execute_server_program` / `dblink`.
 10. **Security-review the vsock bridge** before it ships.
