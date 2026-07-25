@@ -475,6 +475,18 @@ check("the retired name still parses as selection shape (refusal happens at load
 # The segment attaches at the RUN seam (dynamic_system_prompt), not inside
 # TRELLIS_ADDENDUM, so the two byte-identical pins in [4] and [7] are
 # untouched — which the checks below assert rather than assume.
+#
+# July 25, 2026 — the header stopped naming an author. Its first edition
+# opened "The operator selected these protocol modules for this run",
+# which rendered on the default run too: parse_module_selection returns
+# the kernel's own DEFAULT_SELECTION when TRELLIS_MODULES is unset, so no
+# operator act stood behind the sentence (.claude/rules/boundaries.md §3 — a
+# gate has exactly one author, and a kernel default is not one). The
+# replacement states the standing load_module actually settles and states
+# the authorship as unrecorded. The checks below hold that line: they pin
+# the arms IDENTICAL rather than merely happening to match, because the
+# operator/kernel bit is unavailable in this process at all (see the
+# TRELLIS_MODULES decoy check).
 print("\n[9] the active-modules segment (what the run is told it is under)")
 
 _active = build_active_modules_addendum([module0])
@@ -484,6 +496,53 @@ check("an empty selection composes the empty string (byte-identical prompt)",
       and build_active_modules_addendum([]) == "")
 check("the segment is brace-free (rlms .format() safety)",
       "{" not in _active and "}" not in _active)
+
+# --- What the header claims about how this run's selection arose ----------
+# The retired sentence, gone (the module #1 v2 retirement precedent in [5]).
+check("the header no longer asserts an operator act",
+      "The operator selected these protocol modules" not in _active)
+# The standing load_module DOES settle before a module dict exists: the
+# manifest is registered, its status is active, and it cleared every gate
+# in the loader (trellis_modules.load_module).
+check("the header states the standing the loader establishes",
+      "registered active in this kernel's module registry" in _active
+      and "passed the loader's validation before composition" in _active)
+# The provenance fact that holds on BOTH arms: the selection is read once
+# at import (trellis_agent.py:273, a module-level constant) and no later
+# byte moves it.
+check("the header states the selection is fixed at startup and holds for the run",
+      "fixed from the process environment at startup" in _active
+      and "holds unchanged for the whole run" in _active)
+# Authorship is stated as unrecorded rather than left silent: a run reading
+# this cannot claim an operator chose its protocol, and learns its protocol
+# may be a kernel default.
+check("the header states the selection's authorship is unrecorded",
+      "How that selection arose is a fact this prompt does not carry" in _active
+      and "treat its authorship as unknown to you" in _active)
+
+# The arms are identical BY DESIGN now, not by accident. The composer takes
+# module dicts and reads no environment, so the kernel-default selection and
+# an explicit operator selection naming the same modules compose the same
+# bytes — which is the honest rendering precisely because this process
+# cannot tell the arms apart (next check).
+_kernel_arm = build_active_modules_addendum(load_modules(parse_module_selection(None)))
+_operator_arm = build_active_modules_addendum(
+    load_modules(parse_module_selection(json.dumps(list(DEFAULT_SELECTION)))))
+check("the kernel-default arm and the operator-set arm compose the same bytes",
+      _kernel_arm == _operator_arm == _active)
+
+# WHY the arm cannot be inferred here, pinned so a later session does not
+# reach for the nearest available bit. `raw is None` is NOT the
+# operator/kernel bit: rlm_worker.ts:298 forwards
+# config.modules.selectionJson unconditionally and src/config/index.ts:413
+# derives it from parseModuleSelection, which substitutes its own default
+# when TRELLIS_MODULES is unset. This drill's wrapper (scripts/test_modules.ts)
+# forwards it the same way, so THIS process is itself the demonstration:
+# TRELLIS_MODULES is present and carries nothing but the kernel default.
+check("a present TRELLIS_MODULES marks no operator act (this process is the case)",
+      selection_env is not None
+      and json.loads(selection_env) == list(DEFAULT_SELECTION)
+      and parse_module_selection(selection_env) == parse_module_selection(None))
 
 # The bytes come from the manifest, not from this drill and not from the
 # composer: read module.json off disk and require the purpose verbatim.

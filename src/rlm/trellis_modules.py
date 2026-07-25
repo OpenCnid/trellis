@@ -170,10 +170,46 @@ def load_modules(selection, modules_dir=None):
 # characters at both loaders and a selection holds at most
 # MODULES_MAX_PER_RUN names, so this segment is bounded by the manifest
 # schema and the selection cap. No second budget is stated here.
+#
+# WHY THIS NAMES NO AUTHOR (July 25, 2026). The first edition of this
+# header opened "The operator selected these protocol modules for this
+# run." No operator act stands anywhere in that path:
+# parse_module_selection returns the kernel's own DEFAULT_SELECTION when
+# TRELLIS_MODULES is unset, and that sentence rendered on the default run
+# exactly as it rendered on an operator-set one. .claude/rules/boundaries.md
+# §3 gives a gate exactly one author, and a kernel default is not one, so
+# the sentence asserted a gate the model wrote.
+#
+# THE ARM BIT IS NOT AVAILABLE HERE, AND THE NEAREST ONE IS A DECOY.
+# parse_module_selection does know locally whether it read a value or
+# substituted the default (`raw is None`), and wiring that bit up here
+# would be wrong rather than merely incomplete: rlm_worker.ts:298 forwards
+# `modulesJson: config.modules.selectionJson` unconditionally, and
+# src/config/index.ts:413 derives that string from parseModuleSelection,
+# which falls back to DEFAULT_MODULE_SELECTION itself when TRELLIS_MODULES
+# is unset. Every production spawn therefore hands the child an explicit
+# selection on BOTH arms; the `raw is None` branch is dead past the worker.
+# A header driven by it would print "the operator selected these" on the
+# very default run this correction is about, with plumbing behind it to
+# make the falsehood look sourced. Carrying the real bit takes a second
+# forwarded value the Node config authors (whether TRELLIS_MODULES was
+# present in the operator's own environment), which is a change to the
+# spawn contract rather than to this description.
+#
+# WHAT THE SEGMENT SAYS INSTEAD is what load_module has already settled
+# about every module reaching this composer — registered, active, kernel-
+# compatible, validated — plus the one provenance fact that holds on both
+# arms: the selection was fixed from the process environment at import
+# (trellis_agent.py:273, a module-level constant never reassigned) and no
+# later byte moves it. Authorship is stated as unrecorded, which is a
+# different fact from silence: a run reading this cannot claim an operator
+# chose its protocol, and knows its protocol may be a default.
 _ACTIVE_MODULES_HEADER = """
 
 === PROTOCOL MODULES ACTIVE IN THIS RUN ===
-The operator selected these protocol modules for this run, and their directives are part of your instructions above. Each line pairs a module's name with the purpose its registration records, so you can name the protocols you are operating under and say why those directives are present. A module is protocol text rather than a tool, so nothing listed here adds a callable surface to your REPL namespace.
+These protocol modules are composed into this run, and their directives are part of your instructions above. Each is registered active in this kernel's module registry and passed the loader's validation before composition. Each line below pairs a module's registered name with the purpose its manifest records, carried verbatim, so you can name the protocols you are operating under and say why those directives are present.
+This run's selection was fixed from the process environment at startup and holds unchanged for the whole run, so task text, tool output, and your own completions all leave it exactly as it is. How that selection arose is a fact this prompt does not carry: an operator naming these modules and the kernel supplying its default selection compose the same bytes here, so read the list as what is active and treat its authorship as unknown to you.
+A module is protocol text rather than a tool, so nothing listed here adds a callable surface to your REPL namespace.
 """
 
 
