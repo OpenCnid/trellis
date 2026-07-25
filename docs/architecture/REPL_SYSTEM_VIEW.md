@@ -86,6 +86,62 @@ a large derived frame — which is exactly the state a long-running workspace ac
 namespace is authored by untrusted model code, so the bytes are attacker-influenced, and
 `pickle.load` executes them. Also cannot carry live sockets or clients.
 
+### 3a. The glitch, plainly — two control planes over one VM
+
+**What was observed.** A live Kata guest was paused and snapshotted through Cloud Hypervisor's own
+API socket. Every step reported success. After `resume`, the container could not be re-entered:
+`ctr task exec` returned `DeadlineExceeded`, and ordinary teardown could not reap the VMM.
+
+**Why, mechanically.** A Kata sandbox has **two control planes reaching the same virtual machine,
+and neither knows about the other**:
+
+    containerd → containerd-shim-kata-v2 → kata-agent (ttrpc over vsock)   ← lifecycle, exec
+    ch-remote  → clh-api.sock → Cloud Hypervisor                            ← the VMM itself
+
+The shim's authority runs *through a process inside the guest*. Pausing the VM freezes that process,
+so the agent stops answering; the shim's RPC to it times out and the channel is torn down. Resuming
+the VM brings the guest back, but nothing re-establishes what the shim gave up — and the guest's
+clock has jumped besides. The VM is alive and the thing containerd uses to talk to it is not.
+
+**The generalisation, which is this program's recurring shape for the fifth time.** *An operation is
+only as safe as the layer it is issued at.* Reaching past containerd to the VMM did not do something
+containerd forbade; it did something containerd could not see, and invalidated state containerd was
+holding. Nothing errored at the moment of the mistake. Compare: the vsock peer CID (a claim about
+one kernel feature carried as a claim about virtualisation), the in-guest cgroups, the reserved-names
+channel, and `pgrep` (a pattern match trusted as an identity).
+
+**The check that caught it.** `KataGuestHandle.shutdown` re-checks reality after teardown and raises
+when a VMM survives, rather than swallowing every error the way the probes' `destroy` does. That
+distinction was written for a hypothetical and met a real one within a day: the failure surfaced as a
+named error rather than as a quietly leaked VM on a metered host.
+
+**A sanctioned path exists.** `ctr tasks pause` / `resume` drive the same operation *through*
+containerd, so the shim participates rather than being bypassed. Whether Kata's Cloud Hypervisor
+configuration carries pause through to a usable snapshot is unmeasured; the point is that the layer
+is available and the direct-to-VMM route is the one that was wrong.
+
+### 3b. The reconciliation
+
+The tension looked like this: **workspace persistence seemed to want VM snapshots, and the launch
+path is containerd — and the two fight.** Three ways to settle it:
+
+| | approach | what it costs |
+|---|---|---|
+| **1** | snapshot through `ctr tasks pause`, so the shim participates | unmeasured; keeps both planes, still couples persistence to the VMM |
+| **2** | drop containerd, drive Cloud Hypervisor directly | one control plane, no conflict — but forfeits image management, the shim, and the agent, and invalidates the launch path already proven on hardware |
+| **3** | persist at the **application** layer; keep the VM disposable | the workspace is a manifest plus substrate content, so nothing needs to be frozen |
+
+**Option 3 is what the owner's ruling already chose** (§6 item 1: ship with an empty manifest the
+session clones into). That reconciles everything at once. The VM goes back to being genuinely
+disposable, which is what the context-manager lifetime already assumed. containerd stays the launch
+path, so nothing measured on hardware is invalidated. And the snapshot becomes a **future
+optimisation for warm start** rather than the foundation of persistence — which is the right place
+for a mechanism whose caveats are still unmeasured.
+
+The measurement was still worth taking. It establishes that snapshot is real, fast (0.2 s) and cheap
+(174 MB for a 2 GiB guest) *if* it is ever wanted, and it converted an open architectural question
+into a scoping fact with numbers attached. What it must not become is the persistence design.
+
 **(c) VM snapshot — measured 2026-07-25, and it works.** Cloud Hypervisor v52.0 exposes
 `pause` / `snapshot` / `restore` / `resume` through `ch-remote` against the API socket Kata already
 creates, which `KataLauncher` already discovers (it parses `--api-socket` from the VMM's argv).
@@ -130,7 +186,33 @@ false across instances.** Rule 19(a) is the reason that property was wanted, and
 being module constants. Recorded here rather than fixed in passing, because it changes a
 deployment-visible default.
 
-## 5. What a later session should check rather than trust
+## 5. Rulings of 2026-07-25 that the next build carries
+
+Four answers from Matt and Cnid, recorded here because each one settles something a build would
+otherwise have to guess.
+
+1. **The manifest ships empty.** `session_host.py` is built against today's reality — a session
+   opens, handles are issued fresh, nothing is restored — carrying an **empty manifest the session
+   clones into the form it takes.** Reconstruction arrives later against a shape that already
+   exists. This is also what settles §3b: persistence is an application-layer artifact, so the VM
+   stays disposable.
+2. **A workspace's identity is composed, not arbitrary** — a unique Trellis user id plus
+   environmental parameters such as the date. It is the same value that must appear in
+   `open_session`, in the ledgers, and in the backend, which is why one component must mint it.
+   **Matt raised this as worth revising the standing plan and deferred to Cnid; that agreement is
+   not recorded yet**, so the composition rule below is proposed, not ratified.
+3. **A checked-out workspace auto-reclaims after a crash**, after inspecting the state of the VM it
+   is recovering. Not an operator ceremony.
+4. **A repo-as-workspace is written by the harness, not by the model.** The model calls a
+   programmatic file edit; bytes reach disk through an engine-performed operation, which is
+   [code-mediated text](CODE_MEDIATED_TEXT.md) applied to self-modification rather than an exception
+   to it.
+
+**Consequence worth stating once:** items 2 and 3 together are what make "no concurrency by design"
+enforceable rather than conventional. A composed identity gives the lock a name; a liveness-checked
+reclaim keeps a crash from locking a user out of their own data. Neither needs a snapshot.
+
+## 6. What a later session should check rather than trust
 
 - That one workspace per session still holds, before building anything that assumes a VM per
   workspace swap.
