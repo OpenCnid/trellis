@@ -651,9 +651,8 @@ _NEO4J_GUARD_EXPECTS = {
     # _normalize_fact's AST_HASH_PATTERN loop: an element that is not 64
     # lowercase hex characters refuses the batch, echoing the offender
     # bounded. Always live — this check has no injection seam.
-    "hash_format": (" Every sourceNodeIds element is an AST hash, 64 "
-                    "lowercase hex characters; a question id, a workspace "
-                    "segment id, or any other identifier refuses."),
+    "hash_format": (" Every sourceNodeIds element is a 64-lowercase-hex "
+                    "AST hash; any other identifier refuses."),
     # _verify_hashes_retrieved: cited addresses must be members of the
     # run's retrieved set, which get_ast_texts keys, get_ast_blocks block
     # ids and vector_search result ids feed. run_cypher deliberately does
@@ -661,31 +660,25 @@ _NEO4J_GUARD_EXPECTS = {
     # the case the second sentence names — the T1 closure's second-hand
     # citation of a graph-surfaced provenance list.
     "retrieval_closure": (" You may cite only addresses whose bytes a "
-                          "retrieval tool returned to you this run, and an "
-                          "insight naming any other address refuses. An "
-                          "address that arrived as a property inside a "
-                          "Cypher result is a reference and not bytes: read "
-                          "it through trellis_postgres, confirm the bytes "
-                          "support your claim, then cite it."),
+                          "retrieval tool returned to you this run; an "
+                          "address seen as a Cypher property is a reference "
+                          "and not bytes, so read it before citing it."),
     # _verify_hashes_exist: the deduped union of the batch must exist in
     # ast_nodes before any write session opens. Rendered only where it is
     # the live bound — see derive_neo4j_expects for why the retrieval
     # closure suppresses it.
-    "existence": (" Every cited address must already exist in the store, so "
-                  "a hash that is merely well formed refuses."),
+    "existence": (" A well-formed hash that is not in the store refuses."),
     # The experimental semantic gate: _run_insight_writes calls the
     # injected checker only when CITATION_ENTAIL_ENABLED is set AND a
     # checker was injected, and refuses each block whose text the checker
     # reports as not supporting the claim.
-    "entailment": (" Each cited block is additionally checked for whether "
-                   "its text supports the claim, and an unsupported "
-                   "citation refuses."),
+    "entailment": (" Each cited block is also checked for whether its text "
+                   "supports the claim."),
     # _run_insight_writes runs every check above over the whole batch's
     # deduped citations BEFORE the WRITE session opens, so a refused
     # batch leaves nothing partial behind (substrate-writes rule 4).
-    "batch_atomic": (" One refused address ends the whole batch before "
-                     "anything is written: correct the citations and "
-                     "resubmit the batch entire."),
+    "batch_atomic": (" One refused address ends the whole batch before any "
+                     "write."),
 }
 
 
@@ -1040,12 +1033,14 @@ _POSTGRES_GUARD_EXPECTS = {
     # already served, vector_search a query string already run. Held
     # state holds identities and never content, so a repeat REFUSES
     # rather than replaying — there is no store mirror to serve from.
-    "repeat_refusal": (" A fetch this run already served refuses instead of "
-                       "repeating: get_ast_texts when every hash you ask "
-                       "for came back from an earlier fetch, get_ast_blocks "
-                       "on a root it already walked, vector_search on a "
-                       "query string it already ran. Hold each return in a "
-                       "variable and re-derive from that in code."),
+    # Compressed July 25, 2026: the one-line slot is an ORIENTING line,
+    # not an account. Which of the three surfaces refused, and on what,
+    # is in the refusal message the model reads at the moment it matters;
+    # restating the enumeration here spends primacy bytes on something
+    # already delivered at the point of use.
+    "repeat_refusal": (" A fetch this run already served refuses rather "
+                       "than repeating, so hold each return in a variable "
+                       "and re-derive from it."),
     # _discipline_check_budget: budget N serves N byte-returning fetches
     # and the next one refuses before any I/O. Only a call that returned
     # bytes increments the counter, which is why the sentence counts
@@ -1053,11 +1048,9 @@ _POSTGRES_GUARD_EXPECTS = {
     # derive_postgres_expects out of the same attribute the predicate
     # compares against.
     "retrieval_budget": (" This run may spend " + _RETRIEVAL_BUDGET_TOKEN
-                         + " byte-returning fetches across get_ast_texts, "
-                         "get_ast_blocks and vector_search, and every "
-                         "further fetch refuses once they are spent: read "
-                         "the slices each step needs and compute the rest "
-                         "from what you already hold."),
+                         + " byte-returning fetches; every "
+                         "further one refuses, so read the slices each step "
+                         "needs and compute the rest from what you hold."),
 }
 
 
