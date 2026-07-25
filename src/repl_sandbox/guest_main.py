@@ -40,6 +40,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import pathlib
 import sys
 from dataclasses import dataclass, field
 from typing import Any, Callable
@@ -261,12 +262,56 @@ def _default_listener(port: int) -> VsockListener:
     return VsockListener(port)
 
 
+def guest_source_root() -> str:
+    """The directory `repl_sandbox` was imported from, as an absolute path.
+
+    Landlock grants cover a path and everything beneath it, and the entry that
+    has to be granted is the *parent* of the package rather than the package
+    itself: `sys.path` carries that directory, and Python's path finder lists it
+    when resolving `repl_sandbox.anything`.
+    """
+    return str(pathlib.Path(__file__).resolve().parents[1])
+
+
+def guest_tier0_policy() -> Any:
+    """Tier-0 for this process, with the two roots a real guest cannot run without.
+
+    The bare `Tier0Policy()` default grants `/usr`, `/lib`, `/lib64`, `/bin`,
+    `/sbin` and `/etc`. Both additions here are load-bearing, and each has
+    already been paid for once:
+
+    * **`/proc`** — S5 applied every control correctly and then reported
+      `Seccomp: -1`, because the read-back of `/proc/self/status` was denied by
+      the ruleset it was verifying (`scripts/repl_sandbox_s5_probe.py`, the
+      `hardened()` policy comment). The evidence a hardened worker offers is
+      gathered from inside its own blast radius. `os.cpu_count` and
+      `multiprocessing` need it too, so granting it is what a deployment does,
+      not a concession the probe made to see its own state.
+    * **the source root** — this package is unpacked into a launcher-chosen
+      directory that is under none of the default roots, so every *lazy* import
+      after hardening would raise `EACCES`. The imports at module scope have
+      already run by the time this is applied; the ones that have not are the
+      problem, and they surface as an error deep in a later turn rather than at
+      startup.
+
+    That S5 carried the `/proc` fix in the probe's own local policy rather than
+    in the default is why this module inherited the gap: the lesson lived beside
+    the one caller that had met it.
+    """
+    from repl_sandbox.hardening import Tier0Policy
+
+    default = Tier0Policy()
+    return Tier0Policy(
+        read_only_roots=(*default.read_only_roots, "/proc", guest_source_root()),
+    )
+
+
 def _default_harden() -> Any:
     # Imported here rather than at module scope so this module stays importable
     # for its tests on a platform whose syscall table `hardening` does not carry.
     from repl_sandbox.hardening import apply_tier0
 
-    return apply_tier0()
+    return apply_tier0(guest_tier0_policy())
 
 
 def _announce(event: dict) -> None:
