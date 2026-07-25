@@ -3,7 +3,8 @@
 # No databases, no network, no paid work: the derivation parses source
 # text and the registry is an in-process dict.
 #
-# What is under test (docs/architecture/SELF_DESCRIBING_SURFACES.md §11):
+# What is under test (docs/architecture/SELF_DESCRIBING_SURFACES.md §11
+# and §13's ladder table):
 #   [1] registration semantics — a name is required because it is the
 #       key; ARBITRARY FIELDS ARE ACCEPTED, because field shape is
 #       deliberately not validated; identical re-registration is a
@@ -11,13 +12,19 @@
 #   [2] derivation — injected names come from the injecting code by AST
 #       (dict literal, subscript assignment) and dynamic contributions
 #       are NAMED rather than dropped,
-#   [3] coverage — described / undescribed / unwired split, computed
-#       against an injected registry so both arms are exercised,
-#   [4] the live seam — the real trellis_agent.py parses, and the one
-#       shipped descriptor is found through the real registry,
+#   [3] coverage — described / undescribed / registered-not-injected
+#       split, computed against an injected registry so both arms are
+#       exercised,
+#   [3b] THE WIRED RUNG — which surfaces a run passes to
+#       compose_contributions, derived from the composing call by AST in
+#       both shapes it can take: a roster drawn from custom_tools itself,
+#       and a roster of literal names beside it,
+#   [4] the live seam — the real trellis_agent.py parses, the shipped
+#       descriptors are found through the real registry, and no finished
+#       contribution is left unwired,
 #   [5] informs-never-refuses — a gap is a report, never an exception.
 #
-# `--negative-control` plants seven conditions the drill must detect and
+# `--negative-control` plants thirteen conditions the drill must detect and
 # exits 3 when every one is caught (the check:repo-surface and judge-drill
 # mold, rule 19(c)): a check that has never been seen to fail carries no
 # information.
@@ -31,6 +38,7 @@ import trellis_surfaces  # noqa: E402
 from trellis_surfaces import (  # noqa: E402
     coverage_report,
     derive_injected_names,
+    derive_wired_names,
     descriptor_for,
     format_coverage,
     register_surface,
@@ -85,6 +93,46 @@ def author():
     custom_tools = build_author_tools(workspace)
 '''
 
+# The three wiring shapes, as source. Each carries the SAME injection
+# seam, so the only thing that varies between them is the composing
+# call — which is the variable the wired rung reads.
+_FIXTURE_INJECTION = '''
+def main():
+    custom_tools = {
+        "alpha_surface": 1,
+        "beta_surface": 2,
+    }
+    custom_tools["gamma_surface"] = 3
+'''
+
+# The shape that closes the rung: the roster IS the seam, so a surface
+# added above is wired without anyone editing the call below.
+FIXTURE_WIRED_SEAM_WIDE = _FIXTURE_INJECTION + '''
+    composed = compose_contributions([
+        (descriptor_for(name), None)
+        for name in custom_tools
+    ])
+'''
+
+# The shape that produced the defect: a roster of literal names beside
+# the seam. alpha is named, beta and gamma are not.
+FIXTURE_WIRED_BY_HAND = _FIXTURE_INJECTION + '''
+    composed = compose_contributions([
+        (descriptor_for("alpha_surface"), derive_alpha_expects(alpha)),
+    ])
+'''
+
+# The same defect wearing the fixed shape's clothes: a comprehension, but
+# over a curated list rather than over the seam. It must NOT read as
+# seam-wide, or reverting the fix would be invisible.
+FIXTURE_WIRED_CURATED = _FIXTURE_INJECTION + '''
+    _ROSTER = ["alpha_surface"]
+    composed = compose_contributions([
+        (descriptor_for(name), None)
+        for name in _ROSTER
+    ])
+'''
+
 
 # --- 1. Registration semantics ---------------------------------------------
 print("\n[1] registration: a key is required, a field set is not")
@@ -132,7 +180,7 @@ check("dynamic contributions are NAMED, never silently dropped",
       dynamic == ["build_author_tools", "staged_helpers"], str(dynamic))
 
 # --- 3. Coverage over an injected registry ---------------------------------
-print("\n[3] coverage: described / undescribed / unwired")
+print("\n[3] coverage: described / undescribed / registered-not-injected")
 
 full = {n: {"name": n} for n in ("alpha_surface", "beta_surface", "gamma_surface")}
 covered = coverage_report(fixture, full)
@@ -145,11 +193,72 @@ gapped = coverage_report(fixture, partial)
 check("an undescribed surface is named",
       gapped["undescribed"] == ["beta_surface", "gamma_surface"],
       str(gapped["undescribed"]))
-check("a descriptor for something never injected shows as unwired",
-      gapped["unwired"] == ["ghost_surface"], str(gapped["unwired"]))
+check("a descriptor for something never injected is named as such",
+      gapped["registered_not_injected"] == ["ghost_surface"],
+      str(gapped["registered_not_injected"]))
 check("the render names each gap and states that it refuses nothing",
       "beta_surface" in format_coverage(gapped)
       and "refuses nothing" in format_coverage(gapped))
+
+# --- 3b. The wired rung ----------------------------------------------------
+print("\n[3b] the wired rung: what the composing call actually draws from")
+
+# The rung the previous version of this drill declared uncheckable from
+# here, and the one the whole ladder is for. A surface can be registered
+# and can carry a finished line and still reach no model, because whether
+# a run passes it to compose_contributions is a third claim (AMBIENT.md
+# rule 15 one level down: a named caller is what establishes reachability,
+# and neither earlier rung is one).
+#
+# It is checkable because the composing call is in the same file as the
+# injection seam and yields to the same AST read. What the read settles is
+# WHAT THE ROSTER IS DRAWN FROM, which is the property, rather than which
+# names appear today, which is a count that moves every time a surface
+# lands.
+seam_wide = write_fixture(FIXTURE_WIRED_SEAM_WIDE)
+by_hand = write_fixture(FIXTURE_WIRED_BY_HAND)
+curated = write_fixture(FIXTURE_WIRED_CURATED)
+
+wide_names, wide_flag, wide_sources = derive_wired_names(seam_wide)
+check("a roster drawn from custom_tools itself reads as seam-wide",
+      wide_flag is True, f"{wide_names} {wide_flag} {wide_sources}")
+
+hand_names, hand_flag, _hand_sources = derive_wired_names(by_hand)
+check("a roster of literal names does NOT read as seam-wide",
+      hand_flag is False, str(hand_flag))
+check("the literally named surfaces are derived, never assumed",
+      hand_names == ["alpha_surface"], str(hand_names))
+
+curated_names, curated_flag, curated_sources = derive_wired_names(curated)
+check("a comprehension over a curated list is NOT seam-wide either",
+      curated_flag is False, str(curated_flag))
+check("and the list it draws from is NAMED rather than dropped",
+      "_ROSTER" in curated_sources, str(curated_sources))
+
+no_call = write_fixture(FIXTURE_SEAM)
+check("a seam with no composing call wires nothing",
+      derive_wired_names(no_call) == ([], False, []),
+      str(derive_wired_names(no_call)))
+
+# The gap set, over a registry where all three surfaces carry a line.
+_three = {n: {"name": n, "contributes": ["x"]}
+          for n in ("alpha_surface", "beta_surface", "gamma_surface")}
+check("a hand roster leaves the surfaces it forgot NAMED, not counted",
+      coverage_report(by_hand, _three)["contributing_unwired"]
+      == ["beta_surface", "gamma_surface"],
+      str(coverage_report(by_hand, _three)["contributing_unwired"]))
+check("a seam-wide roster leaves nothing unwired",
+      coverage_report(seam_wide, _three)["contributing_unwired"] == [])
+check("a curated roster the read cannot enumerate reports unwired, not wired",
+      coverage_report(curated, _three)["contributing_unwired"]
+      == ["alpha_surface", "beta_surface", "gamma_surface"],
+      str(coverage_report(curated, _three)["contributing_unwired"]))
+check("a surface with no line is not counted at the wired rung",
+      coverage_report(by_hand, {"beta_surface": {"name": "beta_surface"}})
+      ["contributing_unwired"] == [])
+check("the render names the surfaces a hand roster left out",
+      "beta_surface" in format_coverage(coverage_report(by_hand, _three))
+      .split("CONTRIBUTES BUT IS NOT WIRED")[-1])
 
 # --- 4. The live seam ------------------------------------------------------
 print("\n[4] the live seam parses and finds the shipped descriptor")
@@ -212,21 +321,63 @@ _silent = sorted(_described - _contributing)
 check("every described surface contributes a line — the ladder is flat here",
       _silent == [],
       f"described but silent in the listing: {_silent}")
-# The third rung is not checkable from here: whether a run passes a
-# contribution to compose_contributions is a property of the seam, and
-# the seam iterates custom_tools itself rather than a list this drill
-# could compare against. `npm run test:contribution` section 7 composes
-# the live descriptors and holds the total under budget, which is the
-# closest a zero-run drill gets to the wired rung.
+
+# THE THIRD RUNG, which the line above does not establish.
 #
+# RETIRED July 25, 2026: the comment standing here said the wired rung
+# "is not checkable from here", on the reasoning that the seam iterates
+# custom_tools rather than a list this drill could compare against. That
+# reasoning had the derivation backwards. What the seam iterates is not
+# an obstacle to reading the rung — it IS the rung, and it yields to the
+# same AST read that already gives this drill its injected roster. The
+# sentence was written one pass after a seam that named two surfaces by
+# hand shipped eleven finished lines to no model, which is precisely the
+# state a readable wired rung would have shown.
+#
+# THE PROPERTY HELD: no surface carries a contribution that the composing
+# call leaves out. Two shapes satisfy it and the check reads both — a
+# roster drawn from custom_tools itself, where nothing per-surface is
+# left to forget, and a literal roster that happens to cover every
+# contributing surface. The property is the coverage, never the
+# mechanism, so a future seam that closes it a third way stays green.
+#
+# WHY NOT A COUNT. "as many wired as contribute" passes on a rename that
+# drops one surface and adds another, which is the same size and the
+# wrong set. The set difference is computed and its MEMBERS are what the
+# failure prints, because the repair needs the names.
+#
+# WHY THE SET IS SCOPED TO CONTRIBUTING SURFACES rather than to every
+# injected one: UPSUM_BUDGET is a bare int deliberately declined a
+# descriptor, and a check that reddened on it would be reddening on an
+# honest state and would be switched off. A surface with no line has
+# nothing at this rung.
+#
+# WHY IT IS NOT VACUOUS: it is paired below with a positive on the
+# contributing rung. An empty contributing set — a renamed field, a
+# missing import — would otherwise satisfy an empty difference and read
+# exactly like a closed rung.
+#
+# Direction: `attach_contributions` already RAISES at runtime on a line
+# composed for a surface the run does not inject. This holds the other
+# direction, which nothing held: a surface injected with a finished line
+# that the composing call never reaches. Between them both are covered.
+check("the contributing rung is non-empty, so the wired check can fail",
+      live["contributing"] != [], "no descriptor carries a contribution at all")
+_orphaned = live["contributing_unwired"]
+check("no surface carries a line the composing call leaves out",
+      _orphaned == [],
+      f"finished contribution(s) no run passes on: {_orphaned}")
+
 # A check over the WHOLE registry belongs to neither rung and was tried
 # here first: section 1 registers fixture descriptors to exercise the
 # no-field-validation property, so the registry at this point is the live
 # surfaces plus this drill's own scaffolding, and a sweep over it reports
-# the fixtures as gaps. The staged helpers are held by their own roster
-# pin in scripts/test_scaffold_unit.py, which checks the stronger
-# direction — that the descriptor roster names exactly the helpers the
-# factory injects, so a sixth helper added without one goes red there.
+# the fixtures as gaps. Scoping to `contributes` is what keeps those
+# fixtures out — none of them carries one. The staged helpers are held by
+# their own roster pin in scripts/test_scaffold_unit.py, which checks the
+# stronger direction — that the descriptor roster names exactly the
+# helpers the factory injects, so a sixth helper added without one goes
+# red there.
 # RETIRED July 25, 2026: this slot pinned
 #
 #   check("trellis_textedit contributes via its addendum, not the one-line slot",
@@ -293,14 +444,41 @@ def negative_control():
     seam = write_fixture(FIXTURE_SEAM)
     planted("a missing descriptor appears as undescribed",
             "beta_surface" in coverage_report(seam, {})["undescribed"])
-    planted("a stale registration appears as unwired",
-            coverage_report(seam, {"gone": {"name": "gone"}})["unwired"] == ["gone"])
+    planted("a stale registration appears as not injected",
+            coverage_report(seam, {"gone": {"name": "gone"}})
+            ["registered_not_injected"] == ["gone"])
     planted("a new subscript injection is derived",
             "gamma_surface" in derive_injected_names(seam)[0])
     planted("a new dict-literal key is derived",
             "alpha_surface" in derive_injected_names(seam)[0])
     planted("an update() contribution is named",
             "staged_helpers" in derive_injected_names(seam)[1])
+
+    # The wired rung. Every plant here is a way the 2-of-13 state comes
+    # back — a roster beside the seam, a roster the read cannot settle,
+    # or no roster at all — and the drill must name the surfaces left
+    # out rather than report a closed rung.
+    lines_for_all = {n: {"name": n, "contributes": ["x"]}
+                     for n in ("alpha_surface", "beta_surface", "gamma_surface")}
+    hand = write_fixture(FIXTURE_WIRED_BY_HAND)
+    wide = write_fixture(FIXTURE_WIRED_SEAM_WIDE)
+    curated_seam = write_fixture(FIXTURE_WIRED_CURATED)
+    planted("a hand roster leaves the surfaces it forgot named",
+            coverage_report(hand, lines_for_all)["contributing_unwired"]
+            == ["beta_surface", "gamma_surface"])
+    planted("a hand roster does not read as seam-wide",
+            derive_wired_names(hand)[1] is False)
+    planted("a roster over a curated list does not read as seam-wide",
+            derive_wired_names(curated_seam)[1] is False)
+    planted("an unenumerable roster reports unwired rather than wired",
+            coverage_report(curated_seam, lines_for_all)["contributing_unwired"]
+            == ["alpha_surface", "beta_surface", "gamma_surface"])
+    planted("a deleted composing call leaves every line unwired",
+            coverage_report(seam, lines_for_all)["contributing_unwired"]
+            == ["alpha_surface", "beta_surface", "gamma_surface"])
+    planted("a roster drawn from the seam itself is recognised as closing it",
+            derive_wired_names(wide)[1] is True
+            and coverage_report(wide, lines_for_all)["contributing_unwired"] == [])
     try:
         register_surface({"purpose": "no name"})
         planted("a nameless descriptor raises", False)
