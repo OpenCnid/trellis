@@ -20,12 +20,20 @@ from __future__ import annotations
 
 import ast
 import inspect
+import io
+import os
 
 import pytest
 
 from repl_sandbox import algebra, broker, host, surfaces
-from repl_sandbox.capabilities import CapabilityDescriptor, CapabilityRegistry
+from repl_sandbox.capabilities import (
+    CapabilityDescriptor,
+    CapabilityRegistry,
+    PRE_REGISTERED,
+    _LM_ERROR_CODES,
+)
 from repl_sandbox.errors import (
+    ERROR_CLASSES,
     ERROR_CODES,
     CapRateError,
     DeniedError,
@@ -318,7 +326,90 @@ def test_no_descriptor_describes_the_dlp_layer():
     detection rule.
     """
     assert surfaces.descriptor_for("dlp") is None
-    for descriptor in surfaces.registry().values():
+    # The registry holds the broker and algebra descriptors. The LM pair is
+    # constructed directly in capabilities.py and reaches a prompt through
+    # PRE_REGISTERED, so iterating the registry alone would leave the two
+    # descriptors NEAREST lm_handler and dlp outside the guard — the two this
+    # claim is most about. Scanned explicitly for that reason.
+    described = (*surfaces.registry().values(), *PRE_REGISTERED)
+    assert len(described) > len(surfaces.registry()), (
+        "the LM pair must be in this scan; if PRE_REGISTERED moved, this "
+        "check has quietly narrowed to the registry again"
+    )
+    for descriptor in described:
         blob = " ".join((descriptor.doc, *descriptor.expects)).lower()
         for term in ("dlp", "redact", "detection pattern", "scanner"):
             assert term not in blob, f"{descriptor.name} names {term!r}"
+
+
+# ---------------------------------------------------------------------------
+# The declared LM error codes follow lm_handler's raise sites
+# ---------------------------------------------------------------------------
+
+
+def _codes_raised_in(module_filename: str) -> set[str]:
+    """Codes raised in a module, read from its source by AST.
+
+    By AST and never by import: `capabilities.py` ships inside the guest
+    image, and importing `lm_handler` to enumerate its raises would carry
+    `repl_sandbox.dlp` — the detection patterns — in with it, which is the
+    refusal `guest_rpc.py` already records for itself. Reading the seam
+    rather than a hand-kept list is the same move `derive_injected_names`
+    makes on the rlm side.
+    """
+    path = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "repl_sandbox", module_filename)
+    if not os.path.exists(path):  # layout fallback
+        path = os.path.join(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__))), module_filename)
+    tree = ast.parse(io.open(path, encoding="utf-8").read())
+    by_class = {cls.__name__: code for code, cls in ERROR_CLASSES.items()}
+    found = set()
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Raise) and isinstance(node.exc, ast.Call)
+                and isinstance(node.exc.func, ast.Name)):
+            code = by_class.get(node.exc.func.id)
+            if code is not None:
+                found.add(code)
+    return found
+
+
+def test_the_declared_lm_codes_are_the_ones_lm_handler_raises():
+    """Every code `lm_handler` raises is declared on the LM capabilities.
+
+    This direction is strict because it is the direction that failed: the
+    tuple shipped without `frame` while `lm_handler` raised `FrameError` at
+    sites a caller reaches with its own arguments, and `frame` is the one
+    consequence that drops the connection — so the rendered account omitted
+    the harshest outcome a caller could trigger. `_validate_expects` checked
+    membership in `ERROR_CODES` and never agreement with the raise sites,
+    which is how a hand-kept list drifted from the module it names.
+
+    The converse is deliberately not strict: a code may reach the caller
+    through a helper rather than a literal `raise` here. `cap_spend` is
+    exactly that, and the next check pins its route so the declaration is
+    explained rather than merely tolerated.
+    """
+    raised = _codes_raised_in("lm_handler.py")
+    declared = set(_LM_ERROR_CODES)
+    missing = sorted(raised - declared)
+    assert not missing, (
+        f"lm_handler raises {missing} and the LM capabilities do not declare "
+        f"them, so the rendered on-error account omits an outcome a caller "
+        f"can trigger. Declared: {sorted(declared)}."
+    )
+
+
+def test_every_declared_lm_code_has_a_route():
+    """A declared code is raised here or by a helper this module calls.
+
+    Guards the other direction weakly: a code nothing can produce would
+    render a consequence the caller never meets, which is an aspiration in
+    an account that is otherwise all enforced bounds.
+    """
+    routes = _codes_raised_in("lm_handler.py") | _codes_raised_in("ledger.py")
+    orphans = sorted(set(_LM_ERROR_CODES) - routes)
+    assert not orphans, (
+        f"{orphans} are declared on the LM capabilities but raised neither in "
+        f"lm_handler nor in the ledger it charges through."
+    )

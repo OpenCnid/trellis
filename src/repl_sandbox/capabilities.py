@@ -524,9 +524,19 @@ class CapabilityDescriptor:
 #: `error_codes` is nonetheless nameable here. It names members of `ERROR_CODES`
 #: — identifiers from a module this one already imports — and every sentence the
 #: prompt shows for them is composed by `retry_phrase` from the error classes'
-#: own attributes, so nothing about a refusal is being restated. The codes are
-#: the ones `lm_handler` raises: `depth_ceiling`, `cap_rate`,
-#: `cap_concurrency`, `cap_bytes`, `cap_spend`, `denied`, `upstream`.
+#: own attributes, so nothing about a refusal is being restated.
+#:
+#: **This tuple is a hand-kept list and that is the whole hazard.** It shipped
+#: without `frame` while `lm_handler` raised `FrameError` at sites a caller
+#: reaches with its own arguments — `llm_query_batched(prompts=[])` is one — and
+#: `frame` is the one consequence in the taxonomy that drops the connection, so
+#: the rendered account omitted the harshest outcome the caller could trigger.
+#: Membership in `ERROR_CODES` was checked and agreement with the raise sites
+#: was not, which is the second-encoding shape this layer closes everywhere else.
+#: `test_the_declared_lm_codes_are_the_ones_lm_handler_raises` now reads the
+#: raise sites out of `lm_handler.py` by AST at check time — never by import,
+#: which would carry `repl_sandbox.dlp` into the guest image — and refuses a
+#: divergence in either direction.
 _LM_ERROR_CODES: tuple[str, ...] = (
     "cap_rate",
     "cap_concurrency",
@@ -534,6 +544,7 @@ _LM_ERROR_CODES: tuple[str, ...] = (
     "cap_spend",
     "depth_ceiling",
     "denied",
+    "frame",
     "upstream",
 )
 
