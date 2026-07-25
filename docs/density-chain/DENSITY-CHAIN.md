@@ -757,10 +757,11 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   *listener*, never a frame; and deepest — the code may *address* data but never *hold* it (the handle
   data-flow rule). Language-level guards are telemetry, never a boundary. Status: a microVM boots,
   holds state, a real model answers a fan-out across the boundary, and a real database query now
-  crosses it holding a handle rather than a payload, and Tier-0 now caps the worker from inside — but
-  the launch path is absent, so this is still not a working sandbox and must not be read as one.
-  Building it cost the same lesson **twice**: an enforcing surface is only as portable as the mechanism
-  it names — first the vsock peer CID, then in-guest cgroups.
+  crosses it holding a handle rather than a payload, Tier-0 caps the worker from inside, and a
+  launcher now claims a real VMM or refuses — but the host end of the two outbound channels has no
+  owner, so this is still not a working sandbox and must not be read as one. Building it cost the same
+  lesson **three times**: an enforcing surface is only as portable as the mechanism it names — the
+  vsock peer CID, then in-guest cgroups, then the channel meant to carry the reserved names.
 - **T2 — current machinery.** Execution still runs in-process on `rlms==0.1.3` LocalREPL holding live
   credential-bearing clients. Beside it, a host-independent control plane at `src/repl_sandbox/`
   (~22 modules against ~22 test files): the frame codec (a declared fuzz target); a transport carrying
@@ -768,10 +769,13 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   guest-supervisor protocol; the handle table and slice algebra; the DB broker with Postgres/Neo4j
   backends, a statement inspector (`policy.py`), and a least-privilege role DDL; the LM handler with
   byte/rate/spend ledgers and a DLP hook; the capability lifecycle; a CID-keyed audit log;
-  `KataREPL(IsolatedEnv)`; and a `KataLauncher` whose four-condition `preflight` drives a real QEMU
-  benchmark — each transport-agnostic, exercised through loopback doubles. Eleven ratified documents.
-  Host-side, driving `ctr` directly: `provision_kata_host.sh`, the S2 and S3 probes, the S3 `[A]`
-  harness (`repl_sandbox_s3_paid.py`), and now the S4 probe.
+  `KataREPL(IsolatedEnv)`; a `guest_main` entry point binding **native** `AF_VSOCK` (the guest keeps
+  the kernel-supplied peer CID the host lost); and a `KataLauncher` that gates on a real QEMU
+  benchmark, then boots — minting a sandbox, owning a containerd namespace and therefore the digest
+  pull, refusing a shim that exited 0 without a VM, and releasing what it allocated when it does.
+  Eleven ratified documents. Host-side, driving `ctr` directly: `provision_kata_host.sh` and the S2–S5
+  probes. **The composition that binds host chokepoints to a booted guest exists only as a block
+  hand-written five times across those probes and the CLI selftest — never in the package.**
 - **T3 — with receipts.** **G0 lifted 2026-07-22** by owner (`REPL_SANDBOX_BUILD_PLAN.md` §2, The
   research-hold gate) under two qualifications: G1 is unsatisfiable on the dev box, and a loopback
   double is never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3`
@@ -852,11 +856,17 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   Free and scheduled: a **nested guest** as the virgin
   instance the provisioner's never-executed install branch is owed; a second *machine* stays
   **deferred**, re-opening on a kernel-specific finding (vsock the likeliest, the hybrid correction its
-  first evidence, the cgroup correction its second). Then **S6's build half, which is not a
-  probe-authoring job**: `KataLauncher.boot` still raises and the package has **no guest entry
-  point** — the only `GuestSupervisor` construction is inside a host-side double that provides no
-  isolation — so the launch path S2 proved by driving `ctr` by hand is the next real build, and until
-  it exists an S6 pass would be a claim about `KataREPL` and not about `KataLauncher`. Then
+  first evidence, the cgroup correction its second). **S6's build half LANDED 2026-07-25**: `boot`
+  claims a real VMM (G1 ratio 12.7, 34.8 s, socket discovered, package shipped) or refuses and leaves
+  nothing — proven by blinding the VMM check against a *real* successful `ctr run`. Three findings the
+  code owes to running: `pgrep` matches its own ancestors, so on a host with **zero** VMs it invents
+  one; `comm` truncates at 15 chars (`cloud-hyperviso`), so the obvious fix refuses every real boot
+  and `/proc/<pid>/exe` is the only sound discriminator; and image stores are per-namespace, so owning
+  a namespace means owning the digest pull. It stops at `start_bridge`, which **refuses**: the guest
+  needs no in-guest forwarder (no rlms there), but **who binds the host end of LM/DB is unowned** — a
+  blind three-seat panel promoted the negative and refused the proposed replacement, and the audit
+  seat caught the filing omitting `CONFORMANCE §2.1`. The composition is not unbuilt so much as
+  unhomed: it exists hand-written in five probe/selftest sites, never in the package. Then
   GB — which inherits S5's residuals: the watchdog is unproven against a real shim wedge, and the
   seccomp/allowlist divergence is recorded rather than resolved — GA-eq, GA-rt. Proposed:
   doubt-filter Layers 1–2. **`MAX_FRAME_LEN` RATIFIED 2026-07-24** — slice 2 MiB, frame 4 MiB, frame
