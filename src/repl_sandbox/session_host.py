@@ -52,7 +52,7 @@ import time
 import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass, field, replace
-from datetime import date
+from datetime import datetime, timezone
 from typing import Any, Callable, Iterator, Sequence
 
 from repl_sandbox.audit import AuditLog
@@ -74,15 +74,52 @@ LISTENER_JOIN_TIMEOUT_S = 5.0
 # ---------------------------------------------------------------------------
 
 
-def mint_session_id(user_id: str, workspace_id: str, *, today: date | None = None) -> str:
-    """One session's identifier: stable-workspace, dated, and unique.
+def _stamp(now: datetime | None = None) -> str:
+    """UTC, to the finest granularity the platform clock offers, sortable.
 
-    **Two identifiers, not one, and collapsing them is the trap.** A workspace
-    id is *stable* — the physics workspace is the same workspace next Tuesday,
-    which is what makes it lockable and what makes a manifest findable. A session
-    id is *unique per opening*, because it keys the ledgers, the audit trail and
-    the CID binding. A date belongs in the second and would silently break the
-    first.
+    `datetime` carries microseconds, which is the smallest unit that survives
+    into a filename without inventing precision the clock does not have. UTC
+    rather than local time so two Trellises in different zones on one host still
+    sort correctly against each other.
+    """
+    moment = now if now is not None else datetime.now(timezone.utc)
+    return moment.strftime("%Y%m%dT%H%M%S.%f")
+
+
+def mint_workspace_id(*, now: datetime | None = None) -> str:
+    """A workspace's permanent identifier, minted **once, at creation**.
+
+    Owner direction (Matt, 2026-07-25): the timestamp goes to the finest
+    granularity the system offers and a UUID keeps it unique, with the
+    human-facing label held as metadata instead.
+
+    This is what dissolves the naming ambiguity rather than managing it. The
+    earlier shape derived an identifier from the workspace's *name* and the
+    *current* date, which forced a choice between stable and unique: a date made
+    it unique per session and broke it as a lock key, and no date made two
+    workspaces called "physics" the same workspace. Minting once at creation
+    gives both properties at no cost — it never moves, and it never collides.
+
+    The consequence worth stating: **"physics" is a display name, not an
+    identity.** Renaming a workspace touches one metadata field and breaks
+    nothing, because no lease, no manifest and no ledger ever referred to the
+    name.
+    """
+    return f"ws-{_stamp(now)}-{uuid.uuid4().hex}"
+
+
+def mint_session_id(
+    user_id: str,
+    workspace_id: str,
+    *,
+    now: datetime | None = None,
+) -> str:
+    """One session's identifier: unique per opening, and traceable to both ends.
+
+    **Two identifiers, not one, and collapsing them is the trap.** A workspace id
+    is permanent (`mint_workspace_id`) — it is what a lease locks and what a
+    manifest is found by. A session id is *unique per opening*, because it keys
+    the ledgers, the audit trail and the CID binding.
 
     The user component is deliberately **operational identity only**: it names
     who holds a lease on this machine, it lives in configuration, and it is never
@@ -90,15 +127,14 @@ def mint_session_id(user_id: str, workspace_id: str, *, today: date | None = Non
     nothing in the store names an owner and nothing needs to; a user id that
     reached the store would revise that ruling rather than apply it.
 
-    Entropy is not decoration either. One user opening two sessions on one day is
-    ordinary, so `user + date` alone collides — and a collision here is two
-    sessions sharing a ledger.
+    Entropy is not decoration. One user opening two sessions inside the same
+    clock tick is ordinary under automation, and a collision here is two sessions
+    sharing a ledger.
     """
     for name, value in (("user_id", user_id), ("workspace_id", workspace_id)):
         if not isinstance(value, str) or not value.strip():
             raise SandboxError(f"{name} must be a non-empty string")
-    stamp = (today or date.today()).isoformat()
-    return f"{_slug(user_id)}-{_slug(workspace_id)}-{stamp}-{uuid.uuid4().hex[:8]}"
+    return f"{_slug(user_id)}-{_stamp(now)}-{uuid.uuid4().hex[:12]}"
 
 
 def _slug(raw: str) -> str:
@@ -136,6 +172,13 @@ class WorkspaceManifest:
 
     workspace_id: str
     schema_version: int = MANIFEST_SCHEMA_VERSION
+    #: What a person calls this workspace — "physics", "parts inventory".
+    #:
+    #: Metadata, deliberately, and never an identifier (owner direction, Matt,
+    #: 2026-07-25). Nothing resolves it, nothing locks on it, and nothing joins
+    #: by it, so renaming a workspace is a one-field edit that breaks no lease,
+    #: no ledger and no manifest. It is also the only field here a user writes.
+    human_readable_name: str = ""
     #: Document versions that are live for this workspace. Addresses, never bytes.
     live_documents: tuple[str, ...] = ()
     #: Root handles pre-allocated at session open (facts, beliefs, doubts).
@@ -153,6 +196,7 @@ class WorkspaceManifest:
             {
                 "workspace_id": self.workspace_id,
                 "schema_version": self.schema_version,
+                "human_readable_name": self.human_readable_name,
                 "live_documents": list(self.live_documents),
                 "root_handles": list(self.root_handles),
                 "artifacts": list(self.artifacts),
@@ -162,8 +206,8 @@ class WorkspaceManifest:
         )
 
     @classmethod
-    def empty(cls, workspace_id: str) -> "WorkspaceManifest":
-        return cls(workspace_id=workspace_id)
+    def empty(cls, workspace_id: str, human_readable_name: str = "") -> "WorkspaceManifest":
+        return cls(workspace_id=workspace_id, human_readable_name=human_readable_name)
 
     @classmethod
     def from_json(cls, raw: str, workspace_id: str) -> "WorkspaceManifest":
@@ -186,6 +230,7 @@ class WorkspaceManifest:
         return cls(
             workspace_id=data.get("workspace_id", workspace_id),
             schema_version=version,
+            human_readable_name=data.get("human_readable_name", ""),
             live_documents=tuple(data.get("live_documents", ())),
             root_handles=tuple(data.get("root_handles", ())),
             artifacts=tuple(data.get("artifacts", ())),
@@ -332,7 +377,20 @@ class SessionBridge:
         self.bound: tuple[str, ...] = ()
 
     def start(self) -> None:
-        """Bind every granted port, or bind none and leave nothing behind."""
+        """Bind every granted port, or bind none and leave nothing behind.
+
+        **Idempotent, and that is load-bearing rather than defensive.** The
+        composition layer binds at its step 5, because it owns the failure: a
+        second listener can fail after the first is bound and a microVM is
+        already running, and only the party holding both can unwind them. But
+        `KataREPL.setup()` also calls `start_bridge()`, because from the
+        backend's side "the bridge is up before any untrusted worker" is a
+        precondition it is right to assert. Both callers are correct, so the
+        second call confirms rather than rebinds — a re-bind would fail on the
+        socket path the first one already holds.
+        """
+        if self.bound:
+            return
         bound: list[str] = []
         try:
             for port, handler in self._ports:
@@ -453,6 +511,14 @@ def open_workspace_session(
         if ops:
             ports.append((config.ports.db, host.broker_handler))
         bridge = SessionBridge(guest.uds_path, cid, config, ports, audit=audit)
+        # Step 5, performed rather than merely prepared. An earlier draft only
+        # attached the bridge and left starting it to `KataREPL.setup()`, which
+        # meant a session composed without a backend came up with no host end at
+        # all — the guest's first tool call would have met a closed connection.
+        # Found by running the diagonal on real hardware, where `bound` was
+        # empty; no off-host test could see it, because none of them opens a
+        # session without also driving a backend.
+        bridge.start()
         guest.attach_bridge(bridge)
 
         yield KataSession(

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date
+from datetime import datetime, timezone
 
 import pytest
 
@@ -20,6 +20,7 @@ from repl_sandbox.config import SandboxConfig
 from repl_sandbox.errors import DeniedError, SandboxError
 from repl_sandbox.session_host import (
     MANIFEST_SCHEMA_VERSION,
+    mint_workspace_id,
     KataSession,
     WorkspaceLease,
     WorkspaceManifest,
@@ -33,30 +34,56 @@ from repl_sandbox.session_host import (
 # ---------------------------------------------------------------------------
 
 
-def test_a_session_id_is_unique_per_opening_not_per_day() -> None:
-    """Two sessions on one day is ordinary; a collision would share a ledger."""
-    day = date(2026, 7, 25)
-    first = mint_session_id("cnid", "physics", today=day)
-    second = mint_session_id("cnid", "physics", today=day)
+def test_a_session_id_is_unique_even_inside_one_clock_tick() -> None:
+    """Automation opens sessions faster than a clock ticks; a collision shares a ledger."""
+    frozen = datetime(2026, 7, 25, 12, 0, 0, 123456, tzinfo=timezone.utc)
+    ws = mint_workspace_id(now=frozen)
+    first = mint_session_id("cnid", ws, now=frozen)
+    second = mint_session_id("cnid", ws, now=frozen)
     assert first != second
-    assert first.startswith("cnid-physics-2026-07-25-")
+    assert first.startswith("cnid-20260725T120000.123456-")
 
 
-def test_the_workspace_component_is_stable_across_days() -> None:
-    """A workspace is the same workspace next Tuesday, so its name cannot move.
+def test_a_workspace_id_is_minted_once_and_never_derived_from_a_name() -> None:
+    """Owner direction (Matt): timestamp to finest granularity, plus a UUID.
 
-    The date belongs to the session identifier and would silently break the
-    workspace one -- which is the whole reason these are two values.
+    This is what makes the identifier stable AND unique at the same time. An id
+    derived from the workspace's name and the current date could only be one or
+    the other -- and the human-facing label moves to metadata, so a rename
+    touches no lease, no ledger and no manifest.
     """
-    tuesday = mint_session_id("cnid", "physics", today=date(2026, 7, 21))
-    next_tuesday = mint_session_id("cnid", "physics", today=date(2026, 7, 28))
-    assert tuesday.split("-2026-")[0] == next_tuesday.split("-2026-")[0] == "cnid-physics"
+    frozen = datetime(2026, 7, 25, 12, 0, 0, 123456, tzinfo=timezone.utc)
+    first = mint_workspace_id(now=frozen)
+    second = mint_workspace_id(now=frozen)
+    assert first != second
+    assert first.startswith("ws-20260725T120000.123456-")
+    # Nothing about the human name appears in it.
+    assert "physics" not in WorkspaceManifest.empty(first, "physics").workspace_id
+
+
+def test_the_stamp_carries_sub_second_granularity_and_sorts(  ) -> None:
+    """Lexicographic order must equal chronological order for a filename."""
+    early = mint_workspace_id(now=datetime(2026, 7, 25, 12, 0, 0, 100000, tzinfo=timezone.utc))
+    late = mint_workspace_id(now=datetime(2026, 7, 25, 12, 0, 0, 900000, tzinfo=timezone.utc))
+    assert early < late
+    assert ".100000-" in early and ".900000-" in late
+
+
+def test_a_rename_changes_metadata_and_nothing_else() -> None:
+    ws = mint_workspace_id()
+    before = WorkspaceManifest.empty(ws, "physics")
+    after = WorkspaceManifest.from_json(before.to_json(), ws)
+    renamed = WorkspaceManifest(
+        workspace_id=after.workspace_id, human_readable_name="astrophysics"
+    )
+    assert renamed.workspace_id == before.workspace_id
+    assert renamed.human_readable_name != before.human_readable_name
 
 
 def test_an_empty_identifier_is_refused() -> None:
     for bad in ("", "   "):
         with pytest.raises(SandboxError):
-            mint_session_id(bad, "physics")
+            mint_session_id(bad, "ws-1")
         with pytest.raises(SandboxError):
             mint_session_id("cnid", bad)
 
@@ -100,9 +127,10 @@ def test_a_manifest_holds_addresses_never_a_namespace() -> None:
     arbitrary-code-execution primitive running with the host's privileges, so the
     absence of any such field is a property worth pinning rather than assuming.
     """
-    fields = set(WorkspaceManifest.empty("physics").__dataclass_fields__)
+    fields = set(WorkspaceManifest.empty("ws-1").__dataclass_fields__)
     assert fields == {
-        "workspace_id", "schema_version", "live_documents", "root_handles", "artifacts",
+        "workspace_id", "schema_version", "human_readable_name",
+        "live_documents", "root_handles", "artifacts",
     }
 
 
@@ -278,3 +306,33 @@ def test_a_boot_failure_releases_the_lease_it_had_already_taken(tmp_path) -> Non
     assert not os.path.exists(os.path.join(str(tmp_path), "physics.lease"))
     assert "close_session" in log
     assert "guest.shutdown" not in log
+
+
+def test_the_session_starts_the_bridge_rather_than_only_attaching_it(tmp_path) -> None:
+    """Found on hardware: a session composed without a backend had no host end.
+
+    An earlier draft attached the bridge and left starting it to
+    `KataREPL.setup()`. Every off-host test passed, because none of them opens a
+    session without also driving a backend -- so the guest's first tool call
+    would have met a closed connection and nothing here would have said so.
+    """
+    started: list[str] = []
+    log: list[str] = []
+    from repl_sandbox import session_host as sh
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(sh.SessionBridge, "start", lambda self: started.append("start"))
+        with _session(tmp_path, log) as session:
+            assert started == ["start"], "the composition layer must perform step 5, not defer it"
+            assert session.guest.bridge is not None, "and the backend must still find it attached"
+
+
+def test_starting_a_bound_bridge_again_is_a_confirmation_not_a_rebind() -> None:
+    """Both callers are correct; a re-bind would fail on the path already held."""
+    from repl_sandbox.session_host import SessionBridge
+
+    bridge = SessionBridge("/nonexistent/clh.sock", 16, SandboxConfig(), [])
+    bridge.start()          # no ports granted: binds nothing, sets bound to ()
+    bridge.bound = ("/already/bound_5001",)
+    bridge.start()          # must not attempt a second bind
+    assert bridge.bound == ("/already/bound_5001",)

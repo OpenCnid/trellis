@@ -171,7 +171,77 @@ which is a local lock rather than a distributed one — the difference between a
 file lease and a consensus problem. A design that assumed roaming devices editing
 the same workspace would have bought the hard version of this for no reason.
 
-## 6. What is not settled
+## 6. Identity — minted once, named separately
+
+**Owner direction (Matt, 2026-07-25), and it dissolved an ambiguity rather than
+managing it.** A workspace identifier carries a timestamp at the finest
+granularity the system offers plus a UUID, and the human-facing label lives in
+metadata as `human_readable_name`.
+
+The session that raised the ambiguity had proposed composing an identifier from
+the workspace's *name* and the *current date*, which forces a choice between two
+properties a workspace needs at once: a date makes the identifier unique per
+opening and useless as a lock key, and no date makes two workspaces called
+"physics" the same workspace. **Minting once at creation gives both at no cost**
+— it never moves, and it never collides.
+
+The consequence is worth stating because it is what makes renaming safe:
+**"physics" is a display name, not an identity.** No lease, no ledger, no
+manifest and no audit line ever refers to it, so a rename is a one-field edit.
+
+Two identifiers, not one:
+
+| | minted | shape | keys |
+|---|---|---|---|
+| **workspace id** | once, at creation | `ws-<utc µs>-<uuid4>` | the lease, the manifest |
+| **session id** | once per opening | `<user>-<utc µs>-<uuid>` | ledgers, audit, the CID binding |
+
+The user component is **operational identity only**: it names who holds a lease
+on this machine, lives in configuration, and never reaches the substrate.
+`FEATURE_LIST.md` 1.6 is closed on the ground that nothing in the store names an
+owner; a user id written there would revise that ruling rather than apply it.
+Matt flagged that a stored Trellis user id is worth revisiting as part of the
+repo address-code idea — that is a live proposal needing a dated entry, and this
+build is deliberately on the safe side of it, foreclosing neither choice.
+
+## 7. What running it changed
+
+The composition landed as `src/repl_sandbox/session_host.py` and was driven
+against the AX41 on 2026-07-25 — **the first execution of the diagonal**: the
+real backend composition against the real microVM boundary, rather than either
+half against a stand-in for the other. Seven claims, all holding on the second
+attempt.
+
+**The defect the first attempt found, which no off-host test could have.** The
+module's own header lists six ordered steps, step 5 being *bind the listeners*.
+The code attached the bridge and left starting it to `KataREPL.setup()`. Every
+off-host test passed, because **none of them opens a session without also
+driving a backend** — so a session composed without one came up with no host end
+at all, and the guest's first tool call would have met a closed connection. On
+hardware the bound-socket list was simply empty, which is unmissable.
+
+Generalisable, and now the third instance in this program: *a step described in
+prose and merely prepared in code reads as done.* The earlier two were an
+enforcing surface named on a mechanism that could not carry it, and a check
+written to verify a rule while itself breaking that rule.
+
+The repair also names a real subtlety: `SessionBridge.start()` is **idempotent
+by design, not defensively**. The composition layer binds at step 5 because it
+owns the failure — a second listener can fail after the first is bound and a
+microVM is running, and only the party holding both can unwind them. But
+`KataREPL.setup()` is equally right to assert the bridge is up before any
+untrusted worker. Both callers are correct, so the second call confirms rather
+than rebinds, which would fail on the socket path the first already holds.
+
+**Observed, with the boundary crossed:** a real VMM carrying the session's
+sandbox; the host end bound at `<uds>_5001`; an empty manifest reconstructing to
+a no-op with `human_readable_name` intact; the workspace checked out for the
+life of the scope; **a second session on the same live workspace refused**; the
+scope closing to zero VMMs, zero containers, zero VM directories and no lease;
+and **a crashed holder's lease auto-reclaimed against a real liveness check**,
+which is the mechanism §4 specifies rather than a stand-in for it.
+
+## 8. What is not settled
 
 - **The manifest's shape and where it lives.** §3 says a workspace is its store
   plus a manifest; nothing in the tree implements one yet.

@@ -806,8 +806,38 @@ Three corrections the build owes to running rather than reading:
   already exist (first poll at 15 ms found both). An absent VMM is *never booted*, not *not booted
   yet*, so waiting would convert a clean refusal into a timeout.
 
-**The eighth item, and the one this build stopped at.** `start_bridge()` raises rather than
-passing. What is settled: the guest needs no in-guest loopback→vsock forwarder, because §3.3's
+**THE EIGHTH ITEM IS CLOSED — 2026-07-25, `src/repl_sandbox/session_host.py`.** The owner ruled
+option A (a composition layer) on the ground that its only cost was naming a seam. Building it
+established that the seam was not new: **the block already worked in five places** — every probe
+and the CLI selftest each construct a host, open a session, bind the listeners and drive the
+backend — but each proved one half by substituting a stand-in for the other, so the *diagonal*
+(real backend, real boundary) had never run. This promoted it out of `scripts/` and named it.
+
+`open_workspace_session` is a context manager, and that was never really a trade: the durable
+thing and the executing thing are different objects, so a closing scope is a VM released rather
+than a session lost, and rlms already ends a non-persistent run with `cleanup()`. Its six steps
+are forced — lease, host, `open_session`, boot, listeners, scaffold — because the vsock socket
+path does not exist until the VMM does, and the guest dials outward on its first tool call.
+Teardown reverses them, and a failure at step *n* unwinds *n-1 … 1*.
+
+**Observed on the AX41, 2026-07-25, 7/7 claims:** a real VMM carrying the session's sandbox; the
+host end bound at `<uds>_5001`; an empty manifest reconstructing to a no-op; the workspace checked
+out for the life of the scope; a second session on the same live workspace refused; the scope
+closing to zero VMMs, containers, VM directories and no lease; and a crashed holder's lease
+auto-reclaimed against a real liveness check. Identity, manifest and lease design are recorded in
+[THE_REPL_IN_TRELLIS.md](../../architecture/THE_REPL_IN_TRELLIS.md) §6–§7.
+
+The first attempt returned 6/7 and found a defect no off-host test could: step 5 was described in
+the module header and only *prepared* in the code, so a session composed without a backend came up
+with no host end at all. **A step described in prose and merely prepared in code reads as done** —
+the third instance of that shape here.
+
+**What this leaves for S6.** The `[R]` half now has its enforcing surface. The equivalence harness
+against `CONFORMANCE §6`'s twelve predicted-FALSE clauses is unbuilt, and the `[A]` half — the
+metered real-model equivalence run, ≤ $5 — has not been proposed or spent.
+
+**Superseded, kept because the reasoning still holds.** Before the ruling, `start_bridge()` raised
+unconditionally. What is settled: the guest needs no in-guest loopback→vsock forwarder, because §3.3's
 Option A presupposes an rlms client in the guest speaking `AF_INET` and there is no rlms in the
 guest — `guest_main.build_rpc_hook` dials `AF_VSOCK` directly. What is **not** settled, and no item
 1–7 names: **who stands up a session's `LM_PORT`/`DB_PORT` listeners.** `kata_repl.py`'s step-2
