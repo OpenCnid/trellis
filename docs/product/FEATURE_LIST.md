@@ -29,7 +29,7 @@ critical path.
 | 1.3 | Structural chunking | Syntax-aligned, size-budgeted blocks; byte-exact | shipped |
 | 1.4 | Live-blocks-only retrieval | Superseded versions are archive, reachable only by explicit address | shipped |
 | 1.5 | Repository snapshot ingest | Whole-repo scoped snapshots, carry-forward for out-of-scope paths | shipped |
-| 1.6 | **Multi-tenant identity** | A principal the store can name, so "this user's corpus" is expressible | **absent** — `SessionTable` holds `CID → session id` and nothing else. Prerequisite for 3.5 and for any shared deployment |
+| 1.6 | Multi-tenant identity | A principal the store can name | **CLOSED, not applicable** (owner, 2026-07-24) — **one user, one instance.** Ownership is the deployment boundary, so it needs no representation. Enterprise scales by cloning a base image of the raw data, each clone owned by its user. Nothing in the substrate names an owner and nothing needs to |
 
 ## 2. Reasons over it
 
@@ -50,6 +50,17 @@ The worker. This is the layer that drifted toward retrieval.
 
 **The hole, and the reason this list exists.** No layer of the system can express a deliverable that
 is not a string.
+
+**The artifact is not a terminal output — it is a contribution to the store** (owner and
+collaborator, 2026-07-24). A run composes it, it is **filed into the user's own REPL store**, and the
+judges **promote and classify** it, so it lands as a fact, a belief, or a doubt and carries standing
+like anything else the user owns. It then becomes part of the corpus the next query slices.
+
+That closes the loop this system is named for: **the output becomes input.** It also means §3 and §6
+are one pipeline rather than two subjects — a deliverable that carries standing is not a different
+object from one that carries content, it is the same object after the judges have seen it. And it is
+why 3.5 needs no new provenance structure: an artifact filed into the store inherits the machinery
+every other stored thing already crosses.
 
 | # | feature | what it means | status |
 |---|---|---|---|
@@ -89,8 +100,11 @@ Peer agents query Trellis as a human would, without knowing its internals.
 
 ## 6. Forms beliefs and doubts
 
-The epistemic layer. **The gate everyone has been respecting is on a *removal*, and the thing that is
-wanted is an *addition* — those were conflated, which is why this has sat.**
+The epistemic layer — **and, after the 2026-07-24 rulings, the second half of §3 rather than a
+separate concern.** The judges are what turn a composed artifact into a filed one with standing.
+
+**The gate everyone has been respecting is on a *removal*, and the thing that is wanted is an
+*addition* — those were conflated, which is why this has sat.**
 
 `STANDING_MODEL.md` was ratified July 20, 2026 and its status line says it "authorizes **no build**."
 Its §3 says exactly what the withheld authorization covers: if the panel never moves standing, the
@@ -181,8 +195,18 @@ It exists so a security pass has a fixed surface to harden against.
    local open-weights model that does not exist yet (§7 R3; `TRELLIS_RLM_BACKEND` is root-agent only,
    worker transport not configurable), which is why it reads as forward-looking rather than current.
 
-**Still open for the owner:** 1.6, whether a single-tenant artifact ships before multi-tenant
-identity exists.
+**Ruled by the owner, 2026-07-24 — both open questions closed.**
+
+- **Identity: one user, one instance.** Ownership is the deployment boundary and is never
+  represented in the store. Enterprise expands by cloning a base image of the raw data, each clone
+  owned by its user; symlinking the shared base is the variant. 1.6 is closed as not applicable.
+- **Sequencing: artifacts now.** They ship into the single-tenant store immediately, with no
+  recipient slot — a hedge that only earns its place when more than one recipient is possible, which
+  under one-user-one-instance it never is. The migration story is image cloning, which carries
+  artifacts with everything else and needs no backfill against append-only rows.
+
+**Nothing in this list is now blocked on an owner decision.** What remains open is build
+authorization, which is a different gate.
 
 *Siblings: [AMBIENT.md rule 24](../../AMBIENT.md) (what is being built) ·
 [RESPONSE_ARTIFACT.md](../architecture/RESPONSE_ARTIFACT.md) (the doctrine and the audit) ·
