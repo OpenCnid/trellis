@@ -346,6 +346,119 @@ check("extract_draft_envelope returns None on non-JSON and on missing fields",
       trellis_agent.extract_draft_envelope("no json here") is None
       and trellis_agent.extract_draft_envelope('{"purpose": "p"}') is None)
 
+# --- 6b. The author path's per-surface description slot (July 25, 2026) -----
+# rlms reserves one description line per `custom_tools` entry and fills an
+# undescribed one with "A custom <Type> value". The research path composed
+# that slot from each surface's registered descriptor; this path did not,
+# so an author run's one surface reached its model as
+# "A custom TrellisWorkspace value" — a type name in the highest-primacy
+# text the run sees about what it has, while the coverage diagnostic
+# reported the research seam and read as though it meant both.
+#
+# WHY THE SAME BYTES AS THE RESEARCH LINE, in a regime that is not the
+# research one. The line is WORKSPACE_DESCRIPTOR's own `purpose`, and
+# WORKSPACE_ADDENDUM — spliced into this very prompt by
+# build_author_system_prompt — already opens by calling the surface the
+# model's working memory for plan, self-notes, and captured external
+# results. The slot therefore states nothing this prompt does not already
+# state, and a second characterization composed for this path would put
+# two readings of one surface into one prompt
+# (SELF_DESCRIBING_SURFACES.md §9.1). That premise is asserted below
+# rather than assumed, so an addendum edit that moved the claim would take
+# the reasoning's support with it.
+print("\n[6b] the author path composes its surface's description")
+
+from trellis_contribution import (  # noqa: E402
+    attach_contributions,
+    compose_contributions,
+    render_contribution,
+)
+from trellis_surfaces import derive_delivery, descriptor_for  # noqa: E402
+from trellis_workspace import (  # noqa: E402
+    WORKSPACE_ADDENDUM,
+    WORKSPACE_DESCRIPTOR,
+    derive_workspace_expects,
+)
+from rlm.environments.base_env import format_tools_for_prompt  # noqa: E402
+
+# The one renderer, never a local reimplementation: composing the line here
+# would assert on this drill's own copy of the frame.
+_author_line = render_contribution(
+    WORKSPACE_DESCRIPTOR, derive_workspace_expects(author_ws, seeded=True))
+_research_line = render_contribution(
+    WORKSPACE_DESCRIPTOR, derive_workspace_expects(author_ws, seeded=False))
+
+check("the author surface composes a non-empty line",
+      _author_line != "", "the slot renders as a bare type name when empty")
+check("the line is the descriptor's own purpose, re-authored nowhere",
+      _author_line == WORKSPACE_DESCRIPTOR["purpose"], _author_line)
+check("it is byte-identical to the line the research path composes for the "
+      "same surface",
+      _author_line == _research_line, f"{_author_line!r} vs {_research_line!r}")
+check("and the prompt it lands in already states that claim, which is why "
+      "one reading rather than two is correct here",
+      "plan, self-notes, and captured external results" in WORKSPACE_ADDENDUM
+      and WORKSPACE_ADDENDUM in author_prompt)
+check("the composed line is brace-free (rlms .format() safety)",
+      "{" not in _author_line and "}" not in _author_line)
+
+# END TO END, through rlms's own renderer rather than a local idea of it:
+# the type-name fallback is what the author surface used to render as, and
+# is what it must no longer render as.
+_described = attach_contributions(tools, compose_contributions([
+    (descriptor_for(name),
+     derive_workspace_expects(author_ws, seeded=True)
+     if name == "trellis_workspace" else None)
+    for name in tools
+]))
+check("rlms renders the composed line where it rendered a type name",
+      format_tools_for_prompt(_described)
+      == f"- `trellis_workspace`: {_author_line}",
+      repr(format_tools_for_prompt(_described)))
+check("the bare mapping is what rendered the type name",
+      format_tools_for_prompt(tools)
+      == "- `trellis_workspace`: A custom TrellisWorkspace value",
+      repr(format_tools_for_prompt(tools)))
+check("attaching a description preserves the tool value and the tool set",
+      _described["trellis_workspace"]["tool"] is author_ws
+      and set(_described) == set(tools) == {"trellis_workspace"})
+
+# The description rides on custom_tools, not on the system prompt: rlms
+# splices the listing into its own base prompt at format time. Pinned so a
+# later pass cannot move the line into build_author_system_prompt's text
+# without this going red — and it is the reason section [4]'s and [7]'s
+# byte-identical pins are untouched by any of this.
+check("the author system prompt is unchanged by the composition",
+      trellis_agent.build_author_system_prompt(sample_template) == author_prompt
+      and _author_line not in author_prompt)
+check("the author prompt still opens with the rlms base prompt entire "
+      "(the one-base contract)",
+      author_prompt.startswith(RLM_SYSTEM_PROMPT))
+
+# REACHABILITY (AGENTS.md rule 15: correct is a different claim from
+# reachable). Everything above establishes that the frame renders a line
+# for this surface; whether the AUTHOR RUN composes one is a separate
+# claim, derived from trellis_agent.py's own source by the same read the
+# coverage diagnostic uses — never restated here. The section [9]
+# precedent, one seam over.
+_seams = {seam["scope"]: seam for seam in derive_delivery()["seams"]}
+check("the author run composes at its own seam, not merely correctly here",
+      "run_author_mode" in _seams,
+      f"composing seam(s): {sorted(_seams)}")
+check("and what it composes is attached back and handed to rlms",
+      _seams.get("run_author_mode", {}).get("delivered") is True,
+      str(_seams.get("run_author_mode")))
+check("its roster is the author seam itself, so a surface added to "
+      "build_author_tools is described the moment it registers a line",
+      _seams.get("run_author_mode", {}).get("seam_wide") is True,
+      str(_seams.get("run_author_mode")))
+check("the research seam is a separate answer and still delivers",
+      _seams.get("main", {}).get("delivered") is True,
+      str(_seams.get("main")))
+check("no run mode hands rlms a seam it composed nothing for",
+      derive_delivery()["rendering_without_composing"] == [],
+      str(derive_delivery()["rendering_without_composing"]))
+
 # --- 7. The experiment omission flag (Session 21, pillar §6.3) --------------
 # TRELLIS_EXP_OMIT_CMT=1 is the effective-context probe's discipline-off
 # arm: exactly the §6.2 CODE-MEDIATED TEXT block absent, nothing else

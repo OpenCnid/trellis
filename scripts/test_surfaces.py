@@ -215,6 +215,64 @@ def run_author_mode():
     rlm = RLM(custom_tools=custom_tools, custom_system_prompt=prompt)
 '''
 
+# THE SECOND COMPOSING SEAM — the shape the file took once the authoring
+# mode composed too. Delivery is a chain inside ONE function, so two
+# composing functions are two answers, and a read returning one of them
+# describes one run mode while reading like a property of the file.
+#
+# Each of these carries the same healthy research seam above it, so the
+# only thing that varies is what the SECOND mode does. That is the point:
+# a fixture whose research seam also broke could not show that one mode's
+# answer is not the other's, which is the whole finding.
+_FIXTURE_AUTHOR_DELIVERS = '''
+
+def run_author_mode():
+    custom_tools = build_author_tools(workspace)
+    custom_tools = attach_contributions(
+        custom_tools,
+        compose_contributions([
+            (descriptor_for(name), None)
+            for name in custom_tools
+        ]),
+    )
+    rlm = RLM(custom_tools=custom_tools, custom_system_prompt=prompt)
+'''
+
+_FIXTURE_AUTHOR_DISCARDS = '''
+
+def run_author_mode():
+    custom_tools = build_author_tools(workspace)
+    compose_contributions([
+        (descriptor_for(name), None)
+        for name in custom_tools
+    ])
+    rlm = RLM(custom_tools=custom_tools, custom_system_prompt=prompt)
+'''
+
+# The same mode composing from a list beside its own seam. The file-wide
+# wired flag reads True off the research seam regardless, which is exactly
+# why the shape is also read per seam.
+_FIXTURE_AUTHOR_CURATED = '''
+
+def run_author_mode():
+    custom_tools = build_author_tools(workspace)
+    custom_tools = attach_contributions(
+        custom_tools,
+        compose_contributions([
+            (descriptor_for(name), None)
+            for name in ["trellis_workspace"]
+        ]),
+    )
+    rlm = RLM(custom_tools=custom_tools, custom_system_prompt=prompt)
+'''
+
+FIXTURE_TWO_SEAMS_OK = (_FIXTURE_INJECTION + _FIXTURE_ATTACHED
+                        + _FIXTURE_RENDERS_SEAM + _FIXTURE_AUTHOR_DELIVERS)
+FIXTURE_TWO_SEAMS_BROKEN = (_FIXTURE_INJECTION + _FIXTURE_ATTACHED
+                            + _FIXTURE_RENDERS_SEAM + _FIXTURE_AUTHOR_DISCARDS)
+FIXTURE_TWO_SEAMS_CURATED = (_FIXTURE_INJECTION + _FIXTURE_ATTACHED
+                             + _FIXTURE_RENDERS_SEAM + _FIXTURE_AUTHOR_CURATED)
+
 FIXTURE_DELIVERED = (_FIXTURE_INJECTION + _FIXTURE_ATTACHED
                      + _FIXTURE_RENDERS_SEAM + _FIXTURE_AUTHOR_PATH)
 FIXTURE_DISCARDED = (_FIXTURE_INJECTION + _FIXTURE_DISCARDED
@@ -420,6 +478,74 @@ check("the render says NOT DELIVERED where it is not, over the same registry",
       "NOT DELIVERED" in format_coverage(coverage_report(discarded_path, _three))
       and "NOT DELIVERED" not in format_coverage(
           coverage_report(delivered_path, _three)))
+
+# ONE ANSWER PER RUN MODE, and the conjunction is the file's answer.
+#
+# Delivery is a chain inside one function, so a file with two composing
+# functions has two answers. This read took the LAST of them and called it
+# the answer, which was harmless only while the second run mode composed
+# nothing at all — the moment it composed, that choice reported one mode's
+# chain as the file's. Same defect as the hand-kept roster one rung up,
+# moved from surfaces to run modes.
+two_ok = write_fixture(FIXTURE_TWO_SEAMS_OK)
+two_broken = write_fixture(FIXTURE_TWO_SEAMS_BROKEN)
+two_curated = write_fixture(FIXTURE_TWO_SEAMS_CURATED)
+
+_both = derive_delivery(two_ok)
+check("two composing functions are two seams, named in source order",
+      [seam["scope"] for seam in _both["seams"]] == ["main", "run_author_mode"],
+      str([seam["scope"] for seam in _both["seams"]]))
+check("delivered means delivered in every one of them",
+      _both["delivered"] is True, str(_both))
+
+_half = derive_delivery(two_broken)
+check("one seam dropping its composition makes the file NOT delivered",
+      _half["delivered"] is False, str(_half))
+check("and the mode that dropped it is named while its healthy sibling is not",
+      [seam["scope"] for seam in _half["seams"] if not seam["delivered"]]
+      == ["run_author_mode"],
+      str([(s["scope"], s["delivered"]) for s in _half["seams"]]))
+check("the render names the failing run mode rather than the file",
+      "run_author_mode(): the composed mapping is never assigned back"
+      in format_coverage(coverage_report(two_broken, _three)),
+      format_coverage(coverage_report(two_broken, _three)))
+
+# A RUN MODE THAT RENDERS AND COMPOSES NOTHING is invisible to every read
+# above INCLUDING delivery, because it owns no composing call and so has
+# no delivery answer to be false. Its surfaces arrive through a factory,
+# so the injected roster does not count them either. It renders, its model
+# reads type names, and the report is silent — which is why it is its own
+# field rather than a term in `delivered`.
+_orphan = derive_delivery(delivered_path)
+check("a mode that renders and composes nothing is named",
+      _orphan["rendering_without_composing"] == ["run_author_mode"],
+      str(_orphan["rendering_without_composing"]))
+check("and delivery still reads True beside it, which is why it is a "
+      "separate field and not a term in that one",
+      _orphan["delivered"] is True, str(_orphan))
+check("a mode that does compose is not reported as one that does not",
+      derive_delivery(two_ok)["rendering_without_composing"] == [],
+      str(derive_delivery(two_ok)["rendering_without_composing"]))
+check("the render names the undescribed run mode",
+      "RENDERS AND COMPOSES NOTHING"
+      in format_coverage(coverage_report(delivered_path, _three)))
+
+# THE WIRING SHAPE, PER SEAM. `derive_wired_names` ORs its flag across
+# every composing call in the file — a fair question with one seam and the
+# wrong one with two, because a mode composing from a curated list reads
+# seam-wide off its sibling and its forgotten surfaces stay unnamed.
+_curated = derive_delivery(two_curated)
+check("a mode composing from a list beside its own seam is named per seam",
+      [seam["scope"] for seam in _curated["seams"] if not seam["seam_wide"]]
+      == ["run_author_mode"],
+      str([(s["scope"], s["seam_wide"]) for s in _curated["seams"]]))
+check("while the file-wide wired flag still reads seam-wide off its sibling, "
+      "which is the masking this per-seam read exists to end",
+      derive_wired_names(two_curated)[1] is True)
+check("the render names the mode whose roster sits beside its seam",
+      "ROSTER BESIDE THE SEAM in: run_author_mode()"
+      in format_coverage(coverage_report(two_curated, _three)),
+      format_coverage(coverage_report(two_curated, _three)))
 
 # --- 3d. The expects roster ------------------------------------------------
 print("\n[3d] the expects roster: a slot with no supplier ends the run")
@@ -628,6 +754,40 @@ check("so every W above is a line that reaches a model — delivered, not "
       "merely composed",
       _delivery["delivered"] is True, str(_delivery))
 
+# AND ONE ANSWER PER RUN MODE, which the four checks above do not
+# establish. trellis_agent.py builds `custom_tools` once per --mode and
+# each mode hands its own mapping to its own renderer call, so delivery
+# has as many answers as there are composing functions. Until July 25,
+# 2026 only one mode composed and the other rendered type names, and no
+# check here could have said so: the authoring mode's surfaces arrive
+# through a factory (named under dynamic_sources, counted nowhere), it
+# owned no composing call for the wired rung, and its delivery answer did
+# not exist to be false.
+#
+# NON-VACUITY. The three set-difference checks below pass on a file with
+# no composing seams at all, so the count is pinned first — the file has
+# more than one run mode, which is what makes the conjunctions able to
+# fail. A pin on the exact number would move on every mode added; more
+# than one is the property.
+_seams = _delivery["seams"]
+check("the file has more than one composing seam, so the conjunctions below "
+      "can fail",
+      len(_seams) > 1,
+      f"composing seam(s): {[seam['scope'] for seam in _seams]}")
+check("every run mode that composes also delivers",
+      [seam["scope"] for seam in _seams if not seam["delivered"]] == [],
+      f"mode(s) whose composed lines reach no model: "
+      f"{[s['scope'] for s in _seams if not s['delivered']]}")
+check("every run mode draws its roster from its own seam, so none of them "
+      "has a per-surface wiring decision left to forget",
+      [seam["scope"] for seam in _seams if not seam["seam_wide"]] == [],
+      f"mode(s) composing from a list beside the seam: "
+      f"{[s['scope'] for s in _seams if not s['seam_wide']]}")
+check("no run mode hands rlms a seam it composed nothing for",
+      _delivery["rendering_without_composing"] == [],
+      f"run mode(s) whose surfaces reach their model as type names: "
+      f"{_delivery['rendering_without_composing']}")
+
 # THE ROSTER ONE LEVEL BELOW THE DERIVED ONE. A descriptor slot resolving
 # through the seam's hand-kept `_expects` dict fails at COMPOSITION, not
 # at the line: the whole run ends with ContributionShapeError while it is
@@ -832,19 +992,94 @@ def negative_control():
             coverage_report(seam, {})["declined_not_injected"] == sorted(
                 trellis_surfaces.DECLINED))
 
-    # THE SIX PLANTS AGAINST THE REAL SEAM. Each is an edit to a copy of
-    # the shipped trellis_agent.py, and each was watched going green
-    # against this drill before the derivations above existed.
-    unwrapped = plant_in_real_seam(
-        "custom_tools = attach_contributions(", "attach_contributions(")
-    planted("REAL SEAM: the attach wrapper removed leaves the composition "
-            "discarded",
+    # THE PLANTS AGAINST THE REAL SEAM. Each is an edit to a copy of the
+    # shipped trellis_agent.py, and each was watched going green against
+    # this drill before the derivations above existed.
+    #
+    # PER RUN MODE, as of July 25, 2026. The attach plant used to anchor on
+    # `custom_tools = attach_contributions(` alone, which was unique while
+    # one mode composed and became ambiguous the day the second one did:
+    # `plant_in_real_seam` found the anchor twice, returned None, and this
+    # control reported MISSED — the harness working, and the notice that
+    # one plant now has to be two. What distinguishes the two seams is the
+    # `_expects` roster above each, so each anchor carries its own.
+    _RESEARCH_ATTACH = (
+        '            "trellis_textedit": lambda: derive_textedit_expects(textedit),\n'
+        "        }\n"
+        "        custom_tools = attach_contributions(\n")
+    _AUTHOR_BLOCK = (
+        "        _expects = {\n"
+        '            "trellis_workspace": lambda: derive_workspace_expects(\n'
+        "                workspace, seeded=True),\n"
+        "        }\n"
+        "        custom_tools = attach_contributions(\n"
+        "            custom_tools,\n"
+        "            compose_contributions([\n"
+        "                (descriptor_for(name),\n"
+        "                 _expects[name]() if name in _expects else None)\n"
+        "                for name in custom_tools\n"
+        "            ]),\n"
+        "        )\n")
+
+    def _unattached(block):
+        return block.replace("custom_tools = attach_contributions(",
+                             "attach_contributions(")
+
+    unwrapped = plant_in_real_seam(_RESEARCH_ATTACH, _unattached(_RESEARCH_ATTACH))
+    planted("REAL SEAM: the research mode's attach wrapper removed leaves its "
+            "composition discarded",
             unwrapped is not None
             and derive_delivery(unwrapped)["delivered"] is False)
     planted("REAL SEAM: and every rung above it still reads closed",
             unwrapped is not None
             and derive_wired_names(unwrapped)[1] is True
             and coverage_report(unwrapped)["contributing_unwired"] == [])
+    planted("REAL SEAM: the failing mode is named and its sibling is not",
+            unwrapped is not None
+            and [seam["scope"] for seam in derive_delivery(unwrapped)["seams"]
+                 if not seam["delivered"]] == ["main"])
+
+    # The same break in the OTHER mode. One answer per file would have
+    # reported the research seam's health here and said nothing.
+    author_unwrapped = plant_in_real_seam(_AUTHOR_BLOCK, _unattached(_AUTHOR_BLOCK))
+    planted("REAL SEAM: the authoring mode's attach wrapper removed leaves THAT "
+            "mode undelivered",
+            author_unwrapped is not None
+            and derive_delivery(author_unwrapped)["delivered"] is False
+            and [seam["scope"]
+                 for seam in derive_delivery(author_unwrapped)["seams"]
+                 if not seam["delivered"]] == ["run_author_mode"])
+
+    # The state this whole layer was in until July 25, 2026: a run mode
+    # rendering a seam it composed nothing for. Nothing above detects it —
+    # delivery reads True, the wired rung reads seam-wide, coverage reads
+    # zero gaps — because the mode has no composing call to read.
+    uncomposed = plant_in_real_seam(_AUTHOR_BLOCK, "")
+    planted("REAL SEAM: a run mode that composes nothing and still renders is "
+            "named",
+            uncomposed is not None
+            and derive_delivery(uncomposed)["rendering_without_composing"]
+            == ["run_author_mode"])
+    planted("REAL SEAM: and every other read stays closed on it, which is why "
+            "it needed a field of its own",
+            uncomposed is not None
+            and derive_delivery(uncomposed)["delivered"] is True
+            and derive_wired_names(uncomposed)[1] is True
+            and coverage_report(uncomposed)["gaps"] == []
+            and coverage_report(uncomposed)["contributing_unwired"] == [])
+
+    # A mode curating its roster beside its own seam, while the file-wide
+    # wired flag keeps reading seam-wide off its sibling.
+    curated_mode = plant_in_real_seam(
+        _AUTHOR_BLOCK,
+        _AUTHOR_BLOCK.replace("for name in custom_tools",
+                              'for name in ["trellis_workspace"]'))
+    planted("REAL SEAM: a mode composing from a list beside its seam is named "
+            "per seam",
+            curated_mode is not None
+            and [seam["scope"] for seam in derive_delivery(curated_mode)["seams"]
+                 if not seam["seam_wide"]] == ["run_author_mode"]
+            and derive_wired_names(curated_mode)[1] is True)
 
     ghost = plant_in_real_seam(
         '        custom_tools = {\n',

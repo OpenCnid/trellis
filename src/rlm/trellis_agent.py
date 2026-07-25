@@ -376,6 +376,44 @@ def run_author_mode(args):
             seed_data, max_segments=max_segments, max_bytes=max_bytes, goal_id=args.goal_id,
         )
         custom_tools = build_author_tools(workspace)
+        # July 25, 2026: the author path fills the same per-surface
+        # description slot the research path fills. Until now only the
+        # research seam composed, so an author run's one surface reached
+        # its model as "A custom TrellisWorkspace value" — a type name in
+        # the highest-primacy text the run sees about what it has.
+        #
+        # SAME ROSTER SHAPE, for the same reason: the roster is
+        # custom_tools itself, so a surface this seam ever gains is
+        # described the moment it registers a contribution and a surface
+        # with no descriptor keeps its bare value. build_author_tools's
+        # tool set is untouched — this describes what it returns.
+        #
+        # WHY THE SAME BYTES AS THE RESEARCH LINE, in a regime that is not
+        # the research one. The line is the descriptor's own `purpose`, and
+        # WORKSPACE_ADDENDUM — spliced into this very prompt by
+        # build_author_system_prompt below — already opens by calling this
+        # surface the model's working memory for plan, self-notes, and
+        # captured external results. A second characterization composed for
+        # this path would put two readings of one surface into one prompt,
+        # which is the failure SELF_DESCRIBING_SURFACES.md §9.1 names; the
+        # regime's own differences are carried where they are already
+        # carried, by AUTHOR_ADDENDUM and WORKSPACE_SEEDED_ADDENDUM.
+        #
+        # `seeded=True` is a fact about this branch rather than a default:
+        # run_author_mode returns above without --seed-workspace, so an
+        # author workspace is seeded on every run that reaches here.
+        _expects = {
+            "trellis_workspace": lambda: derive_workspace_expects(
+                workspace, seeded=True),
+        }
+        custom_tools = attach_contributions(
+            custom_tools,
+            compose_contributions([
+                (descriptor_for(name),
+                 _expects[name]() if name in _expects else None)
+                for name in custom_tools
+            ]),
+        )
         system_prompt = build_author_system_prompt(args.query)
 
         print("Starting RLM Author run (grounded authoring mode).", flush=True)

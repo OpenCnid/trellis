@@ -44,17 +44,31 @@
 # not been decided about", and the difference between them is a fact
 # rather than a constant.
 #
-# THE SIX CONDITIONS 1 REPORTS, each a state a model would be affected
+# THE SEVEN CONDITIONS 1 REPORTS, each a state a model would be affected
 # by and nobody chose:
 #   * gaps                    — an injected surface with no descriptor and
 #                               no recorded declination,
 #   * contributing_unwired    — a finished line the composing call omits,
 #   * delivery not delivered  — composed lines that reach no model at all,
+#                               answered per composing seam and true only
+#                               when every run mode delivers,
+#   * rendering_without_composing
+#                             — a whole run mode handing rlms a seam it
+#                               composed nothing for, so its surfaces
+#                               reach their model as type names,
 #   * expects_unsupplied      — a slot with no supplier, which ends the
 #                               run at composition rather than at the line,
 #   * declined_not_injected   — a dead exemption still able to cover a
 #                               future surface that takes the name,
 #   * declined_but_described  — an exemption contradicted by the registry.
+#
+# WHY THE FOURTH JOINED. Until July 25, 2026 the file held one run mode
+# that composed and one that did not, and every condition above was blind
+# to the second: its surfaces arrive through a factory, so nothing counts
+# them; it owns no composing call, so no rung reads it; and its delivery
+# answer did not exist to be false. A status that cannot go to 1 on a
+# whole undescribed run mode is the same spent code this header already
+# describes, one level up from the surface it describes it at.
 #
 # Zero-paid, no database, no network: it parses one file and reads a
 # registry populated by importing the surface modules.
@@ -97,6 +111,7 @@ def main():
                  or report["expects_unsupplied"]
                  or report["declined_not_injected"]
                  or report["declined_but_described"]
+                 or report["delivery"]["rendering_without_composing"]
                  or not report["delivery"]["delivered"])
     return 1 if undecided else 0
 

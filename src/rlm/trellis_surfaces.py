@@ -72,6 +72,30 @@ from the same source, and reports them as ONE seam-wide property rather
 than a fourth per-surface flag, because attach either runs on the whole
 dict or on none of it.
 
+AND DELIVERY IS PER RUN MODE, NOT PER FILE. `trellis_agent.py` holds two
+constructions of `custom_tools`, one per `--mode`, and each hands its own
+mapping to its own renderer call. Delivery is a chain inside ONE
+function, so there are as many delivery answers as there are functions
+composing — and a read returning one of them names a property of one run
+mode while reading like a property of the file. This module derived
+exactly that for a while: it took the LAST composing function and called
+its answer the answer, which was harmless only because the second mode
+composed nothing at all. `_composing_scopes` returns them all,
+`derive_delivery` answers per seam and reports `delivered` as the
+conjunction, and `format_coverage` names each seam, so a mode that stops
+delivering cannot hide behind a sibling that still does.
+
+A RUN MODE THAT RENDERS WITHOUT COMPOSING is the shape that state was in
+before anyone noticed, and it is invisible to every read above: its
+surfaces are not in the injected roster (they arrive through a factory,
+named under `dynamic_sources`), it owns no composing call for the wired
+rung to read, and its delivery answer does not exist to be false.
+Everything reads closed and its model reads type names.
+`derive_delivery` therefore also reports `rendering_without_composing` —
+functions handing the renderer a `custom_tools=` with no composing call
+of their own — which is derived from the same parse and is the one
+condition that names a whole run mode rather than a surface.
+
 The seam keeps one hand-kept roster below the derived one: `_expects`,
 which supplies the guard-owned phrases an ('expects', key) slot resolves
 through. A surface missing from it does not lose a line — the
@@ -83,10 +107,13 @@ computed against the registry rather than read off by eye.
 import ast
 import os
 
-# The research-run injection seam this diagnostic derives from. The
-# authoring seam (build_author_tools) is a SECOND construction and is
-# reported as out of scope rather than silently omitted — silent
-# absence is the failure class HARNESS_SELF_MODEL.md §5 names.
+# The injection seam this diagnostic derives from. Both run modes build a
+# local named this, so the per-surface rungs read the research mode's
+# literal entries while the authoring mode's arrive through a factory and
+# are named under `dynamic_sources` — reported as unenumerable rather
+# than silently omitted, which is the failure class
+# HARNESS_SELF_MODEL.md §5 names. The seam-wide reads below are per
+# function, so they answer per run mode.
 _AGENT_MODULE = "trellis_agent.py"
 _SEAM_VARIABLE = "custom_tools"
 
@@ -409,16 +436,24 @@ def _statement_holding(scope, target):
     return max(holders, key=lambda stmt: (stmt.lineno, stmt.col_offset))
 
 
-def _composing_scope(tree):
-    """The function body the composing call sits in, or None.
+def _composing_scopes(tree):
+    """Every function body a composing call sits in, in source order.
 
     Delivery is a chain inside ONE function: compose, attach back to the
     seam, hand the seam to the renderer. Scoping to that function is what
-    keeps a second `RLM(custom_tools=custom_tools)` elsewhere in the file
-    — the authoring path is exactly that — from answering the research
-    path's question. The authoring seam composes nothing, and a read that
-    ranged over the module would have let its renderer call stand in for
-    a research seam that had stopped attaching."""
+    keeps one run mode's `RLM(custom_tools=custom_tools)` from answering
+    another's question — a read that ranged over the module would let a
+    healthy mode's renderer call stand in for a sibling that had stopped
+    attaching.
+
+    ALL of them, never one. This returned a single scope until July 25,
+    2026, chosen as the last one to open, and the choice was invisible
+    because only one function composed. The moment the second run mode
+    composed, that `max` picked one mode's chain and reported it as the
+    file's — the same defect as the hand-kept roster one rung up, moved
+    from surfaces to run modes. The callers below answer per scope and
+    aggregate by conjunction, so every mode has to deliver for the report
+    to say delivered."""
     scopes = []
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -427,9 +462,33 @@ def _composing_scope(tree):
             if isinstance(child, ast.Call) and _call_name(child) == _COMPOSE_FUNCTION:
                 scopes.append(node)
                 break
-    if not scopes:
-        return None
-    return max(scopes, key=lambda fn: (fn.lineno, fn.col_offset))
+    return sorted(scopes, key=lambda fn: (fn.lineno, fn.col_offset))
+
+
+def _rendering_scopes(tree):
+    """Every function body that hands the renderer a `custom_tools=`, in
+    source order, by name.
+
+    This is the read that sees a WHOLE RUN MODE go undescribed. Every
+    other read here is anchored on a composing call or on the seam's
+    literal entries, so a mode that builds its mapping from a factory and
+    composes nothing is absent from all of them: no injected names to
+    count, no roster to read, no delivery answer to be false. It renders,
+    its model reads type names, and the report is silent. Compared
+    against the composing scopes, its absence becomes a positive
+    statement instead."""
+    names = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for child in ast.walk(node):
+            if not (isinstance(child, ast.Call)
+                    and _call_name(child) == _RENDERER):
+                continue
+            if any(keyword.arg == _RENDER_KEYWORD for keyword in child.keywords):
+                names.append((node.lineno, node.col_offset, node.name))
+                break
+    return [name for _, _, name in sorted(names)]
 
 
 def _seam_mutations(scope):
@@ -465,52 +524,24 @@ def _seam_mutations(scope):
     return sorted(found)
 
 
-def derive_delivery(agent_path=None):
-    """Whether a composed contribution can REACH a model — the three
-    links past the composing call, derived from the same source the other
-    rungs are.
+def _delivery_in(scope):
+    """One composing function's delivery chain: compose, attach back to
+    the seam, hand the seam to the renderer, and touch the seam no more.
 
-    The WIRED rung answers *does a run pass this surface to
-    compose_contributions*. It does not answer *does the result go
-    anywhere*, and those come apart in one edit: drop the
-    `attach_contributions` wrapper and every composed line is computed,
-    measured against the budget, and discarded, while the roster is still
-    drawn from the seam and every rung above still reads closed. The
-    prompt reverts to what it was before the layer landed and the report
-    says nothing changed.
-
-    Returns a dict:
-
-      * `composed` — a composing call exists at all,
-      * `attached` — its value is assigned BACK to the seam variable, so
-        the descriptions land in the dict that gets rendered,
-      * `attach_sinks` — where the composed value goes when it is not the
-        seam, named rather than dropped (`<discarded ...>` for a bare
-        expression statement),
-      * `rendered` — the seam variable itself is what the renderer is
-        handed as `custom_tools=`,
-      * `render_sources` — what the renderer is handed instead, named,
-      * `mutated_after_attach` — surfaces put into the seam after the
-        attach, whose lines the new mapping cannot carry,
-      * `delivered` — all of the above, which is the property, and
-      * `scope` — the function all of this was read inside.
-    """
-    tree = _parse_agent(agent_path)
-    scope = _composing_scope(tree)
+    One function is the whole unit of this question — see
+    `_composing_scopes`. `derive_delivery` calls this once per seam and
+    reports the conjunction."""
     delivery = {
-        "composed": False,
+        "composed": True,
         "attached": False,
         "attach_sinks": [],
         "rendered": False,
         "render_sources": [],
         "mutated_after_attach": [],
+        "seam_wide": False,
         "delivered": False,
-        "scope": None,
+        "scope": scope.name,
     }
-    if scope is None:
-        return delivery
-    delivery["scope"] = scope.name
-    delivery["composed"] = True
 
     sinks = set()
     attach_lines = []
@@ -518,6 +549,20 @@ def derive_delivery(agent_path=None):
         if not (isinstance(node, ast.Call)
                 and _call_name(node) == _COMPOSE_FUNCTION):
             continue
+        # The wiring SHAPE, per seam. `derive_wired_names` ORs its flag
+        # across every composing call in the file, which answers "is any
+        # roster drawn from its seam" — a fair question with one seam and
+        # the wrong one with two, since a mode that curated its roster
+        # would read seam-wide off its sibling. Here it is the shape of
+        # THIS seam's roster and nothing else's.
+        argument = node.args[0] if node.args else None
+        if argument is None:
+            for keyword in node.keywords:
+                if keyword.arg in (None, "entries"):
+                    argument = keyword.value
+                    break
+        if argument is not None and _roster_from(argument)[1]:
+            delivery["seam_wide"] = True
         holder = _statement_holding(scope, node)
         if isinstance(holder, ast.Assign) and any(
                 isinstance(target, ast.Name) and target.id == _SEAM_VARIABLE
@@ -557,9 +602,95 @@ def derive_delivery(agent_path=None):
             label for lineno, label in _seam_mutations(scope) if lineno > cutoff]
 
     delivery["delivered"] = bool(
-        delivery["composed"] and delivery["attached"] and delivery["rendered"]
+        delivery["attached"] and delivery["rendered"]
         and not delivery["mutated_after_attach"])
     return delivery
+
+
+def derive_delivery(agent_path=None):
+    """Whether a composed contribution can REACH a model — the three
+    links past the composing call, derived from the same source the other
+    rungs are.
+
+    The WIRED rung answers *does a run pass this surface to
+    compose_contributions*. It does not answer *does the result go
+    anywhere*, and those come apart in one edit: drop the
+    `attach_contributions` wrapper and every composed line is computed,
+    measured against the budget, and discarded, while the roster is still
+    drawn from the seam and every rung above still reads closed. The
+    prompt reverts to what it was before the layer landed and the report
+    says nothing changed.
+
+    Returns a dict:
+
+      * `composed` — a composing call exists at all,
+      * `attached` — its value is assigned BACK to the seam variable, so
+        the descriptions land in the dict that gets rendered,
+      * `attach_sinks` — where the composed value goes when it is not the
+        seam, named rather than dropped (`<discarded ...>` for a bare
+        expression statement),
+      * `rendered` — the seam variable itself is what the renderer is
+        handed as `custom_tools=`,
+      * `render_sources` — what the renderer is handed instead, named,
+      * `mutated_after_attach` — surfaces put into the seam after the
+        attach, whose lines the new mapping cannot carry,
+      * `seam_wide` — THIS seam's roster is drawn from `custom_tools`
+        itself, so nothing per-surface is left for this mode to forget
+        (the file-wide flag on `derive_wired_names` cannot say that of
+        one mode once a second mode composes),
+      * `delivered` — all of the above, which is the property,
+      * `scope` — the composing function(s) all of this was read inside,
+        named in source order,
+      * `seams` — one such dict per composing function, so a mode that
+        stopped delivering is named rather than averaged away, and
+      * `rendering_without_composing` — functions handing the renderer a
+        `custom_tools=` and composing nothing, which is a whole run mode
+        reading type names and is invisible to every other read here.
+
+    ONE ANSWER PER RUN MODE, aggregated by conjunction. The keys above
+    the seam list are the file's answer: `attached` and `rendered` and
+    `delivered` hold when they hold in EVERY composing seam, and the
+    sink and source lists are the union across seams, so a report reading
+    delivered is a report about all of them. `composed` stays a statement
+    that something composes at all.
+    """
+    tree = _parse_agent(agent_path)
+    seams = [_delivery_in(scope) for scope in _composing_scopes(tree)]
+    composing = {seam["scope"] for seam in seams}
+    orphaned = [name for name in _rendering_scopes(tree)
+                if name not in composing]
+
+    if not seams:
+        return {
+            "composed": False,
+            "attached": False,
+            "attach_sinks": [],
+            "rendered": False,
+            "render_sources": [],
+            "mutated_after_attach": [],
+            "seam_wide": False,
+            "delivered": False,
+            "scope": None,
+            "seams": [],
+            "rendering_without_composing": orphaned,
+        }
+
+    return {
+        "composed": True,
+        "attached": all(seam["attached"] for seam in seams),
+        "attach_sinks": sorted({sink for seam in seams
+                                for sink in seam["attach_sinks"]}),
+        "rendered": all(seam["rendered"] for seam in seams),
+        "render_sources": sorted({source for seam in seams
+                                  for source in seam["render_sources"]}),
+        "mutated_after_attach": sorted({label for seam in seams
+                                        for label in seam["mutated_after_attach"]}),
+        "seam_wide": all(seam["seam_wide"] for seam in seams),
+        "delivered": all(seam["delivered"] for seam in seams),
+        "scope": ", ".join(seam["scope"] for seam in seams),
+        "seams": seams,
+        "rendering_without_composing": orphaned,
+    }
 
 
 def derive_expects_roster(agent_path=None):
@@ -577,27 +708,34 @@ def derive_expects_roster(agent_path=None):
     raises ContributionShapeError while the run is starting, before any
     paid call, and takes the whole run with it. Derived here so the
     requirement can be computed against the registry instead of read off
-    by eye."""
+    by eye.
+
+    THE UNION ACROSS COMPOSING SEAMS, where delivery is the conjunction,
+    and the asymmetry is the failure mode rather than an oversight. An
+    unsupplied slot is LOUD: the run raises while it is starting, so it
+    reaches no model and ships nothing. An undelivered seam is SILENT: the
+    run completes and its model reads type names. This diagnostic exists
+    for the silent one, so delivery is answered per mode; the roster is
+    answered for the file, because what it settles is whether a slot can
+    resolve anywhere."""
     tree = _parse_agent(agent_path)
-    scope = _composing_scope(tree)
-    if scope is None:
-        return [], []
     names = set()
     sources = set()
-    for node in ast.walk(scope):
-        if not isinstance(node, ast.Assign):
-            continue
-        if not any(isinstance(target, ast.Name) and target.id == _EXPECTS_ROSTER
-                   for target in node.targets):
-            continue
-        if isinstance(node.value, ast.Dict):
-            for key in node.value.keys:
-                if isinstance(key, ast.Constant) and isinstance(key.value, str):
-                    names.add(key.value)
-                else:
-                    sources.add(_source_label(key))
-        else:
-            sources.add(_source_label(node.value))
+    for scope in _composing_scopes(tree):
+        for node in ast.walk(scope):
+            if not isinstance(node, ast.Assign):
+                continue
+            if not any(isinstance(target, ast.Name) and target.id == _EXPECTS_ROSTER
+                       for target in node.targets):
+                continue
+            if isinstance(node.value, ast.Dict):
+                for key in node.value.keys:
+                    if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                        names.add(key.value)
+                    else:
+                        sources.add(_source_label(key))
+            else:
+                sources.add(_source_label(node.value))
     return sorted(names), sorted(sources)
 
 
@@ -797,11 +935,15 @@ def format_coverage(report):
         f"{len(report['declined'])} declined on the record"
     )
     delivery = report["delivery"]
+    seams = delivery.get("seams") or []
     if delivery["delivered"]:
         lines.append(
             f"  D: the composed mapping is attached back to {_SEAM_VARIABLE} and "
             f"{_SEAM_VARIABLE} is what {_RENDERER} renders, so a wired line "
-            f"reaches a model. Read inside {delivery['scope']}()."
+            f"reaches a model. Read inside "
+            + ", ".join(f"{seam['scope']}()" for seam in seams)
+            + f" -- {len(seams)} composing seam(s), and each one is a run mode "
+            f"answered separately."
         )
     else:
         lines.append(
@@ -812,24 +954,48 @@ def format_coverage(report):
                 f"    no {_COMPOSE_FUNCTION} call inside any function, so "
                 f"nothing is composed to deliver."
             )
-        if delivery["composed"] and not delivery["attached"]:
-            lines.append(
-                f"    the composed mapping is never assigned back to "
-                f"{_SEAM_VARIABLE}; it goes to: "
-                + (", ".join(delivery["attach_sinks"]) or "<nothing readable>")
-            )
-        if delivery["composed"] and not delivery["rendered"]:
-            lines.append(
-                f"    {_RENDERER} is not handed {_SEAM_VARIABLE} as "
-                f"{_RENDER_KEYWORD}=; it is handed: "
-                + (", ".join(delivery["render_sources"]) or "<no such call here>")
-            )
-        if delivery["mutated_after_attach"]:
-            lines.append(
-                "    put into the seam AFTER the attach, so the attached "
-                "mapping cannot carry their lines: "
-                + ", ".join(delivery["mutated_after_attach"])
-            )
+        # Per seam, so a mode that stopped delivering is named instead of
+        # being averaged into a sibling that still does.
+        for seam in seams:
+            if seam["delivered"]:
+                continue
+            if not seam["attached"]:
+                lines.append(
+                    f"    {seam['scope']}(): the composed mapping is never "
+                    f"assigned back to {_SEAM_VARIABLE}; it goes to: "
+                    + (", ".join(seam["attach_sinks"]) or "<nothing readable>")
+                )
+            if not seam["rendered"]:
+                lines.append(
+                    f"    {seam['scope']}(): {_RENDERER} is not handed "
+                    f"{_SEAM_VARIABLE} as {_RENDER_KEYWORD}=; it is handed: "
+                    + (", ".join(seam["render_sources"]) or "<no such call here>")
+                )
+            if seam["mutated_after_attach"]:
+                lines.append(
+                    f"    {seam['scope']}(): put into the seam AFTER the "
+                    "attach, so the attached mapping cannot carry their "
+                    "lines: " + ", ".join(seam["mutated_after_attach"])
+                )
+    _narrow = [seam["scope"] for seam in seams if not seam["seam_wide"]]
+    if _narrow:
+        lines.append(
+            f"  ROSTER BESIDE THE SEAM in: "
+            + ", ".join(f"{name}()" for name in _narrow)
+            + f" -- that mode composes from a list rather than from "
+            f"{_SEAM_VARIABLE}, so a surface added to its seam stays "
+            "undescribed. The W column above cannot say this: its flag is "
+            "true if ANY mode draws from its seam."
+        )
+    if delivery.get("rendering_without_composing"):
+        lines.append(
+            f"  A RUN MODE THAT RENDERS AND COMPOSES NOTHING -- it hands "
+            f"{_RENDERER} a {_RENDER_KEYWORD}= of its own and owns no "
+            f"{_COMPOSE_FUNCTION} call, so every surface it injects reaches "
+            "its model as a type name and no rung above says so: "
+            + ", ".join(f"{name}()" for name
+                        in delivery["rendering_without_composing"])
+        )
     if report["expects_unsupplied"]:
         lines.append(
             "  NO EXPECTATION SUPPLIER -- a descriptor slot that resolves "
