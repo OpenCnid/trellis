@@ -3,15 +3,26 @@
 Source of truth: docs/product/repl-sandbox/REPL_SANDBOX_DATA_MODEL.md section 2
 (Namespace, allocation, lifecycle, revocation) — "per-session, keyed by
 `(CID, id)`; disjoint across sessions" — with the identity rule from
-REPL_SANDBOX_ARCHITECTURE.md section 7 requirement 4 (auth by kernel vsock peer
-CID from `accept()`, never a guest-supplied id) and REPL_SANDBOX_SPEC.md
-section 4 (Host chokepoint contracts).
+REPL_SANDBOX_ARCHITECTURE.md section 7 requirement 4 (auth by the session
+identity the listener supplies at `accept()`, never a guest-supplied id) and
+REPL_SANDBOX_SPEC.md section 4 (Host chokepoint contracts).
 
-The CID is not data the guest can write. It comes from the kernel at
+The CID is not data the guest can write. It is what the *listener* reports at
 `accept()`, which is why it — and nothing in the payload — is what the handle
 table, the ledgers, and the audit log key on. This module's whole job is to say
-whether a CID the kernel just handed us belongs to a live session, and to
+whether a CID the listener just handed us belongs to a live session, and to
 refuse when it does not.
+
+**What supplies that value depends on the VMM, and this module is deliberately
+incurious about which.** Under native vhost-vsock it is a peer CID the host
+kernel reads at `accept()`. Under the ratified VMM's hybrid vsock there is no
+CID to read — a Unix-socket accept carries none — and it is instead the
+host-assigned id bound to that sandbox's own socket path, a path only that one
+VMM can deliver a connection to. Same property, different enforcing surface;
+INTERFACES section 3.1a is the authoritative correction and the one place to
+read it. Earlier revisions of this header said the value comes from the kernel
+without qualification, which was true of the transport the records were first
+written against and is not true of the one that shipped.
 
 Two structural rules beyond the lookup, both enforced here rather than
 documented and hoped for:

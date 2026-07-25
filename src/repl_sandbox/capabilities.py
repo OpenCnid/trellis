@@ -103,8 +103,12 @@ UUID_ALIAS = "_trellis_uuid"
 #: ever collide with it.
 ARGS_LOCAL = "_args"
 
-#: Guest CIDs are kernel-assigned per microVM; 0/1/2 are the reserved vsock CIDs
-#: (hypervisor / local / host), so a registration keyed below 3 is a host bug.
+#: The lowest CID a registration may be keyed on. 0/1/2 are the reserved vsock
+#: CIDs (hypervisor / local / host), so a registration below 3 is a host bug.
+#: Who *supplies* the value depends on the VMM — a kernel-read peer CID under
+#: native vhost-vsock, a host-assigned id bound to the sandbox's socket path
+#: under the ratified VMM's hybrid vsock (INTERFACES section 3.1a). The range
+#: check is the same either way, which is why this constant does not care.
 FIRST_GUEST_CID = 3
 
 MAX_NAME_LEN = 64
