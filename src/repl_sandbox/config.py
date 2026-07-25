@@ -149,6 +149,35 @@ class VsockPorts:
 VMADDR_CID_HOST = 2
 
 
+#: The containerd runtime handler that routes a container to a Kata microVM.
+#: Anything else on this field is a container, not a boundary.
+KATA_RUNTIME_HANDLER = "io.containerd.kata.v2"
+
+#: The guest image, pinned by digest rather than by tag: `python:3.12-slim` is
+#: mutable, and the recorded spike runs are only reproducible against this
+#: manifest. Both values are `scripts/provision_kata_host.sh`'s — that script
+#: pulls and verifies them, so it holds the authority and these are the copy.
+#: `test_config.py` asserts the two agree, so a bump there reddens here first.
+GUEST_IMAGE = "docker.io/library/python:3.12-slim"
+GUEST_IMAGE_DIGEST = "sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd04266317710de"
+
+#: The containerd namespace a launcher works in.
+#:
+#: **Not `default`, and the reason is rule 19(a) rather than tidiness.** A
+#: destructive step is confirmed over its whole reach before it runs, and a
+#: launcher sharing `default` with the provisioner and every past probe cannot
+#: say "everything under this path is mine" about anything it is about to
+#: remove. The namespace is also literally in the leaked-cgroup path — Kata's
+#: cgroup driver builds `/sys/fs/cgroup/<namespace>/kata_<id>` — so moving off
+#: `default` is what makes that sweep bounded.
+#:
+#: **Measured consequence, 2026-07-25:** containerd image stores are
+#: per-namespace. `ctr -n <ns> run` against a namespace that has not pulled the
+#: image fails with `image "...": not found`, so a launcher owning a namespace
+#: necessarily owns the pull, which is why the digest above lives here at all.
+CTR_NAMESPACE = "trellis"
+
+
 @dataclass(frozen=True)
 class LMCaps:
     """Per-session, CID-keyed ceilings the LM handler enforces host-side.

@@ -340,15 +340,75 @@ def test_boot_refuses_on_this_host_and_names_what_was_missing() -> None:
 
 
 def test_boot_gates_before_it_launches() -> None:
-    """With G1 satisfied the refusal changes: the unbuilt launch path is named.
+    """The gate runs to completion before the launch path is touched at all.
 
-    The order matters — a launcher that tried to start a VM before gating would
-    reach the launch path on a host with no KVM.
+    A launcher that started a VM before gating would build a sandbox on a host
+    with no KVM, so this asserts the order directly rather than inferring it
+    from whatever `boot` raises: every G1 probe must have run, and the first
+    command after them is the image check that opens the launch path.
     """
-    with pytest.raises(NotImplementedError) as raised:
-        launcher().boot("session-1")
-    assert "not built" in str(raised.value)
-    assert "No guest was claimed." in str(raised.value)
+    sentinel = RuntimeError("launch path reached")
+    responses = dict(GOOD_PROBES)
+    responses["ctr -n trellis images ls -q"] = sentinel
+    run_cmd = fake_run_cmd(responses)
+
+    with pytest.raises(RuntimeError) as raised:
+        KataLauncher(
+            SandboxConfig(),
+            run_cmd,
+            kvm_probe=kvm_present,
+            accel_benchmark=near_native,
+        ).boot("session-1")
+    assert raised.value is sentinel
+
+    issued = [" ".join(call) for call in run_cmd.calls]
+    for probe in GOOD_PROBES:
+        assert probe in issued, f"the gate did not run {probe!r} before launching"
+        assert issued.index(probe) < issued.index("ctr -n trellis images ls -q")
+
+
+def test_boot_refuses_when_containerd_reports_success_without_a_vm() -> None:
+    """`ctr run` exiting 0 is not the same fact as a VM existing.
+
+    The shim can accept and register a task without Cloud Hypervisor ever
+    starting, and a launcher that trusted the exit code would hand back a handle
+    backed by nothing -- indistinguishable from a working one until the first
+    exec, by which time it has already been counted as a boundary.
+    """
+    responses = dict(GOOD_PROBES)
+    responses["ctr -n trellis images ls -q"] = (0, "docker.io/library/python:3.12-slim\n", "")
+    launched: list[str] = []
+
+    def run_cmd(argv, capture_output=False, text=False, timeout=None):
+        key = " ".join(argv)
+        if key.startswith("ctr -n trellis run -d"):
+            launched.append(key)
+            return subprocess.CompletedProcess(list(argv), 0, "", "")
+        if key.startswith("ctr -n trellis task") or key.startswith("ctr -n trellis container"):
+            return subprocess.CompletedProcess(list(argv), 0, "", "")
+        if key.startswith("pgrep"):
+            return subprocess.CompletedProcess(list(argv), 1, "", "")
+        outcome = responses.get(key)
+        if outcome is None:
+            raise AssertionError(f"unexpected command: {key}")
+        returncode, stdout, stderr = outcome
+        return subprocess.CompletedProcess(list(argv), returncode, stdout, stderr)
+
+    built = KataLauncher(
+        SandboxConfig(),
+        run_cmd,
+        kvm_probe=kvm_present,
+        accel_benchmark=near_native,
+    )
+    # No VMM will ever be found: this test runs on a host with no Kata sandbox,
+    # so the /proc walk legitimately returns nothing for the minted name.
+    with pytest.raises(SandboxError) as raised:
+        built.boot("session-1")
+
+    assert launched, "the test never reached `ctr run`, so it proves nothing about the refusal"
+    message = str(raised.value)
+    assert "exited 0" in message
+    assert "without creating a VM" in message
 
 
 def test_boot_refuses_an_empty_session_id() -> None:
