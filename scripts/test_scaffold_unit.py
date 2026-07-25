@@ -16,6 +16,7 @@ sys.path.insert(0, sys.argv[1])
 from trellis_scaffold import (  # noqa: E402
     CITABLE_ADDENDUM,
     HELPERS_ADDENDUM,
+    SCAFFOLD_HELPER_DESCRIPTORS,
     TASK_DESCRIPTOR,
     TASK_GREP_MAX_HITS,
     TASK_VERIFY_PREVIEW_CHARS,
@@ -43,6 +44,25 @@ from trellis_contribution import (  # noqa: E402
 )
 
 out = {}
+
+# Pinned claims (July 25, 2026). An `out` key is a VALUE, and it becomes a
+# check only where the vitest side asserts on it; a value this module
+# reports and nothing reads is not a check at all. `pin` records the claim
+# in the JSON AND enforces it here —
+# the battery exits non-zero when one is false, and the spawner
+# (src/rlm/trellis_scaffold.test.ts) turns a non-zero exit into a suite
+# failure with stderr attached. That is what earns these the name
+# verification (rule 19(c)): each was watched failing against planted
+# breakage before it was left green.
+_pins = []
+
+
+def pin(label, ok, detail=""):
+    """Record a claim and hold the battery to it. Returns the bool so it
+    can be inlined into an `out` key."""
+    ok = bool(ok)
+    _pins.append((label, ok, str(detail)))
+    return ok
 
 
 def raised(fn):
@@ -231,6 +251,9 @@ _descriptor_strings = (
     _strings(TASK_DESCRIPTOR)
     + _strings(UPSUM_DESCRIPTOR)
     + _strings(derive_upsum_expects(TrellisUpsum()))
+    # The five staged-helper descriptors reach the same .format() call by
+    # the same route, so brace-freedom ranges over them too.
+    + [s for d in SCAFFOLD_HELPER_DESCRIPTORS for s in _strings(d)]
 )
 out["descriptor_strings_brace_free"] = all(
     "{" not in s and "}" not in s for s in _descriptor_strings
@@ -314,6 +337,105 @@ out["upsum_expects_names_domain_cap"] = (
     str(UPSUM_MAX_DOMAIN_KEYS) in _derived["domain_key_bound"]
 )
 
+# --- S3: the staged helpers' own description lines (July 25, 2026) --------
+# rlms renders one line per injected surface at char 1,335 of the
+# 2,116-character protocol prompt, ahead of every Trellis directive. Before
+# this pass the five S3 helpers each rendered there as "A custom function".
+#
+# Every line below is composed THROUGH THE SHIPPED FRAME — render_contribution
+# via _contributed_line, never a local copy of its resolution rule — so a
+# change to the real join moves these numbers instead of leaving them green
+# while the shipped line moves.
+#
+# The ceilings are stated, not discovered: a helper's slot is a POINTER and
+# ~120 characters is what a pointer takes, and the five together stay well
+# inside a quarter of the CONTRIBUTION_BUDGET every wired surface shares.
+# They are chosen with headroom over what ships today and tight enough that
+# growing a pointer into an account reddens the battery.
+_HELPER_LINE_MAX = 120
+_HELPER_TOTAL_MAX = 500
+
+_helper_lines = {d["name"]: _contributed_line(d)
+                 for d in SCAFFOLD_HELPER_DESCRIPTORS}
+out["helper_lines"] = _helper_lines
+out["helper_line_sizes"] = {
+    name: (len(line) if isinstance(line, str) else None)
+    for name, line in _helper_lines.items()
+}
+out["helper_descriptor_count"] = len(SCAFFOLD_HELPER_DESCRIPTORS)
+
+out["helper_descriptors_registered"] = pin(
+    "each helper descriptor is registered under its own surface name",
+    all(descriptor_for(d["name"]) is d for d in SCAFFOLD_HELPER_DESCRIPTORS),
+    str(sorted(_helper_lines)))
+
+out["helper_lines_resolve"] = pin(
+    "every helper descriptor composes to a line the frame accepts",
+    all(isinstance(line, str) and line for line in _helper_lines.values()),
+    str(_helper_lines))
+
+# The four ways a description slot breaks, checked on the shipped bytes:
+# empty, edge whitespace, more than one line, or a brace.
+out["helper_lines_are_one_clean_line"] = pin(
+    "each helper line is one clean brace-free line",
+    all(isinstance(line, str) and bool(line) and line == line.strip()
+        and "\n" not in line and "\r" not in line
+        and "{" not in line and "}" not in line
+        for line in _helper_lines.values()),
+    str(_helper_lines))
+
+out["helper_lines_bounded"] = pin(
+    f"each helper line stays inside {_HELPER_LINE_MAX} characters",
+    all(isinstance(line, str) and len(line) <= _HELPER_LINE_MAX
+        for line in _helper_lines.values()),
+    str(out["helper_line_sizes"]))
+
+out["helper_lines_total"] = sum(
+    len(line) for line in _helper_lines.values() if isinstance(line, str))
+out["helper_lines_total_bounded"] = pin(
+    f"the five helper lines together stay inside {_HELPER_TOTAL_MAX} characters",
+    out["helper_lines_total"] <= _HELPER_TOTAL_MAX,
+    f"{out['helper_lines_total']} of {_HELPER_TOTAL_MAX}")
+
+# ZERO AUTHORED BYTES. Every piece of every helper contribution is a
+# ("descriptor", field) pull, so each rendered line IS the purpose field
+# character for character and there is no second copy to drift from it
+# (SELF_DESCRIBING_SURFACES.md §9.1). This is the shape the five share, and
+# it is checked rather than asserted in a comment: an editorial string
+# spliced into any of the five lists breaks this pin.
+out["helper_contributions_author_no_bytes"] = pin(
+    "no helper contribution authors an editorial byte",
+    all(not any(isinstance(piece, str) for piece in d["contributes"])
+        for d in SCAFFOLD_HELPER_DESCRIPTORS),
+    str([d["name"] for d in SCAFFOLD_HELPER_DESCRIPTORS
+         if any(isinstance(p, str) for p in d["contributes"])]))
+
+out["helper_lines_are_the_purpose_field"] = pin(
+    "each helper line is exactly the purpose field beside it",
+    all(_helper_lines[d["name"]] == d["purpose"]
+        for d in SCAFFOLD_HELPER_DESCRIPTORS),
+    str(_helper_lines))
+
+# `whenToUse` stays OUT of every one of these lines until §6's self-play
+# validation gate runs (SELF_DESCRIBING_SURFACES.md §13 — the trigger was
+# stated rather than the gate waived). Splicing an intent claim into a
+# composed line ahead of that gate is the case this pin forecloses.
+out["helper_lines_carry_no_intent_claim"] = pin(
+    "no helper line carries a whenToUse intent claim ahead of the §6 gate",
+    all("whenToUse" not in d for d in SCAFFOLD_HELPER_DESCRIPTORS),
+    str([d["name"] for d in SCAFFOLD_HELPER_DESCRIPTORS if "whenToUse" in d]))
+
+# `citable` is the one helper whose NAME reads like a permission predicate.
+# What is pinned is the FORECLOSURE, not the wording for its own sake: the
+# line must keep saying that the probe is read-only and never a gate, so a
+# later reword that drops either clause reddens here rather than shipping a
+# high-primacy line a run can read as a licence to cite.
+_citable_line = _helper_lines.get("citable") or ""
+out["citable_line_forecloses_permission"] = pin(
+    "the citable line says read-only and never a gate",
+    "read-only" in _citable_line and "never a gate" in _citable_line,
+    _citable_line)
+
 # --- S3: frame helpers over a real toolkit --------------------------------
 root = tempfile.mkdtemp(prefix="scaffold-unit-")
 try:
@@ -367,6 +489,19 @@ try:
         named_files=["a.ts"])
     out["gate_everything"] = sorted(everything)
 
+    # The descriptor roster covers EXACTLY the surfaces the factory can
+    # inject — both directions, over the fully-gated build. named-implies-
+    # exists is the easy half and the registry already gives it; this pins
+    # exists-implies-named, so a helper added to build_scaffold_helpers
+    # without a descriptor reddens here instead of silently rendering as
+    # "A custom function", and a retired helper cannot leave a descriptor
+    # behind composing a line for a surface no run injects.
+    out["helper_roster_matches_factory"] = pin(
+        "the descriptor roster names exactly the helpers the factory injects",
+        {d["name"] for d in SCAFFOLD_HELPER_DESCRIPTORS} == set(everything),
+        f"described={sorted(d['name'] for d in SCAFFOLD_HELPER_DESCRIPTORS)} "
+        f"injected={sorted(everything)}")
+
     # --- addenda -----------------------------------------------------------
     out["addenda_off_empty"] = (
         build_helpers_addendum({}) == "" and build_citable_addendum({}) == ""
@@ -385,3 +520,15 @@ finally:
     shutil.rmtree(root, ignore_errors=True)
 
 print(json.dumps(out))
+
+# The JSON line lands first so the vitest side still reads it, then the
+# pinned claims decide the exit code. A false pin is a red battery, not a
+# field in a payload nobody asserts on.
+_failed = [(label, detail) for label, ok, detail in _pins if not ok]
+if _failed:
+    print(f"\nscaffold unit battery: {len(_failed)} of {len(_pins)} pinned "
+          f"claim(s) FAILED", file=sys.stderr)
+    for label, detail in _failed:
+        print(f"  [FAILED] {label}" + (f"\n           {detail}" if detail else ""),
+              file=sys.stderr)
+    sys.exit(1)

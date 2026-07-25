@@ -36,6 +36,9 @@ from trellis_surfaces import (  # noqa: E402
     register_surface,
     registry,
 )
+# The one renderer, never a local reimplementation: a drill that composed
+# the line itself would be asserting on its own copy of the frame.
+from trellis_contribution import render_contribution  # noqa: E402
 
 failures = 0
 temp_paths = []
@@ -186,29 +189,86 @@ check("registry() reports the textedit descriptor by name",
 # narrow view rather than the tree. Retired deliberately with its
 # successor below rather than patched, because the claim changed.
 #
-# The successor is the ladder, and the honest scope is that it narrows
-# at every rung: a name is REGISTERED, a registered descriptor may carry
-# a CONTRIBUTION, and a contribution reaches a model only once it is
-# WIRED into the custom_tools seam. Each step is a separate claim and
-# the earlier ones do not establish the later ones (AMBIENT.md rule 15,
-# applied inside one mechanism). A session that grows the first count
-# and reports progress has moved the number this pin exists to
-# distinguish from the one that matters.
+# The ladder has three rungs: a name is REGISTERED, a registered
+# descriptor may carry a CONTRIBUTION, and a contribution reaches a model
+# only once it is WIRED into the custom_tools seam. Each is a separate
+# claim and the earlier ones do not establish the later (AMBIENT.md
+# rule 15, applied inside one mechanism).
+#
+# RETIRED July 25, 2026, one pass after it was written: this slot held
+# "the ladder narrows — fewer contribute than are described", which was
+# honest scope while the work was half-done and became false the moment
+# it was finished. Its successor is not a narrower version of the same
+# claim but the opposite one: the ladder is now FLAT at the first two
+# rungs, and flatness is the property worth holding, because it is what
+# a later pass would break by adding a surface and forgetting its line.
+#
+# A pin that can only say "not yet" cannot notice completion. This one
+# goes red on the regression rather than on the progress.
 _described = set(live["described"])
 _contributing = {name for name, descriptor in registry().items()
                  if "contributes" in descriptor}
-check("FINDING pinned: the ladder narrows — fewer contribute than are described",
-      len(_contributing & _described) < len(_described),
-      f"described={sorted(_described)} contributing={sorted(_contributing)}")
-# trellis_textedit carries no contribution ON PURPOSE, and its absence is
-# the honest half of the design rather than an omission: one line is an
-# orienting line, and a surface whose guard-backed expectations run to
-# several sentences carries them in its addendum instead of truncating
-# them to fit (trellis_contribution.py, "WHAT THE SLOT CAN AND CANNOT
-# CARRY"). Pinned so a later pass does not "fix" it by cramming.
-check("trellis_textedit contributes via its addendum, not the one-line slot",
-      "contributes" not in registry().get("trellis_textedit", {}),
-      "textedit's expectations are addendum-carried by design")
+_silent = sorted(_described - _contributing)
+check("every described surface contributes a line — the ladder is flat here",
+      _silent == [],
+      f"described but silent in the listing: {_silent}")
+# The third rung is not checkable from here: whether a run passes a
+# contribution to compose_contributions is a property of the seam, and
+# the seam iterates custom_tools itself rather than a list this drill
+# could compare against. `npm run test:contribution` section 7 composes
+# the live descriptors and holds the total under budget, which is the
+# closest a zero-run drill gets to the wired rung.
+#
+# A check over the WHOLE registry belongs to neither rung and was tried
+# here first: section 1 registers fixture descriptors to exercise the
+# no-field-validation property, so the registry at this point is the live
+# surfaces plus this drill's own scaffolding, and a sweep over it reports
+# the fixtures as gaps. The staged helpers are held by their own roster
+# pin in scripts/test_scaffold_unit.py, which checks the stronger
+# direction — that the descriptor roster names exactly the helpers the
+# factory injects, so a sixth helper added without one goes red there.
+# RETIRED July 25, 2026: this slot pinned
+#
+#   check("trellis_textedit contributes via its addendum, not the one-line slot",
+#         "contributes" not in registry().get("trellis_textedit", {}), ...)
+#
+# on the reasoning that one line is an orienting line, and a surface
+# whose guard-backed expectations run to several sentences carries them
+# in its addendum instead of truncating them to fit. That reasoning
+# conflated two claims. The first stands and is carried below: the
+# expectations belong in the addendum, and not one of them is in the
+# slot. The second does not — declining the slot did not leave it empty,
+# because rlms fills an undescribed surface with "A custom
+# TrellisTextEdit value", so the surface spent its line in the
+# highest-primacy text a run sees saying a type name. Retired
+# deliberately with its successor rather than patched, because the claim
+# changed (the increment-2 precedent above).
+#
+# The successor holds the property the old one only reached by proxy:
+# the one-line slot carries NO guard-backed expectation. Absence of a
+# contribution was one way to satisfy that and never the only one, so
+# the old assertion read the same on a surface that says nothing and on
+# a surface that orients without stating a bound — it could not tell
+# them apart, and it called the first one correct. This one forecloses
+# the failure the original comment named — a later pass cramming a bound
+# into the slot — and it is the ONLY thing it forecloses, so the surface
+# stays free to say what it is. Held from both sides: the line exists,
+# and no guard-owned phrase is in it.
+#
+# The derived expectations are passed even though the composition has no
+# ("expects", ...) slot today. That is the point: an expects slot added
+# later would resolve to its guard phrase and turn this check red, which
+# a None here would silently let through as a shape error instead.
+_textedit_descriptor = registry()["trellis_textedit"]
+_textedit_line = render_contribution(
+    _textedit_descriptor,
+    trellis_textedit.derive_textedit_expects(None))
+check("trellis_textedit orients in the one-line slot",
+      _textedit_line != "", "the slot renders as a bare type name when empty")
+check("trellis_textedit's one-line slot states no guard-backed expectation",
+      not any(phrase in _textedit_line
+              for phrase in trellis_textedit._TEXTEDIT_GUARD_EXPECTS.values()),
+      f"a guard phrase reached the slot: {_textedit_line!r}")
 
 # --- 5. Informs, never refuses ---------------------------------------------
 print("\n[5] the diagnostic informs and refuses nothing")

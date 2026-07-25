@@ -788,6 +788,59 @@ check("every tail reference resolves to its owner",
       all(key in (tiny_expects if kind == "expects" else WORKSPACE_DESCRIPTOR["usage"])
           for kind, key in WORKSPACE_DESCRIPTOR["tail"]))
 
+# --- The one description line rlms reserves ---------------------------------
+# Composed THROUGH THE SHIPPED FRAME. A local reimplementation of the
+# resolution rule would check this descriptor's data against a COPY of that
+# rule, so a change to the real join would leave this drill green while the
+# shipped line moved; two sibling drills made exactly that mistake and were
+# corrected. render_contribution is the composer that actually runs.
+from trellis_contribution import (  # noqa: E402
+    CONTRIBUTION_BUDGET,
+    render_contribution,
+)
+
+ws_line = render_contribution(WORKSPACE_DESCRIPTOR, tiny_expects)
+# The per-surface fair share of the kernel budget across the thirteen
+# surfaces this pass wires. A CEILING, not an equality: a line under it never
+# forces a sibling out of the composition, and the budget is what refuses.
+WS_FAIR_SHARE = CONTRIBUTION_BUDGET // 13
+check("the contributed pieces resolve and compose to one clean line",
+      bool(ws_line) and ws_line == ws_line.strip()
+      and "\n" not in ws_line and "\r" not in ws_line
+      and "{" not in ws_line and "}" not in ws_line)
+check("the composed line stays inside the per-surface fair share",
+      len(ws_line) <= WS_FAIR_SHARE, f"{len(ws_line)} of {WS_FAIR_SHARE}")
+# The line PULLS and authors nothing: every character came out of a field
+# this descriptor already owns, so there is no second copy here to disagree
+# with the first (SELF_DESCRIBING_SURFACES.md §9.1).
+check("the line authors no bytes of its own — it pulls purpose entire",
+      ws_line == WORKSPACE_DESCRIPTOR["purpose"]
+      and not any(isinstance(p, str) for p in WORKSPACE_DESCRIPTOR["contributes"]))
+# No bound is stated by half. The slot carries no guard-owned phrase and no
+# opening fragment of one, and it does not need to: the addendum states them
+# in full and is emitted on EXACTLY the runs this surface is injected on,
+# because build_workspace_addendum and trellis_agent gate on the same holder.
+check("no guard-owned phrase, whole or partial, rides the one-line slot",
+      not any(phrase[:40] in ws_line
+              for phrase in _WORKSPACE_GUARD_EXPECTS.values()))
+check("the addendum reaches every run the line reaches, and states the bounds",
+      build_workspace_addendum(tiny) != "" and build_workspace_addendum(None) == ""
+      and "Budgets are bounded" in build_workspace_addendum(tiny)
+      and "never full contents" in build_workspace_addendum(tiny))
+# §13 (The description slot, and the gate this did not run) binds §6's
+# self-play validation gate before whenToUse reaches any composed line. It
+# has not run, so no intent claim rides this slot.
+check("the line carries no intent claim — whenToUse stays out of the slot",
+      WORKSPACE_DESCRIPTOR["whenToUse"][:40] not in ws_line)
+# Seededness is the activation cause that changes what a model should do
+# FIRST, and it is a caller flag rather than a refusing predicate. The line
+# is the same on both arms by construction; the seeded addendum is where the
+# read-before-you-fetch discipline is stated, on the same runs.
+check("the line is arm-independent, and the seeded addendum carries the difference",
+      render_contribution(WORKSPACE_DESCRIPTOR,
+                          derive_workspace_expects(tiny, seeded=True)) == ws_line
+      and "VERY FIRST repl block" in build_workspace_addendum(tiny, seeded=True))
+
 # Recorded, not retired: WORKSPACE_ADDENDUM still hand-authors the budget
 # line the guards now own, because moving those bytes is a separate
 # authorized pass. This check fails the day someone moves them silently.

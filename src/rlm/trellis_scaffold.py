@@ -305,14 +305,19 @@ UPSUM_DESCRIPTOR = {
     "name": "trellis_upsum",
     # The one-line render slot: the surface's ROLE. It states THAT the
     # gate refuses; WHAT it refuses past is derived, so the number lives
-    # in exactly one place.
-    "purpose": ("the running-state gate — it measures the upsum dict "
-                "you rebuild each turn and refuses a malformed or "
-                "over-budget one."),
+    # in exactly one place. Compressed July 25, 2026 against the shared
+    # contribution budget: BOTH refusal classes survive — shape
+    # (UpsumShapeError) and size (UpsumBudgetError) — because a run that
+    # knows only one of them meets the other unwarned. What came out is
+    # "dict ... you rebuild each turn", which restates the discipline the
+    # kernel UPSUM block owns and states no bound of its own.
+    "purpose": ("the running-state gate — it measures the upsum you keep "
+                "and refuses a bad shape or size."),
     # Editorial: WHEN a run reaches for this surface. The kernel prompt
-    # owns the rewrite-every-turn discipline; this states no rule.
-    "whenToUse": ("a turn's state is ready to register, or a candidate "
-                  "needs measuring first"),
+    # owns the rewrite-every-turn discipline; this states no rule. Both
+    # occasions survive — register, and measure a candidate first — in
+    # the words the two calls already carry in `exposes`.
+    "whenToUse": ("a turn's state is ready to register or measure"),
     # The ONE description line rlms reserves. Both facts are pulled from
     # fields this descriptor already owns; the connective is the only
     # authored byte. The budget number stays out of this slot on purpose
@@ -586,14 +591,23 @@ _TASK_GUARD_EXPECTS = {
 TASK_DESCRIPTOR = {
     "name": "trellis_task",
     # The one-line render slot: the surface's ROLE, stating no bound.
+    # Compressed July 25, 2026 against the shared contribution budget.
+    # What survives is the fact that decides a behaviour: the task is
+    # ENGINE-HELD, so re-reading it is a code act. The contrast clause
+    # ("rather than a scroll back") argued for that fact instead of
+    # stating it, and the kernel manifest already carries the argument in
+    # full at TOOLS 4 ("find your instructions BY CODE, not by scrolling
+    # the transcript").
     "purpose": ("this run's operator task, held engine-side so "
-                "re-reading the instructions is a code act rather than a "
-                "scroll back."),
+                "re-reading it is a code act."),
     # Editorial: WHEN a run reaches for this surface. The kernel prompt
     # owns the re-read-before-a-decisive-step rule; this names the
-    # situations and states no rule of its own.
+    # situations and states no rule of its own. The three situations all
+    # survive; what came out is the gloss on the third, which the
+    # manifest's ADJUDICATE BY CODE paragraph enumerates (retrieved text,
+    # a file frame, a tool return).
     "whenToUse": ("the task must be re-read, searched, or weighed "
-                  "against text that arrived as data"),
+                  "against data"),
     # The ONE description line rlms reserves, pulled from fields this
     # descriptor already owns. The run uuid is deliberately absent: it is
     # already in the prompt, spliced into the tags around the task text
@@ -827,6 +841,116 @@ def build_scaffold_helpers(textedit=None, postgres=None,
         helpers["citable"] = citable
 
     return helpers
+
+
+# --- Self-description: the staged helpers (SELF_DESCRIBING_SURFACES.md ---
+# §9.1) -------------------------------------------------------------------
+# Five surfaces, one shape. Every `contributes` list below is a SINGLE
+# ("descriptor", "purpose") pull, so these five surfaces author ZERO
+# connective bytes into the rlms listing: each rendered line IS the
+# `purpose` field beside it, character for character. That is §9.1's one
+# encoding made readable rather than argued — there is no second copy here
+# for a later edit to leave disagreeing with the first, and `llm_help`
+# will read the same field these lines render.
+#
+# WHY `whenToUse` IS ABSENT FROM ALL FIVE, and not by oversight. §13 (The
+# description slot, and the gate this did not run) states a trigger rather
+# than waiving a gate: §6's self-play validation binds BEFORE `whenToUse`
+# reaches any composed line, with selected-on-a-lie as the pre-committed
+# falsifier. That gate has not run, so no line here carries an intent
+# claim. The moment to reach for a helper is carried by its purpose phrase
+# and, in full, by HELPERS_ADDENDUM and CITABLE_ADDENDUM below.
+#
+# WHAT THE FOUR FRAME HELPERS SHARE, stated once here instead of four
+# times in the prompt: each reads a frame `trellis_textedit.load()`
+# ALREADY HOLDS and hands back a plain Python value, so the model never
+# retypes bytes to use one (CODE_MEDIATED_TEXT.md §1, at its smallest
+# scale). `frame_text` names the toolkit and the three beside it say "a
+# held frame" — the listing renders them as four adjacent lines in this
+# module's insertion order, so a fourfold repeat of the toolkit name would
+# spend the shared budget on the fact they have in common rather than on
+# what tells them apart.
+#
+# NO derive_*_expects STANDS BESIDE THESE. The bounds these helpers refuse
+# on — the half-open line range, the newline-free expected_lines, the hash
+# cap — are stated by the refusals themselves at the moment they fire, and
+# there is no per-run instance to read a varying value off (the helpers are
+# closures over a factory, not objects carrying a budget the way
+# TrellisUpsum does). Authoring those bounds here as editorial text would
+# be the second encoding §9.1 forecloses, so each line states what the
+# surface IS and leaves every bound to the guard that owns it.
+
+FRAME_TEXT_DESCRIPTOR = {
+    "name": "frame_text",
+    "purpose": ("a held trellis_textedit frame as one string, terminators "
+                "intact — the bytes write_back would write."),
+    "seeAlso": ["trellis_textedit", "region_lines"],
+    "contributes": [("descriptor", "purpose")],
+}
+
+REGION_LINES_DESCRIPTOR = {
+    "name": "region_lines",
+    "purpose": ("a line range of a held frame as a list of line texts, at "
+                "the addresses locate returns."),
+    "seeAlso": ["trellis_textedit", "region_equal"],
+    "contributes": [("descriptor", "purpose")],
+}
+
+REGION_EQUAL_DESCRIPTOR = {
+    "name": "region_equal",
+    "purpose": ("True when a list of expected lines byte-matches a held "
+                "frame at a line address."),
+    "seeAlso": ["trellis_textedit", "region_lines"],
+    "contributes": [("descriptor", "purpose")],
+}
+
+CONCAT_FILES_DESCRIPTOR = {
+    "name": "concat_files",
+    "purpose": ("the held frames of several files joined into one string, "
+                "for buffers you build in code."),
+    "seeAlso": ["trellis_textedit", "frame_text"],
+    "contributes": [("descriptor", "purpose")],
+}
+
+# `citable` is the one surface here whose NAME reads like a permission
+# predicate, which is the whole reason its line is worth its bytes: at
+# char 1,335 of the protocol prompt, ahead of every Trellis directive,
+# "citable" alone invites a run to treat the probe as the thing that
+# licenses a citation. The line therefore leads with the two facts that
+# foreclose that reading — read-only, and never a gate — in the surface's
+# own words. What it deliberately does NOT say is what makes a hash
+# citable, or that a True field permits anything: provenance holds because
+# the write path refuses (AGENTS.md rule 4), and CITABLE_ADDENDUM carries
+# the full account, including that reading this never satisfies the
+# provenance protocol.
+CITABLE_DESCRIPTOR = {
+    "name": "citable",
+    "purpose": ("a read-only probe, never a gate: per hash, retrieved this "
+                "run and bridging to a task-named file."),
+    "seeAlso": ["trellis_postgres", "trellis_neo4j"],
+    "contributes": [("descriptor", "purpose")],
+}
+
+# One call site, one commitment: importing this module registers all five,
+# the same way UPSUM_DESCRIPTOR and TASK_DESCRIPTOR register above
+# (register_surface returns its argument, so registering and collecting
+# are the same expression).
+#
+# This roster is what this module DESCRIBES, never what a run injects.
+# `build_scaffold_helpers` decides what rides — frame helpers only beside
+# an injected toolkit, `citable` only with named files and a database — so
+# the seam composes a line per name actually in `custom_tools`, and
+# `attach_contributions` refuses a line composed for an absent surface
+# rather than spending budget on bytes no run will see.
+SCAFFOLD_HELPER_DESCRIPTORS = tuple(
+    register_surface(descriptor) for descriptor in (
+        FRAME_TEXT_DESCRIPTOR,
+        REGION_LINES_DESCRIPTOR,
+        REGION_EQUAL_DESCRIPTOR,
+        CONCAT_FILES_DESCRIPTOR,
+        CITABLE_DESCRIPTOR,
+    )
+)
 
 
 # --- Prompt addenda (conditional, the build_mcp_addendum precedent) ----

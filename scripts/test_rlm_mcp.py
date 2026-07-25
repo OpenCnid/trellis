@@ -508,6 +508,75 @@ check("every tail reference resolves to its owner",
                   else MCP_DESCRIPTOR["usage"])
           for kind, key in MCP_DESCRIPTOR["tail"]))
 
+# --- The one description line rlms reserves ---------------------------------
+# Composed THROUGH THE SHIPPED FRAME. A local reimplementation of the
+# resolution rule would check this descriptor's data against a COPY of that
+# rule, so a change to the real join would leave this drill green while the
+# shipped line moved; two sibling drills made exactly that mistake and were
+# corrected. render_contribution is the composer that actually runs.
+from trellis_contribution import (  # noqa: E402
+    CONTRIBUTION_BUDGET,
+    render_contribution,
+)
+
+mcp_line = render_contribution(MCP_DESCRIPTOR, closed_derived)
+# The per-surface fair share of the kernel budget across the thirteen
+# surfaces this pass wires. A CEILING, not an equality: a line under it never
+# forces a sibling out of the composition, and the budget is what refuses.
+MCP_FAIR_SHARE = CONTRIBUTION_BUDGET // 13
+check("the contributed pieces resolve and compose to one clean line",
+      bool(mcp_line) and mcp_line == mcp_line.strip()
+      and "\n" not in mcp_line and "\r" not in mcp_line
+      and "{" not in mcp_line and "}" not in mcp_line)
+check("the composed line stays inside the per-surface fair share",
+      len(mcp_line) <= MCP_FAIR_SHARE, f"{len(mcp_line)} of {MCP_FAIR_SHARE}")
+# The line PULLS and authors nothing: every character came out of a field
+# this descriptor already owns, so there is no second copy here to disagree
+# with the first (SELF_DESCRIBING_SURFACES.md §9.1).
+check("the line authors no bytes of its own — it pulls purpose entire",
+      mcp_line == MCP_DESCRIPTOR["purpose"]
+      and not any(isinstance(p, str) for p in MCP_DESCRIPTOR["contributes"]))
+# The purpose clause carries this surface's whole point in the slot's budget:
+# the tools are ALLOWLISTED and the servers are the operator's.
+check("the line states what the surface is — allowlisted tools, operator-configured servers",
+      "allowlisted" in mcp_line and "operator configured" in mcp_line)
+# No bound is stated by half. The allowlist REFUSAL does not fit beside the
+# purpose clause, and it does not need to: the addendum states it in full and
+# is emitted on EXACTLY the runs this surface is injected on, because
+# build_mcp_addendum and trellis_agent gate on the same non-empty registry.
+check("no guard-owned phrase, whole or partial, rides the one-line slot",
+      not any(phrase[:40] in mcp_line for phrase in _MCP_GUARD_EXPECTS.values()))
+check("the allowlist refusal would not fit beside the purpose clause",
+      len(mcp_line) + 1 + len(_MCP_GUARD_EXPECTS["allowlist"]) > MCP_FAIR_SHARE)
+check("the addendum reaches every run the line reaches, and states the refusal",
+      build_mcp_addendum(servers) != "" and build_mcp_addendum([]) == ""
+      and "Only the servers and tools listed below exist" in build_mcp_addendum(servers))
+
+
+class _WorkspaceAttached:
+    """A holder shaped like the attached arm — the same registry, with a
+    workspace present. derive_mcp_expects reads both by attribute, and this
+    is the arm whose result_shape phrase is the long capture contract."""
+
+    _servers = client._servers
+    _workspace = object()
+
+
+attached_derived = derive_mcp_expects(_WorkspaceAttached())
+# result_shape is the one derived phrase that varies with run state, and its
+# capture arm is far past the whole slot. An arm cut to fit would ship the
+# stub contract stated by half, so neither arm reaches the line at all.
+check("the attached arm's result_shape is the capture contract, past the whole slot",
+      attached_derived["result_shape"] is _MCP_GUARD_EXPECTS["capture_stub"]
+      and len(attached_derived["result_shape"]) > MCP_FAIR_SHARE)
+check("the line is arm-independent — neither result_shape arm reaches the slot",
+      render_contribution(MCP_DESCRIPTOR, attached_derived) == mcp_line)
+# §13 (The description slot, and the gate this did not run) binds §6's
+# self-play validation gate before whenToUse reaches any composed line. It
+# has not run, so no intent claim rides this slot.
+check("the line carries no intent claim — whenToUse stays out of the slot",
+      MCP_DESCRIPTOR["whenToUse"][:40] not in mcp_line)
+
 # RECORDED, NOT RETIRED. build_mcp_addendum still hand-authors the
 # allowlist sentence the predicate now owns, because retiring it moves
 # kernel-prompt bytes and that is a separately authorized pass. This check

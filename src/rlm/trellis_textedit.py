@@ -916,6 +916,43 @@ TEXTEDIT_DESCRIPTOR = {
     # — a recorded §9.1 tension, left as-is because rewording it moves
     # kernel-prompt bytes.
     "category": "TEXT EDITING (CODE-MEDIATED, HASH-GUARDED)",
+    # The pieces of the ONE description line rlms reserves for this
+    # surface. Until July 25, 2026 this surface carried no contribution
+    # and rendered as "A custom TrellisTextEdit value" — a type name, in
+    # the highest-primacy text a run sees about its own surfaces.
+    #
+    # Half of the reasoning behind that absence stands and is kept: the
+    # guard-backed expectations DO run to several sentences and DO
+    # belong in the addendum, so not one of them is in this slot. What
+    # it got wrong is the other half — a surface with too much to say
+    # said nothing at all, and the slot it declined was filled by rlms
+    # with a type name rather than left empty.
+    #
+    # Both fact-carrying pieces are ("descriptor", field) slots, so the
+    # line restates nothing: `purpose` is the same bytes the addendum
+    # header renders, and `category` is the addendum's own banner text,
+    # so the pointer cannot drift from the section it names. The only
+    # authored bytes are the connective, and a human is authoritative
+    # for those (SELF_DESCRIBING_SURFACES.md §9.1 — a bound the engine
+    # refuses on is read from its predicate, intent and grouping are
+    # human-authored once). "stated in full" is the load-bearing phrase:
+    # it tells the run this line is orientation and the contract is
+    # elsewhere, which is what makes the split honest rather than a
+    # bound shipped by half (trellis_contribution.py, "WHAT THE SLOT CAN
+    # AND CANNOT CARRY"). Pieces join with the EMPTY string, so each one
+    # carries its own leading space.
+    #
+    # The section this names is present whenever this line is: one block
+    # of trellis_agent.py gates `custom_tools["trellis_textedit"]` and
+    # build_textedit_addendum(textedit) on the same holder, so a run
+    # reading the pointer has the section, and a gated-off run has
+    # neither.
+    "contributes": [
+        ("descriptor", "purpose"),
+        " Its contract is stated in full in the ",
+        ("descriptor", "category"),
+        " section.",
+    ],
     # Cross-cutting protocol lines (MASH's `usage`). All three are
     # ADVISORY in HARNESS_SELF_MODEL.md §4's sense — no predicate on
     # THIS surface refuses when they are ignored; "provenance" is

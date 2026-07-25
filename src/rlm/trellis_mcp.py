@@ -641,6 +641,33 @@ MCP_DESCRIPTOR = {
                   "the operator configured servers to reach it; the surface "
                   "exists only when TRELLIS_MCP_SERVERS names at least one "
                   "server, so its absence is an answer and not an outage"),
+    # The ONE description line rlms reserves for this surface. It pulls the
+    # purpose this descriptor already owns and authors nothing beside it.
+    #
+    # WHAT THE PURPOSE CLAUSE ALREADY CARRIES. This surface's point is that
+    # the tools are ALLOWLISTED and the servers are the ones THE OPERATOR
+    # CONFIGURED, and the purpose sentence says both in 95 characters. What
+    # it leaves out is the refusal behind them — `allowlist`, 183
+    # characters, which build_mcp_addendum states in full on exactly the
+    # runs trellis_agent injects this surface on (both gate on the same
+    # non-empty registry). A copy in this slot reaches no run the addendum
+    # does not, and the pair would run to 279 characters against a
+    # per-surface share of roughly 150.
+    #
+    # WHY result_shape CANNOT RIDE THIS SLOT AT ALL. It is the one derived
+    # phrase that varies with run state, and its capture arm runs to 371
+    # characters — the stub contract, the segment id, and the fan-out
+    # remedy. An arm cut to fit would ship that contract stated by half,
+    # which is the failure trellis_contribution.py refuses rather than
+    # performs. It stays on the addendum path.
+    #
+    # WHY whenToUse IS NOT PULLED. SELF_DESCRIBING_SURFACES.md §13 (The
+    # description slot, and the gate this did not run) binds §6's self-play
+    # validation gate BEFORE whenToUse reaches any composed line, and that
+    # gate has not run. This line carries no intent claim.
+    "contributes": [
+        ("descriptor", "purpose"),
+    ],
     "example": ("surface = json.loads(trellis_mcp.list_tools()); "
                 "hit = json.loads(trellis_mcp.call_tool('a_server', 'a_tool'))"),
     "seeAlso": ["trellis_workspace"],

@@ -22,13 +22,20 @@ from trellis_tools import (
     derive_postgres_expects,
     derive_neo4j_expects,
 )
-from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
+from trellis_mcp import (
+    TrellisMcp,
+    parse_mcp_config,
+    build_mcp_addendum,
+    get_mcp_call_count,
+    derive_mcp_expects,
+)
 from trellis_workspace import (
     TrellisWorkspace,
     WORKSPACE_ADDENDUM,
     WORKSPACE_SEEDED_ADDENDUM,
     build_workspace_addendum,
     parse_workspace_bounds,
+    derive_workspace_expects,
 )
 from trellis_modules import (
     RUBRIC_TOKEN,
@@ -41,6 +48,7 @@ from trellis_textedit import (
     build_textedit_addendum,
     parse_textedit_bounds,
     parse_textedit_guarded_only,
+    derive_textedit_expects,
 )
 from trellis_answer import TrellisAnswer, get_answer_submit_count
 from trellis_scaffold import (
@@ -52,6 +60,7 @@ from trellis_scaffold import (
     build_scaffold_helpers,
     parse_task_named_files,
     wrap_task_text,
+    derive_upsum_expects,
 )
 
 # July 25, 2026: the contribution frame — one composed line per surface
@@ -624,13 +633,35 @@ def main():
         # its line stays byte-identical, so this is additive per surface.
         # compose_contributions REFUSES over CONTRIBUTION_BUDGET rather
         # than growing (HARNESS_SELF_MODEL.md §5).
+        # THE ROSTER IS custom_tools ITSELF, and that is the whole point.
+        # The first pass named two surfaces here by hand and shipped with
+        # eleven of thirteen still rendering as "A custom <Type> value" --
+        # a hand-kept list drifting from the seam beside it, which is the
+        # failure this layer exists to close, committed inside the layer
+        # that closes it. Iterating the dict means a surface added to the
+        # seam is described the moment it registers a contribution, and a
+        # surface with none keeps its bare value.
+        #
+        # A derive_*_expects is named only where a surface HAS guard-owned
+        # phrases to select; the holder it reads is the same object
+        # custom_tools injects, so a line can only ever state what that
+        # run's own instance will refuse on. A surface absent from this
+        # run is absent from custom_tools, so its entry never resolves.
+        _expects = {
+            "trellis_postgres": lambda: derive_postgres_expects(postgres_tool),
+            "trellis_neo4j": lambda: derive_neo4j_expects(neo4j_tool),
+            "trellis_upsum": lambda: derive_upsum_expects(upsum_surface),
+            "trellis_workspace": lambda: derive_workspace_expects(
+                workspace, seeded=bool(args.seed_workspace)),
+            "trellis_mcp": lambda: derive_mcp_expects(mcp_tool),
+            "trellis_textedit": lambda: derive_textedit_expects(textedit),
+        }
         custom_tools = attach_contributions(
             custom_tools,
             compose_contributions([
-                (descriptor_for("trellis_postgres"),
-                 derive_postgres_expects(postgres_tool)),
-                (descriptor_for("trellis_neo4j"),
-                 derive_neo4j_expects(neo4j_tool)),
+                (descriptor_for(name),
+                 _expects[name]() if name in _expects else None)
+                for name in custom_tools
             ]),
         )
 

@@ -435,6 +435,36 @@ WORKSPACE_DESCRIPTOR = {
                   "result here instead of inline; a GOAL-SCOPED run leaves "
                   "what it writes to sibling tasks of the same goal. Which "
                   "conditions are live this run is derived, never authored"),
+    # The ONE description line rlms reserves for this surface. It pulls the
+    # purpose this descriptor already owns and authors nothing beside it.
+    #
+    # WHY NOTHING RIDES ALONG. Every guard-backed bound on this surface is
+    # stated IN FULL by WORKSPACE_ADDENDUM, and build_workspace_addendum
+    # emits it on exactly the runs trellis_agent injects the surface on —
+    # both gate on the same holder being present, so a copy in this slot
+    # reaches no run the addendum does not already reach. It would spend a
+    # slot on a surface that has an addendum, against siblings that have
+    # none (trellis_postgres and trellis_neo4j state their bounds here
+    # because nothing else states them). Measured, largest first, the
+    # phrases that could ride along are byte_budget, plan_json,
+    # segment_budget, plan_replacement, goal_stamped, index_excludes_content
+    # and unknown_segment; the purpose clause plus the shortest of those is
+    # already 187 characters, and the only phrase that fits beside it is the
+    # note-shape refusal — the least decisive thing this surface enforces,
+    # which is padding rather than orientation.
+    #
+    # WHY whenToUse IS NOT PULLED. It runs to 451 characters, and it
+    # enumerates three activation causes of which any subset is live: a
+    # seeded run, a run with external tools configured, and a goal-scoped
+    # run do not mean the same thing, so a line stating all three states two
+    # conditions that are not this run's. Selecting among them takes a
+    # derived phrase, and SELF_DESCRIBING_SURFACES.md §13 (The description
+    # slot, and the gate this did not run) binds §6's self-play validation
+    # gate BEFORE whenToUse reaches any composed line. That gate has not
+    # run, so this line carries no intent claim.
+    "contributes": [
+        ("descriptor", "purpose"),
+    ],
     "example": ("state = json.loads(trellis_workspace.read()); "
                 "full = json.loads(trellis_workspace.segment(some_segment_id))"),
     "seeAlso": ["trellis_mcp", "trellis_textedit"],

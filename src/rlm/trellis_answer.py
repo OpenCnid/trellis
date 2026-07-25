@@ -255,9 +255,16 @@ _ANSWER_GUARD_EXPECTS = {
 ANSWER_DESCRIPTOR = {
     "name": "trellis_answer",
     # The one-line render slot: the surface's ROLE, stating no bound.
-    "purpose": ("the run's completion channel — it evaluates an "
-                "expression over your REPL variables and sets the final "
-                "answer from the value."),
+    # Compressed July 25, 2026 against the shared contribution budget:
+    # the mechanism a run must know here is that an EXPRESSION over its
+    # own variables is what becomes the answer, and that survives. The
+    # step-by-step account of what submit() does with it — evaluates in
+    # the live namespace, prefixes FINAL_ANSWER, sets content and ready —
+    # is stated in full by the kernel TOOLS manifest and by this
+    # descriptor's own `exposes` doc, so the slot no longer carries a
+    # third copy.
+    "purpose": ("the completion channel — an expression over your REPL "
+                "variables becomes the final answer."),
     # Editorial: WHEN a run reaches for this surface. The workflow rules
     # in the kernel prompt own the discipline itself; this is the
     # navigational half and states no rule of its own.
