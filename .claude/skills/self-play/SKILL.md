@@ -119,6 +119,38 @@ The evaluator's frame additionally withholds the condition label: it judges item
 in a single undifferentiated list and never learns which are the "live" ones and
 which are controls.
 
+### The `## Ground` block carries relevant context only
+
+Ground is what a player cannot derive from a cold start and needs in order to
+look: `{Authorship_And_Provenance_Of_The_Artifact}`,
+`{Roster_Addresses_And_Where_To_Read}`, `{What_Counts_As_A_Fact_Here}`. An
+expectation — `{What_You_Believe_The_Player_Will_Find}` — is never ground. It
+contaminates even when it is true, and most of all when it is true: a player
+handed a true expectation hands it back, and nothing in the report separates that
+from a finding. The two read alike on the page and separate on one question:
+*does this let the player look, or does it tell the player what looking will turn
+up?* The probe you already ran falls on the second side — handing over the method
+hands over the finding with one step of deniability attached. This is discipline
+1's channel audit turned on the ground block itself.
+
+A held expectation has one destination and it is not a prompt: the un-tool, the
+move that ends the tool call and addresses the collaborator instead (`AMBIENT.md`
+rule 21(a); `.claude/skills/spark-steering/SKILL.md` § *Ask first — the un-tool*).
+
+*(A ceremony spawned four seats over work its own composer had authored. The
+composer pre-registered its expected findings, then handed one seat the exact
+probe by which it had already obtained one of them; the seat duly found it, and
+the audit seat ruled the run's independence unestablishable — the composer "had
+already run the probe, saw the result, wrote it down as a prediction, then handed
+the probe to the seat." Three seats carried composer-stated facts, and the
+composer's own disclosure said "three seats" while naming two. Every artifact this
+skill asks for was present — pre-registration held separate, isolated players, an
+audit seat — which is exactly why none of them discharges this; the ground blocks
+do. The re-run sent seven reviewers whose ground blocks carried the facts and
+stated in as many words that no prediction was offered and none was wanted, and
+they returned findings the composer had not anticipated, several against the
+composer's own work.)*
+
 ## The ten disciplines — each paid for by a real failure
 
 1. **Pre-register before the prompts exist.** A forecast that shares bytes with
