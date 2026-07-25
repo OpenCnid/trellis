@@ -314,3 +314,19 @@ lookup.
 - **Field shape is still not validated** (§11), and `llm_help` must not
   become the thing that validates it by assuming fields are present.
   Render what a descriptor carries; omit what it does not.
+
+## 13. Half A shipped without this surface, and §6 is outstanding (dated entry — July 25, 2026)
+
+`SELF_DESCRIBING_SURFACES.md` §13 records the build. The part that bears on this
+spec: `attach_contributions` (`src/rlm/trellis_contribution.py`, called at the
+`custom_tools` seam in `trellis_agent.py`) computes the registry × injected-surface
+intersection — which §12 above names as the alive catalog's own work — and hands
+it to a production model through the per-entry description slot rlms reserves.
+`llm_help` itself is still unbuilt, and neither composed-prompt pin moved, because
+the slot is filled at run composition rather than in `SYSTEM_PROMPT`.
+
+**§6's self-play gate did not run, and is outstanding rather than waived.** The
+reasoning and the trigger are in `SELF_DESCRIBING_SURFACES.md` §13; in short, two
+wired surfaces carrying guard-derived bounds and no `whenToUse` do not engage the
+discrimination or *selected-on-a-lie* questions, and §6 binds before `whenToUse`
+reaches a composed line or a queryable catalog surface lands.

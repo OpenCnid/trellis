@@ -395,7 +395,9 @@ guard-derivation but the same rule at the other end of the axis.
 
 ### 9.2 Honest scope — what ratification does not claim
 
-- **Guard-derivation is specified, not demonstrated.** No shipped surface
+- **Guard-derivation is specified, not demonstrated.** *(Superseded July 25,
+  2026 — §13. This sentence was already false when written: `composeJudgePrompt`
+  derives from the taxonomy its own parser refuses against.)* No shipped surface
   derives its self-description from its guard predicates today. The closest
   live thing is `build_textedit_addendum(textedit)`
   (`src/rlm/trellis_textedit.py`), and read precisely it *selects* between two
@@ -615,4 +617,68 @@ surface would make an instance into law by accident (rule 17). It belongs
 with `llm_help`'s frame. The banner-qualifier tension (§10, finding 4) and
 guard-class granularity (finding 5) stand as recorded; eight surfaces still
 carry no descriptor, which the diagnostic now reports rather than leaving
-to memory.
+to memory. *(That count is superseded — see §13: 8 of 9 are described.)*
+
+## 13. The description slot, and the gate this did not run (dated entry — July 25, 2026)
+
+Half A reached a model. Not through `llm_help`, which is still unbuilt, but
+through a slot rlms already reserved and Trellis had never filled: every
+`custom_tools` entry renders as one line in the base prompt, `parse_tool_entry`
+accepts `{"tool": …, "description": …}`, and the listing splices in at character
+1,335 of the 2,116-character protocol prompt — ahead of every Trellis directive.
+Trellis passed bare values, so each injected surface rendered as its type name.
+
+**This supersedes two claims above.** §12's closing sentence — *eight surfaces
+still carry no descriptor* — is false: `npm run check:surfaces` reports **8 of 9
+described**, and the ninth, `UPSUM_BUDGET`, is a bare int declined on purpose
+rather than a gap. §9.2's first bullet — *No shipped surface derives its
+self-description from its guard predicates today* — was already false when
+written, and is further false now: `composeJudgePrompt`
+(`src/core/graph/judge_intake_prompt.ts`) renders the same `taxonomy` object
+`parseJudgeVerdict` refuses against, with `buildSpawnRequest` re-rendering and
+re-hashing before transport, and it predates increment 1 in a different
+subsystem and a different language.
+
+**What the frame owns.** `src/rlm/trellis_contribution.py` composes a surface's
+line from its registered descriptor and its derived expectations, joins pieces
+with the empty string so the frame contributes no prose of its own, and refuses
+a brace, a newline, an empty line, boundary whitespace, and a whole composition
+over `CONTRIBUTION_BUDGET`. That budget is §5 of `HARNESS_SELF_MODEL.md` paid:
+a bound that raises rather than one held by authorial discipline. It is drilled
+by `npm run test:contribution`, whose `--negative-control` detects nine plants
+and exits 3.
+
+**The ladder, and which rung a number names.** Three claims, and the earlier ones
+do not establish the later:
+
+| rung | property | count today |
+|---|---|---|
+| registered | the surface carries a descriptor | 8 of 9 |
+| contributing | that descriptor carries a `contributes` list | 5 |
+| wired | a run passes it to `compose_contributions` | 2 |
+
+`check:surfaces` reports the first. Any sentence citing it as progress toward
+the third is citing the wrong rung, and `scripts/test_surfaces.py` pins that the
+ladder narrows.
+
+**The gate this did not run, stated as outstanding rather than declined
+silently.** `attach_contributions` computes the registry × `custom_tools`
+intersection, which `LLM_HELP_SPEC.md` §12 defines as the alive catalog, and
+hands it to a production model. §6's self-play validation gate — discrimination,
+and drift resistance with *selected-on-a-lie* as the pre-committed falsifier —
+binds before anything relies on that catalog, and it did not run.
+
+The judgment made instead, so a later session can overturn it rather than
+inherit it unstated: the gate's concern is barely engaged at two wired surfaces.
+`whenToUse` — the field the *selected-on-a-lie* cell targets — is deliberately
+absent from both wired lines, both of which carry guard-derived bounds rather
+than intent claims, and a discrimination test over two surfaces measures
+nothing. **The trigger is therefore stated rather than the gate waived: §6 binds
+before `whenToUse` reaches any composed line, and before any queryable catalog
+surface lands.** Either event, and the gate runs first.
+
+**Reachability is unchanged.** `src/repl_sandbox/` still has no non-test caller;
+`FEATURE_LIST.md` row 2.4 stands. Nothing here measures whether a model behaves
+differently for reading any of it — that remains the separately gated paid probe
+of `HARNESS_SELF_MODEL.md` §12.2, and rule 20 still bars running it as a
+new-versus-null arm.
