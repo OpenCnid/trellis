@@ -794,22 +794,31 @@ check("every tail reference resolves to its owner",
 # rule, so a change to the real join would leave this drill green while the
 # shipped line moved; two sibling drills made exactly that mistake and were
 # corrected. render_contribution is the composer that actually runs.
-from trellis_contribution import (  # noqa: E402
-    CONTRIBUTION_BUDGET,
-    render_contribution,
-)
+from trellis_contribution import render_contribution  # noqa: E402
 
 ws_line = render_contribution(WORKSPACE_DESCRIPTOR, tiny_expects)
-# The per-surface fair share of the kernel budget across the thirteen
-# surfaces this pass wires. A CEILING, not an equality: a line under it never
-# forces a sibling out of the composition, and the budget is what refuses.
-WS_FAIR_SHARE = CONTRIBUTION_BUDGET // 13
+# ORIENTING LENGTH, per line — a STATED target, and the same one the answer,
+# mcp, scaffold and contribution drills hold their lines to. The slot rlms
+# reserves takes ONE ORIENTING line: what the surface is, and when to reach
+# for it. Anything longer rides the addendum path instead
+# (trellis_contribution.py, "WHAT THE SLOT CAN AND CANNOT CARRY").
+#
+# It replaces `CONTRIBUTION_BUDGET // 13`, which divided the shared budget by
+# the number of surfaces that happened to carry a contribution the day it was
+# written. That instance was hard-coded in five drills, and a fourteenth
+# surface loosened all five at once: fourteen lines at the stale 153 sum to
+# 2,142, past the 2,000-character budget, with every per-surface check green.
+# This is a property of ONE line, so no surface count enters it. The
+# whole-composition bound stays the engine's own — compose_contributions
+# refuses over CONTRIBUTION_BUDGET, exercised over every registered
+# contribution in scripts/test_contribution.py [7].
+ORIENTING_LINE_MAX = 160
 check("the contributed pieces resolve and compose to one clean line",
       bool(ws_line) and ws_line == ws_line.strip()
       and "\n" not in ws_line and "\r" not in ws_line
       and "{" not in ws_line and "}" not in ws_line)
-check("the composed line stays inside the per-surface fair share",
-      len(ws_line) <= WS_FAIR_SHARE, f"{len(ws_line)} of {WS_FAIR_SHARE}")
+check("the composed line stays inside the orienting-line ceiling",
+      len(ws_line) <= ORIENTING_LINE_MAX, f"{len(ws_line)} of {ORIENTING_LINE_MAX}")
 # The line PULLS and authors nothing: every character came out of a field
 # this descriptor already owns, so there is no second copy here to disagree
 # with the first (SELF_DESCRIBING_SURFACES.md §9.1).

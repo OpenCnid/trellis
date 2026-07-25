@@ -645,7 +645,7 @@ with the empty string so the frame contributes no prose of its own, and refuses
 a brace, a newline, an empty line, boundary whitespace, and a whole composition
 over `CONTRIBUTION_BUDGET`. That budget is §5 of `HARNESS_SELF_MODEL.md` paid:
 a bound that raises rather than one held by authorial discipline. It is drilled
-by `npm run test:contribution`, whose `--negative-control` detects nine plants
+by `npm run test:contribution`, whose `--negative-control` detects eleven plants
 and exits 3.
 
 **The ladder, and which rung a number names.** Three claims, and the earlier ones

@@ -44,11 +44,22 @@ from trellis_contribution import (  # noqa: E402
     render_contribution,
 )
 
-# The per-surface fair share of the kernel budget across the thirteen
-# surfaces the agent seam wires. A CEILING, not an equality: a line under
-# it never forces a sibling out of the composition, and the budget is what
-# refuses. Same idiom as the mcp and workspace drills.
-SCAFFOLD_FAIR_SHARE = CONTRIBUTION_BUDGET // 13
+# ORIENTING LENGTH, per line — a STATED target, and the same one the answer,
+# mcp, workspace and contribution drills hold their lines to. The slot rlms
+# reserves takes ONE ORIENTING line: what the surface is, and when to reach
+# for it. Anything longer rides the addendum path instead
+# (trellis_contribution.py, "WHAT THE SLOT CAN AND CANNOT CARRY").
+#
+# It replaces `CONTRIBUTION_BUDGET // 13`, which divided the shared budget by
+# the number of surfaces that happened to carry a contribution the day it was
+# written. That instance was hard-coded in five drills, and a fourteenth
+# surface loosened all five at once: fourteen lines at the stale 153 sum to
+# 2,142, past the 2,000-character budget, with every per-surface check green.
+# This is a property of ONE line, so no surface count enters it. The
+# whole-composition bound stays the engine's own — compose_contributions
+# refuses over CONTRIBUTION_BUDGET, exercised over every registered
+# contribution in scripts/test_contribution.py [7].
+ORIENTING_LINE_MAX = 160
 
 out = {}
 
@@ -295,17 +306,17 @@ out["contributed_lines_are_one_clean_line"] = all(
     and "{" not in line and "}" not in line
     for line in (_task_line, _upsum_line)
 )
-# Orienting length, not an account. The old ceiling here was 320 — two
-# per-surface fair shares — so a scaffold line at it took a sibling's slot
-# out of the budget the thirteen wired surfaces share.
+# Orienting length, not an account. The old ceiling here was 320 — twice the
+# stated one — so a scaffold line at it was a write-up in the slot reserved
+# for a pointer, spending the budget its siblings share.
 out["contributed_lines_bounded"] = all(
-    isinstance(line, str) and len(line) <= SCAFFOLD_FAIR_SHARE
+    isinstance(line, str) and len(line) <= ORIENTING_LINE_MAX
     for line in (_task_line, _upsum_line)
 )
 out["contributed_line_sizes"] = {
     "trellis_task": len(_task_line or ""),
     "trellis_upsum": len(_upsum_line or ""),
-    "fairShare": SCAFFOLD_FAIR_SHARE,
+    "orientingLineMax": ORIENTING_LINE_MAX,
 }
 # The line PULLS rather than restates: everything but the connective
 # comes from a field the descriptor already owns (§9.1). The authored
@@ -361,12 +372,17 @@ out["upsum_expects_names_domain_cap"] = (
 # while the shipped line moves.
 #
 # The ceilings are stated, not discovered: a helper's slot is a POINTER and
-# ~120 characters is what a pointer takes, and the five together stay well
-# inside a quarter of the CONTRIBUTION_BUDGET every wired surface shares.
-# They are chosen with headroom over what ships today and tight enough that
-# growing a pointer into an account reddens the battery.
+# ~120 characters is what a pointer takes — tighter than the orienting-line
+# ceiling above, because a pointer says less than an account of a surface.
+# The group ceiling is a stated FRACTION of the composition budget rather
+# than a count of anything: a quarter of CONTRIBUTION_BUDGET is what the
+# staged helpers may take between them, and it is written as that fraction so
+# a sixth helper is measured against the same quarter instead of against a
+# number that silently described five. Both are chosen with headroom over
+# what ships today and tight enough that growing a pointer into an account
+# reddens the battery.
 _HELPER_LINE_MAX = 120
-_HELPER_TOTAL_MAX = 500
+_HELPER_TOTAL_MAX = CONTRIBUTION_BUDGET // 4
 
 _helper_lines = {d["name"]: _contributed_line(d)
                  for d in SCAFFOLD_HELPER_DESCRIPTORS}

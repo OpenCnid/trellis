@@ -514,22 +514,31 @@ check("every tail reference resolves to its owner",
 # rule, so a change to the real join would leave this drill green while the
 # shipped line moved; two sibling drills made exactly that mistake and were
 # corrected. render_contribution is the composer that actually runs.
-from trellis_contribution import (  # noqa: E402
-    CONTRIBUTION_BUDGET,
-    render_contribution,
-)
+from trellis_contribution import render_contribution  # noqa: E402
 
 mcp_line = render_contribution(MCP_DESCRIPTOR, closed_derived)
-# The per-surface fair share of the kernel budget across the thirteen
-# surfaces this pass wires. A CEILING, not an equality: a line under it never
-# forces a sibling out of the composition, and the budget is what refuses.
-MCP_FAIR_SHARE = CONTRIBUTION_BUDGET // 13
+# ORIENTING LENGTH, per line — a STATED target, and the same one the answer,
+# workspace, scaffold and contribution drills hold their lines to. The slot
+# rlms reserves takes ONE ORIENTING line: what the surface is, and when to
+# reach for it. Anything longer rides the addendum path instead
+# (trellis_contribution.py, "WHAT THE SLOT CAN AND CANNOT CARRY").
+#
+# It replaces `CONTRIBUTION_BUDGET // 13`, which divided the shared budget by
+# the number of surfaces that happened to carry a contribution the day it was
+# written. That instance was hard-coded in five drills, and a fourteenth
+# surface loosened all five at once: fourteen lines at the stale 153 sum to
+# 2,142, past the 2,000-character budget, with every per-surface check green.
+# This is a property of ONE line, so no surface count enters it. The
+# whole-composition bound stays the engine's own — compose_contributions
+# refuses over CONTRIBUTION_BUDGET, exercised over every registered
+# contribution in scripts/test_contribution.py [7].
+ORIENTING_LINE_MAX = 160
 check("the contributed pieces resolve and compose to one clean line",
       bool(mcp_line) and mcp_line == mcp_line.strip()
       and "\n" not in mcp_line and "\r" not in mcp_line
       and "{" not in mcp_line and "}" not in mcp_line)
-check("the composed line stays inside the per-surface fair share",
-      len(mcp_line) <= MCP_FAIR_SHARE, f"{len(mcp_line)} of {MCP_FAIR_SHARE}")
+check("the composed line stays inside the orienting-line ceiling",
+      len(mcp_line) <= ORIENTING_LINE_MAX, f"{len(mcp_line)} of {ORIENTING_LINE_MAX}")
 # The line PULLS and authors nothing: every character came out of a field
 # this descriptor already owns, so there is no second copy here to disagree
 # with the first (SELF_DESCRIBING_SURFACES.md §9.1).
@@ -547,7 +556,7 @@ check("the line states what the surface is — allowlisted tools, operator-confi
 check("no guard-owned phrase, whole or partial, rides the one-line slot",
       not any(phrase[:40] in mcp_line for phrase in _MCP_GUARD_EXPECTS.values()))
 check("the allowlist refusal would not fit beside the purpose clause",
-      len(mcp_line) + 1 + len(_MCP_GUARD_EXPECTS["allowlist"]) > MCP_FAIR_SHARE)
+      len(mcp_line) + 1 + len(_MCP_GUARD_EXPECTS["allowlist"]) > ORIENTING_LINE_MAX)
 check("the addendum reaches every run the line reaches, and states the refusal",
       build_mcp_addendum(servers) != "" and build_mcp_addendum([]) == ""
       and "Only the servers and tools listed below exist" in build_mcp_addendum(servers))
@@ -568,7 +577,7 @@ attached_derived = derive_mcp_expects(_WorkspaceAttached())
 # stub contract stated by half, so neither arm reaches the line at all.
 check("the attached arm's result_shape is the capture contract, past the whole slot",
       attached_derived["result_shape"] is _MCP_GUARD_EXPECTS["capture_stub"]
-      and len(attached_derived["result_shape"]) > MCP_FAIR_SHARE)
+      and len(attached_derived["result_shape"]) > ORIENTING_LINE_MAX)
 check("the line is arm-independent — neither result_shape arm reaches the slot",
       render_contribution(MCP_DESCRIPTOR, attached_derived) == mcp_line)
 # §13 (The description slot, and the gate this did not run) binds §6's

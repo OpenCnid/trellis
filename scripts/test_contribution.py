@@ -13,8 +13,8 @@
 # and the reason it is written against the module's guards rather than against
 # any surface's data.
 #
-# `--negative-control` plants nine conditions the drill must detect, and exits 3
-# when every one of them is caught (rule 19(c)).
+# `--negative-control` plants eleven conditions the drill must detect, and exits
+# 3 when every one of them is caught (rule 19(c)).
 #
 # Zero-paid: no model, no database, no network, no filesystem write.
 
@@ -33,6 +33,35 @@ from trellis_contribution import (  # noqa: E402
     measure_contributions,
     render_contribution,
 )
+
+# ORIENTING LENGTH, per line — a STATED engineering target (rule 20: a session
+# that finds no target stated states one before choosing the shape of a test).
+#
+# What the target says. The slot rlms reserves takes ONE ORIENTING line: what
+# the surface is, and when to reach for it. A surface whose account runs longer
+# carries it on the addendum path instead — trellis_contribution.py, "WHAT THE
+# SLOT CAN AND CANNOT CARRY" — so a line past this ceiling is not a long line,
+# it is an account in the wrong place. 160 characters forecloses the two
+# instances that produced the rule: the first pass's two full write-ups, at 361
+# and 461 characters.
+#
+# Why it is not a share of the budget. This replaces `CONTRIBUTION_BUDGET // 13`,
+# hard-coded here and in four sibling drills. Thirteen was the count of surfaces
+# carrying a contribution the day it was written — an instance that reached five
+# checks and became their denominator (COMPOSITION_FROM_PRIMITIVES.md §7, the
+# plural test: a fourteenth surface would need the constant edited in five
+# places, so thirteen was never a frame). A fourteenth surface LOOSENED all five
+# at once: fourteen lines at the stale 153 sum to 2,142, past the 2,000-character
+# budget, with every per-surface check still green. This target is a property of
+# ONE line, so no surface count enters it and a fourteenth neither raises nor
+# lowers it.
+#
+# The whole-composition bound is a separate check and stays the engine's own:
+# compose_contributions refuses over CONTRIBUTION_BUDGET, and [7] below exercises
+# that refusal over EVERY registered contribution rather than a hand-named pair.
+# The pair covers the space — the sum is bounded by the budget the surfaces share,
+# and no single line is allowed to become an account inside it.
+ORIENTING_LINE_MAX = 160
 
 failures = 0
 
@@ -177,8 +206,19 @@ expect_shape("a contribution for a surface this run did not inject is refused",
 
 print("\n[6] the budget is stated against a measured prompt, not guessed")
 
+# The two figures every record cites and no drill held: the slot's offset and
+# the protocol prompt's length. trellis_contribution.py's header ("spliced into
+# the rlms base prompt at character 1,335 of 2,116 — both received from a
+# command"), trellis_agent.py's composing comment, and the design record all
+# state them. They are claims about a THIRD-PARTY artifact, so an rlms upgrade
+# that moves either one makes those sentences false; pinning them here is where
+# that shows up, and the failure detail names the repair (rule 22a).
+SLOT_OFFSET = 1335
+PROMPT_CHARS = 2116
+
 try:
     from rlm.utils.prompts import RLM_SYSTEM_PROMPT
+    from trellis_agent import SYSTEM_PROMPT  # noqa: E402
     base_len = len(RLM_SYSTEM_PROMPT)
     slot_at = RLM_SYSTEM_PROMPT.find("{custom_tools_section}")
     check("the rlms base prompt is reachable and carries the slot", slot_at > 0,
@@ -186,8 +226,40 @@ try:
     check("the budget stays under the protocol prompt it is spliced into",
           CONTRIBUTION_BUDGET < base_len,
           f"budget {CONTRIBUTION_BUDGET} vs prompt {base_len}")
-    check("the slot precedes the prompt's own midpoint, so it keeps primacy",
-          slot_at < base_len, f"slot {slot_at} of {base_len}")
+    # PRIMACY, and the premise it actually rests on.
+    #
+    # What stood here was `slot_at < base_len`, under the name "the slot
+    # precedes the prompt's own midpoint, so it keeps primacy". A found index is
+    # always inside the string it was found in, so that assertion is entailed by
+    # the `slot_at > 0` check three lines above and could not fail while that one
+    # passed: it reported primacy and tested nothing. The tautology was also
+    # hiding a false sentence — the measured slot sits at 1,335 of 2,116, which
+    # is 63% in, PAST the midpoint its own name claimed.
+    #
+    # Primacy does hold, on a different premise: every Trellis directive is
+    # APPENDED to RLM_SYSTEM_PROMPT (.claude/rules/prompt-authoring.md rule 6,
+    # "One base" — SYSTEM_PROMPT = RLM_SYSTEM_PROMPT + TRELLIS_ADDENDUM, and
+    # build_author_system_prompt opens the same way), so a slot anywhere inside
+    # the base precedes all of them however late in the base it sits. That
+    # premise is a real claim about composed bytes, and it is what is checked.
+    check("the base prompt is a prefix of the prompt Trellis composes, so every "
+          "Trellis directive follows the slot",
+          SYSTEM_PROMPT.startswith(RLM_SYSTEM_PROMPT) and len(SYSTEM_PROMPT) > base_len,
+          f"composed {len(SYSTEM_PROMPT)} chars, base {base_len}, prefix "
+          f"{SYSTEM_PROMPT.startswith(RLM_SYSTEM_PROMPT)}")
+    check("the slot sits at the offset the records cite",
+          slot_at == SLOT_OFFSET,
+          f"slot {slot_at}, records say {SLOT_OFFSET} — repair the figure in "
+          f"trellis_contribution.py's header, trellis_agent.py's composing "
+          f"comment, and SELF_DESCRIBING_SURFACES.md")
+    check("the protocol prompt is the length the records cite",
+          base_len == PROMPT_CHARS,
+          f"prompt {base_len}, records say {PROMPT_CHARS} — repair the same "
+          f"three sentences")
+    print(f"  slot at {slot_at} of {base_len}; {base_len - slot_at} characters of "
+          f"protocol follow it inside the base, and all "
+          f"{len(SYSTEM_PROMPT) - base_len} characters of Trellis directive "
+          f"follow the whole base.")
 except ImportError as exc:  # pragma: no cover
     check("the rlms base prompt is reachable", False, f"import failed: {exc}")
 
@@ -210,29 +282,96 @@ neo._retrieved_addresses_check = lambda: set()
 neo._ast_existence_check = lambda h: True
 neo._entailment_check = None
 
-live = compose_contributions([
-    (ts.descriptor_for("trellis_postgres"), tt.derive_postgres_expects(pg)),
-    (ts.descriptor_for("trellis_neo4j"), tt.derive_neo4j_expects(neo)),
-])
-live_total = sum(len(v) for v in live.values())
-check("the two wired surfaces compose", len(live) == 2)
+# THE ROSTER IS DERIVED, NEVER LISTED. `import trellis_agent` above runs the
+# same surface imports the research seam runs, so by this line every surface
+# that registers a descriptor is in the registry; the roster is whatever
+# carries a contribution, which is exactly what the seam composes (the
+# composing call in trellis_agent.py iterates `custom_tools` itself). A surface
+# added tomorrow is composed here the moment it registers a line, with nothing
+# in this file to remember.
+#
+# What this replaces: two names typed by hand, under the assertion "the two
+# wired surfaces compose" — stale from before thirteen were wired. The budget
+# was therefore exercised at 276 of 2,000 characters and the total that
+# actually ships was measured by no drill, while the five per-surface ceilings
+# were the only thing standing between the composition and the bound.
+#
+# A line carrying an ("expects", key) slot needs its derive_*_expects result,
+# and only two surfaces have one. This mapping FAILS CLOSED: a fourteenth
+# surface that needs a derivation and is missing here raises out of
+# render_contribution, so the drill reddens naming that surface rather than
+# quietly composing a shorter roster.
+_DERIVED = {
+    "trellis_postgres": tt.derive_postgres_expects(pg),
+    "trellis_neo4j": tt.derive_neo4j_expects(neo),
+}
+_registered = ts.registry()
+_entries = [(descriptor, _DERIVED.get(name))
+            for name, descriptor in sorted(_registered.items())]
+_report = ts.coverage_report()
+
+# measure_contributions does not refuse an over-budget composition, so the
+# total is readable even in the state the budget check exists to catch;
+# compose_contributions is the shipped path and does refuse. Both are run, so
+# an over-budget roster reddens as a measured number AND as the engine's own
+# refusal instead of as a traceback.
+live_measured = None
+live = {}
+try:
+    live_measured = measure_contributions(_entries)
+    check("every registered contribution resolves through the shipped frame", True)
+except ContributionShapeError as exc:
+    check("every registered contribution resolves through the shipped frame",
+          False, str(exc))
+try:
+    live = compose_contributions(_entries)
+    check("the shipped composer returns the whole roster rather than refusing", True)
+except (ContributionShapeError, ContributionBudgetError) as exc:
+    check("the shipped composer returns the whole roster rather than refusing",
+          False, str(exc))
+
+# An unmeasurable composition is a defect, not a size: the fallback is over
+# budget on purpose, so the bound below reddens rather than passing on a zero.
+if live_measured is None:
+    live_measured = {"total": CONTRIBUTION_BUDGET + 1, "budget": CONTRIBUTION_BUDGET,
+                     "headroom": -1, "surfaces": 0, "perSurface": {}}
+live_total = live_measured["total"]
+
+check("the composed roster is every registered contribution, derived not listed",
+      sorted(live) == _report["contributing"],
+      f"composed {sorted(live)} vs contributing rung {_report['contributing']}")
+# ANTI-TRIVIAL FLOOR. A drill that reads a registry passes vacuously when the
+# registry is empty, so the floor comes from a source the registry cannot
+# supply: coverage_report derives the injected roster by AST from
+# trellis_agent.py's own seam text. Every name that read finds which also
+# carries a contribution must be in the composition, and there must be at least
+# one — an empty or half-imported registry empties that intersection and
+# reddens here rather than reporting a comfortable zero.
+_seam_backed = [n for n in _report["described"] if n in _report["contributing"]]
+check("the seam's own described surfaces are all composed, and there is at least one",
+      len(_seam_backed) > 0 and set(_seam_backed) <= set(live),
+      f"{len(_seam_backed)} seam-backed name(s), {len(live)} composed")
 check("the composed total is under budget",
       live_total <= CONTRIBUTION_BUDGET, f"{live_total} of {CONTRIBUTION_BUDGET}")
 check("every composed line is brace-free",
-      all("{" not in v and "}" not in v for v in live.values()))
+      bool(live) and all("{" not in v and "}" not in v for v in live.values()))
 check("every composed line is one line",
-      all("\n" not in v and "\r" not in v for v in live.values()))
+      bool(live) and all("\n" not in v and "\r" not in v for v in live.values()))
 check("the budget number a run is told is the number it is refused past",
-      str(64) in live["trellis_postgres"])
-# ORIENTING LENGTH, per surface. The budget alone is satisfiable by two
-# surfaces eating it between them, which is how eleven of thirteen shipped
-# as "A custom <Type> value": the first pass wrote two full accounts at 361
-# and 461 characters. The fair share is the same ceiling the mcp, workspace,
-# answer and scaffold drills hold their own lines to.
-FAIR_SHARE = CONTRIBUTION_BUDGET // 13
-for _name, _line in sorted(live.items()):
-    check(f"{_name} stays inside the per-surface fair share",
-          len(_line) <= FAIR_SHARE, f"{len(_line)} of {FAIR_SHARE}")
+      str(64) in live.get("trellis_postgres", ""))
+# ORIENTING LENGTH, per line. The budget alone is satisfiable by a couple of
+# surfaces eating it between them, which is the state the first pass shipped:
+# two full accounts at 361 and 461 characters. The ceiling is stated at the top
+# of this file and is the same one the mcp, workspace, answer and scaffold
+# drills hold their own lines to — a property of one line, carrying no count of
+# how many lines there are.
+for _name, _size in sorted(live_measured["perSurface"].items()):
+    check(f"{_name} stays inside the orienting-line ceiling",
+          _size <= ORIENTING_LINE_MAX, f"{_size} of {ORIENTING_LINE_MAX}")
+print(f"  composed {live_measured['surfaces']} surface(s): {live_total} of "
+      f"{CONTRIBUTION_BUDGET} characters, headroom {live_measured['headroom']}; "
+      f"longest line {max(live_measured['perSurface'].values(), default=0)} of "
+      f"{ORIENTING_LINE_MAX}")
 
 bare = _Stub()
 check("a bare-constructed surface states no bound it does not enforce",
@@ -241,7 +380,7 @@ check("a bare-constructed surface states no bound it does not enforce",
 
 
 def negative_control():
-    """Nine plants the drill must catch. Exits 3 when every one is detected."""
+    """Eleven plants the drill must catch. Exits 3 when every one is detected."""
     planted = []
 
     def caught(name, fn):
@@ -271,6 +410,28 @@ def negative_control():
            lambda: compose_contributions([(big_a, None), (big_b, None)], budget=100))
     caught("a contribution names a surface no run injected",
            lambda: attach_contributions({"alpha": object()}, {"ghost": "x"}))
+
+    # The two properties this pass repaired, planted so each is watched failing
+    # rather than argued for (rule 19c). Both are drill predicates rather than
+    # module guards, so each plant asserts and the AssertionError is the catch.
+    def _line_grows_into_an_account():
+        stretched = d(name="stretched",
+                      **{CONTRIBUTES_FIELD: ["x" * (ORIENTING_LINE_MAX + 1)]})
+        rendered = render_contribution(stretched)
+        assert len(rendered) <= ORIENTING_LINE_MAX, \
+            f"{len(rendered)} of {ORIENTING_LINE_MAX}"
+
+    def _roster_reverts_to_a_hand_named_pair():
+        pair = [(_registered[n], _DERIVED.get(n))
+                for n in ("trellis_postgres", "trellis_neo4j")]
+        composed = compose_contributions(pair)
+        assert sorted(composed) == _report["contributing"], \
+            f"composed {sorted(composed)} of {len(_report['contributing'])} contributing"
+
+    caught("a description line grows past the orienting ceiling",
+           _line_grows_into_an_account)
+    caught("the composing roster reverts to a hand-named pair",
+           _roster_reverts_to_a_hand_named_pair)
 
     detected = sum(1 for _, ok in planted if ok)
     print(f"\nnegative control: {len(planted)} planted, {detected} detected")

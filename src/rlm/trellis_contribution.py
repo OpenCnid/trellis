@@ -92,7 +92,7 @@ import json
 # Kernel constant, never env-tunable (Guardrail 5). `npm run test:contribution`
 # section 6 re-measures the rlms prompt and holds the budget under it; every
 # refusal in this module is exercised there, with a --negative-control that
-# exits 3 when all nine plants are detected.
+# exits 3 when all eleven plants are detected.
 CONTRIBUTION_BUDGET = 2000
 
 # The one tuple tag a `contributes` piece may carry. One tag, matching

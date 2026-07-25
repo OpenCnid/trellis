@@ -46,16 +46,26 @@ failures = 0
 
 
 from trellis_contribution import (  # noqa: E402
-    CONTRIBUTION_BUDGET,
     ContributionShapeError,
     render_contribution,
 )
 
-# The per-surface fair share of the kernel budget across the thirteen
-# surfaces the agent seam wires. A CEILING, not an equality: a line under
-# it never forces a sibling out of the composition, and the budget is what
-# refuses. Same idiom as the mcp and workspace drills.
-ANSWER_FAIR_SHARE = CONTRIBUTION_BUDGET // 13
+# ORIENTING LENGTH, per line — a STATED target, and the same one the mcp,
+# workspace, scaffold and contribution drills hold their lines to. The slot
+# rlms reserves takes ONE ORIENTING line: what the surface is, and when to
+# reach for it. Anything longer rides the addendum path instead
+# (trellis_contribution.py, "WHAT THE SLOT CAN AND CANNOT CARRY").
+#
+# It replaces `CONTRIBUTION_BUDGET // 13`, which divided the shared budget by
+# the number of surfaces that happened to carry a contribution the day it was
+# written. That instance was hard-coded in five drills, and a fourteenth
+# surface loosened all five at once: fourteen lines at the stale 153 sum to
+# 2,142, past the 2,000-character budget, with every per-surface check green.
+# This is a property of ONE line, so no surface count enters it. The
+# whole-composition bound stays the engine's own — compose_contributions
+# refuses over CONTRIBUTION_BUDGET, exercised over every registered
+# contribution in scripts/test_contribution.py [7].
+ORIENTING_LINE_MAX = 160
 
 def check(name, ok, detail=""):
     global failures
@@ -334,11 +344,10 @@ check("they compose to exactly one clean, bounded description line",
       bool(line) and line == line.strip()
       and "\n" not in line and "\r" not in line
       and "{" not in line and "}" not in line)
-# Orienting length, not an account: the 320 this once allowed was two
-# fair shares, so a line at the old ceiling took a sibling's slot out of
-# the shared budget.
-check("the composed line stays inside the per-surface fair share",
-      len(line) <= ANSWER_FAIR_SHARE, f"{len(line)} of {ANSWER_FAIR_SHARE}")
+# Orienting length, not an account: the 320 this once allowed was twice the
+# ceiling, and a line at it is a write-up in the slot reserved for a pointer.
+check("the composed line stays inside the orienting-line ceiling",
+      len(line) <= ORIENTING_LINE_MAX, f"{len(line)} of {ORIENTING_LINE_MAX}")
 # The line PULLS rather than restates: everything but the connective
 # comes from a field the descriptor already owns (§9.1).
 check("the line pulls from descriptor fields rather than restating them",
