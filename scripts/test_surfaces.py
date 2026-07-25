@@ -19,15 +19,31 @@
 #       compose_contributions, derived from the composing call by AST in
 #       both shapes it can take: a roster drawn from custom_tools itself,
 #       and a roster of literal names beside it,
+#   [3c] DELIVERY — whether what the composing call RETURNS is attached
+#       back to the seam and the seam is what rlms is handed, which no
+#       rung above establishes and one edit breaks while all three stay
+#       closed,
+#   [3d] THE EXPECTS ROSTER — the one roster at the seam still kept by
+#       hand, checked against the descriptors that need it rather than
+#       against a copy of itself,
+#   [3e] COVERAGE and its recorded exception — a gap is an injected
+#       surface nobody has decided about; a declination is one somebody
+#       has, and the roster of declinations is held honest from both
+#       sides so it cannot outlive what it exempts,
 #   [4] the live seam — the real trellis_agent.py parses, the shipped
-#       descriptors are found through the real registry, and no finished
-#       contribution is left unwired,
+#       descriptors are found through the real registry, no finished
+#       contribution is left unwired, the composition is delivered, every
+#       slot has a supplier, and no injected surface is an undecided gap,
 #   [5] informs-never-refuses — a gap is a report, never an exception.
 #
-# `--negative-control` plants thirteen conditions the drill must detect and
-# exits 3 when every one is caught (the check:repo-surface and judge-drill
-# mold, rule 19(c)): a check that has never been seen to fail carries no
-# information.
+# `--negative-control` plants twenty-seven conditions the drill must detect
+# and exits 3 when every one is caught (the check:repo-surface and
+# judge-drill mold, rule 19(c)): a check that has never been seen to fail
+# carries no information. Six of them are edits to a COPY of the shipped
+# trellis_agent.py rather than to a fixture — three of those six were
+# found by making the same edit to the real file and watching every suite
+# in this tree stay green, so a fixture analogue would not have been
+# evidence that the real seam is read.
 
 import os
 import sys
@@ -37,6 +53,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import trellis_surfaces  # noqa: E402
 from trellis_surfaces import (  # noqa: E402
     coverage_report,
+    derive_delivery,
+    derive_expects_roster,
     derive_injected_names,
     derive_wired_names,
     descriptor_for,
@@ -132,6 +150,88 @@ FIXTURE_WIRED_CURATED = _FIXTURE_INJECTION + '''
         for name in _ROSTER
     ])
 '''
+
+# The DELIVERY fixtures — the links past the composing call.
+#
+# Every one of these carries the same injection seam and the same
+# seam-wide roster, so all three rungs read closed in each. The only
+# thing that varies is what happens to what the composing call RETURNS.
+# That is the point: a fixture that also broke the rung could not show
+# that the rung and the delivery are different claims, which is the whole
+# finding — remove the attach wrapper from the real seam and every
+# composed line is built, budget-checked and dropped while the report
+# still prints "8 of those are wired at this seam".
+_FIXTURE_ATTACHED = '''    custom_tools = attach_contributions(
+        custom_tools,
+        compose_contributions([
+            (descriptor_for(name), None)
+            for name in custom_tools
+        ]),
+    )
+'''
+
+_FIXTURE_DISCARDED = '''    compose_contributions([
+        (descriptor_for(name), None)
+        for name in custom_tools
+    ])
+'''
+
+_FIXTURE_SIDELINED = '''    described = attach_contributions(
+        custom_tools,
+        compose_contributions([
+            (descriptor_for(name), None)
+            for name in custom_tools
+        ]),
+    )
+'''
+
+_FIXTURE_RENDERS_SEAM = '''    rlm = RLM(
+        environment="local",
+        custom_tools=custom_tools,
+        custom_system_prompt=prompt,
+    )
+'''
+
+_FIXTURE_RENDERS_OTHER = '''    rlm = RLM(
+        environment="local",
+        custom_tools=raw_tools,
+        custom_system_prompt=prompt,
+    )
+'''
+
+_FIXTURE_LATE_MUTATION = '''    custom_tools["delta_surface"] = 4
+'''
+
+# The authoring path in shape: a SECOND function handing RLM a
+# custom_tools of its own and composing nothing. It rides along in every
+# delivery fixture, because the real file has one and a read that ranged
+# over the module rather than the composing function would let this call
+# stand in for the research seam's — reporting a delivered prompt for a
+# run that delivers nothing.
+_FIXTURE_AUTHOR_PATH = '''
+
+def run_author_mode():
+    custom_tools = build_author_tools(workspace)
+    rlm = RLM(custom_tools=custom_tools, custom_system_prompt=prompt)
+'''
+
+FIXTURE_DELIVERED = (_FIXTURE_INJECTION + _FIXTURE_ATTACHED
+                     + _FIXTURE_RENDERS_SEAM + _FIXTURE_AUTHOR_PATH)
+FIXTURE_DISCARDED = (_FIXTURE_INJECTION + _FIXTURE_DISCARDED
+                     + _FIXTURE_RENDERS_SEAM + _FIXTURE_AUTHOR_PATH)
+FIXTURE_SIDELINED = (_FIXTURE_INJECTION + _FIXTURE_SIDELINED
+                     + _FIXTURE_RENDERS_SEAM + _FIXTURE_AUTHOR_PATH)
+FIXTURE_UNRENDERED = (_FIXTURE_INJECTION + _FIXTURE_ATTACHED
+                      + _FIXTURE_RENDERS_OTHER + _FIXTURE_AUTHOR_PATH)
+FIXTURE_LATE = (_FIXTURE_INJECTION + _FIXTURE_ATTACHED + _FIXTURE_LATE_MUTATION
+                + _FIXTURE_RENDERS_SEAM + _FIXTURE_AUTHOR_PATH)
+
+# A seam carrying the one roster below the derived one: the per-surface
+# suppliers an ('expects', key) slot resolves through at compose time.
+FIXTURE_EXPECTS_ROSTER = (_FIXTURE_INJECTION + '''    _expects = {
+        "alpha_surface": lambda: derive_alpha_expects(alpha),
+    }
+''' + _FIXTURE_ATTACHED + _FIXTURE_RENDERS_SEAM)
 
 
 # --- 1. Registration semantics ---------------------------------------------
@@ -260,6 +360,145 @@ check("the render names the surfaces a hand roster left out",
       "beta_surface" in format_coverage(coverage_report(by_hand, _three))
       .split("CONTRIBUTES BUT IS NOT WIRED")[-1])
 
+# --- 3c. Delivery ----------------------------------------------------------
+print("\n[3c] delivery: what the composing call RETURNS has to reach rlms")
+
+# The rung above answers *does a run pass this surface to
+# compose_contributions*. It does not answer *does the result go
+# anywhere*, and the two come apart in one edit. Removing the
+# `attach_contributions` wrapper from the live seam leaves every rung
+# reading closed — the roster is still drawn from custom_tools, every
+# line is still composed and still measured against the budget — and
+# reverts the prompt to "A custom <Type> value" for every surface,
+# because the composed mapping is dropped on the floor. Rule 15 again,
+# one link further along than the rung it already applies to: composed is
+# a different claim from delivered.
+delivered_path = write_fixture(FIXTURE_DELIVERED)
+discarded_path = write_fixture(FIXTURE_DISCARDED)
+sidelined_path = write_fixture(FIXTURE_SIDELINED)
+unrendered_path = write_fixture(FIXTURE_UNRENDERED)
+late_path = write_fixture(FIXTURE_LATE)
+
+_ok = derive_delivery(delivered_path)
+check("a seam that attaches back and hands the seam to the renderer delivers",
+      _ok["delivered"] is True, str(_ok))
+check("the read is scoped to the function the composing call is in",
+      _ok["scope"] == "main", str(_ok["scope"]))
+
+_dropped = derive_delivery(discarded_path)
+check("a composed mapping nobody assigns is NOT delivered",
+      _dropped["delivered"] is False, str(_dropped))
+check("and every rung above still reads closed, which is why the rung is "
+      "not the property",
+      derive_wired_names(discarded_path)[1] is True)
+check("the discard is NAMED rather than reported as an absent call",
+      any("discarded" in sink for sink in _dropped["attach_sinks"]),
+      str(_dropped["attach_sinks"]))
+
+_aside = derive_delivery(sidelined_path)
+check("a composed mapping assigned somewhere other than the seam is not delivered",
+      _aside["delivered"] is False and _aside["attached"] is False, str(_aside))
+check("and the name it went to is what the report prints",
+      _aside["attach_sinks"] == ["described"], str(_aside["attach_sinks"]))
+
+_unrendered = derive_delivery(unrendered_path)
+check("a seam the renderer is not handed is not delivered",
+      _unrendered["delivered"] is False and _unrendered["rendered"] is False,
+      str(_unrendered))
+check("the authoring path's own RLM call does not stand in for the research one",
+      _unrendered["render_sources"] == ["raw_tools"],
+      str(_unrendered["render_sources"]))
+
+_late = derive_delivery(late_path)
+check("a surface put into the seam after the attach is not delivered either",
+      _late["delivered"] is False, str(_late))
+check("and the surface whose line the new mapping cannot carry is named",
+      _late["mutated_after_attach"] == ["delta_surface"],
+      str(_late["mutated_after_attach"]))
+
+check("the render says NOT DELIVERED where it is not, over the same registry",
+      "NOT DELIVERED" in format_coverage(coverage_report(discarded_path, _three))
+      and "NOT DELIVERED" not in format_coverage(
+          coverage_report(delivered_path, _three)))
+
+# --- 3d. The expects roster ------------------------------------------------
+print("\n[3d] the expects roster: a slot with no supplier ends the run")
+
+# The one roster at the seam still kept by hand, one level BELOW the
+# derived one. The composing call iterates custom_tools, so every
+# injected surface composes; a descriptor carrying an ('expects', key)
+# slot then resolves it through the seam's `_expects` dict. A name
+# dropped from that dict does not lose a line — render_contribution
+# raises while the run is starting and takes the run with it, before any
+# paid call. Nothing composed the live seam, so nothing saw that.
+roster_path = write_fixture(FIXTURE_EXPECTS_ROSTER)
+_roster_names, _roster_sources = derive_expects_roster(roster_path)
+check("the roster is derived from the seam's own dict, never listed here",
+      _roster_names == ["alpha_surface"], str(_roster_names))
+check("a seam with no roster at all reads as empty rather than raising",
+      derive_expects_roster(write_fixture(FIXTURE_SEAM)) == ([], []))
+
+_slots = {
+    "alpha_surface": {"name": "alpha_surface", "contributes": [("expects", "k")]},
+    "beta_surface": {"name": "beta_surface", "contributes": [("expects", "k")]},
+    "gamma_surface": {"name": "gamma_surface", "contributes": ["plain words"]},
+}
+_slot_report = coverage_report(roster_path, _slots)
+check("the requirement is derived from the descriptors, never listed",
+      _slot_report["expects_required"] == ["alpha_surface", "beta_surface"],
+      str(_slot_report["expects_required"]))
+check("an injected slot the roster does not supply is named",
+      _slot_report["expects_unsupplied"] == ["beta_surface"],
+      str(_slot_report["expects_unsupplied"]))
+check("a line needing no guard phrase is not demanded of the roster",
+      "gamma_surface" not in _slot_report["expects_unsupplied"])
+check("a roster naming a surface the seam does not inject is named as such",
+      coverage_report(roster_path, {})["expects_orphaned"] == [],
+      str(coverage_report(roster_path, {})["expects_orphaned"]))
+
+# --- 3e. Coverage, and its one recorded exception --------------------------
+print("\n[3e] coverage: a gap and a recorded declination are different states")
+
+# §11 calls coverage THE ENFORCED PROPERTY, and until now the drill
+# computed `undescribed` over the live seam and asserted nothing on it —
+# an injected surface with no descriptor at all went green. The reason it
+# could not simply assert emptiness is UPSUM_BUDGET, a bare int declined
+# a descriptor on purpose (§13); a check that reddened on that would be
+# reddening on an honest state and would be switched off. The split below
+# is what lets the property be enforced anyway: `declined` is the
+# recorded judgment, `gaps` is what nobody has decided about, and the
+# check is over `gaps`.
+_declined_name = sorted(trellis_surfaces.DECLINED)[0]
+mixed_path = write_fixture(
+    "\ndef main():\n    custom_tools = {\n"
+    f'        "{_declined_name}": 1,\n'
+    '        "alpha_surface": 2,\n'
+    "    }\n")
+_mixed = coverage_report(mixed_path, {})
+check("an undescribed surface with no recorded declination is a gap",
+      _mixed["gaps"] == ["alpha_surface"], str(_mixed["gaps"]))
+check("an undescribed surface with one is declined, not a gap",
+      _mixed["declined"] == [_declined_name], str(_mixed["declined"]))
+check("both are still undescribed — the split adds a state, it hides none",
+      _mixed["undescribed"] == sorted(["alpha_surface", _declined_name]),
+      str(_mixed["undescribed"]))
+
+# The two ways the recorded roster goes wrong. Without these it would be
+# the hand-kept list one level up, which is the defect this whole module
+# exists to avoid: an exemption outliving what it exempted still covers
+# whatever later takes the name.
+_no_declined = coverage_report(write_fixture(
+    '\ndef main():\n    custom_tools = {"alpha_surface": 1}\n'), {})
+check("a declination for a name the seam no longer injects is reported dead",
+      _no_declined["declined_not_injected"] == sorted(trellis_surfaces.DECLINED),
+      str(_no_declined["declined_not_injected"]))
+check("a declination contradicted by a registered descriptor is reported",
+      coverage_report(mixed_path, {_declined_name: {"name": _declined_name}})
+      ["declined_but_described"] == [_declined_name])
+check("and neither state is silent in the render",
+      "DECLINATION FOR A NAME THIS SEAM NO LONGER INJECTS"
+      in format_coverage(_no_declined))
+
 # --- 4. The live seam ------------------------------------------------------
 print("\n[4] the live seam parses and finds the shipped descriptor")
 
@@ -368,6 +607,62 @@ check("no surface carries a line the composing call leaves out",
       _orphaned == [],
       f"finished contribution(s) no run passes on: {_orphaned}")
 
+# THE FOURTH LINK, which none of the three rungs establishes. Composing is
+# what the rung reads; whether the composed mapping is attached back to
+# the seam and the seam is what rlms is handed is a separate claim, and
+# the whole W column is worth nothing when it fails. Held here rather
+# than as a fourth per-surface flag because attach either runs on the
+# whole dict or on none of it, so §13's three-rung table stays the table
+# it is.
+_delivery = live["delivery"]
+check("the composed mapping is attached back to the seam",
+      _delivery["attached"] is True,
+      f"the composition goes to: {_delivery['attach_sinks']}")
+check("the seam itself is what the renderer is handed",
+      _delivery["rendered"] is True,
+      f"the renderer is handed: {_delivery['render_sources']}")
+check("no surface is put into the seam after the attach",
+      _delivery["mutated_after_attach"] == [],
+      f"attached mapping cannot carry: {_delivery['mutated_after_attach']}")
+check("so every W above is a line that reaches a model — delivered, not "
+      "merely composed",
+      _delivery["delivered"] is True, str(_delivery))
+
+# THE ROSTER ONE LEVEL BELOW THE DERIVED ONE. A descriptor slot resolving
+# through the seam's hand-kept `_expects` dict fails at COMPOSITION, not
+# at the line: the whole run ends with ContributionShapeError while it is
+# starting. Ten drills stayed green through that plant because none of
+# them composed the live seam.
+#
+# Non-vacuity, on the same pattern as the contributing-rung pin above: an
+# empty requirement would satisfy an empty difference and read exactly
+# like a supplied roster.
+check("at least one shipped descriptor needs a supplier, so the check below "
+      "can fail",
+      live["expects_required"] != [],
+      "no descriptor carries an expects slot at all")
+check("every descriptor slot the seam composes has a supplier at the seam",
+      live["expects_unsupplied"] == [],
+      f"slot(s) with no supplier, which end the run at composition: "
+      f"{live['expects_unsupplied']}")
+check("the expects roster names no surface this seam does not inject",
+      live["expects_orphaned"] == [],
+      f"stale roster entr(ies): {live['expects_orphaned']}")
+
+# COVERAGE, the property §11 calls the enforced one and which nothing
+# asserted on the live seam until now: an injected surface carries a
+# descriptor, or a recorded declination says why it does not.
+check("no injected surface is an undecided gap",
+      live["gaps"] == [],
+      f"injected with no descriptor and no recorded declination: "
+      f"{live['gaps']}")
+check("every recorded declination still names a surface this seam injects",
+      live["declined_not_injected"] == [],
+      f"dead exemption(s): {live['declined_not_injected']}")
+check("no recorded declination is contradicted by a registered descriptor",
+      live["declined_but_described"] == [],
+      f"declined and registered: {live['declined_but_described']}")
+
 # A check over the WHOLE registry belongs to neither rung and was tried
 # here first: section 1 registers fixture descriptors to exercise the
 # no-field-validation property, so the registry at this point is the live
@@ -432,6 +727,30 @@ check("an empty seam is a report, not an error",
 
 
 # --- negative control ------------------------------------------------------
+_AGENT_SOURCE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                             "src", "rlm", "trellis_agent.py")
+
+
+def plant_in_real_seam(old, new):
+    """A COPY of the live trellis_agent.py with one edit applied, written
+    to a temp file. Returns the path, or None when the anchor is not
+    present exactly once.
+
+    Fixture seams establish that a derivation reads a SHAPE. They cannot
+    establish that it reads the shape the real file is in, and the three
+    misses this drill closes were all found by editing the real file and
+    watching every suite stay green. So the plants below are those edits,
+    applied to a copy — the repository file is never written, and an
+    anchor that has moved returns None and is reported MISSED rather than
+    skipped, because a plant that cannot be applied has detected
+    nothing."""
+    with open(_AGENT_SOURCE, encoding="utf-8", newline="") as source_file:
+        text = source_file.read()
+    if text.count(old) != 1:
+        return None
+    return write_fixture(text.replace(old, new, 1))
+
+
 def negative_control():
     """Plant conditions this drill must detect; healthy is exit 3."""
     print("\n[negative control] planting conditions the drill must catch")
@@ -484,6 +803,82 @@ def negative_control():
         planted("a nameless descriptor raises", False)
     except ValueError:
         planted("a nameless descriptor raises", True)
+    # Delivery, over fixtures: the composed mapping dropped, sidelined,
+    # withheld from the renderer, or undone by a later seam mutation.
+    planted("a composed mapping nobody assigns is not delivered",
+            derive_delivery(write_fixture(FIXTURE_DISCARDED))["delivered"] is False)
+    planted("a composed mapping assigned elsewhere is not delivered",
+            derive_delivery(write_fixture(FIXTURE_SIDELINED))["delivered"] is False)
+    planted("a seam the renderer is not handed is not delivered",
+            derive_delivery(write_fixture(FIXTURE_UNRENDERED))["delivered"] is False)
+    planted("a surface added to the seam after the attach is named",
+            derive_delivery(write_fixture(FIXTURE_LATE))["mutated_after_attach"]
+            == ["delta_surface"])
+    planted("a seam that attaches and renders reads as delivered",
+            derive_delivery(write_fixture(FIXTURE_DELIVERED))["delivered"] is True)
+
+    # Coverage and its recorded exception.
+    _name = sorted(trellis_surfaces.DECLINED)[0]
+    _mixed_seam = write_fixture(
+        "\ndef main():\n    custom_tools = {\n"
+        '        "' + _name + '": 1,\n'
+        '        "alpha_surface": 2,\n'
+        "    }\n")
+    planted("an undescribed surface with no declination is a gap",
+            coverage_report(_mixed_seam, {})["gaps"] == ["alpha_surface"])
+    planted("a recorded declination is not counted as a gap",
+            coverage_report(_mixed_seam, {})["declined"] == [_name])
+    planted("a declination for a name the seam dropped is reported dead",
+            coverage_report(seam, {})["declined_not_injected"] == sorted(
+                trellis_surfaces.DECLINED))
+
+    # THE SIX PLANTS AGAINST THE REAL SEAM. Each is an edit to a copy of
+    # the shipped trellis_agent.py, and each was watched going green
+    # against this drill before the derivations above existed.
+    unwrapped = plant_in_real_seam(
+        "custom_tools = attach_contributions(", "attach_contributions(")
+    planted("REAL SEAM: the attach wrapper removed leaves the composition "
+            "discarded",
+            unwrapped is not None
+            and derive_delivery(unwrapped)["delivered"] is False)
+    planted("REAL SEAM: and every rung above it still reads closed",
+            unwrapped is not None
+            and derive_wired_names(unwrapped)[1] is True
+            and coverage_report(unwrapped)["contributing_unwired"] == [])
+
+    ghost = plant_in_real_seam(
+        '        custom_tools = {\n',
+        '        custom_tools = {\n            "trellis_ghost": object(),\n')
+    planted("REAL SEAM: an injected surface with no descriptor is a gap",
+            ghost is not None
+            and coverage_report(ghost)["gaps"] == ["trellis_ghost"])
+
+    dropped = plant_in_real_seam(
+        '            "trellis_postgres": lambda: derive_postgres_expects(postgres_tool),\n',
+        "")
+    planted("REAL SEAM: a surface dropped from the expects roster has no supplier",
+            dropped is not None
+            and coverage_report(dropped)["expects_unsupplied"] == ["trellis_postgres"])
+
+    unrendered_seam = plant_in_real_seam(
+        "            custom_tools=custom_tools,\n"
+        "            custom_system_prompt=dynamic_system_prompt,\n",
+        "            custom_tools=raw_tools,\n"
+        "            custom_system_prompt=dynamic_system_prompt,\n")
+    planted("REAL SEAM: a renderer handed something other than the seam is "
+            "not delivered",
+            unrendered_seam is not None
+            and derive_delivery(unrendered_seam)["rendered"] is False)
+
+    renamed = plant_in_real_seam(
+        '            "UPSUM_BUDGET": UPSUM_BUDGET,\n',
+        '            "UPSUM_BUDGET_V2": UPSUM_BUDGET,\n')
+    planted("REAL SEAM: a renamed declined surface is a gap and leaves the "
+            "exemption dead",
+            renamed is not None
+            and coverage_report(renamed)["gaps"] == ["UPSUM_BUDGET_V2"]
+            and coverage_report(renamed)["declined_not_injected"] == ["UPSUM_BUDGET"])
+
     try:
         register_surface({"name": "alpha_surface", "purpose": "conflict"})
         planted("a name collision raises", False)

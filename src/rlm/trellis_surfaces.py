@@ -60,6 +60,24 @@ DRAWS FROM, so it distinguishes a call that iterates the seam itself
 (every injected surface is wired, by construction) from one naming
 surfaces literally (only those are wired, and a surface added to the
 seam stays unwired until it is named there too).
+
+AND WIRED IS STILL NOT DELIVERED. The three rungs are per-surface and
+they stop at the composing call. What that call RETURNS has to be
+attached back to `custom_tools` and that mapping has to be the one rlms
+is handed, or every composed line is computed, budget-checked, and
+dropped while all three rungs read closed and the prompt reverts to
+"A custom <Type> value" for every surface. `derive_delivery` reads those
+links — attached, rendered, and not undone by a later seam mutation —
+from the same source, and reports them as ONE seam-wide property rather
+than a fourth per-surface flag, because attach either runs on the whole
+dict or on none of it.
+
+The seam keeps one hand-kept roster below the derived one: `_expects`,
+which supplies the guard-owned phrases an ('expects', key) slot resolves
+through. A surface missing from it does not lose a line — the
+composition raises while the run is starting and takes the run with it.
+`derive_expects_roster` reads that dict so the requirement can be
+computed against the registry rather than read off by eye.
 """
 
 import ast
@@ -78,6 +96,46 @@ _SEAM_VARIABLE = "custom_tools"
 # rungs.
 _COMPOSE_FUNCTION = "compose_contributions"
 _DESCRIPTOR_LOOKUP = "descriptor_for"
+
+# THE LINKS PAST THE COMPOSING CALL. Composing is necessary and is not
+# sufficient: a composed mapping that is discarded, or attached to a name
+# rlms never renders, produces byte-for-byte what an uncomposed run
+# produces — every surface back to "A custom <Type> value" — while the
+# WIRED rung above still reads closed, because that rung reads the
+# composing call and nothing downstream of it. `RLM` is rlms's entry point
+# and `custom_tools=` is the parameter whose entries it renders, so this
+# pair is the seam's FAR end the way _SEAM_VARIABLE is its near end.
+_RENDERER = "RLM"
+_RENDER_KEYWORD = "custom_tools"
+
+# The per-surface expectation suppliers the composing call reads. A
+# descriptor asking for a guard-owned phrase resolves through this dict at
+# compose time, so a surface missing from it is a startup exception rather
+# than a missing line — the composition raises and the whole run ends.
+_EXPECTS_ROSTER = "_expects"
+
+# COVERAGE'S RECORDED EXCEPTIONS, and why these are recorded where
+# everything else on this page is derived.
+#
+# `format_coverage`'s own closing sentence is the reason: whether a name
+# WARRANTS a descriptor at all is a human call. A human call is not a fact
+# about the code, so no read of the code returns it — a derivation that
+# tried would be inferring intent from a value's type or a name's case,
+# and a wrong inference here EXEMPTS a real gap silently, which is worse
+# than the gap. So the judgment is written down, with the record that made
+# it, and the roster is held honest from both sides instead: a declination
+# for a name the seam no longer injects, and a declination for a name that
+# has since registered a descriptor, are each reported as defects in the
+# roster (see coverage_report's `declined_not_injected` and
+# `declined_but_described`). That is what keeps this from being the
+# hand-kept list one level up — it cannot drift without saying so.
+DECLINED = {
+    "UPSUM_BUDGET":
+        "a bare int the run injects as a REPL constant, declined a "
+        "descriptor on purpose rather than missing one "
+        "(SELF_DESCRIBING_SURFACES.md §13, The description slot, and the "
+        "gate this did not run).",
+}
 
 _REGISTRY = {}
 
@@ -334,6 +392,235 @@ def derive_wired_names(agent_path=None):
     return sorted(names), seam_wide, sorted(sources)
 
 
+def _statement_holding(scope, target):
+    """The innermost statement in `scope` whose subtree contains `target`.
+
+    What a composed value is DONE with is a property of the statement it
+    sits in — assigned back to the seam, assigned somewhere else, or
+    evaluated and dropped — so the read that answers it has to climb from
+    the call to its statement. Innermost is the last one to open, which
+    is the greatest (lineno, col_offset) among the statements containing
+    it."""
+    holders = [stmt for stmt in ast.walk(scope)
+               if isinstance(stmt, ast.stmt)
+               and any(child is target for child in ast.walk(stmt))]
+    if not holders:
+        return None
+    return max(holders, key=lambda stmt: (stmt.lineno, stmt.col_offset))
+
+
+def _composing_scope(tree):
+    """The function body the composing call sits in, or None.
+
+    Delivery is a chain inside ONE function: compose, attach back to the
+    seam, hand the seam to the renderer. Scoping to that function is what
+    keeps a second `RLM(custom_tools=custom_tools)` elsewhere in the file
+    — the authoring path is exactly that — from answering the research
+    path's question. The authoring seam composes nothing, and a read that
+    ranged over the module would have let its renderer call stand in for
+    a research seam that had stopped attaching."""
+    scopes = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for child in ast.walk(node):
+            if isinstance(child, ast.Call) and _call_name(child) == _COMPOSE_FUNCTION:
+                scopes.append(node)
+                break
+    if not scopes:
+        return None
+    return max(scopes, key=lambda fn: (fn.lineno, fn.col_offset))
+
+
+def _seam_mutations(scope):
+    """Every statement in `scope` that puts a surface into the seam after
+    the dict exists — a `custom_tools["name"] = ...` subscript assignment
+    and a `custom_tools.update(...)` merge. Returns sorted (lineno, label)
+    pairs.
+
+    Read for ORDER, which is the one thing about these that the injected
+    roster does not settle: `attach_contributions` returns a NEW mapping,
+    so a surface added to the seam after that call carries the bare value
+    it was added with and its composed line is dropped on the floor. That
+    is plant 1 again, restricted to one surface instead of all of them."""
+    found = []
+    for node in ast.walk(scope):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if (isinstance(target, ast.Subscript)
+                        and isinstance(target.value, ast.Name)
+                        and target.value.id == _SEAM_VARIABLE):
+                    label = (target.slice.value
+                             if isinstance(target.slice, ast.Constant)
+                             and isinstance(target.slice.value, str)
+                             else "<computed key>")
+                    found.append((node.lineno, label))
+        elif isinstance(node, ast.Call):
+            func = node.func
+            if (isinstance(func, ast.Attribute) and func.attr == "update"
+                    and isinstance(func.value, ast.Name)
+                    and func.value.id == _SEAM_VARIABLE):
+                merged = ", ".join(_source_label(arg) for arg in node.args)
+                found.append((node.lineno, merged or "<nothing>"))
+    return sorted(found)
+
+
+def derive_delivery(agent_path=None):
+    """Whether a composed contribution can REACH a model — the three
+    links past the composing call, derived from the same source the other
+    rungs are.
+
+    The WIRED rung answers *does a run pass this surface to
+    compose_contributions*. It does not answer *does the result go
+    anywhere*, and those come apart in one edit: drop the
+    `attach_contributions` wrapper and every composed line is computed,
+    measured against the budget, and discarded, while the roster is still
+    drawn from the seam and every rung above still reads closed. The
+    prompt reverts to what it was before the layer landed and the report
+    says nothing changed.
+
+    Returns a dict:
+
+      * `composed` — a composing call exists at all,
+      * `attached` — its value is assigned BACK to the seam variable, so
+        the descriptions land in the dict that gets rendered,
+      * `attach_sinks` — where the composed value goes when it is not the
+        seam, named rather than dropped (`<discarded ...>` for a bare
+        expression statement),
+      * `rendered` — the seam variable itself is what the renderer is
+        handed as `custom_tools=`,
+      * `render_sources` — what the renderer is handed instead, named,
+      * `mutated_after_attach` — surfaces put into the seam after the
+        attach, whose lines the new mapping cannot carry,
+      * `delivered` — all of the above, which is the property, and
+      * `scope` — the function all of this was read inside.
+    """
+    tree = _parse_agent(agent_path)
+    scope = _composing_scope(tree)
+    delivery = {
+        "composed": False,
+        "attached": False,
+        "attach_sinks": [],
+        "rendered": False,
+        "render_sources": [],
+        "mutated_after_attach": [],
+        "delivered": False,
+        "scope": None,
+    }
+    if scope is None:
+        return delivery
+    delivery["scope"] = scope.name
+    delivery["composed"] = True
+
+    sinks = set()
+    attach_lines = []
+    for node in ast.walk(scope):
+        if not (isinstance(node, ast.Call)
+                and _call_name(node) == _COMPOSE_FUNCTION):
+            continue
+        holder = _statement_holding(scope, node)
+        if isinstance(holder, ast.Assign) and any(
+                isinstance(target, ast.Name) and target.id == _SEAM_VARIABLE
+                for target in holder.targets):
+            delivery["attached"] = True
+            attach_lines.append(holder.lineno)
+        elif isinstance(holder, ast.Assign):
+            sinks.add(", ".join(_source_label(t) for t in holder.targets)
+                      or "<expression>")
+        elif isinstance(holder, ast.AnnAssign) and holder.target is not None:
+            sinks.add(_source_label(holder.target))
+        elif isinstance(holder, ast.Expr):
+            sinks.add("<discarded: composed, then never assigned>")
+        elif holder is None:
+            sinks.add("<no enclosing statement>")
+        else:
+            sinks.add(f"<{type(holder).__name__}>")
+    delivery["attach_sinks"] = sorted(sinks)
+
+    render_sources = set()
+    for node in ast.walk(scope):
+        if not (isinstance(node, ast.Call) and _call_name(node) == _RENDERER):
+            continue
+        for keyword in node.keywords:
+            if keyword.arg != _RENDER_KEYWORD:
+                continue
+            if (isinstance(keyword.value, ast.Name)
+                    and keyword.value.id == _SEAM_VARIABLE):
+                delivery["rendered"] = True
+            else:
+                render_sources.add(_source_label(keyword.value))
+    delivery["render_sources"] = sorted(render_sources)
+
+    if attach_lines:
+        cutoff = max(attach_lines)
+        delivery["mutated_after_attach"] = [
+            label for lineno, label in _seam_mutations(scope) if lineno > cutoff]
+
+    delivery["delivered"] = bool(
+        delivery["composed"] and delivery["attached"] and delivery["rendered"]
+        and not delivery["mutated_after_attach"])
+    return delivery
+
+
+def derive_expects_roster(agent_path=None):
+    """The surfaces the composing call can supply guard-derived
+    expectations for, read from the `_expects` dict at the seam.
+
+    Returns (names, sources): the literal keys, and any key or whole
+    roster this static read cannot enumerate.
+
+    This is the one roster at the seam that is still kept by hand, one
+    level BELOW the derived one: the composing call iterates
+    `custom_tools`, so every injected surface is composed, but a surface
+    whose descriptor carries an ('expects', ...) slot resolves that slot
+    through this dict. A name dropped from it does not lose a line — it
+    raises ContributionShapeError while the run is starting, before any
+    paid call, and takes the whole run with it. Derived here so the
+    requirement can be computed against the registry instead of read off
+    by eye."""
+    tree = _parse_agent(agent_path)
+    scope = _composing_scope(tree)
+    if scope is None:
+        return [], []
+    names = set()
+    sources = set()
+    for node in ast.walk(scope):
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(isinstance(target, ast.Name) and target.id == _EXPECTS_ROSTER
+                   for target in node.targets):
+            continue
+        if isinstance(node.value, ast.Dict):
+            for key in node.value.keys:
+                if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                    names.add(key.value)
+                else:
+                    sources.add(_source_label(key))
+        else:
+            sources.add(_source_label(node.value))
+    return sorted(names), sorted(sources)
+
+
+def _expects_tag():
+    """The tuple tag a guard-owned slot carries, taken from the module
+    that owns it rather than copied here — the `_contributes_field`
+    discipline, for the same reason (§9.1, one encoding)."""
+    from trellis_contribution import EXPECTS_TAG
+    return EXPECTS_TAG
+
+
+def _needs_expects(descriptor, tag, field):
+    """True when this descriptor cannot render without a derived
+    expectation mapping — it carries at least one (tag, key) slot."""
+    if not isinstance(descriptor, dict):
+        return False
+    pieces = descriptor.get(field)
+    if not isinstance(pieces, (list, tuple)):
+        return False
+    return any(isinstance(piece, (tuple, list)) and len(piece) == 2
+               and piece[0] == tag for piece in pieces)
+
+
 def _contributes_field():
     """The descriptor field the contribution frame reads, taken from the
     module that owns it rather than copied here — one encoding, owned by
@@ -376,6 +663,18 @@ def coverage_report(agent_path=None, registered=None):
     wired_set = set(wired_names)
     described = [n for n in injected if n in known]
     undescribed = [n for n in injected if n not in known]
+    # Coverage is the enforced property (§11), and it has recorded
+    # exceptions rather than none. Splitting the two is what lets a
+    # reader — and an exit code — tell "this seam is fully covered, with
+    # one name declined on the record" from "one name is missing". The
+    # undescribed list keeps its meaning and its name; `gaps` is the
+    # subset nobody has decided about.
+    declined = [n for n in undescribed if n in DECLINED]
+    gaps = [n for n in undescribed if n not in DECLINED]
+    # The two ways the recorded roster goes wrong, both derived against
+    # the seam so the roster cannot quietly outlive what it exempts.
+    declined_not_injected = sorted(n for n in DECLINED if n not in injected_set)
+    declined_but_described = sorted(n for n in DECLINED if n in known)
     # A descriptor registered for something the seam never injects
     # STATICALLY: not an error (the staged helpers arrive through
     # custom_tools.update and are named under dynamic_sources), but worth
@@ -414,10 +713,30 @@ def coverage_report(agent_path=None, registered=None):
             "wired": _wired(name),
         }
 
+    # Past the per-surface rungs: whether the composed mapping reaches the
+    # renderer at all, and whether every slot that needs a guard-derived
+    # phrase has a supplier at the seam. Both are seam-wide rather than
+    # per-surface — attach either runs on the whole dict or on none of
+    # it — so they qualify the whole W column instead of adding a fourth
+    # flag to it, and §13's three-rung table stays the table it is.
+    delivery = derive_delivery(agent_path)
+    expects_roster, expects_roster_sources = derive_expects_roster(agent_path)
+    expects_tag = _expects_tag()
+    needs_expects = {name for name, descriptor in known.items()
+                     if _needs_expects(descriptor, expects_tag, field)}
+    roster_set = set(expects_roster)
+    expects_required = sorted(n for n in needs_expects if n in injected_set)
+    expects_unsupplied = [n for n in expects_required if n not in roster_set]
+    expects_orphaned = sorted(n for n in expects_roster if n not in injected_set)
+
     return {
         "injected": injected,
         "described": described,
         "undescribed": undescribed,
+        "declined": declined,
+        "gaps": gaps,
+        "declined_not_injected": declined_not_injected,
+        "declined_but_described": declined_but_described,
         "registered_not_injected": registered_not_injected,
         "dynamic_sources": dynamic,
         "contributing": contributing,
@@ -425,6 +744,12 @@ def coverage_report(agent_path=None, registered=None):
         "wired_seam_wide": seam_wide,
         "wired_sources": wired_sources,
         "contributing_unwired": contributing_unwired,
+        "delivery": delivery,
+        "expects_roster": expects_roster,
+        "expects_roster_sources": expects_roster_sources,
+        "expects_required": expects_required,
+        "expects_unsupplied": expects_unsupplied,
+        "expects_orphaned": expects_orphaned,
         "rungs": rungs,
     }
 
@@ -467,6 +792,62 @@ def format_coverage(report):
         f"contribution | {len(settled_wired)} of those are wired at this seam"
         + (f", {len(unsettled)} not settleable statically" if unsettled else "")
     )
+    lines.append(
+        f"coverage: {len(report['gaps'])} gap(s), "
+        f"{len(report['declined'])} declined on the record"
+    )
+    delivery = report["delivery"]
+    if delivery["delivered"]:
+        lines.append(
+            f"  D: the composed mapping is attached back to {_SEAM_VARIABLE} and "
+            f"{_SEAM_VARIABLE} is what {_RENDERER} renders, so a wired line "
+            f"reaches a model. Read inside {delivery['scope']}()."
+        )
+    else:
+        lines.append(
+            "  NOT DELIVERED -- every W above is a line that reaches no model:"
+        )
+        if not delivery["composed"]:
+            lines.append(
+                f"    no {_COMPOSE_FUNCTION} call inside any function, so "
+                f"nothing is composed to deliver."
+            )
+        if delivery["composed"] and not delivery["attached"]:
+            lines.append(
+                f"    the composed mapping is never assigned back to "
+                f"{_SEAM_VARIABLE}; it goes to: "
+                + (", ".join(delivery["attach_sinks"]) or "<nothing readable>")
+            )
+        if delivery["composed"] and not delivery["rendered"]:
+            lines.append(
+                f"    {_RENDERER} is not handed {_SEAM_VARIABLE} as "
+                f"{_RENDER_KEYWORD}=; it is handed: "
+                + (", ".join(delivery["render_sources"]) or "<no such call here>")
+            )
+        if delivery["mutated_after_attach"]:
+            lines.append(
+                "    put into the seam AFTER the attach, so the attached "
+                "mapping cannot carry their lines: "
+                + ", ".join(delivery["mutated_after_attach"])
+            )
+    if report["expects_unsupplied"]:
+        lines.append(
+            "  NO EXPECTATION SUPPLIER -- a descriptor slot that resolves "
+            f"through the seam's {_EXPECTS_ROSTER} roster, for a surface the "
+            "roster does not name. This ends the run at composition, not at "
+            "the line: " + ", ".join(report["expects_unsupplied"])
+        )
+    if report["expects_orphaned"]:
+        lines.append(
+            f"  {_EXPECTS_ROSTER} names surface(s) this seam does not inject "
+            "(harmless until the name is real again, and how a rename goes "
+            "unnoticed): " + ", ".join(report["expects_orphaned"])
+        )
+    if report["expects_roster_sources"]:
+        lines.append(
+            f"  {_EXPECTS_ROSTER} entries this read cannot enumerate: "
+            + ", ".join(report["expects_roster_sources"])
+        )
 
     for name, rung in rungs.items():
         wired = rung["wired"]
@@ -483,7 +864,12 @@ def format_coverage(report):
         flags = (("R" if rung["registered"] else "-")
                  + ("C" if rung["contributes"] else "-")
                  + wired_flag)
-        note = "" if rung["injected"] else "   (not injected at this seam)"
+        if not rung["injected"]:
+            note = "   (not injected at this seam)"
+        elif name in DECLINED:
+            note = "   (descriptor declined on the record, not a gap)"
+        else:
+            note = ""
         lines.append(f"  [{flags}] {name}{note}")
 
     if report["wired_seam_wide"]:
@@ -525,6 +911,18 @@ def format_coverage(report):
         lines.append(
             "  not enumerable statically, so NOT counted above: "
             + ", ".join(report["dynamic_sources"])
+        )
+    if report["declined_not_injected"]:
+        lines.append(
+            "  DECLINATION FOR A NAME THIS SEAM NO LONGER INJECTS -- a dead "
+            "exemption that would silently cover a future surface taking the "
+            "name: " + ", ".join(report["declined_not_injected"])
+        )
+    if report["declined_but_described"]:
+        lines.append(
+            "  DECLINED AND ALSO REGISTERED -- the record says no descriptor "
+            "and the registry holds one; drop the declination: "
+            + ", ".join(report["declined_but_described"])
         )
     lines.append(
         "This reports; it refuses nothing. Whether a name warrants a "

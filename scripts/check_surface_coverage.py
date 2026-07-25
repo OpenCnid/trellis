@@ -18,16 +18,43 @@
 # the one nothing reported. A report that measures the cheap rung makes
 # the expensive gap look measured, which is worse than reporting nothing.
 #
-# EXIT CODES, and why they are not a gate. 0 when every injected surface
-# is described AND no finished contribution is left unwired, 1 when
-# either gap remains, 2 on an internal error. This mirrors
+# EXIT CODES, and why they are not a gate. 1 names a gap nobody has
+# decided about, 2 an internal error, 0 everything else. This mirrors
 # `npm run wiki:check`, whose staleness half is deliberately NOT wired
 # into CI: a report that reddens every honest in-progress branch gets
 # switched off, and gaps here are expected while the program is mid-build.
 # Nothing in a run consults this, and no gate reads it (Phase 4 stays
-# owner-gated, HARNESS_SELF_MODEL.md §12.2). The wired rung joins the
-# exit code on the same terms it joins the report: advisory, and out of
-# CI, so an in-progress branch is described rather than blocked.
+# owner-gated, HARNESS_SELF_MODEL.md §12.2). Every rung joins the exit
+# code on the same terms it joins the report: advisory, and out of CI, so
+# an in-progress branch is described rather than blocked.
+#
+# WHAT 1 MEANT UNTIL NOW, AND WHY IT WAS WORTH NOTHING. It counted
+# UPSUM_BUDGET — a bare int declined a descriptor on purpose
+# (SELF_DESCRIBING_SURFACES.md §13) — as an undescribed surface, so the
+# check exited 1 on a clean tree and had exited 1 on every tree since the
+# rung shipped. A code that is already 1 cannot go to 1, so the one thing
+# an exit code is for was spent: a real gap arriving changed nothing a
+# caller could read, and the report had to be read by eye to find it,
+# which is what a report is for and not what a status is for.
+# `trellis_surfaces.DECLINED` records that judgment where the derivation
+# can subtract it, and the roster is held honest from both sides — a
+# declination for a name the seam stopped injecting, or for a name that
+# has since registered a descriptor, is itself one of the conditions
+# below. So 0 now means "no undecided gap", 1 means "something here has
+# not been decided about", and the difference between them is a fact
+# rather than a constant.
+#
+# THE SIX CONDITIONS 1 REPORTS, each a state a model would be affected
+# by and nobody chose:
+#   * gaps                    — an injected surface with no descriptor and
+#                               no recorded declination,
+#   * contributing_unwired    — a finished line the composing call omits,
+#   * delivery not delivered  — composed lines that reach no model at all,
+#   * expects_unsupplied      — a slot with no supplier, which ends the
+#                               run at composition rather than at the line,
+#   * declined_not_injected   — a dead exemption still able to cover a
+#                               future surface that takes the name,
+#   * declined_but_described  — an exemption contradicted by the registry.
 #
 # Zero-paid, no database, no network: it parses one file and reads a
 # registry populated by importing the surface modules.
@@ -65,8 +92,13 @@ def main():
         print(f"surface coverage: ERROR — {exc}", flush=True)
         return 2
     print(format_coverage(report), flush=True)
-    gaps = report["undescribed"] or report["contributing_unwired"]
-    return 1 if gaps else 0
+    undecided = (report["gaps"]
+                 or report["contributing_unwired"]
+                 or report["expects_unsupplied"]
+                 or report["declined_not_injected"]
+                 or report["declined_but_described"]
+                 or not report["delivery"]["delivered"])
+    return 1 if undecided else 0
 
 
 if __name__ == "__main__":
