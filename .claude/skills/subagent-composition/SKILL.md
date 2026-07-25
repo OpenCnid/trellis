@@ -169,6 +169,45 @@ What each slot absorbs — the variable names carry the rule; this table annotat
 - **`--agent {name}` silently ignores `skills:`.** Session-agent mode and subagent spawn are different paths; only the spawn path preloads. Validate agent behavior through an actual spawn, never through `--agent`, or a working definition reads as broken.
 - **`tools:` is enforced, not advisory.** A probe declaring `tools: WebSearch` reported exactly that one tool — the allowlist replaces inheritance rather than trimming it.
 
+## The disproving arm — required when a finding would change scope
+
+**Trigger, and it is narrow: the fan-out's finding would change what kind of
+work follows** — rebuild versus repair, absent versus unreachable, defect versus
+default. Then one additional arm is spawned whose **only** task is to disprove
+the reading the others are converging on, and whose ground block says so in
+those words. Routine sweeps do not get one; the charge is one agent on
+scope-changing findings, not a standing skeptic on every dispatch.
+
+**Why it is a separate arm rather than an instruction to the others.** Siblings
+primed to find a problem find it, and each one honestly. Their returns then
+agree, and agreement among arms that share a prior is not corroboration — it is
+the prior, restated N times. Nothing in the fan-out can catch that from inside,
+because no sibling is looking.
+
+**Composing it.** Same ground block as its siblings, and then the inversion
+stated plainly: name what the others are assembling evidence *for*, say that
+nobody else is assigned to look for the counter-evidence, and say that if it is
+not found here it will not be found. Give it the strongest form of the claim to
+attack, not a softened one. Require an address and a quotation per point, so a
+charitable reading cannot pass as a finding — and require it to report
+"the diagnosis holds" plainly when that is the honest result, since an arm that
+can only come back one way is decoration.
+
+```md
+{Three_Sibling_Agents_Are_Gathering_Evidence_That_X}. Your job is the opposite:
+find where that reading is overstated, and report the strongest honest case for
+{Not_X}. You do not manufacture a defence — if the diagnosis holds everywhere
+you looked, say so — but nobody else is assigned to look for the
+counter-evidence, so if you do not find it, it will not be found.
+```
+
+**Provenance.** Trellis, July 24 2026. Three sweeps primed on "the build drifted
+toward retrieval" found drift, correctly and everywhere they looked. A fourth,
+primed to bound the claim, found the capability the other three had reported
+missing — built, and merely unreachable. Without it the session would have
+carried a rebuild estimate for work already done. Owner-approved as standing
+practice the same day.
+
 ## Fan-out discipline
 
 Compose one **shared ground block** and reuse it verbatim across siblings; drift between copies produces findings that cannot be reconciled. Give each sibling a **disjoint write scope**, or give them all `isolation: worktree` (`Agent_Isolation_Worktree_Mode`). Siblings cannot see each other, so any cross-cutting judgment belongs to you after they return — never to a sibling. Prefer running the last agent synchronously (`Agent_Foreground_Synchronous_Wait`, `run_in_background: false`) when you need its result to proceed.

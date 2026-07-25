@@ -157,13 +157,15 @@ capability.
   spec the standing provenance-grounded injection-objection and the outbound defeater seats,
   composed from the -1 doubt tier ([DOUBTS_WORKSPACE §8–§9](../../architecture/DOUBTS_WORKSPACE.md));
   Guardrail 15 (prompt-engineering + hypershot-protocol) applies when the seat prompts are authored.
-- **`MAX_FRAME_LEN` — rule settled July 22, 2026, shipped value still owner-gated.** Size the cap
-  off the worker's context window rather than off the largest frame the plumbing might carry, so it
-  is a structural guarantee (no single frame can context-saturate a worker) and not only a DoS
-  bound. Derivation: 1,050,000-token window × 50% × ~4 bytes/token ≈ 2.1 MB → **2 MiB**, set as
-  `config.DEFAULT_MAX_FRAME_LEN` with the window recorded beside it as the input to re-derive from
-  when the model pin changes. The DoS property is unchanged: the reader still rejects an over-length
-  declaration before allocating.
+- **`MAX_FRAME_LEN` — RATIFIED July 24, 2026.** `max_result_bytes` **2 MiB** (one materialisation),
+  `max_frame_len` **4 MiB**, the frame **derived from the slice** and never from the worker's context
+  window; `tests/test_config.py` asserts `max_frame_len >= 2 * max_result_bytes`. Full ruling:
+  [CONFORMANCE §2.3](REPL_SANDBOX_CONFORMANCE.md). The superseded July-22 rule sized the frame off
+  the context window, which protects nothing the marshal caps do not already hold and left the frame
+  *below* `max_result_bytes`, so a legal broker result could not cross the wire; the token derivation
+  now sizes the **slice**, as a sizing convention rather than an enforcing bound. The DoS property is
+  unchanged and was never what the number bought: the reader rejects an over-length declaration
+  before allocating.
 - The vsock bridge is unbuilt glue — security-critical; spec its frame parser + privilege drop.
 - Warm-pool clean-slate-reset policy (only if pooling is adopted).
 - Whether to relax `_SAFE_BUILTINS` once the VM boundary exists (redundant defense-in-depth).

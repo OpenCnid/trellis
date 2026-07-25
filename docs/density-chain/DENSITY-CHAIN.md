@@ -865,8 +865,17 @@ the RLM execution model, the doubts machinery it borrows, or the pillar it reali
   protects nothing (a 12 MiB namespace value returns a ~4 KB reply — `MarshalCaps` holds attention,
   independently) while leaving the frame **below** `max_result_bytes`, so a legal broker result could
   not cross the wire. The token rule now sizes the **slice**, as a sizing convention and never an
-  enforcing bound. **The REPL is meant to be gigabytes read in slices; the corpus ceiling is
-  `RLIMIT_AS`, not any wire number.** Still open: handle lifetime, the warm pool, depth-2. The
+  enforcing bound. **The corpus is bounded by nothing in the config, because it never enters the
+  guest** — `RLIMIT_AS` bounds the *working set*, and an earlier edition of that same layering table
+  asked what corpus size address space permits, which puts the corpus in the one place the handle
+  model says it never is. **A second correction the same day, and the sharper one: `answer.submit(H)`
+  — the by-reference answer sink two records route bulk content through — DOES NOT EXIST.** `submit`
+  takes an expression string and renders a value; there is no handle argument and no host-side
+  resolution. So the doctrine's wholesale hand-off is not capped, it is **unbuilt**, and an unbuilt
+  escape hatch reads exactly like a built one. Also established: `charge_outbound` is called only for
+  the `llm_query` prompt, so the answer is **not on the exfil ledger at all**, and THREAT_MODEL
+  already calls the 64 KiB cap output-shaping *"not a confidentiality or escape control"* — the
+  collapse lives in DATA_MODEL §6 alone. Still open: handle lifetime, the warm pool, depth-2. The
   remaining **[A]** halves (S6, GB, GA-eq) are ≤$5 and **unspent**; S3's and S4's are **banked**.
 
 *Status ledger:* **control plane shipped; a microVM boots, a frame crosses to it, a real database
@@ -963,6 +972,17 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   is also where `llm_help` composes from — and that registry, with its **coverage** diagnostic, is
   now BUILT. What remains unbuilt: `llm_help` itself, the eight further descriptors, the human-doc
   generator, and the advisory-marking convention that belongs with `llm_help`'s frame.
+
+**AMBIENT.md gained rule 24 on 2026-07-24 — what is being built — and it is this class's business
+because it is a self-description that construction has to be able to see.** The rule is numbered
+last and printed first: the target existed only in records a construction decision never had to
+open, and the build converged on the nearest familiar shape. That is rule 20's ordering failure
+raised from measurement to construction, and the placement is the correction. Fitting it obeyed the
+byte discipline rather than the ceiling — the file's least-decisive prose was compressed instead of
+appending past the bound (**8,070 / 8,192**, 122 free). `docs/product/FEATURE_LIST.md` is the
+consequence: eight capability groups, every row marked shipped, built-unreachable, partial or
+absent, written **before** security hardening because a hardening pass over an unspecified feature
+set yields follow-ups rather than a boundary.
 
 *Status ledger:* root contract · machine twin · surface checker · its governed-headroom report · CI
 wiring — **shipped-pinned**;

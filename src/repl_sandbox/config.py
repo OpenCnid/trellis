@@ -52,15 +52,16 @@ def version_at_least(observed: str, minimum: str) -> bool:
 # Four different things get bounded in this system and they are easy to collapse
 # into one number. Keeping them apart is the point of this block:
 #
-#   REPL namespace     the corpus the model works over   `Tier0Limits.address_space_bytes`
-#   one slice          host store -> guest namespace     `BrokerCaps.max_result_bytes`
+#   the corpus         what the model reasons over       *nothing here* — host-side, behind handles
+#   the working set    what it holds in the namespace    `Tier0Limits.address_space_bytes`
+#   one materialisation host store -> guest namespace    `BrokerCaps.max_result_bytes`
 #   model attention    what reaches the transcript       `MarshalCaps` (this file)
 #   one wire message   a single frame                    `DEFAULT_MAX_FRAME_LEN`
 #
-# **The REPL is meant to be large — potentially gigabytes — and read in slices.**
-# None of the bounds below constrain that; the namespace ceiling is the rlimit.
-# A 12 MiB value in the namespace returns a ~4 KB exec reply, because the
-# marshalling caps describe it rather than carrying it.
+# **The corpus is bounded by nothing in this file, because it never enters the
+# guest.** Address space bounds the working set — what the model materialised and
+# is computing over — and nothing else. A 12 MiB value in the namespace returns a
+# ~4 KB exec reply, because the marshalling caps describe it rather than carry it.
 
 #: The context window a slice is sized against, in tokens. Recorded so the
 #: derivation below can be re-run rather than re-guessed.
@@ -87,9 +88,24 @@ BYTES_PER_TOKEN_ESTIMATE = 4
 #: as though it protected the context would repeat, one layer over, the error that
 #: produced the correction.
 #:
-#: Raising this is the single lever for bulk transfer: a corpus arrives in
-#: `ceil(bytes / max_result_bytes)` round trips, so 2 MiB is ~500 calls per GB.
-#: `DEFAULT_MAX_FRAME_LEN` follows it and must be re-derived with it.
+#: **This is not a bulk-transfer bound, because there is no bulk transfer.** The
+#: worker does not move a corpus through itself; it answers questions *about* one
+#: by reading slices and composing a derived response artifact over several turns.
+#: `materialize` is the exception path — DATA_MODEL section 6, whose title is
+#: *The bounded materialisation exception*: *prefer by-reference sinks;
+#: `materialize` is only for when the model itself must compute over the bytes.*
+#: A gigabyte reaching an answer was meant to go `answer.submit(H)`, resolved
+#: host-side and leaving by the audited egress — **an op that does not exist.**
+#: `trellis_answer.submit` takes an expression string and renders a value; there
+#: is no handle argument. Recorded because two records route bulk through it, and
+#: an unbuilt escape hatch reads exactly like a built one.
+#:
+#: So the number to size against is **one computation's working set**, not a
+#: corpus divided by anything. Arithmetic of the form "a corpus takes N calls at
+#: this size" is the tell that the model is being treated as the transport, which
+#: it never is (`docs/architecture/CODE_MEDIATED_TEXT.md` — the model never counts
+#: and never copies, so bulk movement is the engine's job).
+#: `DEFAULT_MAX_FRAME_LEN` follows this constant and must be re-derived with it.
 DEFAULT_MAX_RESULT_BYTES = 2 * 1024 * 1024
 
 #: Hard cap on the declared length of a single wire frame. **Derived from the

@@ -177,7 +177,11 @@ residual the boundary deliberately leaves; its caps are defense-in-depth, **neve
 them host-side, so the model can direct host-resident data to a sink **without ever holding it**:
 `llm_query(prompt="summarise", context=beliefs)` resolves the belief handle host-side, the sub-LLM
 summarises, and only the bounded summary returns (inbound-metered) — the model reasoned over the belief
-base without a row of it entering the guest. Likewise `answer.submit(H)`: the referent leaves via the
+base without a row of it entering the guest. Likewise `answer.submit(H)` — **DESIGNED, NOT BUILT
+(noted 2026-07-24): `trellis_answer.submit` takes an expression string and renders a value; there is
+no handle argument and no host-side resolution. The by-reference answer sink is the doctrine's
+wholesale hand-off and it does not exist** ([FEATURE_LIST.md](../FEATURE_LIST.md) 3.2) — under which
+the referent leaves via the
 audited answer egress, never through the guest namespace. **Prefer by-reference sinks; `materialize`
 is only for when the model itself must compute over the bytes.**
 
