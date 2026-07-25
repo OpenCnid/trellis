@@ -19,6 +19,7 @@ import {
 } from '../src/config/modules';
 
 const MODULES_DIR = path.resolve('modules');
+const TOOLS_PY = path.resolve('src', 'rlm', 'trellis_tools.py');
 
 let passed = 0;
 let failed = 0;
@@ -50,6 +51,29 @@ function addendumTextOnDisk(name: string): string | null {
   const addendumPath = path.join(MODULES_DIR, name, manifest.addendum);
   if (!fs.existsSync(addendumPath)) return null;
   return fs.readFileSync(addendumPath, 'utf-8').replace(/\r\n/g, '\n');
+}
+
+// Which engine surfaces feed a run's CITABLE address set, and which ones
+// spend it. Both are derived from trellis_tools.py's own call sites rather
+// than listed here: a hand-kept copy of either list would keep passing
+// after a new retrieval surface joined the citable set, or after a new
+// write surface reached _run_insight_writes. A `def` line declares, so it
+// is never counted as a call site, and comments are stripped first.
+function pythonMethodsCalling(source: string, call: RegExp): string[] {
+  const found = new Set<string>();
+  let current: string | null = null;
+  for (const raw of source.split('\n')) {
+    const line = raw.split('#')[0];
+    const def = /^\s*def\s+([A-Za-z_]\w*)\s*\(/.exec(line);
+    if (def) {
+      current = def[1];
+      continue;
+    }
+    if (current !== null && call.test(line)) found.add(current);
+  }
+  // Private helpers are plumbing an addendum never names; the model is
+  // taught the public surfaces.
+  return [...found].filter(fn => !fn.startsWith('_')).sort();
 }
 
 const name = process.argv[2];
@@ -154,7 +178,83 @@ if (manifest.status !== 'active') {
   }
 }
 
-// 5. Provenance ids are unique. The schema pins their 64-hex shape but
+// 5. A module that prescribes a provenance WRITE prescribes the RETRIEVAL
+//    that makes its citations legal, and prescribes it FIRST.
+//
+//    The engine constrains a run's citable addresses to the ones a
+//    retrieval tool actually returned to it (_verify_hashes_retrieved),
+//    and that set is fed only by the read/search buckets of _audit_add —
+//    run_cypher deliberately feeds neither, because a sourceNodeIds
+//    property in a query result is a REFERENCE to bytes rather than the
+//    bytes. So an addendum whose steps write derived insights without
+//    ever instructing a retrieval prescribes exactly the batch the write
+//    path refuses whole, on every run that composes it. Order is part of
+//    the property, not a nicety: an addendum is read as a procedure, and
+//    a retrieval instructed after the write it was meant to license
+//    licenses nothing.
+//
+//    What this check reads is instruction text, so it establishes that
+//    the procedure NAMES a retrieval before its writes — not that a run
+//    executes one. That is the class it closes: a module that never asks.
+let retrievalSurfaces: string[] = [];
+let writeSurfaces: string[] = [];
+try {
+  const toolsSource = fs.readFileSync(TOOLS_PY, 'utf-8');
+  retrievalSurfaces = pythonMethodsCalling(toolsSource, /_audit_add\(\s*['"](?:read|search)['"]/);
+  writeSurfaces = pythonMethodsCalling(toolsSource, /_run_insight_writes\(/);
+} catch (err) {
+  check('engine surfaces derive from trellis_tools.py', false, errText(err));
+}
+
+// The anti-vacuity guard. A scan that silently matched nothing would
+// leave the check below reporting success on every addendum ever written,
+// including one that cites addresses no run retrieved.
+const derived =
+  `retrieval [${retrievalSurfaces.join(', ') || 'none'}] / write [${writeSurfaces.join(', ') || 'none'}]`;
+const derivationHeld = retrievalSurfaces.length > 0 && writeSurfaces.length > 0;
+check(
+  `citable-address surfaces derive from the engine — ${derived}`,
+  derivationHeld,
+  'the trellis_tools.py call-site scan found an empty set; the check below would pass anything'
+);
+
+let addendumForCitations: string | null = null;
+try {
+  addendumForCitations = addendumTextOnDisk(name);
+} catch {
+  addendumForCitations = null;
+}
+
+if (!derivationHeld) {
+  skip('prescribes retrieval before it prescribes a provenance write', 'surface derivation failed');
+} else if (addendumForCitations === null) {
+  skip('prescribes retrieval before it prescribes a provenance write', 'addendum unreadable');
+} else {
+  const text = addendumForCitations;
+  const firstMention = (surfaces: string[]): number =>
+    surfaces
+      .map(surface => text.indexOf(surface))
+      .filter(at => at >= 0)
+      .reduce((lowest, at) => (at < lowest ? at : lowest), Number.MAX_SAFE_INTEGER);
+
+  const writesNamed = writeSurfaces.filter(surface => text.includes(surface));
+  const retrievalsNamed = retrievalSurfaces.filter(surface => text.includes(surface));
+  const firstWrite = firstMention(writeSurfaces);
+  const firstRetrieval = firstMention(retrievalSurfaces);
+
+  const detail =
+    retrievalsNamed.length === 0
+      ? `prescribes ${writesNamed.join(', ')} and names no retrieval surface at all — every address it cites would be refused as unretrieved`
+      : `names ${retrievalsNamed.join(', ')} only AFTER ${writesNamed.join(', ')} — the write it licenses runs first, so its citations are still unretrieved`;
+
+  check(
+    'prescribes retrieval before it prescribes a provenance write',
+    writesNamed.length === 0 || firstRetrieval < firstWrite,
+    detail
+  );
+}
+
+// 6. Provenance ids are unique. The schema pins their 64-hex shape but
 //    not their multiplicity, and a repeated id inflates the apparent
 //    research support behind a module without adding a source.
 const ids = manifest.research.sourceNodeIds;

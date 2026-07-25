@@ -137,7 +137,38 @@ def expect_raises(name, fn, needle=""):
 #     each went red again under a one-hex-digit perturbation of the
 #     constant with the prompt restored — so the comparison discriminates
 #     on both sides, not just on whichever one moved.
-COMPOSED_SYSTEM_PROMPT_SHA256 = "d58abbb2918ae85d6389aaf3bea726bae3b8bfcc07691cffd1920b695d8c7bf0"
+#   ce8f59e0...23a8 — July 25, 2026: modules/spatial-flywheel/addendum.txt
+#     gained a retrieval step, and its write steps stopped prescribing
+#     citations the engine refuses. The module is DEFAULT_MODULE_SELECTION,
+#     so this composed into every research run: step 1 loaded
+#     q.sourceNodeIds through run_cypher, and the mandatory cache write
+#     cited those same values as provenance with nothing in between reading
+#     the bytes at those addresses. run_cypher feeds neither the read nor
+#     the search bucket of _audit_add by design — a sourceNodeIds property
+#     in a query result is a REFERENCE to bytes rather than the bytes — so
+#     _verify_hashes_retrieved (src/rlm/trellis_tools.py:443), wired
+#     unconditionally on research runs, refused exactly the batch the
+#     module made mandatory. The new step 2 retrieves the deduped union of
+#     the catalog's addresses in ONE get_ast_texts call, which charges the
+#     per-run retrieval budget once per CALL whatever the batch size
+#     (trellis_tools.py:888) — one fetch of 64 at any sweep size — and the
+#     three write steps now cite only the elements that came back.
+#     Read-then-cite is the legitimate act here, not an evasion: the gate's
+#     own docstring scopes it to transcription and second-hand citation and
+#     leaves read-then-cite to the sampled entailment tier, so what it asks
+#     is that the run actually held the bytes. No predicate, bound, default
+#     or refusal message moved; the engine was right and the module was
+#     wrong. Authored under the prompt-engineering + hypershot-protocol
+#     skills (Guardrail 15), brace-free as both loaders require.
+#     15,658 -> 17,214 composed chars. Both pins were watched failing at
+#     their stale values against the rewritten addendum before either was
+#     trusted (rule 19(c)), and each new value was derived twice in
+#     separate processes. The failure class is now checked rather than
+#     remembered: scripts/test_module.ts refuses a module that names a
+#     write surface without naming a retrieval surface earlier in its own
+#     text, with both surface sets derived from trellis_tools.py's own call
+#     sites rather than listed by hand.
+COMPOSED_SYSTEM_PROMPT_SHA256 = "ce8f59e04f5e36e6ac6d8b23a2d40c93238e8da458d2c31f75f63bc052323a38"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -512,7 +543,15 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     than part of the discipline experiment (still structurally default
 #     minus exactly the block; the structural check below re-proves that
 #     on every run). 15,406 composed chars with the flag set.
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "51eab4af2d953b73366f08772273940dcea3ad4a967fd86719e563c75e99c0aa"
+#   174bbd84...7e09 — the July 25, 2026 spatial-flywheel retrieval-step
+#     repair (see the default pin's history) lands in BOTH arms — a module
+#     addendum composes outside CODE_MEDIATED_TEXT_BLOCK entirely, and a
+#     module prescribing a write the engine refuses is a defect in both
+#     arms rather than part of the discipline experiment (still
+#     structurally default minus exactly the block; the structural check
+#     below re-proves that on every run). 16,962 composed chars with the
+#     flag set.
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "174bbd84b7104bdc046e712126ea9910af1d1c4e7b28dc1a90de57d590397e09"
 
 import subprocess  # noqa: E402
 
