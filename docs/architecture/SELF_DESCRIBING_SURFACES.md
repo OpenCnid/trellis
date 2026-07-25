@@ -653,13 +653,29 @@ do not establish the later:
 
 | rung | property | count today |
 |---|---|---|
-| registered | the surface carries a descriptor | 8 of 9 |
-| contributing | that descriptor carries a `contributes` list | 5 |
-| wired | a run passes it to `compose_contributions` | 2 |
+| registered | the surface carries a descriptor | 8 of 9 injected |
+| contributing | that descriptor carries a `contributes` list | 13 |
+| wired | a run passes it to `compose_contributions` | 8, plus 5 the static read cannot settle |
 
-`check:surfaces` reports the first. Any sentence citing it as progress toward
-the third is citing the wrong rung, and `scripts/test_surfaces.py` pins that the
-ladder narrows.
+*(Figures corrected July 25, 2026 — this table first read 5 contributing and 2
+wired, which was the state when the rung split was written and not the state it
+shipped in.)*
+
+**The ladder is flat now, and it is flat structurally rather than by
+bookkeeping.** The composing call draws its roster from `custom_tools` itself,
+so every surface a run injects is wired and no per-surface wiring decision
+exists to forget. The five it cannot settle are the staged helpers, injected
+conditionally, which the report names rather than counts — unestablished is not
+established (rule 15).
+
+`check:surfaces` reports all three rungs, and `scripts/test_surfaces.py` holds
+the property that matters: **no surface carries a line the composing call
+leaves out.** That check was run against the real historical seam from
+`34538be^` and went red naming eleven surfaces, while the two rungs above it
+stayed green — which is the failure it exists to catch, the cheap rungs reading
+as progress while eleven finished lines reached no model. Its predecessor
+asserted that the ladder *narrows*, which turned an unfinished wiring into a
+pinned property; that assertion is retired.
 
 **The gate this did not run, stated as outstanding rather than declined
 silently.** `attach_contributions` computes the registry × `custom_tools`
