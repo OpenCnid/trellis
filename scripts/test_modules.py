@@ -116,7 +116,27 @@ def expect_raises(name, fn, needle=""):
 #     skills (Guardrail 15). Rationale: .claude/rules/measurement-and-reporting.md rule 8 — tooling shape
 #     closes a failure class, prompt text only reinforces; both of these
 #     were reinforcement with nothing behind it.
-COMPOSED_SYSTEM_PROMPT_SHA256 = "ee5bfca69a8da64c3ba78e4e6d02c9c81ac921274166e871648786c0ff241200"
+#   d58abbb2...7bf0 — July 25, 2026, owner-authorized: the ITERATION
+#     BUDGET paragraph in _ADDENDUM_BASE_SUFFIX stopped telling the model
+#     to collapse several turns into one load ("Combine as many protocol
+#     steps as possible into each single repl block"). AMBIENT.md rule 24
+#     names that instruction as falsifying what Trellis is — the worker
+#     answers ACROSS turns about a context larger than any one load, so a
+#     kernel optimizing for a single big load contradicts the product —
+#     and docs/product/FEATURE_LIST.md row 2.6 carried it as wrong shape.
+#     The replacement scopes each repl block to the step at hand, has the
+#     turn leave the running state further along than it found it, and
+#     keeps the anti-idling clause, so what left is the batching directive
+#     alone. The prompt bytes were authored in a separate pass, which left
+#     both pins stale on purpose so that recomputing them is an
+#     independent act; this pin was derived here from the tree afterwards,
+#     twice in separate processes. 15,427 -> 15,658 composed chars. Both
+#     pins were watched failing before they were trusted (rule 19(c)):
+#     each went red at its stale value against the rewritten prompt, and
+#     each went red again under a one-hex-digit perturbation of the
+#     constant with the prompt restored — so the comparison discriminates
+#     on both sides, not just on whichever one moved.
+COMPOSED_SYSTEM_PROMPT_SHA256 = "d58abbb2918ae85d6389aaf3bea726bae3b8bfcc07691cffd1920b695d8c7bf0"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -372,7 +392,13 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     task adjudication surface are kernel scaffolding, not part of the
 #     discipline experiment (still structurally default minus exactly
 #     the block; the structural check below re-proves that on every run).
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "322cbe5dc5f73a279ee253910dbf1e6d4e1267c64c1c11289f975f93824245ae"
+#   51eab4af...c0aa — the July 25, 2026 ITERATION BUDGET rewrite (see the
+#     default pin's history) lands in BOTH arms — the batching directive
+#     sat in _ADDENDUM_BASE_SUFFIX, which is kernel scaffolding rather
+#     than part of the discipline experiment (still structurally default
+#     minus exactly the block; the structural check below re-proves that
+#     on every run). 15,406 composed chars with the flag set.
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "51eab4af2d953b73366f08772273940dcea3ad4a967fd86719e563c75e99c0aa"
 
 import subprocess  # noqa: E402
 

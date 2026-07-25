@@ -16,9 +16,13 @@ sys.path.insert(0, sys.argv[1])
 from trellis_scaffold import (  # noqa: E402
     CITABLE_ADDENDUM,
     HELPERS_ADDENDUM,
+    TASK_DESCRIPTOR,
     TASK_GREP_MAX_HITS,
     TASK_VERIFY_PREVIEW_CHARS,
     UPSUM_BUDGET,
+    UPSUM_DESCRIPTOR,
+    UPSUM_MAX_DOMAIN_KEYS,
+    UPSUM_STANDING_KEYS,
     TrellisTask,
     TrellisUpsum,
     UpsumBudgetError,
@@ -26,9 +30,11 @@ from trellis_scaffold import (  # noqa: E402
     build_citable_addendum,
     build_helpers_addendum,
     build_scaffold_helpers,
+    derive_upsum_expects,
     parse_task_named_files,
     wrap_task_text,
 )
+from trellis_surfaces import descriptor_for  # noqa: E402
 from trellis_textedit import TrellisTextEdit  # noqa: E402
 
 out = {}
@@ -179,6 +185,132 @@ out["ptnf_refusals"] = [
     raised(lambda: parse_task_named_files({"TRELLIS_TASK_NAMED_FILES": "[42]"})),
     raised(lambda: parse_task_named_files({"TRELLIS_TASK_NAMED_FILES": json.dumps(["x" * 513])})),
 ]
+
+# --- surface self-description (SELF_DESCRIBING_SURFACES.md §9.1/§11) ------
+# Both descriptors are bound at their surfaces' definition sites, so
+# IMPORTING this module is what registers them (one call site, one
+# commitment). rlms renders one description line per injected surface;
+# with nothing registered these read to the model as bare type names.
+out["task_descriptor_registered"] = descriptor_for("trellis_task") is TASK_DESCRIPTOR
+out["upsum_descriptor_registered"] = descriptor_for("trellis_upsum") is UPSUM_DESCRIPTOR
+out["descriptor_purposes_non_empty"] = (
+    bool(TASK_DESCRIPTOR["purpose"].strip())
+    and bool(UPSUM_DESCRIPTOR["purpose"].strip())
+)
+# The split the §9.1 ownership rule produces here: trellis_task's
+# expectations are AUTHORED (nothing a run varies), trellis_upsum's are
+# DERIVED, so its descriptor carries no `expects` to disagree with them.
+out["task_expects_authored"] = "expects" in TASK_DESCRIPTOR
+out["upsum_expects_not_authored"] = "expects" not in UPSUM_DESCRIPTOR
+
+
+def _strings(value):
+    """Every string reachable inside a descriptor or derived mapping."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        acc = []
+        for k, v in value.items():
+            if isinstance(k, str):
+                acc.append(k)
+            acc.extend(_strings(v))
+        return acc
+    if isinstance(value, (list, tuple)):
+        return [s for item in value for s in _strings(item)]
+    return []
+
+
+# These bytes can reach a prompt rlms runs .format() over, so the whole
+# reachable string set is brace-free (rule 6, the addenda pin's mold).
+_descriptor_strings = (
+    _strings(TASK_DESCRIPTOR)
+    + _strings(UPSUM_DESCRIPTOR)
+    + _strings(derive_upsum_expects(TrellisUpsum()))
+)
+out["descriptor_strings_brace_free"] = all(
+    "{" not in s and "}" not in s for s in _descriptor_strings
+)
+out["descriptor_strings_counted"] = len(_descriptor_strings) > 20
+
+
+def _contributed_line(descriptor):
+    """The line this descriptor's own `contributes` pieces compose to,
+    resolved from the descriptor's own fields. Local to the drill on
+    purpose: the shared frame owns composition, and what is under test
+    here is the DATA this module authors — that every slot resolves and
+    the result is one clean line. Returns None when a slot points at a
+    field the descriptor does not carry as text."""
+    parts = []
+    for piece in descriptor.get("contributes", []):
+        if isinstance(piece, str):
+            parts.append(piece)
+            continue
+        tag, key = piece
+        if tag != "descriptor" or not isinstance(descriptor.get(key), str):
+            return None
+        parts.append(descriptor[key])
+    return "".join(parts)
+
+
+_task_line = _contributed_line(TASK_DESCRIPTOR)
+_upsum_line = _contributed_line(UPSUM_DESCRIPTOR)
+out["contributed_lines_resolve"] = _task_line is not None and _upsum_line is not None
+# One line per surface, and the four ways a description slot breaks:
+# empty, edge whitespace, more than one line, or a brace.
+out["contributed_lines_are_one_clean_line"] = all(
+    isinstance(line, str) and bool(line) and line == line.strip()
+    and "\n" not in line and "\r" not in line
+    and "{" not in line and "}" not in line
+    for line in (_task_line, _upsum_line)
+)
+# Bounded so three scaffold surfaces stay inside a third of the shared
+# 2000-character contribution budget: 320 each is the stated ceiling.
+out["contributed_lines_bounded"] = all(
+    isinstance(line, str) and len(line) <= 320
+    for line in (_task_line, _upsum_line)
+)
+# The line PULLS rather than restates: everything but the connective
+# comes from a field the descriptor already owns (§9.1). The authored
+# bytes are what is left over, and they stay connective-sized.
+out["contributed_authored_bytes"] = max(
+    sum(len(p) for p in d["contributes"] if isinstance(p, str))
+    for d in (TASK_DESCRIPTOR, UPSUM_DESCRIPTOR)
+)
+
+# THE DERIVATION DISCRIMINATES. The budget sentence is read off the same
+# attribute commit() compares the measured size against, so an instance
+# built with a different budget describes THAT budget. This is what
+# distinguishes trellis_upsum from the other scaffold surfaces: nothing
+# on trellis_task varies that its description should carry.
+_u2000 = TrellisUpsum(2000)
+_u500 = TrellisUpsum(500)
+out["upsum_expects_follows_instance"] = (
+    derive_upsum_expects(_u2000)["budget"] != derive_upsum_expects(_u500)["budget"]
+    and "2000-character budget" in derive_upsum_expects(_u2000)["budget"]
+    and "500-character budget" in derive_upsum_expects(_u500)["budget"]
+)
+# ...and the number the description states is the number the REFUSAL
+# states: one encoding, owned by the guard (§9.1). A description that
+# named the constant instead would be a second copy free to drift.
+try:
+    _u500.commit(dict(done=["y" * 600], pending=[], blocked=[], decisive_facts=[]))
+    _refusal_500 = ""
+except UpsumBudgetError as e:
+    _refusal_500 = str(e)
+out["upsum_description_number_is_refusal_number"] = (
+    "500-character budget" in _refusal_500
+    and "500-character budget" in derive_upsum_expects(_u500)["budget"]
+)
+# The standing keys and the domain-key cap are read from the constants
+# _validate itself iterates and compares, so adding a standing key or
+# moving the cap moves the sentence with it.
+_derived = derive_upsum_expects(_u2000)
+out["upsum_expects_names_standing_keys"] = all(
+    k in _derived["standing_keys"] for k in UPSUM_STANDING_KEYS
+)
+out["upsum_expects_names_domain_cap"] = (
+    str(UPSUM_MAX_DOMAIN_KEYS) in _derived["domain_key_bound"]
+)
 
 # --- S3: frame helpers over a real toolkit --------------------------------
 root = tempfile.mkdtemp(prefix="scaffold-unit-")

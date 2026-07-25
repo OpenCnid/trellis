@@ -246,6 +246,90 @@ check("the taught surface is brace-free beyond the rlms base (format safety)",
       and "{" not in trellis_agent.TRELLIS_ADDENDUM.replace("{{", "")
       .replace("}}", ""))
 
+# --- 7. The surface descriptor -------------------------------------------------
+# docs/architecture/SELF_DESCRIBING_SURFACES.md §9.1 (one encoding, owned
+# by whoever is authoritative for the fact) and §11 (a descriptor is a
+# REGISTRATION, not a validated schema). rlms reserves one description
+# line per injected surface; unregistered, this one reads to the model as
+# a bare type name.
+print("\n[7] the surface descriptor")
+
+from trellis_answer import ANSWER_DESCRIPTOR  # noqa: E402
+from trellis_surfaces import descriptor_for  # noqa: E402
+
+
+def descriptor_strings(value):
+    """Every string reachable inside the descriptor."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        acc = []
+        for key, item in value.items():
+            if isinstance(key, str):
+                acc.append(key)
+            acc.extend(descriptor_strings(item))
+        return acc
+    if isinstance(value, (list, tuple)):
+        return [s for item in value for s in descriptor_strings(item)]
+    return []
+
+
+check("the descriptor is bound at the surface's own definition site",
+      descriptor_for("trellis_answer") is ANSWER_DESCRIPTOR)
+check("it carries a non-empty one-line purpose for the rlms description slot",
+      bool(ANSWER_DESCRIPTOR["purpose"].strip()))
+# Every property a guard enforces lives once, in the expects mapping;
+# `purpose` states no bound, so the two cannot disagree (§9.1).
+check("guard-backed expectations are keyed by guard class, not folded into purpose",
+      sorted(ANSWER_DESCRIPTOR["expects"]) == [
+          "content_bound", "expression_bound", "expression_text",
+          "no_bare_literal", "none_refused"])
+# NO derive_answer_expects exists, and that is the finding: this surface
+# takes no constructor arguments and every bound it enforces is a kernel
+# constant, so a derivation would return one mapping on every run.
+import trellis_answer  # noqa: E402
+
+check("no derive_*_expects is shipped — nothing here varies per run",
+      not any(n.startswith("derive_") for n in dir(trellis_answer)))
+_strings = descriptor_strings(ANSWER_DESCRIPTOR)
+check("every reachable descriptor string is brace-free (rlms .format safety)",
+      len(_strings) > 10
+      and all("{" not in s and "}" not in s for s in _strings))
+
+
+def contributed_line(descriptor):
+    """The line this descriptor's own `contributes` pieces compose to,
+    resolved from the descriptor's own fields. Local to this drill: the
+    shared frame owns composition, and what is checked here is the DATA
+    this module authors. None when a slot names a field the descriptor
+    does not carry as text."""
+    parts = []
+    for piece in descriptor.get("contributes", []):
+        if isinstance(piece, str):
+            parts.append(piece)
+            continue
+        tag, key = piece
+        if tag != "descriptor" or not isinstance(descriptor.get(key), str):
+            return None
+        parts.append(descriptor[key])
+    return "".join(parts)
+
+
+line = contributed_line(ANSWER_DESCRIPTOR)
+check("the contributed pieces all resolve against this descriptor's own fields",
+      line is not None)
+# The four ways rlms's one-line description slot breaks: empty, edge
+# whitespace, more than one line, or a brace.
+check("they compose to exactly one clean, bounded description line",
+      bool(line) and line == line.strip()
+      and "\n" not in line and "\r" not in line
+      and "{" not in line and "}" not in line and len(line) <= 320)
+# The line PULLS rather than restates: everything but the connective
+# comes from a field the descriptor already owns (§9.1).
+check("the line pulls from descriptor fields rather than restating them",
+      sum(len(p) for p in ANSWER_DESCRIPTOR["contributes"]
+          if isinstance(p, str)) <= 32)
+
 # ---------------------------------------------------------------------------
 if failures:
     print(f"\n{failures} check(s) failed.")

@@ -42,6 +42,7 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Protocol
 
+from repl_sandbox.capabilities import HANDLE_SCHEMA
 from repl_sandbox.config import SandboxConfig
 from repl_sandbox.errors import (
     CapBytesError,
@@ -51,6 +52,7 @@ from repl_sandbox.errors import (
     UpstreamError,
 )
 from repl_sandbox.policy import ApocAllowlist, inspect_cypher, inspect_sql
+from repl_sandbox.surfaces import describes
 
 if TYPE_CHECKING:  # collaborators arrive by injection; only the types are needed here
     from repl_sandbox.audit import AuditLog
@@ -248,6 +250,93 @@ def _json_bytes(value: Any) -> int:
 def _digest(blob: str) -> str:
     """The audit line's args digest — a hash, so no argument content is logged."""
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# Guard-owned expectation phrases
+# ---------------------------------------------------------------------------
+
+#: ONE encoding per guard class, keyed by the predicate that is authoritative
+#: for it, and read only by the `@describes` decorations below. The comment over
+#: each entry names the guard; granularity is the guard CLASS rather than the
+#: raise site, so `metered` accounts for both `charge_inbound` calls in
+#: `_op_slice` and `bounded_window` for both the row-cap and the byte-fit trims.
+#:
+#: These live here because the code that refuses lives here. Before this pass
+#: they were typed into descriptor prose in `host.py`, three modules away from
+#: every predicate they described — the drift `SELF_DESCRIBING_SURFACES.md`
+#: section 3.3 names, where a documented gate and the real gate agree today with
+#: nothing binding them.
+#:
+#: Operator-facing guards have no phrase on purpose: `_check_backend_posture`
+#: refuses a misdeclared backend before any session exists, and the composed
+#: read is addressed to the model.
+_BROKER_GUARD_EXPECTS: dict[str, str] = {
+    # `policy.inspect_sql` / `inspect_cypher`: anything that is not a single
+    # read-only statement is refused before a backend is reached.
+    "read_only": (
+        "One read-only statement per call; a write, a multi-statement string, or "
+        "a denied construct is refused before any backend is reached."
+    ),
+    # `_land_result`: `broker_caps.max_rows` and `max_result_bytes`, checked
+    # against the result before it is parked and a handle minted.
+    "result_caps": (
+        "A result over the host's row cap or result-byte cap is refused whole; "
+        "no handle is minted for it."
+    ),
+    # `_check_deadline`: an over-budget result is refused after the fact, since
+    # the cancelling control is the backend's own session timeout.
+    "deadline": (
+        "A statement that ran past its host-side budget is refused rather than "
+        "returned late."
+    ),
+    # `_substitute`: a parameter of exactly `{id, kind}` is resolved against the
+    # host's own handle table and bound host-side.
+    "handle_params": (
+        "A parameter that is a handle is resolved host-side and bound into the "
+        "statement; its referent is never readable from here."
+    ),
+    # `_referent` / `HandleTable.resolve`: an unknown, expired, or foreign-CID
+    # handle is refused; there is no path from an id to another session's data.
+    "handle_resolution": (
+        "The handle argument is resolved against this session's own table; an "
+        "unknown, expired, or foreign handle is refused."
+    ),
+    # `_parse_span`: half-open, integer, non-negative, end not before start.
+    "span": (
+        "The span is half-open [start, end) with non-negative integer bounds and "
+        "end not before start; a negative index is refused rather than wrapped."
+    ),
+    # `ByteLedger.charge_inbound`: the returned bytes are charged before they are
+    # returned, and a spent per-call or cumulative ledger raises with nothing
+    # crossing.
+    "metered": (
+        "The returned bytes are charged against this session's inbound ledger "
+        "before they are returned; a spent ledger raises and nothing crosses."
+    ),
+    # `broker_caps.max_rows` plus `_fit_rows` against `byte_caps.inbound_per_call`.
+    "bounded_window": (
+        "A window over the row cap or over one call's inbound byte allowance is "
+        "trimmed and the result carries truncated=True."
+    ),
+    # `_op_materialize`'s own `raise CapBytesError`: over-cap is refused, never
+    # trimmed, so a caller cannot mistake a short result for the whole referent.
+    "whole_or_nothing": (
+        "A referent over one call's inbound cap is refused rather than trimmed, "
+        "so a returned result is always the whole referent; window it instead."
+    ),
+    # The absence that makes this component correct: no op here returns rows
+    # except the two named sinks (`Broker.CONTENT_OPS`).
+    "no_content": (
+        "The result is a handle plus row count and column schema; no row of the "
+        "referent crosses."
+    ),
+    # `_op_resolve_meta`: shape, length and schema, and nothing addressed by them.
+    "meta_only": (
+        "Shape, length and column schema only; no element of the referent "
+        "crosses."
+    ),
+}
 
 
 # ---------------------------------------------------------------------------
@@ -451,6 +540,23 @@ class Broker:
             raise UpstreamError(f"no {name} backend is configured on this broker")
         return backend
 
+    @describes(
+        doc=(
+            "Run one read-only SQL statement host-side and return an opaque handle "
+            "plus its row count and column schema."
+        ),
+        dispatch_ref="trellis.db.v1.run_query",
+        properties={"sql": {"type": "string"}, "params": {"type": "array"}},
+        required=["sql"],
+        expects=(
+            _BROKER_GUARD_EXPECTS["read_only"],
+            _BROKER_GUARD_EXPECTS["no_content"],
+            _BROKER_GUARD_EXPECTS["handle_params"],
+            _BROKER_GUARD_EXPECTS["result_caps"],
+            _BROKER_GUARD_EXPECTS["deadline"],
+        ),
+        error_codes=("denied", "timeout", "upstream"),
+    )
     def _op_run_query(
         self, cid: int, args: dict, session: Any
     ) -> tuple[dict, dict[str, Any]]:
@@ -469,6 +575,27 @@ class Broker:
         self._check_deadline(elapsed_ms, self.config.broker_caps.statement_timeout_ms, "statement")
         return self._land_result(cid, result, elapsed_ms)
 
+    @describes(
+        doc=(
+            "Run one read-only Cypher query host-side and return an opaque handle "
+            "plus its row count and column schema."
+        ),
+        dispatch_ref="trellis.db.v1.run_cypher",
+        properties={"query": {"type": "string"}, "params": {"type": "object"}},
+        required=["query"],
+        expects=(
+            _BROKER_GUARD_EXPECTS["read_only"],
+            # `ApocAllowlist.check`, deny-by-default: the allowlist is empty
+            # unless the host was constructed with one.
+            "Only APOC procedures the operator allowlisted are reachable; the "
+            "default allowlist is empty.",
+            _BROKER_GUARD_EXPECTS["no_content"],
+            _BROKER_GUARD_EXPECTS["handle_params"],
+            _BROKER_GUARD_EXPECTS["result_caps"],
+            _BROKER_GUARD_EXPECTS["deadline"],
+        ),
+        error_codes=("denied", "timeout", "upstream"),
+    )
     def _op_run_cypher(
         self, cid: int, args: dict, session: Any
     ) -> tuple[dict, dict[str, Any]]:
@@ -488,6 +615,17 @@ class Broker:
         self._check_deadline(elapsed_ms, self.config.broker_caps.bolt_timeout_ms, "bolt")
         return self._land_result(cid, result, elapsed_ms)
 
+    @describes(
+        doc="Report the shape, length, and column schema of a handle's referent.",
+        dispatch_ref="trellis.db.v1.resolve_meta",
+        properties={"handle": HANDLE_SCHEMA},
+        required=["handle"],
+        expects=(
+            _BROKER_GUARD_EXPECTS["meta_only"],
+            _BROKER_GUARD_EXPECTS["handle_resolution"],
+        ),
+        error_codes=("denied", "upstream"),
+    )
     def _op_resolve_meta(
         self, cid: int, args: dict, session: Any
     ) -> tuple[dict, dict[str, Any]]:
@@ -507,6 +645,19 @@ class Broker:
             f"resolve_meta is not defined for a {type(referent).__name__} referent"
         )
 
+    @describes(
+        doc="Return the half-open window [start, end) of a handle's referent.",
+        dispatch_ref="trellis.db.v1.slice",
+        properties={"handle": HANDLE_SCHEMA, "span": {"type": "object"}},
+        required=["handle", "span"],
+        expects=(
+            _BROKER_GUARD_EXPECTS["handle_resolution"],
+            _BROKER_GUARD_EXPECTS["span"],
+            _BROKER_GUARD_EXPECTS["bounded_window"],
+            _BROKER_GUARD_EXPECTS["metered"],
+        ),
+        error_codes=("denied", "cap_bytes", "upstream"),
+    )
     def _op_slice(self, cid: int, args: dict, session: Any) -> tuple[dict, dict[str, Any]]:
         """The bounded, audited, byte-charged path by which rows reach the guest.
 
@@ -544,6 +695,18 @@ class Broker:
         self.byte_ledger.charge_inbound(cid, size)
         return ({"rows": kept, "truncated": truncated}, {"rows": len(kept), "bytes": size})
 
+    @describes(
+        doc="Return a handle's whole referent.",
+        dispatch_ref="trellis.db.v1.materialize",
+        properties={"handle": HANDLE_SCHEMA},
+        required=["handle"],
+        expects=(
+            _BROKER_GUARD_EXPECTS["handle_resolution"],
+            _BROKER_GUARD_EXPECTS["whole_or_nothing"],
+            _BROKER_GUARD_EXPECTS["metered"],
+        ),
+        error_codes=("denied", "cap_bytes", "upstream"),
+    )
     def _op_materialize(
         self, cid: int, args: dict, session: Any
     ) -> tuple[dict, dict[str, Any]]:

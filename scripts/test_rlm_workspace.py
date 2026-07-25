@@ -14,6 +14,7 @@
 #       semantics pin against the installed rlms==0.1.3 (Appendix A of
 #       the design record) — an rlms upgrade that changes namespace
 #       semantics must fail this suite loudly.
+import hashlib
 import json
 import os
 import re
@@ -255,6 +256,29 @@ try:
               json.loads(one_slot.read())["usage"]["segments"] == 1)
     finally:
         one_client.close()
+
+    # The MCP surface's result-shape account, on both live arms. The
+    # sentence about what call_tool returns when a workspace is attached
+    # lives in WORKSPACE_ADDENDUM today, but the predicate that decides it
+    # is trellis_mcp.call_tool's `self._workspace is not None` branch — so
+    # the descriptor layer homes it there, and derive_mcp_expects selects
+    # the arm by reading the very attribute the branch reads
+    # (HARNESS_SELF_MODEL.md §2.1). Both clients above just exercised their
+    # own arm, so the account is checked against observed return shapes.
+    from trellis_mcp import derive_mcp_expects, _MCP_GUARD_EXPECTS  # noqa: E402
+    attached = derive_mcp_expects(client)
+    detached = derive_mcp_expects(legacy_client)
+    check("the result-shape account is selected by the attribute call_tool branches on",
+          attached["capturesToWorkspace"] is True
+          and detached["capturesToWorkspace"] is False
+          and attached["result_shape"] is _MCP_GUARD_EXPECTS["capture_stub"]
+          and detached["result_shape"] is _MCP_GUARD_EXPECTS["direct_result"])
+    check("the attached arm's account names the stub this run actually received",
+          all(word in attached["result_shape"]
+              for word in ("STUB", "server", "tool", "segment id", "preview"))
+          and set(stub) == {"server", "tool", "segmentId", "bytes", "truncated", "preview"})
+    check("the detached arm's account names the inline result this run actually received",
+          "inline" in detached["result_shape"] and set(legacy) == {"server", "tool", "result"})
 
     check("workspace and MCP activity never increment the database tool-call count",
           get_tool_call_count() == 0)
@@ -613,6 +637,188 @@ check("32 MiB snapshot parse + re-serialize is byte-identical (canonical form)",
       json.dumps(snap_hard, sort_keys=True, separators=(",", ":")) == parked_hard)
 check("1024-segment snapshot parse + re-serialize is byte-identical (canonical form)",
       json.dumps(count_parsed, sort_keys=True, separators=(",", ":")) == count_parked)
+
+# --- 9. The surface descriptor (Workstream B, July 25, 2026) ---------------
+# One encoding per fact (SELF_DESCRIBING_SURFACES.md §9.1). The claim under
+# test is not that prose exists but that the guard-backed half is read off
+# the guards: the two budget sentences carry THIS run's numbers because
+# they are composed from the same attributes capture() and
+# _require_byte_budget compare against, and each is checked against the
+# refusal those guards actually raise. Nothing here renders, and the
+# addendum equality checks in sections 4 and 6 are what hold the live
+# prompt bytes still.
+print("\n[9] surface descriptor: registration, brace-freedom, and the budget tie")
+
+from trellis_surfaces import descriptor_for  # noqa: E402
+from trellis_workspace import (  # noqa: E402
+    WORKSPACE_DESCRIPTOR,
+    WORKSPACE_SEEDED_ADDENDUM,
+    _WORKSPACE_GUARD_EXPECTS,
+    derive_workspace_expects,
+)
+
+
+def authored_strings(node):
+    """Every string a human wrote into a descriptor. Tuples are guard
+    REFERENCES rather than authored bytes, so their contents are skipped;
+    everything else is walked generically. Walking beats naming the fields
+    here: descriptors are a registration and fields vary per surface
+    (SELF_DESCRIBING_SURFACES.md §11), so a helper that listed them would
+    silently stop covering the field somebody adds next."""
+    if isinstance(node, str):
+        return [node]
+    if isinstance(node, tuple):
+        return []
+    if isinstance(node, dict):
+        out = []
+        for key, value in node.items():
+            out.append(key)
+            out += authored_strings(value)
+        return out
+    if isinstance(node, list):
+        out = []
+        for item in node:
+            out += authored_strings(item)
+        return out
+    return []
+
+
+check("the descriptor is registered at the surface's own definition site",
+      descriptor_for("trellis_workspace") is WORKSPACE_DESCRIPTOR)
+
+ws_strings = authored_strings(WORKSPACE_DESCRIPTOR) + list(_WORKSPACE_GUARD_EXPECTS.values())
+check("every authored descriptor string is brace-free (rlms .format() safety)",
+      all("{" not in s and "}" not in s for s in ws_strings))
+
+# The tie that makes a budget sentence guard-backed rather than authored:
+# the number the account states is the number the guard refuses past. Both
+# bounds sit well under the defaults so the refusal is reachable here and
+# a default leaking in would be visible.
+tiny = TrellisWorkspace(max_segments=1, max_bytes=400, goal_id="goal-desc")
+tiny_expects = derive_workspace_expects(tiny)
+check("the derived budgets are this run's own bounds, not the defaults",
+      tiny_expects["maxSegments"] == 1 and tiny_expects["maxBytes"] == 400
+      and tiny_expects["maxSegments"] != WORKSPACE_MAX_SEGMENTS_DEFAULT
+      and tiny_expects["maxBytes"] != WORKSPACE_MAX_BYTES_DEFAULT)
+check("each budget sentence carries its own guard's number",
+      "budget for this run is 1;" in tiny_expects["segment_budget"]
+      and "budget for this run is 400," in tiny_expects["byte_budget"])
+
+tiny.capture(server="s", tool="t", args_hash="0" * 16, content="a", truncated=False)
+segment_refusal = ""
+try:
+    tiny.capture(server="s", tool="t", args_hash="0" * 16, content="b", truncated=False)
+except WorkspaceBudgetError as e:
+    segment_refusal = str(e)
+check("the segment number in the account is the number in the refusal",
+      str(tiny_expects["maxSegments"]) in segment_refusal
+      and "segment budget exceeded" in segment_refusal.lower())
+
+byte_ws = TrellisWorkspace(max_segments=4, max_bytes=400)
+byte_expects = derive_workspace_expects(byte_ws)
+byte_refusal = ""
+try:
+    byte_ws.add_note("x" * 500)
+except WorkspaceBudgetError as e:
+    byte_refusal = str(e)
+check("the byte number in the account is the number in the refusal",
+      str(byte_expects["maxBytes"]) in byte_refusal
+      and "byte budget exceeded" in byte_refusal.lower())
+
+# Activation cause 1 of 3 — goal scope — is DERIVED, from the very
+# attribute capture() stamps onto a segment.
+goal_expects = derive_workspace_expects(capture_ws)
+check("goalScoped derives from the attribute capture stamps segments with",
+      goal_expects["goalScoped"] is True
+      and goal_expects["goalId"] == captured["goalId"]
+      and derive_workspace_expects(TrellisWorkspace())["goalScoped"] is False)
+
+# Activation cause 2 of 3 — seeding — is NOT derivable: seed_from_snapshot
+# leaves no mark on the instance and no guard consults seededness, so it
+# arrives as a caller flag and the phrase it selects is editorial.
+check("seeded is a caller flag, not a read: one holder answers both ways",
+      derive_workspace_expects(capture_ws, seeded=True)["seeded"] is True
+      and derive_workspace_expects(capture_ws)["seeded"] is False)
+check("the seeded account sits in the editorial half, not among the guard phrases",
+      "seeded_run" in WORKSPACE_DESCRIPTOR["usage"]
+      and not any("seed" in key for key in _WORKSPACE_GUARD_EXPECTS))
+
+# Activation cause 3 of 3 — an attached MCP client — is the OTHER
+# surface's state, so its sentence is not restated here.
+check("the capture-stub sentence is homed on trellis_mcp, not restated here",
+      _MCP_GUARD_EXPECTS["capture_stub"] not in " ".join(ws_strings)
+      and "call_tool" not in " ".join(authored_strings(WORKSPACE_DESCRIPTOR)))
+
+# Run ids arrive from argv and are never charset-validated, so they stay
+# DATA in the derived dict and reach no phrase: a brace in a goal id must
+# not become a brace in a string rlms will run .format() over.
+hostile = TrellisWorkspace(goal_id="goal-{0}", task_id="task-{1}")
+hostile_expects = derive_workspace_expects(hostile, seeded=True)
+hostile_phrases = {key: value for key, value in hostile_expects.items()
+                   if isinstance(value, str) and key not in ("goalId", "taskId")}
+check("derived phrases stay brace-free even when the run ids carry braces",
+      all("{" not in v and "}" not in v for v in hostile_phrases.values())
+      and hostile_expects["goalId"] == "goal-{0}"
+      and hostile_expects["taskId"] == "task-{1}")
+
+# The inventories are closed and pre-stated: a key added or dropped
+# without touching this pin is drift.
+check("the guard-expectation inventory is exactly the pre-stated set",
+      set(_WORKSPACE_GUARD_EXPECTS) == {
+          "index_excludes_content", "unknown_segment", "plan_json",
+          "plan_replacement", "note_shape", "goal_stamped"})
+check("the derived keys are the guard phrases plus the run-state account",
+      set(tiny_expects) == set(_WORKSPACE_GUARD_EXPECTS) | {
+          "maxSegments", "maxBytes", "goalId", "taskId", "goalScoped",
+          "seeded", "segment_budget", "byte_budget"})
+
+# One encoding, enforced both ways: no guard-owned phrase may be restated
+# inside an editorial field, and every reference the descriptor makes must
+# resolve to an owner.
+check("no guard-owned phrase is restated in an editorial field",
+      not any(phrase in bit
+              for phrase in _WORKSPACE_GUARD_EXPECTS.values()
+              if len(phrase) >= 30
+              for bit in authored_strings(WORKSPACE_DESCRIPTOR)))
+ws_refs = [p[1] for entry in WORKSPACE_DESCRIPTOR["exposes"]
+           for p in entry["doc"] if isinstance(p, tuple)]
+check("every guard reference in exposes resolves in the derived expectations",
+      bool(ws_refs) and all(key in tiny_expects for key in ws_refs))
+check("every tail reference resolves to its owner",
+      all(key in (tiny_expects if kind == "expects" else WORKSPACE_DESCRIPTOR["usage"])
+          for kind, key in WORKSPACE_DESCRIPTOR["tail"]))
+
+# Recorded, not retired: WORKSPACE_ADDENDUM still hand-authors the budget
+# line the guards now own, because moving those bytes is a separate
+# authorized pass. This check fails the day someone moves them silently.
+check("the addendum still carries its own budget line (recorded, not retired)",
+      "Budgets are bounded" in WORKSPACE_ADDENDUM
+      and tiny_expects["byte_budget"] not in WORKSPACE_ADDENDUM)
+check("the descriptor layer moved no addendum bytes",
+      build_workspace_addendum(capture_ws) == WORKSPACE_ADDENDUM
+      and build_workspace_addendum(capture_ws, seeded=True)
+      == WORKSPACE_ADDENDUM + WORKSPACE_SEEDED_ADDENDUM)
+
+# PIN: the addendum bytes themselves, recorded July 25, 2026 BEFORE the
+# descriptor layer was added and unchanged by it. The equality checks
+# above compare the composition against the constant, so an edit to the
+# constant moves both sides together and neither notices; a digest
+# recorded outside the run is what catches that.
+WORKSPACE_ADDENDUM_SHA256 = (
+    "9b2c27c3d138edd3df61aa53bca9980f84644125074f3652663ad1bde42a6e0f")
+WORKSPACE_SEEDED_ADDENDUM_SHA256 = (
+    "7d47c68963c87740c1567c8b1a228c243e190d89b8839de8d8f3d73901d5740a")
+unseeded_sha = hashlib.sha256(
+    build_workspace_addendum(capture_ws).encode("utf-8")).hexdigest()
+seeded_sha = hashlib.sha256(
+    build_workspace_addendum(capture_ws, seeded=True).encode("utf-8")).hexdigest()
+check("PIN: the unseeded addendum bytes are the recorded ones",
+      unseeded_sha == WORKSPACE_ADDENDUM_SHA256,
+      f"got {unseeded_sha} over {len(WORKSPACE_ADDENDUM)} chars")
+check("PIN: the seeded addendum bytes are the recorded ones",
+      seeded_sha == WORKSPACE_SEEDED_ADDENDUM_SHA256,
+      f"got {seeded_sha} over "
+      f"{len(WORKSPACE_ADDENDUM + WORKSPACE_SEEDED_ADDENDUM)} chars")
 
 # ---------------------------------------------------------------------------
 if failures:

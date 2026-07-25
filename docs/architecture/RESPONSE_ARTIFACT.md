@@ -70,10 +70,18 @@ this record makes.
   documents exactly as readily as sixty-four paragraphs, so a model optimising against the budget
   **maximises bytes per fetch**. The per-root dedup on `get_ast_blocks` sharpens it: one read of a
   document, ever — under-fetching is unrecoverable, over-fetching is free.
-- **`ITERATION BUDGET` instructs the opposite of composition.** The kernel tells the worker it has
-  *"very few REPL turns"*, to combine loading and computing into **one** block, and not to *"spend a
-  turn on tiny exploratory prints"* — against a `--max-iterations` default of **5**. The doctrine
-  wants an artifact composed over several turns and multiple slices.
+- **`ITERATION BUDGET` instructed the opposite of composition — CLOSED July 25, 2026.** The kernel
+  told the worker it had *"very few REPL turns"*, to combine loading and computing into **one**
+  block, and not to *"spend a turn on tiny exploratory prints"* — against a `--max-iterations`
+  default of **5**. The doctrine wants an artifact composed over several turns and multiple slices,
+  so the combine-into-one-block directive was rule 24's own falsifying act sitting in the kernel
+  prompt. Those bytes are gone: the instruction now routes the same scarcity premise to the opposite
+  conclusion — each turn carries a step, reads the slices that step needs, and the answer comes
+  together across turns rather than inside any one of them. Both composed-prompt sha256 pins moved
+  wittingly, together, and were seen failing before they were recomputed (rule 19(c)). The warning
+  against spending a turn on tiny exploratory prints was sound and is preserved. **`FEATURE_LIST`
+  row 2.6 stays open**: its other half is the schema ceiling of 9, which is a bound rather than an
+  instruction, and row 2.7's exhaustion defect gates widening it.
 - **No retrieval surface over the corpus has a `locate`.** `get_ast_blocks(root)` returns every block
   of a document with full text and no way to ask for a range. The editing half of the runtime has
   `load` (shape only), `locate` (addresses plus previews, capped) and a 200-line slice cap; **the

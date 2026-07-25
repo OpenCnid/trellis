@@ -194,6 +194,60 @@ describe('parse_task_named_files (the driver input)', () => {
   });
 });
 
+// Self-describing surfaces (docs/architecture/SELF_DESCRIBING_SURFACES.md
+// §9.1 ownership, §11 registration-not-schema). rlms reserves one
+// description line per injected surface; unregistered, these two read to
+// the model as bare type names.
+describe('surface self-description: the descriptors and the derived account', () => {
+  it('registers both descriptors at their surfaces definition sites', () => {
+    expect(R.task_descriptor_registered).toBe(true);
+    expect(R.upsum_descriptor_registered).toBe(true);
+    expect(R.descriptor_purposes_non_empty).toBe(true);
+  });
+
+  it('authors trellis_task expectations and derives trellis_upsum ones', () => {
+    // The §9.1 split: an authored `expects` where nothing a run varies,
+    // and NO authored `expects` where a derivation reads the guard.
+    expect(R.task_expects_authored).toBe(true);
+    expect(R.upsum_expects_not_authored).toBe(true);
+  });
+
+  it('keeps every reachable descriptor string brace-free', () => {
+    // rlms runs .format() over the prompt these bytes can reach.
+    expect(R.descriptor_strings_brace_free).toBe(true);
+    expect(R.descriptor_strings_counted).toBe(true);
+  });
+
+  it('composes one clean description line per surface from its own fields', () => {
+    // rlms reserves exactly one line per injected surface; the four ways
+    // that slot breaks are empty, edge whitespace, multi-line, brace.
+    expect(R.contributed_lines_resolve).toBe(true);
+    expect(R.contributed_lines_are_one_clean_line).toBe(true);
+    expect(R.contributed_lines_bounded).toBe(true);
+  });
+
+  it('pulls the line from descriptor fields instead of restating them', () => {
+    // Everything but a connective comes from a field the descriptor
+    // already owns, so the line cannot disagree with the descriptor.
+    expect(R.contributed_authored_bytes).toBeLessThanOrEqual(32);
+  });
+
+  it('derives the budget sentence from the instance the guard reads', () => {
+    // The derivation has to DISCRIMINATE, or it is decoration: a
+    // differently-budgeted instance must describe its own budget.
+    expect(R.upsum_expects_follows_instance).toBe(true);
+  });
+
+  it('states the same number the refusal states (one encoding)', () => {
+    expect(R.upsum_description_number_is_refusal_number).toBe(true);
+  });
+
+  it('reads the standing keys and the domain cap from the validators own constants', () => {
+    expect(R.upsum_expects_names_standing_keys).toBe(true);
+    expect(R.upsum_expects_names_domain_cap).toBe(true);
+  });
+});
+
 describe('S3: frame helpers over a real toolkit', () => {
   it('frame_text is byte-identical to the file for LF and CRLF frames', () => {
     expect(R.frame_text_lf).toBe(true);

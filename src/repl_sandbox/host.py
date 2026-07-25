@@ -42,6 +42,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Sequence
 
+from repl_sandbox import surfaces
 from repl_sandbox.audit import AuditLog
 from repl_sandbox.broker import Broker, DBBackend, DispatchTable
 from repl_sandbox.capabilities import (
@@ -59,137 +60,40 @@ from repl_sandbox.policy import ApocAllowlist
 from repl_sandbox.session import SessionTable
 from repl_sandbox.transport import Handler
 
-#: A JSON Schema fragment for a handle-typed slot. `capabilities._annotation`
-#: renders it as `Handle` in both renderings, which is the whole shape the guest
-#: ever sees of a referent.
-_HANDLE_SCHEMA: dict = {"type": "object", "format": "handle"}
+try:  # imported for its registrations, on the same terms `broker.py` sets: a
+    # deployment that grants no algebra op does not need the module, and its
+    # absence removes those names from `BROKER_CAPABILITIES` rather than
+    # granting a name that has no route.
+    from repl_sandbox import algebra as _algebra  # noqa: F401
+except ImportError:  # pragma: no cover - the module ships in this package
+    _algebra = None
 
-
-def _descriptor(
-    name: str,
-    doc: str,
-    dispatch_ref: str,
-    properties: dict,
-    required: list[str],
-) -> CapabilityDescriptor:
-    return CapabilityDescriptor(
-        name=name,
-        typed_signature={
-            "type": "object",
-            "properties": properties,
-            "required": required,
-            "returns": {"type": "object"},
-        },
-        doc=doc,
-        dispatch_ref=dispatch_ref,
-    )
-
-
-#: Descriptors for the broker's own operation set (`broker.BROKER_OPS`) and for
-#: the handle-algebra ops the broker routes on (`algebra.ALGEBRA_OPS`).
+#: The descriptors this host can grant by name, read from the surface registry
+#: rather than authored here.
+#:
+#: Every one of them is now registered at the definition site of the op it
+#: describes — `broker.py`'s five through `@describes` on the `_op_*` handler
+#: that serves them, `algebra.py`'s five beside the `_ARG_KEYS` table that
+#: refuses their arguments. This module reads the result. Before this pass the
+#: descriptors were authored in one dict here, and every one of the ten carried
+#: at least one sentence restating a bound enforced two modules away; a guard
+#: could move and the prose would go on reading as authoritative
+#: (`SELF_DESCRIBING_SURFACES.md` §3.3). `test_surfaces.py` keeps those
+#: sentences out of a `doc` now that each has one owner.
 #:
 #: This is a rendering of a fixed surface, not a policy: *which* of these a
 #: session may call is `open_session`'s `ops` argument and nothing here. An op
 #: that is not granted has no dispatch entry, no stub, and therefore no path —
 #: that absence is what denial is (INTERFACES section 5, Tool denial).
-BROKER_CAPABILITIES: dict[str, CapabilityDescriptor] = {
-    descriptor.name: descriptor
-    for descriptor in (
-        _descriptor(
-            "run_query",
-            "Run one read-only SQL statement host-side and return an opaque handle "
-            "plus its row count and column schema. No row crosses.",
-            "trellis.db.v1.run_query",
-            {"sql": {"type": "string"}, "params": {"type": "array"}},
-            ["sql"],
-        ),
-        _descriptor(
-            "run_cypher",
-            "Run one read-only Cypher query host-side and return an opaque handle "
-            "plus its row count and column schema. No row crosses.",
-            "trellis.db.v1.run_cypher",
-            {"query": {"type": "string"}, "params": {"type": "object"}},
-            ["query"],
-        ),
-        _descriptor(
-            "resolve_meta",
-            "Report the shape, length, and column schema of a handle's referent. "
-            "Metadata only; no content.",
-            "trellis.db.v1.resolve_meta",
-            {"handle": _HANDLE_SCHEMA},
-            ["handle"],
-        ),
-        _descriptor(
-            "slice",
-            "Return the half-open window [start, end) of a handle's referent. A "
-            "metered sink: the returned bytes are charged to the session ledger.",
-            "trellis.db.v1.slice",
-            {"handle": _HANDLE_SCHEMA, "span": {"type": "object"}},
-            ["handle", "span"],
-        ),
-        _descriptor(
-            "materialize",
-            "Return a handle's whole referent, or refuse when it is over the "
-            "per-call cap. A metered sink; never silently trimmed.",
-            "trellis.db.v1.materialize",
-            {"handle": _HANDLE_SCHEMA},
-            ["handle"],
-        ),
-        _descriptor(
-            "narrow",
-            "Derive a handle onto the half-open window [start, end) of another "
-            "handle's referent. No referent is read and no content crosses; the "
-            "metered way to read a window is `slice`.",
-            "trellis.algebra.v1.narrow",
-            {
-                "handle": _HANDLE_SCHEMA,
-                "start": {"type": "integer"},
-                "end": {"type": "integer"},
-            },
-            ["handle"],
-        ),
-        _descriptor(
-            "project",
-            "Derive a handle holding the named columns of another handle. No "
-            "referent is read and no content crosses.",
-            "trellis.algebra.v1.project",
-            {"handle": _HANDLE_SCHEMA, "cols": {"type": "array"}},
-            ["handle", "cols"],
-        ),
-        _descriptor(
-            "filter",
-            "Derive a handle holding the rows of another handle that satisfy a "
-            "predicate. No referent is read and no content crosses.",
-            "trellis.algebra.v1.filter",
-            {"handle": _HANDLE_SCHEMA, "predicate": {"type": "object"}},
-            ["handle", "predicate"],
-        ),
-        _descriptor(
-            "search",
-            "Derive a handle holding the matches of a query over another handle. "
-            "No referent is read and no content crosses.",
-            "trellis.algebra.v1.search",
-            {
-                "handle": _HANDLE_SCHEMA,
-                "query": {"type": "string"},
-                "limit": {"type": "integer"},
-            },
-            ["handle", "query"],
-        ),
-        _descriptor(
-            "locate",
-            "Return engine-computed addresses of a pattern within a handle's "
-            "referent. Addresses only, bounded in count and audited.",
-            "trellis.algebra.v1.locate",
-            {
-                "handle": _HANDLE_SCHEMA,
-                "pattern": {"type": "string"},
-                "limit": {"type": "integer"},
-            },
-            ["handle", "pattern"],
-        ),
-    )
-}
+#:
+#: The set is `broker.BROKER_OPS` entire plus `algebra.DESCRIBED_ALGEBRA_OPS`,
+#: which is a deliberate subset of `algebra.ALGEBRA_OPS`: `join`, `union`,
+#: `concat`, `vector_search` and `get_ast_blocks` are routable and undescribed,
+#: so they are not nameable in `ops=` and a caller wanting one passes its own
+#: `(descriptor, port)` pair. That was already true when the dict was written by
+#: hand; it is stated here because `surfaces.undescribed` now makes it
+#: countable rather than something a reader has to notice.
+BROKER_CAPABILITIES: dict[str, CapabilityDescriptor] = surfaces.registry()
 
 #: The port each capability in `BROKER_CAPABILITIES` is served on. Everything the
 #: broker serves is `DB_PORT`; the two pre-registered LM capabilities are

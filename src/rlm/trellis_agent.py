@@ -19,6 +19,8 @@ from trellis_tools import (
     CITATION_AUDIT_ENABLED,
     CITATION_ENTAIL_ENABLED,
     get_citation_audit,
+    derive_postgres_expects,
+    derive_neo4j_expects,
 )
 from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
 from trellis_workspace import (
@@ -51,6 +53,11 @@ from trellis_scaffold import (
     parse_task_named_files,
     wrap_task_text,
 )
+
+# July 25, 2026: the contribution frame — one composed line per surface
+# into the description slot rlms reserves. See trellis_contribution.py.
+from trellis_contribution import attach_contributions, compose_contributions
+from trellis_surfaces import descriptor_for
 
 # --- Sub-call counting -------------------------------------------------
 # In this rlms version, REPL llm_query()/llm_query_batched() requests are
@@ -227,7 +234,7 @@ The shape and the size are ENGINE-CHECKED, so rebuild the state and register it 
 
 `trellis_upsum.commit(upsum)` measures the serialized state itself and returns a JSON receipt carrying revision, size, budget, and headroom — you never compute a length by eye. Over the budget it raises UpsumBudgetError naming the per-key sizes largest-first: compress the entries it names and commit again. Use `trellis_upsum.size(upsum)` to measure without registering, and `trellis_upsum.state()` to re-read the last committed state as JSON at a decisive step — engine-held, so transcript distance cannot corrupt it. `UPSUM_BUDGET` holds the same number in your namespace.
 
-ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
+ITERATION BUDGET: your REPL turns are few, so each one carries a step of the answer you are composing. A turn reads the slices its own step needs, computes on them, and leaves your running state further along than it found it; the answer comes together ACROSS those turns rather than inside any single one. Scope each ```repl``` block to the step at hand and spend every turn on work that moves the answer forward — a turn holding only tiny exploratory prints moves nothing.
 
 """
 
@@ -602,6 +609,30 @@ def main():
             named_files=task_named_files,
         )
         custom_tools.update(scaffold_helpers)
+
+        # July 25, 2026 (path A of the composed-intent build): fill the
+        # per-surface description slot rlms already reserves. Until now
+        # Trellis passed bare values, so every injected surface rendered
+        # in the base prompt as "A custom <Type> value" — eleven slots at
+        # char 1,335 of the 2,116-char protocol prompt, ahead of every
+        # Trellis directive, all carrying type names.
+        #
+        # Each line is composed by code from the surface's own registered
+        # descriptor (editorial) and its derive_*_expects (guard-owned),
+        # so no sentence here is a second encoding of a bound stated
+        # elsewhere. A surface with no descriptor keeps its bare value and
+        # its line stays byte-identical, so this is additive per surface.
+        # compose_contributions REFUSES over CONTRIBUTION_BUDGET rather
+        # than growing (HARNESS_SELF_MODEL.md §5).
+        custom_tools = attach_contributions(
+            custom_tools,
+            compose_contributions([
+                (descriptor_for("trellis_postgres"),
+                 derive_postgres_expects(postgres_tool)),
+                (descriptor_for("trellis_neo4j"),
+                 derive_neo4j_expects(neo4j_tool)),
+            ]),
+        )
 
         # Inject the query directly into the system prompt to ensure the LLM sees it and doesn't ask for it.
         # Curly braces are escaped because rlms applies .format() to the system prompt.

@@ -33,6 +33,16 @@ from trellis_surfaces import coverage_report, format_coverage  # noqa: E402
 # would make the diagnostic under-report rather than over-report, so the
 # import list is part of the check, not incidental to it.
 import trellis_textedit  # noqa: E402,F401
+import trellis_tools  # noqa: E402,F401
+import trellis_workspace  # noqa: E402,F401
+import trellis_answer  # noqa: E402,F401
+import trellis_scaffold  # noqa: E402,F401
+
+try:  # trellis_mcp is import-light but keep the roster honest if it moves
+    import trellis_mcp  # noqa: E402,F401
+except Exception as _exc:  # noqa: BLE001
+    print(f"surface coverage: WARNING — trellis_mcp did not import ({_exc});"
+          " its descriptor, if any, is invisible to this report.", flush=True)
 
 
 def main():

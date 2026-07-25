@@ -152,6 +152,15 @@ check("the render names each gap and states that it refuses nothing",
 print("\n[4] the live seam parses and finds the shipped descriptor")
 
 import trellis_textedit  # noqa: E402,F401  (importing is what registers)
+# July 25, 2026: the roster of modules holding descriptors is itself a
+# hand-kept list — the one list this diagnostic does not derive. It is
+# kept here beside the report it feeds so a missing import shows up as
+# an under-count in the same file that asserts on the count.
+import trellis_tools  # noqa: E402,F401
+import trellis_workspace  # noqa: E402,F401
+import trellis_mcp  # noqa: E402,F401
+import trellis_answer  # noqa: E402,F401
+import trellis_scaffold  # noqa: E402,F401
 
 live_names, live_dynamic = derive_injected_names()
 check("the real agent seam parses and yields surfaces", len(live_names) >= 5,
@@ -167,11 +176,39 @@ check("the one shipped descriptor is found through the live registry",
       "trellis_textedit" in live["described"], str(live["described"]))
 check("registry() reports the textedit descriptor by name",
       registry().get("trellis_textedit", {}).get("name") == "trellis_textedit")
-# Honest scope, pinned so it cannot be quietly overstated later: this
-# is increment 2, and most surfaces still carry no descriptor.
-check("FINDING pinned: most injected surfaces are still undescribed",
-      len(live["undescribed"]) > len(live["described"]),
-      f"described={live['described']} undescribed={live['undescribed']}")
+# Honest scope, pinned so it cannot be quietly overstated later.
+#
+# RETIRED July 25, 2026: this slot pinned "most injected surfaces are
+# still undescribed", which was true at increment 2 and is false now —
+# 8 of 9 carry a descriptor, and the 9th (UPSUM_BUDGET) is a bare int
+# deliberately declined rather than a gap. It was passing for the wrong
+# reason: the drill imported one surface module, so it measured its own
+# narrow view rather than the tree. Retired deliberately with its
+# successor below rather than patched, because the claim changed.
+#
+# The successor is the ladder, and the honest scope is that it narrows
+# at every rung: a name is REGISTERED, a registered descriptor may carry
+# a CONTRIBUTION, and a contribution reaches a model only once it is
+# WIRED into the custom_tools seam. Each step is a separate claim and
+# the earlier ones do not establish the later ones (AMBIENT.md rule 15,
+# applied inside one mechanism). A session that grows the first count
+# and reports progress has moved the number this pin exists to
+# distinguish from the one that matters.
+_described = set(live["described"])
+_contributing = {name for name, descriptor in registry().items()
+                 if "contributes" in descriptor}
+check("FINDING pinned: the ladder narrows — fewer contribute than are described",
+      len(_contributing & _described) < len(_described),
+      f"described={sorted(_described)} contributing={sorted(_contributing)}")
+# trellis_textedit carries no contribution ON PURPOSE, and its absence is
+# the honest half of the design rather than an omission: one line is an
+# orienting line, and a surface whose guard-backed expectations run to
+# several sentences carries them in its addendum instead of truncating
+# them to fit (trellis_contribution.py, "WHAT THE SLOT CAN AND CANNOT
+# CARRY"). Pinned so a later pass does not "fix" it by cramming.
+check("trellis_textedit contributes via its addendum, not the one-line slot",
+      "contributes" not in registry().get("trellis_textedit", {}),
+      "textedit's expectations are addendum-carried by design")
 
 # --- 5. Informs, never refuses ---------------------------------------------
 print("\n[5] the diagnostic informs and refuses nothing")
