@@ -378,6 +378,97 @@ check("a bare-constructed surface states no bound it does not enforce",
       "64" not in render_contribution(ts.descriptor_for("trellis_postgres"),
                                       tt.derive_postgres_expects(bare)))
 
+print("\n[8] the retrieval closure states the predicate it is derived from")
+
+# WHAT THIS SECTION HOLDS, and why the seven checks above did not hold it.
+# Every check to here measures a line's SHAPE — brace-free, one line, inside
+# the orienting ceiling, composed from the registry rather than a hand-named
+# pair. None measures what a line CLAIMS, so a phrase asserting a rule no
+# guard enforces ships green. It did: `retrieval_closure` read "not ones
+# Cypher surfaced", and a blind review found the clause naming a standing
+# disqualifier the guard behind it does not hold.
+#
+# THE PREDICATE. TrellisNeo4j._verify_hashes_retrieved is set membership and
+# nothing else: set(cited_hashes) - self._retrieved_addresses_check(). It
+# never reads HOW an address was seen, so the whole class it refuses is
+# "absent from the retrieved set" — an address a Cypher result named and
+# get_ast_texts then returned is a member, and citable. Bytes that over-refuse
+# are drift the way bytes that under-refuse are: the run is told a rule the
+# engine does not have, and declines a citation the engine takes.
+#
+# THE TWO HALVES A CLAIM-LEVEL CHECK TAKES. The first runs the shipped guard
+# on both sides of the membership line, and runs the seam that feeds the set,
+# so the predicate below is a result rather than a reading. The second holds
+# the phrase to it: the predicate reads ONE condition, so every exclusion the
+# clause states is stated in terms of retrieval. A future clause excluding a
+# class by the surface that showed it — a Cypher result, scrollback, a query
+# property — carries its exclusion marker with no retrieval term in the same
+# clause, and reddens here instead of shipping.
+
+import inspect  # noqa: E402
+import re  # noqa: E402
+
+_H = "a" * 64
+_OTHER = "b" * 64
+
+
+def _closure_verdict(retrieved, cited):
+    """The shipped guard against a retrieved set this drill controls.
+    _verify_hashes_retrieved touches only self._retrieved_addresses_check, so
+    binding it to a stub exercises the real function with no driver and no
+    database."""
+    holder = _Stub()
+    holder._retrieved_addresses_check = lambda: set(retrieved)
+    try:
+        tt.TrellisNeo4j._verify_hashes_retrieved(holder, list(cited))
+        return "accepted"
+    except ValueError:
+        return "refused"
+
+
+check("absence from the retrieved set is the one thing the guard refuses",
+      _closure_verdict(set(), [_H]) == "refused")
+check("membership in the retrieved set is the one thing the guard asks",
+      _closure_verdict({_H}, [_H]) == "accepted")
+check("one unretrieved address refuses the batch beside a retrieved one",
+      _closure_verdict({_H}, [_H, _OTHER]) == "refused")
+
+# The seam rather than a stub. A retrieval tool's return feeds the run's set
+# and a Cypher read does not, which is both why the clause's second half earns
+# its bytes AND why it may not state a permanent disqualification.
+tt._audit_add("read", [_H])
+check("a retrieval tool's return puts an address in the run's retrieved set",
+      _H in tt.get_retrieved_addresses())
+check("run_cypher feeds the retrieved set nothing, so naming is not retrieving",
+      "_audit_add" not in inspect.getsource(tt.TrellisNeo4j.run_cypher))
+check("an address a Cypher result named and the run then retrieved is citable",
+      _closure_verdict(tt.get_retrieved_addresses(), [_H]) == "accepted")
+
+# EVERY EXCLUSION THE CLAUSE STATES IS STATED IN TERMS OF RETRIEVAL.
+# The markers are the ways English fences a class off; the term is the one
+# condition the predicate reads. A clause carrying a marker and no term has
+# fenced off a class on some other ground, and the guard has no other ground.
+_EXCLUSION_MARKERS = ("only", "not", "never", "no ", "cannot", "unless",
+                      "except", "uncitable")
+_RETRIEVAL_TERM = "retriev"
+
+_closure = _DERIVED["trellis_neo4j"]["retrieval_closure"]
+_clauses = [c.strip() for c in re.split(r"[;,.]", _closure) if c.strip()]
+_unbacked = [c for c in _clauses
+             if any(m in c.lower() for m in _EXCLUSION_MARKERS)
+             and _RETRIEVAL_TERM not in c.lower()]
+# ANTI-TRIVIAL FLOOR. An empty phrase has no clauses and passes the scan on
+# nothing, and blanking is exactly what an unwired holder is supposed to do —
+# so the wired derivation is required to be non-empty before the scan means
+# anything, and the blanking is asserted separately rather than assumed.
+check("the wired closure is a non-empty phrase with clauses to scan",
+      _closure != "" and len(_clauses) >= 2, f"{len(_clauses)} clause(s) in {_closure!r}")
+check("every exclusion the closure states is stated in terms of retrieval",
+      _unbacked == [],
+      f"clause(s) fencing off a class the predicate does not: {_unbacked}")
+check("an unwired holder blanks the closure rather than stating it",
+      tt.derive_neo4j_expects(_Stub())["retrieval_closure"] == "")
+
 
 def negative_control():
     """Eleven plants the drill must catch. Exits 3 when every one is detected."""

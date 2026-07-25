@@ -690,22 +690,39 @@ _NEO4J_GUARD_EXPECTS = {
     # run's retrieved set, which get_ast_texts keys, get_ast_blocks block
     # ids and vector_search result ids feed. run_cypher deliberately does
     # NOT feed it (the module comment at _retrieved_addresses), which is
-    # the case the second sentence names — the T1 closure's second-hand
+    # the case the second clause names — the T1 closure's second-hand
     # citation of a graph-surfaced provenance list.
-    # BOTH clauses survive compression, in fewer words. The first is the
-    # closure itself; the second is the case a run cannot infer from it —
+    #
+    # THE PREDICATE IS SET MEMBERSHIP AND NOTHING ELSE:
+    # set(cited_hashes) - self._retrieved_addresses_check(). It never
+    # reads HOW an address was seen, so the whole class of addresses it
+    # refuses is "absent from the retrieved set", and no source
+    # disqualifies a hash standing alone. Corrected July 25, 2026: the
+    # second clause read "not ones Cypher surfaced", which states a
+    # property of the hash where the guard holds a property of what the
+    # run has DONE with it — an address Cypher named and get_ast_texts
+    # then returned is in the set and is citable, and the line told the
+    # model it was not. Over-refusal is drift the way under-refusal is:
+    # the bytes describe a guard that does not exist, and a run obeying
+    # them declines a citation the engine takes.
+    #
+    # BOTH CLAUSES SURVIVE, in fewer words. The first is the closure
+    # itself; the second is the case a run cannot infer from it —
     # run_cypher surfaces sourceNodeIds as a property WITHOUT feeding the
-    # retrieved set, so a hash the model has plainly "seen" is still
-    # uncitable. That distinction changes what the model does before any
-    # refusal fires, which is what earns it the bytes, and "not ones
-    # Cypher surfaced" names the same set the old "a hash on a Cypher
-    # property is a reference, not bytes" named. The remedy is in the
-    # raise ("Call get_ast_texts on them, confirm the bytes actually
-    # support your claim, then re-derive and cite"), and "retrieved" is
-    # load-bearing over "read": vector_search result ids join the
-    # retrieved set too, so narrowing the verb would narrow the bound.
+    # retrieved set, so an address the model has plainly "seen" is not
+    # yet citable and retrieving it is what makes it so. That changes
+    # what the model does before any refusal fires, which is what earns
+    # it the bytes. The remedy is in the raise ("Call get_ast_texts on
+    # them, confirm the bytes actually support your claim, then
+    # re-derive and cite"), and "retrieved" is load-bearing over "read":
+    # vector_search result ids join the retrieved set too, so narrowing
+    # the verb would narrow the bound.
+    #
+    # Held by test_contribution.py section 8, which runs this guard on
+    # both sides of the membership line and reddens on a clause stating
+    # an exclusion the retrieval predicate does not carry.
     "retrieval_closure": (" Cite only addresses whose bytes you retrieved "
-                          "this run, not ones Cypher surfaced."),
+                          "this run; retrieve a Cypher-named one first."),
     # _verify_hashes_exist: the deduped union of the batch must exist in
     # ast_nodes before any write session opens. Rendered only where it is
     # the live bound — see derive_neo4j_expects for why the retrieval
