@@ -2,10 +2,18 @@
 
 > *Trellis: it's an expert at working with your data.*
 
-**Status: PROPOSED, July 24, 2026. A planning artifact, not a design record and not an
-authorization.** Written before security hardening deliberately: a hardening pass over an
-unspecified feature set produces a queue of follow-ups rather than a boundary, because every
-control has to be re-litigated the moment a feature it did not anticipate arrives.
+**Status: BUILD AUTHORIZED — owner (Cnid), July 24, 2026, for execution in a future session.**
+Written before security hardening deliberately: a hardening pass over an unspecified feature set
+produces a queue of follow-ups rather than a boundary, because every control has to be re-litigated
+the moment a feature it did not anticipate arrives. That ordering is why this list exists, and the
+authorization follows it — **feature list, then build, then harden.**
+
+**What the authorization covers and what it does not.** It authorizes building against this list. It
+does not waive the gates that ride on *kinds* of work: prompt bytes still run under rule 16, paid
+runs under rule 7, standing configuration under rule 21(b), and any change that *removes* shipped
+engine surface still needs its own dated entry (see §6, where that distinction is the reason the
+epistemic layer has sat unbuilt). A row's presence here is permission to build it, never permission
+to skip the gate its construction crosses.
 
 **Governed by [AMBIENT.md rule 24](../../AMBIENT.md).** Every row below is a consequence of that
 rule or a component that serves it. Where a row's status contradicts the rule, the rule wins and the
