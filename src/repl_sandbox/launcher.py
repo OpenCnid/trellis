@@ -39,7 +39,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Callable, Protocol, runtime_checkable
+from typing import Any, Callable, Protocol, runtime_checkable
 
 from repl_sandbox.audit import AuditLog
 from repl_sandbox.config import (
@@ -881,8 +881,13 @@ class KataLauncher:
         if tagged.get("error"):
             raise SandboxError(f"could not tag {reference}: {tagged['error']}")
 
-    def boot(self, session_id: str) -> GuestHandle:
+    def boot(self, session_id: str, *, sandbox_name: str | None = None) -> GuestHandle:
         """Gate the host, then claim one microVM for `session_id`.
+
+        `sandbox_name` lets a caller mint the name *before* the boot, which the
+        composition layer needs: a workspace lease records the sandbox its holder
+        booted, and the lease has to be taken before any resource is allocated.
+        Absent, the name is minted here, which is the standalone case.
 
         Raises `SandboxError` with the full failure list when G1 does not pass —
         including on this repository's Windows development host, which has no
@@ -898,7 +903,7 @@ class KataLauncher:
                 "failed: " + "; ".join(result.failures)
             )
 
-        name = self.mint_sandbox_name(session_id)
+        name = sandbox_name if sandbox_name is not None else self.mint_sandbox_name(session_id)
         handle = KataGuestHandle(
             config=self.config,
             sandbox_name=name,
@@ -1001,42 +1006,49 @@ class KataGuestHandle:
         self.uds_path: str | None = None
         self.package_installed = False
         self.serving = False
+        self.bridge_started = False
+        self._bridge: Any = None
         self._control_conn: Connection | None = None
 
     # -- setup steps -------------------------------------------------------
 
-    def start_bridge(self) -> None:
-        """Refuses, and names precisely what is unresolved.
+    def attach_bridge(self, bridge: Any) -> None:
+        """Supply the host end of `LM_PORT`/`DB_PORT` for this sandbox.
 
-        A launcher cannot honestly implement this step today, and a no-op would
-        be the worst available answer: `KataREPL.setup` calls it as "the bridge,
-        before any untrusted worker process", so a silent pass asserts a bridge
-        exists when nothing has been brought up.
+        The launcher cannot build this itself: the listeners serve a host's
+        handlers, and a launcher has no host. So the composition layer that holds
+        both binds them and hands the result here (`session_host.SessionBridge`).
+        Without it `start_bridge` still refuses, which keeps the honest default
+        for any caller that boots a guest and never composes a session.
+        """
+        self._bridge = bridge
+
+    def start_bridge(self) -> None:
+        """Bring the host end up, or refuse if nobody supplied one.
+
+        `KataREPL.setup` calls this "the bridge, before any untrusted worker
+        process", so a silent no-op would assert a bridge exists when nothing has
+        been bound — and the first thing to discover that would be model-authored
+        code, at runtime, inside the boundary.
 
         What is settled: the guest needs no loopback-to-vsock forwarder. The
         forwarder of INTERFACES section 3.3 exists to carry an in-guest rlms
         client's `AF_INET` traffic, and there is no rlms in the guest — the
         materialised stubs dial `AF_VSOCK` directly (`guest_main.build_rpc_hook`).
-
-        What is **not** settled, and is not this module's to decide: who stands
-        up a session's `LM_PORT`/`DB_PORT` listeners. `kata_repl.py`'s own step-2
-        comment assigns that to the LM handler and the broker and calls the CID
-        binding "the backend's whole part in bringing those two channels up",
-        while no code anywhere binds a `HybridVsockListener` outside tests and
-        the probes. `KataLauncher` takes no host to serve them against, and
-        `GuestHandle` has no member for them. Guessing here would install a
-        composition decision the record does not make.
+        What this step actually needs is an owner for the per-sandbox
+        `LM_PORT`/`DB_PORT` listeners, which is `session_host`'s.
         """
-        raise SandboxError(
-            f"sandbox {self.sandbox_name} booted, but the host-side LM/DB listener "
-            "composition is unresolved: no code joins a launched guest to a "
-            "TrellisSandboxHost, and KataLauncher takes none. The guest needs no "
-            "in-guest forwarder (there is no rlms in the guest), so this step is "
-            "not the forwarder INTERFACES section 3.3 describes; what it needs is "
-            "an owner for the per-sandbox LM_PORT/DB_PORT listeners. Refusing "
-            "rather than passing silently, because setup() treats this call as "
-            "the bridge being up."
-        )
+        if self._bridge is None:
+            raise SandboxError(
+                f"sandbox {self.sandbox_name} booted, but no host-side bridge was "
+                "attached: the LM_PORT/DB_PORT listeners serve a TrellisSandboxHost's "
+                "handlers and a launcher has no host. Compose the session through "
+                "session_host.open_workspace_session, which binds them and calls "
+                "attach_bridge. Refusing rather than passing silently, because "
+                "setup() treats this call as the bridge being up."
+            )
+        self._bridge.start()
+        self.bridge_started = True
 
     def install_package(self) -> None:
         """Ship `repl_sandbox` into the guest. Called by `boot`, not by the backend."""
