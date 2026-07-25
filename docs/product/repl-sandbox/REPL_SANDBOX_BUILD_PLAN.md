@@ -98,7 +98,7 @@ requirement set) then C = acceptance, plus one PROPOSED side-track (the doubt fi
 | **S3** | `llm_query` over vsock — **[R]+[A] PASSED 2026-07-23** (§5.3) | A | S2 | Frame round-trips guest→host with parity → the vsock bridge + LM handler | **[R+A]** | toward gates 2, 4 |
 | **S4** | DB broker minimal proof — **[R]+[A] PASSED 2026-07-23** (§5.4) | A | S2 (reuses S3 bridge) | Real query, zero credential in guest → the host broker + NOSUPERUSER role + egress deny | **[R+A]** | toward gate 2 |
 | **S5** | Tier-0 in-guest hardening — **[R] PASSED 2026-07-23** (§5.5) | A | S2, S3, S4 | Scripted fork-bomb/syscall/write denied, channels survive → in-guest rlimits-after-privilege-drop + seccomp + Landlock + host watchdog | **[R]** | toward gate 2 (req 8) |
-| **S6** | Author the `IsolatedEnv` subclass | A | S1–S5 | Unedited load → `execute_code` round-trips as `LocalREPL` → the `KataREPL` backend | **[R+A]** | gate 3 |
+| **S6** | Author the `IsolatedEnv` subclass — **entry + launch built 2026-07-25** (§5.6); blocked on the listener-ownership gap | A | S1–S5 | Unedited load → `execute_code` round-trips as `LocalREPL` → the `KataREPL` backend | **[R+A]** | gate 3 |
 | **GB** | Security hardening to the 12 reqs | B | S3, S4, S5, S6 | Each of the 12 [ARCHITECTURE §7](REPL_SANDBOX_ARCHITECTURE.md) reqs mapped to an enforcing surface (§6) | **[R+A]** | gate 2 |
 | **GA-eq** | Equivalence acceptance | C | S6, GB | Scripted equivalence **and** a metered real-model equivalence run | **[R+A]** | gate 3 |
 | **GA-rt** | vsock-bridge red-team | C | S3, GB | Adversarial review + fuzzed frame parser → the vsock bridge, before it ships | **[R]** | gate 4 |
@@ -782,11 +782,88 @@ What landed:
 harness exists**, with twelve clauses predicted FALSE today — the spike's expected yield, not a
 defect log against it.
 
-**S6's remaining half, and why it is not a probe-authoring job.** `KataLauncher.boot` raises
-`NotImplementedError` after the G1 gate passes: guest-image mint, Cloud Hypervisor launch with an
-assigned CID, and supervisor readiness are unbuilt, and the package has no guest entry point — the
-only `GuestSupervisor` construction is inside `InProcessGuest`, a host-side double that provides no
-isolation. S2 proved the `ctr run --runtime io.containerd.kata.v2` path boots a stateful guest, but a
+**BUILT 2026-07-25 — `KataLauncher.boot` claims a real microVM, and `start_bridge` refuses.**
+Observed on the AX41: G1 PASS at ratio 12.7, boot in 34.8 s, the VMM pid found and its socket
+discovered at `/run/vc/vm/<sandbox>/clh.sock`, the guest importing the shipped package and
+reporting its source root as `/run/trellis`. The negative control — VMM detection blinded against
+a **real, successful** `ctr run` — fired the refusal and left zero containers, tasks, VMMs, vm
+directories and namespace cgroups behind, which is the self-cleanup property observed rather than
+argued. Three of the seven items below are closed (1 partially, 4, 6); item 5 is closed by a
+monotonic host-assigned mint; items 2, 3 and 7 are open, and **an eighth is named below**.
+
+Three corrections the build owes to running rather than reading:
+
+- **`pgrep` cannot carry the refusal.** It excludes its own PID but not its ancestors, so on a host
+  with zero VMMs a `pgrep -af cloud-hypervisor` issued from any process whose command line contains
+  that string matches itself. Identity is `/proc/<pid>/exe`. **`comm` is not a substitute**:
+  `TASK_COMM_LEN` truncates at 15 characters, so a genuine VMM reads `cloud-hyperviso` and the
+  obvious equality test refuses every real boot while looking correct.
+- **Item 6 is a chain, not a flag.** Containerd image stores are per-namespace, so `ctr -n <ns> run`
+  fails with `image "...": not found` until that namespace has pulled. Owning a namespace means
+  owning the pull, which is why the digest is now `config.GUEST_IMAGE_DIGEST` with a test asserting
+  it tracks `provision_kata_host.sh`'s copy — the provisioner still holds the authority.
+- **Readiness does not gate the refusal.** By the time `ctr run -d` returns, the VMM and its socket
+  already exist (first poll at 15 ms found both). An absent VMM is *never booted*, not *not booted
+  yet*, so waiting would convert a clean refusal into a timeout.
+
+**THE EIGHTH ITEM IS CLOSED — 2026-07-25, `src/repl_sandbox/session_host.py`.** The owner ruled
+option A (a composition layer) on the ground that its only cost was naming a seam. Building it
+established that the seam was not new: **the block already worked in five places** — every probe
+and the CLI selftest each construct a host, open a session, bind the listeners and drive the
+backend — but each proved one half by substituting a stand-in for the other, so the *diagonal*
+(real backend, real boundary) had never run. This promoted it out of `scripts/` and named it.
+
+`open_workspace_session` is a context manager, and that was never really a trade: the durable
+thing and the executing thing are different objects, so a closing scope is a VM released rather
+than a session lost, and rlms already ends a non-persistent run with `cleanup()`. Its six steps
+are forced — lease, host, `open_session`, boot, listeners, scaffold — because the vsock socket
+path does not exist until the VMM does, and the guest dials outward on its first tool call.
+Teardown reverses them, and a failure at step *n* unwinds *n-1 … 1*.
+
+**Observed on the AX41, 2026-07-25, 7/7 claims:** a real VMM carrying the session's sandbox; the
+host end bound at `<uds>_5001`; an empty manifest reconstructing to a no-op; the workspace checked
+out for the life of the scope; a second session on the same live workspace refused; the scope
+closing to zero VMMs, containers, VM directories and no lease; and a crashed holder's lease
+auto-reclaimed against a real liveness check. Identity, manifest and lease design are recorded in
+[THE_REPL_IN_TRELLIS.md](../../architecture/THE_REPL_IN_TRELLIS.md) §6–§7.
+
+The first attempt returned 6/7 and found a defect no off-host test could: step 5 was described in
+the module header and only *prepared* in the code, so a session composed without a backend came up
+with no host end at all. **A step described in prose and merely prepared in code reads as done** —
+the third instance of that shape here.
+
+**What this leaves for S6.** The `[R]` half now has its enforcing surface. The equivalence harness
+against `CONFORMANCE §6`'s twelve predicted-FALSE clauses is unbuilt, and the `[A]` half — the
+metered real-model equivalence run, ≤ $5 — has not been proposed or spent.
+
+**Superseded, kept because the reasoning still holds.** Before the ruling, `start_bridge()` raised
+unconditionally. What is settled: the guest needs no in-guest loopback→vsock forwarder, because §3.3's
+Option A presupposes an rlms client in the guest speaking `AF_INET` and there is no rlms in the
+guest — `guest_main.build_rpc_hook` dials `AF_VSOCK` directly. What is **not** settled, and no item
+1–7 names: **who stands up a session's `LM_PORT`/`DB_PORT` listeners.** `kata_repl.py`'s step-2
+comment assigns them to the LM handler and the broker and calls the CID binding "the backend's
+whole part in bringing those two channels up"; `KataLauncher` takes no host to serve them against;
+`GuestHandle` has no member for them; and no code outside tests and the probes binds a
+`HybridVsockListener` at all. `KataREPL` is constructed in exactly one non-test place (`cli.py`,
+with `InProcessLauncher`) and `TrellisSandboxHost` in the selftest and every probe — the two sets
+never intersect, so real-Kata-transport and `KataREPL`-drives-the-host have each been proven once,
+separately, each substituting for the other half. **S6's `[A]` gate requires exactly that union,
+and it has never run.** A silent no-op here would assert a bridge that does not exist.
+
+That reading was put to a composed judge panel rather than settled by the session that benefits
+from it (the claim shrinks its own build). Three seats, blind to the candidate at composition
+time: the no-forwarder claim promoted unanimously; the proposal that `start_bridge` therefore means
+"bind the host-side listeners" was **refused by all three on independent grounds**; and the audit
+seat found the filing had omitted `CONFORMANCE.md` §2.1's still-standing "Option A … is viable
+unchanged", which concerns host-side rlms and does not disturb the guest-side finding but should
+have been filed. The gap is therefore recorded as open, not resolved.
+
+**What remains of the original framing.** `KataLauncher.boot` no longer raises after the G1 gate:
+guest-image mint, the Kata launch, and package delivery are built; supervisor readiness and the
+scaffold payload are not, because they sit behind the unresolved composition above. The package now
+has a guest entry point (`guest_main.py`, built at S6 entry), so the only remaining
+`GuestSupervisor` construction that runs is still `InProcessGuest`, a host-side double that provides
+no isolation. S2 proved the `ctr run --runtime io.containerd.kata.v2` path boots a stateful guest, but a
 spike driving `ctr` by hand is not that launch path. Until it exists, an S6 PASS would be a claim
 about `KataREPL` and not yet about `KataLauncher`, and the equivalence harness has nothing to point
 at but the double. **That is the next build, and it is the one place where a harness would otherwise

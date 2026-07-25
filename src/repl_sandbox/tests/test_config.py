@@ -99,3 +99,36 @@ def test_the_inbound_literal_cap_stays_under_a_frame() -> None:
     """`load_context` literals ride a frame too, so they cannot exceed one."""
     config = SandboxConfig()
     assert config.byte_caps.inbound_per_call <= config.max_frame_len
+
+
+def test_the_guest_image_pin_tracks_the_provisioner() -> None:
+    """The provisioner holds the authority; this module holds a copy.
+
+    `scripts/provision_kata_host.sh` is what actually pulls and verifies the
+    image, so its two constants are the real pin. Python needs them because a
+    launcher owning a containerd namespace necessarily owns the pull -- image
+    stores are per-namespace, and `ctr -n <ns> run` against a namespace that
+    has not pulled reports the image as not found.
+
+    Two copies of one pin is the drift shape S6-entry found in the reserved
+    names, so the copies are asserted against each other rather than each
+    against its own literal: a bump in the script reddens here first.
+    """
+    import pathlib
+    import re
+
+    from repl_sandbox.config import GUEST_IMAGE, GUEST_IMAGE_DIGEST
+
+    script = pathlib.Path(__file__).resolve().parents[3] / "scripts" / "provision_kata_host.sh"
+    text = script.read_text(encoding="utf-8")
+
+    image = re.search(r'^GUEST_IMAGE="([^"]+)"', text, re.MULTILINE)
+    digest = re.search(r'^GUEST_IMAGE_DIGEST="([^"]+)"', text, re.MULTILINE)
+
+    # A pattern that stopped matching would make this test vacuously green,
+    # which is the one failure a copy-vs-copy check cannot afford.
+    assert image is not None, f"no GUEST_IMAGE assignment found in {script}"
+    assert digest is not None, f"no GUEST_IMAGE_DIGEST assignment found in {script}"
+
+    assert GUEST_IMAGE == image.group(1)
+    assert GUEST_IMAGE_DIGEST == digest.group(1)

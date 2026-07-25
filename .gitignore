@@ -38,3 +38,8 @@ benchmark_logs/
 
 # Personal Claude Code overrides; the committed harness config is .claude/settings.json
 .claude/settings.local.json
+
+# Dev-server config the Claude Code preview tooling scaffolds per worktree. It is
+# generated rather than authored, so committing it would make one session's
+# incidental choice of server the default every later session loads.
+.claude/launch.json

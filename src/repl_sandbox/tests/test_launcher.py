@@ -28,7 +28,10 @@ from repl_sandbox.launcher import (
     InProcessLauncher,
     KataLauncher,
     PreflightResult,
+    SHIM_EXECUTABLE_NAME,
     _benchmark_argv,
+    _pids_by_executable,
+    vmm_pids_carrying,
     probe_kvm_device,
     qemu_accel_benchmark,
 )
@@ -340,15 +343,75 @@ def test_boot_refuses_on_this_host_and_names_what_was_missing() -> None:
 
 
 def test_boot_gates_before_it_launches() -> None:
-    """With G1 satisfied the refusal changes: the unbuilt launch path is named.
+    """The gate runs to completion before the launch path is touched at all.
 
-    The order matters — a launcher that tried to start a VM before gating would
-    reach the launch path on a host with no KVM.
+    A launcher that started a VM before gating would build a sandbox on a host
+    with no KVM, so this asserts the order directly rather than inferring it
+    from whatever `boot` raises: every G1 probe must have run, and the first
+    command after them is the image check that opens the launch path.
     """
-    with pytest.raises(NotImplementedError) as raised:
-        launcher().boot("session-1")
-    assert "not built" in str(raised.value)
-    assert "No guest was claimed." in str(raised.value)
+    sentinel = RuntimeError("launch path reached")
+    responses = dict(GOOD_PROBES)
+    responses["ctr -n trellis images ls -q"] = sentinel
+    run_cmd = fake_run_cmd(responses)
+
+    with pytest.raises(RuntimeError) as raised:
+        KataLauncher(
+            SandboxConfig(),
+            run_cmd,
+            kvm_probe=kvm_present,
+            accel_benchmark=near_native,
+        ).boot("session-1")
+    assert raised.value is sentinel
+
+    issued = [" ".join(call) for call in run_cmd.calls]
+    for probe in GOOD_PROBES:
+        assert probe in issued, f"the gate did not run {probe!r} before launching"
+        assert issued.index(probe) < issued.index("ctr -n trellis images ls -q")
+
+
+def test_boot_refuses_when_containerd_reports_success_without_a_vm() -> None:
+    """`ctr run` exiting 0 is not the same fact as a VM existing.
+
+    The shim can accept and register a task without Cloud Hypervisor ever
+    starting, and a launcher that trusted the exit code would hand back a handle
+    backed by nothing -- indistinguishable from a working one until the first
+    exec, by which time it has already been counted as a boundary.
+    """
+    responses = dict(GOOD_PROBES)
+    responses["ctr -n trellis images ls -q"] = (0, "docker.io/library/python:3.12-slim\n", "")
+    launched: list[str] = []
+
+    def run_cmd(argv, capture_output=False, text=False, timeout=None):
+        key = " ".join(argv)
+        if key.startswith("ctr -n trellis run -d"):
+            launched.append(key)
+            return subprocess.CompletedProcess(list(argv), 0, "", "")
+        if key.startswith("ctr -n trellis task") or key.startswith("ctr -n trellis container"):
+            return subprocess.CompletedProcess(list(argv), 0, "", "")
+        if key.startswith("pgrep"):
+            return subprocess.CompletedProcess(list(argv), 1, "", "")
+        outcome = responses.get(key)
+        if outcome is None:
+            raise AssertionError(f"unexpected command: {key}")
+        returncode, stdout, stderr = outcome
+        return subprocess.CompletedProcess(list(argv), returncode, stdout, stderr)
+
+    built = KataLauncher(
+        SandboxConfig(),
+        run_cmd,
+        kvm_probe=kvm_present,
+        accel_benchmark=near_native,
+    )
+    # No VMM will ever be found: this test runs on a host with no Kata sandbox,
+    # so the /proc walk legitimately returns nothing for the minted name.
+    with pytest.raises(SandboxError) as raised:
+        built.boot("session-1")
+
+    assert launched, "the test never reached `ctr run`, so it proves nothing about the refusal"
+    message = str(raised.value)
+    assert "exited 0" in message
+    assert "without creating a VM" in message
 
 
 def test_boot_refuses_an_empty_session_id() -> None:
@@ -656,3 +719,66 @@ def test_an_unproven_benchmark_fails_the_gate_with_its_own_reason(tmp_path, init
     ).preflight()
     assert result.ok is False
     assert "is not a file" in only(result.failures)
+
+
+# ---------------------------------------------------------------------------
+# Process identity — the kernel's answer, never a command-line pattern
+# ---------------------------------------------------------------------------
+
+
+def _fake_proc(tmp_path, entries: dict[int, tuple[str, list[str]]]) -> str:
+    """A `/proc` stand-in: {pid: (exe_target, argv)}."""
+    for pid, (target, argv) in entries.items():
+        d = tmp_path / str(pid)
+        d.mkdir()
+        try:
+            os.symlink(target, d / "exe")
+        except (OSError, NotImplementedError):
+            pytest.skip("this platform cannot create the symlink /proc/<pid>/exe is")
+        (d / "cmdline").write_bytes(b"\0".join(a.encode() for a in argv) + b"\0")
+    (tmp_path / "uptime").write_text("noise")  # a non-numeric entry must be skipped
+    return str(tmp_path)
+
+
+def test_a_process_merely_naming_the_vmm_is_not_the_vmm(tmp_path) -> None:
+    """The trap that has now fired four times on the reference host.
+
+    `pgrep` matches any process whose command line contains the pattern,
+    including the caller's own ancestors. On a host with zero VMs that returns a
+    hit, and a launcher whose job is refusing a boot that produced no VM cannot
+    use a check that invents one. Identity is `/proc/<pid>/exe`.
+    """
+    proc = _fake_proc(tmp_path, {
+        # An impostor: a shell whose argv carries every string a pattern match
+        # would key on, including the sandbox name.
+        11: ("/usr/bin/bash", ["bash", "-c", "pgrep -af cloud-hypervisor",
+                              "/run/vc/vm/sandbox-a/clh-api.sock"]),
+        # The real thing.
+        22: ("/opt/kata/bin/cloud-hypervisor", ["cloud-hypervisor", "--api-socket",
+                                                "/run/vc/vm/sandbox-a/clh-api.sock"]),
+    })
+    assert vmm_pids_carrying("sandbox-a", proc_root=proc) == [22]
+
+
+def test_a_sandbox_name_matches_as_a_path_component_not_a_substring(tmp_path) -> None:
+    """`sess-1` is a substring of `sess-10`; containment would cross the wires."""
+    proc = _fake_proc(tmp_path, {
+        33: ("/opt/kata/bin/cloud-hypervisor", ["cloud-hypervisor", "--api-socket",
+                                               "/run/vc/vm/sess-10/clh-api.sock"]),
+    })
+    assert vmm_pids_carrying("sess-10", proc_root=proc) == [33]
+    assert vmm_pids_carrying("sess-1", proc_root=proc) == []
+
+
+def test_the_shim_lookup_uses_the_same_kernel_answer(tmp_path) -> None:
+    """Teardown SIGKILLs what this returns, so a wrong match kills a process.
+
+    Observed 2026-07-25: the previous `pgrep -f 'containerd-shim-kata-v2.*<name>'`
+    form, run from a shell during cleanup, matched the shell itself and killed it.
+    """
+    proc = _fake_proc(tmp_path, {
+        44: ("/usr/bin/bash", ["bash", "-c", "kill $(pgrep -f containerd-shim-kata-v2)",
+                              "/run/vc/vm/sandbox-a/clh.sock"]),
+        55: ("/opt/kata/bin/containerd-shim-kata-v2", ["containerd-shim-kata-v2", "-id", "sandbox-a"]),
+    })
+    assert _pids_by_executable(SHIM_EXECUTABLE_NAME, carrying="sandbox-a", proc_root=proc) == [55]

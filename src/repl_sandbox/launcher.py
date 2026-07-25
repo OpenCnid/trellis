@@ -28,17 +28,29 @@ Two launchers live here and they are not interchangeable:
 
 from __future__ import annotations
 
+import base64
+import io
 import os
 import platform
 import stat
 import subprocess
+import tarfile
 import threading
 import time
+import uuid
 from dataclasses import dataclass, field
-from typing import Callable, Protocol, runtime_checkable
+from typing import Any, Callable, Protocol, runtime_checkable
 
 from repl_sandbox.audit import AuditLog
-from repl_sandbox.config import SandboxConfig, VMADDR_CID_HOST, parse_version
+from repl_sandbox.config import (
+    CTR_NAMESPACE,
+    GUEST_IMAGE,
+    GUEST_IMAGE_DIGEST,
+    KATA_RUNTIME_HANDLER,
+    SandboxConfig,
+    VMADDR_CID_HOST,
+    parse_version,
+)
 from repl_sandbox.errors import SandboxError
 from repl_sandbox.supervisor import GuestSupervisor
 from repl_sandbox.transport import Connection, LoopbackClient, LoopbackListener, serve_forever
@@ -53,6 +65,10 @@ KVM_DEVICE = "/dev/kvm"
 
 KATA_RUNTIME_BIN = "kata-runtime"
 CLOUD_HYPERVISOR_BIN = "cloud-hypervisor"
+
+#: The containerd shim binary Kata runs per sandbox. Named so teardown can
+#: identify it by `/proc/<pid>/exe` rather than by a command-line pattern.
+SHIM_EXECUTABLE_NAME = "containerd-shim-kata-v2"
 
 #: Bound on any probe subprocess. `kata-runtime check` talks to the kernel and
 #: to containerd; a hung probe must not hang the gate.
@@ -116,6 +132,81 @@ BENCHMARK_APPEND = "console=ttyS0 panic=-1 rdinit=/bin/false"
 #: CIDs (0 hypervisor / 1 local / 2 host) so it satisfies the same range checks
 #: a real guest CID does.
 IN_PROCESS_CID = 3
+
+#: Where a real launcher starts minting session ids. Deliberately above
+#: `IN_PROCESS_CID` so a real session's identifier can never be confused with
+#: the double's constant in an audit log or a ledger key.
+FIRST_LAUNCHER_CID = 16
+
+#: Bound on one `ctr run -d`. A Kata boot returned in ~0.7s on the reference
+#: host, but that host was idle; this is generous because the alternative to a
+#: generous bound is a false refusal on a loaded host.
+DEFAULT_BOOT_TIMEOUT_S = 180.0
+
+#: Bound on the whole readiness wait, and the spacing between polls. Every stage
+#: before the guest's own Python startup was complete within ~30 ms on the
+#: reference host, so this budget is almost entirely for the interpreter coming
+#: up inside the guest and for `GuestSupervisor` construction.
+DEFAULT_READY_TIMEOUT_S = 90.0
+READY_POLL_INTERVAL_S = 0.25
+
+#: Where the launcher unpacks the package and places the startup payload. Its
+#: parent is what Tier-0 must grant read access to, which `guest_main` derives
+#: from its own `__file__` rather than from this constant.
+GUEST_ROOT = "/run/trellis"
+
+#: Bytes of base64 per `ctr task exec`. A single argv string is capped at 128 KiB
+#: by the kernel (`MAX_ARG_STRLEN`), so a payload is appended in chunks.
+EXEC_CHUNK_BYTES = 60_000
+
+
+def discover_vsock_uds(vmm_pid: int, *, proc_root: str = "/proc") -> str:
+    """The hybrid-vsock Unix socket the VMM created, found rather than assumed.
+
+    The path convention (`/run/vc/vm/<sandbox>/clh.sock`) is Kata's and could
+    move, so it is read out of the running VMM's own argv: the process names its
+    sandbox directory, and the socket is identified by being the one non-API
+    socket in it. A launcher that hard-coded the path would report "no bridge"
+    when what it means is "no socket where I looked".
+
+    Observed on the reference host 2026-07-25: the VMM's argv carries only
+    `--api-socket /run/vc/vm/<sandbox>/clh-api.sock`, and the vsock socket
+    (`clh.sock`) appears in that directory without ever being named on the
+    command line — which is exactly why the directory is listed rather than the
+    argv being scanned for the socket itself.
+    """
+    try:
+        with open(os.path.join(proc_root, str(vmm_pid), "cmdline"), "rb") as handle:
+            argv = handle.read().split(b"\0")
+    except OSError as exc:
+        raise SandboxError(f"cannot read the command line of VMM pid {vmm_pid}: {exc}") from exc
+
+    directory = None
+    for raw in argv:
+        token = raw.decode("utf-8", "replace")
+        if token.startswith("/run/") and "/vm/" in token:
+            directory = os.path.dirname(token)
+            break
+    if directory is None or not os.path.isdir(directory):
+        raise SandboxError(
+            f"no /run/**/vm/** path in VMM pid {vmm_pid}'s command line, so its "
+            "sandbox directory could not be located"
+        )
+
+    sockets = []
+    for entry in sorted(os.listdir(directory)):
+        path = os.path.join(directory, entry)
+        try:
+            if stat.S_ISSOCK(os.stat(path).st_mode) and "api" not in entry:
+                sockets.append(path)
+        except OSError:
+            continue
+    if not sockets:
+        raise SandboxError(
+            f"{directory} holds no non-API socket; the VMM may not have been "
+            "configured with a vsock device"
+        )
+    return sockets[0]
 
 
 @dataclass(frozen=True)
@@ -399,6 +490,75 @@ def qemu_accel_benchmark(
     return observed
 
 
+def _pids_by_executable(
+    executable: str, *, carrying: str | None = None, proc_root: str = "/proc"
+) -> list[int]:
+    """PIDs whose `/proc/<pid>/exe` basename is `executable`.
+
+    The kernel's answer to *what is this process running*, which is a different
+    question from *what string appears on its command line* — and only the first
+    is safe to act on. `carrying`, when given, additionally requires the sandbox
+    name as a whole path component of some argument.
+    """
+    found: list[int] = []
+    try:
+        entries = os.listdir(proc_root)
+    except OSError:
+        return found
+    for entry in entries:
+        if not entry.isdigit():
+            continue
+        try:
+            resolved = os.readlink(os.path.join(proc_root, entry, "exe"))
+        except OSError:
+            # Exited mid-walk, or not ours to read. Neither is a process this
+            # launcher started, and neither is one it may signal.
+            continue
+        if os.path.basename(resolved) != executable:
+            continue
+        if carrying is not None:
+            try:
+                with open(os.path.join(proc_root, entry, "cmdline"), "rb") as handle:
+                    argv = handle.read().split(b"\0")
+            except OSError:
+                continue
+            # Whole path component, never substring containment: sandbox names
+            # are minted from a session id, so `sess-1` is a substring of
+            # `sess-10` and containment would attribute one session's VMM to
+            # another.
+            if not any(
+                carrying in token.decode("utf-8", "replace").split("/")
+                for token in argv
+                if token
+            ):
+                continue
+        found.append(int(entry))
+    return found
+
+
+def vmm_pids_carrying(name: str, *, proc_root: str = "/proc") -> list[int]:
+    """PIDs of real Cloud Hypervisor processes whose argv names this sandbox.
+
+    Identity comes from `/proc/<pid>/exe` rather than from `pgrep`, and the reason is
+    measured rather than stylistic. **`pgrep` excludes its own PID but not its
+    ancestors**, so on a host with zero VMMs running, a `pgrep -af
+    cloud-hypervisor` issued from any process whose own command line contains
+    that string matches *itself* — observed 2026-07-25 on the reference host,
+    with the calling interpreter returned as the sole hit. A launcher whose job
+    is to refuse a boot that produced no VM cannot use a check that invents one.
+
+    So identity is `/proc/<pid>/exe`, the kernel's own answer to what a process
+    is running, and the argv is used only to attribute a real VMM to a sandbox.
+
+    **`/proc/<pid>/comm` is not the discriminator and must not be used for it.**
+    `TASK_COMM_LEN` truncates it to 15 characters, so a genuine Cloud Hypervisor
+    reads `cloud-hyperviso` — a `comm == "cloud-hypervisor"` test refuses every
+    real VM while looking exactly like a correct check (measured the same day:
+    `comm='cloud-hyperviso' exe='/opt/kata/bin/cloud-hypervisor'`).
+    """
+    return _pids_by_executable(CLOUD_HYPERVISOR_BIN, carrying=name, proc_root=proc_root)
+
+
 def _clip(text: object) -> str:
     """Bound a probe's output before it is kept for an operator to read."""
     if not isinstance(text, str):
@@ -427,11 +587,28 @@ class KataLauncher:
         audit: AuditLog | None = None,
         probe_timeout_s: float = DEFAULT_PROBE_TIMEOUT_S,
         reserved_names: frozenset[str] | None = None,
+        boot_timeout_s: float = DEFAULT_BOOT_TIMEOUT_S,
+        namespace: str = CTR_NAMESPACE,
+        guest_image: str = GUEST_IMAGE,
+        guest_image_digest: str = GUEST_IMAGE_DIGEST,
     ) -> None:
         self.config = config
         self.run_cmd = run_cmd
         self.audit = audit
         self.probe_timeout_s = probe_timeout_s
+        #: A Kata boot is not a probe and does not share the probe bound.
+        self.boot_timeout_s = boot_timeout_s
+        #: The containerd namespace this launcher owns. Not `default`: rule
+        #: 19(a) asks a session to confirm a destructive step over its whole
+        #: reach, and nothing sharing `default` with the provisioner and every
+        #: past probe can say "everything here is mine". Kata's cgroup driver
+        #: also puts the namespace literally in the leaked-cgroup path.
+        self.namespace = namespace
+        #: Pinned by digest. Image stores are per-namespace (measured), so
+        #: owning a namespace means owning the pull.
+        self.config_guest_image = guest_image
+        self.guest_image_digest = guest_image_digest
+        self._cid_counter = FIRST_LAUNCHER_CID
         #: Carried for the guest supervisor this launcher will construct once
         #: the microVM launch path exists. Optional here and required there:
         #: `boot` refuses before reaching a supervisor, so a launcher built
@@ -445,12 +622,18 @@ class KataLauncher:
 
     # -- probe plumbing ----------------------------------------------------
 
-    def _run(self, argv: list[str]) -> dict:
+    def _run(self, argv: list[str], *, timeout_s: float | None = None) -> dict:
         """Run one probe command and reduce it to facts.
 
         A missing binary, a timeout, and a non-zero exit are three different
         observations and are kept apart, because they point at three different
         fixes for the operator.
+
+        `timeout_s` overrides the probe bound for calls that are not probes. A
+        Kata boot legitimately runs past `DEFAULT_PROBE_TIMEOUT_S` on a loaded
+        host, and a boot truncated by a probe-sized timeout reports as an
+        infrastructure error indistinguishable from every other one — passing on
+        an idle host and misfiring exactly where the margin matters.
         """
         observed: dict = {"argv": list(argv)}
         try:
@@ -458,7 +641,7 @@ class KataLauncher:
                 list(argv),
                 capture_output=True,
                 text=True,
-                timeout=self.probe_timeout_s,
+                timeout=self.probe_timeout_s if timeout_s is None else timeout_s,
             )
         except FileNotFoundError as exc:
             observed["error"] = f"{argv[0]} was not found on PATH: {exc}"
@@ -634,8 +817,77 @@ class KataLauncher:
 
     # -- boot --------------------------------------------------------------
 
-    def boot(self, session_id: str) -> GuestHandle:
+    def mint_sandbox_name(self, session_id: str) -> str:
+        """A per-boot sandbox name: the session id, plus entropy this mints.
+
+        The entropy is not decoration. The name is simultaneously the container
+        name, the attribution token in the VMM's argv, the `/run/vc/vm/<id>`
+        directory and the shim-kill pattern, so two live sandboxes whose names
+        are prefixes of one another would cross-attribute. `sess-1` is a prefix
+        of `sess-10`, and a caller-supplied session id is exactly the kind of
+        value that produces such pairs — so the launcher never lets the caller's
+        id be the whole address.
+        """
+        suffix = uuid.uuid4().hex[:10]
+        stem = "".join(char if char.isalnum() else "-" for char in session_id)[:32].strip("-")
+        return f"trellis-{stem}-{suffix}" if stem else f"trellis-{suffix}"
+
+    def mint_cid(self) -> int:
+        """The host-assigned session id for the next boot.
+
+        Under the ratified VMM there is no kernel-supplied CID on the host side
+        (INTERFACES section 3.1a) — this number is the host's own label, and its
+        soundness rests entirely on the launcher issuing it once and binding it
+        1:1 to one sandbox's socket path. Monotonic rather than random so a
+        collision is impossible within a process rather than merely unlikely;
+        `TrellisSandboxHost.open_session` remains the authority that refuses a
+        CID already open, and a caller sharing one host across launchers gets
+        that refusal rather than silent reuse.
+        """
+        value = self._cid_counter
+        self._cid_counter += 1
+        return value
+
+    def _ensure_image(self) -> None:
+        """Make the pinned image present in this launcher's namespace.
+
+        **Measured 2026-07-25:** containerd image stores are per-namespace, so a
+        launcher that moved off `default` sees none of what the provisioner
+        pulled — `ctr -n <ns> run` fails with `image "...": not found`. Owning a
+        namespace therefore means owning the pull, which is why the digest is a
+        config value at all rather than living only in the provisioner.
+        """
+        listed = self._run(["ctr", "-n", self.namespace, "images", "ls", "-q"])
+        if listed.get("error"):
+            raise SandboxError(f"cannot list images in namespace {self.namespace}: {listed['error']}")
+        if self.config_guest_image in (listed.get("stdout") or "").split():
+            return
+
+        reference = f"{self.config_guest_image}@{self.guest_image_digest}"
+        pulled = self._run(
+            ["ctr", "-n", self.namespace, "images", "pull", reference],
+            timeout_s=self.boot_timeout_s,
+        )
+        if pulled.get("error") or pulled.get("returncode") != 0:
+            raise SandboxError(
+                f"could not pull {reference} into namespace {self.namespace}: "
+                f"{pulled.get('error') or _clip(pulled.get('stderr'))}"
+            )
+        # Tag so the digest-pinned pull is reachable by the plain reference the
+        # run command uses, mirroring what the provisioner does in `default`.
+        tagged = self._run(
+            ["ctr", "-n", self.namespace, "images", "tag", reference, self.config_guest_image]
+        )
+        if tagged.get("error"):
+            raise SandboxError(f"could not tag {reference}: {tagged['error']}")
+
+    def boot(self, session_id: str, *, sandbox_name: str | None = None) -> GuestHandle:
         """Gate the host, then claim one microVM for `session_id`.
+
+        `sandbox_name` lets a caller mint the name *before* the boot, which the
+        composition layer needs: a workspace lease records the sandbox its holder
+        booted, and the lease has to be taken before any resource is allocated.
+        Absent, the name is minted here, which is the standalone case.
 
         Raises `SandboxError` with the full failure list when G1 does not pass —
         including on this repository's Windows development host, which has no
@@ -651,23 +903,294 @@ class KataLauncher:
                 "failed: " + "; ".join(result.failures)
             )
 
-        # Everything above this line is built and probes a real host. What
-        # follows it — minting the guest image, launching Cloud Hypervisor with
-        # a chosen guest CID, and waiting for the supervisor to listen — is not
-        # built. The S2 spike (BUILD_PLAN section 5.2, PASS 2026-07-23) proved
-        # the `ctr run --runtime io.containerd.kata.v2` path boots a stateful
-        # guest and showed which host provisioning facts it needs, but a spike
-        # driving `ctr` by hand is not this launch path; see
-        # scripts/repl_sandbox_s2_probe.py. Raising here is the
-        # whole of the honesty: a launcher that returned a handle backed by
-        # nothing would be indistinguishable from a working one until the first
-        # exec, and would have already been counted as a boundary by then.
-        raise NotImplementedError(
-            f"host gate G1 passed for session {session_id}, but the microVM launch "
-            "path (guest image, Cloud Hypervisor launch with an assigned guest CID, "
-            "supervisor readiness) is BUILD_PLAN section 5.2 (S2) and is not built. "
-            "No guest was claimed."
+        name = sandbox_name if sandbox_name is not None else self.mint_sandbox_name(session_id)
+        handle = KataGuestHandle(
+            config=self.config,
+            sandbox_name=name,
+            cid=self.mint_cid(),
+            namespace=self.namespace,
+            launcher=self,
+            audit=self.audit,
         )
+
+        # Every allocation is recorded on the handle at the instant it is made,
+        # never after the sequence completes. `KataREPL.setup` assigns
+        # `self._guest` only once `boot` has *returned*, so a boot that raises
+        # partway leaves its caller with nothing to tear down — this method is
+        # structurally the only code that can release what it allocated, and a
+        # handle whose bookkeeping lags the host by even one step leaks exactly
+        # the middle of the sequence.
+        try:
+            self._ensure_image()
+
+            started = time.monotonic()
+            run_result = self._run(
+                [
+                    "ctr", "-n", self.namespace, "run", "-d",
+                    "--runtime", KATA_RUNTIME_HANDLER,
+                    self.config_guest_image, name, "sleep", "infinity",
+                ],
+                timeout_s=self.boot_timeout_s,
+            )
+            elapsed = time.monotonic() - started
+            if run_result.get("error") or run_result.get("returncode") != 0:
+                raise SandboxError(
+                    f"`ctr run` for sandbox {name} did not start it: "
+                    f"{run_result.get('error') or _clip(run_result.get('stderr'))}"
+                )
+            # containerd registered the task, so the name is taken from here on
+            # whatever happens next.
+            handle.container_created = True
+
+            # The refusal (BUILD_PLAN section 5.6 item 4). `ctr run -d` returning
+            # 0 means the shim accepted the task, which is not the same fact as a
+            # VMM existing. Measured on the reference host 2026-07-25: by the
+            # time `ctr run -d` returns, the VMM and its vsock socket are already
+            # present — the first poll 15 ms later found both. So an absent VMM
+            # here is not "not booted yet", it is "never booted", and waiting
+            # would only convert a clean refusal into a timeout.
+            pids = vmm_pids_carrying(name)
+            if not pids:
+                raise SandboxError(
+                    f"`ctr run` for sandbox {name} exited 0 after {elapsed:.1f}s but no "
+                    f"{CLOUD_HYPERVISOR_BIN} process carries that name: containerd "
+                    "reported success without creating a VM, so there is no boundary "
+                    "to hand back"
+                )
+            handle.vmm_pids = tuple(pids)
+            handle.uds_path = discover_vsock_uds(pids[0])
+            handle.install_package()
+            return handle
+        except BaseException:
+            handle.shutdown()
+            raise
+
+
+class KataGuestHandle:
+    """One live Kata sandbox, from the host's side.
+
+    Holds every allocation `KataLauncher.boot` made, and is the only object that
+    can release them: `KataREPL.setup` assigns its `_guest` after `boot` returns,
+    so a boot that fails partway has no caller able to tear it down.
+
+    The four-call order is the backend's (`GuestHandle`), and `install_scaffold`
+    is the call that brings the guest process into existence — the same shape
+    `InProcessGuest.install_scaffold` already has, where constructing the
+    supervisor and starting it serving happen there rather than at boot. That is
+    forced rather than chosen: `GuestSupervisor` takes its scaffold and its
+    reserved-name pins as constructor arguments, so the payload must be complete
+    on disk before the guest's Python starts, and the scaffold is not known until
+    the backend materialises it for this CID.
+    """
+
+    def __init__(
+        self,
+        config: SandboxConfig,
+        sandbox_name: str,
+        cid: int,
+        namespace: str,
+        launcher: "KataLauncher",
+        audit: AuditLog | None = None,
+    ) -> None:
+        self.config = config
+        self.sandbox_name = sandbox_name
+        self.cid = cid
+        self.namespace = namespace
+        self.audit = audit
+        self._launcher = launcher
+        #: Set the instant `ctr run -d` returns 0 — before anything is checked
+        #: about whether a VM exists — because from that moment containerd holds
+        #: a record under this name that teardown must remove.
+        self.container_created = False
+        self.vmm_pids: tuple[int, ...] = ()
+        self.uds_path: str | None = None
+        self.package_installed = False
+        self.serving = False
+        self.bridge_started = False
+        self._bridge: Any = None
+        self._control_conn: Connection | None = None
+
+    # -- setup steps -------------------------------------------------------
+
+    def attach_bridge(self, bridge: Any) -> None:
+        """Supply the host end of `LM_PORT`/`DB_PORT` for this sandbox.
+
+        The launcher cannot build this itself: the listeners serve a host's
+        handlers, and a launcher has no host. So the composition layer that holds
+        both binds them and hands the result here (`session_host.SessionBridge`).
+        Without it `start_bridge` still refuses, which keeps the honest default
+        for any caller that boots a guest and never composes a session.
+        """
+        self._bridge = bridge
+
+    def start_bridge(self) -> None:
+        """Bring the host end up, or refuse if nobody supplied one.
+
+        `KataREPL.setup` calls this "the bridge, before any untrusted worker
+        process", so a silent no-op would assert a bridge exists when nothing has
+        been bound — and the first thing to discover that would be model-authored
+        code, at runtime, inside the boundary.
+
+        What is settled: the guest needs no loopback-to-vsock forwarder. The
+        forwarder of INTERFACES section 3.3 exists to carry an in-guest rlms
+        client's `AF_INET` traffic, and there is no rlms in the guest — the
+        materialised stubs dial `AF_VSOCK` directly (`guest_main.build_rpc_hook`).
+        What this step actually needs is an owner for the per-sandbox
+        `LM_PORT`/`DB_PORT` listeners, which is `session_host`'s.
+        """
+        if self._bridge is None:
+            raise SandboxError(
+                f"sandbox {self.sandbox_name} booted, but no host-side bridge was "
+                "attached: the LM_PORT/DB_PORT listeners serve a TrellisSandboxHost's "
+                "handlers and a launcher has no host. Compose the session through "
+                "session_host.open_workspace_session, which binds them and calls "
+                "attach_bridge. Refusing rather than passing silently, because "
+                "setup() treats this call as the bridge being up."
+            )
+        self._bridge.start()
+        self.bridge_started = True
+
+    def install_package(self) -> None:
+        """Ship `repl_sandbox` into the guest. Called by `boot`, not by the backend."""
+        payload = _package_tarball()
+        self._put_bytes(payload, f"{GUEST_ROOT}/repl_sandbox.tgz")
+        self._exec(
+            f"cd {GUEST_ROOT} && tar xzf repl_sandbox.tgz && rm -f repl_sandbox.tgz",
+            exec_id="unpack",
+        )
+        self.package_installed = True
+
+    def install_scaffold(self, stub_source: str) -> None:
+        """Place the startup payload and start the guest supervisor serving."""
+        raise SandboxError(
+            "unreachable until start_bridge's composition is resolved; the guest "
+            "process would come up with no host listener to dial"
+        )
+
+    def control(self) -> Connection:
+        """Open the persistent control connection to the guest supervisor."""
+        if not self.serving:
+            raise SandboxError("the guest is not serving yet; install the scaffold first")
+        raise SandboxError("unreachable until install_scaffold is reachable")
+
+    # -- teardown ----------------------------------------------------------
+
+    def shutdown(self) -> None:
+        """Release everything this handle holds, and report what survived.
+
+        Bounded and swallowing per step, like the probes' `destroy` — `ctr`
+        blocks indefinitely against a shim that has stopped answering, and a
+        `TimeoutExpired` escaping here would mask the failure that caused it.
+        Unlike the probes, this **re-checks reality afterwards and raises** if
+        something survived: a probe compensates for a total-swallow teardown with
+        its own separate verification pass, and a launcher has no such pass —
+        its caller records one audit line and moves on, so a `shutdown` that
+        absorbed everything would make that line unreachable even when a VMM is
+        still running.
+        """
+        errors: list[str] = []
+
+        if self._control_conn is not None:
+            try:
+                self._control_conn.close()
+            except OSError:
+                pass
+            self._control_conn = None
+
+        if self.container_created:
+            for argv in (
+                ["ctr", "-n", self.namespace, "task", "kill", "-s", "SIGKILL", "-a", self.sandbox_name],
+                ["ctr", "-n", self.namespace, "task", "delete", "-f", self.sandbox_name],
+                ["ctr", "-n", self.namespace, "container", "delete", self.sandbox_name],
+            ):
+                observed = self._launcher._run(argv, timeout_s=30.0)
+                if observed.get("error") and "timed out" in str(observed["error"]):
+                    self._kill_shim()
+                    self._launcher._run(argv, timeout_s=30.0)
+
+            survivors = vmm_pids_carrying(self.sandbox_name)
+            if survivors:
+                errors.append(
+                    f"{CLOUD_HYPERVISOR_BIN} pids {survivors} still carry {self.sandbox_name} "
+                    "after teardown"
+                )
+            self.container_created = False
+
+        self._audit("shutdown", errors=errors)
+        if errors:
+            raise SandboxError("; ".join(errors))
+
+    def _kill_shim(self) -> None:
+        """SIGKILL this sandbox's Kata shim so a wedged `ctr` call can complete.
+
+        Identity is `/proc/<pid>/exe`, for the same reason `vmm_pids_carrying`
+        uses it and with more at stake: this call sends SIGKILL, so a wrong match
+        is not a wrong answer but a killed process.
+
+        The earlier form shelled out to
+        `pgrep -f 'containerd-shim-kata-v2.*<name>'`. **Observed 2026-07-25:** an
+        operator ran that pattern from a shell during cleanup and killed the
+        shell itself, because `pgrep` matches any process whose command line
+        contains the pattern and the invoking command line did. Survivable in a
+        probe, not in shipped teardown, so no `pgrep` reaches a `kill` here.
+        """
+        for pid in _pids_by_executable(SHIM_EXECUTABLE_NAME, carrying=self.sandbox_name):
+            try:
+                os.kill(pid, 9)
+            except (ProcessLookupError, PermissionError, OSError):
+                continue
+        time.sleep(1.0)
+
+    # -- internals ---------------------------------------------------------
+
+    def _exec(self, script: str, *, exec_id: str, timeout_s: float = 120.0) -> str:
+        observed = self._launcher._run(
+            [
+                "ctr", "-n", self.namespace, "task", "exec",
+                "--exec-id", exec_id, self.sandbox_name, "sh", "-c", script,
+            ],
+            timeout_s=timeout_s,
+        )
+        if observed.get("error") or observed.get("returncode") != 0:
+            raise SandboxError(
+                f"guest exec {exec_id!r} in {self.sandbox_name} failed: "
+                f"{observed.get('error') or _clip(observed.get('stderr'))}"
+            )
+        return observed.get("stdout") or ""
+
+    def _put_bytes(self, raw: bytes, dest: str) -> None:
+        """Write bytes into the guest in argv-sized chunks."""
+        encoded = base64.b64encode(raw).decode("ascii")
+        self._exec(f"mkdir -p {GUEST_ROOT} && : > {dest}.b64", exec_id=f"put-init-{uuid.uuid4().hex[:6]}")
+        for index in range(0, len(encoded), EXEC_CHUNK_BYTES):
+            chunk = encoded[index : index + EXEC_CHUNK_BYTES]
+            self._exec(f"printf %s {chunk} >> {dest}.b64", exec_id=f"put-{index}-{uuid.uuid4().hex[:6]}")
+        self._exec(f"base64 -d {dest}.b64 > {dest} && rm -f {dest}.b64", exec_id=f"put-fin-{uuid.uuid4().hex[:6]}")
+
+    def _audit(self, event: str, **fields: object) -> None:
+        if self.audit is not None:
+            self.audit.record(self.cid, f"guest.{event}", **fields)
+
+
+def _package_tarball() -> bytes:
+    """`repl_sandbox` as a gzipped tar, tests and caches excluded.
+
+    The guest runs the same source the host does. Tests are excluded because
+    they run host-side and would otherwise ship the very literals the host is
+    the authority for.
+    """
+    package = os.path.dirname(os.path.abspath(__file__))
+    source_root = os.path.dirname(package)
+    buffer = io.BytesIO()
+    with tarfile.open(fileobj=buffer, mode="w:gz") as tar:
+        for root, dirs, files in os.walk(package):
+            dirs[:] = [d for d in dirs if d not in ("__pycache__", "tests")]
+            for name in sorted(files):
+                if not name.endswith(".py"):
+                    continue
+                path = os.path.join(root, name)
+                tar.add(path, arcname=os.path.relpath(path, source_root))
+    return buffer.getvalue()
 
 
 # ---------------------------------------------------------------------------

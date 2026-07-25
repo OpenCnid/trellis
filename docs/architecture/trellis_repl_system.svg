@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 1000" width="1480" height="1000" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>The REPL inside Trellis — what persists, what is ephemeral, and where the loop closes</title>
+  <desc>A system view. Many swappable workspaces sit in durable storage. One is loaded into a persistent REPL namespace. A microVM is an ephemeral shell placed around that namespace for one working session. The model holds addresses, never bytes. A response artifact composed in the REPL is filed back into the store, judged, given standing at a user gate, and becomes input to the next query.</desc>
+
+  <defs>
+    <style>
+      .bg      { fill: #f4f6f7; }
+      .ink     { fill: #10181c; }
+      .soft    { fill: #4a5b62; }
+      .faint   { fill: #7d9098; }
+      .rule    { stroke: #c2ced3; }
+      .store   { fill: #e3ecee; stroke: #2c6b78; }
+      .repl    { fill: #fdf6e6; stroke: #a97400; }
+      .vm      { fill: none;    stroke: #9c4033; }
+      .model   { fill: #ece6f0; stroke: #5b4a78; }
+      .judge   { fill: #e8eee6; stroke: #4a6b3f; }
+      .t-title { font-size: 30px; font-weight: 650; letter-spacing: -0.4px; }
+      .t-sub   { font-size: 15.5px; }
+      .t-head  { font-size: 17px; font-weight: 650; }
+      .t-lbl   { font-size: 12.5px; font-weight: 620; letter-spacing: 1.1px; text-transform: uppercase; }
+      .t-body  { font-size: 13px; }
+      .t-mono  { font-size: 12.5px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+      .t-note  { font-size: 12px; font-style: italic; }
+      @media (prefers-color-scheme: dark) {
+        .bg    { fill: #0d1417; }
+        .ink   { fill: #e8eef0; }
+        .soft  { fill: #a6b6bc; }
+        .faint { fill: #708289; }
+        .rule  { stroke: #2a3a40; }
+        .store { fill: #12262b; stroke: #63c0d0; }
+        .repl  { fill: #241d0f; stroke: #e8b64c; }
+        .vm    { stroke: #e08a76; }
+        .model { fill: #1d1a2b; stroke: #a99ad0; }
+        .judge { fill: #16211a; stroke: #8fb87f; }
+      }
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1480" height="1000"/>
+
+  <!-- ══ title ══ -->
+  <text class="t-title ink" x="56" y="62">Everything resides on the REPL</text>
+  <text class="t-sub soft" x="56" y="90">What persists is the workspace and its store. The microVM is a shell placed around one working session — which is why the composition is a context manager.</text>
+  <line class="rule" x1="56" y1="112" x2="1424" y2="112" stroke-width="1"/>
+
+  <!-- ══ LEFT: swappable workspaces ══ -->
+  <text class="t-lbl faint" x="56" y="152">Workspaces · swappable · many</text>
+
+  <g>
+    <rect class="store" x="56" y="172" width="250" height="52" rx="5" opacity="0.35" stroke-width="1.5"/>
+    <text class="t-body soft" x="74" y="203">philosophy</text>
+    <rect class="store" x="56" y="232" width="250" height="52" rx="5" opacity="0.35" stroke-width="1.5"/>
+    <text class="t-body soft" x="74" y="263">parts inventory · manuals · receipts</text>
+    <rect class="store" x="56" y="292" width="250" height="52" rx="5" opacity="0.35" stroke-width="1.5"/>
+    <text class="t-body soft" x="74" y="323">Trellis' own source</text>
+    <text class="t-note faint" x="74" y="341">self-modification: the repo is the artifact</text>
+
+    <!-- the loaded one -->
+    <rect class="store" x="56" y="368" width="250" height="72" rx="5" stroke-width="2.5"/>
+    <text class="t-head ink" x="74" y="398">physics</text>
+    <text class="t-note soft" x="74" y="420">loaded this session</text>
+  </g>
+
+  <text class="t-note faint" x="56" y="472">A workspace is not a chat thread. It carries its</text>
+  <text class="t-note faint" x="56" y="490">domain, the artifacts it has produced, and its own</text>
+  <text class="t-note faint" x="56" y="508">past — and it is still there when the VM is gone.</text>
+
+  <path class="rule" d="M306,404 L372,404" stroke-width="2" marker-end="url(#a)" fill="none"/>
+  <text class="t-mono faint" x="312" y="394">load</text>
+
+  <!-- ══ CENTRE: the ephemeral VM shell around the persistent REPL ══ -->
+  <rect class="vm" x="392" y="150" width="600" height="470" rx="12" stroke-width="2" stroke-dasharray="9 6"/>
+  <text class="t-lbl" x="412" y="178" fill="#9c4033">Kata microVM · ephemeral · one session</text>
+  <text class="t-note faint" x="412" y="198">hardware boundary · torn down at exit · holds no credential</text>
+
+  <!-- the REPL namespace -->
+  <rect class="repl" x="422" y="222" width="540" height="270" rx="9" stroke-width="2.5"/>
+  <text class="t-head ink" x="446" y="254">The REPL — persistent namespace</text>
+  <text class="t-note soft" x="446" y="276">gigabytes, read in slices. The corpus ceiling is address space.</text>
+
+  <g>
+    <rect class="store" x="446" y="296" width="228" height="60" rx="5" stroke-width="1.5" opacity="0.5"/>
+    <text class="t-mono ink" x="462" y="322">context</text>
+    <text class="t-note soft" x="462" y="342">handles, not payloads</text>
+
+    <rect class="store" x="690" y="296" width="248" height="60" rx="5" stroke-width="1.5" opacity="0.5"/>
+    <text class="t-mono ink" x="706" y="322">facts · beliefs · doubts</text>
+    <text class="t-note soft" x="706" y="342">three pre-allocated roots</text>
+
+    <rect class="store" x="446" y="372" width="228" height="60" rx="5" stroke-width="1.5" opacity="0.5"/>
+    <text class="t-mono ink" x="462" y="398">artifacts</text>
+    <text class="t-note soft" x="462" y="418">what past turns built</text>
+
+    <rect class="store" x="690" y="372" width="248" height="60" rx="5" stroke-width="1.5" opacity="0.5"/>
+    <text class="t-mono ink" x="706" y="398">model-authored code</text>
+    <text class="t-note soft" x="706" y="418">untrusted; runs here</text>
+  </g>
+
+  <text class="t-note faint" x="446" y="466">State survives a turn because it is written to the store —</text>
+  <text class="t-note faint" x="446" y="484">never because this process stayed alive.</text>
+
+  <!-- the three ports -->
+  <text class="t-lbl faint" x="412" y="534">Three ports through the wall</text>
+  <text class="t-mono soft" x="412" y="558">CONTROL 5003 · host dials in</text>
+  <text class="t-mono soft" x="412" y="580">LM 5001 · guest dials out</text>
+  <text class="t-mono soft" x="412" y="602">DB 5002 · guest dials out</text>
+  <text class="t-mono" x="700" y="580" fill="#a97400">← host end unowned</text>
+  <text class="t-mono" x="700" y="602" fill="#a97400">← host end unowned</text>
+
+  <!-- ══ RIGHT: the model ══ -->
+  <rect class="model" x="1058" y="222" width="366" height="150" rx="9" stroke-width="2"/>
+  <text class="t-head ink" x="1082" y="254">The model</text>
+  <text class="t-body soft" x="1082" y="282">Holds addresses. Never the corpus.</text>
+  <text class="t-body soft" x="1082" y="304">Slices by reference; the engine moves</text>
+  <text class="t-body soft" x="1082" y="326">the bytes and does the counting.</text>
+  <text class="t-mono faint" x="1082" y="352">llm_query · flat fan-out, depth 1</text>
+
+  <path class="rule" d="M992,300 L1052,300" stroke-width="2" marker-end="url(#a)" fill="none" stroke="#5b4a78"/>
+  <path class="rule" d="M1052,332 L992,332" stroke-width="2" marker-end="url(#a)" fill="none" stroke="#5b4a78"/>
+  <text class="t-mono faint" x="1000" y="292">ask</text>
+  <text class="t-mono faint" x="1000" y="352">answer</text>
+
+  <!-- ══ BOTTOM: the substrate ══ -->
+  <rect class="store" x="392" y="672" width="1032" height="128" rx="9" stroke-width="2.5"/>
+  <text class="t-head ink" x="416" y="704">The substrate — durable, content-addressed, append-only</text>
+  <text class="t-body soft" x="416" y="730">Every node addressed by its SHA-256 preimage and final at write time. Corrections are written beside, never over.</text>
+  <text class="t-mono faint" x="416" y="756">AST nodes · document versions · the belief graph · provenance the write path enforces</text>
+  <text class="t-note faint" x="416" y="782">This is what makes a workspace survivable. The VM above it is disposable; this is not.</text>
+
+  <path class="rule" d="M560,668 L560,500" stroke-width="2" marker-end="url(#a)" fill="none" stroke="#2c6b78"/>
+  <text class="t-mono faint" x="572" y="640">slices, by address</text>
+
+  <path class="rule" d="M900,500 L900,668" stroke-width="2" marker-end="url(#a)" fill="none" stroke="#2c6b78"/>
+  <text class="t-mono faint" x="912" y="640">the artifact, filed</text>
+
+  <!-- ══ the closing loop ══ -->
+  <rect class="judge" x="1058" y="420" width="366" height="196" rx="9" stroke-width="2"/>
+  <text class="t-head ink" x="1082" y="452">The loop that closes</text>
+  <text class="t-body soft" x="1082" y="480">A query does not return a reply. It builds a</text>
+  <text class="t-body soft" x="1082" y="500">response artifact — derived, never regurgitated.</text>
+  <text class="t-body soft" x="1082" y="528">Judges compose per context and evaluate it.</text>
+  <text class="t-body soft" x="1082" y="548">The user gate ratifies standing:</text>
+  <text class="t-mono ink" x="1082" y="574">−1 doubt · 0 belief · +1 fact</text>
+  <text class="t-note faint" x="1082" y="598">Then it is corpus. Output becomes input.</text>
+
+  <path class="rule" d="M962,406 L1058,470" stroke-width="2" marker-end="url(#a)" fill="none" stroke="#4a6b3f"/>
+  <path class="rule" d="M1150,616 L1000,668" stroke-width="2" marker-end="url(#a)" fill="none" stroke="#4a6b3f"/>
+
+  <!-- ══ the thesis ══ -->
+  <line class="rule" x1="56" y1="848" x2="1424" y2="848" stroke-width="1"/>
+  <text class="t-lbl faint" x="56" y="884">Why this settles the lifetime question</text>
+  <text class="t-body ink" x="56" y="912">The durable thing and the executing thing are different objects. A workspace outlives every session because its state is in the</text>
+  <text class="t-body ink" x="56" y="934">substrate; the microVM is compute borrowed for one stretch of work. So a scope that ends is not a session that is lost — it is a VM</text>
+  <text class="t-body ink" x="56" y="956">released. rlms already models this: its driver ends a non-persistent run with <tspan class="t-mono">cleanup()</tspan>. A context manager is that lifecycle in Python,</text>
+  <text class="t-body ink" x="56" y="978">and it makes the one genuinely unrecoverable mistake — leaking a live VM — impossible to make by forgetting.</text>
+</svg>

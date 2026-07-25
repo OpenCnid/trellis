@@ -268,8 +268,52 @@ def test_the_listener_is_closed_even_when_construction_fails() -> None:
 
 
 # ---------------------------------------------------------------------------
-# The two properties that would be silently wrong
+# The properties that would be silently wrong
 # ---------------------------------------------------------------------------
+
+
+def test_tier0_grants_proc_so_the_guest_can_read_back_its_own_hardening() -> None:
+    """Evidence-gathering sits inside the blast radius of the thing it measures.
+
+    `apply_tier0` installs the Landlock ruleset and only afterwards reads
+    `/proc/self/status` to fill in `seccomp_mode` and `no_new_privs`. With the
+    bare default policy those roots do not include `/proc`, so a guest that
+    hardened *correctly* reports `Seccomp: -1` -- the exact failure S5 met on its
+    first host run and fixed in the probe's own local policy, which is why this
+    module inherited the gap.
+    """
+    policy = guest_main.guest_tier0_policy()
+    assert "/proc" in policy.read_only_roots
+
+
+def test_tier0_grants_the_root_this_package_is_imported_from() -> None:
+    """A lazy import after hardening must not become EACCES.
+
+    The launcher unpacks `repl_sandbox` into a directory of its choosing, which
+    is under none of `Tier0Policy`'s default roots. Module-scope imports have
+    already run by the time Tier-0 is applied; the ones that have not are the
+    failure, and they surface deep in a later turn rather than at startup.
+    """
+    policy = guest_main.guest_tier0_policy()
+    root = pathlib.Path(guest_main.guest_source_root())
+
+    # The granted root really does contain this package -- not merely a string
+    # that looks plausible.
+    assert (root / "repl_sandbox" / "guest_main.py").is_file()
+    assert str(root) in policy.read_only_roots
+
+
+def test_the_default_hardener_passes_a_policy_rather_than_taking_the_bare_default() -> None:
+    """The two grants above only bind if `_default_harden` actually applies them.
+
+    Checked at the call site because that is where the defect lived: a correct
+    policy nobody passes is the same guest as no policy at all.
+    """
+    import inspect
+
+    body = inspect.getsource(guest_main._default_harden)
+    assert "apply_tier0()" not in body
+    assert "guest_tier0_policy()" in body
 
 
 def test_the_default_listener_is_native_vsock_never_the_hybrid_one() -> None:

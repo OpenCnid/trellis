@@ -132,6 +132,25 @@ def test_min_guest_cid_sits_above_the_host_cid():
     assert MIN_GUEST_CID == 3
 
 
+def test_both_copies_of_the_guest_cid_floor_agree():
+    """One fact, two modules, and until now nothing tied them together.
+
+    `session.MIN_GUEST_CID` is derived (`VMADDR_CID_HOST + 1`) and
+    `capabilities.FIRST_GUEST_CID` is a literal, and both are the same fact:
+    the lowest CID a guest may be keyed on. They happen to agree today, so a
+    change to either -- the reserved-CID range widening, or the literal being
+    edited -- would leave two enforcing surfaces disagreeing about which CIDs
+    are admissible, with each module's own tests still green.
+
+    Asserting the two constants against each other rather than each against a
+    literal is the point: a literal-vs-literal check passes while the modules
+    drift apart, which is the shape S6-entry found in the reserved names.
+    """
+    from repl_sandbox.capabilities import FIRST_GUEST_CID
+
+    assert MIN_GUEST_CID == FIRST_GUEST_CID
+
+
 # --- audit ------------------------------------------------------------------
 
 
