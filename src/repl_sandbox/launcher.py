@@ -66,6 +66,10 @@ KVM_DEVICE = "/dev/kvm"
 KATA_RUNTIME_BIN = "kata-runtime"
 CLOUD_HYPERVISOR_BIN = "cloud-hypervisor"
 
+#: The containerd shim binary Kata runs per sandbox. Named so teardown can
+#: identify it by `/proc/<pid>/exe` rather than by a command-line pattern.
+SHIM_EXECUTABLE_NAME = "containerd-shim-kata-v2"
+
 #: Bound on any probe subprocess. `kata-runtime check` talks to the kernel and
 #: to containerd; a hung probe must not hang the gate.
 DEFAULT_PROBE_TIMEOUT_S = 60.0
@@ -486,10 +490,56 @@ def qemu_accel_benchmark(
     return observed
 
 
+def _pids_by_executable(
+    executable: str, *, carrying: str | None = None, proc_root: str = "/proc"
+) -> list[int]:
+    """PIDs whose `/proc/<pid>/exe` basename is `executable`.
+
+    The kernel's answer to *what is this process running*, which is a different
+    question from *what string appears on its command line* — and only the first
+    is safe to act on. `carrying`, when given, additionally requires the sandbox
+    name as a whole path component of some argument.
+    """
+    found: list[int] = []
+    try:
+        entries = os.listdir(proc_root)
+    except OSError:
+        return found
+    for entry in entries:
+        if not entry.isdigit():
+            continue
+        try:
+            resolved = os.readlink(os.path.join(proc_root, entry, "exe"))
+        except OSError:
+            # Exited mid-walk, or not ours to read. Neither is a process this
+            # launcher started, and neither is one it may signal.
+            continue
+        if os.path.basename(resolved) != executable:
+            continue
+        if carrying is not None:
+            try:
+                with open(os.path.join(proc_root, entry, "cmdline"), "rb") as handle:
+                    argv = handle.read().split(b"\0")
+            except OSError:
+                continue
+            # Whole path component, never substring containment: sandbox names
+            # are minted from a session id, so `sess-1` is a substring of
+            # `sess-10` and containment would attribute one session's VMM to
+            # another.
+            if not any(
+                carrying in token.decode("utf-8", "replace").split("/")
+                for token in argv
+                if token
+            ):
+                continue
+        found.append(int(entry))
+    return found
+
+
 def vmm_pids_carrying(name: str, *, proc_root: str = "/proc") -> list[int]:
     """PIDs of real Cloud Hypervisor processes whose argv names this sandbox.
 
-    Walks `/proc` directly rather than shelling out to `pgrep`, and the reason is
+    Identity comes from `/proc/<pid>/exe` rather than from `pgrep`, and the reason is
     measured rather than stylistic. **`pgrep` excludes its own PID but not its
     ancestors**, so on a host with zero VMMs running, a `pgrep -af
     cloud-hypervisor` issued from any process whose own command line contains
@@ -506,34 +556,7 @@ def vmm_pids_carrying(name: str, *, proc_root: str = "/proc") -> list[int]:
     real VM while looking exactly like a correct check (measured the same day:
     `comm='cloud-hyperviso' exe='/opt/kata/bin/cloud-hypervisor'`).
     """
-    found: list[int] = []
-    try:
-        entries = os.listdir(proc_root)
-    except OSError:
-        return found
-    for entry in entries:
-        if not entry.isdigit():
-            continue
-        pid = int(entry)
-        try:
-            executable = os.readlink(os.path.join(proc_root, entry, "exe"))
-        except OSError:
-            # A process that exited mid-walk, or one this uid cannot read. Both
-            # are ordinary; neither is a VMM this launcher started.
-            continue
-        if os.path.basename(executable) != CLOUD_HYPERVISOR_BIN:
-            continue
-        try:
-            with open(os.path.join(proc_root, entry, "cmdline"), "rb") as handle:
-                argv = handle.read().split(b"\0")
-        except OSError:
-            continue
-        # Whole-argument match, never substring containment: sandbox names are
-        # minted from a session id, so `sess-1` is a substring of `sess-10` and
-        # a containment test would attribute one session's VMM to another.
-        if any(name in token.decode("utf-8", "replace").split("/") for token in argv if token):
-            found.append(pid)
-    return found
+    return _pids_by_executable(CLOUD_HYPERVISOR_BIN, carrying=name, proc_root=proc_root)
 
 
 def _clip(text: object) -> str:
@@ -1086,14 +1109,23 @@ class KataGuestHandle:
             raise SandboxError("; ".join(errors))
 
     def _kill_shim(self) -> None:
-        """SIGKILL this sandbox's Kata shim so a wedged `ctr` call can complete."""
-        found = self._launcher._run(
-            ["pgrep", "-f", f"containerd-shim-kata-v2.*{self.sandbox_name}"], timeout_s=15.0
-        )
-        for token in (found.get("stdout") or "").split():
+        """SIGKILL this sandbox's Kata shim so a wedged `ctr` call can complete.
+
+        Identity is `/proc/<pid>/exe`, for the same reason `vmm_pids_carrying`
+        uses it and with more at stake: this call sends SIGKILL, so a wrong match
+        is not a wrong answer but a killed process.
+
+        The earlier form shelled out to
+        `pgrep -f 'containerd-shim-kata-v2.*<name>'`. **Observed 2026-07-25:** an
+        operator ran that pattern from a shell during cleanup and killed the
+        shell itself, because `pgrep` matches any process whose command line
+        contains the pattern and the invoking command line did. Survivable in a
+        probe, not in shipped teardown, so no `pgrep` reaches a `kill` here.
+        """
+        for pid in _pids_by_executable(SHIM_EXECUTABLE_NAME, carrying=self.sandbox_name):
             try:
-                os.kill(int(token), 9)
-            except (ValueError, ProcessLookupError, PermissionError, OSError):
+                os.kill(pid, 9)
+            except (ProcessLookupError, PermissionError, OSError):
                 continue
         time.sleep(1.0)
 

@@ -751,7 +751,8 @@ def test_a_process_merely_naming_the_vmm_is_not_the_vmm(tmp_path) -> None:
     proc = _fake_proc(tmp_path, {
         # An impostor: a shell whose argv carries every string a pattern match
         # would key on, including the sandbox name.
-        11: ("/usr/bin/bash", ["bash", "-c", "pgrep -af cloud-hypervisor sandbox-a"]),
+        11: ("/usr/bin/bash", ["bash", "-c", "pgrep -af cloud-hypervisor",
+                              "/run/vc/vm/sandbox-a/clh-api.sock"]),
         # The real thing.
         22: ("/opt/kata/bin/cloud-hypervisor", ["cloud-hypervisor", "--api-socket",
                                                 "/run/vc/vm/sandbox-a/clh-api.sock"]),
@@ -776,7 +777,8 @@ def test_the_shim_lookup_uses_the_same_kernel_answer(tmp_path) -> None:
     form, run from a shell during cleanup, matched the shell itself and killed it.
     """
     proc = _fake_proc(tmp_path, {
-        44: ("/usr/bin/bash", ["bash", "-c", "kill $(pgrep -f containerd-shim-kata-v2.*sandbox-a)"]),
+        44: ("/usr/bin/bash", ["bash", "-c", "kill $(pgrep -f containerd-shim-kata-v2)",
+                              "/run/vc/vm/sandbox-a/clh.sock"]),
         55: ("/opt/kata/bin/containerd-shim-kata-v2", ["containerd-shim-kata-v2", "-id", "sandbox-a"]),
     })
     assert _pids_by_executable(SHIM_EXECUTABLE_NAME, carrying="sandbox-a", proc_root=proc) == [55]
