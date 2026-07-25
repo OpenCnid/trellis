@@ -28,7 +28,10 @@ from repl_sandbox.launcher import (
     InProcessLauncher,
     KataLauncher,
     PreflightResult,
+    SHIM_EXECUTABLE_NAME,
     _benchmark_argv,
+    _pids_by_executable,
+    vmm_pids_carrying,
     probe_kvm_device,
     qemu_accel_benchmark,
 )
@@ -716,3 +719,64 @@ def test_an_unproven_benchmark_fails_the_gate_with_its_own_reason(tmp_path, init
     ).preflight()
     assert result.ok is False
     assert "is not a file" in only(result.failures)
+
+
+# ---------------------------------------------------------------------------
+# Process identity — the kernel's answer, never a command-line pattern
+# ---------------------------------------------------------------------------
+
+
+def _fake_proc(tmp_path, entries: dict[int, tuple[str, list[str]]]) -> str:
+    """A `/proc` stand-in: {pid: (exe_target, argv)}."""
+    for pid, (target, argv) in entries.items():
+        d = tmp_path / str(pid)
+        d.mkdir()
+        try:
+            os.symlink(target, d / "exe")
+        except (OSError, NotImplementedError):
+            pytest.skip("this platform cannot create the symlink /proc/<pid>/exe is")
+        (d / "cmdline").write_bytes(b"\0".join(a.encode() for a in argv) + b"\0")
+    (tmp_path / "uptime").write_text("noise")  # a non-numeric entry must be skipped
+    return str(tmp_path)
+
+
+def test_a_process_merely_naming_the_vmm_is_not_the_vmm(tmp_path) -> None:
+    """The trap that has now fired four times on the reference host.
+
+    `pgrep` matches any process whose command line contains the pattern,
+    including the caller's own ancestors. On a host with zero VMs that returns a
+    hit, and a launcher whose job is refusing a boot that produced no VM cannot
+    use a check that invents one. Identity is `/proc/<pid>/exe`.
+    """
+    proc = _fake_proc(tmp_path, {
+        # An impostor: a shell whose argv carries every string a pattern match
+        # would key on, including the sandbox name.
+        11: ("/usr/bin/bash", ["bash", "-c", "pgrep -af cloud-hypervisor sandbox-a"]),
+        # The real thing.
+        22: ("/opt/kata/bin/cloud-hypervisor", ["cloud-hypervisor", "--api-socket",
+                                                "/run/vc/vm/sandbox-a/clh-api.sock"]),
+    })
+    assert vmm_pids_carrying("sandbox-a", proc_root=proc) == [22]
+
+
+def test_a_sandbox_name_matches_as_a_path_component_not_a_substring(tmp_path) -> None:
+    """`sess-1` is a substring of `sess-10`; containment would cross the wires."""
+    proc = _fake_proc(tmp_path, {
+        33: ("/opt/kata/bin/cloud-hypervisor", ["cloud-hypervisor", "--api-socket",
+                                               "/run/vc/vm/sess-10/clh-api.sock"]),
+    })
+    assert vmm_pids_carrying("sess-10", proc_root=proc) == [33]
+    assert vmm_pids_carrying("sess-1", proc_root=proc) == []
+
+
+def test_the_shim_lookup_uses_the_same_kernel_answer(tmp_path) -> None:
+    """Teardown SIGKILLs what this returns, so a wrong match kills a process.
+
+    Observed 2026-07-25: the previous `pgrep -f 'containerd-shim-kata-v2.*<name>'`
+    form, run from a shell during cleanup, matched the shell itself and killed it.
+    """
+    proc = _fake_proc(tmp_path, {
+        44: ("/usr/bin/bash", ["bash", "-c", "kill $(pgrep -f containerd-shim-kata-v2.*sandbox-a)"]),
+        55: ("/opt/kata/bin/containerd-shim-kata-v2", ["containerd-shim-kata-v2", "-id", "sandbox-a"]),
+    })
+    assert _pids_by_executable(SHIM_EXECUTABLE_NAME, carrying="sandbox-a", proc_root=proc) == [55]
