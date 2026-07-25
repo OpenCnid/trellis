@@ -39,9 +39,16 @@ from trellis_surfaces import descriptor_for  # noqa: E402
 from trellis_textedit import TrellisTextEdit  # noqa: E402
 
 from trellis_contribution import (  # noqa: E402
+    CONTRIBUTION_BUDGET,
     ContributionShapeError,
     render_contribution,
 )
+
+# The per-surface fair share of the kernel budget across the thirteen
+# surfaces the agent seam wires. A CEILING, not an equality: a line under
+# it never forces a sibling out of the composition, and the budget is what
+# refuses. Same idiom as the mcp and workspace drills.
+SCAFFOLD_FAIR_SHARE = CONTRIBUTION_BUDGET // 13
 
 out = {}
 
@@ -288,12 +295,18 @@ out["contributed_lines_are_one_clean_line"] = all(
     and "{" not in line and "}" not in line
     for line in (_task_line, _upsum_line)
 )
-# Bounded so three scaffold surfaces stay inside a third of the shared
-# 2000-character contribution budget: 320 each is the stated ceiling.
+# Orienting length, not an account. The old ceiling here was 320 — two
+# per-surface fair shares — so a scaffold line at it took a sibling's slot
+# out of the budget the thirteen wired surfaces share.
 out["contributed_lines_bounded"] = all(
-    isinstance(line, str) and len(line) <= 320
+    isinstance(line, str) and len(line) <= SCAFFOLD_FAIR_SHARE
     for line in (_task_line, _upsum_line)
 )
+out["contributed_line_sizes"] = {
+    "trellis_task": len(_task_line or ""),
+    "trellis_upsum": len(_upsum_line or ""),
+    "fairShare": SCAFFOLD_FAIR_SHARE,
+}
 # The line PULLS rather than restates: everything but the connective
 # comes from a field the descriptor already owns (§9.1). The authored
 # bytes are what is left over, and they stay connective-sized.

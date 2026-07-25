@@ -401,11 +401,16 @@ def coverage_report(agent_path=None, registered=None):
     else:
         contributing_unwired = sorted(contributing_set - wired_set)
 
+    # One row per name this diagnostic knows about, from any direction:
+    # injected by the seam, registered in the registry, or named at the
+    # composing call. A name appearing from only one of the three is the
+    # interesting case, so the domain is their union rather than any one.
     rungs = {}
-    for name in sorted(injected_set | contributing_set | wired_set):
+    for name in sorted(injected_set | set(known) | wired_set):
         rungs[name] = {
             "registered": name in known,
             "contributes": name in contributing_set,
+            "injected": name in injected_set,
             "wired": _wired(name),
         }
 
@@ -436,10 +441,19 @@ def format_coverage(report):
     lines = ["surface descriptor coverage  (derived from "
              f"{_AGENT_MODULE}'s {_SEAM_VARIABLE} seam; nothing stored)"]
     lines.append(
-        "three rungs, and an earlier one does not establish a later one — "
-        "R registered (carries a descriptor) · C contributes (that "
-        "descriptor carries a line) · W wired (a run passes it to "
-        f"{_COMPOSE_FUNCTION})"
+        "three rungs, and an earlier one does not establish a later one:"
+    )
+    lines.append(
+        "  R registered, carries a descriptor | C contributes, that "
+        "descriptor carries a line"
+    )
+    lines.append(
+        f"  W wired, a run passes it to {_COMPOSE_FUNCTION} -- '-' means it "
+        "has a line no run passes on"
+    )
+    lines.append(
+        "  '?' the seam may inject it dynamically, which this static read "
+        "cannot settle | '.' nothing at that rung"
     )
 
     total = len(report["injected"])
@@ -449,30 +463,40 @@ def format_coverage(report):
     unsettled = [n for n in contributing if rungs[n]["wired"] is None]
     lines.append(
         f"{len(report['described'])} of {total} injected surface(s) carry a "
-        f"descriptor · {len(contributing)} carry a contribution · "
-        f"{len(settled_wired)} of those are wired at this seam"
-        + (f" ({len(unsettled)} not settleable statically)" if unsettled else "")
+        f"descriptor | {len(contributing)} registered surface(s) carry a "
+        f"contribution | {len(settled_wired)} of those are wired at this seam"
+        + (f", {len(unsettled)} not settleable statically" if unsettled else "")
     )
 
     for name, rung in rungs.items():
         wired = rung["wired"]
+        if not rung["contributes"]:
+            # Nothing at the wired rung: a surface with no contribution
+            # contributes zero bytes, so there is no line to pass on.
+            wired_flag = "."
+        elif wired is True:
+            wired_flag = "W"
+        elif wired is None:
+            wired_flag = "?"
+        else:
+            wired_flag = "-"
         flags = (("R" if rung["registered"] else "-")
                  + ("C" if rung["contributes"] else "-")
-                 + ("W" if wired is True else ("?" if wired is None else "-")))
-        lines.append(f"  [{flags}] {name}")
+                 + wired_flag)
+        note = "" if rung["injected"] else "   (not injected at this seam)"
+        lines.append(f"  [{flags}] {name}{note}")
 
     if report["wired_seam_wide"]:
         lines.append(
             f"  W: the composing call draws its roster from {_SEAM_VARIABLE} "
             f"itself, so every surface a run injects is wired and no "
-            f"per-surface wiring decision is left to forget. ? marks a "
-            f"surface whose injection this static read cannot settle."
+            f"per-surface wiring decision is left to forget."
         )
     elif report["wired"]:
         lines.append(
             f"  W: the composing call names {len(report['wired'])} surface(s) "
-            f"literally — a roster beside the seam, so a surface added to the "
-            f"seam stays unwired until it is named there too: "
+            f"literally -- a roster beside the seam, so a surface added to "
+            f"the seam stays unwired until it is named there too: "
             + ", ".join(report["wired"])
         )
     else:
@@ -482,7 +506,7 @@ def format_coverage(report):
         )
     if report["contributing_unwired"]:
         lines.append(
-            "  CONTRIBUTES BUT IS NOT WIRED — a finished line no run passes "
+            "  CONTRIBUTES BUT IS NOT WIRED -- a finished line no run passes "
             "on: " + ", ".join(report["contributing_unwired"])
         )
     if report["wired_sources"]:
@@ -490,9 +514,12 @@ def format_coverage(report):
             "  roster(s) at the composing call this read cannot enumerate: "
             + ", ".join(report["wired_sources"])
         )
-    for name in report["registered_not_injected"]:
+    if report["registered_not_injected"]:
         lines.append(
-            f"  [registered, not injected here] {name}"
+            "  registered but not injected at this seam (a dynamic source "
+            "below may still inject it; a name here matching none of them is "
+            "how a rename goes unnoticed): "
+            + ", ".join(report["registered_not_injected"])
         )
     if report["dynamic_sources"]:
         lines.append(

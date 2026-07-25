@@ -224,6 +224,15 @@ check("every composed line is one line",
       all("\n" not in v and "\r" not in v for v in live.values()))
 check("the budget number a run is told is the number it is refused past",
       str(64) in live["trellis_postgres"])
+# ORIENTING LENGTH, per surface. The budget alone is satisfiable by two
+# surfaces eating it between them, which is how eleven of thirteen shipped
+# as "A custom <Type> value": the first pass wrote two full accounts at 361
+# and 461 characters. The fair share is the same ceiling the mcp, workspace,
+# answer and scaffold drills hold their own lines to.
+FAIR_SHARE = CONTRIBUTION_BUDGET // 13
+for _name, _line in sorted(live.items()):
+    check(f"{_name} stays inside the per-surface fair share",
+          len(_line) <= FAIR_SHARE, f"{len(_line)} of {FAIR_SHARE}")
 
 bare = _Stub()
 check("a bare-constructed surface states no bound it does not enforce",

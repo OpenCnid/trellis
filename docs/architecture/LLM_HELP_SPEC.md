@@ -325,8 +325,11 @@ it to a production model through the per-entry description slot rlms reserves.
 `llm_help` itself is still unbuilt, and neither composed-prompt pin moved, because
 the slot is filled at run composition rather than in `SYSTEM_PROMPT`.
 
-**§6's self-play gate did not run, and is outstanding rather than waived.** The
-reasoning and the trigger are in `SELF_DESCRIBING_SURFACES.md` §13; in short, two
-wired surfaces carrying guard-derived bounds and no `whenToUse` do not engage the
-discrimination or *selected-on-a-lie* questions, and §6 binds before `whenToUse`
-reaches a composed line or a queryable catalog surface lands.
+**§6's drift/gaming half is struck** by a collaborator ruling of July 25, 2026 —
+its adversary is whoever writes a descriptor, descriptors are reviewed repository
+code, and the experiment reduces to whether a model believes a lie it was told,
+which is entailed rather than measured (rule 20). The reasoning is recorded at
+`SELF_DESCRIBING_SURFACES.md` §13.1. **§6's discrimination half stands**, as a
+paid question under rule 7 that needs a queryable catalog to select within — so
+it belongs with `llm_help` and not with a per-tool listing that is always
+present entire.

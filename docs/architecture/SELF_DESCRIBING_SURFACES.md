@@ -682,3 +682,40 @@ surface lands.** Either event, and the gate runs first.
 differently for reading any of it — that remains the separately gated paid probe
 of `HARNESS_SELF_MODEL.md` §12.2, and rule 20 still bars running it as a
 new-versus-null arm.
+
+### 13.1 The drift half of §6 is struck (collaborator ruling — July 25, 2026)
+
+§13 above stated a trigger: *§6 binds before `whenToUse` reaches any composed
+line*. `whenToUse` now reaches three composed lines, so that trigger has fired
+— and the collaborator (Matt) ruled the test it points at is not a legitimate
+target. Recorded here in his terms rather than paraphrased into agreement.
+
+**The ruling.** `LLM_HELP_SPEC.md` §6's second test asks whether a *lying*
+descriptor — a `whenToUse` that oversells — can mislead the model, with
+*selected-on-a-lie* as the pre-committed falsifier. Matt: *"If someone wants to
+reverse-engineer Trellis to do something pointlessly nefarious with the internal
+metaprompts, like lying to the interior model, there is nothing that will stop
+that. Not ever."* And: *"We know what happens if you give a language model the
+wrong context. It's not a mystery."*
+
+**Why the test cannot inform.** Its adversary is whoever writes a descriptor,
+and descriptors are repository code authored under rule 16 and reviewed. So the
+adversary is a reviewer, the threat crosses no boundary, and the experiment
+reduces to *if we commit a lie, does the model believe it* — whose answer is
+entailed by what a language model is. That is rule 20's own failure: an
+outcome fixed by construction, reached for because the comparison was closer to
+hand than a target. The measurement would report the design.
+
+**What this strikes, and what it leaves.** The drift/gaming half of §6 is
+struck, and with it the `whenToUse` trigger §13 stated, which was scoped to it.
+§6's **discrimination** half is untouched and stands on its own merits — given a
+task and a queryable catalog, does an agent select the right surface — but it
+needs a catalog to select *within* and a live model to select, so it is a paid
+question under rule 7 and belongs with `llm_help`, not with a per-tool listing
+that is always present entire.
+
+**What still binds.** Nothing here weakens the guard-derivation of §3.3, which
+was never a test — it is the structural reason an `expects` line cannot drift
+from the predicate that refuses, and it holds whether or not anyone probes it.
+The descriptor drills hold the same property by construction: a guard-owned
+phrase restated in an editorial field is refused by the drills, not by a study.
