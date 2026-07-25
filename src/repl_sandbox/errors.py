@@ -11,6 +11,11 @@ Two properties beyond the message matter to callers:
   connection. Neither is offered back to the model as a recoverable error.
   Everything else surfaces to the in-guest stub as a Python exception, which
   lands in `REPLResult.stderr` and feeds the model's self-debug loop.
+
+Those three class attributes partition the taxonomy, so a prompt-facing account
+of what a refusal means is derivable rather than authorable: `retry_phrase`
+reads them and composes the sentence, and the module that decides retryability
+is the module that says so.
 """
 
 from __future__ import annotations
@@ -162,6 +167,47 @@ ERROR_CLASSES: dict[str, type[SandboxError]] = {
     "timeout": TimeoutError_,
     "upstream": UpstreamError,
 }
+
+
+#: The four consequences the three class attributes above partition the taxonomy
+#: into, as the clause a prompt-facing account states. Keyed by
+#: `(retryable, connection_terminal, session_terminal)`, so the sentence a code
+#: gets is decided by that code's own attributes and by nothing written here per
+#: code. Flip `CapRateError.retryable` and the sentence for `cap_rate` flips with
+#: it; add a class with a new combination and this lookup raises rather than
+#: inventing a clause for it.
+_RETRY_CLAUSE: dict[tuple[bool, bool, bool], str] = {
+    (True, False, False): "may be retried once the condition it names clears",
+    (False, False, False): "is not retryable; the session continues",
+    (False, False, True): "is not retryable and halts the session",
+    (False, True, False): "is not retryable and drops the connection",
+}
+
+
+def retry_phrase(code: str) -> str:
+    """One prompt-facing sentence about `code`, read off its class attributes.
+
+    This is the derivation `SELF_DESCRIBING_SURFACES.md` section 3.3 asks for
+    applied to the error taxonomy: the module that decides whether a caller may
+    try again is the module that says so, so a rendered account cannot drift
+    from the flag the caller is actually handed. `to_error_object` puts
+    `retryable` on the wire from the same attribute this reads.
+
+    Unknown codes are refused rather than described, because a code outside
+    `ERROR_CLASSES` has no attributes to read and a guessed clause is exactly
+    the authored prose this replaces.
+    """
+    cls = ERROR_CLASSES.get(code)
+    if cls is None:
+        raise KeyError(f"{code!r} is not in the error taxonomy; the set is {ERROR_CODES}")
+    key = (bool(cls.retryable), bool(cls.connection_terminal), bool(cls.session_terminal))
+    clause = _RETRY_CLAUSE.get(key)
+    if clause is None:  # pragma: no cover - a new combination is a taxonomy change
+        raise KeyError(
+            f"{code!r} carries the combination {key}, which has no clause; add one "
+            "beside the class that introduced it"
+        )
+    return f"{code} {clause}"
 
 
 def error_from_object(obj: dict) -> SandboxError:

@@ -45,6 +45,28 @@ from trellis_answer import (  # noqa: E402
 failures = 0
 
 
+from trellis_contribution import (  # noqa: E402
+    ContributionShapeError,
+    render_contribution,
+)
+
+# ORIENTING LENGTH, per line — a STATED target, and the same one the mcp,
+# workspace, scaffold and contribution drills hold their lines to. The slot
+# rlms reserves takes ONE ORIENTING line: what the surface is, and when to
+# reach for it. Anything longer rides the addendum path instead
+# (trellis_contribution.py, "WHAT THE SLOT CAN AND CANNOT CARRY").
+#
+# It replaces `CONTRIBUTION_BUDGET // 13`, which divided the shared budget by
+# the number of surfaces that happened to carry a contribution the day it was
+# written. That instance was hard-coded in five drills, and a fourteenth
+# surface loosened all five at once: fourteen lines at the stale 153 sum to
+# 2,142, past the 2,000-character budget, with every per-surface check green.
+# This is a property of ONE line, so no surface count enters it. The
+# whole-composition bound stays the engine's own — compose_contributions
+# refuses over CONTRIBUTION_BUDGET, exercised over every registered
+# contribution in scripts/test_contribution.py [7].
+ORIENTING_LINE_MAX = 160
+
 def check(name, ok, detail=""):
     global failures
     print(f"  [{'PASS' if ok else 'FAIL'}] {name}" + (f" — {detail}" if detail and not ok else ""))
@@ -245,6 +267,92 @@ check("the taught surface is brace-free beyond the rlms base (format safety)",
       "trellis_answer" in trellis_agent.TRELLIS_ADDENDUM
       and "{" not in trellis_agent.TRELLIS_ADDENDUM.replace("{{", "")
       .replace("}}", ""))
+
+# --- 7. The surface descriptor -------------------------------------------------
+# docs/architecture/SELF_DESCRIBING_SURFACES.md §9.1 (one encoding, owned
+# by whoever is authoritative for the fact) and §11 (a descriptor is a
+# REGISTRATION, not a validated schema). rlms reserves one description
+# line per injected surface; unregistered, this one reads to the model as
+# a bare type name.
+print("\n[7] the surface descriptor")
+
+from trellis_answer import ANSWER_DESCRIPTOR  # noqa: E402
+from trellis_surfaces import descriptor_for  # noqa: E402
+
+
+def descriptor_strings(value):
+    """Every string reachable inside the descriptor."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        acc = []
+        for key, item in value.items():
+            if isinstance(key, str):
+                acc.append(key)
+            acc.extend(descriptor_strings(item))
+        return acc
+    if isinstance(value, (list, tuple)):
+        return [s for item in value for s in descriptor_strings(item)]
+    return []
+
+
+check("the descriptor is bound at the surface's own definition site",
+      descriptor_for("trellis_answer") is ANSWER_DESCRIPTOR)
+check("it carries a non-empty one-line purpose for the rlms description slot",
+      bool(ANSWER_DESCRIPTOR["purpose"].strip()))
+# Every property a guard enforces lives once, in the expects mapping;
+# `purpose` states no bound, so the two cannot disagree (§9.1).
+check("guard-backed expectations are keyed by guard class, not folded into purpose",
+      sorted(ANSWER_DESCRIPTOR["expects"]) == [
+          "content_bound", "expression_bound", "expression_text",
+          "no_bare_literal", "none_refused"])
+# NO derive_answer_expects exists, and that is the finding: this surface
+# takes no constructor arguments and every bound it enforces is a kernel
+# constant, so a derivation would return one mapping on every run.
+import trellis_answer  # noqa: E402
+
+check("no derive_*_expects is shipped — nothing here varies per run",
+      not any(n.startswith("derive_") for n in dir(trellis_answer)))
+_strings = descriptor_strings(ANSWER_DESCRIPTOR)
+check("every reachable descriptor string is brace-free (rlms .format safety)",
+      len(_strings) > 10
+      and all("{" not in s and "}" not in s for s in _strings))
+
+
+def contributed_line(descriptor):
+    """The line this descriptor composes to, THROUGH THE SHIPPED FRAME.
+
+    This was a local reimplementation of the frame's resolution rule. It
+    joined with "" and skipped `_guard_line`, so it checked this module's
+    data against a COPY of the rule rather than the rule — and a change to
+    the real join would have kept this drill green while the shipped line
+    moved. It now calls `render_contribution`, so the data is checked
+    against the composer that actually runs. None when a slot cannot
+    resolve, which the frame reports by raising."""
+    try:
+        return render_contribution(descriptor) or None
+    except ContributionShapeError:
+        return None
+
+
+line = contributed_line(ANSWER_DESCRIPTOR)
+check("the contributed pieces all resolve against this descriptor's own fields",
+      line is not None)
+# The four ways rlms's one-line description slot breaks: empty, edge
+# whitespace, more than one line, or a brace.
+check("they compose to exactly one clean, bounded description line",
+      bool(line) and line == line.strip()
+      and "\n" not in line and "\r" not in line
+      and "{" not in line and "}" not in line)
+# Orienting length, not an account: the 320 this once allowed was twice the
+# ceiling, and a line at it is a write-up in the slot reserved for a pointer.
+check("the composed line stays inside the orienting-line ceiling",
+      len(line) <= ORIENTING_LINE_MAX, f"{len(line)} of {ORIENTING_LINE_MAX}")
+# The line PULLS rather than restates: everything but the connective
+# comes from a field the descriptor already owns (§9.1).
+check("the line pulls from descriptor fields rather than restating them",
+      sum(len(p) for p in ANSWER_DESCRIPTOR["contributes"]
+          if isinstance(p, str)) <= 32)
 
 # ---------------------------------------------------------------------------
 if failures:

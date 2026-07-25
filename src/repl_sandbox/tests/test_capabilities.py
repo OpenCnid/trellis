@@ -525,6 +525,131 @@ def test_both_renderings_share_one_signature():
     assert signature in rendered
 
 
+# ---------------------------------------------------------------------------
+# The guard-derived half of the rendering
+# ---------------------------------------------------------------------------
+
+
+def make_bounded(**kwargs) -> CapabilityDescriptor:
+    """`run_query` again, carrying an account of what it refuses."""
+    base = dict(
+        name="run_query",
+        typed_signature={
+            "type": "object",
+            "properties": {"sql": {"type": "string"}},
+            "required": ["sql"],
+            "returns": {"type": "object"},
+        },
+        doc="Run a read-only SQL query.",
+        dispatch_ref="trellis.db.v1.run_query",
+        expects=("One statement per call.",),
+        error_codes=("denied", "cap_bytes"),
+    )
+    base.update(kwargs)
+    return CapabilityDescriptor(**base)
+
+
+def test_the_account_renders_under_the_signature_without_adding_a_statement():
+    registry = CapabilityRegistry()
+    registry.register(GUEST_CID, make_bounded(), "DB_PORT")
+
+    rendered = registry.render(GUEST_CID)
+    assert "    # expects: One statement per call." in rendered
+    assert "    # on error: denied is not retryable; the session continues" in rendered
+    assert "    # on error: cap_bytes is not retryable; the session continues" in rendered
+
+    # The body is still exactly a docstring and `...`: comments are not nodes,
+    # so a bound reaching the prompt did not change what a rendered stub is.
+    fn = ast.parse(rendered).body[0]
+    assert len(fn.body) == 2
+    assert ast.get_docstring(fn) == "Run a read-only SQL query."
+    assert fn.body[1].value.value is Ellipsis
+
+
+def test_a_repeated_error_code_states_its_consequence_once():
+    registry = CapabilityRegistry()
+    registry.register(
+        GUEST_CID, make_bounded(error_codes=("denied", "denied", "timeout")), "DB_PORT"
+    )
+    rendered = registry.render(GUEST_CID)
+    assert rendered.count("# on error: denied") == 1
+    assert rendered.count("# on error: timeout") == 1
+
+
+def test_the_account_reaches_the_prompt_and_not_the_guest_module():
+    """`materialise` is untouched: the account is prompt-facing only.
+
+    The guest stub's job is to carry an envelope to a port, and the host
+    enforces every one of these bounds whatever the guest holds. Rendering them
+    into executable source would grow the module a supervisor `exec`s for no
+    enforcement gain, so the two renderings deliberately diverge here.
+    """
+    with_account = CapabilityRegistry()
+    with_account.register(GUEST_CID, make_bounded(), "DB_PORT")
+    without = CapabilityRegistry()
+    without.register(GUEST_CID, make_bounded(expects=(), error_codes=()), "DB_PORT")
+
+    assert with_account.materialise(GUEST_CID) == without.materialise(GUEST_CID)
+    assert with_account.render(GUEST_CID) != without.render(GUEST_CID)
+
+
+@pytest.mark.parametrize(
+    "hostile_phrase",
+    [
+        "ends the comment:\ndef exfiltrate(): pass",
+        "carries an escape \x1b[31m and a null \x00",
+        "spreads over\r\nseveral\rlines",
+    ],
+)
+def test_a_hostile_expects_phrase_cannot_escape_its_comment(hostile_phrase):
+    registry = CapabilityRegistry()
+    registry.register(GUEST_CID, make_bounded(expects=(hostile_phrase,)), "DB_PORT")
+
+    rendered = registry.render(GUEST_CID)
+    tree = ast.parse(rendered)
+
+    # One function, and nothing new at module level.
+    assert [node.name for node in tree.body if isinstance(node, ast.FunctionDef)] == [
+        "run_query"
+    ]
+    assert len(tree.body) == 1
+    assert "exfiltrate" not in {
+        node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)
+    }
+    # The phrase landed on one printable comment line, exactly like the doc does.
+    comment = next(
+        line for line in rendered.splitlines() if line.strip().startswith("# expects:")
+    )
+    assert comment == f"    # expects: {one_line(hostile_phrase)}"
+    assert all(ch.isprintable() for ch in comment)
+
+
+def test_an_error_code_outside_the_taxonomy_is_refused():
+    """A code with no class has no attributes to read a consequence off."""
+    with pytest.raises(DeniedError):
+        make_bounded(error_codes=("denied", "not_a_code"))
+
+
+def test_an_oversized_or_empty_expects_phrase_is_refused():
+    with pytest.raises(DeniedError):
+        make_bounded(expects=("x" * 401,))
+    with pytest.raises(DeniedError):
+        make_bounded(expects=("  \n\t ",))
+    with pytest.raises(DeniedError):
+        make_bounded(expects=tuple(f"bound {n}." for n in range(13)))
+
+
+def test_a_descriptor_without_an_account_renders_exactly_as_before():
+    """The additive property: no expects, no comment lines, same three lines."""
+    registry = CapabilityRegistry()
+    registry.register(GUEST_CID, make_run_cypher(), "DB_PORT")
+
+    rendered = registry.render(GUEST_CID)
+    assert "#" not in rendered
+    assert rendered.splitlines()[-1] == "    ..."
+    assert len(rendered.splitlines()) == 3
+
+
 def test_handle_typed_slots_render_as_handles():
     """Handle-first: a handle-typed parameter reads as a handle in both renderings."""
     registry = CapabilityRegistry()

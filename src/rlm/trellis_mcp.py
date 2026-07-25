@@ -40,6 +40,8 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamablehttp_client
 
+from trellis_surfaces import register_surface
+
 # --- Registry validation (must mirror src/config/mcp_servers.ts) --------
 
 # Names appear verbatim in the rlms-formatted system prompt addendum, so
@@ -603,3 +605,229 @@ class TrellisMcp:
         self._thread.join(timeout=10.0)
         if not self._thread.is_alive():
             self._loop.close()
+
+
+# --- The surface descriptor (Workstream B, July 25, 2026) -------------------
+#
+# Ownership follows SELF_DESCRIBING_SURFACES.md §9.1 — one encoding, owned
+# by whoever is authoritative for the fact. Nothing here renders:
+# build_mcp_addendum above is untouched and is still the live prompt
+# encoding, so its hand-authored allowlist sentence stands as a second copy
+# until a pass authorized to move kernel-prompt bytes retires it. What this
+# layer settles is WHO owns that sentence: the predicate in call_tool, not
+# an author.
+#
+# Field shape is NOT validated (SELF_DESCRIBING_SURFACES.md §11, owner
+# ruling): a descriptor is a REGISTRATION, not a schema. `expects` is
+# deliberately absent — derive_mcp_expects() supplies it from the guards.
+#
+# WHAT ACTIVATION TELLS A MODEL TO DO DIFFERENTLY. This surface exists only
+# where the operator configured servers, so its presence means research
+# context is reachable from outside the corpus — and its presence changes
+# nothing about what may be cited. The second thing activation settles is
+# the SHAPE OF A RESULT: with a workspace attached, call_tool returns a
+# stub and the payload lands in the workspace; without one it returns the
+# payload inline. That branch is this surface's own state, so its account
+# is derived here rather than authored in the workspace's addendum, where
+# the sentence lives today.
+MCP_DESCRIPTOR = {
+    "name": "trellis_mcp",
+    "purpose": ("calls allowlisted tools on the external Model Context "
+                "Protocol servers the operator configured."),
+    # llm_help-facing editorial fields: no predicate refuses when these are
+    # wrong and no derivation can supply them (§9.1's human-authoritative
+    # half). Authored once, here.
+    "whenToUse": ("the task needs context from outside the Trellis corpus and "
+                  "the operator configured servers to reach it; the surface "
+                  "exists only when TRELLIS_MCP_SERVERS names at least one "
+                  "server, so its absence is an answer and not an outage"),
+    # The ONE description line rlms reserves for this surface. It pulls the
+    # purpose this descriptor already owns and authors nothing beside it.
+    #
+    # WHAT THE PURPOSE CLAUSE ALREADY CARRIES. This surface's point is that
+    # the tools are ALLOWLISTED and the servers are the ones THE OPERATOR
+    # CONFIGURED, and the purpose sentence says both in 95 characters. What
+    # it leaves out is the refusal behind them — `allowlist`, 183
+    # characters, which build_mcp_addendum states in full on exactly the
+    # runs trellis_agent injects this surface on (both gate on the same
+    # non-empty registry). A copy in this slot reaches no run the addendum
+    # does not, and the pair would run to 279 characters against a
+    # per-surface share of roughly 150.
+    #
+    # WHY result_shape CANNOT RIDE THIS SLOT AT ALL. It is the one derived
+    # phrase that varies with run state, and its capture arm runs to 371
+    # characters — the stub contract, the segment id, and the fan-out
+    # remedy. An arm cut to fit would ship that contract stated by half,
+    # which is the failure trellis_contribution.py refuses rather than
+    # performs. It stays on the addendum path.
+    #
+    # WHY whenToUse IS NOT PULLED. SELF_DESCRIBING_SURFACES.md §13 (The
+    # description slot, and the gate this did not run) binds §6's self-play
+    # validation gate BEFORE whenToUse reaches any composed line, and that
+    # gate has not run. This line carries no intent claim.
+    "contributes": [
+        ("descriptor", "purpose"),
+    ],
+    "example": ("surface = json.loads(trellis_mcp.list_tools()); "
+                "hit = json.loads(trellis_mcp.call_tool('a_server', 'a_tool'))"),
+    "seeAlso": ["trellis_workspace"],
+    "category": "EXTERNAL TOOLS (MCP)",
+    # Cross-cutting protocol lines (MASH's `usage`). Both are ADVISORY in
+    # HARNESS_SELF_MODEL.md §4's sense — no predicate on THIS surface
+    # refuses when they are ignored. The external-content contract is
+    # enforced by the database write path and by the protocol-violation
+    # check keyed to database tool calls, both different surfaces; this
+    # module only keeps MCP usage on its own counter so it can never
+    # satisfy them.
+    "usage": {
+        "returns": ("Every method returns a JSON STRING — wrap results in "
+                    "json.loads(...)."),
+        "self_correct": ("If a call raises, read the message, correct the "
+                         "call, and retry."),
+        "external_contract": ("EXTERNAL CONTENT CONTRACT (HARD RULE): MCP "
+                              "results are research context ONLY. They are "
+                              "not part of the Trellis corpus, they have NO "
+                              "AST hashes, and they must NEVER be passed as "
+                              "sourceNodeIds or written into the graph in any "
+                              "form. Database provenance remains mandatory "
+                              "for every answer and every cached insight: a "
+                              "run that only called MCP tools is still "
+                              "provenance-free and will be rejected. External "
+                              "content earns citability only after the "
+                              "operator ingests it through the verified "
+                              "ingest path — that is not your job and not "
+                              "possible from this session."),
+    },
+    # One entry per model-visible method. Plain strings are editorial
+    # teaching prose; ("expects", key) slots pull the guard-owned phrase
+    # from the derived expectations, so no guard-backed sentence is encoded
+    # twice.
+    "exposes": [
+        {
+            "call": "trellis_mcp.list_tools()",
+            "doc": ["returns the configured surface: which servers exist, "
+                    "which tools each allowlists, and the per-call bounds. "
+                    "Registry truth, so it performs no I/O."],
+        },
+        {
+            "call": "trellis_mcp.call_tool(server, tool, arguments)",
+            "doc": ["invokes one allowlisted tool. ",
+                    ("expects", "allowlist"), " ",
+                    ("expects", "arguments_shape"), " ",
+                    ("expects", "tool_error")],
+        },
+    ],
+    # Render order for the closing lines. ("expects", key) is a guard-owned
+    # phrase, ("usage", key) an editorial one, and ("table", key) the
+    # derived per-server rows — one row per configured server, read off the
+    # same config dicts the connection refuses on.
+    "tail": [
+        ("table", "servers"),
+        ("expects", "timeout"),
+        ("expects", "result_cap"),
+        ("expects", "credential_redaction"),
+        ("expects", "result_shape"),
+        ("usage", "external_contract"),
+    ],
+}
+
+# Guard-owned expectation phrases: ONE encoding per guard class, keyed by
+# the guard that is authoritative for it. Granularity is the guard CLASS,
+# not the raise site — `allowlist` accounts for the unknown-server and
+# not-allowlisted refusals together, since both refuse the same act for
+# the same reason before any I/O.
+#
+# What is NOT in here, and why:
+#   * The per-server numbers. timeoutMs and maxResultBytes differ per
+#     server, so derive_mcp_expects reads them off the very config dicts
+#     _McpServerConnection holds; the phrases below say what those numbers
+#     mean, and the numbers themselves stay data.
+#   * parse_mcp_config, _require_http_url and _require_auth refuse the
+#     OPERATOR's registry before a run exists, and resolve_mcp_auth refuses
+#     a missing credential before any I/O. The composed read is addressed
+#     to the model, so those guards have no phrase — the trellis_textedit
+#     precedent for operator-facing guards.
+_MCP_GUARD_EXPECTS = {
+    # call_tool: an unknown server, or a tool the server does not
+    # allowlist, raises before any I/O and the refusal enumerates what is
+    # configured. This is the sentence build_mcp_addendum hand-authors
+    # today; the predicate is authoritative for it, not the author.
+    "allowlist": ("Only the servers and tools listed here exist. A call "
+                  "naming any other server, or a tool that server does not "
+                  "allowlist, raises before any I/O and the refusal names "
+                  "what is configured."),
+    # call_tool: arguments must be a dict or omitted.
+    "arguments_shape": ("arguments is a dict of that tool's parameters, or "
+                        "omitted; anything else raises before any I/O."),
+    # _McpServerConnection.call: a server-reported error raises rather than
+    # returning, carrying a bounded excerpt of what the server said.
+    "tool_error": ("A server that reports an error raises rather than "
+                   "returning, carrying a bounded excerpt of what it said."),
+    # _McpServerConnection.call: read_timeout_seconds plus the sync
+    # backstop, both from the server's own timeoutMs.
+    "timeout": ("Each server carries its own per-call time bound; a call that "
+                "passes it raises naming the server, the tool and the bound, "
+                "and never leaves the REPL waiting."),
+    # truncate_result at the server's own maxResultBytes: an oversized
+    # result degrades to a bounded string with an explicit marker.
+    "result_cap": ("Each server carries its own result size cap; a larger "
+                   "result arrives truncated to it with an explicit "
+                   "TRELLIS_MCP_TRUNCATED marker rather than whole."),
+    # _scrub over every message that crosses out of this module.
+    "credential_redaction": ("Any credential the operator configured is "
+                             "stripped from every message this surface "
+                             "raises, so a REDACTED marker in an error is "
+                             "that stripping and not the server's own text."),
+    # call_tool's `self._workspace is not None` branch, arm one. The
+    # sentence build_workspace_addendum hand-authors today; the predicate
+    # that decides it lives HERE.
+    "capture_stub": ("Results land in the workspace: call_tool stores the "
+                     "full result as an origin-stamped segment and returns a "
+                     "STUB carrying the server, the tool, the segment id, the "
+                     "size, whether it was truncated, and a short preview. "
+                     "Read the whole result with "
+                     "trellis_workspace.segment(segment_id), or fan llm_query "
+                     "out over segment contents instead of pasting them into "
+                     "your own context."),
+    # The same branch, arm two.
+    "direct_result": ("No workspace is attached, so call_tool returns the "
+                      "whole result inline under the calling server's size "
+                      "cap."),
+}
+
+
+# One call site, one commitment: the descriptor is bound to its surface
+# HERE, where the surface is defined.
+register_surface(MCP_DESCRIPTOR)
+
+
+def derive_mcp_expects(mcp):
+    """The guard-derived half of the composed read (HARNESS_SELF_MODEL.md
+    §2: the same code that refuses is the code that explains).
+
+    The per-server table is read off `_servers` — the very dicts
+    _McpServerConnection holds as `_cfg` and refuses on, so the stated
+    bound and the enforced bound are one value rather than two copies. The
+    result-shape account is selected by the SAME `_workspace` attribute
+    call_tool branches on, so the description and the return shape cannot
+    drift apart (§2.1). Composed by code, never authored by the model."""
+    expects = dict(_MCP_GUARD_EXPECTS)
+    servers = getattr(mcp, "_servers", None) or {}
+    # Names and tool names passed _require_name, whose charset excludes
+    # braces and whitespace, so this table is safe to splice into text rlms
+    # will run .format() over.
+    expects["servers"] = [
+        {
+            "name": cfg["name"],
+            "tools": list(cfg["tools"]),
+            "timeoutMs": cfg["timeoutMs"],
+            "maxResultBytes": cfg["maxResultBytes"],
+        }
+        for cfg in servers.values()
+    ]
+    expects["capturesToWorkspace"] = getattr(mcp, "_workspace", None) is not None
+    expects["result_shape"] = (
+        expects["capture_stub"] if expects["capturesToWorkspace"]
+        else expects["direct_result"]
+    )
+    return expects

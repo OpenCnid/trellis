@@ -395,7 +395,9 @@ guard-derivation but the same rule at the other end of the axis.
 
 ### 9.2 Honest scope — what ratification does not claim
 
-- **Guard-derivation is specified, not demonstrated.** No shipped surface
+- **Guard-derivation is specified, not demonstrated.** *(Superseded July 25,
+  2026 — §13. This sentence was already false when written: `composeJudgePrompt`
+  derives from the taxonomy its own parser refuses against.)* No shipped surface
   derives its self-description from its guard predicates today. The closest
   live thing is `build_textedit_addendum(textedit)`
   (`src/rlm/trellis_textedit.py`), and read precisely it *selects* between two
@@ -615,4 +617,121 @@ surface would make an instance into law by accident (rule 17). It belongs
 with `llm_help`'s frame. The banner-qualifier tension (§10, finding 4) and
 guard-class granularity (finding 5) stand as recorded; eight surfaces still
 carry no descriptor, which the diagnostic now reports rather than leaving
-to memory.
+to memory. *(That count is superseded — see §13: 8 of 9 are described.)*
+
+## 13. The description slot, and the gate this did not run (dated entry — July 25, 2026)
+
+Half A reached a model. Not through `llm_help`, which is still unbuilt, but
+through a slot rlms already reserved and Trellis had never filled: every
+`custom_tools` entry renders as one line in the base prompt, `parse_tool_entry`
+accepts `{"tool": …, "description": …}`, and the listing splices in at character
+1,335 of the 2,116-character protocol prompt — ahead of every Trellis directive.
+Trellis passed bare values, so each injected surface rendered as its type name.
+
+**This supersedes two claims above.** §12's closing sentence — *eight surfaces
+still carry no descriptor* — is false: `npm run check:surfaces` reports **8 of 9
+described**, and the ninth, `UPSUM_BUDGET`, is a bare int declined on purpose
+rather than a gap. §9.2's first bullet — *No shipped surface derives its
+self-description from its guard predicates today* — was already false when
+written, and is further false now: `composeJudgePrompt`
+(`src/core/graph/judge_intake_prompt.ts`) renders the same `taxonomy` object
+`parseJudgeVerdict` refuses against, with `buildSpawnRequest` re-rendering and
+re-hashing before transport, and it predates increment 1 in a different
+subsystem and a different language.
+
+**What the frame owns.** `src/rlm/trellis_contribution.py` composes a surface's
+line from its registered descriptor and its derived expectations, joins pieces
+with the empty string so the frame contributes no prose of its own, and refuses
+a brace, a newline, an empty line, boundary whitespace, and a whole composition
+over `CONTRIBUTION_BUDGET`. That budget is §5 of `HARNESS_SELF_MODEL.md` paid:
+a bound that raises rather than one held by authorial discipline. It is drilled
+by `npm run test:contribution`, whose `--negative-control` detects eleven plants
+and exits 3.
+
+**The ladder, and which rung a number names.** Three claims, and the earlier ones
+do not establish the later:
+
+| rung | property | count today |
+|---|---|---|
+| registered | the surface carries a descriptor | 8 of 9 injected |
+| contributing | that descriptor carries a `contributes` list | 13 |
+| wired | a run passes it to `compose_contributions` | 8, plus 5 the static read cannot settle |
+
+*(Figures corrected July 25, 2026 — this table first read 5 contributing and 2
+wired, which was the state when the rung split was written and not the state it
+shipped in.)*
+
+**The ladder is flat now, and it is flat structurally rather than by
+bookkeeping.** The composing call draws its roster from `custom_tools` itself,
+so every surface a run injects is wired and no per-surface wiring decision
+exists to forget. The five it cannot settle are the staged helpers, injected
+conditionally, which the report names rather than counts — unestablished is not
+established (rule 15).
+
+`check:surfaces` reports all three rungs, and `scripts/test_surfaces.py` holds
+the property that matters: **no surface carries a line the composing call
+leaves out.** That check was run against the real historical seam from
+`34538be^` and went red naming eleven surfaces, while the two rungs above it
+stayed green — which is the failure it exists to catch, the cheap rungs reading
+as progress while eleven finished lines reached no model. Its predecessor
+asserted that the ladder *narrows*, which turned an unfinished wiring into a
+pinned property; that assertion is retired.
+
+**The gate this did not run, stated as outstanding rather than declined
+silently.** `attach_contributions` computes the registry × `custom_tools`
+intersection, which `LLM_HELP_SPEC.md` §12 defines as the alive catalog, and
+hands it to a production model. §6's self-play validation gate — discrimination,
+and drift resistance with *selected-on-a-lie* as the pre-committed falsifier —
+binds before anything relies on that catalog, and it did not run.
+
+The judgment made instead, so a later session can overturn it rather than
+inherit it unstated: the gate's concern is barely engaged at two wired surfaces.
+`whenToUse` — the field the *selected-on-a-lie* cell targets — is deliberately
+absent from both wired lines, both of which carry guard-derived bounds rather
+than intent claims, and a discrimination test over two surfaces measures
+nothing. **The trigger is therefore stated rather than the gate waived: §6 binds
+before `whenToUse` reaches any composed line, and before any queryable catalog
+surface lands.** Either event, and the gate runs first.
+
+**Reachability is unchanged.** `src/repl_sandbox/` still has no non-test caller;
+`FEATURE_LIST.md` row 2.4 stands. Nothing here measures whether a model behaves
+differently for reading any of it — that remains the separately gated paid probe
+of `HARNESS_SELF_MODEL.md` §12.2, and rule 20 still bars running it as a
+new-versus-null arm.
+
+### 13.1 The drift half of §6 is struck (collaborator ruling — July 25, 2026)
+
+§13 above stated a trigger: *§6 binds before `whenToUse` reaches any composed
+line*. `whenToUse` now reaches three composed lines, so that trigger has fired
+— and the collaborator (Matt) ruled the test it points at is not a legitimate
+target. Recorded here in his terms rather than paraphrased into agreement.
+
+**The ruling.** `LLM_HELP_SPEC.md` §6's second test asks whether a *lying*
+descriptor — a `whenToUse` that oversells — can mislead the model, with
+*selected-on-a-lie* as the pre-committed falsifier. Matt: *"If someone wants to
+reverse-engineer Trellis to do something pointlessly nefarious with the internal
+metaprompts, like lying to the interior model, there is nothing that will stop
+that. Not ever."* And: *"We know what happens if you give a language model the
+wrong context. It's not a mystery."*
+
+**Why the test cannot inform.** Its adversary is whoever writes a descriptor,
+and descriptors are repository code authored under rule 16 and reviewed. So the
+adversary is a reviewer, the threat crosses no boundary, and the experiment
+reduces to *if we commit a lie, does the model believe it* — whose answer is
+entailed by what a language model is. That is rule 20's own failure: an
+outcome fixed by construction, reached for because the comparison was closer to
+hand than a target. The measurement would report the design.
+
+**What this strikes, and what it leaves.** The drift/gaming half of §6 is
+struck, and with it the `whenToUse` trigger §13 stated, which was scoped to it.
+§6's **discrimination** half is untouched and stands on its own merits — given a
+task and a queryable catalog, does an agent select the right surface — but it
+needs a catalog to select *within* and a live model to select, so it is a paid
+question under rule 7 and belongs with `llm_help`, not with a per-tool listing
+that is always present entire.
+
+**What still binds.** Nothing here weakens the guard-derivation of §3.3, which
+was never a test — it is the structural reason an `expects` line cannot drift
+from the predicate that refuses, and it holds whether or not anyone probes it.
+The descriptor drills hold the same property by construction: a guard-owned
+phrase restated in an editorial field is refused by the drills, not by a study.

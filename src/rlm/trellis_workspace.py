@@ -34,6 +34,8 @@ import threading
 import uuid
 from datetime import datetime, timezone
 
+from trellis_surfaces import register_surface
+
 # Bounds: defaults and hard caps (must mirror src/config/index.ts).
 WORKSPACE_MAX_SEGMENTS_DEFAULT = 128
 WORKSPACE_MAX_SEGMENTS_CAP = 1024
@@ -377,6 +379,273 @@ class TrellisWorkspace:
                 "workspace_segments": len(self._state["segments"]),
                 "workspace_bytes": self._total_bytes(),
             }
+
+
+# --- The surface descriptor (Workstream B, July 25, 2026) -------------------
+#
+# Ownership follows SELF_DESCRIBING_SURFACES.md §9.1 — one encoding, owned
+# by whoever is authoritative for the fact. Every sentence a guard on THIS
+# surface enforces lives in the expectations below, keyed by its guard
+# class; the editorial teaching prose lives in the descriptor. Nothing
+# here renders: WORKSPACE_ADDENDUM below is untouched and is still the
+# live prompt encoding, so the addendum's own copies of the guard-backed
+# sentences stand until a pass authorized to move kernel-prompt bytes
+# retires them. `expects` is deliberately absent from the descriptor — it
+# is derived by derive_workspace_expects() from the guards, never
+# authored here.
+#
+# Field shape is NOT validated (SELF_DESCRIBING_SURFACES.md §11, owner
+# ruling): a descriptor is a REGISTRATION, not a schema, so fields vary
+# per surface and adding one is an edit. Vocabulary drawn from
+# LLM_HELP_SPEC.md §1 plus MASH's `usage`, as trellis_textedit draws it.
+#
+# THE THREE ACTIVATION CAUSES ARE NOT ONE THING. trellis_agent.py injects
+# this surface when the run is seeded, when MCP servers are configured,
+# or when the run carries a goal id, and each tells a model to do
+# something different. Where each is answerable from:
+#
+#   * goal-scoped   DERIVED from state. `_goal_id` is the same attribute
+#                   capture() stamps onto every segment, so the account
+#                   and the stamp cannot drift apart (HARNESS_SELF_MODEL.md
+#                   §2.1 applied to this surface).
+#   * seeded        NOT DERIVABLE from state. seed_from_snapshot leaves no
+#                   mark on the instance and no guard here reads
+#                   seededness — it is a construction-path fact the caller
+#                   holds. derive_workspace_expects takes it exactly as
+#                   build_workspace_addendum takes it, and the phrase it
+#                   selects sits in the EDITORIAL half, because a caller
+#                   flag is not a refusing predicate.
+#   * MCP-attached  OWNED BY THE OTHER SURFACE. The predicate is
+#                   TrellisMcp.call_tool's `self._workspace is not None`
+#                   branch, so the capture-stub sentence is homed in
+#                   trellis_mcp.py's expectations and is deliberately not
+#                   restated here.
+WORKSPACE_DESCRIPTOR = {
+    "name": "trellis_workspace",
+    "purpose": ("holds this run's working state — plan, self-notes, and "
+                "captured external results — across every REPL turn."),
+    # llm_help-facing editorial fields. No predicate refuses when these are
+    # wrong and no derivation can supply them (§9.1's human-authoritative
+    # half); they are authored once, here, and nowhere else.
+    "whenToUse": ("the run has state worth carrying between turns. Three run "
+                  "conditions put this surface in the namespace and they do "
+                  "not mean the same thing: a SEEDED run inherits earlier "
+                  "tasks' state and should read before it fetches anything; a "
+                  "run with external tools configured receives every tool "
+                  "result here instead of inline; a GOAL-SCOPED run leaves "
+                  "what it writes to sibling tasks of the same goal. Which "
+                  "conditions are live this run is derived, never authored"),
+    # The ONE description line rlms reserves for this surface. It pulls the
+    # purpose this descriptor already owns and authors nothing beside it.
+    #
+    # WHY NOTHING RIDES ALONG. Every guard-backed bound on this surface is
+    # stated IN FULL by WORKSPACE_ADDENDUM, and build_workspace_addendum
+    # emits it on exactly the runs trellis_agent injects the surface on —
+    # both gate on the same holder being present, so a copy in this slot
+    # reaches no run the addendum does not already reach. It would spend a
+    # slot on a surface that has an addendum, against siblings that have
+    # none (trellis_postgres and trellis_neo4j state their bounds here
+    # because nothing else states them). Measured, largest first, the
+    # phrases that could ride along are byte_budget, plan_json,
+    # segment_budget, plan_replacement, goal_stamped, index_excludes_content
+    # and unknown_segment; the purpose clause plus the shortest of those is
+    # already 187 characters, and the only phrase that fits beside it is the
+    # note-shape refusal — the least decisive thing this surface enforces,
+    # which is padding rather than orientation.
+    #
+    # WHY whenToUse IS NOT PULLED. It runs to 451 characters, and it
+    # enumerates three activation causes of which any subset is live: a
+    # seeded run, a run with external tools configured, and a goal-scoped
+    # run do not mean the same thing, so a line stating all three states two
+    # conditions that are not this run's. Selecting among them takes a
+    # derived phrase, and SELF_DESCRIBING_SURFACES.md §13 (The description
+    # slot, and the gate this did not run) binds §6's self-play validation
+    # gate BEFORE whenToUse reaches any composed line. That gate has not
+    # run, so this line carries no intent claim.
+    "contributes": [
+        ("descriptor", "purpose"),
+    ],
+    "example": ("state = json.loads(trellis_workspace.read()); "
+                "full = json.loads(trellis_workspace.segment(some_segment_id))"),
+    "seeAlso": ["trellis_mcp", "trellis_textedit"],
+    # An editorial grouping label (MASH's category).
+    "category": "WORKSPACE (TIER-3 WORKING STATE)",
+    # Cross-cutting protocol lines (MASH's `usage`). All four are ADVISORY
+    # in HARNESS_SELF_MODEL.md §4's sense — no predicate on THIS surface
+    # refuses when they are ignored. "provenance" is enforced by the
+    # database write path, a different surface; "seeded_run" is selected by
+    # a caller flag rather than by a refusing bool, which is why it sits
+    # here rather than among the guard-owned phrases.
+    "usage": {
+        "returns": ("Every method returns a JSON STRING — wrap results in "
+                    "json.loads(...)."),
+        "persistence": ("This state survives every REPL turn of the run; your "
+                        "own local variables do too, but only this survives "
+                        "as data the harness can park and hand on."),
+        "atomic_updates": ("ATOMIC UPDATES: when changing state that must not "
+                           "tear, build the new value first and then rebind "
+                           "through set_plan in one call — rebinding survives "
+                           "errors atomically, while a half-finished in-place "
+                           "mutation from a failed block persists and must be "
+                           "repaired by re-reading."),
+        "seeded_run": ("SEEDED RUN: this workspace was pre-populated with "
+                       "state inherited from earlier tasks in the same goal, "
+                       "origin stamps intact. Call trellis_workspace.read() in "
+                       "your VERY FIRST repl block and reuse what is already "
+                       "there instead of re-fetching it. Inherited content has "
+                       "the same trust standing as everything else in the "
+                       "workspace: NONE."),
+        "provenance": ("HARD RULE: the workspace has NO provenance standing. "
+                       "Segment ids and workspace content are NEVER "
+                       "sourceNodeIds and can never be written to the graph as "
+                       "provenance; database provenance stays mandatory for "
+                       "every answer and every cached insight."),
+    },
+    # One entry per model-visible method, in render order. Plain strings are
+    # editorial teaching prose; ("expects", key) slots pull the guard-owned
+    # phrase from the derived expectations, so no guard-backed sentence is
+    # encoded twice. capture() is absent on purpose: it is harness-side, the
+    # wrapper calls it from inside trellis_mcp.call_tool, and a model that
+    # called it itself would be forging origin stamps.
+    "exposes": [
+        {
+            "call": "trellis_workspace.read()",
+            "doc": ["returns the bounded index — your plan, your notes, and "
+                    "each stored segment's id, origin, size and timestamp. ",
+                    ("expects", "index_excludes_content")],
+        },
+        {
+            "call": "trellis_workspace.segment(segment_id)",
+            "doc": ["returns one segment in full, content included. ",
+                    ("expects", "unknown_segment")],
+        },
+        {
+            "call": "trellis_workspace.set_plan(plan)",
+            "doc": ["replaces your plan, e.g. a list of "
+                    "dict(id='s1', desc='...', status='pending') steps; keep "
+                    "it current as you work. ", ("expects", "plan_json"), " ",
+                    ("expects", "plan_replacement")],
+        },
+        {
+            "call": "trellis_workspace.add_note(text)",
+            "doc": ["appends one self-note. ", ("expects", "note_shape")],
+        },
+        {
+            "call": "trellis_workspace.drop(segment_id)",
+            "doc": ["removes a segment you no longer need and reports the "
+                    "bytes it freed. ", ("expects", "unknown_segment")],
+        },
+    ],
+    # Render order for the closing lines, the generalization of what
+    # render_textedit_addendum hardcodes at its tail. ("expects", key) is a
+    # guard-owned phrase, ("usage", key) an editorial one.
+    "tail": [
+        ("expects", "segment_budget"),
+        ("expects", "byte_budget"),
+        ("usage", "provenance"),
+    ],
+}
+
+# Guard-owned expectation phrases: ONE encoding per guard class, keyed by
+# the guard that is authoritative for it. Granularity is the guard CLASS,
+# not the raise site — `unknown_segment` accounts for the identical
+# refusal in segment() and drop(), `byte_budget` for both
+# _require_byte_budget and set_plan's replacement-semantics twin.
+#
+# What is NOT in here, and why:
+#   * The two budget sentences carry the RUN's numbers, so their bytes
+#     depend on run state and derive_workspace_expects composes them from
+#     the same attributes the guards compare against. A static phrase
+#     could only say "bounded", which is exactly the gap this descriptor
+#     exists to close.
+#   * _require_bound and parse_workspace_bounds refuse the OPERATOR before
+#     a run exists, and seed_from_snapshot refuses the WORKER's snapshot
+#     before the model's first turn. The composed read is addressed to the
+#     model, so those guards have no phrase — the trellis_textedit
+#     precedent for operator-facing guards.
+_WORKSPACE_GUARD_EXPECTS = {
+    # read(): the index comprehension drops the content key, so the index
+    # cannot carry segment bytes even if a caller wanted it to.
+    "index_excludes_content": ("The index never carries segment contents — "
+                               "pull those deliberately, one segment at a "
+                               "time."),
+    # segment() / drop(): an id that is not stored raises and names the
+    # remedy (re-read the index).
+    "unknown_segment": ("An unknown segment id raises and names read() as the "
+                        "way to see which ids exist."),
+    # set_plan(): json.dumps(plan) raises BEFORE the lock is taken, so a
+    # rejected plan leaves the stored one exactly as it was.
+    "plan_json": ("A plan must be plain JSON-serializable data — lists, "
+                  "dicts, strings, numbers — never live objects; anything "
+                  "else raises before the stored plan changes."),
+    # set_plan(): the budget check sums segments + notes + the incoming
+    # plan, deliberately excluding the plan currently held.
+    "plan_replacement": ("set_plan replaces the whole plan, so a new plan "
+                         "competes for the budget the current plan already "
+                         "holds rather than adding to it."),
+    # add_note(): non-string or empty raises.
+    "note_shape": "A note must be a non-empty string.",
+    # capture(): a segment whose goal id is set is stamped with it, which
+    # is the same attribute derive_workspace_expects reads for goalScoped.
+    "goal_stamped": ("This run belongs to a goal, so every result captured "
+                     "here carries that goal id as part of its origin stamp."),
+}
+
+
+# One call site, one commitment: the descriptor is bound to its surface
+# HERE, where the surface is defined, so the coverage diagnostic — and
+# later llm_help — find it without anything being wired by hand elsewhere.
+register_surface(WORKSPACE_DESCRIPTOR)
+
+
+def derive_workspace_expects(workspace, seeded=False):
+    """The guard-derived half of the composed read (HARNESS_SELF_MODEL.md
+    §2: the same code that refuses is the code that explains).
+
+    Every value here is read off the workspace holder, from the SAME
+    attributes the guards compare against: `_max_segments` is what
+    capture() refuses a new segment past, `_max_bytes` is what
+    _require_byte_budget refuses a write past, and `_goal_id` is what
+    capture() stamps onto a segment. The two budget sentences are composed
+    from those numbers rather than authored, so the account cannot state a
+    bound the run does not enforce.
+
+    `seeded` is a PARAMETER and not a read, deliberately: seededness is
+    the one activation cause that leaves no mark on the instance and that
+    no guard on this surface consults, so it arrives from the caller the
+    way build_workspace_addendum already takes it, and the phrase it
+    selects lives in the descriptor's editorial half. Composed by code,
+    never authored by the model."""
+    expects = dict(_WORKSPACE_GUARD_EXPECTS)
+    max_segments = getattr(workspace, "_max_segments", WORKSPACE_MAX_SEGMENTS_DEFAULT)
+    max_bytes = getattr(workspace, "_max_bytes", WORKSPACE_MAX_BYTES_DEFAULT)
+    goal_id = getattr(workspace, "_goal_id", None)
+    task_id = getattr(workspace, "_task_id", None)
+    # Raw values for a renderer or a diagnostic; the ids are values, never
+    # spliced into prose, because they arrive from argv and this text is
+    # handed to rlms .format().
+    expects["maxSegments"] = max_segments
+    expects["maxBytes"] = max_bytes
+    expects["goalId"] = goal_id
+    expects["taskId"] = task_id
+    expects["goalScoped"] = goal_id is not None
+    expects["seeded"] = bool(seeded)
+    # capture(): the segment-count refusal, stated with the number it
+    # refuses past.
+    expects["segment_budget"] = (
+        f"The segment budget for this run is {max_segments}; a capture past "
+        f"it raises with current usage and names drop(segment_id) as the "
+        f"remedy."
+    )
+    # _require_byte_budget() and set_plan()'s twin: the byte refusal,
+    # stated with the number it refuses past and over the same total the
+    # guard sums.
+    expects["byte_budget"] = (
+        f"The byte budget for this run is {max_bytes}, counted across plan, "
+        f"notes and segments together; a write that would pass it raises "
+        f"with current usage and stores nothing."
+    )
+    return expects
 
 
 # The prompt addendum, appended when (and only when) a workspace is

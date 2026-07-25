@@ -363,7 +363,10 @@ teaches `verify`, and `trellis_upsum` joins the TOOLS manifest as item 5.
 Authored under the prompt-engineering and hypershot-protocol skills
 (Guardrail 15). Both composed-prompt sha256 pins moved wittingly and were
 recomputed in the same commit (Guardrail 9): default
-`ee5bfca6…1200`, omit-arm `322cbe5d…45ae`.
+`ee5bfca6…1200`, omit-arm `322cbe5d…45ae` — the values **as of that pass**,
+superseded July 25, 2026 when the rule-24 turn-composition fix moved both arms
+again. The live pair is always the pair in `scripts/test_modules.py`; digests
+quoted in this record are history, never the current value.
 
 ### 8.5 What this section produced beyond the three fixes
 

@@ -51,6 +51,8 @@ import json
 import sys
 import threading
 
+from trellis_surfaces import register_surface
+
 # The engine-owned answer prefix (the workflow contract the benchmark
 # client and the TRELLIS_RESULT extraction both key on).
 ANSWER_PREFIX = "FINAL_ANSWER: "
@@ -193,3 +195,111 @@ class TrellisAnswer:
             "preview": preview,
             "preview_truncated": len(content) > len(preview),
         })
+
+
+# --- Self-description (SELF_DESCRIBING_SURFACES.md §3.2, §9.1, §11) -------
+# rlms reserves one description line per injected surface
+# (format_tools_for_prompt, rlm/environments/base_env.py). With nothing
+# registered, this surface renders to the model as a bare type name and
+# the run is told nothing about the one channel it must finish through.
+#
+# Ownership follows §9.1 — one encoding per fact, owned by whoever is
+# authoritative for it. `purpose` and `whenToUse` are EDITORIAL: no
+# predicate refuses when they are wrong and no derivation can supply
+# them. Every property a guard enforces lives once in
+# _ANSWER_GUARD_EXPECTS, keyed by the guard class that owns it, and
+# `purpose` deliberately states no bound so the two cannot disagree.
+#
+# NO derive_answer_expects() stands beside this dict, and that is the
+# finding rather than an omission. TrellisAnswer takes no constructor
+# arguments, holds no per-run state beyond a counter, and every bound it
+# enforces is a kernel constant above — so a derivation would return the
+# same mapping on every run and discriminate nothing. The mapping is
+# bound to the descriptor here instead, at the definition site. Contrast
+# derive_textedit_expects(), which earns its existence because the SAME
+# bool that makes splice() refuse selects the mode account.
+#
+# Descriptors are a REGISTRATION, not a schema (§11, owner ruling, July
+# 23, 2026): fields vary per surface, nothing validates this shape, and
+# adding a field is an edit. Every string here is brace-free — rlms runs
+# .format() over the prompt these bytes can reach (rule 6).
+_ANSWER_GUARD_EXPECTS = {
+    # submit(): a non-string argument raises before anything is
+    # evaluated, so the value reaches the answer through evaluation
+    # rather than through the model's own output.
+    "expression_text": ("submit takes the TEXT of a Python expression, "
+                        "never the value itself."),
+    # submit() via _references_repl_state(): a tree that is constants all
+    # the way down raises — it names no REPL state, so it can only be a
+    # value typed by hand.
+    "no_bare_literal": ("An expression that references nothing you "
+                        "computed is refused as a retyped literal; name "
+                        "a variable or an expression over your "
+                        "variables instead."),
+    # submit(): an expression longer than the kernel cap raises with
+    # usage. The cap is a number the guard owns; the phrase states the
+    # bound without restating the number beside it.
+    "expression_bound": ("The expression is bounded: it names a result "
+                         "and is never the content itself."),
+    # submit(): a None result raises rather than landing as an answer —
+    # it is almost always a function that printed instead of returning.
+    "none_refused": ("An expression evaluating to None is refused "
+                     "rather than submitted."),
+    # submit(): rendered content over the kernel cap raises with its
+    # measured size instead of silently truncating (Guardrail 6).
+    "content_bound": ("The rendered answer is bounded, and an over-cap "
+                      "answer raises with its measured size rather than "
+                      "landing truncated."),
+}
+
+ANSWER_DESCRIPTOR = {
+    "name": "trellis_answer",
+    # The one-line render slot: the surface's ROLE, stating no bound.
+    # Compressed July 25, 2026 against the shared contribution budget:
+    # the mechanism a run must know here is that an EXPRESSION over its
+    # own variables is what becomes the answer, and that survives. The
+    # step-by-step account of what submit() does with it — evaluates in
+    # the live namespace, prefixes FINAL_ANSWER, sets content and ready —
+    # is stated in full by the kernel TOOLS manifest and by this
+    # descriptor's own `exposes` doc, so the slot no longer carries a
+    # third copy.
+    "purpose": ("the completion channel — an expression over your REPL "
+                "variables becomes the final answer."),
+    # Editorial: WHEN a run reaches for this surface. The workflow rules
+    # in the kernel prompt own the discipline itself; this is the
+    # navigational half and states no rule of its own. Compressed July
+    # 25, 2026, second pass: "computed and" came out because "held in a
+    # variable" already carries it — a variable holds what was computed
+    # into it — so the occasion is named in fewer bytes, not narrowed.
+    "whenToUse": "your result is held in a variable",
+    # The pieces of the ONE description line rlms reserves for this
+    # surface. Two are ("descriptor", field) slots pulling fields this
+    # descriptor already owns, so the line restates nothing; the only
+    # authored bytes are the connective between them. Guard-backed
+    # expectations stay OUT of this slot deliberately — one line is an
+    # orienting line, and a bound stated by half is worse than a bound
+    # the run reads in full where it is enforced.
+    "contributes": [
+        ("descriptor", "purpose"),
+        " Reach for it when ",
+        ("descriptor", "whenToUse"),
+        ".",
+    ],
+    "expects": _ANSWER_GUARD_EXPECTS,
+    "exposes": [
+        {
+            "call": "trellis_answer.submit(expression_text)",
+            # Editorial teaching prose only. Every refusal this call
+            # carries is stated once, above, in the expects mapping.
+            "doc": ("evaluates the expression in your namespace, renders "
+                    "the value deterministically, and sets the final "
+                    "answer from it — returns a JSON receipt carrying a "
+                    "bounded preview of what landed."),
+        },
+    ],
+}
+
+# One call site, one commitment: the descriptor is bound to its surface
+# HERE, where the surface is defined, so the coverage diagnostic — and
+# later llm_help — find it without anything wired by hand elsewhere.
+register_surface(ANSWER_DESCRIPTOR)

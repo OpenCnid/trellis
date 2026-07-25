@@ -10,9 +10,16 @@ A descriptor is registered once, host-side, and then rendered twice:
   proxy stubs in the worker namespace. A stub holds **no credential and no live
   client** — only the RPC envelope and the name of the vsock port to send it on.
 * `render(cid, names)` emits the typed, doc-commented stub the model writes code
-  against: signature plus a one-line doc, body stripped. Code shaped like the
-  model's pretraining rather than JSON schema recited in prose
-  (REPL_SANDBOX_RESEARCH.md section 7 (Prompt-composition-by-function)).
+  against: signature, a one-line doc, the guard-derived bounds as comment lines,
+  body stripped. Code shaped like the model's pretraining rather than JSON
+  schema recited in prose (REPL_SANDBOX_RESEARCH.md section 7
+  (Prompt-composition-by-function)).
+
+The two renderings diverge on exactly one thing, and deliberately: the bounds
+go to the prompt and not into the guest module. `materialise` emits what a
+supervisor executes, and the host enforces every bound whatever the guest holds,
+so a bound rendered into executable source would grow that module for no
+enforcement gain. `expects_source` is therefore read by `render` alone.
 
 Both come off the same descriptor, which is what buys modularity (swap the
 backend, callers unchanged) and prompt-composition-by-function at once.
@@ -53,7 +60,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from repl_sandbox.errors import DeniedError
+from repl_sandbox.errors import ERROR_CODES, DeniedError, retry_phrase
 
 # ---------------------------------------------------------------------------
 # Names and bounds
@@ -118,6 +125,13 @@ MAX_PARAMS = 16
 MAX_DISPATCH_REF_LEN = 256
 MAX_DEFAULT_LITERAL_LEN = 120
 
+#: Bounds on the guard-derived half of a descriptor. `expects` phrases reach
+#: prompt text through `one_line`, exactly as the doc does, so they are held to
+#: the same per-line ceiling; the count bound keeps one op's account from
+#: crowding out the signatures around it.
+MAX_EXPECTS = 12
+MAX_EXPECTS_LEN = 400
+
 #: JSON Schema `type` to the annotation shown in both renderings.
 _JSON_TYPE_TO_PY: dict[str, str] = {
     "string": "str",
@@ -135,6 +149,12 @@ HANDLE_ANNOTATION = "Handle"
 
 #: Fallback when a schema fragment does not pin a type.
 ANY_ANNOTATION = "Any"
+
+#: The schema fragment for a handle-typed slot, kept beside the `_annotation`
+#: rule that renders it. Every module that declares a handle parameter names
+#: this constant, so "what a handle looks like in a signature" is decided once,
+#: here, rather than re-typed as a dict literal at each declaration site.
+HANDLE_SCHEMA: dict = {"type": "object", "format": "handle"}
 
 
 # ---------------------------------------------------------------------------
@@ -359,12 +379,29 @@ class CapabilityDescriptor:
     enforces: a capability that reads data declares a return of a handle plus
     safe metadata, and a capability that returns content is one of the named
     metered sinks (DATA_MODEL section 6).
+
+    `doc` and `expects` are two encodings with two different owners, which is
+    why they are two fields (SELF_DESCRIBING_SURFACES.md section 3.3). `doc` is
+    editorial: what this capability is for. `expects` is guard-backed: a bound
+    the code refuses past, written where that code lives and travelling here by
+    reference. A sentence that belongs in `expects` and is typed into `doc`
+    instead is a second encoding of a fact the guard already owns, and it is the
+    encoding that goes stale when the guard moves.
+
+    `error_codes` names the taxonomy codes reachable from this capability, and
+    stops there. What each code *means* for a retry is not stated here at all —
+    `render` derives that from `errors.retry_phrase`, which reads the error
+    classes' own attributes.
     """
 
     name: str
     typed_signature: dict
     doc: str
     dispatch_ref: str
+    #: Guard-derived phrases, each owned by the predicate that refuses.
+    expects: tuple[str, ...] = ()
+    #: `errors.ERROR_CODES` members this capability can raise.
+    error_codes: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         _validate_identifier(self.name, what="capability name")
@@ -380,6 +417,45 @@ class CapabilityDescriptor:
         if not self.dispatch_ref:
             raise DeniedError(f"capability {self.name!r} has an empty dispatch_ref")
         _validate_schema(self.typed_signature)
+        self._validate_expects()
+
+    def _validate_expects(self) -> None:
+        """Hold the guard-derived half to the doc's own bounds, and close its set.
+
+        Every `expects` phrase reaches prompt text, so it crosses `one_line` at
+        render and is bounded and UTF-8-checked here. `error_codes` is checked
+        against `ERROR_CODES` because a code outside the taxonomy has no class
+        to read a retry consequence off — refusing it here is what keeps the
+        derivation total rather than best-effort.
+        """
+        if not isinstance(self.expects, tuple):
+            raise DeniedError(
+                f"capability {self.name!r} expects must be a tuple, got "
+                f"{type(self.expects).__name__}"
+            )
+        if len(self.expects) > MAX_EXPECTS:
+            raise DeniedError(
+                f"capability {self.name!r} declares more than {MAX_EXPECTS} expectations"
+            )
+        for phrase in self.expects:
+            _validate_text(
+                phrase, what=f"capability {self.name!r} expects", max_len=MAX_EXPECTS_LEN
+            )
+            if not one_line(phrase):
+                raise DeniedError(
+                    f"capability {self.name!r} carries an empty expects phrase"
+                )
+        if not isinstance(self.error_codes, tuple):
+            raise DeniedError(
+                f"capability {self.name!r} error_codes must be a tuple, got "
+                f"{type(self.error_codes).__name__}"
+            )
+        for code in self.error_codes:
+            if code not in ERROR_CODES:
+                raise DeniedError(
+                    f"capability {self.name!r} names error code {code!r}, which is "
+                    f"outside the taxonomy {ERROR_CODES}"
+                )
 
     # -- rendering fragments shared by both renderings ----------------------
 
@@ -405,10 +481,72 @@ class CapabilityDescriptor:
         """
         return f"    {one_line(self.doc)!r}"
 
+    def expects_source(self) -> str:
+        """The guard-derived account, as comment lines. Empty when there is none.
+
+        Comments rather than more docstring, for two reasons that both hold at
+        once. The rendered stub's body stays exactly a docstring and `...` — no
+        AST node is added, so *what a stub is* does not change to make room for
+        this — and a `#` line is what a reader of Python source already expects a
+        bound to be written on, which is the whole reason this rendering emits
+        code instead of a schema recited in prose.
+
+        Two labels, because there are two derivations: `expects:` carries a
+        phrase its guard owns, and `on error:` is composed here from the
+        capability's declared codes through `errors.retry_phrase`. Neither line
+        is authored at this call site. `one_line` runs over the phrases for the
+        same reason it runs over the doc — a newline in a comment would end the
+        comment and put the rest of the phrase into the source.
+        """
+        lines = [f"    # expects: {one_line(phrase)}" for phrase in self.expects]
+        lines += [
+            f"    # on error: {retry_phrase(code)}"
+            for code in dict.fromkeys(self.error_codes)
+        ]
+        return "\n".join(lines)
+
 
 # ---------------------------------------------------------------------------
 # Pre-registered capabilities (INTERFACES section 6; section 4 for the wire)
 # ---------------------------------------------------------------------------
+
+#: **These two descriptors stay here, and that is a boundary rather than an
+#: oversight.** Every other capability's descriptor now lives beside the code
+#: that serves it, registered there through `surfaces.describes` — the LM pair
+#: cannot, because the code that serves them is `lm_handler.py` and this module
+#: is imported by `guest_main.py`, inside the microVM. `guest_rpc.py` records
+#: the same refusal for the same reason: importing `lm_handler` carries
+#: `repl_sandbox.dlp`, the detection patterns, in with it. So the LM pair's
+#: `expects` is deliberately empty rather than hand-authored at a distance from
+#: `lm_handler`'s guards; writing those phrases here would recreate exactly the
+#: second encoding this pass removed everywhere else.
+#:
+#: `error_codes` is nonetheless nameable here. It names members of `ERROR_CODES`
+#: — identifiers from a module this one already imports — and every sentence the
+#: prompt shows for them is composed by `retry_phrase` from the error classes'
+#: own attributes, so nothing about a refusal is being restated.
+#:
+#: **This tuple is a hand-kept list and that is the whole hazard.** It shipped
+#: without `frame` while `lm_handler` raised `FrameError` at sites a caller
+#: reaches with its own arguments — `llm_query_batched(prompts=[])` is one — and
+#: `frame` is the one consequence in the taxonomy that drops the connection, so
+#: the rendered account omitted the harshest outcome the caller could trigger.
+#: Membership in `ERROR_CODES` was checked and agreement with the raise sites
+#: was not, which is the second-encoding shape this layer closes everywhere else.
+#: `test_the_declared_lm_codes_are_the_ones_lm_handler_raises` now reads the
+#: raise sites out of `lm_handler.py` by AST at check time — never by import,
+#: which would carry `repl_sandbox.dlp` into the guest image — and refuses a
+#: divergence in either direction.
+_LM_ERROR_CODES: tuple[str, ...] = (
+    "cap_rate",
+    "cap_concurrency",
+    "cap_bytes",
+    "cap_spend",
+    "depth_ceiling",
+    "denied",
+    "frame",
+    "upstream",
+)
 
 #: The `context` slot on both LM capabilities. A **Trellis extension to the rlms
 #: LM wire** (INTERFACES section 4), not an rlms field: it takes handles, the host
@@ -441,6 +579,7 @@ _LLM_QUERY = CapabilityDescriptor(
         "not. Metered both ways against the session ledgers."
     ),
     dispatch_ref="trellis.lm.v1.single",
+    error_codes=_LM_ERROR_CODES,
 )
 
 _LLM_QUERY_BATCHED = CapabilityDescriptor(
@@ -461,6 +600,7 @@ _LLM_QUERY_BATCHED = CapabilityDescriptor(
         "prompt. Fan-out is bounded host-side."
     ),
     dispatch_ref="trellis.lm.v1.batched",
+    error_codes=_LM_ERROR_CODES,
 )
 
 #: Materialised for every session at `setup()` (INTERFACES section 2, step 4).
@@ -635,13 +775,22 @@ class CapabilityRegistry:
     # -- rendering 2: render (composer -> prompt) ---------------------------
 
     def render(self, cid: int, names: Sequence[str] | None = None) -> str:
-        """The prompt-facing stubs: signature, one-line doc, body stripped.
+        """The prompt-facing stubs: signature, one-line doc, bounds, body stripped.
 
         This is a frame, not an example. It carries no sample arguments, no
         sample return value, and no worked call — concrete filler in a
         prompt-facing artifact primes content the caller never asked for. The
         free variables in the signature carry the shape; the doc line carries the
-        behaviour.
+        behaviour; the comment lines under it carry the bounds.
+
+        **Those comment lines are the difference between a bound that is
+        discoverable and a bound that is only trippable.** A signature and a
+        purpose tell a caller what to write and leave every refusal to be found
+        by being refused. `expects_source` composes the rest from two derivations
+        — a phrase each guard owns, and a retry consequence read off the error
+        class — so what the prompt says a capability refuses is what the code
+        refuses, by construction rather than by review
+        (SELF_DESCRIBING_SURFACES.md section 3.3).
 
         `names` is progressive disclosure: a caller renders only the signatures a
         turn needs. Order follows `names`, duplicates collapse, and a name that
@@ -659,8 +808,12 @@ class CapabilityRegistry:
         else:
             selected = [descriptor for descriptor, _port in registrations]
 
-        blocks = [
-            "\n".join([descriptor.signature_source(), descriptor.docstring_source(), "    ..."])
-            for descriptor in selected
-        ]
+        blocks = []
+        for descriptor in selected:
+            parts = [descriptor.signature_source(), descriptor.docstring_source()]
+            expects = descriptor.expects_source()
+            if expects:
+                parts.append(expects)
+            parts.append("    ...")
+            blocks.append("\n".join(parts))
         return "\n\n\n".join(blocks)

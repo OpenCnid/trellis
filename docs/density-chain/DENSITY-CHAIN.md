@@ -167,7 +167,9 @@ planner above it. Not what the injected tools reach into, only that they arrive 
   retries.
 - **T3 — with receipts.** PR #95 (`1878e89`) landed S1/S3; #98 (`74c3b48`) UPSUM; #135 (`3bdc0e7`)
   made it enforce — `commit()` refuses over `UPSUM_BUDGET = 2000`, `UPSUM_MAX_DOMAIN_KEYS = 12`. Pins:
-  `COMPOSED_SYSTEM_PROMPT_SHA256 = ee5bfca6…1200`, omit-arm `322cbe5d…45ae`;
+  `COMPOSED_SYSTEM_PROMPT_SHA256 = d58abbb2…7bf0`, omit-arm `51eab4af…c0aa` (both moved
+  2026-07-25 with the rule-24 turn-composition fix; the live pair is always the pair in
+  `scripts/test_modules.py`);
   `trellis_scaffold.test.ts` pins `{upsum_commits: 1, upsum_budget_refusals: 1,
   upsum_shape_refusals: 5}`. Motivating run: **402,781 input tokens by iteration 14**. Probe round 1:
   12 runs, $0.7320; the off arm pushed 110,550 tokens through one `llm_query`, 7.6×. `rlms==0.1.3`,

@@ -13,6 +13,12 @@ import psycopg2
 # import).
 from trellis_blocks import blocks_from_root, node_text as _node_text
 
+# One call site, one commitment: each surface below binds its descriptor
+# at its own definition site (SELF_DESCRIBING_SURFACES.md §12, increment
+# 2a). trellis_surfaces imports only ast and os, so this adds no runtime
+# dependency to a module the drills import without a database.
+from trellis_surfaces import register_surface
+
 # Session 14 (design record §10.2): an AST hash is 64 lowercase hex chars
 # (SHA-256 via digest('hex')). Tier-3 identifiers (uuids, module names)
 # are structurally disjoint from this shape, so nothing scratch-shaped
@@ -576,6 +582,206 @@ class TrellisNeo4j:
         self.driver.close()
 
 
+# --- The trellis_neo4j surface descriptor ------------------------------
+#
+# WHAT FILLS WHAT. rlms reserves a per-surface description slot:
+# format_tools_for_prompt (rlm/environments/base_env.py) renders exactly
+# one line per injected surface — the backtick-quoted name, then the
+# description. Trellis passes bare values at the custom_tools seam, so
+# this surface currently renders as a bare type name. These bytes are
+# what fill that slot.
+#
+# OWNERSHIP follows SELF_DESCRIBING_SURFACES.md §9.1 — one encoding,
+# owned by whoever is authoritative for the fact. Every sentence a guard
+# enforces lives in _NEO4J_GUARD_EXPECTS, keyed by its guard class, and
+# nowhere else. `purpose`, `whenToUse` and `seeAlso` are editorial: no
+# predicate stands behind them, and going looking for one is looking for
+# the wrong kind of fact rather than finding a gap in the mechanism.
+#
+# FIELD SHAPE IS NOT VALIDATED and nothing here should start validating
+# it (SELF_DESCRIBING_SURFACES.md §11, owner, July 23, 2026): the
+# descriptor is a REGISTRATION, register_surface requires only a
+# non-empty name, and fields vary per surface.
+#
+# BRACE-FREE, EVERY STRING (.claude/rules/prompt-authoring.md rule 6):
+# rlms runs .format() over the prompt these bytes land in, so no literal
+# brace appears in any string below — not a doubled one either. The one
+# substitution this pair needs travels in the house <<...>> idiom.
+#
+# WHY THE PHRASES CARRY THEIR OWN LEADING SPACE, and what owns the rest.
+# `trellis_contribution.render_contribution` owns how a `contributes` list
+# becomes a line, and this file states none of it: a copy here restating
+# the field name, the tag set, or the join would be one rule in two
+# places, which is the failure §9.1 forecloses and the failure this whole
+# surface layer exists to close. It was one, briefly — it named a field
+# `line` and a join of one space, both wrong against the shipped frame —
+# and a second composer written to it would have diverged silently.
+#
+# What is this file's own business: a phrase is empty exactly when the
+# guard behind it is not wired on this holder, and the frame contributes
+# no bytes of its own, so each phrase begins with the space that
+# separates it from whatever precedes it. An unwired guard then costs
+# nothing rather than leaving a gap. That is the converse of the bijection
+# orphan SELF_DESCRIBING_SURFACES.md §10 recorded: a run is never told a
+# rule that cannot fire on it, and never refused by one it was not told.
+#
+# WHAT IS DELIBERATELY ABSENT. The Cypher mutation blocklist, the four
+# entity kinds, and the 0.0-1.0 confidence bound are each guard-backed
+# AND already stated in the kernel TOOLS manifest (trellis_agent.py
+# _ADDENDUM_BASE_PREFIX). Restating one here would be the second encoding
+# §9.1 forecloses, so the manifest keeps them until a pass that owns
+# those bytes moves them.
+NEO4J_DESCRIPTOR = {
+    "name": "trellis_neo4j",
+    "purpose": ("the belief graph — Cypher reads, plus the one derivation "
+                "write path."),
+    "whenToUse": ("you need to find which AST addresses bear on the task, "
+                  "or to cache a fact you derived so a later run gets it "
+                  "without deriving it again"),
+    "seeAlso": ["trellis_postgres"],
+    # WHAT THIS SLOT SELECTS: ONE guard-owned phrase, the retrieval
+    # closure. Thirteen surfaces share CONTRIBUTION_BUDGET, so the slot
+    # is an ORIENTING line rather than this surface's account
+    # (trellis_contribution.py's header states the split), and the one
+    # phrase that earns it is the one no refusal can deliver in time to
+    # change the first attempt: a run composing a batch from hashes a
+    # Cypher result named has already done the wrong thing, and the
+    # closure is what stops it beforehand.
+    #
+    # THE FOUR PHRASES THIS SLOT LEAVES UNSELECTED, and what states each:
+    #   * hash_format — the _normalize_fact raise, which names the
+    #     offending element, the 64-lowercase-hex shape, and the
+    #     identifier classes that are never provenance;
+    #   * existence — the _verify_hashes_exist raise; it also never
+    #     renders on a shipped run, since trellis_agent wires
+    #     retrieved_addresses_check unconditionally and the closure
+    #     suppresses it (derive_neo4j_expects);
+    #   * entailment — the per-block refusal the checker raises, on the
+    #     TRELLIS_CITATION_ENTAIL runs where it is wired at all;
+    #   * batch_atomic — atomicity triggers no refusal of its own, and
+    #     both provenance gates end their message with "nothing was
+    #     written".
+    # Each stays in _NEO4J_GUARD_EXPECTS as the one encoding of it
+    # (§9.1); what the slot no longer does is spend primacy bytes on a
+    # sentence its own refusal delivers in full at the point of use.
+    "contributes": [
+        ("descriptor", "purpose"),
+        ("expects", "retrieval_closure"),
+    ],
+}
+
+# Guard-owned phrases: ONE encoding per guard class, keyed by the guard
+# that is authoritative for it. Granularity is the class, not the raise
+# site — the textedit precedent (SELF_DESCRIBING_SURFACES.md §10,
+# finding 5).
+_NEO4J_GUARD_EXPECTS = {
+    # _normalize_fact's AST_HASH_PATTERN loop: an element that is not 64
+    # lowercase hex characters refuses the batch, echoing the offender
+    # bounded. Always live — this check has no injection seam.
+    # Compressed July 25, 2026: the format itself is the bound that makes
+    # the refusal predictable, and it stays. What came out is the trailing
+    # "any other identifier refuses" — the raise names the offending
+    # element and adds "Workspace segment ids, question ids, and any other
+    # identifiers are never provenance", so the slot states the shape and
+    # the refusal states the consequence.
+    "hash_format": (" sourceNodeIds elements are 64-lowercase-hex AST "
+                    "hashes."),
+    # _verify_hashes_retrieved: cited addresses must be members of the
+    # run's retrieved set, which get_ast_texts keys, get_ast_blocks block
+    # ids and vector_search result ids feed. run_cypher deliberately does
+    # NOT feed it (the module comment at _retrieved_addresses), which is
+    # the case the second clause names — the T1 closure's second-hand
+    # citation of a graph-surfaced provenance list.
+    #
+    # THE PREDICATE IS SET MEMBERSHIP AND NOTHING ELSE:
+    # set(cited_hashes) - self._retrieved_addresses_check(). It never
+    # reads HOW an address was seen, so the whole class of addresses it
+    # refuses is "absent from the retrieved set", and no source
+    # disqualifies a hash standing alone. Corrected July 25, 2026: the
+    # second clause read "not ones Cypher surfaced", which states a
+    # property of the hash where the guard holds a property of what the
+    # run has DONE with it — an address Cypher named and get_ast_texts
+    # then returned is in the set and is citable, and the line told the
+    # model it was not. Over-refusal is drift the way under-refusal is:
+    # the bytes describe a guard that does not exist, and a run obeying
+    # them declines a citation the engine takes.
+    #
+    # BOTH CLAUSES SURVIVE, in fewer words. The first is the closure
+    # itself; the second is the case a run cannot infer from it —
+    # run_cypher surfaces sourceNodeIds as a property WITHOUT feeding the
+    # retrieved set, so an address the model has plainly "seen" is not
+    # yet citable and retrieving it is what makes it so. That changes
+    # what the model does before any refusal fires, which is what earns
+    # it the bytes. The remedy is in the raise ("Call get_ast_texts on
+    # them, confirm the bytes actually support your claim, then
+    # re-derive and cite"), and "retrieved" is load-bearing over "read":
+    # vector_search result ids join the retrieved set too, so narrowing
+    # the verb would narrow the bound.
+    #
+    # Held by test_contribution.py section 8, which runs this guard on
+    # both sides of the membership line and reddens on a clause stating
+    # an exclusion the retrieval predicate does not carry.
+    "retrieval_closure": (" Cite only addresses whose bytes you retrieved "
+                          "this run; retrieve a Cypher-named one first."),
+    # _verify_hashes_exist: the deduped union of the batch must exist in
+    # ast_nodes before any write session opens. Rendered only where it is
+    # the live bound — see derive_neo4j_expects for why the retrieval
+    # closure suppresses it.
+    "existence": (" A well-formed hash that is not in the store refuses."),
+    # The experimental semantic gate: _run_insight_writes calls the
+    # injected checker only when CITATION_ENTAIL_ENABLED is set AND a
+    # checker was injected, and refuses each block whose text the checker
+    # reports as not supporting the claim.
+    "entailment": (" Each cited block is also checked for whether its text "
+                   "supports the claim."),
+    # _run_insight_writes runs every check above over the whole batch's
+    # deduped citations BEFORE the WRITE session opens, so a refused
+    # batch leaves nothing partial behind (substrate-writes rule 4).
+    "batch_atomic": (" One refused address ends the whole batch before any "
+                     "write."),
+}
+
+
+# One call site, one commitment: bound here, where the surface is
+# defined, so the coverage diagnostic and later llm_help find it without
+# anything being wired by hand elsewhere.
+register_surface(NEO4J_DESCRIPTOR)
+
+
+def derive_neo4j_expects(neo4j):
+    """The guard-derived half of this surface's description
+    (HARNESS_SELF_MODEL.md §2: the same code that refuses is the code
+    that explains).
+
+    Each conditional phrase is selected by the SAME state its guard
+    reads, so the description and the refusal cannot drift apart (§2.1):
+    the retrieval closure by the injected `retrieved_addresses_check`,
+    the existence sentence by the injected `ast_existence_check`, and
+    the entailment sentence by the module flag and the injected checker
+    that `_run_insight_writes` tests together. A guard that is not wired
+    on this holder contributes the empty string rather than a sentence.
+
+    The retrieval closure SUPPRESSES the existence sentence, because an
+    address whose bytes a retrieval tool returned is by construction one
+    the store holds: with both wired, the weaker sentence changes no
+    decision the stronger one has not already changed, and spending a
+    line on it is the census entry that exists to raise the count.
+
+    Composed by code, never authored by the model."""
+    expects = dict(_NEO4J_GUARD_EXPECTS)
+    retrieval_wired = getattr(neo4j, "_retrieved_addresses_check", None) is not None
+    existence_wired = getattr(neo4j, "_ast_existence_check", None) is not None
+    entailment_wired = (CITATION_ENTAIL_ENABLED
+                        and getattr(neo4j, "_entailment_check", None) is not None)
+    if not retrieval_wired:
+        expects["retrieval_closure"] = ""
+    if retrieval_wired or not existence_wired:
+        expects["existence"] = ""
+    if not entailment_wired:
+        expects["entailment"] = ""
+    return expects
+
+
 class TrellisPostgres:
     def __init__(self, retrieval_discipline=False, retrieval_budget=None):
         # Session 33 (RETRIEVAL_DISCIPLINE.md §5): held-state dedup and
@@ -846,3 +1052,117 @@ class TrellisPostgres:
 
     def close(self):
         self.conn.close()
+
+
+# --- The trellis_postgres surface descriptor ---------------------------
+#
+# Same ownership split, same brace rule, same line contract as the
+# trellis_neo4j block above; the reasoning is written out there once.
+#
+# WHAT IS DELIBERATELY ABSENT. get_ast_blocks refuses a non-string
+# argument and a hash with no ast_nodes row, but the kernel TOOLS
+# manifest already names the parameter `root_hash` and says the call
+# returns a document's blocks — so a sentence here would be a second
+# encoding of a fact the manifest owns (§9.1), not a bound the model
+# would otherwise meet unwarned. The two phrases below are the ones no
+# default prompt byte states today.
+POSTGRES_DESCRIPTOR = {
+    "name": "trellis_postgres",
+    "purpose": ("the byte layer — text at AST addresses, and search by "
+                "meaning."),
+    "whenToUse": ("you hold addresses and need the bytes behind them, or "
+                  "you hold none yet and need to find some; the graph "
+                  "tells you which addresses exist and this surface is "
+                  "where their bytes come from"),
+    "seeAlso": ["trellis_neo4j"],
+    # WHAT THIS SLOT SELECTS: ONE guard-owned phrase, the retrieval
+    # budget. Thirteen surfaces share CONTRIBUTION_BUDGET, so the slot
+    # orients rather than accounts, and the budget is the one bound here
+    # NO refusal can deliver in time — a run learns its budget from the
+    # exhaustion message only once the budget is already gone, whereas
+    # the number in the line changes how the first fetch is planned.
+    #
+    # `repeat_refusal` is unselected and the get_ast_texts /
+    # get_ast_blocks / vector_search raises state it in full at the
+    # moment it bears on a decision, each naming what was already served
+    # and ending with the remedy ("Reuse the variable holding the earlier
+    # get_ast_texts/get_ast_blocks return — re-derive from it in code
+    # instead of re-fetching"). The phrase stays below as the one
+    # encoding of it (§9.1).
+    "contributes": [
+        ("descriptor", "purpose"),
+        ("expects", "retrieval_budget"),
+    ],
+}
+
+# The one substitution these bytes carry, in the house <<...>> idiom
+# (.claude/rules/prompt-authoring.md rule 6) rather than a format field:
+# angle brackets survive rlms's .format() call, a brace would not.
+_RETRIEVAL_BUDGET_TOKEN = "<<RETRIEVAL_BUDGET>>"
+
+_POSTGRES_GUARD_EXPECTS = {
+    # The three dedup predicates, one guard class: get_ast_texts refuses
+    # a request whose every hash is already held, get_ast_blocks a root
+    # already served, vector_search a query string already run. Held
+    # state holds identities and never content, so a repeat REFUSES
+    # rather than replaying — there is no store mirror to serve from.
+    # Compressed July 25, 2026: the one-line slot is an ORIENTING line,
+    # not an account. Which of the three surfaces refused, and on what,
+    # is in the refusal message the model reads at the moment it matters;
+    # restating the enumeration here spends primacy bytes on something
+    # already delivered at the point of use. The same pass took the
+    # remedy clause out for the same reason — get_ast_texts's refusal
+    # ends "Reuse the variable holding the earlier get_ast_texts/
+    # get_ast_blocks return — re-derive from it in code instead of
+    # re-fetching", so the line keeps only what makes that refusal
+    # PREDICTABLE and lets the refusal carry what to do about it.
+    # July 25, 2026, second pass: the phrase is no longer pulled into the
+    # one-line slot at all (see POSTGRES_DESCRIPTOR above). It stays here
+    # as the one encoding of the dedup class, for the addendum and
+    # llm_help paths that read derived expectations.
+    "repeat_refusal": (" A fetch this run already served refuses."),
+    # _discipline_check_budget: budget N serves N byte-returning fetches
+    # and the next one refuses before any I/O. Only a call that returned
+    # bytes increments the counter, which is why the sentence counts
+    # fetches rather than calls. The number is run state, spliced by
+    # derive_postgres_expects out of the same attribute the predicate
+    # compares against. The NUMBER is what this phrase exists to carry —
+    # it is the one thing here no refusal can deliver in time, since a
+    # run learns its budget from the exhaustion message only once the
+    # budget is already gone. The advice that followed it is in that
+    # message ("Work from the variables holding what you already
+    # retrieved — re-derive in code instead of re-fetching"), so the
+    # slot keeps the count and the refusal keeps the remedy.
+    "retrieval_budget": (" This run may spend " + _RETRIEVAL_BUDGET_TOKEN
+                         + " byte-returning fetches; the next refuses."),
+}
+
+
+register_surface(POSTGRES_DESCRIPTOR)
+
+
+def derive_postgres_expects(postgres):
+    """The guard-derived half of this surface's description.
+
+    Both phrases are selected by `_retrieval_discipline` — the SAME bool
+    that decides whether the dedup and budget checks run at all — and
+    the budget figure is read from `_retrieval_budget`, the SAME
+    attribute `_discipline_check_budget` compares the fetch count
+    against. A bare-constructed instance refuses neither, so it
+    describes neither, and its line stays what it was before this
+    machinery existed (the byte-identical-when-absent mold).
+
+    The budget number is run state and is never stated in the
+    descriptor: an operator raising TRELLIS_RETRIEVAL_BUDGET_PER_RUN
+    moves the sentence and the refusal together or moves neither.
+
+    Composed by code, never authored by the model."""
+    expects = dict(_POSTGRES_GUARD_EXPECTS)
+    if not getattr(postgres, "_retrieval_discipline", False):
+        expects["repeat_refusal"] = ""
+        expects["retrieval_budget"] = ""
+        return expects
+    budget = getattr(postgres, "_retrieval_budget", RETRIEVAL_BUDGET_DEFAULT)
+    expects["retrieval_budget"] = expects["retrieval_budget"].replace(
+        _RETRIEVAL_BUDGET_TOKEN, str(budget))
+    return expects

@@ -50,7 +50,7 @@ The worker. This is the layer that drifted toward retrieval.
 | 2.3 | Code-mediated text | Engine computes locations; bytes move by splice or reference | shipped |
 | 2.4 | **Corpus `locate` + bounded window** | Query the corpus for addresses; read a bounded range — what `trellis_textedit` already does for files | **built, unreachable** — `repl_sandbox/algebra.py` has `locate`, `narrow`, text-free `get_ast_blocks`, byte metering, handle-typed `llm_query` context. Nothing outside `src/repl_sandbox/` imports it; production spawns `src/rlm/trellis_agent.py` |
 | 2.5 | Byte-metered extraction budget | "No more than needed" needs a unit; today the budget counts calls | **absent** in the live path, shipped in 2.4's layer |
-| 2.6 | Turn budget affording composition | Several turns and multiple slices, per rule 24 | **wrong shape** — schema ceiling of 9, and the kernel instructs collapsing turns |
+| 2.6 | Turn budget affording composition | Several turns and multiple slices, per rule 24 | **partial** — the kernel no longer instructs collapsing turns (fixed 2026-07-25; both composed-prompt pins moved wittingly, watched failing first). The schema ceiling of 9 stands, and 2.7 gates widening it |
 | 2.7 | **Iteration-exhaustion path that keeps its guards** | Running out of turns must not bypass the answer channel | **defect** — `rlms` re-prompts over the transcript and returns that as `FINAL_ANSWER`: no literal check, no cap, no telemetry, no protocol violation. See §6 |
 | 2.8 | Durable artifact-under-construction state | A growing, engine-measured buffer the model deposits into across turns | **absent** — `upsum` is a 2,000-char shrinking summary; the workspace has no model-facing deposit path |
 

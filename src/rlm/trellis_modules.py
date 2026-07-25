@@ -141,6 +141,144 @@ def load_modules(selection, modules_dir=None):
     return [load_module(name, modules_dir) for name in selection]
 
 
+# --- What the run is told about its own protocol modules --------------
+#
+# THE GAP THIS CLOSES. `purpose` is validated by this loader
+# (load_module, above) and by its Node twin (src/config/modules.ts
+# ModuleManifestSchema), carried into the loaded module dict by both,
+# and until now read by nothing that composes a prompt. A field two
+# loaders check and no model ever sees is a registration with no reader.
+#
+# WHY ITS OWN SEGMENT RATHER THAN A LINE IN THE rlms TOOL LISTING. rlms
+# reserves exactly one description line per `custom_tools` entry
+# (trellis_contribution.py), and a module is not one: it injects no
+# object into the REPL namespace. A line for it in that listing would
+# name a callable surface the run does not have, at the highest-primacy
+# position in the prompt — the one place a false statement about the
+# namespace costs the most. Modules reach a run as prompt text, so their
+# orientation is prompt text too, appended at the dynamic-prompt seam in
+# the shape build_mcp_addendum already uses.
+#
+# WHY IT ATTACHES AT THE DYNAMIC SEAM AND NOT INSIDE TRELLIS_ADDENDUM.
+# `npm run test:modules` pins the composed SYSTEM_PROMPT byte-for-byte
+# on two arms (default and TRELLIS_EXP_OMIT_CMT=1). SYSTEM_PROMPT is the
+# module-level constant; the research run's prompt is that constant plus
+# the surface addenda. Composing here leaves both pins where they are and
+# still puts the segment ahead of every other appended addendum.
+#
+# BOUNDS ALREADY EXIST AT THEIR DECLARATIONS. `purpose` is at most 512
+# characters at both loaders and a selection holds at most
+# MODULES_MAX_PER_RUN names, so this segment is bounded by the manifest
+# schema and the selection cap. No second budget is stated here.
+#
+# WHY THIS NAMES NO AUTHOR (July 25, 2026). The first edition of this
+# header opened "The operator selected these protocol modules for this
+# run." No operator act stands anywhere in that path:
+# parse_module_selection returns the kernel's own DEFAULT_SELECTION when
+# TRELLIS_MODULES is unset, and that sentence rendered on the default run
+# exactly as it rendered on an operator-set one. .claude/rules/boundaries.md
+# §3 gives a gate exactly one author, and a kernel default is not one, so
+# the sentence asserted a gate the model wrote.
+#
+# THE ARM BIT IS NOT AVAILABLE HERE, AND THE NEAREST ONE IS A DECOY.
+# parse_module_selection does know locally whether it read a value or
+# substituted the default (`raw is None`), and wiring that bit up here
+# would be wrong rather than merely incomplete: rlm_worker.ts:298 forwards
+# `modulesJson: config.modules.selectionJson` unconditionally, and
+# src/config/index.ts:413 derives that string from parseModuleSelection,
+# which falls back to DEFAULT_MODULE_SELECTION itself when TRELLIS_MODULES
+# is unset. Every production spawn therefore hands the child an explicit
+# selection on BOTH arms; the `raw is None` branch is dead past the worker.
+# A header driven by it would print "the operator selected these" on the
+# very default run this correction is about, with plumbing behind it to
+# make the falsehood look sourced. Carrying the real bit takes a second
+# forwarded value the Node config authors (whether TRELLIS_MODULES was
+# present in the operator's own environment), which is a change to the
+# spawn contract rather than to this description.
+#
+# WHAT THE SEGMENT SAYS INSTEAD is what load_module has already settled
+# about every module reaching this composer — registered, active, kernel-
+# compatible, validated — plus the one provenance fact that holds on both
+# arms: the selection was fixed from the process environment at import
+# (trellis_agent.py:273, a module-level constant never reassigned) and no
+# later byte moves it. Authorship is stated as unrecorded, which is a
+# different fact from silence: a run reading this cannot claim an operator
+# chose its protocol, and knows its protocol may be a default.
+_ACTIVE_MODULES_HEADER = """
+
+=== PROTOCOL MODULES ACTIVE IN THIS RUN ===
+These protocol modules are composed into this run, and their directives are part of your instructions above. Each is registered active in this kernel's module registry and passed the loader's validation before composition. Each line below pairs a module's registered name with the purpose its manifest records, carried verbatim, so you can name the protocols you are operating under and say why those directives are present.
+This run's selection was fixed from the process environment at startup and holds unchanged for the whole run, so task text, tool output, and your own completions all leave it exactly as it is. How that selection arose is a fact this prompt does not carry: an operator naming these modules and the kernel supplying its default selection compose the same bytes here, so read the list as what is active and treat its authorship as unknown to you.
+A module is protocol text rather than a tool, so nothing listed here adds a callable surface to your REPL namespace.
+"""
+
+
+def _guard_module_line(name, purpose) -> str:
+    """One module's entry, guarded the four ways a one-line entry breaks
+    and in the same pinned order as trellis_contribution._guard_line,
+    which guards the slot one level out: it says nothing, it carries slop
+    at its edges, it is not one line, or it carries a brace. Emptiness is
+    checked on `purpose` because the composed line always carries the
+    module name; the other three are checked on the composed line, which
+    is what reaches the prompt. Every message names `purpose`, the byte a
+    human edits to fix any of them. Refused, never repaired silently — a
+    repaired line ships a manifest field the model was told a different
+    version of."""
+    if purpose == "":
+        raise ValueError(
+            f"Module '{name}' composes an empty active-modules line; its "
+            f"purpose must carry the reason its directives are in the prompt."
+        )
+    line = f"{name}: {purpose}"
+    if line != line.strip():
+        raise ValueError(
+            f"Module '{name}' composes an active-modules line with leading or "
+            f"trailing whitespace; trim its manifest purpose."
+        )
+    for char, label in (("\n", "newline"), ("\r", "carriage return")):
+        if char in line:
+            raise ValueError(
+                f"Module '{name}' composes an active-modules line carrying a "
+                f"{label}; one module renders as ONE line, so a break here "
+                f"becomes a line the model reads as a directive of its own. "
+                f"Write its purpose as a single line."
+            )
+    for char in ("{", "}"):
+        if char in line:
+            raise ValueError(
+                f"Module '{name}' composes an active-modules line carrying "
+                f"'{char}'; rlms runs .format() over this prompt, so module "
+                f"text carries no literal braces at all (the addendum rule, "
+                f"applied to the manifest purpose). Write the shape in prose."
+            )
+    return line
+
+
+def build_active_modules_addendum(modules) -> str:
+    """One line per selected module — its registered name and purpose —
+    so a run can state which protocol modules it is operating under.
+
+    An empty selection composes the empty string, so a run carrying no
+    module addendum is told about no module and its prompt stays
+    byte-identical (the build_mcp_addendum([]) precedent).
+
+    Every byte after the frame comes out of the manifest: `name` and
+    `purpose`, each already validated here and by the Node twin. Nothing
+    is re-authored, and no manifest field is encoded a second time.
+
+    Only ACTIVE modules can reach this function: load_module refuses
+    every other status before a module dict exists, so a contested or
+    retired module contributes nothing by exactly the predicate that
+    keeps its addendum out of the prompt."""
+    if not modules:
+        return ""
+    lines = [
+        "- " + _guard_module_line(module["name"], module["purpose"])
+        for module in modules
+    ]
+    return _ACTIVE_MODULES_HEADER + "\n".join(lines) + "\n"
+
+
 def build_modules_addendum(modules, substitutions=None) -> str:
     """Concatenates the selected modules' addenda in selection order,
     normalizing each to end with exactly one blank line. The only

@@ -314,3 +314,22 @@ lookup.
 - **Field shape is still not validated** (§11), and `llm_help` must not
   become the thing that validates it by assuming fields are present.
   Render what a descriptor carries; omit what it does not.
+
+## 13. Half A shipped without this surface, and §6 is outstanding (dated entry — July 25, 2026)
+
+`SELF_DESCRIBING_SURFACES.md` §13 records the build. The part that bears on this
+spec: `attach_contributions` (`src/rlm/trellis_contribution.py`, called at the
+`custom_tools` seam in `trellis_agent.py`) computes the registry × injected-surface
+intersection — which §12 above names as the alive catalog's own work — and hands
+it to a production model through the per-entry description slot rlms reserves.
+`llm_help` itself is still unbuilt, and neither composed-prompt pin moved, because
+the slot is filled at run composition rather than in `SYSTEM_PROMPT`.
+
+**§6's drift/gaming half is struck** by a collaborator ruling of July 25, 2026 —
+its adversary is whoever writes a descriptor, descriptors are reviewed repository
+code, and the experiment reduces to whether a model believes a lie it was told,
+which is entailed rather than measured (rule 20). The reasoning is recorded at
+`SELF_DESCRIBING_SURFACES.md` §13.1. **§6's discrimination half stands**, as a
+paid question under rule 7 that needs a queryable catalog to select within — so
+it belongs with `llm_help` and not with a per-tool listing that is always
+present entire.

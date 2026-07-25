@@ -46,7 +46,11 @@
 #  [16] the self-describing descriptor (Workstream B increment 1,
 #       HARNESS_SELF_MODEL.md §12.1) — the composed addendum reproduces
 #       both hand-authored constants byte-exactly, one pin per arm; the
-#       guard-expectation registry maps onto the rendered lines.
+#       guard-expectation registry maps onto the rendered lines,
+#  [17] the one-line contribution (July 25, 2026) — the other half of
+#       the same self-description: the single line rlms reserves for
+#       this surface orients and states no bound, byte-pinned, with the
+#       section it addresses proved present in both rendered arms.
 import ast
 import hashlib
 import json
@@ -79,6 +83,10 @@ from trellis_textedit import (  # noqa: E402
 )
 import trellis_textedit as trellis_textedit_module  # noqa: E402
 from trellis_tools import get_tool_call_count  # noqa: E402
+# Section 17 composes through the one renderer, never a local copy of
+# the frame: a drill that joined the pieces itself would be asserting
+# on its own reimplementation rather than on what a run reads.
+from trellis_contribution import render_contribution  # noqa: E402
 
 failures = 0
 temp_roots = []
@@ -1072,6 +1080,93 @@ check("no guard-owned phrase is restated in an editorial field",
               for phrase in _TEXTEDIT_GUARD_EXPECTS.values()
               if len(phrase) >= 30
               for bit in _editorial_bits))
+
+# --- 17. The one-line contribution (July 25, 2026) --------------------------
+# The other half of this surface's self-description. rlms renders each
+# custom_tools entry as exactly one line, `- name: description`, spliced
+# into its base prompt ahead of every Trellis directive; until this
+# increment trellis_textedit passed a bare value, so the highest-primacy
+# sentence a run read about this surface was "A custom TrellisTextEdit
+# value" — a type name.
+#
+# The split section 16 pins and this section pins hold together, and
+# neither is the whole read on its own: the guard-backed expectations
+# are carried IN FULL by the addendum and NOT ONE of them is in the
+# one-line slot, because a bound stated by half is worse than a bound
+# read where it is enforced (trellis_contribution.py, "WHAT THE SLOT CAN
+# AND CANNOT CARRY"). What the slot carries instead is orientation plus
+# the address of the section that does state the contract — which is why
+# the pointer's target is proved present below rather than assumed.
+#
+# The literal below is a SECOND COPY on purpose, in the test and only
+# here (the PINNED_LEGACY_SYSTEM precedent, .claude/rules/boundaries.md
+# §2): editing the descriptor alone turns this red. Measured at 142
+# characters by the renderer, not estimated.
+print("\n[17] the one-line contribution: orientation, no bound")
+
+TEXTEDIT_CONTRIBUTION = (
+    "edits files under the operator-configured edit root. Its contract "
+    "is stated in full in the TEXT EDITING (CODE-MEDIATED, HASH-GUARDED) "
+    "section.")
+
+composed_line = render_contribution(
+    TEXTEDIT_DESCRIPTOR, derive_textedit_expects(default_mode))
+check("PIN: the composed line is the recorded bytes",
+      composed_line == TEXTEDIT_CONTRIBUTION,
+      f"got {composed_line!r} ({len(composed_line)} chars)")
+
+# The frame refuses each of these, so this asserts on the value a run
+# actually reads rather than trusting the refusal to have been reached.
+check("the line is one line, brace-free, and edge-trimmed",
+      "\n" not in composed_line and "\r" not in composed_line
+      and "{" not in composed_line and "}" not in composed_line
+      and composed_line == composed_line.strip()
+      and composed_line != "")
+
+# The addendum swaps arms; the listing line does not. A guarded-only run
+# reads the same orientation, because nothing in this composition is
+# mode-selected — the mode account is an expectation, and expectations
+# are addendum-carried.
+check("the line is identical on both mode arms",
+      render_contribution(TEXTEDIT_DESCRIPTOR, derive_textedit_expects(go))
+      == composed_line)
+
+# The property the retired scripts/test_surfaces.py pin reached only by
+# proxy, stated directly and held from both sides: the slot orients, and
+# no guard-owned phrase is in it. The derived expectations are passed
+# even though the composition has no ("expects", ...) slot today —
+# that is the point, since a slot added later would resolve to its guard
+# phrase and turn this red.
+check("no guard-owned phrase reaches the one-line slot",
+      not any(phrase in composed_line
+              for phrase in _TEXTEDIT_GUARD_EXPECTS.values()),
+      f"a guard phrase reached the slot: {composed_line!r}")
+
+# One encoding, enforced on the line itself: both fact-carrying pieces
+# are ("descriptor", field) slots, so the bytes that state something are
+# the descriptor's and the bytes this list authors are the connective
+# only (SELF_DESCRIBING_SURFACES.md §9.1).
+_pulled = composed_line.replace(TEXTEDIT_DESCRIPTOR["purpose"], "", 1)
+_pulled = _pulled.replace(TEXTEDIT_DESCRIPTOR["category"], "", 1)
+check("the line restates nothing: its facts are pulled, its authored bytes connect",
+      TEXTEDIT_DESCRIPTOR["purpose"] in composed_line
+      and TEXTEDIT_DESCRIPTOR["category"] in composed_line
+      and _pulled == "".join(p for p in TEXTEDIT_DESCRIPTOR["contributes"]
+                             if isinstance(p, str)),
+      f"remainder {_pulled!r}")
+
+# The pointer resolves. Both come from `category`, so they cannot drift
+# apart in wording — what this catches is the renderer dropping the
+# banner, which would leave the line addressing a section no run has.
+check("the section the line addresses is present in both rendered arms",
+      TEXTEDIT_DESCRIPTOR["category"] in rendered_default
+      and TEXTEDIT_DESCRIPTOR["category"] in rendered_guarded)
+
+# Section 16's shas are the standing proof that adding this field moved
+# no addendum byte; restated here so the two halves are read together.
+check("adding the contribution moved no addendum byte",
+      sha_of(rendered_default) == TEXTEDIT_ADDENDUM_SHA256
+      and sha_of(rendered_guarded) == TEXTEDIT_ADDENDUM_GUARDED_ONLY_SHA256)
 
 # ---------------------------------------------------------------------------
 for stale_root in temp_roots:

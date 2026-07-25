@@ -34,6 +34,13 @@ look for.
 Arg validation is strict-schema and fail-closed: an unknown op, an unknown key,
 a wrong type, or an oversized arg blob is `DeniedError`, never a best-effort
 interpretation (INTERFACES section 7, Error model).
+
+Each described op's prompt-facing descriptor is registered here too, beside
+those tables rather than in the composition root — MASH's *one call site, one
+commitment* (SELF_DESCRIBING_SURFACES.md section 3.2). The signature is derived:
+`_ARG_KEYS` decides which args exist and which are mandatory and `_INPUT_KINDS`
+decides which kinds the account names, so the stub a model reads cannot invite a
+call `_check_args` refuses.
 """
 
 from __future__ import annotations
@@ -43,8 +50,10 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Callable
 
+from repl_sandbox.capabilities import HANDLE_SCHEMA, CapabilityDescriptor
 from repl_sandbox.errors import DeniedError, SandboxError, UpstreamError
 from repl_sandbox.handles import Handle, HandleEntry, HandleTable
+from repl_sandbox.surfaces import descriptor_for, register_surface
 
 #: Ops that take handles and return a handle. No content crosses; no referent
 #: is evaluated.
@@ -132,6 +141,244 @@ _ARG_KEYS: dict[str, tuple[frozenset[str], frozenset[str]]] = {
     "locate": (frozenset({"handle", "pattern"}), frozenset({"limit"})),
     "get_ast_blocks": (frozenset({"handle"}), frozenset({"limit"})),
 }
+
+
+# ---------------------------------------------------------------------------
+# Descriptors, derived from the tables above
+# ---------------------------------------------------------------------------
+
+#: The render position of each arg. `_ARG_KEYS` is the authority on *membership*
+#: and says nothing about order, because a frozenset has none — so the signature
+#: a model reads takes its order from here and its required/optional split from
+#: `_ARG_KEYS`. `_describe` refuses at import when the two disagree, which is
+#: what makes an arg added to `_ARG_KEYS` alone a startup failure rather than a
+#: signature that quietly omits it.
+_ARG_ORDER: dict[str, tuple[str, ...]] = {
+    "narrow": ("handle", "start", "end"),
+    "project": ("handle", "cols"),
+    "filter": ("handle", "predicate"),
+    "join": ("handles", "on"),
+    "union": ("handles",),
+    "concat": ("handles",),
+    "search": ("handle", "query", "limit"),
+    "vector_search": ("handle", "query", "limit"),
+    "locate": ("handle", "pattern", "limit"),
+    "get_ast_blocks": ("handle", "limit"),
+}
+
+#: The annotation each arg renders under. One entry per arg name, and the
+#: checker each entry has to agree with: `_check_handle_id` and
+#: `_check_handle_list` for the two handle forms, `_check_span` for `start` and
+#: `end`, `_check_cols`, `_check_predicate`, `_check_on`, `_check_text` for
+#: `query` and `pattern`, `_check_limit` for `limit`.
+_ARG_SCHEMA: dict[str, dict] = {
+    "handle": HANDLE_SCHEMA,
+    "handles": {"type": "array"},
+    "start": {"type": "integer"},
+    "end": {"type": "integer"},
+    "cols": {"type": "array"},
+    "predicate": {"type": "object"},
+    "on": {"type": "string"},
+    "query": {"type": "string"},
+    "pattern": {"type": "string"},
+    "limit": {"type": "integer"},
+}
+
+#: ONE encoding per guard class, keyed by the predicate that owns it. Read only
+#: by `_describe` below; nothing here restates a bound that lives elsewhere, and
+#: the two size phrases interpolate this module's own constants so the sentence
+#: moves when the constant does.
+_ALGEBRA_GUARD_EXPECTS: dict[str, str] = {
+    # `_apply_handle_op`: the derivation records (op, parents, args) and the
+    # evaluator is never called. Tested by passing an evaluator that raises
+    # through every handle-returning op.
+    "no_content": (
+        "A derivation is composed and no referent is read, so nothing of the "
+        "data crosses; the metered way to read a window is slice."
+    ),
+    # `_check_args`: strict schema. A missing required key, an unknown key, or a
+    # wrong type is a denial rather than a best-effort interpretation.
+    "strict_args": (
+        "Arguments are strict-schema: a missing argument, an unknown argument, "
+        "or a wrong type is refused, never interpreted."
+    ),
+    # `_check_args_size`: MAX_ARGS_BYTES over the JSON encoding.
+    "args_size": (
+        f"One call's arguments serialise to at most {MAX_ARGS_BYTES} bytes."
+    ),
+    # `_check_span`: non-negative integers only; a negative index would depend on
+    # a length the guest does not have and the host would have to reveal.
+    "span": (
+        "start and end are non-negative integers with end not before start; a "
+        "negative index is refused rather than counted from the end."
+    ),
+    # `_check_cols`: non-empty, bounded, each a bounded non-empty string.
+    "cols": (
+        f"cols is a non-empty list of at most {MAX_COLUMNS} names, each at most "
+        f"{MAX_NAME_CHARS} characters."
+    ),
+    # `_check_predicate`: a structured mapping or a bounded expression string.
+    "predicate": (
+        f"predicate is a non-empty object, or an expression string of at most "
+        f"{MAX_QUERY_CHARS} characters."
+    ),
+    # `_check_text`: bounded non-empty string for query and pattern alike.
+    "text_bound": (
+        f"The query text is non-empty and at most {MAX_QUERY_CHARS} characters."
+    ),
+    # `_check_limit`: a positive integer, then clamped to the op's ceiling in
+    # `_apply_address_op`.
+    "limit": (
+        f"limit is a positive integer, clamped to at most {MAX_ADDRESS_RESULTS} "
+        "results; the result reports truncated when more were available."
+    ),
+    # `_check_address` against ADDRESS_FIELDS: a record carrying anything that is
+    # not an address is refused whole. A trimmed result is a result that leaked
+    # whatever the trimmer did not know to look for.
+    "addresses_only": (
+        "Only engine-computed addresses are returned: a result record carrying "
+        "any field that is not a position, length, or id is refused whole rather "
+        "than trimmed."
+    ),
+    # `_apply_address_op`: no evaluator configured is a denial, not a fallback.
+    # The broker in this package configures none (`Broker._op_algebra`).
+    "needs_evaluator": (
+        "Host-side referent evaluation is required; a host that has none "
+        "configured refuses this op rather than guessing."
+    ),
+}
+
+
+def _describe(
+    op: str,
+    *,
+    doc: str,
+    expects: tuple[str, ...],
+    error_codes: tuple[str, ...] = ("denied", "upstream"),
+) -> CapabilityDescriptor:
+    """Register one algebra op's descriptor, at the op's own definition site.
+
+    The signature is *derived*: `_ARG_KEYS[op]` decides which arguments exist
+    and which are required, and `_ARG_ORDER[op]` decides only where each one
+    appears. Nothing about the shape is retyped, so the stub a model reads and
+    the guard that refuses it cannot disagree about which arguments are
+    mandatory — the drift `SELF_DESCRIBING_SURFACES.md` section 3.3 names, where
+    a documented gate and the real gate agree today with nothing binding them.
+    """
+    required, optional = _ARG_KEYS[op]
+    order = _ARG_ORDER[op]
+    if set(order) != required | optional:
+        raise DeniedError(
+            f"algebra op {op!r} renders args {sorted(order)} but its schema takes "
+            f"{sorted(required | optional)}; give every argument a render position"
+        )
+    return register_surface(
+        CapabilityDescriptor(
+            name=op,
+            typed_signature={
+                "type": "object",
+                "properties": {name: _ARG_SCHEMA[name] for name in order},
+                "required": [name for name in order if name in required],
+                "returns": {"type": "object"},
+            },
+            doc=doc,
+            dispatch_ref=f"trellis.algebra.v1.{op}",
+            expects=expects,
+            error_codes=error_codes,
+        )
+    )
+
+
+def _kinds_phrase(op: str) -> str:
+    """The accepted-kind sentence, composed from `_INPUT_KINDS[op]` itself.
+
+    `_check_kinds` refuses a handle whose kind is outside that tuple, so this
+    reads the table the refusal reads. A kind added to or removed from the table
+    moves this sentence with it.
+    """
+    kinds = _INPUT_KINDS[op]
+    listed = (
+        ", ".join(kinds[:-1]) + f" or {kinds[-1]}" if len(kinds) > 1 else kinds[0]
+    )
+    return f"The handle must be of kind {listed}; any other kind is refused."
+
+
+_describe(
+    "narrow",
+    doc=(
+        "Derive a handle onto the half-open window [start, end) of another "
+        "handle's referent."
+    ),
+    expects=(
+        _ALGEBRA_GUARD_EXPECTS["no_content"],
+        _kinds_phrase("narrow"),
+        _ALGEBRA_GUARD_EXPECTS["span"],
+        _ALGEBRA_GUARD_EXPECTS["strict_args"],
+    ),
+)
+
+_describe(
+    "project",
+    doc="Derive a handle holding the named columns of another handle.",
+    expects=(
+        _ALGEBRA_GUARD_EXPECTS["no_content"],
+        _kinds_phrase("project"),
+        _ALGEBRA_GUARD_EXPECTS["cols"],
+        _ALGEBRA_GUARD_EXPECTS["strict_args"],
+    ),
+)
+
+_describe(
+    "filter",
+    doc=(
+        "Derive a handle holding the rows of another handle that satisfy a "
+        "predicate."
+    ),
+    expects=(
+        _ALGEBRA_GUARD_EXPECTS["no_content"],
+        _kinds_phrase("filter"),
+        _ALGEBRA_GUARD_EXPECTS["predicate"],
+        _ALGEBRA_GUARD_EXPECTS["args_size"],
+    ),
+)
+
+_describe(
+    "search",
+    doc="Derive a handle holding the matches of a query over another handle.",
+    expects=(
+        _ALGEBRA_GUARD_EXPECTS["no_content"],
+        _kinds_phrase("search"),
+        _ALGEBRA_GUARD_EXPECTS["text_bound"],
+        _ALGEBRA_GUARD_EXPECTS["strict_args"],
+    ),
+)
+
+_describe(
+    "locate",
+    doc="Return engine-computed addresses of a pattern within a handle's referent.",
+    expects=(
+        _ALGEBRA_GUARD_EXPECTS["addresses_only"],
+        _kinds_phrase("locate"),
+        _ALGEBRA_GUARD_EXPECTS["text_bound"],
+        _ALGEBRA_GUARD_EXPECTS["limit"],
+        _ALGEBRA_GUARD_EXPECTS["needs_evaluator"],
+    ),
+)
+
+
+#: Which algebra ops came out of the registrations above — read back rather than
+#: listed, so it cannot claim a registration that is not there.
+#:
+#: It is a proper subset of `ALGEBRA_OPS`, and that is a decision rather than an
+#: oversight: `join`, `union`, `concat`, `vector_search` and `get_ast_blocks` are
+#: routable and undescribed, so `TrellisSandboxHost` cannot name them in
+#: `open_session(ops=...)` and a caller wanting one composes its own descriptor.
+#: `surfaces.undescribed(ALGEBRA_OPS)` reports that remainder, and the test suite
+#: pins it — which is what turns "we have not described these yet" from something
+#: a reader has to notice into something a new op has to answer.
+DESCRIBED_ALGEBRA_OPS: tuple[str, ...] = tuple(
+    op for op in ALGEBRA_OPS if descriptor_for(op) is not None
+)
 
 
 @dataclass(frozen=True)

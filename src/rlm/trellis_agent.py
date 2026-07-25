@@ -19,17 +19,27 @@ from trellis_tools import (
     CITATION_AUDIT_ENABLED,
     CITATION_ENTAIL_ENABLED,
     get_citation_audit,
+    derive_postgres_expects,
+    derive_neo4j_expects,
 )
-from trellis_mcp import TrellisMcp, parse_mcp_config, build_mcp_addendum, get_mcp_call_count
+from trellis_mcp import (
+    TrellisMcp,
+    parse_mcp_config,
+    build_mcp_addendum,
+    get_mcp_call_count,
+    derive_mcp_expects,
+)
 from trellis_workspace import (
     TrellisWorkspace,
     WORKSPACE_ADDENDUM,
     WORKSPACE_SEEDED_ADDENDUM,
     build_workspace_addendum,
     parse_workspace_bounds,
+    derive_workspace_expects,
 )
 from trellis_modules import (
     RUBRIC_TOKEN,
+    build_active_modules_addendum,
     build_modules_addendum,
     load_modules,
     parse_module_selection,
@@ -39,6 +49,7 @@ from trellis_textedit import (
     build_textedit_addendum,
     parse_textedit_bounds,
     parse_textedit_guarded_only,
+    derive_textedit_expects,
 )
 from trellis_answer import TrellisAnswer, get_answer_submit_count
 from trellis_scaffold import (
@@ -50,7 +61,13 @@ from trellis_scaffold import (
     build_scaffold_helpers,
     parse_task_named_files,
     wrap_task_text,
+    derive_upsum_expects,
 )
+
+# July 25, 2026: the contribution frame — one composed line per surface
+# into the description slot rlms reserves. See trellis_contribution.py.
+from trellis_contribution import attach_contributions, compose_contributions
+from trellis_surfaces import descriptor_for
 
 # --- Sub-call counting -------------------------------------------------
 # In this rlms version, REPL llm_query()/llm_query_batched() requests are
@@ -227,7 +244,7 @@ The shape and the size are ENGINE-CHECKED, so rebuild the state and register it 
 
 `trellis_upsum.commit(upsum)` measures the serialized state itself and returns a JSON receipt carrying revision, size, budget, and headroom — you never compute a length by eye. Over the budget it raises UpsumBudgetError naming the per-key sizes largest-first: compress the entries it names and commit again. Use `trellis_upsum.size(upsum)` to measure without registering, and `trellis_upsum.state()` to re-read the last committed state as JSON at a decisive step — engine-held, so transcript distance cannot corrupt it. `UPSUM_BUDGET` holds the same number in your namespace.
 
-ITERATION BUDGET: you have very few REPL turns. Combine as many protocol steps as possible into each single ```repl``` block (loading, classifying, caching, and computing can often be ONE block). Do not spend a turn on tiny exploratory prints.
+ITERATION BUDGET: your REPL turns are few, so each one carries a step of the answer you are composing. A turn reads the slices its own step needs, computes on them, and leaves your running state further along than it found it; the answer comes together ACROSS those turns rather than inside any single one. Scope each ```repl``` block to the step at hand and spend every turn on work that moves the answer forward — a turn holding only tiny exploratory prints moves nothing.
 
 """
 
@@ -359,6 +376,44 @@ def run_author_mode(args):
             seed_data, max_segments=max_segments, max_bytes=max_bytes, goal_id=args.goal_id,
         )
         custom_tools = build_author_tools(workspace)
+        # July 25, 2026: the author path fills the same per-surface
+        # description slot the research path fills. Until now only the
+        # research seam composed, so an author run's one surface reached
+        # its model as "A custom TrellisWorkspace value" — a type name in
+        # the highest-primacy text the run sees about what it has.
+        #
+        # SAME ROSTER SHAPE, for the same reason: the roster is
+        # custom_tools itself, so a surface this seam ever gains is
+        # described the moment it registers a contribution and a surface
+        # with no descriptor keeps its bare value. build_author_tools's
+        # tool set is untouched — this describes what it returns.
+        #
+        # WHY THE SAME BYTES AS THE RESEARCH LINE, in a regime that is not
+        # the research one. The line is the descriptor's own `purpose`, and
+        # WORKSPACE_ADDENDUM — spliced into this very prompt by
+        # build_author_system_prompt below — already opens by calling this
+        # surface the model's working memory for plan, self-notes, and
+        # captured external results. A second characterization composed for
+        # this path would put two readings of one surface into one prompt,
+        # which is the failure SELF_DESCRIBING_SURFACES.md §9.1 names; the
+        # regime's own differences are carried where they are already
+        # carried, by AUTHOR_ADDENDUM and WORKSPACE_SEEDED_ADDENDUM.
+        #
+        # `seeded=True` is a fact about this branch rather than a default:
+        # run_author_mode returns above without --seed-workspace, so an
+        # author workspace is seeded on every run that reaches here.
+        _expects = {
+            "trellis_workspace": lambda: derive_workspace_expects(
+                workspace, seeded=True),
+        }
+        custom_tools = attach_contributions(
+            custom_tools,
+            compose_contributions([
+                (descriptor_for(name),
+                 _expects[name]() if name in _expects else None)
+                for name in custom_tools
+            ]),
+        )
         system_prompt = build_author_system_prompt(args.query)
 
         print("Starting RLM Author run (grounded authoring mode).", flush=True)
@@ -603,14 +658,70 @@ def main():
         )
         custom_tools.update(scaffold_helpers)
 
+        # July 25, 2026 (path A of the composed-intent build): fill the
+        # per-surface description slot rlms already reserves. Until now
+        # Trellis passed bare values, so every injected surface rendered
+        # in the base prompt as "A custom <Type> value" — eleven slots at
+        # char 1,335 of the 2,116-char protocol prompt, ahead of every
+        # Trellis directive, all carrying type names.
+        #
+        # Each line is composed by code from the surface's own registered
+        # descriptor (editorial) and its derive_*_expects (guard-owned),
+        # so no sentence here is a second encoding of a bound stated
+        # elsewhere. A surface with no descriptor keeps its bare value and
+        # its line stays byte-identical, so this is additive per surface.
+        # compose_contributions REFUSES over CONTRIBUTION_BUDGET rather
+        # than growing (HARNESS_SELF_MODEL.md §5).
+        # THE ROSTER IS custom_tools ITSELF, and that is the whole point.
+        # The first pass named two surfaces here by hand and shipped with
+        # eleven of thirteen still rendering as "A custom <Type> value" --
+        # a hand-kept list drifting from the seam beside it, which is the
+        # failure this layer exists to close, committed inside the layer
+        # that closes it. Iterating the dict means a surface added to the
+        # seam is described the moment it registers a contribution, and a
+        # surface with none keeps its bare value.
+        #
+        # A derive_*_expects is named only where a surface HAS guard-owned
+        # phrases to select; the holder it reads is the same object
+        # custom_tools injects, so a line can only ever state what that
+        # run's own instance will refuse on. A surface absent from this
+        # run is absent from custom_tools, so its entry never resolves.
+        _expects = {
+            "trellis_postgres": lambda: derive_postgres_expects(postgres_tool),
+            "trellis_neo4j": lambda: derive_neo4j_expects(neo4j_tool),
+            "trellis_upsum": lambda: derive_upsum_expects(upsum_surface),
+            "trellis_workspace": lambda: derive_workspace_expects(
+                workspace, seeded=bool(args.seed_workspace)),
+            "trellis_mcp": lambda: derive_mcp_expects(mcp_tool),
+            "trellis_textedit": lambda: derive_textedit_expects(textedit),
+        }
+        custom_tools = attach_contributions(
+            custom_tools,
+            compose_contributions([
+                (descriptor_for(name),
+                 _expects[name]() if name in _expects else None)
+                for name in custom_tools
+            ]),
+        )
+
         # Inject the query directly into the system prompt to ensure the LLM sees it and doesn't ask for it.
         # Curly braces are escaped because rlms applies .format() to the system prompt.
         # Session 50: the task text is wrapped in this run's uuid tags at
         # both injection points (here and the completion call) — only
         # uuid-tagged text is operator instruction (the S1 wrapper).
         safe_query = args.query.replace("{", "{{").replace("}", "}}")
+        # July 25, 2026: the run says which protocol modules it is under.
+        # `purpose` was validated by both loaders and read by nothing that
+        # composes a prompt; this names the same _SELECTED_MODULES whose
+        # addenda are already inside SYSTEM_PROMPT, so the segment can only
+        # ever describe directives the model has just read. First among the
+        # appended addenda — it orients on the prompt above it rather than
+        # teaching a surface — and outside SYSTEM_PROMPT, so both
+        # test:modules pins stay where they are. Empty selection composes
+        # nothing.
         dynamic_system_prompt = (
             SYSTEM_PROMPT
+            + build_active_modules_addendum(_SELECTED_MODULES)
             + build_mcp_addendum(mcp_servers)
             + build_workspace_addendum(workspace, seeded=bool(args.seed_workspace))
             + build_textedit_addendum(textedit)

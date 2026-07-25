@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from trellis_modules import (  # noqa: E402
     DEFAULT_SELECTION,
     RUBRIC_TOKEN,
+    build_active_modules_addendum,
     build_modules_addendum,
     load_module,
     load_modules,
@@ -116,7 +117,58 @@ def expect_raises(name, fn, needle=""):
 #     skills (Guardrail 15). Rationale: .claude/rules/measurement-and-reporting.md rule 8 — tooling shape
 #     closes a failure class, prompt text only reinforces; both of these
 #     were reinforcement with nothing behind it.
-COMPOSED_SYSTEM_PROMPT_SHA256 = "ee5bfca69a8da64c3ba78e4e6d02c9c81ac921274166e871648786c0ff241200"
+#   d58abbb2...7bf0 — July 25, 2026, owner-authorized: the ITERATION
+#     BUDGET paragraph in _ADDENDUM_BASE_SUFFIX stopped telling the model
+#     to collapse several turns into one load ("Combine as many protocol
+#     steps as possible into each single repl block"). AMBIENT.md rule 24
+#     names that instruction as falsifying what Trellis is — the worker
+#     answers ACROSS turns about a context larger than any one load, so a
+#     kernel optimizing for a single big load contradicts the product —
+#     and docs/product/FEATURE_LIST.md row 2.6 carried it as wrong shape.
+#     The replacement scopes each repl block to the step at hand, has the
+#     turn leave the running state further along than it found it, and
+#     keeps the anti-idling clause, so what left is the batching directive
+#     alone. The prompt bytes were authored in a separate pass, which left
+#     both pins stale on purpose so that recomputing them is an
+#     independent act; this pin was derived here from the tree afterwards,
+#     twice in separate processes. 15,427 -> 15,658 composed chars. Both
+#     pins were watched failing before they were trusted (rule 19(c)):
+#     each went red at its stale value against the rewritten prompt, and
+#     each went red again under a one-hex-digit perturbation of the
+#     constant with the prompt restored — so the comparison discriminates
+#     on both sides, not just on whichever one moved.
+#   ce8f59e0...23a8 — July 25, 2026: modules/spatial-flywheel/addendum.txt
+#     gained a retrieval step, and its write steps stopped prescribing
+#     citations the engine refuses. The module is DEFAULT_MODULE_SELECTION,
+#     so this composed into every research run: step 1 loaded
+#     q.sourceNodeIds through run_cypher, and the mandatory cache write
+#     cited those same values as provenance with nothing in between reading
+#     the bytes at those addresses. run_cypher feeds neither the read nor
+#     the search bucket of _audit_add by design — a sourceNodeIds property
+#     in a query result is a REFERENCE to bytes rather than the bytes — so
+#     _verify_hashes_retrieved (src/rlm/trellis_tools.py:443), wired
+#     unconditionally on research runs, refused exactly the batch the
+#     module made mandatory. The new step 2 retrieves the deduped union of
+#     the catalog's addresses in ONE get_ast_texts call, which charges the
+#     per-run retrieval budget once per CALL whatever the batch size
+#     (trellis_tools.py:888) — one fetch of 64 at any sweep size — and the
+#     three write steps now cite only the elements that came back.
+#     Read-then-cite is the legitimate act here, not an evasion: the gate's
+#     own docstring scopes it to transcription and second-hand citation and
+#     leaves read-then-cite to the sampled entailment tier, so what it asks
+#     is that the run actually held the bytes. No predicate, bound, default
+#     or refusal message moved; the engine was right and the module was
+#     wrong. Authored under the prompt-engineering + hypershot-protocol
+#     skills (Guardrail 15), brace-free as both loaders require.
+#     15,658 -> 17,214 composed chars. Both pins were watched failing at
+#     their stale values against the rewritten addendum before either was
+#     trusted (rule 19(c)), and each new value was derived twice in
+#     separate processes. The failure class is now checked rather than
+#     remembered: scripts/test_module.ts refuses a module that names a
+#     write surface without naming a retrieval surface earlier in its own
+#     text, with both surface sets derived from trellis_tools.py's own call
+#     sites rather than listed by hand.
+COMPOSED_SYSTEM_PROMPT_SHA256 = "ce8f59e04f5e36e6ac6d8b23a2d40c93238e8da458d2c31f75f63bc052323a38"
 
 # --- 1. Selection parsing (twins of src/config/modules.test.ts) -------------
 print("\n[1] parse_module_selection re-validation")
@@ -325,6 +377,119 @@ check("extract_draft_envelope returns None on non-JSON and on missing fields",
       trellis_agent.extract_draft_envelope("no json here") is None
       and trellis_agent.extract_draft_envelope('{"purpose": "p"}') is None)
 
+# --- 6b. The author path's per-surface description slot (July 25, 2026) -----
+# rlms reserves one description line per `custom_tools` entry and fills an
+# undescribed one with "A custom <Type> value". The research path composed
+# that slot from each surface's registered descriptor; this path did not,
+# so an author run's one surface reached its model as
+# "A custom TrellisWorkspace value" — a type name in the highest-primacy
+# text the run sees about what it has, while the coverage diagnostic
+# reported the research seam and read as though it meant both.
+#
+# WHY THE SAME BYTES AS THE RESEARCH LINE, in a regime that is not the
+# research one. The line is WORKSPACE_DESCRIPTOR's own `purpose`, and
+# WORKSPACE_ADDENDUM — spliced into this very prompt by
+# build_author_system_prompt — already opens by calling the surface the
+# model's working memory for plan, self-notes, and captured external
+# results. The slot therefore states nothing this prompt does not already
+# state, and a second characterization composed for this path would put
+# two readings of one surface into one prompt
+# (SELF_DESCRIBING_SURFACES.md §9.1). That premise is asserted below
+# rather than assumed, so an addendum edit that moved the claim would take
+# the reasoning's support with it.
+print("\n[6b] the author path composes its surface's description")
+
+from trellis_contribution import (  # noqa: E402
+    attach_contributions,
+    compose_contributions,
+    render_contribution,
+)
+from trellis_surfaces import derive_delivery, descriptor_for  # noqa: E402
+from trellis_workspace import (  # noqa: E402
+    WORKSPACE_ADDENDUM,
+    WORKSPACE_DESCRIPTOR,
+    derive_workspace_expects,
+)
+from rlm.environments.base_env import format_tools_for_prompt  # noqa: E402
+
+# The one renderer, never a local reimplementation: composing the line here
+# would assert on this drill's own copy of the frame.
+_author_line = render_contribution(
+    WORKSPACE_DESCRIPTOR, derive_workspace_expects(author_ws, seeded=True))
+_research_line = render_contribution(
+    WORKSPACE_DESCRIPTOR, derive_workspace_expects(author_ws, seeded=False))
+
+check("the author surface composes a non-empty line",
+      _author_line != "", "the slot renders as a bare type name when empty")
+check("the line is the descriptor's own purpose, re-authored nowhere",
+      _author_line == WORKSPACE_DESCRIPTOR["purpose"], _author_line)
+check("it is byte-identical to the line the research path composes for the "
+      "same surface",
+      _author_line == _research_line, f"{_author_line!r} vs {_research_line!r}")
+check("and the prompt it lands in already states that claim, which is why "
+      "one reading rather than two is correct here",
+      "plan, self-notes, and captured external results" in WORKSPACE_ADDENDUM
+      and WORKSPACE_ADDENDUM in author_prompt)
+check("the composed line is brace-free (rlms .format() safety)",
+      "{" not in _author_line and "}" not in _author_line)
+
+# END TO END, through rlms's own renderer rather than a local idea of it:
+# the type-name fallback is what the author surface used to render as, and
+# is what it must no longer render as.
+_described = attach_contributions(tools, compose_contributions([
+    (descriptor_for(name),
+     derive_workspace_expects(author_ws, seeded=True)
+     if name == "trellis_workspace" else None)
+    for name in tools
+]))
+check("rlms renders the composed line where it rendered a type name",
+      format_tools_for_prompt(_described)
+      == f"- `trellis_workspace`: {_author_line}",
+      repr(format_tools_for_prompt(_described)))
+check("the bare mapping is what rendered the type name",
+      format_tools_for_prompt(tools)
+      == "- `trellis_workspace`: A custom TrellisWorkspace value",
+      repr(format_tools_for_prompt(tools)))
+check("attaching a description preserves the tool value and the tool set",
+      _described["trellis_workspace"]["tool"] is author_ws
+      and set(_described) == set(tools) == {"trellis_workspace"})
+
+# The description rides on custom_tools, not on the system prompt: rlms
+# splices the listing into its own base prompt at format time. Pinned so a
+# later pass cannot move the line into build_author_system_prompt's text
+# without this going red — and it is the reason section [4]'s and [7]'s
+# byte-identical pins are untouched by any of this.
+check("the author system prompt is unchanged by the composition",
+      trellis_agent.build_author_system_prompt(sample_template) == author_prompt
+      and _author_line not in author_prompt)
+check("the author prompt still opens with the rlms base prompt entire "
+      "(the one-base contract)",
+      author_prompt.startswith(RLM_SYSTEM_PROMPT))
+
+# REACHABILITY (AGENTS.md rule 15: correct is a different claim from
+# reachable). Everything above establishes that the frame renders a line
+# for this surface; whether the AUTHOR RUN composes one is a separate
+# claim, derived from trellis_agent.py's own source by the same read the
+# coverage diagnostic uses — never restated here. The section [9]
+# precedent, one seam over.
+_seams = {seam["scope"]: seam for seam in derive_delivery()["seams"]}
+check("the author run composes at its own seam, not merely correctly here",
+      "run_author_mode" in _seams,
+      f"composing seam(s): {sorted(_seams)}")
+check("and what it composes is attached back and handed to rlms",
+      _seams.get("run_author_mode", {}).get("delivered") is True,
+      str(_seams.get("run_author_mode")))
+check("its roster is the author seam itself, so a surface added to "
+      "build_author_tools is described the moment it registers a line",
+      _seams.get("run_author_mode", {}).get("seam_wide") is True,
+      str(_seams.get("run_author_mode")))
+check("the research seam is a separate answer and still delivers",
+      _seams.get("main", {}).get("delivered") is True,
+      str(_seams.get("main")))
+check("no run mode hands rlms a seam it composed nothing for",
+      derive_delivery()["rendering_without_composing"] == [],
+      str(derive_delivery()["rendering_without_composing"]))
+
 # --- 7. The experiment omission flag (Session 21, pillar §6.3) --------------
 # TRELLIS_EXP_OMIT_CMT=1 is the effective-context probe's discipline-off
 # arm: exactly the §6.2 CODE-MEDIATED TEXT block absent, nothing else
@@ -372,7 +537,21 @@ print("\n[7] the experiment omission flag (TRELLIS_EXP_OMIT_CMT)")
 #     task adjudication surface are kernel scaffolding, not part of the
 #     discipline experiment (still structurally default minus exactly
 #     the block; the structural check below re-proves that on every run).
-EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "322cbe5dc5f73a279ee253910dbf1e6d4e1267c64c1c11289f975f93824245ae"
+#   51eab4af...c0aa — the July 25, 2026 ITERATION BUDGET rewrite (see the
+#     default pin's history) lands in BOTH arms — the batching directive
+#     sat in _ADDENDUM_BASE_SUFFIX, which is kernel scaffolding rather
+#     than part of the discipline experiment (still structurally default
+#     minus exactly the block; the structural check below re-proves that
+#     on every run). 15,406 composed chars with the flag set.
+#   174bbd84...7e09 — the July 25, 2026 spatial-flywheel retrieval-step
+#     repair (see the default pin's history) lands in BOTH arms — a module
+#     addendum composes outside CODE_MEDIATED_TEXT_BLOCK entirely, and a
+#     module prescribing a write the engine refuses is a defect in both
+#     arms rather than part of the discipline experiment (still
+#     structurally default minus exactly the block; the structural check
+#     below re-proves that on every run). 16,962 composed chars with the
+#     flag set.
+EXP_OMIT_CMT_SYSTEM_PROMPT_SHA256 = "174bbd84b7104bdc046e712126ea9910af1d1c4e7b28dc1a90de57d590397e09"
 
 import subprocess  # noqa: E402
 
@@ -438,6 +617,154 @@ check("module #2 is NOT in the default selection (the byte-identical pin is unto
 check("the retired name still parses as selection shape (refusal happens at load)",
       parse_module_selection('["spatial-flywheel","estimation-discipline"]')
       == ["spatial-flywheel", "estimation-discipline"])
+
+# --- 9. The active-modules segment (July 25, 2026) --------------------------
+# `purpose` was validated by BOTH loaders (trellis_modules.load_module and
+# src/config/modules.ts ModuleManifestSchema), carried into the loaded
+# module dict by both, and read by nothing that composes a prompt. This
+# section is that field's reader.
+#
+# The segment attaches at the RUN seam (dynamic_system_prompt), not inside
+# TRELLIS_ADDENDUM, so the two byte-identical pins in [4] and [7] are
+# untouched — which the checks below assert rather than assume.
+#
+# July 25, 2026 — the header stopped naming an author. Its first edition
+# opened "The operator selected these protocol modules for this run",
+# which rendered on the default run too: parse_module_selection returns
+# the kernel's own DEFAULT_SELECTION when TRELLIS_MODULES is unset, so no
+# operator act stood behind the sentence (.claude/rules/boundaries.md §3 — a
+# gate has exactly one author, and a kernel default is not one). The
+# replacement states the standing load_module actually settles and states
+# the authorship as unrecorded. The checks below hold that line: they pin
+# the arms IDENTICAL rather than merely happening to match, because the
+# operator/kernel bit is unavailable in this process at all (see the
+# TRELLIS_MODULES decoy check).
+print("\n[9] the active-modules segment (what the run is told it is under)")
+
+_active = build_active_modules_addendum([module0])
+
+check("an empty selection composes the empty string (byte-identical prompt)",
+      build_active_modules_addendum(load_modules([])) == ""
+      and build_active_modules_addendum([]) == "")
+check("the segment is brace-free (rlms .format() safety)",
+      "{" not in _active and "}" not in _active)
+
+# --- What the header claims about how this run's selection arose ----------
+# The retired sentence, gone (the module #1 v2 retirement precedent in [5]).
+check("the header no longer asserts an operator act",
+      "The operator selected these protocol modules" not in _active)
+# The standing load_module DOES settle before a module dict exists: the
+# manifest is registered, its status is active, and it cleared every gate
+# in the loader (trellis_modules.load_module).
+check("the header states the standing the loader establishes",
+      "registered active in this kernel's module registry" in _active
+      and "passed the loader's validation before composition" in _active)
+# The provenance fact that holds on BOTH arms: the selection is read once
+# at import (trellis_agent.py:273, a module-level constant) and no later
+# byte moves it.
+check("the header states the selection is fixed at startup and holds for the run",
+      "fixed from the process environment at startup" in _active
+      and "holds unchanged for the whole run" in _active)
+# Authorship is stated as unrecorded rather than left silent: a run reading
+# this cannot claim an operator chose its protocol, and learns its protocol
+# may be a kernel default.
+check("the header states the selection's authorship is unrecorded",
+      "How that selection arose is a fact this prompt does not carry" in _active
+      and "treat its authorship as unknown to you" in _active)
+
+# The arms are identical BY DESIGN now, not by accident. The composer takes
+# module dicts and reads no environment, so the kernel-default selection and
+# an explicit operator selection naming the same modules compose the same
+# bytes — which is the honest rendering precisely because this process
+# cannot tell the arms apart (next check).
+_kernel_arm = build_active_modules_addendum(load_modules(parse_module_selection(None)))
+_operator_arm = build_active_modules_addendum(
+    load_modules(parse_module_selection(json.dumps(list(DEFAULT_SELECTION)))))
+check("the kernel-default arm and the operator-set arm compose the same bytes",
+      _kernel_arm == _operator_arm == _active)
+
+# WHY the arm cannot be inferred here, pinned so a later session does not
+# reach for the nearest available bit. `raw is None` is NOT the
+# operator/kernel bit: rlm_worker.ts:298 forwards
+# config.modules.selectionJson unconditionally and src/config/index.ts:413
+# derives it from parseModuleSelection, which substitutes its own default
+# when TRELLIS_MODULES is unset. This drill's wrapper (scripts/test_modules.ts)
+# forwards it the same way, so THIS process is itself the demonstration:
+# TRELLIS_MODULES is present and carries nothing but the kernel default.
+check("a present TRELLIS_MODULES marks no operator act (this process is the case)",
+      selection_env is not None
+      and json.loads(selection_env) == list(DEFAULT_SELECTION)
+      and parse_module_selection(selection_env) == parse_module_selection(None))
+
+# The bytes come from the manifest, not from this drill and not from the
+# composer: read module.json off disk and require the purpose verbatim.
+_module0_manifest_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "modules",
+    "spatial-flywheel", "module.json")
+with open(_module0_manifest_path, "r", encoding="utf-8") as _fh:
+    _manifest0 = json.load(_fh)
+check("the line carries the manifest purpose verbatim (nothing re-authored)",
+      f"- spatial-flywheel: {_manifest0['purpose']}" in _active
+      and _manifest0["purpose"] == module0["purpose"])
+check("one line per module, in selection order, each self-delimited",
+      _active.startswith("\n\n=== PROTOCOL MODULES ACTIVE IN THIS RUN ===\n")
+      and _active.endswith(f"{_manifest0['purpose']}\n")
+      and len([ln for ln in _active.splitlines() if ln.startswith("- ")]) == 1)
+_two_active = build_active_modules_addendum([module0, module1])
+_two_lines = [ln for ln in _two_active.splitlines() if ln.startswith("- ")]
+check("two selected modules compose two lines in selection order",
+      len(_two_lines) == 2
+      and _two_lines[0].startswith("- spatial-flywheel: ")
+      and _two_lines[1].startswith("- workspace-discipline: "))
+
+# The four ways a one-line entry breaks, refused rather than repaired.
+def _fake(purpose):
+    return [dict(name="m", version=1, purpose=purpose, addendum_text="")]
+
+
+expect_raises("an empty purpose is refused",
+              lambda: build_active_modules_addendum(_fake("")), "empty active-modules line")
+expect_raises("a purpose with trailing slop is refused",
+              lambda: build_active_modules_addendum(_fake("p  ")), "whitespace")
+expect_raises("a multi-line purpose is refused",
+              lambda: build_active_modules_addendum(_fake("p\nq")), "newline")
+expect_raises("a purpose carrying a brace is refused",
+              lambda: build_active_modules_addendum(_fake("p {x}")), "format")
+
+# Inert modules contribute nothing by the SAME predicate that keeps their
+# addenda out of the prompt: load_module refuses any status but active, so
+# no module dict for them ever reaches the composer.
+expect_raises("a contested module never becomes a composable module dict",
+              lambda: load_module("reasoning-templates"), "cannot be composed")
+check("only active modules can reach the composer (retired and contested refused at load)",
+      all(load_module(n)["name"] == n for n in ("spatial-flywheel", "workspace-discipline")))
+
+# Reachability (AGENTS.md rule 15: correct is a different claim from
+# reachable). The composer is called at the research seam, derived from
+# trellis_agent.py's own source rather than restated here.
+import ast as _ast  # noqa: E402
+
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                       "src", "rlm", "trellis_agent.py"), encoding="utf-8") as _src:
+    _agent_tree = _ast.parse(_src.read())
+_seam_calls = []
+for _node in _ast.walk(_agent_tree):
+    if isinstance(_node, _ast.Assign) and any(
+            isinstance(t, _ast.Name) and t.id == "dynamic_system_prompt" for t in _node.targets):
+        for _sub in _ast.walk(_node.value):
+            if isinstance(_sub, _ast.Call) and isinstance(_sub.func, _ast.Name):
+                _seam_calls.append(_sub.func.id)
+check("the run seam calls the composer (reachable, not merely correct)",
+      "build_active_modules_addendum" in _seam_calls)
+check("trellis_agent selected exactly the modules the segment would name",
+      [m["name"] for m in trellis_agent._SELECTED_MODULES] == list(DEFAULT_SELECTION))
+
+# The pins in [4] and [7] are over SYSTEM_PROMPT. The segment lives past
+# it, so both stayed put — asserted here so a later move into
+# TRELLIS_ADDENDUM cannot happen quietly.
+check("the segment is outside the pinned SYSTEM_PROMPT",
+      "=== PROTOCOL MODULES ACTIVE IN THIS RUN ===" not in trellis_agent.SYSTEM_PROMPT
+      and "=== PROTOCOL MODULES ACTIVE IN THIS RUN ===" not in trellis_agent.TRELLIS_ADDENDUM)
 
 # ---------------------------------------------------------------------------
 if failures:
