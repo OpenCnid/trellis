@@ -46,9 +46,16 @@ failures = 0
 
 
 from trellis_contribution import (  # noqa: E402
+    CONTRIBUTION_BUDGET,
     ContributionShapeError,
     render_contribution,
 )
+
+# The per-surface fair share of the kernel budget across the thirteen
+# surfaces the agent seam wires. A CEILING, not an equality: a line under
+# it never forces a sibling out of the composition, and the budget is what
+# refuses. Same idiom as the mcp and workspace drills.
+ANSWER_FAIR_SHARE = CONTRIBUTION_BUDGET // 13
 
 def check(name, ok, detail=""):
     global failures
@@ -326,7 +333,12 @@ check("the contributed pieces all resolve against this descriptor's own fields",
 check("they compose to exactly one clean, bounded description line",
       bool(line) and line == line.strip()
       and "\n" not in line and "\r" not in line
-      and "{" not in line and "}" not in line and len(line) <= 320)
+      and "{" not in line and "}" not in line)
+# Orienting length, not an account: the 320 this once allowed was two
+# fair shares, so a line at the old ceiling took a sibling's slot out of
+# the shared budget.
+check("the composed line stays inside the per-surface fair share",
+      len(line) <= ANSWER_FAIR_SHARE, f"{len(line)} of {ANSWER_FAIR_SHARE}")
 # The line PULLS rather than restates: everything but the connective
 # comes from a field the descriptor already owns (§9.1).
 check("the line pulls from descriptor fields rather than restating them",

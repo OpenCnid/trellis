@@ -311,8 +311,12 @@ UPSUM_DESCRIPTOR = {
     # knows only one of them meets the other unwarned. What came out is
     # "dict ... you rebuild each turn", which restates the discipline the
     # kernel UPSUM block owns and states no bound of its own.
-    "purpose": ("the running-state gate — it measures the upsum you keep "
-                "and refuses a bad shape or size."),
+    # Second pass, July 25, 2026: "the upsum you keep" became "your
+    # upsum". Both refusal classes still stand in the sentence — shape
+    # and size — and the possessive carries the keeping, so what came out
+    # is words rather than a bound.
+    "purpose": ("the running-state gate — it measures your upsum and "
+                "refuses a bad shape or size."),
     # Editorial: WHEN a run reaches for this surface. The kernel prompt
     # owns the rewrite-every-turn discipline; this states no rule. Both
     # occasions survive — register, and measure a candidate first — in
@@ -598,8 +602,12 @@ TASK_DESCRIPTOR = {
     # stating it, and the kernel manifest already carries the argument in
     # full at TOOLS 4 ("find your instructions BY CODE, not by scrolling
     # the transcript").
-    "purpose": ("this run's operator task, held engine-side so "
-                "re-reading it is a code act."),
+    # Second pass, July 25, 2026: "held engine-side" became
+    # "engine-held", this module's own word for the same property (the
+    # TrellisTask docstring above), so the fact the line exists to carry
+    # is stated in fewer bytes rather than in weaker ones.
+    "purpose": ("this run's operator task, engine-held so re-reading it "
+                "is a code act."),
     # Editorial: WHEN a run reaches for this surface. The kernel prompt
     # owns the re-read-before-a-decisive-step rule; this names the
     # situations and states no rule of its own. The three situations all

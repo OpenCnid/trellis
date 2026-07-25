@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from trellis_modules import (  # noqa: E402
     DEFAULT_SELECTION,
     RUBRIC_TOKEN,
+    build_active_modules_addendum,
     build_modules_addendum,
     load_module,
     load_modules,
@@ -464,6 +465,95 @@ check("module #2 is NOT in the default selection (the byte-identical pin is unto
 check("the retired name still parses as selection shape (refusal happens at load)",
       parse_module_selection('["spatial-flywheel","estimation-discipline"]')
       == ["spatial-flywheel", "estimation-discipline"])
+
+# --- 9. The active-modules segment (July 25, 2026) --------------------------
+# `purpose` was validated by BOTH loaders (trellis_modules.load_module and
+# src/config/modules.ts ModuleManifestSchema), carried into the loaded
+# module dict by both, and read by nothing that composes a prompt. This
+# section is that field's reader.
+#
+# The segment attaches at the RUN seam (dynamic_system_prompt), not inside
+# TRELLIS_ADDENDUM, so the two byte-identical pins in [4] and [7] are
+# untouched — which the checks below assert rather than assume.
+print("\n[9] the active-modules segment (what the run is told it is under)")
+
+_active = build_active_modules_addendum([module0])
+
+check("an empty selection composes the empty string (byte-identical prompt)",
+      build_active_modules_addendum(load_modules([])) == ""
+      and build_active_modules_addendum([]) == "")
+check("the segment is brace-free (rlms .format() safety)",
+      "{" not in _active and "}" not in _active)
+
+# The bytes come from the manifest, not from this drill and not from the
+# composer: read module.json off disk and require the purpose verbatim.
+_module0_manifest_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "modules",
+    "spatial-flywheel", "module.json")
+with open(_module0_manifest_path, "r", encoding="utf-8") as _fh:
+    _manifest0 = json.load(_fh)
+check("the line carries the manifest purpose verbatim (nothing re-authored)",
+      f"- spatial-flywheel: {_manifest0['purpose']}" in _active
+      and _manifest0["purpose"] == module0["purpose"])
+check("one line per module, in selection order, each self-delimited",
+      _active.startswith("\n\n=== PROTOCOL MODULES ACTIVE IN THIS RUN ===\n")
+      and _active.endswith(f"{_manifest0['purpose']}\n")
+      and len([ln for ln in _active.splitlines() if ln.startswith("- ")]) == 1)
+_two_active = build_active_modules_addendum([module0, module1])
+_two_lines = [ln for ln in _two_active.splitlines() if ln.startswith("- ")]
+check("two selected modules compose two lines in selection order",
+      len(_two_lines) == 2
+      and _two_lines[0].startswith("- spatial-flywheel: ")
+      and _two_lines[1].startswith("- workspace-discipline: "))
+
+# The four ways a one-line entry breaks, refused rather than repaired.
+def _fake(purpose):
+    return [dict(name="m", version=1, purpose=purpose, addendum_text="")]
+
+
+expect_raises("an empty purpose is refused",
+              lambda: build_active_modules_addendum(_fake("")), "empty active-modules line")
+expect_raises("a purpose with trailing slop is refused",
+              lambda: build_active_modules_addendum(_fake("p  ")), "whitespace")
+expect_raises("a multi-line purpose is refused",
+              lambda: build_active_modules_addendum(_fake("p\nq")), "newline")
+expect_raises("a purpose carrying a brace is refused",
+              lambda: build_active_modules_addendum(_fake("p {x}")), "format")
+
+# Inert modules contribute nothing by the SAME predicate that keeps their
+# addenda out of the prompt: load_module refuses any status but active, so
+# no module dict for them ever reaches the composer.
+expect_raises("a contested module never becomes a composable module dict",
+              lambda: load_module("reasoning-templates"), "cannot be composed")
+check("only active modules can reach the composer (retired and contested refused at load)",
+      all(load_module(n)["name"] == n for n in ("spatial-flywheel", "workspace-discipline")))
+
+# Reachability (AGENTS.md rule 15: correct is a different claim from
+# reachable). The composer is called at the research seam, derived from
+# trellis_agent.py's own source rather than restated here.
+import ast as _ast  # noqa: E402
+
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                       "src", "rlm", "trellis_agent.py"), encoding="utf-8") as _src:
+    _agent_tree = _ast.parse(_src.read())
+_seam_calls = []
+for _node in _ast.walk(_agent_tree):
+    if isinstance(_node, _ast.Assign) and any(
+            isinstance(t, _ast.Name) and t.id == "dynamic_system_prompt" for t in _node.targets):
+        for _sub in _ast.walk(_node.value):
+            if isinstance(_sub, _ast.Call) and isinstance(_sub.func, _ast.Name):
+                _seam_calls.append(_sub.func.id)
+check("the run seam calls the composer (reachable, not merely correct)",
+      "build_active_modules_addendum" in _seam_calls)
+check("trellis_agent selected exactly the modules the segment would name",
+      [m["name"] for m in trellis_agent._SELECTED_MODULES] == list(DEFAULT_SELECTION))
+
+# The pins in [4] and [7] are over SYSTEM_PROMPT. The segment lives past
+# it, so both stayed put — asserted here so a later move into
+# TRELLIS_ADDENDUM cannot happen quietly.
+check("the segment is outside the pinned SYSTEM_PROMPT",
+      "=== PROTOCOL MODULES ACTIVE IN THIS RUN ===" not in trellis_agent.SYSTEM_PROMPT
+      and "=== PROTOCOL MODULES ACTIVE IN THIS RUN ===" not in trellis_agent.TRELLIS_ADDENDUM)
 
 # ---------------------------------------------------------------------------
 if failures:

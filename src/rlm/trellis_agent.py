@@ -39,6 +39,7 @@ from trellis_workspace import (
 )
 from trellis_modules import (
     RUBRIC_TOKEN,
+    build_active_modules_addendum,
     build_modules_addendum,
     load_modules,
     parse_module_selection,
@@ -671,8 +672,18 @@ def main():
         # both injection points (here and the completion call) — only
         # uuid-tagged text is operator instruction (the S1 wrapper).
         safe_query = args.query.replace("{", "{{").replace("}", "}}")
+        # July 25, 2026: the run says which protocol modules it is under.
+        # `purpose` was validated by both loaders and read by nothing that
+        # composes a prompt; this names the same _SELECTED_MODULES whose
+        # addenda are already inside SYSTEM_PROMPT, so the segment can only
+        # ever describe directives the model has just read. First among the
+        # appended addenda — it orients on the prompt above it rather than
+        # teaching a surface — and outside SYSTEM_PROMPT, so both
+        # test:modules pins stay where they are. Empty selection composes
+        # nothing.
         dynamic_system_prompt = (
             SYSTEM_PROMPT
+            + build_active_modules_addendum(_SELECTED_MODULES)
             + build_mcp_addendum(mcp_servers)
             + build_workspace_addendum(workspace, seeded=bool(args.seed_workspace))
             + build_textedit_addendum(textedit)

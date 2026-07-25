@@ -267,8 +267,11 @@ ANSWER_DESCRIPTOR = {
                 "variables becomes the final answer."),
     # Editorial: WHEN a run reaches for this surface. The workflow rules
     # in the kernel prompt own the discipline itself; this is the
-    # navigational half and states no rule of its own.
-    "whenToUse": "the result is computed and held in a variable",
+    # navigational half and states no rule of its own. Compressed July
+    # 25, 2026, second pass: "computed and" came out because "held in a
+    # variable" already carries it — a variable holds what was computed
+    # into it — so the occasion is named in fewer bytes, not narrowed.
+    "whenToUse": "your result is held in a variable",
     # The pieces of the ONE description line rlms reserves for this
     # surface. Two are ("descriptor", field) slots pulling fields this
     # descriptor already owns, so the line restates nothing; the only

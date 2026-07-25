@@ -3,18 +3,31 @@
 # §11, the owner ruling: coverage is the enforced property, field shape is
 # not; the diagnostic informs and never refuses).
 #
-# Run it with `npm run check:surfaces`. It answers ONE question — which
-# surfaces the agent injects into the REPL namespace carry a descriptor,
-# and which do not — by deriving the injected names from the injecting
-# code itself, so the roster cannot drift from the seam.
+# Run it with `npm run check:surfaces`. It walks the LADDER — registered,
+# contributes, wired — for every surface the agent injects into the REPL
+# namespace, deriving both the injected roster and the wired roster from
+# the injecting and composing code itself, so neither can drift from the
+# seam.
+#
+# WHY ALL THREE RUNGS AND NOT THE FIRST. This check used to report
+# registration alone. It read "8 of 9 injected surfaces carry a
+# descriptor" at a moment when eleven of thirteen finished description
+# lines were reaching no model at all, because the composing call named
+# two surfaces by hand. The number was true and answered the easy
+# question; the rung that decides whether a model ever sees the bytes was
+# the one nothing reported. A report that measures the cheap rung makes
+# the expensive gap look measured, which is worse than reporting nothing.
 #
 # EXIT CODES, and why they are not a gate. 0 when every injected surface
-# is described, 1 when gaps remain, 2 on an internal error. This mirrors
+# is described AND no finished contribution is left unwired, 1 when
+# either gap remains, 2 on an internal error. This mirrors
 # `npm run wiki:check`, whose staleness half is deliberately NOT wired
 # into CI: a report that reddens every honest in-progress branch gets
 # switched off, and gaps here are expected while the program is mid-build.
 # Nothing in a run consults this, and no gate reads it (Phase 4 stays
-# owner-gated, HARNESS_SELF_MODEL.md §12.2).
+# owner-gated, HARNESS_SELF_MODEL.md §12.2). The wired rung joins the
+# exit code on the same terms it joins the report: advisory, and out of
+# CI, so an in-progress branch is described rather than blocked.
 #
 # Zero-paid, no database, no network: it parses one file and reads a
 # registry populated by importing the surface modules.
@@ -52,7 +65,8 @@ def main():
         print(f"surface coverage: ERROR — {exc}", flush=True)
         return 2
     print(format_coverage(report), flush=True)
-    return 1 if report["undescribed"] else 0
+    gaps = report["undescribed"] or report["contributing_unwired"]
+    return 1 if gaps else 0
 
 
 if __name__ == "__main__":

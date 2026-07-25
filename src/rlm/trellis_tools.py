@@ -639,28 +639,34 @@ NEO4J_DESCRIPTOR = {
                   "or to cache a fact you derived so a later run gets it "
                   "without deriving it again"),
     "seeAlso": ["trellis_postgres"],
-    # WHAT THIS SLOT SELECTS, and the one guard-owned phrase it leaves
-    # unselected. Every piece here states a bound that decides whether a
-    # write is refused, so a run reading the line ahead of composing a
-    # batch can avoid the refusal — the format of a citable address, the
-    # retrieval closure over which addresses are citable, and (each on
-    # the runs where its guard is wired) existence and entailment.
+    # WHAT THIS SLOT SELECTS: ONE guard-owned phrase, the retrieval
+    # closure. Thirteen surfaces share CONTRIBUTION_BUDGET, so the slot
+    # is an ORIENTING line rather than this surface's account
+    # (trellis_contribution.py's header states the split), and the one
+    # phrase that earns it is the one no refusal can deliver in time to
+    # change the first attempt: a run composing a batch from hashes a
+    # Cypher result named has already done the wrong thing, and the
+    # closure is what stops it beforehand.
     #
-    # `batch_atomic` is deliberately unselected, and it is the only one:
-    # atomicity triggers no refusal of its own. It is the SCOPE of a
-    # refusal the phrases above already make predictable, and both
-    # provenance gates end their message with "nothing was written" —
-    # _verify_hashes_exist and _verify_hashes_retrieved alike — so the
-    # run meets the fact at the moment it bears on a decision. The phrase
-    # stays in _NEO4J_GUARD_EXPECTS as the one encoding of it (§9.1);
-    # what changed is that the one-line slot no longer spends primacy
-    # bytes on a sentence the refusal delivers in full.
+    # THE FOUR PHRASES THIS SLOT LEAVES UNSELECTED, and what states each:
+    #   * hash_format — the _normalize_fact raise, which names the
+    #     offending element, the 64-lowercase-hex shape, and the
+    #     identifier classes that are never provenance;
+    #   * existence — the _verify_hashes_exist raise; it also never
+    #     renders on a shipped run, since trellis_agent wires
+    #     retrieved_addresses_check unconditionally and the closure
+    #     suppresses it (derive_neo4j_expects);
+    #   * entailment — the per-block refusal the checker raises, on the
+    #     TRELLIS_CITATION_ENTAIL runs where it is wired at all;
+    #   * batch_atomic — atomicity triggers no refusal of its own, and
+    #     both provenance gates end their message with "nothing was
+    #     written".
+    # Each stays in _NEO4J_GUARD_EXPECTS as the one encoding of it
+    # (§9.1); what the slot no longer does is spend primacy bytes on a
+    # sentence its own refusal delivers in full at the point of use.
     "contributes": [
         ("descriptor", "purpose"),
-        ("expects", "hash_format"),
         ("expects", "retrieval_closure"),
-        ("expects", "existence"),
-        ("expects", "entailment"),
     ],
 }
 
@@ -686,17 +692,20 @@ _NEO4J_GUARD_EXPECTS = {
     # NOT feed it (the module comment at _retrieved_addresses), which is
     # the case the second sentence names — the T1 closure's second-hand
     # citation of a graph-surfaced provenance list.
-    # BOTH clauses survive compression. The first is the closure itself;
-    # the second is the case a run cannot infer from it — run_cypher
-    # surfaces sourceNodeIds as a property WITHOUT feeding the retrieved
-    # set, so a hash the model has plainly "seen" is still uncitable. That
-    # distinction changes what the model does before any refusal fires,
-    # which is what earns it the bytes. The remedy the sentence used to
-    # spell out is in the raise ("Call get_ast_texts on them, confirm the
-    # bytes actually support your claim, then re-derive and cite").
+    # BOTH clauses survive compression, in fewer words. The first is the
+    # closure itself; the second is the case a run cannot infer from it —
+    # run_cypher surfaces sourceNodeIds as a property WITHOUT feeding the
+    # retrieved set, so a hash the model has plainly "seen" is still
+    # uncitable. That distinction changes what the model does before any
+    # refusal fires, which is what earns it the bytes, and "not ones
+    # Cypher surfaced" names the same set the old "a hash on a Cypher
+    # property is a reference, not bytes" named. The remedy is in the
+    # raise ("Call get_ast_texts on them, confirm the bytes actually
+    # support your claim, then re-derive and cite"), and "retrieved" is
+    # load-bearing over "read": vector_search result ids join the
+    # retrieved set too, so narrowing the verb would narrow the bound.
     "retrieval_closure": (" Cite only addresses whose bytes you retrieved "
-                          "this run; a hash on a Cypher property is a "
-                          "reference, not bytes — read it first."),
+                          "this run, not ones Cypher surfaced."),
     # _verify_hashes_exist: the deduped union of the batch must exist in
     # ast_nodes before any write session opens. Rendered only where it is
     # the live bound — see derive_neo4j_expects for why the retrieval
@@ -1049,9 +1058,22 @@ POSTGRES_DESCRIPTOR = {
                   "tells you which addresses exist and this surface is "
                   "where their bytes come from"),
     "seeAlso": ["trellis_neo4j"],
+    # WHAT THIS SLOT SELECTS: ONE guard-owned phrase, the retrieval
+    # budget. Thirteen surfaces share CONTRIBUTION_BUDGET, so the slot
+    # orients rather than accounts, and the budget is the one bound here
+    # NO refusal can deliver in time — a run learns its budget from the
+    # exhaustion message only once the budget is already gone, whereas
+    # the number in the line changes how the first fetch is planned.
+    #
+    # `repeat_refusal` is unselected and the get_ast_texts /
+    # get_ast_blocks / vector_search raises state it in full at the
+    # moment it bears on a decision, each naming what was already served
+    # and ending with the remedy ("Reuse the variable holding the earlier
+    # get_ast_texts/get_ast_blocks return — re-derive from it in code
+    # instead of re-fetching"). The phrase stays below as the one
+    # encoding of it (§9.1).
     "contributes": [
         ("descriptor", "purpose"),
-        ("expects", "repeat_refusal"),
         ("expects", "retrieval_budget"),
     ],
 }
@@ -1077,6 +1099,10 @@ _POSTGRES_GUARD_EXPECTS = {
     # get_ast_blocks return — re-derive from it in code instead of
     # re-fetching", so the line keeps only what makes that refusal
     # PREDICTABLE and lets the refusal carry what to do about it.
+    # July 25, 2026, second pass: the phrase is no longer pulled into the
+    # one-line slot at all (see POSTGRES_DESCRIPTOR above). It stays here
+    # as the one encoding of the dedup class, for the addendum and
+    # llm_help paths that read derived expectations.
     "repeat_refusal": (" A fetch this run already served refuses."),
     # _discipline_check_budget: budget N serves N byte-returning fetches
     # and the next one refuses before any I/O. Only a call that returned
