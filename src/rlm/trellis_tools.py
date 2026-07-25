@@ -608,15 +608,22 @@ class TrellisNeo4j:
 # brace appears in any string below — not a doubled one either. The one
 # substitution this pair needs travels in the house <<...>> idiom.
 #
-# THE LINE CONTRACT, for whatever composes this: resolve each piece of
-# `line` — a plain string is itself, ("descriptor", key) is that field of
-# this dict, ("expects", key) is the phrase derive_neo4j_expects returned
-# — drop the empty results, and join the rest with one space. A phrase is
-# empty exactly when the guard behind it is not wired on this holder, so
-# the composed line states what will actually refuse and nothing else.
-# That is the converse of the bijection orphan SELF_DESCRIBING_SURFACES.md
-# §10 recorded: a run is never told a rule that cannot fire on it, and
-# never refused by one it was not told.
+# WHY THE PHRASES CARRY THEIR OWN LEADING SPACE, and what owns the rest.
+# `trellis_contribution.render_contribution` owns how a `contributes` list
+# becomes a line, and this file states none of it: a copy here restating
+# the field name, the tag set, or the join would be one rule in two
+# places, which is the failure §9.1 forecloses and the failure this whole
+# surface layer exists to close. It was one, briefly — it named a field
+# `line` and a join of one space, both wrong against the shipped frame —
+# and a second composer written to it would have diverged silently.
+#
+# What is this file's own business: a phrase is empty exactly when the
+# guard behind it is not wired on this holder, and the frame contributes
+# no bytes of its own, so each phrase begins with the space that
+# separates it from whatever precedes it. An unwired guard then costs
+# nothing rather than leaving a gap. That is the converse of the bijection
+# orphan SELF_DESCRIBING_SURFACES.md §10 recorded: a run is never told a
+# rule that cannot fire on it, and never refused by one it was not told.
 #
 # WHAT IS DELIBERATELY ABSENT. The Cypher mutation blocklist, the four
 # entity kinds, and the 0.0-1.0 confidence bound are each guard-backed

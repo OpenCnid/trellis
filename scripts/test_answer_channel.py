@@ -45,6 +45,11 @@ from trellis_answer import (  # noqa: E402
 failures = 0
 
 
+from trellis_contribution import (  # noqa: E402
+    ContributionShapeError,
+    render_contribution,
+)
+
 def check(name, ok, detail=""):
     global failures
     print(f"  [{'PASS' if ok else 'FAIL'}] {name}" + (f" — {detail}" if detail and not ok else ""))
@@ -298,21 +303,19 @@ check("every reachable descriptor string is brace-free (rlms .format safety)",
 
 
 def contributed_line(descriptor):
-    """The line this descriptor's own `contributes` pieces compose to,
-    resolved from the descriptor's own fields. Local to this drill: the
-    shared frame owns composition, and what is checked here is the DATA
-    this module authors. None when a slot names a field the descriptor
-    does not carry as text."""
-    parts = []
-    for piece in descriptor.get("contributes", []):
-        if isinstance(piece, str):
-            parts.append(piece)
-            continue
-        tag, key = piece
-        if tag != "descriptor" or not isinstance(descriptor.get(key), str):
-            return None
-        parts.append(descriptor[key])
-    return "".join(parts)
+    """The line this descriptor composes to, THROUGH THE SHIPPED FRAME.
+
+    This was a local reimplementation of the frame's resolution rule. It
+    joined with "" and skipped `_guard_line`, so it checked this module's
+    data against a COPY of the rule rather than the rule — and a change to
+    the real join would have kept this drill green while the shipped line
+    moved. It now calls `render_contribution`, so the data is checked
+    against the composer that actually runs. None when a slot cannot
+    resolve, which the frame reports by raising."""
+    try:
+        return render_contribution(descriptor) or None
+    except ContributionShapeError:
+        return None
 
 
 line = contributed_line(ANSWER_DESCRIPTOR)

@@ -60,6 +60,7 @@
     "test:rlm-workspace": "tsx scripts/test_rlm_workspace.ts",
     "test:textedit": "tsx scripts/test_textedit.ts",
     "test:surfaces": "python scripts/test_surfaces.py",
+    "test:contribution": "python scripts/test_contribution.py",
     "test:answer-channel": "tsx scripts/test_answer_channel.ts",
     "test:modules": "tsx scripts/test_modules.ts",
     "test:module": "tsx scripts/test_module.ts",
