@@ -288,3 +288,86 @@ PAID, token-scoped (ingest + embed + spawn + judge + teardown), OOLONG price
 constants. The `module`/`hybrid` arms require the Appendix A module at
 `modules/provenance-citation-discipline/`. `scripts/exp_citation_metadata.ts`
 holds the metadata-copy variant.
+
+---
+
+## The spatial-flywheel retrieval repair, measured (dated entry — July 26, 2026)
+
+**Claim:** the default protocol module prescribed a provenance write the default
+guard refuses, and the repair at `41eff03` closes it.
+
+    provenance writes refused: 24/24 hashes (control) → 0 (treatment)
+    insights cached:           0 (control) → 220 (treatment)
+    F1:                        0.800 (control) → 1.000 (treatment)
+    · control discriminated · target: the run's writes are accepted
+      (docs/architecture/SELF_DESCRIBING_SURFACES.md, the T1 closure)
+
+### What was run
+
+One cold OOLONG-Pairs query per arm, city `dublin`, truth 6 pairs, through the
+shipped path (`executeScoredQuery` → `/api/rlm-stream` → the RLM worker). Arms
+differ in one file: `modules/spatial-flywheel/addendum.txt` at `41eff03^`
+against `41eff03`. Version A against version B of a shipped artifact — the
+rule-20-safe carve-out, not a new-versus-null baseline.
+
+Both arms faced an identical cold graph: 220 `:Question` nodes, **0** carrying
+`category`, no `DERIVED_INSIGHT` edges, `sourceNodeIds` intact. Verified between
+runs.
+
+### Results
+
+| | control (`41eff03^`) | treatment (`41eff03`) |
+|---|---|---|
+| provenance writes | **refused** — 24 cited hashes not retrieved | none refused |
+| insights cached | 0 | **220** |
+| F1 · precision · recall | 0.800 · 0.667 · 1.000 | **1.000 · 1.000 · 1.000** |
+| sub-LLM calls | 1 | 5 |
+| tool calls · iterations | 4 · 5 | 4 · 5 |
+| cost | $0.1551 | $0.1979 |
+
+The control's refusal is the observation the code trace predicted:
+`_verify_hashes_retrieved` admits only hashes in the run's retrieved set, and
+`run_cypher` — where the module's step 1 obtains `sourceNodeIds` — feeds neither
+the read nor the search bucket. The treatment's added step retrieves that
+deduped union in one `get_ast_texts` call before any write, for one fetch of the
+64-fetch budget at any catalog size.
+
+### Two figures, per rule 7
+
+Estimate printed before the first paid call: **$0.25**. Measured actual:
+**$0.4591** — $0.1061 + $0.1551 + $0.1979, all `gpt-5.4` through the RLM worker.
+Coverage: the run's own telemetry, one process, no orphaned consumer (the queue
+was empty and two 45-hour hung drills were killed before the stack came up).
+
+The overage is the first arm. It returned F1 1.0 with **zero** sub-LLM calls,
+because the freshly ingested corpus carried all 220 categories and the module's
+step 3 short-circuits when `q.category` is set — so nothing classified, nothing
+wrote, and the guard never fired. A blind arm, and its output was noise
+(rule 11). `oolong:flywheel-prep --confirm-strip` produced the real cold start.
+
+### A scorer defect this run exposed
+
+The treatment first scored **F1 0.000, 0 predicted pairs**, and that reading was
+false. It had answered `FINAL_ANSWER: [["q_0013", "q_0050"], …]` — a JSON list
+of lists, the notation `json.dumps` produces — while `parsePredictedPairs`
+matched parentheses only. Every pair was present and none was counted.
+
+Any run answering in valid JSON scored 0.0 and was reported as a reasoning
+failure. The parser now accepts both bracket forms; the pair shape still has to
+match, so no new class of text is admitted. Rescoring the same logged answer
+gives 6/6 and F1 1.000, which is the figure in the table.
+
+This is worth more than the arm that produced it: the defect had nothing to do
+with the module under test and would have misread any future benchmark run.
+
+### Standing
+
+n=1 per arm. What is established is that the pre-repair module's write is
+refused and the repaired module's is not, with the control discriminating on the
+same instrument — not a distribution over runs, and not a claim about the
+repair's effect on answer quality, where a single sample separates 0.800 from
+1.000 and cannot say why.
+
+Stack: compose project `trellis-tests-approved`, ports 5443/7697/6389, isolated
+from the `implement-trellis-flywheel-benchmark` containers that were running from
+another worktree on the default ports and were not touched.

@@ -56,12 +56,19 @@ export function cityTruth(dataset: OolongDataset, city: string): Set<string> {
   return truth;
 }
 
-// Extracts (q_x, q_y) tuples from FINAL_ANSWER and canonicalizes each to
+// Extracts (q_x, q_y) pairs from FINAL_ANSWER and canonicalizes each to
 // (LOC id, HUM id) using the dataset's category index, so tuple ordering
 // mistakes by the agent don't mask a semantically correct pair.
+//
+// BOTH BRACKET FORMS. The module asks for a Python list of tuples and a run
+// may answer with a JSON list of lists instead -- semantically the same pairs,
+// in the notation json.dumps produces. Accepting only parentheses scored such
+// an answer 0.0 and reported it as a reasoning failure; observed on a live run
+// 2026-07-26, where every pair was present and none was counted. The pair shape
+// still has to match, so widening the brackets admits no new class of text.
 export function parsePredictedPairs(finalAnswer: string, categoryOf: Map<string, string>): Set<string> {
   const predicted = new Set<string>();
-  const tupleRe = /\(\s*['"]?(q_\d+)['"]?\s*,\s*['"]?(q_\d+)['"]?\s*\)/g;
+  const tupleRe = /[([]\s*['"]?(q_\d+)['"]?\s*,\s*['"]?(q_\d+)['"]?\s*[)\]]/g;
   for (const match of finalAnswer.matchAll(tupleRe)) {
     const [, x, y] = match;
     if (categoryOf.get(x) === 'LOC' && categoryOf.get(y) === 'HUM') predicted.add(pairKey(x, y));
