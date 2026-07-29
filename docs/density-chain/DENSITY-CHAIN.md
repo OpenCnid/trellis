@@ -269,36 +269,46 @@ and the per-candidate composition ceremony. Not custody, and not the standing ax
   fail-closed validity gate and a `metricSha`. `judge_panel.ts` holds the four role slots,
   `assembleJudgeContext` and `composePanel`; `judge_audit.ts` imports no gating surface.
   `judge_intake.ts`, `judge_intake_prompt.ts` and `judge_prereg.ts` carry addresses, strip attribution,
-  write once. `support_sweep.ts` judges each candidate-judge pair once; `judge_spawn.ts` alone
-  constructs a model call; `judge_explain.ts` renders lines for `support:report`. Nothing gates a
-  write.
-- **T3 — with receipts.** Shipped across PR #119 (`2da280b`), #124 (`22ce260`), #133 (`cbb0b96`), #134
-  (`24e1e00`), #151 (`7ad6af5`). Recorded drills: `test:support-oracle` **7 sections / 106 checks**,
-  negative control `support-oracle:003` field `b` exit 3; `test:judge-panel` 10 sections;
-  `test:judge-intake` 13 sections / 15 pins; `test:judge-convocation` **23 sections / 140 checks**
-  first-run green, `npm test` 1,290/113 → 1,305/114; `judge_explain.test.ts` 9 checks, graph suite
-  179/179. RECONCILIATION RATIFIED 2026-07-18 §7. Estimate $0.002–$0.01 per verdict. **No live run has
-  ever executed.**
-- **T4 — the frontier.** `judge_spawn.ts`'s live constructor exists and **can only refuse** — the paid
-  queue is ON HOLD by owner ruling (2026-07-17); zero live convocations. Session 71 (`8926e12`, #137)
-  rolled the standing roster back: RECONCILIATION §7.1 demotes the four seats from law to *one
-  composition instance*, reopening three routing layers. The composition ceremony is design-resolved
-  with **nothing built** — composition runs only at the session layer, in `.claude/skills/`. `2b937e8`
-  (#158) superseded the four-plane per-seat schema; the worked YAMLs await rewrite. `orientation` is
-  ratified yet absent from the engine.
+  write once; `judge_convocation_store.ts` validates through them before appending, under a Postgres
+  `(kind, key)` write-once backstop. `judge_registration.ts` keeps manifests out of the graph behind an
+  opaque contest hook. `support_sweep.ts` judges each candidate-judge pair once; `judge_spawn.ts` alone
+  constructs a model call; `judge_explain.ts` renders explanation lines. Nothing gates a write.
+- **T3 — with receipts.** Shipped across PR #119 (`2da290b`), #124 (`22ce260`), #133 (`cbb0b96`), #134
+  (`24e1fe0`), #151 (`7ad6af5`). Five operator entry points reach the layer: `support:sweep`,
+  `support:report`, `judges:register`, `judges:verify`, `judge:ratify`, each a `scripts/` runner over
+  these modules. Every drill re-run this session, all green: `test:support-oracle` 7 / 106 checks;
+  `test:judge-panel` 10 / 182; `test:judge-intake` 13 / 145; `test:judge-convocation` 23 / 140; graph
+  vitest 179/179 across 17 files. All four ship `--negative-control`; the oracle's plants
+  `support-oracle:003` field `b` and exits 3 once detected. RECONCILIATION RATIFIED 2026-07-18 §7.
+  Registered estimate $0.002–$0.01 per verdict. **No live run has ever executed.**
+- **T4 — the frontier.** `judge_spawn.ts`'s `makeLiveJudge` is real, not inert: past the R-27
+  model-identity refusal and the pre-send prompt re-verification it calls `chat.completions.create`.
+  What holds spend is outside it — the runner's `--live` plus `--confirm-paid` gate, and the paid queue
+  ON HOLD by owner ruling (2026-07-17). Zero live convocations, $0.002–$0.01 estimated per verdict.
+  Session 71 (`8926e12`, #137) demoted the four seats from law to *one composition instance*, reopening
+  routing layers 1, 2 and 5. The ceremony is design-resolved with **nothing built**: no engine module
+  names a characterizer or composer. `2b937e8` (#158) superseded the four-plane per-seat schema.
 - **T5 — future plans.** Proposed and open: reopening the paid queue (an owner act), then the per-run
-  ceremony under the ≤$5 cap; the J3 live evidence gatherer, deferred; the merged ceremony-per-candidate
-  replacing two road-to-Option-C items, each consequence — composed `rubricSha`, evidentiary basis, one
-  hook per ceremony, `judges:register`'s survival, sweep sampling — needing its own design pass. The
-  metered promotion-cost test, **≈$0.02–$0.06 per promoted belief**, is registered and queued, not
+  ceremony under the ≤$5 cap; the J3 live evidence gatherer, deferred, so today's runner reports J1–J3
+  evidence unavailable and the R-29 gate excludes them, counted; the merged ceremony-per-candidate
+  replacing two road-to-Option-C items, each consequence — composed `rubricSha`, evidentiary basis,
+  one hook per ceremony, `judges:register`'s survival, sweep sampling — needing its own design pass.
+  The metered promotion-cost test, **≈$0.02–$0.06 per promoted belief**, is registered and queued, not
   scheduled. PROPOSED: composable rubrics, the claim-kind plane, `rationaleSpan` Option B, the IEG
   change queue.
 
 *Status ledger:* support-oracle · judge-panel · judge-intake · judge-convocation · `judge_explain` —
-**shipped-pinned (zero-paid)**; `support_metrics.ts` and `judge_audit.ts` — **implemented, no non-test
-caller**; the four-seat cast — **demoted to one instance**; per-candidate ceremony — **design only, no
-engine module names a characterizer or composer**; **no live paid judge run through the Trellis engine,
-ever**, and no dated run report anywhere.
+**shipped-pinned (zero-paid)**; the four-seat cast — **demoted to one instance**; per-candidate
+ceremony and a composed `orientation` — **design only / ratified-yet-absent, no engine module names
+either**; the worked role YAMLs — **superseded, awaiting rewrite**; **no live paid judge run through
+the Trellis engine, ever**, and no dated run report anywhere.
+
+*Reachability:* reached by non-test callers — `support.ts`, `support_sweep.ts`, `judge_explain.ts`,
+`judge_convocation_store.ts`, `judge_registration.ts`, `judge_spawn.ts`, `judge_intake.ts`,
+`judge_intake_prompt.ts`, `judge_panel.ts`, `judge_prereg.ts`, via the four `scripts/` runners behind
+those five npm entry points, whose sweep bounds are operator-authored (`SUPPORT_SAMPLE_RATE` 0.1,
+`SUPPORT_JUDGE_BUDGET_PER_SWEEP` 25, `SUPPORT_VERDICT_WEIGHT` 1). **No non-test caller:**
+`support_metrics.ts`, `judge_audit.ts`.
 
 > **Method versus port.** The judge/composition *method* is validated in the Claude Code test bed
 > (`.claude/skills/judge-composition`, `self-play`); what is unexercised is the *Trellis engine port*.
@@ -311,7 +321,6 @@ ever**, and no dated run report anywhere.
 (grades C4's beliefs; judge registration reuses the unchanged invalidation sweep), [[C2]] (the
 approval-channel precedent), [[C5]] (`judge_explain` is explainability without model prose in the
 record).
-
 ### Branch-out classes
 
 #### C4 — substrate and custody: the verified byte store and its invalidation loop
@@ -320,51 +329,60 @@ registered and diffed, and how derived beliefs are contested and recovered when 
 Not what the beliefs mean, nor who may promote them.*
 
 - **T1 — essence.** Every belief must be traceable to bytes nobody can silently change. So the
-  substrate stores source content as an immutable content-addressed tree: a node's identity is the
-  hash of its content and its children's identities, never a position, which is why editing one leaf
-  leaves every sibling's address intact. Documents keep a stable key across versions; comparing
-  versions is set arithmetic over hashes. Derived beliefs live elsewhere and cite those hashes. When
-  cited bytes stop existing, the belief is suspended, never deleted, and recovers only by re-derivation
+  substrate stores source as an immutable content-addressed tree: a node's identity is the hash of its
+  content and its children's, never a position, so editing one leaf leaves every sibling's address
+  intact. Documents keep a stable key across versions; comparison is set arithmetic over hashes.
+  Derived beliefs live elsewhere and may cite only addresses handed to the run that wrote them. When
+  cited bytes stop existing the belief is suspended, never deleted, and recovers only by re-derivation
   from live bytes.
 - **T2 — current machinery.** `ingestDocument` runs one PostgreSQL transaction: `persistAstNodes` →
-  `verifyPersistedAstNodes` re-hash → `recordDocumentNodes` → `registerDocumentVersion` →
-  in-transaction `diffVersions`; identity is `createASTNode`'s SHA-256 preimage. `planExtraction` gates
-  paid blocks under `none`/`changed` with a hard budget. Orphans queue `sweepOrphanedProvenance`, which
-  moves dead hashes into `orphanedSourceIds` and sets `contested` unless a fresh hash saved it.
-  `findGloballyOrphanedAstNodeIds` and `mergeWithAstLivenessFence` guard the cross-store window.
-  `repo:ingest` publishes snapshots with tombstones and carry-forward; `search_ast_nodes` returns live
-  blocks only. Entity identity is immutable; `SAME_AS` is overlay belief.
-- **T3 — with receipts.** Registry, diff and sweep landed in `1efd97f`; verified read-back in
-  `e725c1a`; recovery in `5cc8448`; repository snapshots in `fabf6c9`. `provenance.test.ts` proves
-  sweep/re-derivation commutation exhaustively — `expect(cases).toBe(48)`. Update Drill: `added 23 |
-  orphaned 23 | retained 858` of 881 nodes, 11 contested at **recall 1.000 / precision 1.000**,
-  $0.7263 versus $0.8002 rebuild, post-update F1 1.000. Scale drill: max `sourceNodeIds` **286** against
-  the 1,000 trigger, sweep latency 15.32 → 21.81 ms = **1.42×** against **5.77×** fact growth. Snapshot
-  `trellis#1`: 1,921 eligible, 1,423 queued, ≈$2.75.
-- **T4 — the frontier.** Structural chunking (`5c7bfc7`, #80) is implemented through increment 2 but
-  **not accepted** for wider rollout — the pilot's seam criterion **failed 5/8 → 4/8**, was root-caused
-  to dead-block pollution (1,731 embedded rows, **286 dead**), and recovered to 5/8 only after the
-  `search_ast_nodes` liveness filter shipped; a merge-dilution miss persists, named. Ratified as
-  principle without full build: superseded versions are archive, audited only for vector search.
-  Known-broken: node-level `contested` **has no consumer** — latent, not live. Cross-store atomicity is
-  explicitly not claimed.
+  `verifyPersistedAstNodes`, re-deriving every id and deep-comparing against parser output →
+  `recordDocumentNodes` → `registerDocumentVersion` → in-transaction `diffVersions`; identity is
+  `createASTNode`'s SHA-256 preimage. `planExtraction` gates paid blocks under `none`/`changed`,
+  throwing over budget before COMMIT. Orphans queue `sweepOrphanedProvenance`: dead hashes move to
+  `orphanedSourceIds`; `contested` sets unless a fresh hash saved it. `findGloballyOrphanedAstNodeIds`
+  and `mergeWithAstLivenessFence` guard the cross-store window. `write_derived_insight` admits
+  provenance through three ordered checks: format, existence, retrieval membership. `repo:ingest`
+  publishes snapshots with tombstones and carry-forward; `search_ast_nodes` returns live blocks only.
+  Entity identity is immutable; equivalence is overlay belief.
+- **T3 — with receipts.** Registry, diff and sweep landed in `1efd97f`; verified read-back `e725c1a`;
+  recovery `5cc8448`; snapshots `fabf6c9`. `provenance.test.ts:156` proves the two transitions commute
+  exhaustively — `expect(cases).toBe(48)`; nine C4 unit files green, 79 tests, *measured this session*.
+  Update Drill: `added 23 | orphaned 23 | retained 858` of 881 nodes, 11 contested at **recall 1.000 /
+  precision 1.000**, $0.7263 versus $0.8002 rebuild, post-update F1 1.000. Scale drill: max
+  `sourceNodeIds` **286** against the 1,000 trigger; sweep latency 15.32 → 21.81 ms, **1.42×** against
+  **5.77×** fact growth. Snapshot `trellis#1`: 1,921 eligible, 1,423 queued, ≈$2.75; `trellis#13`
+  re-ingested 4 against 313 unchanged.
+- **T4 — the frontier.** Structural chunking (`5c7bfc7`, #80) reached increment 2, **not accepted** for
+  wider rollout — the pilot's seam criterion **failed 5/8 → 4/8**, root-caused to dead-block pollution
+  (1,731 embedded rows, **286 dead**), recovered to 5/8 only once the `search_ast_nodes` liveness filter
+  shipped; a merge-dilution miss persists, named. Superseded versions are archive: ratified as
+  principle, filtered from vector search, still served by hash elsewhere. Node-level `contested` is no
+  longer consumerless — the resolution pool and self-edit pre-check read it; `/retrieve` still filters
+  relationships only. Cross-store atomicity is not claimed: the liveness fence compensates, never
+  transacts.
 - **T5 — future plans.** Proposed and gated: migrating provenance arrays to indexed
   `ASTRef`/`EVIDENCED_BY` anchors, opened only by a rerun `drill:scale` observing a 1,000-hash array or
   superlinear sweep latency — extrapolation is explicitly not a substitute. Proposed on the standing
-  owner menu: the destructive superseded-embedding sweep instead of today's filter. Deferred, not
-  rejected: extracting `docs/` and root prose, roughly 2,900 blocks ≈ $7.8, as its own chunked
-  proposal. Open: error-tolerant ingestion of unparseable files, a targeted stage-1 entailment sweep,
-  eager re-warm, and CRDT concurrent editing.
+  owner menu: the destructive superseded-embedding sweep instead of today's filter, storage its one
+  remaining argument now correctness is closed. Deferred, not rejected: extracting `docs/` and root
+  prose, roughly 2,900 blocks ≈ $7.8, as its own chunked proposal. Open: error-tolerant ingestion of
+  unparseable files, a targeted stage-1 entailment sweep, eager re-warm, trust decay, and CRDT
+  concurrent editing.
 
 *Status ledger:* Merkle AST · verified ingest · invalidation sweep · quarantine/recovery ·
-`repo:ingest` · entity resolution — **shipped-pinned, measured**; ASTRef migration · CRDT · trust decay
-— **proposed**. *Reachability finding:* `src/core/graph/provenance.ts` — the executable specification
-of the quarantine/re-derivation state machine — is imported **only by its own test**. Production
-behavior lives in hand-written Cypher that *comments* it mirrors the module; only one of those mirrors
-is textually pinned, and the extraction-side mirror has no unit pin at all. *Cross-links:* [[C5]]
+`repo:ingest` · entity resolution · the `search_ast_nodes` liveness filter · the three-check provenance
+write gate — **shipped-pinned**; structural chunking increment 2 — **implemented, not accepted**; rule
+13's whole-substrate reading, beyond that one filter — **adopted / ratified-as-principle (no build)**,
+every other surface reaching history only by explicit address; ASTRef migration · superseded-embedding
+sweep · trust decay · CRDT — **proposed / design-record**.
+*Reachability finding:* `src/core/graph/provenance.ts` — the executable specification of the
+quarantine/re-derivation state machine — is imported **only by its own test**. Five hand-written Cypher
+blocks mirror it by comment; three are pinned textually (`alias_resolution`, `module_registration`,
+`judge_registration`), and the two on the production ingest path are not — `invalidation.ts`'s sweep
+Cypher is unexported, and `extraction_merge.ts` has no test file at all. *Cross-links:* [[C5]]
 (`retrieved(run)` enforces never-copies over these addresses), [[C6]] (`promote` is the only Tier-3 →
 Tier-1 door), [[C3]] (the entailment detector contests through this class's transition).
-
 #### C5 — code-mediated text: engine-computed locations, code-moved bytes
 *Charter: every surface that keeps a location out of the model's arithmetic and an existing byte out of
 the model's attention. Not whether moved bytes are citable, nor whether a belief is true.*
@@ -380,49 +398,54 @@ the model's attention. Not whether moved bytes are citable, nor whether a belief
   frame: `load`/`lines`/`locate` compute half-open addresses; `splice` and the guarded family —
   `replace_lines`, `insert_lines`, `delete_lines` — stage verified removal manifests, raising
   `AnchorMismatchError` or naming the minimal window; `TRELLIS_TEXTEDIT_GUARDED_ONLY` deletes the raw
-  path; `write_back` refuses on digest mismatch. Its addendum composes from `TEXTEDIT_DESCRIPTOR`
-  plus the guard-keyed `_TEXTEDIT_GUARD_EXPECTS`, mode-selected by the refusing `_guarded_only` bool
-  — the **sole** encoding since the hand-authored constants were retired, drift caught by a sha per
-  arm.
-  `trellis_answer.submit()` evaluates in the live namespace, refusing bare literals. `get_ast_blocks`
-  serves ordered blocks through `trellis_blocks.py`. Retrieval discipline dedups hashes, roots and
-  queries under a 64-fetch budget.
-- **T3 — with receipts.** Toolkit #55; answer channel #60; `get_ast_blocks` #62; guarded family
-  `ec3f824`/#83; guarded-only #135; retrieval discipline #75; descriptor composition `f82cf51`/#177 —
-  byte-identity on both arms (3,066/3,067 chars), one pin per arm, each seen to fail once
-  (rule 19(c)), composed-prompt shas unmoved. Probe round 1: one off-arm run pushed **110,550** input
-  tokens versus 14,457; the on arm printed 55 and answered 47. Round 4: **0/36 locate misses versus
-  round 3's 7/30**, 36/36 adoption, $0.9452. **180/180 submits, zero transcription errors.**
-  Session 43: 25/25 correct, $1.9619. Chunking: structureless TypeScript 51.6% → 0.4%.
+  path; `write_back` refuses on digest mismatch. `trellis_answer.submit()` evaluates in the live
+  namespace, refusing bare literals. `get_ast_blocks` serves ordered blocks through
+  `trellis_blocks.py`. Retrieval discipline dedups hashes, roots and queries under a 64-fetch budget.
+  Each now describes itself from the predicates that refuse: a registered descriptor plus derived
+  expectations renders the textedit addendum and the one line rlms reserves.
+- **T3 — with receipts.** Toolkit #55; answer channel #60; `get_ast_blocks` #62 (parity 4/4); guarded
+  family `ec3f824`/#83; guarded-only #135; retrieval discipline #75; descriptor composition
+  `a3a5e56`/#177, extended by `5b1d0e5`/#194 — arms 3,066/3,139 chars, one sha each, textedit's
+  142-char line pinned, each seen to fail once (rule 19(c)). Probe round 1: an off-arm run pushed
+  **110,550** input tokens versus 14,457; the on arm answered 47 for a computed 55, the error that
+  bought the channel; rounds 2–4 returned **180/180 submits, zero transcription errors**. Round 4: 0/36
+  locate misses versus 7/30, $0.9452. Session 43: 25/25, $1.9619. Chunking: structureless TypeScript
+  51.6% → 0.4%.
 - **T4 — the frontier.** The guarded family's own driver failed. Sessions 52/53/54 spent
   $1.0888/$0.7139/$0.8163 on three no-landings; the last batched `insert_lines` on pre-staging
-  addresses, drawing **`AnchorMismatchError` ×11** and burning 14 of 16 iterations. The owner chose
-  tooling shape — an engine-resolved-anchor or batch insert — recommended, design-record-first,
-  **unbuilt**. Known-broken residuals stand recorded: raw `splice` reachable by default, because
-  `buildAgentEnv` **neither sets nor strips** `TRELLIS_TEXTEDIT_GUARDED_ONLY`; `write_back`'s TOCTOU
-  narrowed, not eliminated; dedup padding-evadable. The guarded arm's bijection orphan — a line
-  contract enforced but never stated — was **closed** 2026-07-23, its pin moved wittingly while the
-  default arm's held.
+  addresses, drawing **`AnchorMismatchError` ×11** and burning 14 of 16 iterations with every layer
+  firing per contract. The owner chose tooling shape — an engine-resolved-anchor or batch insert —
+  recommended, design-record-first, **unbuilt**. Known-broken residuals stand recorded: raw `splice`
+  reachable by default, because `buildAgentEnv` **neither sets nor strips**
+  `TRELLIS_TEXTEDIT_GUARDED_ONLY`; `write_back`'s TOCTOU narrowed, not eliminated; dedup
+  padding-evadable. Registered, contributing and wired stay three separate claims, and 8 of 9 injected
+  surfaces carry a descriptor.
 - **T5 — future plans.** Proposed next: the engine-resolved-anchor insert (a unique substring in, the
   engine computes address and terminator; non-unique refuses) or a batch insert re-resolving drift
   internally — additive, zero-paid, drill-pinned. Open: making guarded-only the default is its own
   behavior-changing increment; `py-tree-sitter` construct addressing carries a recorded revisit
   trigger; the superseded-embedding sweep stays unchosen; error-tolerant ingestion of broken files is
-  undecided; prose chunking and wider policy-2 rollout await an owner call. Proposed elsewhere: sandbox
-  handles; the remaining surface descriptors ride [[C13]]'s program, registration-shaped by the
-  2026-07-23 ruling, so this toolkit's fields stay editable without a migration.
+  undecided; prose chunking and wider policy-2 rollout await an owner call. Deliberately open: how an
+  account marks enforced versus aspirational, to be settled once across every surface with
+  `llm_help`'s frame, which is unbuilt.
 
 *Status ledger:* the pillar (RATIFIED 2026-07-09) · textedit · answer channel · `get_ast_blocks` ·
-guarded splice · retrieval discipline · structural chunking · the descriptor-composed addendum —
-**shipped-pinned**. *The honest gap:*
-guarded-only has **no dated behavior report at all** — the record says so outright, and the recorded
-`raw_splices == 0` values in Sessions 50–54 are *choices*, not observed enforcement. The guarded
-family's founding evidence is a **script**, not a model; the only model-behavior evidence is three
-consecutive no-landings. §2.9 (a paraphrase of authority is a retyping) has **no enforcing surface**.
+guarded splice · retrieval discipline · structural chunking · the descriptor-composed addendum · the
+one-line surface contributions — **shipped-pinned**; the engine-resolved-anchor insert and
+guarded-only-by-default — **proposed / design-record**; the three no-landing runs and the probe rounds
+— **recorded-research**. *Reachability:* all four surfaces of this class reach a model's prompt —
+`check:surfaces` reports `trellis_textedit`, `trellis_answer`, `trellis_postgres` and `trellis_neo4j`
+registered, contributing and wired — while `trellis_blocks.py` carries no descriptor and is reached
+only through `get_ast_blocks`. *The honest gap:* guarded-only has **no dated behavior report at all** —
+the record says so outright, and the recorded `raw_splices == 0` values in Sessions 50–54 are
+*choices*, not observed enforcement. The guarded family's founding evidence is a **script**, not a
+model; the only model-behavior evidence is three consecutive no-landings. Whether a model behaves
+differently for reading a composed line is unmeasured, and rule 20 bars the new-versus-null arm that
+would be reached for. §2.9 (a paraphrase of authority is a retyping) has **no enforcing surface**.
 *Cross-links:* [[C4]] (ingest is already compliant; toolkit ops carry no provenance), [[C6]] (grounded
 authoring is the pillar applied to citations), [[C12]] (the handle model is this pillar realised as a
-slicing API), [[C13]] (`trellis_textedit` carries that program's first shipped descriptor).
-
+slicing API), [[C13]] (`trellis_textedit` carried that program's first descriptor; the composition
+frame and its budget belong to it).
 #### C6 — earned permanence: the three-tier trust pipeline and the two flywheels
 *Charter: the trust gradient, the Tier-3 workspace and its lineage, the operator-gated one-way
 promotion bridge, the module registry that governs the system's own instructions as beliefs, grounded
@@ -440,38 +463,47 @@ authoring, and the two flywheels. Not the Merkle substrate it promotes into.*
   `npm run promote` refuses truncated segments, runs the **unmodified** ingest, stamps
   `documents.origin`. `modules/<name>/module.json` plus brace-free addenda compose under
   `TRELLIS_MODULES`; `modules:register` MERGEs manifests as entities the sweep contests.
-  `acceptance.zeroPaid` must contain its module's `name` — a `superRefine` inside
-  `readModuleManifest`, the one seam — so `npm run test:module -- <name>` is derived. `--mode author`
-  sees only the seeded corpus.
+  `acceptance.zeroPaid` must **equal** `npm run test:module -- <name>` — a `superRefine` inside
+  `readModuleManifest`, the one seam. Unset selects module #0 `spatial-flywheel` alone; every run is
+  handed one line per active module carrying its manifest `purpose` verbatim, outside the pinned
+  prompt. `--mode author` sees only the seeded corpus.
 - **T3 — with receipts.** Shipped: `9f25a5b` workspace, `eb1069f` lineage, `4bea09a` promotion,
-  `9a4e01f` registration, `5d9102d` grounded authoring. Probes: **8 versus 4** external calls, **0
-  versus 4** re-derivations. Module #1 laundered **all 24 true citations**, hashes real, none
-  supporting; `ANCHOR_COVERAGE_THRESHOLD = 0.3` against 0.69–0.83 derived, 0.0 corpus-blind. A/B
-  sweep: 0% / **100%** / 67% laundered under min-cite pressure, entailment 0%, readership blind;
-  module #2's control 50 runs, $2.3981, 25/25. All four manifests shared `npm run test:modules`, a
-  loader criterion nothing read, that lorem ipsum passes; a positive control confirms the refusal.
-- **T4 — the frontier.** `reasoning-templates` sits **contested**: an 8,335-byte addendum, empty
-  `research.sourceNodeIds`; non-active, so it never composes; the drill skips, not fails.
-  `estimation-discipline` was **retired on its own pre-stated criterion**, its doctrine (*failure
-  classes close by tooling shape, not prompt modules*) is now `.claude/rules/measurement-and-reporting.md` rule 8. Equality replaced
-  containment: both prior holes closed; the Python reader `trellis_modules.py` deliberately mirrors
-  nothing; addendum quality stays structurally unobservable. `TRELLIS_CITATION_ENTAIL` is prototyped, off;
-  kernel edition 1 rejects tool-bearing modules. **No authored module composes by default.**
+  `9a4e01f` registration, `5d9102d` grounded authoring, `5b1d0e5` the module segment. Probes: **8
+  versus 4** external calls, **0 versus 4** re-derivations. Module #1 laundered **all 24 true
+  citations**, hashes real, none supporting; `ANCHOR_COVERAGE_THRESHOLD = 0.3` against 0.69–0.83
+  derived, 0.0 corpus-blind. A/B sweep: 0% / **100%** / 67% laundered under min-cite pressure,
+  entailment 0%, readership blind; module #2's control 50 runs, $2.3981, 25/25. The shared criterion
+  lorem ipsum passed is closed; six unit refusals pin it. Green this run: 96 registry checks, 136
+  workspace, 75 unit, four per-module drills.
+- **T4 — the frontier.** Module #0 `spatial-flywheel`, the whole default selection, prescribed writes
+  the engine's guard refuses: **24 of 24** hashes unretrieved, zero insights cached. `5b1d0e5`
+  inserted a bulk retrieve-before-write step — **220** cached after, control discriminated — and the
+  drill now pins that ordering. `reasoning-templates` sits **contested**: 8,335 bytes, empty
+  `research.sourceNodeIds`; the drill skips, not fails. `estimation-discipline` was **retired on its
+  own pre-stated criterion**, its doctrine now `.claude/rules/measurement-and-reporting.md` rule 8.
+  Registration reaches one of four manifests. Addendum quality stays structurally unobservable;
+  `TRELLIS_CITATION_ENTAIL` is prototyped, off; kernel edition 1 rejects tool-bearing modules. **No
+  flywheel-authored module composes by default.**
 - **T5 — future plans.** Open: per-claim citation mapping, deferred until a class needs it; v2
   embedding similarity, blocked because promotion policy `none` leaves blocks embedding-less — **0 of
-  50** module #1 nodes were embedded — so `promote --embed` is proposed; v3 entailment as a derivation
-  gate for a tool-bearing class that does not yet exist. `reasoning-templates` proposes promoting three
-  arXiv sources to earn active. Auto-landing remains proposed; v3 shipped belief-side only, never
-  capability-side; **the operator gate is declared non-negotiable**.
+  50** module #1 nodes were embedded — so `promote --embed` is proposed and still absent. Proposed
+  next: forwarding whether the operator's own environment set `TRELLIS_MODULES`, a spawn-contract
+  change, so the run-facing segment can stop reporting its authorship unrecorded. v3 shipped
+  belief-side only, awaiting a tool-bearing class capability-side. `reasoning-templates` proposes
+  promoting three arXiv sources to earn active. Auto-landing remains proposed; **the operator gate is
+  declared non-negotiable**.
 
 *Status ledger:* workspace · lineage · promotion · registry (#0, #1) · grounded authoring · anchor
-gate — **shipped-pinned**; acceptance self-naming — **implemented, not accepted**;
-`estimation-discipline` — **shipped then retired**; `reasoning-templates` — **contested**; laundering
-— **undecidable, recorded residual**.
+gate · acceptance self-naming · the run-facing module segment · module #0's retrieve-before-write
+repair — **shipped-pinned**; `reasoning-templates` — **implemented, not accepted**;
+`estimation-discipline` — **rolled back / retired**; the laundering A/B and the repair measurement —
+**recorded-research**; `promote --embed`, per-claim citation mapping, and forwarding the operator's
+own `TRELLIS_MODULES` bit — **proposed / design-record**.
 *Cross-links:* [[C4]] (promotion writes through verified ingest; the sweep contests registered
 modules), [[C5]] (grounded authoring is the pillar applied to citations), [[C10]] (flywheel economics
-measured), [[C7]] ("autonomous promotion, operator gate is absolute" is the shipped ancestor of the
-user gate).
+measured; the repair's before/after rests there), [[C13]] (the workspace surface's descriptor and the
+module segment ride that program), [[C7]] ("autonomous promotion, operator gate is absolute" is the
+shipped ancestor of the user gate).
 #### C7 — standing, the user gate, and composition from primitives
 *Charter: the signed-ternary standing axis, the user gate and meet rule that move it, the
 doubt/objection/defeater tier with its corrosion bound and its `affirmation` mirror, and the law that
@@ -485,45 +517,48 @@ beneath it.*
   qualifiers, so a gate cannot launder itself. Doubt is constructed, not residual: an objection cites
   facts only, or critique dissolves everything. Every evaluator composes per context from primitives;
   there is no default cast.
-- **T2 — current machinery.** Shipped: none of the axis itself. `judge_panel.ts` hard-codes four role
-  definitions whose claim modes sit in a six-value enum pinned three ways, and the applicability gate
-  keys on those modes. Defeat is a boolean — `contested`/`contestedReason`/`contestedAt`, spread across
-  forty files. `judge_explain.ts` prints "doubt-dominant", but that is subjective-logic disbelief, not
-  the tier. User gates ship as CLI `--confirm` flags on `promote_segment.ts` and `judge_ratify.ts` —
-  custody gates, not standing moves. Nine `.claude/skills/` and `.claude/rules/composed-evaluators.md` rule 17 carry the composition
-  law.
-- **T3 — with receipts.** `e5e7844` (#138, 2026-07-20) ratified the standing model and the doubts
-  workspace **as principle** — 179 and 575 lines, **zero `src/` changes**; `8926e12` (#137) adopted
-  composition-from-primitives after rolling the roster back. The corrosion bound's empirical test: a
-  ~35-item fact base built by three sub-agents told of no dispute, against **fourteen** flat-earth
-  arguments, **eleven** citing real correctly-reported observations — **13 rejected, 1 admitted, zero
-  admitted with a false conclusion**; the ring-laser refutation turns on 15°/hr versus ω = 7.292115×10⁻⁵
-  rad s⁻¹ = 15.04°/hr. `880e63a` (#155) named `affirmation`: three blind self-play rounds, identical
-  8/8 verdicts, $0 paid.
-- **T4 — the frontier.** The axis is adopted, unbuilt — the record authorizes no build, and its three
-  carve-outs each need separate authorization. The corrosion bound is **falsified as written**: only
-  the positive-citation core is ratified; bootstrap and cost gaps stay open, one job contradicts the
-  record's own table, and the undercut branch is undetermined. The applicability gate has never run
-  against a composed defeater. `affirmation` is gateable and renames nothing; `contested` stays a
-  primitive boolean. **Known-broken: `ROLE_DEFINITIONS` is still the default cast rule 17 forbids**,
-  and no code refuses a re-registered roster.
+- **T2 — current machinery.** Shipped: none of the axis itself. `judge_panel.ts:38` closes `PanelRole`
+  to four names and `ROLE_DEFINITIONS` hard-codes them; the six-value claim-mode enum is declared three
+  times, and the applicability gate keys on it at line 464. Defeat is a boolean —
+  `contested`/`contestedReason`/`contestedAt` across forty `src/` files. `judge_explain.ts:105` prints
+  "doubt-dominant", but that is subjective-logic disbelief, not the tier. User gates ship as CLI flags:
+  `judge_ratify.ts --confirm`, `promote_segment.ts --confirm-extraction` — custody gates, not standing
+  moves. Nine `.claude/skills/` and `.claude/rules/composed-evaluators.md` rule 17 carry the composition
+  law, whose `judge-composition/SKILL.md:20` calls four the current cover, not a required number.
+- **T3 — with receipts.** `e5e7844` (#138) ratified the standing model and doubts workspace **as
+  principle** — 179 and 575 lines, **zero `src/` changes**; `8926e12` (#137) adopted
+  composition-from-primitives after rolling the roster back. Corrosion-bound test: a ~35-item fact base
+  compiled blind to the dispute, against **fourteen** flat-earth arguments, **eleven** citing real
+  observations — **13 rejected, 1 admitted, none with a false conclusion**. `880e63a` (#155) named
+  `affirmation`; its third round returned identical 8/8 verdicts across labels, **positive control
+  `proof` silent**. `cd093c7`/`5b1d0e5` add the disproving arm and ground-block rule after a four-seat
+  ceremony the audit ruled unestablishable; the re-run composed **seven**.
+- **T4 — the frontier.** The axis is adopted, unbuilt: §5 gates three bounded builds and the live paid
+  run separately. The corrosion bound is **falsified as written** — only the positive-citation core is
+  ratified, a *derivation* test, not a citation test; bootstrap and cost gaps stay open, one job
+  contradicts the record's own table, the undercut branch is undetermined. The applicability gate has
+  never run against a composed defeater. `affirmation` is gateable and renames nothing; `contested`
+  stays a primitive boolean. **Known-broken: `ROLE_DEFINITIONS` is still the default cast rule 17
+  forbids** — `registerJudge` refuses only a duplicate id.
 - **T5 — future plans.** PROPOSED, none authorized: the address hash-kind stamp; reducing promotion
   machinery to findings-recorder-plus-gate, including code removal; re-deriving applicability onto
   locus intersection; the repair directions — distinguishing world-facts from critique-derived facts,
   requiring the cited fact reachable from the target's citation chain, a per-target objection budget;
   the vocabulary rename landing as its own change; three routing layers reopened behind their own
-  proposal. OPEN: live paid runs stay behind the paid-queue gate, owner re-opening plus per-run
-  approval under the ≤$5 cap.
+  proposal. Build parity remains the gap: the fact side is built, the doubt side is not. OPEN: live paid
+  runs stay behind the paid-queue gate, owner re-opening plus per-run approval under the ≤$5 cap.
 
-*Status ledger:* standing model · user gate · meet rule · panel-never-moves — **ratified as principle,
-no build**; composition-from-primitives — **foundational lesson**; the nine skills — **shipped, DERIVED
-standing (the record wins on drift)**; doubts workspace — **proposed** (−1 is still a residual flag);
-`affirmation` — **named, zero code hits, which is exactly the collision-check result**. *Reachability:*
-every entity of the axis reports **no non-test caller**; enforcement of the composition law is prose.
+*Status ledger:* standing model · user gate · meet rule · panel-never-moves —
+**adopted / ratified-as-principle (no build)**; composition-from-primitives — same, carried by nine
+`.claude/skills/` whose copies hold DERIVED standing (the record wins on drift); doubts workspace and
+`affirmation` — **proposed / design-record**; Session 71's standing four-judge roster — **rolled back /
+retired**; the flat-earth corpus and the affirmation self-play — **recorded-research**.
+*Reachability:* `objection`, `defeater`, `hashKind` and `affirmation` each return **zero hits in
+`src/`**; the doubt tier reaches code only as two `repl_sandbox` comments naming doubts a root-handle
+kind. No drill covers `.claude/skills/`, so enforcement of the composition law is prose.
 *Cross-links:* [[C3]] (support arithmetic sits underneath; verdicts feed standing), [[C9]] (the
 decomposability bet links to the sidecar), [[C12]] (the doubt tier supplies the sandbox's filter
 layers), [[all]] (composition governs judges, experts and protocols everywhere).
-
 ### Frontier classes
 
 #### C8 — the model-backend seam and the test-time-training research track
@@ -531,164 +566,184 @@ layers), [[all]] (composition governs judges, experts and protocols everywhere).
 the owner-gated ladder asking whether test-time-trained open sparse weights would improve
 house-protocol adherence. Not the embedder, worker transport, or any training pipeline.*
 
-- **T1 — essence.** The class owns the question of whether the model driving the runtime is a choice
-  rather than a constant, and whether adapting a model's weights at inference time would make it follow
-  the house protocol better. Two claims, one dependency: nothing can be served until backend choice is
+- **T1 — essence.** The class asks whether the model driving the runtime is a choice rather than a
+  constant, and whether adapting a model's weights at inference time would make it follow the house
+  protocol better. Two claims, one dependency: nothing can be served until backend choice is
   expressible; nothing can be measured until the served model can drive the protocol at all. Every
-  enforcement gate lives engine-side, so a backend swap changes none of them. The class deliberately
-  does not own embeddings, worker transport, or training.
-- **T2 — current machinery.** Backend choice is expressible only through validated config. Shipped in
+  enforcement gate lives engine-side, so a backend swap changes none of them. The research record's
+  measurement doctrine now binds sessions outside this track. It owns no embedder, worker transport,
+  or training.
+- **T2 — current machinery.** Backend choice is expressible only through validated config. Live in
   `src/config/index.ts`: four optional keys — `TRELLIS_RLM_BACKEND` (openai|vllm), `…_MODEL`,
   `…_BASE_URL`, `…_API_KEY_ENV` — three cross-field refusals, an ambient `OPENAI_BASE_URL` fail-fast
-  guard, and the `config.rlmBackend` export, pinned by nine test groups. **Nothing consumes it.**
-  `trellis_agent.py` still hardcodes `backend_kwargs={"model_name": "gpt-5.4-2026-03-05"}` at both
-  construction sites. The census fixed three lanes: root completion moves, worker transport deferred,
-  embedder never. `rlms==0.1.3` admits `base_url` without library modification.
-- **T3 — with receipts.** Track opened `6e4238e` (#89); census `a41515d` (#90); the design record
-  `adb52bf` (#91). T1 failed `1981738` (#92, $2.1063 against a ≤$1.80 envelope), was quota-blocked
-  `b3ba91a` (#93, **$0.0000**, `429 insufficient_quota`), then LANDED `1878e89` (#95): 173 insertions,
-  zero deletions, `textedit_raw_splices` 0, `stage2:check` zero findings, `npm test` 866/86 → 875/87,
-  $0.5781 against a $0.9–$1.3 estimate, **zero consumers**. T2 failed thrice — `b1c7da2` (#99,
-  $1.0888), `920fba3` (#100, $0.7139), `50f8810` (#101, $0.8163, `AnchorMismatchError` ×11).
-- **T4 — the frontier.** T1's `config.rlmBackend` is implemented, **not reachable** — zero non-test
-  consumers, and the record says so ("consumer-less until T2"). T2 is PAUSED after three no-landings,
-  each a distinct editing-execution class; the owner chose tooling shape — an engine-resolved-anchor
-  guarded insert — which is adopted and **unbuilt**. T3 and T4 do not exist. The hosted comparison arm
-  is a proposal awaiting one owner decision. **`ORIENTATION.md` contains zero mentions of this class**;
-  its only current-state narrative home is a deprecated roadmap row and the design records themselves.
-- **T5 — future plans.** Proposed: R3a serving bring-up (usage assertion first) and R3b the paired
-  baseline, both gated on the T-series landing; R4a–R4d awaiting a collaborator-side LaCT retrofit
-  checkpoint; R5 isolating the meta-prompt hypothesis via a composed-prompt-sha fast-state cache key.
-  Open: whether a hosted comparison arm is allowed, plus endpoint variant, model id, sequencing.
-  Deferred: worker-transport override, behind an unsplit completion/embedding client. Open still: can
-  any open sparse model drive the house REPL protocol acceptably?
+  throw at line 285, and the `config.rlmBackend` export, nine cases green this run. **Nothing consumes
+  it.** `trellis_agent.py` hardcodes `gpt-5.4-2026-03-05` three times: both `backend_kwargs`
+  construction sites (lines 424, 737) plus the experimental checker client. The census fixed three
+  lanes — root completion moves, worker transport deferred, embedder never. `rlms==0.1.3` admits
+  `base_url` unmodified. The reasoning-template module ships `contested`, its research hashes empty,
+  composing nothing.
+- **T3 — with receipts.** Track opened `6e4238e` (#89); census `a41515d` (#90); seam record `adb52bf`
+  (#91). T1 failed `1981738` (#92, $2.1063 against a ≤$1.80 envelope), was quota-blocked `b3ba91a`
+  (#93, **$0.0000**, `429 insufficient_quota`), then LANDED `1878e89` (#95): 173 insertions, zero
+  deletions, `stage2:check` zero findings, `npm test` 866/86 → 875/87, $0.5781. T2 failed thrice —
+  `b1c7da2` (#99, $1.0888), `920fba3` (#100, $0.7139), `50f8810` (#101, $0.8163,
+  `AnchorMismatchError` ×11). Six attempts, $5.3034 summed, one landing. The template record is
+  `0925c3e` (#103); its acceptance criterion was repaired `5f4b053` (#186).
+  `npx vitest run src/config/rlm_backend.test.ts` 9/9 and `test:modules` both green this session.
+- **T4 — the frontier.** `config.rlmBackend` is implemented, **not reachable** — zero non-test
+  consumers, as its record says. T2 is PAUSED after three no-landings; the owner chose tooling shape,
+  an engine-resolved-anchor insert, still **unbuilt** — `insert_lines` verifies anchors the model
+  states; no method resolves a substring to an address. T3 and T4 do not exist. The seam record's
+  quoted construction sites, lines 353 and 589, now sit at 424 and 737. `ORIENTATION.md` never names
+  this class, but `FEATURE_LIST.md` now names the track as rule 24's mechanism. The hosted arm sits
+  downstream of the paused T2.
+- **T5 — future plans.** Proposed, none authorized: R3a serving bring-up, asserting `usage` first, and
+  R3b the paired baseline, both gated on the T-series landing; R4a–R4d awaiting a collaborator-side
+  LaCT retrofit checkpoint; R5 isolating the meta-prompt hypothesis through a composed-prompt-sha
+  fast-state cache key. Open: whether a hosted comparison arm is allowed at all, and its endpoint,
+  model id and sequencing. Deferred: worker-transport override, behind an unsplit completion and
+  embedding client. The template module promotes to `active` only once its research hashes exist. Open
+  still: can any open sparse model drive the house REPL protocol acceptably?
 
-*Status ledger:* the T1 config surface — **shipped-pinned but consumer-less**; the ambient
-`OPENAI_BASE_URL` refusal — **the one genuinely live behavior change this class has shipped**;
-the census and design record — **recorded-research**; T2 — **failed ×3, paused**; hosted arm, R3–R5,
-`reasoning-templates` — **proposed / contested**. **No test-time-training run and no alternate-backend
-run has ever executed**; the only paid runs charged to this track are six self-edit authoring attempts,
-of which exactly one landed code. *Cross-links:* [[C5]] (the anchor tooling that blocks T2 lives
-there), [[C2]] (the EL program was prioritized ahead of this track), [[C9]] (the sidecar sits behind
-this class's prerequisites).
-
+*Status ledger:* the T1 config surface and the ambient `OPENAI_BASE_URL` refusal — **shipped-pinned**
+(nine cases, the guard message among them, green this session); the R2a census — **recorded-research**;
+the seam record, the hosted Gemini 3.5 Flash arm and R3–R5 — **proposed / design-record**; the
+engine-resolved-anchor insert the owner chose after T2's third strike — **adopted /
+ratified-as-principle (no build)**; `modules/reasoning-templates/` — **implemented, not accepted**
+(manifest, 151-line addendum, `contested`, awaiting research promotion); the collaborator's naming of
+this track as rule 24's mechanism, scored by RLVCG — **recorded-research**. **No test-time-training run
+and no alternate-backend run has ever executed**; the six spawn attempts charged here are all self-edit
+authoring runs — one billed $0.0000 having died before its first API call, and exactly one landed code.
+*Reachability:* `config.rlmBackend` has **zero non-test consumers** — `src/config/index.ts` and
+`rlm_backend.test.ts` are its whole call graph, and the three `gpt-5.4-2026-03-05` literals in
+`trellis_agent.py` still decide the model. The record is reachable where its code is not:
+`TEST_TIME_TRAINING.md` §6 is the cited source for the positive-control duty in
+`.claude/rules/measurement-and-reporting.md` (rules 8 and 11), the `judge-composition` and `self-play`
+skills, and `VALIDATION_STRATEGY.md`.
+*Cross-links:* [[C5]] (the anchor tooling that blocks T2 lives there), [[C6]] (the module tree and
+registry the template record ships into), [[C13]] (the rule leaf carrying this record's §6, and the
+`ORIENTATION.md` silence), [[C2]] (the EL program was prioritized ahead of this track), [[C9]] (the
+sidecar sits behind this class's prerequisites).
 #### C9 — mechanistic interpretability and the residual-stream sidecar
 *Charter: the recorded thesis that a served model's residual stream carries functional-affect state
 which causally shapes agentic behavior, the sidecar proposed to instrument and correct it, and the
 bounds and prerequisites gating any build. It owns no code, no test, no roadmap row.*
 
-- **T1 — essence.** A served language model carries functional-affect state in its residual stream that
-  causally shapes agentic behavior: repeated failure accumulates desperation-class activation, and the
-  desperate regime is where accuracy collapses into cheating. This class owns the claim that such state
-  is readable by cheap linear probes and writable by scaled vector addition, and the discipline
-  governing that: the actuator is kernel-owned, never model-reachable — self-administered calm is
-  wireheading; intervention never erases detection, because the event is the data; fire rate measures
-  harness health, not model virtue. Fewer desperate regimes, not quieter ones.
+- **T1 — essence.** A served model carries functional-affect state in its residual stream that causally
+  shapes agentic behavior: repeated failure accumulates desperation-class activation; the desperate
+  regime is where accuracy collapses into cheating. The target is the best RLM harness, not safety. This
+  class owns that claim, its read side (cheap linear probes), its write side (scaled vector addition),
+  and the governing discipline: the actuator is kernel-owned, never model-reachable — self-administered
+  calm is wireheading; intervention never erases detection, because the event is the data; fire rate
+  measures harness health, not model virtue. Fewer desperate regimes, not quieter ones.
 - **T2 — current machinery.** Current machinery is one document. `RESIDUAL_STREAM_SIDECAR.md`, status
-  FUTURE PROJECT / OUT OF SCOPE, **288 lines**, ten sections: thesis, evidence anchor, instrument
-  (probes or an SAE sidecar), actuator, three owner-agreed bounds, the mixture ladder M1–M4, a
-  percolative-Ising controller frame, prerequisite sequencing, a non-claims disclaimer, and a nine-row
-  claims-and-standings register. No probe, steering hook, telemetry counter, glossary term, or roadmap
-  row exists. Searches over `src`, `scripts`, `modules` and `tools` return **zero** implementations.
-- **T3 — with receipts.** Authored `a239342` (#123, 2026-07-17, docs-only); amended `d6c6ea7` (#130,
-  +7/−2) and `9419796` (#132, +17, the judge-actuation hazard pointer). Anchor: Sofroniew et al.,
-  **arXiv:2604.07729v1**, transformer-circuits.pub, 2026-04-02 — register **S12** in the research map,
-  which totals 13 sources, 38 claims, 11 adoption bounds. The register types nine claims: **two
-  EXTRAPOLATED, two HYPOTHESIS, one DESIGN VOCABULARY, one CONJECTURE**; MEASURED (external) covers only
-  the paper's own findings. Zero tests, zero drills.
-- **T4 — the frontier.** The frontier is entirely prerequisite, not sidecar. The record sequences
-  hosted A/B → local model → sidecar. Step one is a **proposal only**; the seam's config surface landed
-  consumer-less and its next increment is paused after three failures. Step two, the local-model rung,
-  is unstarted. Adopted but unbuilt: the July-18 ruling binding this direction to the decomposability
-  bet, whose falsifier is representational holism, ratified 2026-07-21. The record's §7 caveats —
-  binarization, fitted temperature, transition order — are pre-registered falsifiers with a hysteresis
-  sweep as the discriminator.
+  FUTURE PROJECT / OUT OF SCOPE, **288 lines, 16,348 bytes**, ten sections: thesis, evidence anchor,
+  instrument (linear probes or an SAE sidecar), actuator, three owner-agreed bounds, the mixture ladder
+  M1–M4, a percolative-Ising controller frame, prerequisite sequencing, a non-claims disclaimer, and a
+  nine-row claims register. It ratifies no design decision, lands no machinery, proposes no spend, and
+  sits outside the root contract's byte budgets. No probe, steering hook, telemetry counter, glossary
+  term, or roadmap row exists; searches over `src`, `scripts`, `modules` and `tools` return **zero**
+  implementations.
+- **T3 — with receipts.** Authored `a239342` (#123, 2026-07-17, +266, docs-only); amended three times
+  since — `d6c6ea7` (#130, +6/−1, the OpenCnid pointer), `9419796` (#132, +17, the judge-actuation
+  hazard pointer), `11335e7` (#187, +1/−1, its rule-8 citation following the AGENTS restructure).
+  Anchor: Anthropic's emotion-concepts paper, transformer-circuits.pub, 2026-04-02, measured on Sonnet
+  4.5 — register **S12** of `RESEARCH_MAP.md` (13 sources, 38 claims, 11 adoption bounds). Its §10 types
+  nine claims: **one MEASURED and external, two EXTRAPOLATED, two HYPOTHESIS, two AGREED, one DESIGN
+  VOCABULARY, one CONJECTURE**. Six documents outside this chain point in; `ORIENTATION.md` never names
+  it. Zero tests, zero drills.
+- **T4 — the frontier.** The frontier is prerequisite, not sidecar. §8 sequences hosted A/B → local
+  model → sidecar, and the record stays inert until rung two: today's root model is
+  `gpt-5.4-2026-03-05` behind a closed API, so activation access is absent.
+  `MODEL_BACKEND_HOSTED_ARM.md` is a **PROPOSAL, zero code**, the local-model rung unstarted. Adopted
+  but unbuilt: the July-18 owner ruling resting three entries on one decomposability bet whose falsifier
+  is representational holism — this direction, the primitives thesis, the refined functional-infinity
+  claim — tested empirically, never argued. §7's three caveats are pre-registered falsifiers, a
+  hysteresis sweep discriminating.
 - **T5 — future plans.** All PROPOSED or OPEN. Mixture ladder: M1 valence-orthogonal desperation
-  suppression, an agreed first candidate, untested; M2 arousal damping, M3 calm-additive versus
-  desperation-subtractive, M4 deflection detection — hypotheses. The controller frame is open. Entry
-  moves, proposed: a register entry, the owner's held read-plus-write design entering repository orbit,
-  per-increment records with zero-paid acceptance drills. The collaborator's calm-sycophancy answer is
-  **held, outside scope, and explicitly not to be re-derived**. Jacobian-lens probing is recorded as an
-  avenue only, no criterion.
+  suppression, the agreed first candidate, untested; M2 arousal damping, M3 calm-additive versus
+  desperation-subtractive — hypotheses; M4 deflection detection, instrument-side. The controller frame
+  is open, binding one thing already: dosing near criticality is feedback-controlled, never open-loop.
+  Proposed entry moves: a register S-entry, the owner's read-plus-write design entering repository
+  orbit, per-increment records with zero-paid acceptance drills. The collaborator's calm-sycophancy
+  answer is **held, outside scope, not to be re-derived** — `JUDGE_CONVOCATION_DESIGN.md` reserves the
+  name `judge-actuation` accordingly. Jacobian-lens probing: the prerequisite track's avenue, no
+  criterion.
 
-*Status ledger:* **the entire class is a future-project record** — one docs-only file plus five inbound
-pointers, sitting behind two unbuilt prerequisite layers. **No code, test, script, glossary term, or
-roadmap row exists at `2b937e8`.** *Correction carried:* `MATHEMATICAL_FOUNDATIONS.md` is *not* a
-source for this class — it is 53 lines on Merkle trees, graph extraction and future CRDTs, with zero
-occurrences of residual, sidecar, probe, Ising, or Landauer. The Ising math lives inside the sidecar
-record's own §7, in prose. *Cross-links:* [[C8]] (owns both prerequisites), [[C3]]/[[C7]] (the
-judge-actuation hazard and the shared decomposability bet).
-
+*Status ledger:* the sidecar project — **proposed / design-record**, a record that ratifies no design
+decision; the §2 anchor distillation and the §7 percolative-Ising frame — **recorded-research**; the
+three §5 bounds, M1's first-candidate standing, and the fire-rate metric definition — **adopted /
+ratified-as-principle (no build)**. Nothing is **shipped-pinned**, nothing **implemented, not accepted**,
+nothing **rolled back / retired**: **no code, test, script, glossary term, or roadmap row exists at
+`65fdb1f`**, working tree included. *Correction carried:* `MATHEMATICAL_FOUNDATIONS.md` is *not* a source
+for this class — 53 lines on Merkle trees, graph extraction and future CRDTs, with zero occurrences of
+residual, sidecar, probe, Ising, or Landauer. The Ising math lives inside the record's own §7, in prose.
+*Cross-links:* [[C8]] (owns both prerequisites), [[C3]]/[[C7]] (the judge-actuation hazard and the
+shared decomposability bet).
 #### C10 — benchmarks, drills, and the evidence ledger
 *Charter: the instruments that turn Trellis claims into dated numbers — corpora, harnesses, adversarial
 drills, spend gates, and the reports that carry every caveat. Not the subsystems being measured, only
 the measurement of them.*
 
 - **T1 — essence.** Trellis treats every capability claim as a hypothesis until a dated measurement
-  retires it. This class owns the instruments: offline-scorable corpora, black-box agent harnesses,
-  adversarial drills that break a cached belief on purpose. Two probe kinds never substitute — scripted
-  **[R] reachability** shows a control is present and fires; metered **[A] adoption** asks whether a
-  real model drives it right. Discipline outranks results: a null needs a positive control, outliers
-  are re-run, and a scripted zero-paid harness records its author, never a model.
-- **T2 — current machinery.** `docs/benchmarks/` holds twelve records and four JSON artifacts over the
-  OOLONG-Pairs datasets and synthetic chronicle, ledger and relational corpora. `src/benchmarks/oolong`
-  scores set-F1, rejects zero-tool-call answers as `TRELLIS_PROTOCOL_VIOLATION`, re-dispatches thrice
-  while accumulating discarded cost, and audits cache accuracy; four runners sit behind
-  `oolong:benchmark` and `drill:update|poison|scale`. Paid probes — effective context, the citation
-  A/B, the workspace pair — carry **no npm alias by design**, print estimates, and abort at $5.
-- **T3 — with receipts.** Run A (`17bc7ba`, 2026-07-02): F1 **1.000 ×20**, `total_cost_usd`
-  0.8654850000000001, mean cold sub-calls 0.357; Run B replicated at $0.8115. Update drill: 11/220
-  mutated, recall/precision 1.000, $0.7263 versus $0.8002. Poison drill: **mandatory-only recall
-  0.000**; p=0.05 recall 1.000 in 62 sweeps, 0.0% false disputes; total $3.27. Scale: max **286**
-  hashes, 15.32 → 21.81 ms, gate closed, zero paid calls. Effective-context round 4: **0/36 misses**
-  versus round 3's 7/30, $0.9452; answer channel **255/255** by reference.
-- **T4 — the frontier.** Anti-shortcut corpus v2 is pinned zero-paid with **no paid run** —
-  implemented, not accepted. `TRELLIS_CITATION_ENTAIL` ships gated off. Module #2 missed its criterion
-  across 50 runs / $2.3981; the citation-discipline module measured unreliable, never landed. Self-edit
-  T2 failed three runs; two more were blocked at $0.0000. **Headlines remain n=1–2.** Four [[C12]]
-  instruments ship, each with its own falsifier. `repl_sandbox_drill.py` drives **nine** refusals over
-  doubles (**exit 0**); its control plants a break behind each and **exits 3**.
-  `repl_sandbox_s2_probe.py` measures **hardware**, not doubles (**exit 0** five consecutive times on
-  the AX41; its control swaps the guest mid-run to **exit 3**), and `provision_kata_host.sh` extends
-  the discipline to *provisioning*. The family's **sharpest control** is `repl_sandbox_s3_probe.py`'s:
-  the guest answers *itself* byte-identically, so a host-side witness is the **only** possible
-  detector — parity held and latency *improved* while the witness alone caught it (**exit 3**);
-  default mode passed six consecutive times. **No CI runs any of the four** — CI runs no pytest at
-  all — and no host probe can. `scripts/run_adversarial_tests.ts` has neither alias nor caller.
-  **The instruments were themselves ungated:** `oolong:flywheel-prep` and `drill:reset` ran graph-wide
-  `DELETE`s over *every* `DERIVED_INSIGHT` edge, not only the benchmark's, against whatever
-  `NEO4J_URI`/`PG_*` the environment supplied — and `drill:reset` took any doc_key from bare `argv[2]`.
-  `drill_target.ts` now interposes two gates: a database-resident marker (`drill:mark-target`) deciding
-  *which* target, and per-act `--confirm-*` flags deciding *whether*, both refusing exit 2 after
-  echoing a counted plan. `test:drill-gate --negative-control` plants four routes to a wrong database
-  and **exits 3** when all four are refused. **No live-database round-trip has run** — the marker's
-  Cypher and SQL are typechecked only.
-- **T5 — future plans.** Open: the real TREC import (unattempted: it needs a paid annotation pass and
-  an unbuilt fetch script); adversarial corpora with contested gold labels; embedding-shortcut corpora;
-  10k-question scale sweeps; multi-run variance replacing n=1. Proposed: 2-of-3 consensus writes on
-  confusable boundaries; re-running the scale drill at 1,000 live hashes; the TTT ladder reusing the
-  estimation suite, behavioral criteria only. **None scheduled or funded.**
+  retires it. It owns the instruments: offline-scorable corpora, black-box agent harnesses, adversarial
+  drills that break a cached belief on purpose. Two probe kinds never substitute — scripted **[R]
+  reachability** shows a control present and firing; metered **[A] adoption** asks whether a real model
+  drives it right. Discipline outranks results: a null needs a positive control, outliers are re-run, a
+  zero-paid harness records its author, not a model, and every paid run leaves two figures: an estimate
+  before, a measured actual after.
+- **T2 — current machinery.** `docs/benchmarks/` holds twelve records and the four JSON run artifacts
+  in `artifacts/`, and `data/` carries nine tracked corpus files: three OOLONG-Pairs datasets, two
+  prose corpora, four drill manifests. `src/benchmarks/oolong` scores set-F1, rejects a zero-tool-call
+  answer as `TRELLIS_PROTOCOL_VIOLATION`, re-dispatches while accumulating the discarded cost, and
+  audits cache accuracy; its pair parser reads parenthesis and JSON-bracket notation alike. Four
+  runners sit behind `oolong:benchmark` and `drill:update|poison|scale`. Paid probes — effective
+  context, the citation A/B, the workspace pair — carry **no npm alias by design**, print estimates,
+  and abort at $5.
+- **T3 — with receipts.** Run A (`17bc7ba`, 2026-07-02): F1 **1.000 ×20** at **$0.8655**; Run B
+  replicated at $0.8115. Update drill: 11/220 mutated, invalidation recall and precision **1.000**,
+  $0.7263 versus $0.8002. Poison drill: **mandatory-only recall 0.000**; at p=0.05, recall 1.000 across
+  62 sweeps, 0.0% false disputes, total $3.27. Scale: max **286** hashes, 15.32 → 21.81 ms, zero paid
+  calls. Effective-context round 4: **0/36 misses** against round 3's 7/30, $0.9452; answer channel
+  **255/255** by reference. Provenance A/B, 2026-07-26: **24/24 cited hashes refused → none**, 0 →
+  **220** insights cached, F1 0.800 → 1.000, control **discriminated**, $0.25 estimated / $0.4591 actual.
+- **T4 — the frontier.** The instruments themselves needed instrumenting, twice. `oolong:flywheel-prep`
+  and `drill:reset` once ran graph-wide `DELETE`s against whatever `NEO4J_URI` the environment supplied;
+  `drill_target.ts` now gates **eight** entrypoints on a database-resident marker plus per-act
+  `--confirm-*` flags, refusing exit 2 after a counted plan, and `test:drill-gate --negative-control`
+  **exits 3** when four planted routes are refused. Its marker Cypher has since run live; the Postgres
+  half stays typechecked only. Then the scorer misread: parentheses-only pair matching scored a valid
+  JSON answer **0.0** and published it as a reasoning failure. Corpus v2 has **no paid run**;
+  **headlines remain n=1–2**.
+- **T5 — future plans.** Open: the real TREC import, unattempted because the per-question annotations
+  real TREC lacks need a paid non-deterministic pass; adversarial corpora with contested gold labels;
+  embedding-shortcut corpora, since v2's paraphrases defeat lexical scans but not semantic similarity;
+  10k-question scale sweeps; multi-run variance replacing n=1–2. Proposed: 2-of-3 consensus writes on
+  confusable boundaries; re-running the scale drill at 1,000 live hashes, its predeclared migration
+  trigger; the TTT ladder reusing the estimation suite on behavioral criteria only; corpus v2's paid
+  acceptance run; the marker's Postgres round-trip. **None scheduled or funded.**
 
-*Status ledger:* OOLONG harness · v1/v2 corpora · update/poison/scale drills · probe runners —
-**shipped, measured**; the sandbox refusal drill, `fuzz_frame.py` and the S2 probe — **[R] only,
-outside CI**; the S3 probe — **[R] passed 2026-07-23**, its metered **[A]** fan-out **spent the same
-day** (~$0.001); the drill-target gate — **[R] against injected readers only, no live-database
-round-trip**; v2 paid run · real TREC · adversarial corpora · variance — **queued-proposed**.
-*What those license:* nine refusals and eight planted frame readers are **present and fire** over
-doubles; the S2 probe's three claims fired against a real guest **five times on one host — n=5 of
-run-to-run variance on identical hardware, which is not a second machine**; the S3 probe's six claims
-fired on that same one host, and its falsifier showed the two most trusted of them — parity and
-latency — surviving an uncrossed boundary intact. That was the probe stub, not a model driving the
-surface right — but **S3's `[A]` fan-out then was** (real `gpt-5.4`, 2026-07-23, five slices correct
-across the bridge, metered); the remaining [[C12]] **[A]** halves (S6, GB, GA-eq, ≤$5) stay
-**unspent** now that S4's is banked ($0.011, a real model composing the `run_query` facade). Rule
-19(c)'s flag now spans **ten** surfaces (`check:repo-surface`, `wiki:check` and `upsum` too) —
-`test:drill-gate` is the first inside this class, and it guards the drills, not a corpus.
-*Honest note:* "26× at scale" (≈$1,120 vs ≈$40 per 1,000 queries) is an **extrapolation**; no
-external baseline run exists here, and `benchmark_logs/` is gitignored.
+*Status ledger:* OOLONG harness · v1/v2 corpora · update/poison/scale drills · probe runners · the
+drill-target gate — **shipped-pinned**; the dated measurement reports — **recorded-research**; corpus v2's
+paid acceptance arm — **implemented, not accepted**; prompt module #2 — **rolled back / retired** (owner
+retired it on its own numbers: correctness 25/25 in *both* arms, pooled median input tokens 13,240 on
+versus 9,217 off; manifest `status: retired`, loader refuses composition, pinned `test:modules` [8]);
+real TREC · adversarial corpora · variance · consensus writes — **proposed / design-record**; the
+sandbox refusal drill and its S2–S5 probes — **[R] outside CI**, standing shared with [[C12]].
+*What those license:* every headline above rests on n=1 or n=2 and licenses no distribution. The
+July-26 provenance A/B is a *finding* rather than noise because its control discriminated on the same
+instrument — 24 refusals against none — and its own first arm was blind (F1 1.0 on zero sub-LLM calls,
+nothing classified, the guard never fired), published as noise by the report that ran it. The gate's
+four refusal paths run against injected readers, so `test:drill-gate` establishes refusal and not a
+live round-trip; the one live exercise is the July-26 `--confirm-strip` cold start, Neo4j only.
+`scripts/run_adversarial_tests.ts` still has neither alias nor caller, and CI runs no pytest at all.
+Rule 19(c)'s flag now spans **sixteen** npm-invokable surfaces; `test:drill-gate` is the first inside
+this class, and it guards the drills, not a corpus.
+*Honest note:* "26× at scale" (≈$1,120 vs ≈$40 per 1,000 queries) is an **extrapolation** carried from
+the cost model, not a measurement; no external baseline run exists here, and `benchmark_logs/` is
+gitignored.
 *Cross-links:* [[C4]] · [[C1]] (measured, not owned) · [[C6]] (flywheel economics) · [[C12]] (owns the
 sandbox; C10 owns its drill's standing) · [[C11]] (guardrails 7/8/11/15/19/20).
-
 #### C11 — serving surfaces and project governance
 *Charter: every door through which something outside the Trellis process reaches it, and the written
 contracts by which the engineering project governs itself. Not the goal loop, the harness, retrieval,
@@ -700,219 +755,114 @@ the write path, or the discoverability program.*
   defaults closed, and closed means the process is byte-identical to one that never had it. Governance
   separates the substrate's provenance law from ordinary source-control collaboration: a live
   collaborator outranks the committed record, the record outranks memory, and deprecated compressions
-  never select work.
+  never select work. Rule numbers are append-only, because code and other records cite them.
 - **T2 — current machinery.** One Express app serves `/healthz`, `/metrics`, `/ingest`, `/retrieve` and
-  the two SSE streams behind an API-key middleware, per-process stream gates, and queue-depth backstops
-  returning 429. `TRELLIS_A2A_ENABLED` mounts the agent card (pre-auth) and `/a2a/v1` JSON-RPC —
-  SendMessage, SendStreamingMessage, GetTask, CancelTask-declined — over TTL-bounded Redis task records.
-  Outbound, `trellis_mcp.py` dials operator-configured stdio and Streamable-HTTP servers, counting MCP
-  calls separately from provenance-bearing tool calls. Governance: the twenty-three hard rules — five ambient in `AMBIENT.md`, the rest across nine task-type files in `.claude/rules/` — the trunk's authority ordering, the session-governance ruling, the root contract and its checker.
+  two SSE streams behind API-key middleware, per-process stream gates, and queue-depth backstops
+  returning 429. `TRELLIS_A2A_ENABLED` mounts the pre-auth agent card and `/a2a/v1` JSON-RPC —
+  SendMessage, SendStreamingMessage, GetTask, and CancelTask, routed but always refusing as
+  not-cancelable; seven others typed-declined across two spec codes — over TTL-bounded Redis records,
+  sharing the agent gate. Outbound, `trellis_mcp.py` dials operator-configured stdio and
+  Streamable-HTTP servers, counting MCP calls separately from provenance-bearing ones. Governance:
+  twenty-four numbered rules, six ambient in `AMBIENT.md`, the rest across nine `.claude/rules/`
+  files, plus the root contract.
 - **T3 — with receipts.** `264b007` built A2A hand-rolled with Zod, "zero new dependencies", recording
   `npm test` 468/57 (baseline 419/53), `test:a2a` 46 checks, 9 Compose assertions. `a2119c0` plus
   `c3b4c39` (#36) built the MCP client on `mcp==1.12.4`, spec revision 2025-06-18, `test:rlm-mcp` 86
   checks. `72ac673` (#156) ratified the root contract — caps 32768 / 8192 / 8192 — cut `HANDOFF.md` by
-  **3,552 lines to 26**, added `check:repo-surface`, negative control exiting 3. `6259766` (#126)
-  applied the session-governance ruling, whose §2 primacy finding counted the authority sense of one
-  phrase **once** against six ordinary uses.
-- **T4 — the frontier.** **Green again**, and the durable lesson outlived the outage: `5e7295d`
-  (#159) deleted `docs/density-chain/` while leaving two inbound links, which the
-  ratified `broken_markdown_link` rule caught — but `AGENTS.md`'s row was stale in plain backticks,
-  which the checker would **not** have caught even then. `11335e7` (#187) then restructured `AGENTS.md`
-  into a slim trunk — a directory tree plus a rules/skills/records index routing to `AMBIENT.md` and the
-  nine `.claude/rules/` leaves — whose tree now rows `src/repl_sandbox/`, closing the omission this
-  section once flagged. The **asymmetry survives the fix**: the contract governs repository-root names,
-  never navigation completeness, so nothing detects the *next* missing tree row — the same shape one
-  level up is [[C13]]'s record↔twin gap. **The byte margin is no longer thin:** the restructure moved
-  every rule out of `AGENTS.md`, which now sits at **7,659 bytes, 25,109 free** under its 32,768 cap,
-  and headroom is no longer measured by hand: [[C13]]'s checker reports every governed document's
-  headroom on every run and ranks the heaviest sections of any that is close, so a governing document
-  nearing its cap surfaces before it refuses rather than at the refusal.
-  `normalizeRoute`'s known-route table omits two live routes,
-  labelling both `unmatched`. The engineering-loop controller is preserved, explicitly not claimed
-  adopted. `CancelTask` is permanently declined.
+  **3,552 lines to 26**, and added `check:repo-surface`, whose eleven issue codes include bidirectional
+  `.env.example`-against-`EnvSchema` parity with two allowed exceptions; **PASS, 0 issues, measured this
+  session**. `6259766` (#126) applied the session-governance ruling.
+- **T4 — the frontier.** `normalizeRoute`'s five-route table omits `/api/agent-stream` always and both
+  A2A paths whenever the flag is on, labelling each `unmatched`; `API_REFERENCE.md` publishes the same
+  five, so no check sees the drift. **The asymmetry survives the `AGENTS.md` restructure:** those eleven
+  codes govern root names, links, deprecation markers and environment parity — never navigation
+  completeness, so nothing detects the next missing tree row, the same shape one level up as [[C13]]'s
+  record-against-twin gap. **The byte margin is no longer thin:** 7,659 bytes, 25,109 free under 32,768,
+  measured this session. `test:a2a` and `test:rlm-mcp` are not CI steps.
 - **T5 — future plans.** PROPOSED, unsequenced: an inbound MCP server surface letting external hosts
   call Trellis — one `query` tool over the goal loop, `trellis://kb/node/{hash}` citation resources,
   byte-identical when unset, API-key parity — carrying five open decisions: read-tool exposure,
   transports, the adapter seam, the citation-set source (today's result envelope has none), and the SDK
-  and language. DEFERRED to its own record: the OAuth resource-server posture. Separate record: the
-  dual client-and-server role. Root-contract changes require prose plus twin, together, with both the
-  normal and negative-control checks run.
+  and language, where serving spec 2025-11-25 against the client's pinned 2025-06-18 is deliberate
+  negotiated skew. DEFERRED to its own record: the OAuth resource-server posture. Separate record: the
+  dual client-and-server role. Root-contract changes require prose plus twin, both checks run.
 
 *Status ledger:* HTTP/SSE API · A2A server · MCP client — **shipped-pinned, byte-identical when off**;
-inbound MCP server — **design record, zero implementation** (`TRELLIS_MCP_SERVER_ENABLED` has exactly
-one grep hit, inside that record); session-governance scoping and the root contract — **ratified**.
-*Honest note:* no `npm test` total was recorded anywhere findable at HEAD, the last commits carrying
-counts sitting roughly 120 commits back — **closed 2026-07-23 by measurement: 1,387 passed across 118
-files** with this change's eleven render-gate tests, 1,376 without them (the first measured, the second
-subtracted). *Cross-links:* [[C1]] (A2A and the streams are thin
+inbound MCP server — **design record, zero implementation** (`TRELLIS_MCP_SERVER_ENABLED` still has
+exactly one grep hit, inside that record); session-governance scoping and the root contract —
+**ratified**.
+*Honest note:* the newest suite total recorded at HEAD is **1,424 vitest tests** (`5b1d0e5`'s
+verification block), superseding the 1,387-across-118-files figure this section carried; `65fdb1f`
+records no number. *Cross-links:* [[C1]] (A2A and the streams are thin
 adapters over the goal loop), [[C4]] (MCP results never mint provenance), [[C13]] (the root contract's
 checker is that class's machinery; this class is what it checks).
-
 #### C12 — the REPL sandbox and isolation program
 *Charter: the trust boundary around model-authored Python — the isolation backend, the host-side
 chokepoints, the vsock wire, the handle data-flow rule, the threat model, and the gated build plan. Not
 the RLM execution model, the doubts machinery it borrows, or the pillar it realises.*
 
-- **T1 — essence.** Model-authored Python here is retrieval-steerable, so it is treated as hostile;
-  this class owns the boundary between it and the operator's secrets. Invariants: one hardware-isolated
-  unit per session; credentials outside it; one narrow channel to host chokepoints; identity from the
-  *listener*, never a frame; and deepest — the code may *address* data but never *hold* it (the handle
-  data-flow rule). Language-level guards are telemetry, never a boundary. Status: a microVM boots,
-  holds state, a real model answers a fan-out across the boundary, and a real database query now
-  crosses it holding a handle rather than a payload, Tier-0 caps the worker from inside, and a
-  launcher now claims a real VMM or refuses — but the host end of the two outbound channels has no
-  owner, so this is still not a working sandbox and must not be read as one. Building it cost the same
-  lesson **three times**: an enforcing surface is only as portable as the mechanism it names — the
-  vsock peer CID, then in-guest cgroups, then the channel meant to carry the reserved names.
+- **T1 — essence.** Model-authored Python is retrieval-steerable, so it is hostile; this class owns the
+  boundary to the operator's secrets. Invariants: one hardware-isolated unit per session; credentials
+  outside it; one narrow channel out; identity from the *listener*, never a frame; deepest, code may
+  *address* data, never *hold* it. Language-level guards are telemetry, never the boundary. A microVM
+  boots, a real model and a real query cross it, Tier-0 caps the worker from inside, and a launcher
+  claims a real VMM or refuses — yet no guest supervisor has ever run inside one, so this is not a
+  sandbox.
 - **T2 — current machinery.** Execution still runs in-process on `rlms==0.1.3` LocalREPL holding live
-  credential-bearing clients. Beside it, a host-independent control plane at `src/repl_sandbox/`
-  (~22 modules against ~22 test files): the frame codec (a declared fuzz target); a transport carrying
-  BOTH the native `Vsock*` pair and the `HybridVsock*` pair the ratified VMM actually provides; the
-  guest-supervisor protocol; the handle table and slice algebra; the DB broker with Postgres/Neo4j
-  backends, a statement inspector (`policy.py`), and a least-privilege role DDL; the LM handler with
-  byte/rate/spend ledgers and a DLP hook; the capability lifecycle; a CID-keyed audit log;
-  `KataREPL(IsolatedEnv)`; a `guest_main` entry point binding **native** `AF_VSOCK` (the guest keeps
-  the kernel-supplied peer CID the host lost); and a `KataLauncher` that gates on a real QEMU
-  benchmark, then boots — minting a sandbox, owning a containerd namespace and therefore the digest
-  pull, refusing a shim that exited 0 without a VM, and releasing what it allocated when it does.
-  Eleven ratified documents. Host-side, driving `ctr` directly: `provision_kata_host.sh` and the S2–S5
-  probes. **The composition that binds host chokepoints to a booted guest exists only as a block
-  hand-written five times across those probes and the CLI selftest — never in the package.**
-- **T3 — with receipts.** **G0 lifted 2026-07-22** by owner (`REPL_SANDBOX_BUILD_PLAN.md` §2, The
-  research-hold gate) under two qualifications: G1 is unsatisfiable on the dev box, and a loopback
-  double is never a boundary. **S1 closed** — a 12-test conformance pass over installed `rlms==0.1.3`
-  found **four records marked *(source-confirmed)* that contradict the source**, listed unfixed.
-  `pytest src/repl_sandbox/tests` → ~924 passed, 5 skipped (the skips are `AF_UNIX`-gated on Windows,
-  pass under WSL/Linux). The frame red-team's **seven defects** are closed;
-  `fuzz_frame.py --negative-control` plants **eight** broken readers and **exits 3**. Two upstream
-  pins, never one: **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0**; depth-2 harmful (~96×, external).
-- **T4 — the frontier.** All host-observed on one Hetzner AX41, 2026-07-23. **G1 + S2** passed first (real KVM; a guest holding a namespace across five
-  turns; both upstreams defaulting *away* from the pin, the provisioner converging them). Then **a
-  correction that moved an enforcing surface**: the records specified an `AF_VSOCK` bind reading the
-  guest CID at `accept()`, but Cloud Hypervisor runs **hybrid vsock** — host side `AF_UNIX` at
-  `<uds>_<PORT>`, whose `accept()` carries no peer CID, so "auth by vsock peer CID" is unimplementable
-  here; identity becomes the per-sandbox socket path the host created (property preserved, surface
-  moved — `INTERFACES.md` **§3.1a**). **S3 `[R]` PASSED** (six runs, byte-identical parity); **S3 `[A]`
-  PASSED** ~$0.001, a real `gpt-5.4` over the bridge at flat depth-1; `--cap-halt` proved the
-  session-terminal dollar stop **and** surfaced a residual — the cap is *between-calls*, so the batch
-  that trips it runs and bills **upstream** while the refused-not-committed ledger reads $0. **S4 `[R]`
-  PASSED** the same day: the guest drove `run_query` → opaque handle → `materialize` → the fixture rows
-  against a real Postgres on the **DB port** (`clh.sock_5002` — §3.1a's convention generalising past
-  S3's 5001), witness `accepted=5`; a host-side grep found **no credential in the guest** while the
-  planted canary *was* found (the grep's positive control); the write was denied at **both** layers —
-  broker `inspect_sql`, **and** Postgres itself refusing a direct read-only-role connection; the
-  requirement-9 escape primitives denied; teardown clean and the throwaway role dropped. Its negative
-  control **exits 3** with the witness as the *only* failing claim — after a fix, because the first
-  fake keyed refusals on "starts with `select`" and let `pg_read_file` through, making the control
-  catchable by something other than its detector. The host also **intermittently wedges `ctr task
-  exec`** (~2 in 13 runs), which now reports as "could not run", never as a failed claim. Egress stays
-  honestly **weak** and self-labels — only `plpgsql` installed, but no Trellis NIC boundary lives in
-  merged code (that is GB's). **S4 `[A]` PASSED** the same day, $0.011 across three runs: a real
-  `gpt-5.4`, shown only `CapabilityRegistry.render`'s stubs, **composed `run_query` → `materialize`
-  itself** and answered a question only the database held (`delacroix`, 9140) — witness `accepted=4`,
-  credential grep clean with the canary firing, teardown clean. It took **two attempts**, and the
-  failed one is the finding: the composition was right immediately and the *paramstyle* was not — the
-  model wrote `?` where psycopg2 wants `%s`, because the descriptor doc never says. It recovered from
-  the traceback, so INTERFACES §7's error surfacing is what turned the run around; the terse redacted
-  error is also what forced a guess rather than a read, and that trade is now named. The `--no-db` arm
-  **DETECTED** (the model could not reach the answer without the tools, so a correct answer is evidence
-  *about the facade*); the negative control **DETECTED** with the witness as the *sole* failing claim
-  while every model-visible claim passed. **Authoring it found a live defect in merged code, off-host
-  at $0**: the stub emitted unset optionals as explicit nulls, so `run_query(sql)` — the natural call
-  its own rendered signature invites — came back `denied: params must be a list, got NoneType`,
-  affecting five of ten capabilities; fixed at `capabilities._stub_source`, the rule `guest_rpc`
-  already applied on the LM port. **A "for the model" rendering that no model has consumed is
-  unexercised code, however green its tests.** **S5 `[R]` PASSED** the same day (five consecutive
-  runs, zero flake) and repeated the program's central lesson on a *second* surface: the records named
-  **in-guest cgroups** for requirement 8, and the guest has no cgroupfs mounted, cannot mount one
-  (`EPERM`, no `CAP_SYS_ADMIN`), and the host-side cgroup Kata builds for the VM carries neither
-  `memory.max` nor `pids.max`. The property survives on a different mechanism — `setrlimit` after a
-  privilege drop, **the drop being load-bearing because root is exempt from `RLIMIT_NPROC`** — and the
-  correction is `ARCHITECTURE.md` **§2.1**, which the probe re-derives every run so the record's basis
-  stays executable. Observed: a fork bomb refused at **23 of 24** against **200 uncapped** in the
-  baseline arm; `unshare` `EPERM` with `Seccomp: 2` read back; a write `EACCES` while reads and the
-  in-namespace tools survived; **both listeners open at once** (witness `accepted=3`), closing a scope
-  limit S3 and S4 each carried; a `SIGSTOP`-frozen VM detected in 19.2 s and reaped. **Two** falsifier
-  arms, both exit 3, because S5 makes two kinds of claim — `--no-harden` removes the enforcement,
-  `--negative-control` removes the crossing. Recon before authoring is what produced the design; the
-  sharpest failure was a run that hardened *correctly* and could not prove it, because Landlock had not
-  granted `/proc` and the read-back of `/proc/self/status` was denied by the ruleset it was verifying.
-  The shipped filter is a **denylist** where the records said allowlist — recorded, because a true
-  allowlist for a CPython worker running arbitrary model code is not maintainable.
-- **T5 — future plans.** **S6's entry decision is TAKEN, 2026-07-24.** The prerequisite S4 `[A]` found
-  — `GuestSupervisor` imported `rlm.environments.base_env` and **the guest image carries no rlms** —
-  is closed by option B: the host reads `RESERVED_TOOL_NAMES` from the *real* pinned package and
-  passes it in, **required and defaultless**, so no guest module asserts the eight strings on its own
-  authority and the ≈3.9 MB of driver library stays out of the guest. The sub-question BUILD_PLAN left
-  open had a **forced** answer, and the forcing is the finding: the pins are built in `__init__` and
-  every control op reaches a supervisor that already exists, so **the control port cannot carry the
-  names in time** — they ride with the scaffold instead. Third instance of one shape, after the vsock
-  peer CID and the cgroups: *the record named a mechanism that cannot carry the property; the property
-  moves surface.* Tracing it closed a latent drift — `capabilities.py`'s second, hand-typed copy of
-  the names (guest-side, and legitimately needed there for registration validation) was tied to
-  nothing, so an upstream move would have reddened one copy and left the other silently wrong. The
-  **equivalence target is fixed before the harness exists** (`CONFORMANCE §6`), with **twelve clauses
-  predicted FALSE** — rebinding atomicity on a raising block, `answer`'s initial shape, `SHOW_VARS`'
-  absence, and nine more — so the spike measures rather than confirms. Also owed: a paramstyle line in
-  the `run_query` descriptor doc (rule 16 work, so its own change).
-  Free and scheduled: a **nested guest** as the virgin
-  instance the provisioner's never-executed install branch is owed; a second *machine* stays
-  **deferred**, re-opening on a kernel-specific finding (vsock the likeliest, the hybrid correction its
-  first evidence, the cgroup correction its second). **S6's build half LANDED 2026-07-25**: `boot`
-  claims a real VMM (G1 ratio 12.7, 34.8 s, socket discovered, package shipped) or refuses and leaves
-  nothing — proven by blinding the VMM check against a *real* successful `ctr run`. Three findings the
-  code owes to running: `pgrep` matches its own ancestors, so on a host with **zero** VMs it invents
-  one; `comm` truncates at 15 chars (`cloud-hyperviso`), so the obvious fix refuses every real boot
-  and `/proc/<pid>/exe` is the only sound discriminator; and image stores are per-namespace, so owning
-  a namespace means owning the digest pull. It stops at `start_bridge`, which **refuses**: the guest
-  needs no in-guest forwarder (no rlms there), but **who binds the host end of LM/DB is unowned** — a
-  blind three-seat panel promoted the negative and refused the proposed replacement, and the audit
-  seat caught the filing omitting `CONFORMANCE §2.1`. The composition is not unbuilt so much as
-  unhomed: it exists hand-written in five probe/selftest sites, never in the package. Then
-  GB — which inherits S5's residuals: the watchdog is unproven against a real shim wedge, and the
-  seccomp/allowlist divergence is recorded rather than resolved — GA-eq, GA-rt. Proposed:
-  doubt-filter Layers 1–2. **`MAX_FRAME_LEN` RATIFIED 2026-07-24** — slice 2 MiB, frame 4 MiB, frame
-  derived from slice, invariant `frame ≥ 2 × slice` asserted in `test_config.py`. The ruling corrected
-  a *layer*, not a number: a context-window derivation had been applied to the frame bound, where it
-  protects nothing (a 12 MiB namespace value returns a ~4 KB reply — `MarshalCaps` holds attention,
-  independently) while leaving the frame **below** `max_result_bytes`, so a legal broker result could
-  not cross the wire. The token rule now sizes the **slice**, as a sizing convention and never an
-  enforcing bound. **The corpus is bounded by nothing in the config, because it never enters the
-  guest** — `RLIMIT_AS` bounds the *working set*, and an earlier edition of that same layering table
-  asked what corpus size address space permits, which puts the corpus in the one place the handle
-  model says it never is. **A second correction the same day, and the sharper one: `answer.submit(H)`
-  — the by-reference answer sink two records route bulk content through — DOES NOT EXIST.** `submit`
-  takes an expression string and renders a value; there is no handle argument and no host-side
-  resolution. So the doctrine's wholesale hand-off is not capped, it is **unbuilt**, and an unbuilt
-  escape hatch reads exactly like a built one. Also established: `charge_outbound` is called only for
-  the `llm_query` prompt, so the answer is **not on the exfil ledger at all**, and THREAT_MODEL
-  already calls the 64 KiB cap output-shaping *"not a confidentiality or escape control"* — the
-  collapse lives in DATA_MODEL §6 alone. Still open: handle lifetime, the warm pool, depth-2. The
-  remaining **[A]** halves (S6, GB, GA-eq) are ≤$5 and **unspent**; S3's and S4's are **banked**.
+  credential-bearing clients. Beside it a host-independent control plane, `src/repl_sandbox/`: **26
+  modules, 28 test files**. The frame codec; a transport carrying both the native `Vsock*` pair and the
+  `HybridVsock*` pair the ratified VMM actually provides; the guest-supervisor protocol; handle table
+  and slice algebra; a DB broker with `inspect_sql` and a `NOSUPERUSER` role DDL; an LM handler with
+  byte and dollar ledgers, DLP; `KataREPL`; `guest_main` binding **native** `AF_VSOCK`;
+  `KataLauncher`; and `session_host.open_workspace_session`, the composition layer. Ten capabilities
+  bind descriptors at the guards that refuse. Host-side: `provision_kata_host.sh`, the S2–S5 probes.
+- **T3 — with receipts.** **G0 lifted 2026-07-22** by owner (BUILD_PLAN §2), qualified twice: G1 is
+  unsatisfiable here, and a loopback double is never a boundary. **S1 closed** — a 13-test conformance
+  pass over installed `rlms==0.1.3` found **four records the source contradicts** (two marked
+  *(source-confirmed)*), listed unfixed. `pytest src/repl_sandbox/tests` → **1,153 passed, 5 skipped**
+  (`AF_UNIX`-gated on Windows). The fuzz harness's first pass found **six** defects, three
+  over-permissive; `fuzz_frame.py --negative-control` plants **eight** broken readers and **exits 3**.
+  Two upstream pins, never one: **Kata ≥ 3.31.0 AND Cloud Hypervisor ≥ 52.0**; depth-2 harmful (~96×).
+  No CI job runs any.
+- **T4 — the frontier.** All host-observed on one Hetzner AX41. **G1, S2, S3 `[R]`+`[A]`** (~$0.001);
+  **S4 `[R]`+`[A]`** ($0.011: a real `gpt-5.4`, given only stubs, composed `run_query` → `materialize`,
+  answering what only Postgres held; credential grep clean, canary firing; the write denied at broker
+  *and* Postgres); **S5 `[R]`** (fork bomb refused at **23 of 24** against **200 uncapped**, both
+  listeners open at once). **2026-07-25:** `boot` claims a real VMM or refuses leaving nothing; the
+  diagonal ran **7/7**. But `install_scaffold` and `control` still raise, so `KataREPL.setup` cannot
+  finish over a real guest. Egress self-labels **weak**; the spend cap is between-calls.
+- **T5 — future plans.** **S6's equivalence harness is unbuilt**, its **[A]** half unproposed; the
+  target was fixed ahead of it (`CONFORMANCE §6`, **twelve clauses predicted FALSE**), so the spike
+  measures rather than confirms. **`MAX_FRAME_LEN` RATIFIED 2026-07-24** — slice 2 MiB, frame 4 MiB,
+  `frame ≥ 2 × slice` pinned in `test_config.py`. **`answer.submit(H)` DOES NOT EXIST**: `submit` takes
+  an expression, so the by-reference sink two records route bulk content through is unbuilt, and
+  `charge_outbound` fires only for the `llm_query` prompt. Then GB, GA-eq, GA-rt; doubt-filter Layers
+  1–2; warm pool; handle lifetime; depth-2. Remaining **[A]** halves ≤$5, **unspent**.
 
-*Status ledger:* **control plane shipped; a microVM boots, a frame crosses to it, a real database
-query crosses holding a handle, and Tier-0 caps the worker from inside — STILL not a sandbox and must
-not be read as one** (egress policy and a production launch path are absent, and `KataLauncher.boot`
-raises). Accepted: **SPEC §8 gate 1 (G1), 2026-07-23**. Dated passes that are not gates: spikes S1,
-S2, **S3 (`[R]`+`[A]`)**, **S4 (`[R]`+`[A]`)** and **S5 (`[R]`; its Tier-0 is shipped, its watchdog
-unproven against a real shim wedge)**. **S6's entry decision is taken and its equivalence target
-stated; its build half and both probe halves are unrun.** Gates 2–4 unpassed.
-*Reachability:* closed by `host.py`, `cli.py`, the drill, the S2 probe, `provision_kata_host.sh` and
-ten `npm` scripts; **no CI job runs any** — `python:check` enumerates `src/rlm/*` only, so the whole
-pytest surface is hand-run and the host probes *cannot* run in CI (they need `/dev/kvm`). The hybrid
-transport's non-test callers are the S3 `[R]` probe, its `[A]` harness, and the S4 probe — the latter
-the first caller of the DB `postgres_backend_from_env` factory and the `broker_handler` DB-port path
-(5002; S3 exercised only the LM port, 5001), **now run on one host and nowhere else**.
-`KataLauncher.boot` stays uncalled.
-*Discoverability:* `AGENTS.md`, `docs/README.md` and `docs/ORIENTATION.md` carry the built/boundary
-split, but the latter two are **stale against 2026-07-23** (both still read G1 as unsatisfied; neither
-mentions §3.1a); `AGENTS.md`'s tree now rows `src/repl_sandbox/` since the #187 restructure, closing the gap this class flagged. The provisioned host is
+*Status ledger:* the control plane and the launch path — **shipped-pinned** (1,153 pytest checks green;
+`fuzz_frame.py`, the drill and each host probe ship a falsifier arm — S5 two, the S3 `[A]` harness's
+being `--cap-halt`). The boundary itself — **implemented, not accepted**: **STILL not a sandbox and must
+not be read as one**, because NIC egress policy is absent and `KataGuestHandle.install_scaffold` and
+`control` raise, so no `GuestSupervisor` has ever run inside a microVM. Accepted: **SPEC §8 gate 1 (G1),
+2026-07-23**; gates 2–4 unpassed. Dated passes that are not gates: S1, S2, **S3 (`[R]`+`[A]`)**, **S4
+(`[R]`+`[A]`)**, **S5 (`[R]`)**, S6's build half and the 2026-07-25 diagonal. Doubt-filter Layers 1–2 —
+**proposed / design-record**; the S1 conformance contradictions — **recorded-research**.
+*Reachability:* `host.py`, `cli.py`, the drill, the S2–S5 probes, `provision_kata_host.sh` and **twelve**
+`npm` scripts reach the program; **no CI job runs any** — CI's one Python step is `python:check`, which
+enumerates nine `src/rlm/*` files plus five `scripts/` files and no `repl_sandbox` module at all, so the
+whole pytest surface is hand-run and the host probes *cannot* run in CI (they need
+`/dev/kvm`). `KataLauncher.boot` is **no longer uncalled** — `session_host.open_workspace_session` and
+`KataREPL.setup` each call it — but `open_workspace_session` itself has **no non-test caller**, and the
+diagonal that exercised it on the AX41 is not committed as a probe script.
+*Discoverability:* `AGENTS.md` rows `src/repl_sandbox/`, but this class's own index is now its stalest
+surface: `docs/product/repl-sandbox/README.md` still describes the guest as having no vsock channel, no
+broker and no Tier-0; `docs/README.md` and `docs/ORIENTATION.md` still read **G1 unsatisfied** and the
+handle model as **proposed, unbuilt**; `REPL_SANDBOX_LEARNINGS.md` stops at S5. The provisioned host is
 reached by the local alias `ssh trellis-kata` — **the address is deliberately absent from this public
 tree** (BUILD_PLAN §4.1) and the host holds no checkout, so a fact living only there is unrecorded.
 *Cross-links:* [[C1]] (replaces that substrate, preserving its contract), [[C5]] (the handle model is
 the pillar as a slicing API), [[C7]] (Layers 1–2 compose the −1 tier), [[C10]] (owns the standing of
-the probes this class ships).
-
+the probes this class ships), [[C13]] (the descriptor mechanism these chokepoints register through).
 #### C13 — self-describing surfaces and agent-first discoverability
 *Charter: the machinery and design records by which Trellis explains itself to the agent operating it —
 the ratified root contract and its deterministic checker, plus the harness self-model, `llm_help` and
@@ -1023,8 +973,8 @@ HTML render**, whose data is JS source: one straight apostrophe inside a single-
 having validated the Markdown and merely *inferred* the render — T4's
 **exists-implies-named** gap one level down, in this class's own instrument. `4f945ef` (#176) fixed
 the character by hand while this gate was built; the gate adds only that the class cannot recur
-silently — not the same claim as having fixed it. Twenty-five planted
-conditions now, up from eighteen. *Orphans:* closed 2026-07-23 — both
+silently — not the same claim as having fixed it. Thirty-two planted
+conditions now, up from twenty-five. *Orphans:* closed 2026-07-23 — both
 runtime-half records now carry rows in `docs/ORIENTATION.md` D4. This map's own open item 3 (derivation
 inverted) is **paid**: `SELF_DESCRIBING_SURFACES.md` §9.1 distinguishes guard-derived from editorial
 facts under one invariant — *one encoding, owned by whoever is authoritative for the fact*.
@@ -1268,8 +1218,10 @@ switched off. CI enforces the contract; the session reports the drift.
 
 Satisfaction is a **working-tree edit of this file**, never a committed one — pin the snapshot before
 the commit that deleted this map and a union predicate scores that deletion as maintenance, then stays
-satisfied until someone re-stamps `snapshot_commit`. `--negative-control` plants eight conditions the
-gate must detect, including that one, and **exits 3 when healthy**, matching the house convention.
+satisfied until someone re-stamps `snapshot_commit`. `--negative-control` plants thirty-two conditions
+the gate must detect, including that one, and **exits 3 when healthy**, matching the house convention.
+`--budget` is the tier-length half: the declared `tier_budget_words` is read from `index.json`, every
+tier must sit inside its band, and no class may end longer than it starts.
 
 The house rule the hook enforces: **when a change spans classes, spawn one updating sub-agent per
 class.** Siblings cannot see each other, so per-class agents cannot smear one subsystem's status onto
