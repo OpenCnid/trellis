@@ -165,7 +165,10 @@ Authored 2026-07-21 during the self-improving-loop mapping (the skill-gap cartog
 rank-1 proposal), installed at owner direction. Guardrail 15 honored: `prompt-engineering`
 and `hypershot-protocol` invoked before authoring. Subordinate to the canonical records it
 cites (`HARNESS_SELF_MODEL.md`, `TEST_TIME_TRAINING.md`, `STANDING_MODEL.md`,
-`RECONCILIATION.md`); on any drift the record wins and this skill is corrected. Companion
+`RECONCILIATION.md`); on any drift the record wins and this skill is corrected.
+Those records, and `DOUBTS_WORKSPACE.md`, are mirrored byte-for-byte in
+[`references/`](references/) so the skill runs with the repo absent — read by the
+section a citation names; see [`references/README.md`](references/README.md). Companion
 proposals from the same map, **not built, owner-gated**: `loop-ledger` (version / record /
 rollback + diagnosis memory), a `skill-creator` update (wire measurement + live-vs-proposed
 regression into adjudication), and `loop-cadence` (schedule re-triggers, surface a prompt for

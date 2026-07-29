@@ -479,19 +479,21 @@ every evaluating function composes per context from categoric primitives. Not th
 beneath it.*
 
 - **T1 — essence.** A claim's worth rides one signed ternary axis — doubt −1, belief 0, fact +1 —
-  orthogonal to custody: provenance says where bytes came from; standing says what they are worth. Only
-  the user moves standing toward fact, because the system's expertise *is* the user's own data; the
-  panel emits signed deltas and records. Derived claims inherit the meet of their dependencies'
-  qualifiers, so a gate cannot launder itself. Doubt is constructed, not residual: an objection cites
-  facts only, or critique dissolves everything. Every evaluator composes per context from primitives;
-  there is no default cast.
+  orthogonal to custody: provenance says where bytes came from, standing what they are worth. Only the
+  user moves standing toward fact, because the system's expertise *is* the user's own data; the panel
+  emits signed deltas and records. Derived claims inherit the meet of their dependencies' qualifiers,
+  so a gate cannot launder itself. Doubt is constructed, not residual: an objection cites facts only,
+  or critique dissolves everything. Every evaluator composes per context from primitives; there is no
+  default cast.
 - **T2 — current machinery.** Shipped: none of the axis itself. `judge_panel.ts` hard-codes four role
-  definitions whose claim modes sit in a six-value enum pinned three ways, and the applicability gate
-  keys on those modes. Defeat is a boolean — `contested`/`contestedReason`/`contestedAt`, spread across
-  forty files. `judge_explain.ts` prints "doubt-dominant", but that is subjective-logic disbelief, not
-  the tier. User gates ship as CLI `--confirm` flags on `promote_segment.ts` and `judge_ratify.ts` —
-  custody gates, not standing moves. Nine `.claude/skills/` and `.claude/rules/composed-evaluators.md` rule 17 carry the composition
-  law.
+  definitions whose claim modes sit in a six-value enum pinned three ways; the applicability gate keys
+  on those modes. Defeat is a boolean — `contested`/`contestedReason`/`contestedAt` across forty files.
+  `judge_explain.ts` prints "doubt-dominant", but that is subjective-logic disbelief, not the tier.
+  User gates ship as CLI `--confirm` flags on `promote_segment.ts` and `judge_ratify.ts` — custody
+  gates, not standing moves. Nine `.claude/skills/` and `.claude/rules/composed-evaluators.md` rule 17
+  carry the composition law; four now vendor their cited records as **31 byte-identical mirrors** under
+  `<skill>/references/`, manifested with source path and SHA-256, so the law reaches a checkout holding
+  no Trellis repo.
 - **T3 — with receipts.** `e5e7844` (#138, 2026-07-20) ratified the standing model and the doubts
   workspace **as principle** — 179 and 575 lines, **zero `src/` changes**; `8926e12` (#137) adopted
   composition-from-primitives after rolling the roster back. The corrosion bound's empirical test: a
@@ -500,8 +502,8 @@ beneath it.*
   admitted with a false conclusion**; the ring-laser refutation turns on 15°/hr versus ω = 7.292115×10⁻⁵
   rad s⁻¹ = 15.04°/hr. `880e63a` (#155) named `affirmation`: three blind self-play rounds, identical
   8/8 verdicts, $0 paid.
-- **T4 — the frontier.** The axis is adopted, unbuilt — the record authorizes no build, and its three
-  carve-outs each need separate authorization. The corrosion bound is **falsified as written**: only
+- **T4 — the frontier.** The axis is adopted, unbuilt — the record authorizes no build, its three
+  carve-outs each needing separate authorization. The corrosion bound is **falsified as written**: only
   the positive-citation core is ratified; bootstrap and cost gaps stay open, one job contradicts the
   record's own table, and the undercut branch is undetermined. The applicability gate has never run
   against a composed defeater. `affirmation` is gateable and renames nothing; `contested` stays a
@@ -509,17 +511,17 @@ beneath it.*
   and no code refuses a re-registered roster.
 - **T5 — future plans.** PROPOSED, none authorized: the address hash-kind stamp; reducing promotion
   machinery to findings-recorder-plus-gate, including code removal; re-deriving applicability onto
-  locus intersection; the repair directions — distinguishing world-facts from critique-derived facts,
-  requiring the cited fact reachable from the target's citation chain, a per-target objection budget;
-  the vocabulary rename landing as its own change; three routing layers reopened behind their own
-  proposal. OPEN: live paid runs stay behind the paid-queue gate, owner re-opening plus per-run
-  approval under the ≤$5 cap.
+  locus intersection; the repair directions — world-facts distinguished from critique-derived, the
+  cited fact reachable from the target's citation chain, a per-target objection budget; the vocabulary
+  rename as its own change; three routing layers reopened behind their own proposal. OPEN: live paid
+  runs behind the paid-queue gate, owner re-opening plus per-run approval under the ≤$5 cap.
 
 *Status ledger:* standing model · user gate · meet rule · panel-never-moves — **ratified as principle,
 no build**; composition-from-primitives — **foundational lesson**; the nine skills — **shipped, DERIVED
-standing (the record wins on drift)**; doubts workspace — **proposed** (−1 is still a residual flag);
-`affirmation` — **named, zero code hits, which is exactly the collision-check result**. *Reachability:*
-every entity of the axis reports **no non-test caller**; enforcement of the composition law is prose.
+standing (the record wins on drift, now across 31 vendored mirrors no checker compares)**; doubts
+workspace — **proposed** (−1 is still a residual flag); `affirmation` — **named, zero code hits, which
+is exactly the collision-check result**. *Reachability:* every entity of the axis reports **no non-test
+caller**; enforcement of the composition law is prose, and so is mirror-against-record.
 *Cross-links:* [[C3]] (support arithmetic sits underneath; verdicts feed standing), [[C9]] (the
 decomposability bet links to the sidecar), [[C12]] (the doubt tier supplies the sandbox's filter
 layers), [[all]] (composition governs judges, experts and protocols everywhere).
@@ -955,7 +957,8 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   one in a `docs/` sibling, so widening the prefix loses the sibling and narrowing it fires the
   archive. First headroom run: `docs/README.md`
   **45 bytes** under its 20,480 cap, `docs/ORIENTATION.md` **352** under 32,768. Checker
-  **PASS (0 issues)**.
+  **PASS (0 issues)** — link arm watched red at **173 issues**, green once the exemption followed the
+  mirrors, *measured this session*.
 - **T4 — the frontier.** **The honest scope of "derived" is recorded:** phrase text is still
   hand-authored once per guard class and pinned; what the engine derives is the selection (the
   refusing bool), single-encoding ownership, and now the injected-name roster — nothing generates
@@ -965,7 +968,9 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   guarded-arm orphan is **closed**; the advisory-marking duty is deliberately still open, because
   settling it for one surface would make an instance into law (rule 17). **The record↔twin asymmetry is structural:** the checker proves twin↔tree, never
   record↔twin — **named-implies-exists is proved; exists-implies-named is not** (green again since
-  `20e94ae`). **Confirmed unfixed, deliberately:** the nine-field telemetry allowlist — Workstream A's
+  `20e94ae`). Fresh instance: the link-exclusion array went **one prefix to five** for four skills'
+  vendored mirrors, and nothing proves a listed prefix still names a folder — a new mirror folder
+  fails loudly, a retired one silently widens the exemption. **Confirmed unfixed, deliberately:** the nine-field telemetry allowlist — Workstream A's
   Phase 0a, and A was held back. **Falsified:** Phase 0, 2026-07-19, proved its own specification
   impossible. **Unscheduled:** `.claude/ceremonies/` — the dedupe loop whose prompt is committed
   beside the rulings it honors, whose allow-list travels by checkout, and which cannot rewrite its
@@ -981,9 +986,9 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   questions closed 2026-07-23: **descriptors are a registration, not a schema** — the field set is
   *dissolved* rather than settled, because a vocabulary that becomes law early cannot survive the
   iteration prompt authoring needs — and that registry, populated at each surface's definition site,
-  is also where `llm_help` composes from — and that registry, with its **coverage** diagnostic, is
-  now BUILT. What remains unbuilt: `llm_help` itself, the eight further descriptors, the human-doc
-  generator, and the advisory-marking convention that belongs with `llm_help`'s frame.
+  is where `llm_help` composes from and, with its **coverage** diagnostic, is now BUILT. What remains
+  unbuilt: `llm_help` itself, the eight further descriptors, the human-doc generator, and the
+  advisory-marking convention that belongs with `llm_help`'s frame.
 
 **AMBIENT.md gained rule 24 on 2026-07-24 — what is being built — and it is this class's business
 because it is a self-description that construction has to be able to see.** The rule is numbered
