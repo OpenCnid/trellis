@@ -17,6 +17,8 @@
       "commit_count_first_parent": 157,
       "commit_count_all": 216,
       "tier_budget_words": 90,
+      "tier_budget_tolerance": 0.05,
+      "tier_budget_enforced": false,
       "tier_count": 5,
       "structure": "trunk (T0-T2) + 13 subsystem-class branches + cross-link lattice + self-index + constellation",
       "method": "Adams et al. 2023, arXiv:2309.04269 (chain of density), system mode: fixed tier length, one chain per subsystem class",

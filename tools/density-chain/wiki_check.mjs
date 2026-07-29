@@ -195,6 +195,88 @@ function extractRoster(text) {
 }
 
 /**
+ * Split each `#### C{n}` section into its `- **T{k} — label.**` tier bullets.
+ *
+ * A tier runs from its own bullet to the next tier bullet, the first `*Status
+ * ledger:*`-style italic footer, or the next heading — whichever comes first.
+ *
+ * The counting convention is fixed HERE rather than left to the caller, and
+ * that is the whole point of this function. Three separate readers counting
+ * one tier by eye returned 799, 803 and 844 words for the same bytes, because
+ * each made a different call on the bullet label and on code spans. A budget
+ * measured three ways is not a budget. The convention: drop the
+ * `- **T{k} — label.**` prefix, then count whitespace-separated tokens on what
+ * remains. Markdown punctuation counts as part of the token it is attached to,
+ * which is what a human counting words does.
+ */
+function extractTiers(text) {
+  const out = new Map();
+  if (text === null) return out;
+  const lines = text.split(/\r?\n/);
+  const isTier = (l) => /^-\s+\*\*(T\d)\s*[—-]/.exec(l);
+  const closes = (l) => /^\*\S/.test(l) || /^#{1,4}\s/.test(l) || isTier(l);
+  let cls = null;
+  for (let i = 0; i < lines.length; i += 1) {
+    const heading = /^#{4}\s+(C\d{1,2})(?=\s|$)/.exec(lines[i]);
+    if (heading) {
+      cls = heading[1];
+      if (!out.has(cls)) out.set(cls, []);
+      continue;
+    }
+    if (cls === null) continue;
+    const t = isTier(lines[i]);
+    if (!t) continue;
+    const body = [lines[i].replace(/^-\s+\*\*T\d\s*[—-][^*]*\*\*/, '')];
+    for (let j = i + 1; j < lines.length && !closes(lines[j]); j += 1) body.push(lines[j]);
+    out.get(cls).push({
+      tier: t[1],
+      startLine: i + 1,
+      words: body.join(' ').split(/\s+/).filter(Boolean).length,
+    });
+  }
+  return out;
+}
+
+/**
+ * The three clauses that make a declared tier budget mean something, as pure
+ * predicates over already-counted tiers so the suite can drive them without a
+ * repository.
+ *
+ * Clause 2 is the one that is easy to leave out and is load-bearing. A ceiling
+ * with no floor is satisfiable by a tier that never approaches the budget, and
+ * a tier under its budget has no compression pressure on it at all — which is
+ * the forcing function the whole method rests on (Adams et al. 2023,
+ * arXiv:2309.04269 §2). Clause 3 exists because the source study's own chain
+ * lands step 1 and step 5 at an identical 72 tokens; endpoints that are not
+ * length-matched make a density claim across them unreadable.
+ */
+function tierBudgetIssues({ tiers, budget, tolerance, tierCount }) {
+  const issues = [];
+  if (!Number.isInteger(budget) || budget <= 0) {
+    issues.push(`tier_budget_words must be a positive integer, got ${JSON.stringify(budget)}`);
+    return issues;
+  }
+  const lo = Math.floor(budget * (1 - tolerance));
+  const hi = Math.ceil(budget * (1 + tolerance));
+  for (const [id, list] of tiers) {
+    if (Number.isInteger(tierCount) && list.length !== tierCount) {
+      issues.push(`${id}: ${list.length} tier(s), expected ${tierCount}`);
+      continue;
+    }
+    for (const t of list) {
+      if (t.words > hi) issues.push(`${id} ${t.tier}: ${t.words} words over ceiling ${hi} (line ${t.startLine})`);
+      else if (t.words < lo) issues.push(`${id} ${t.tier}: ${t.words} words under floor ${lo} (line ${t.startLine})`);
+    }
+    const first = list[0];
+    const last = list[list.length - 1];
+    if (first && last && last !== first && last.words > first.words) {
+      issues.push(`${id}: ${last.tier} (${last.words}w) is longer than ${first.tier} (${first.words}w) — densest tier must not be the longest`);
+    }
+  }
+  return issues;
+}
+
+/**
  * Parse the self-index table's `Declares` column. Only backticked spans are
  * read, so the prose around a glob is ignored by construction; `*(none)*`
  * declares nothing.
@@ -712,6 +794,7 @@ function formatScriptProblem(problem, label = RENDER_PATH) {
 function runVerify() {
   const mapText = readMapText();
   const problems = [];
+  let budgetSummary = { enforced: false, issues: [] };
   let router;
   try {
     router = buildRouter(mapText);
@@ -762,6 +845,27 @@ function runVerify() {
         if (dead in b) problems.push(`${b.id}: stale field \`${dead}\` — verification is derived from git, not stored`);
       }
     }
+    // The budget field is READ here, which is the point. Before this,
+    // `tier_budget_words` occurred exactly once in the repository — its own
+    // declaration — so the map could and did drift to tiers nine times the
+    // stated figure while every gate stayed green. A declared constant with no
+    // reader is a comment.
+    //
+    // Reading it always, gating on it only when `tier_budget_enforced` is true:
+    // the branches as shipped violate the band, and a gate that reddens CI on
+    // day one is a gate someone switches off (the same reasoning that keeps
+    // staleness out of `--verify`). The measurement is unconditional so the
+    // drift is visible; the flag is the operator's, and flipping it is a
+    // behaviour change to put to the collaborator rather than to assume.
+    const cfg = index.notes?.[0] ?? {};
+    const budgetIssues = tierBudgetIssues({
+      tiers: extractTiers(mapText),
+      budget: cfg.tier_budget_words,
+      tolerance: typeof cfg.tier_budget_tolerance === 'number' ? cfg.tier_budget_tolerance : 0.05,
+      tierCount: cfg.tier_count,
+    });
+    budgetSummary = { enforced: cfg.tier_budget_enforced === true, issues: budgetIssues };
+    if (budgetSummary.enforced) problems.push(...budgetIssues);
   }
   if ([...router.declarations.keys()].join(',') !== router.roster.join(',')) {
     problems.push('self-index roster ≠ map headings');
@@ -790,8 +894,53 @@ function runVerify() {
     `density-trellis contract: PASS (${visible.length} paths routed; ${router.roster.length} branch classes, ` +
       `roster agrees three ways; ${router.declared.length} declared globs, ` +
       `${(router.residue.heuristic ?? []).length} heuristics, ${(router.residue.fallback ?? []).length} fallbacks; ` +
-      `no stored pins; ${scripts.checked.length} inline script block(s) in the render compile)\n`,
+      `no stored pins; ${scripts.checked.length} inline script block(s) in the render compile; ` +
+      `tier budget ${budgetSummary.enforced ? 'enforced' : 'measured only'}, ${budgetSummary.issues.length} breach(es))\n`,
   );
+  if (!budgetSummary.enforced && budgetSummary.issues.length) {
+    process.stdout.write(
+      `  tier budget: ${budgetSummary.issues.length} breach(es), not gating. ` +
+        `Run \`npm run wiki:check -- --budget\` for the per-tier table, or set ` +
+        `\`tier_budget_enforced: true\` in docs/density-chain/index.json to make these fail this check.\n`,
+    );
+  }
+  return 0;
+}
+
+/**
+ * `--budget`: the tier-length gate on its own. Exit 0 clean, 1 on any breach,
+ * regardless of `tier_budget_enforced` — the flag governs whether `--verify`
+ * fails, never whether the measurement runs.
+ */
+function runBudget() {
+  const mapText = readMapText();
+  if (mapText === null) {
+    process.stderr.write(`${CHAIN_PATH} is missing\n`);
+    return 1;
+  }
+  const cfg = loadIndex()?.notes?.[0] ?? {};
+  const tolerance = typeof cfg.tier_budget_tolerance === 'number' ? cfg.tier_budget_tolerance : 0.05;
+  const tiers = extractTiers(mapText);
+  const issues = tierBudgetIssues({ tiers, budget: cfg.tier_budget_words, tolerance, tierCount: cfg.tier_count });
+
+  const budget = cfg.tier_budget_words;
+  const lo = Math.floor(budget * (1 - tolerance));
+  const hi = Math.ceil(budget * (1 + tolerance));
+  process.stdout.write(`tier budget ${budget} words, band ${lo}-${hi} (±${Math.round(tolerance * 100)}%)\n\n`);
+  const cols = [...tiers.values()][0]?.map((t) => t.tier) ?? [];
+  process.stdout.write(`class  ${cols.map((c) => c.padStart(6)).join('')}   verdict\n`);
+  for (const [id, list] of tiers) {
+    const cells = list.map((t) => (t.words > hi || t.words < lo ? `${t.words}!` : `${t.words}`).padStart(6)).join('');
+    const bad = list.some((t) => t.words > hi || t.words < lo)
+      || (list.length > 1 && list[list.length - 1].words > list[0].words);
+    process.stdout.write(`${id.padEnd(6)} ${cells}   ${bad ? 'BREACH' : 'ok'}\n`);
+  }
+  if (issues.length) {
+    process.stdout.write(`\ntier budget: FAIL (${issues.length} breach(es))\n`);
+    for (const i of issues) process.stdout.write(`- ${i}\n`);
+    return 1;
+  }
+  process.stdout.write(`\ntier budget: PASS (${[...tiers.values()].flat().length} tiers within band; no class ends longer than it starts)\n`);
   return 0;
 }
 
@@ -905,6 +1054,40 @@ function runNegativeControl() {
     planted.push('new_heading_extends_the_roster');
   }
 
+  // The tier-budget gate. The positive control fires first: if the shipped map
+  // yields no tiers at all, every "we caught the breach" below is a check
+  // passing on an empty set.
+  const shippedTiers = extractTiers(mapText);
+  const shippedTierCount = [...shippedTiers.values()].flat().length;
+  if (shippedTiers.size > 0 && shippedTierCount === shippedTiers.size * 5) {
+    planted.push('shipped_map_yields_five_tiers_per_class');
+  }
+  const bandCfg = { budget: 90, tolerance: 0.05, tierCount: 2 };
+  const oneClass = (a, b) => new Map([['C1', [
+    { tier: 'T1', startLine: 1, words: a }, { tier: 'T2', startLine: 2, words: b },
+  ]]]);
+  if (tierBudgetIssues({ tiers: oneClass(90, 800), ...bandCfg }).some((s) => s.includes('over ceiling'))) {
+    planted.push('an_over_ceiling_tier_is_caught');
+  }
+  // The clause a ceiling-only rule cannot have: a tier well UNDER budget has no
+  // compression pressure on it, which is the forcing function itself.
+  if (tierBudgetIssues({ tiers: oneClass(90, 20), ...bandCfg }).some((s) => s.includes('under floor'))) {
+    planted.push('an_under_floor_tier_is_caught');
+  }
+  // Both endpoints inside the band, yet the chain ends longer than it starts.
+  if (tierBudgetIssues({ tiers: oneClass(86, 94), ...bandCfg }).some((s) => s.includes('longer than'))) {
+    planted.push('a_chain_ending_longer_than_it_starts_is_caught');
+  }
+  if (tierBudgetIssues({ tiers: oneClass(90, 90), ...bandCfg }).length === 0) {
+    planted.push('a_held_budget_passes');
+  }
+  if (tierBudgetIssues({ tiers: oneClass(90, 90), ...bandCfg, tierCount: 5 }).some((s) => s.includes('expected 5'))) {
+    planted.push('a_short_chain_is_caught');
+  }
+  if (tierBudgetIssues({ tiers: oneClass(90, 90), ...bandCfg, budget: 0 }).some((s) => s.includes('positive integer'))) {
+    planted.push('a_missing_budget_is_caught');
+  }
+
   const sections = extractSections(mapText);
   if (sections.has('C5') && sections.has('C6')) planted.push('sections_extract_per_class');
   if (extractSections(mapText.replace(/\n/g, '\r\n')).get('C5')?.sha256 === sections.get('C5')?.sha256) {
@@ -999,6 +1182,9 @@ function runNegativeControl() {
     'working_tree_section_edit_satisfies', 'uncommitted_code_change_is_stale',
     'missing_section_is_orphaned', 'never_committed_branch_is_stale', 'shallow_clone_does_not_gate',
     'no_unresolvable_pin_state_exists',
+    'shipped_map_yields_five_tiers_per_class', 'an_over_ceiling_tier_is_caught',
+    'an_under_floor_tier_is_caught', 'a_chain_ending_longer_than_it_starts_is_caught',
+    'a_held_budget_passes', 'a_short_chain_is_caught', 'a_missing_budget_is_caught',
   ];
   const missed = expected.filter((n) => !planted.includes(n));
   if (missed.length) {
@@ -1016,6 +1202,7 @@ function main() {
   if (argv.includes('--hook')) return hookMode();
   if (argv.includes('--verify')) return runVerify();
   if (argv.includes('--check-html')) return runCheckHtml();
+  if (argv.includes('--budget')) return runBudget();
   if (argv.includes('--negative-control')) return runNegativeControl();
 
   if (argv.includes('--list-classes')) {
@@ -1073,7 +1260,7 @@ if (invokedDirectly) {
 
 export {
   globToRegExp, expandBraces, specificity,
-  extractSections, extractRoster, extractDeclarations,
+  extractSections, extractRoster, extractDeclarations, extractTiers, tierBudgetIssues,
   buildRouter, route, classify,
   sectionVerdict, classVerdicts, lastCodeCommitByClass, report,
   extractScriptBlocks, findSyntaxError, checkHtmlScripts, formatScriptProblem,

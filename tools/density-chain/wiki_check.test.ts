@@ -9,8 +9,14 @@ import * as wiki from './wiki_check.mjs';
 const {
   globToRegExp, expandBraces, extractSections, extractRoster,
   extractDeclarations, buildRouter, route, classify, sectionVerdict,
-  extractScriptBlocks, checkHtmlScripts,
+  extractScriptBlocks, checkHtmlScripts, extractTiers, tierBudgetIssues,
 } = wiki as {
+  extractTiers: (t: string | null) => Map<string, { tier: string; startLine: number; words: number }[]>;
+  tierBudgetIssues: (a: {
+    tiers: Map<string, { tier: string; startLine: number; words: number }[]>;
+    budget: unknown; tolerance: number; tierCount?: number;
+  }) => string[];
+} & {
   globToRegExp: (g: string) => RegExp;
   expandBraces: (g: string) => string[];
   extractSections: (t: string | null) => Map<string, { startLine: number; endLine: number; sha256: string }>;
@@ -382,6 +388,83 @@ describe('residue hygiene', () => {
   it('never shadows a declaration', () => {
     for (const kind of ['ignore', 'heuristic', 'fallback']) {
       for (const entry of residue[kind]) expect(declared.has(entry.glob), `${entry.glob}`).toBe(false);
+    }
+  });
+});
+
+describe('tier extraction', () => {
+  const tiers = extractTiers(MAP_TEXT);
+
+  it('finds every class in the roster', () => {
+    expect([...tiers.keys()]).toEqual(extractRoster(MAP_TEXT).map((r) => r.id));
+  });
+
+  it('finds exactly five tiers per class', () => {
+    for (const [id, list] of tiers) expect(list.length, id).toBe(5);
+  });
+
+  it('labels them T1..T5 in order', () => {
+    for (const [id, list] of tiers) {
+      expect(list.map((t) => t.tier), id).toEqual(['T1', 'T2', 'T3', 'T4', 'T5']);
+    }
+  });
+
+  // The counting convention is the deliverable, not an implementation detail:
+  // three readers counting one tier by eye returned 799, 803 and 844.
+  it('counts a tier body without its bullet label', () => {
+    const one = extractTiers('#### C1 — x\n\n- **T1 — essence.** alpha beta gamma\n');
+    expect(one.get('C1')?.[0].words).toBe(3);
+  });
+
+  it('stops a tier at the status footer, not at the end of the section', () => {
+    const one = extractTiers('#### C1 — x\n\n- **T1 — essence.** alpha beta\n\n*Status ledger:* delta epsilon zeta\n');
+    expect(one.get('C1')?.[0].words).toBe(2);
+  });
+
+  it('spans continuation lines within one tier', () => {
+    const one = extractTiers('#### C1 — x\n\n- **T1 — essence.** alpha\n  beta gamma\n');
+    expect(one.get('C1')?.[0].words).toBe(3);
+  });
+});
+
+describe('tier budget clauses', () => {
+  const cfg = { budget: 90, tolerance: 0.05, tierCount: 2 };
+  const chain = (a: number, b: number) => new Map([['C1', [
+    { tier: 'T1', startLine: 1, words: a }, { tier: 'T2', startLine: 2, words: b },
+  ]]]);
+
+  it('passes a held budget', () => {
+    expect(tierBudgetIssues({ tiers: chain(90, 90), ...cfg })).toEqual([]);
+  });
+
+  it('catches a tier over the ceiling', () => {
+    expect(tierBudgetIssues({ tiers: chain(90, 800), ...cfg }).join()).toContain('over ceiling');
+  });
+
+  // A ceiling-only rule passes this, and a tier under budget has no
+  // compression pressure on it — which is the mechanism the budget exists for.
+  it('catches a tier under the floor', () => {
+    expect(tierBudgetIssues({ tiers: chain(90, 20), ...cfg }).join()).toContain('under floor');
+  });
+
+  it('catches a chain ending longer than it starts, both ends in band', () => {
+    const issues = tierBudgetIssues({ tiers: chain(86, 94), ...cfg });
+    expect(issues.join()).toContain('longer than');
+    expect(issues.join()).not.toContain('ceiling');
+  });
+
+  it('allows a chain ending shorter than it starts', () => {
+    expect(tierBudgetIssues({ tiers: chain(94, 86), ...cfg })).toEqual([]);
+  });
+
+  it('catches a short chain', () => {
+    expect(tierBudgetIssues({ tiers: chain(90, 90), ...cfg, tierCount: 5 }).join()).toContain('expected 5');
+  });
+
+  it('refuses a budget that is absent or not a positive integer', () => {
+    for (const budget of [undefined, 0, -1, '90', 90.5]) {
+      expect(tierBudgetIssues({ tiers: chain(90, 90), ...cfg, budget }).join(), String(budget))
+        .toContain('positive integer');
     }
   });
 });
