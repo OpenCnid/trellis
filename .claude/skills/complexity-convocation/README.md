@@ -37,18 +37,18 @@ drift between the two, **the record wins and the skill is corrected**
 — never the reverse. The binding sources, cited by section header, not
 reproduced here (a paraphrased copy is drift, not an implementation):
 
-- [`JUDGE_COMPOSITION_CEREMONY.md`](../../../docs/product/epistemic-support/JUDGE_COMPOSITION_CEREMONY.md)
+- [`JUDGE_COMPOSITION_CEREMONY.md`](references/JUDGE_COMPOSITION_CEREMONY.md)
   — the six-stage ceremony (characterize → compose → gate → judge →
   audit → dispose) this skill runs in the harness.
-- [`JUDGE_COMPOSITION_GAME.md`](../../../docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md)
+- [`JUDGE_COMPOSITION_GAME.md`](references/JUDGE_COMPOSITION_GAME.md)
   §6 — the twenty binding rules, cited by number in `SKILL.md`.
-- [`STANDING_MODEL.md`](../../../docs/product/epistemic-support/STANDING_MODEL.md)
+- [`STANDING_MODEL.md`](references/STANDING_MODEL.md)
   — the signed ternary (`clean | drawback | abstain` = `+1 | −1 | 0`)
   and the user gate the skill's disposition obeys.
-- [`FOUR_JUDGE_BASIC_MODEL.md`](../../../docs/product/epistemic-support/FOUR_JUDGE_BASIC_MODEL.md)
+- [`FOUR_JUDGE_BASIC_MODEL.md`](references/FOUR_JUDGE_BASIC_MODEL.md)
   — the four registries and the YAML judge schema the composer draws
   from.
-- [`RECONCILIATION.md`](../../../docs/product/epistemic-support/RECONCILIATION.md)
+- [`RECONCILIATION.md`](references/RECONCILIATION.md)
   §7.1 — composition supersession: "there are no base judges and no
   default cast."
 
@@ -64,7 +64,7 @@ reproduced here (a paraphrased copy is drift, not an implementation):
   anchors are composed per artifact by the Stage-2 composer, from the
   Stage-1 characterization. **There is no default cast** — the
   Session-71 standing-roster rollback
-  ([`JUDGE_COMPOSITION_GAME.md`](../../../docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md)
+  ([`JUDGE_COMPOSITION_GAME.md`](references/JUDGE_COMPOSITION_GAME.md)
   §6.1) is the cautionary case, and a judge that outlives its ceremony
   has rebuilt exactly that.
 
@@ -74,8 +74,7 @@ The engine's convocation machinery (`src/core/graph/*`, PR #134) is
 zero-paid and arithmetic-gated, and emits no token or cost counter.
 This skill lives one layer up, in the harness, where the `Agent` tool
 returns **real per-run telemetry** — the composition-from-primitives
-that the July-19 note in
-[`../judge-composition/README.md`](../judge-composition/README.md)
+that the July-19 note in the `judge-composition` skill's own `README.md`
 says "must be built and tested." Until these composition meta-prompts
 are tested against real artifacts, the system is **trusted or
 simulated, never assumed**; `SKILL.md`'s `simulate` path and the

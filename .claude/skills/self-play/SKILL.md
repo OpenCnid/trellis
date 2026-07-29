@@ -274,11 +274,15 @@ skeleton or the isolation it protects.
 Provenance, not law — one program's instances of the general method, kept
 short-lived on purpose so they illustrate rather than anchor:
 
-- `docs/architecture/DOUBTS_WORKSPACE.md` §11–§12 — the adversarial run and the
-  fact-corpus run, with the falsification recorded inline.
-- `docs/product/epistemic-support/PRIMITIVE_ENCODING_AUDIT.md` — the audit run;
-  findings 1 and 3 were later **withdrawn** by a follow-up probe.
+- `DOUBTS_WORKSPACE.md` §11–§12 — the adversarial run and the fact-corpus run,
+  with the falsification recorded inline. Mirrored in
+  [`references/`](references/); canonical at `docs/architecture/`.
+- `PRIMITIVE_ENCODING_AUDIT.md` — the audit run; findings 1 and 3 were later
+  **withdrawn** by a follow-up probe. Mirrored in [`references/`](references/);
+  canonical at `docs/product/epistemic-support/`.
 - `fixtures/doubts_workspace/earth_figure_factbase.md` — the blind-built corpus.
+  **In-repo only, deliberately unmirrored:** it is a corpus to illustrate from,
+  and a copy that travels is an example that anchors.
 - Memory: `project-corrosion-bound-critique`, `feedback-encoding-tracks-presentation`.
 
 ## House note
