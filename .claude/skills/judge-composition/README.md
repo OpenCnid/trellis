@@ -2,7 +2,7 @@
 
 This directory versions the operational shorthand for composing judge
 panels. It closes
-[`JUDGE_COMPOSITION_GAME.md`](../../../docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md)
+[`JUDGE_COMPOSITION_GAME.md`](references/JUDGE_COMPOSITION_GAME.md)
 §10 open item 4 ("In-repo copy of the `judge-composition` skill, if the
 owner wants it versioned here"), landed July 19, 2026 at owner
 direction.

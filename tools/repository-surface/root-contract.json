@@ -33,7 +33,13 @@
     "tools"
   ],
   "markdownLinks": {
-    "excludePrefixes": ["docs/archive/"]
+    "excludePrefixes": [
+      "docs/archive/",
+      ".claude/skills/complexity-convocation/references/",
+      ".claude/skills/judge-composition/references/",
+      ".claude/skills/loop-orchestrator/references/",
+      ".claude/skills/self-play/references/"
+    ]
   },
   "environment": {
     "schemaPath": "src/config/index.ts",

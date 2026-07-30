@@ -11,7 +11,7 @@ description: Assess whether something is excessively complex and return interpre
 
 This is the **harness-orchestration form** of the judge-composition ceremony, on one driving question: **is this complexity warranted, and if not, what specifically should change?** It spawns sub-agent judges — composed fresh for the artifact, never a standing cast — and a judges-judge that audits their runs on **real run telemetry** (`subagent_tokens`, `tool_uses`, `duration_ms`, transcript paths) the zero-paid engine cannot see.
 
-The law lives in the record, not here. Canonical, in `docs/product/epistemic-support/` of the Trellis repo:
+The law lives in the record, not here. Canonical in `docs/product/epistemic-support/` of the Trellis repo, and mirrored byte-for-byte in [`references/`](references/) so this skill runs with the repo absent — read them there, by the section each citation names ([`references/README.md`](references/README.md) carries the provenance and the section-read idiom):
 
 - `JUDGE_COMPOSITION_CEREMONY.md` — the six-stage ceremony this skill runs.
 - `JUDGE_COMPOSITION_GAME.md §6` — the twenty binding rules, **cited by number below and never paraphrased** (a paraphrased copy is drift, not an implementation).

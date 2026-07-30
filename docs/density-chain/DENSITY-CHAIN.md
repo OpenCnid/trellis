@@ -518,13 +518,14 @@ beneath it.*
   facts only, or critique dissolves everything. Every evaluator composes per context from primitives;
   there is no default cast.
 - **T2 — current machinery.** Shipped: none of the axis itself. `judge_panel.ts:38` closes `PanelRole`
-  to four names and `ROLE_DEFINITIONS` hard-codes them; the six-value claim-mode enum is declared three
-  times, and the applicability gate keys on it at line 464. Defeat is a boolean —
+  `ROLE_DEFINITIONS` hard-codes four; the six-value claim-mode enum is declared three times, the
+  applicability gate keying on it at line 464. Defeat is a boolean —
   `contested`/`contestedReason`/`contestedAt` across forty `src/` files. `judge_explain.ts:105` prints
-  "doubt-dominant", but that is subjective-logic disbelief, not the tier. User gates ship as CLI flags:
-  `judge_ratify.ts --confirm`, `promote_segment.ts --confirm-extraction` — custody gates, not standing
-  moves. Nine `.claude/skills/` and `.claude/rules/composed-evaluators.md` rule 17 carry the composition
-  law, whose `judge-composition/SKILL.md:20` calls four the current cover, not a required number.
+  "doubt-dominant", subjective-logic disbelief, not the tier. User gates are CLI flags:
+  `judge_ratify.ts --confirm`, `promote_segment.ts --confirm-extraction` — custody, not standing. Nine
+  `.claude/skills/` and `.claude/rules/composed-evaluators.md` rule 17 carry the composition law; five
+  now vendor their cited records as **33 mirrors of 18 records** under `references/`, manifested with
+  path and SHA-256, compared by nothing.
 - **T3 — with receipts.** `e5e7844` (#138) ratified the standing model and doubts workspace **as
   principle** — 179 and 575 lines, **zero `src/` changes**; `8926e12` (#137) adopted
   composition-from-primitives after rolling the roster back. Corrosion-bound test: a ~35-item fact base
@@ -550,12 +551,14 @@ beneath it.*
 
 *Status ledger:* standing model · user gate · meet rule · panel-never-moves —
 **adopted / ratified-as-principle (no build)**; composition-from-primitives — same, carried by nine
-`.claude/skills/` whose copies hold DERIVED standing (the record wins on drift); doubts workspace and
-`affirmation` — **proposed / design-record**; Session 71's standing four-judge roster — **rolled back /
-retired**; the flat-earth corpus and the affirmation self-play — **recorded-research**.
+`.claude/skills/` whose copies hold DERIVED standing (the record wins on drift, now across 33 vendored
+mirrors nothing compares); doubts workspace and `affirmation` — **proposed / design-record**; Session
+71's standing four-judge roster — **rolled back / retired**; the flat-earth corpus and the affirmation
+self-play — **recorded-research**.
 *Reachability:* `objection`, `defeater`, `hashKind` and `affirmation` each return **zero hits in
 `src/`**; the doubt tier reaches code only as two `repl_sandbox` comments naming doubts a root-handle
-kind. No drill covers `.claude/skills/`, so enforcement of the composition law is prose.
+kind. No drill covers `.claude/skills/`, so enforcement of the composition law is prose, and so is
+mirror-against-record.
 *Cross-links:* [[C3]] (support arithmetic sits underneath; verdicts feed standing), [[C9]] (the
 decomposability bet links to the sidecar), [[C12]] (the doubt tier supplies the sandbox's filter
 layers), [[all]] (composition governs judges, experts and protocols everywhere).
@@ -905,7 +908,8 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   one in a `docs/` sibling, so widening the prefix loses the sibling and narrowing it fires the
   archive. First headroom run: `docs/README.md`
   **45 bytes** under its 20,480 cap, `docs/ORIENTATION.md` **352** under 32,768. Checker
-  **PASS (0 issues)**.
+  **PASS (0 issues)** — link arm watched red at **173 issues**, green once the exemption followed the
+  mirrors, *measured this session*.
 - **T4 — the frontier.** **The honest scope of "derived" is recorded:** phrase text is still
   hand-authored once per guard class and pinned; what the engine derives is the selection (the
   refusing bool), single-encoding ownership, and now the injected-name roster — nothing generates
@@ -915,7 +919,9 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   guarded-arm orphan is **closed**; the advisory-marking duty is deliberately still open, because
   settling it for one surface would make an instance into law (rule 17). **The record↔twin asymmetry is structural:** the checker proves twin↔tree, never
   record↔twin — **named-implies-exists is proved; exists-implies-named is not** (green again since
-  `20e94ae`). **Confirmed unfixed, deliberately:** the nine-field telemetry allowlist — Workstream A's
+  `20e94ae`). Fresh instance: the link-exclusion array went **one prefix to five** for four skills'
+  vendored mirrors, and nothing proves a listed prefix still names a folder — a new mirror folder
+  fails loudly, a retired one silently widens the exemption. **Confirmed unfixed, deliberately:** the nine-field telemetry allowlist — Workstream A's
   Phase 0a, and A was held back. **Falsified:** Phase 0, 2026-07-19, proved its own specification
   impossible. **Unscheduled:** `.claude/ceremonies/` — the dedupe loop whose prompt is committed
   beside the rulings it honors, whose allow-list travels by checkout, and which cannot rewrite its
@@ -931,9 +937,9 @@ descriptor program. Not the guards it describes, only the accounts of them.*
   questions closed 2026-07-23: **descriptors are a registration, not a schema** — the field set is
   *dissolved* rather than settled, because a vocabulary that becomes law early cannot survive the
   iteration prompt authoring needs — and that registry, populated at each surface's definition site,
-  is also where `llm_help` composes from — and that registry, with its **coverage** diagnostic, is
-  now BUILT. What remains unbuilt: `llm_help` itself, the eight further descriptors, the human-doc
-  generator, and the advisory-marking convention that belongs with `llm_help`'s frame.
+  is where `llm_help` composes from and, with its **coverage** diagnostic, is now BUILT. What remains
+  unbuilt: `llm_help` itself, the eight further descriptors, the human-doc generator, and the
+  advisory-marking convention that belongs with `llm_help`'s frame.
 
 **AMBIENT.md gained rule 24 on 2026-07-24 — what is being built — and it is this class's business
 because it is a self-description that construction has to be able to see.** The rule is numbered

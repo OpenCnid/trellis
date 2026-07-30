@@ -19,9 +19,32 @@ Each skill here is subordinate to a canonical authority — its design record
 the reverse. A paraphrased copy is drift, not an implementation — consumers
 cite the record, they do not restate it. These copies also sit under the
 house ordering **code > glossary > prose**; they bind nothing that code or
-the glossary contradicts. The owner keeps personal mirrors under
-`~/.claude/skills/` for use outside this repo; those and these are kept
-byte-identical, and neither is authority over the record.
+the glossary contradicts. `~/.claude/skills/` reaches these by **symlink**
+into this directory rather than by copy, so the owner's out-of-repo
+invocations load these exact bytes; `loop-orchestrator` is in-repo only, and
+`harness-traps` and `spark-probe` live only at the user level and are not
+versioned here.
+
+## Bundled reference material — `references/`
+
+A skill that cites a record carries that record beside it, mirrored
+**byte-for-byte** under `<skill>/references/`, so the skill directory can be
+lifted out of this repository and still resolve every citation it makes. Four
+skills carry mirrors — `judge-composition` (13 records), `complexity-convocation`
+(9), `loop-orchestrator` (5), `self-play` (4) — and each folder's `README.md` is
+the manifest: canonical source path, byte count, and SHA-256 per file, against
+the commit they were taken at.
+
+Mirrors are snapshots, not the record, and **no sync check is installed** — the
+authority ordering above decides every divergence, and a stale mirror is
+replaced from source rather than edited. Nothing is appended inside a mirrored
+file: byte-identity to the source is what makes the manifest's hashes
+verifiable, so provenance lives in the manifest instead of in a header.
+
+`spark-steering/references/` is a different thing under the same name — original
+authored material, not mirrors, and it carries no manifest. The remaining
+skills — `prompt-engineering`, `hypershot-protocol`, `subagent-composition`,
+`density-chain` — cite no in-repo record and are already self-contained.
 
 Versioning a skill here is an owner act
 (`docs/product/epistemic-support/JUDGE_COMPOSITION_GAME.md §10`, open item
