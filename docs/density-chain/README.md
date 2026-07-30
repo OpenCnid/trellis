@@ -36,9 +36,11 @@ record, adopted doctrine, and design record.
 1. **Trunk first.** T0 (a sentence), T1 (a paragraph), T2 (the class map). Under 500 words.
 2. **Then one branch.** Each is complete at every tier: T1 is true on its own terms, and deeper tiers
    *add* rather than *correct* (the layer test). Stop at the first tier that answers you.
-3. **Watch the status labels.** `shipped-pinned` ≠ `implemented, not accepted` ≠ `ratified as
-   principle (no build)` ≠ `proposed` ≠ `rolled back`. Blurring them is the failure this house keeps
-   paying for.
+3. **Watch the status labels.** `shipped-pinned` (committed code plus a passing drill) ≠
+   `implemented, not accepted` ≠ `adopted / ratified-as-principle (no build)` ≠ `proposed /
+   design-record` ≠ `recorded-research` ≠ `rolled back / retired`. Six members, and the same six the
+   map's reading contract and the density-chain skill declare — a taxonomy enumerated two ways is one
+   nobody can check against. Blurring them is the failure this house keeps paying for.
 4. **Read the reachability lines.** Hard rule 15 — *correct is not the same claim as reachable*. Every
    branch names what has no non-test caller. Those are findings, not accusations.
 5. **Every number is as recorded, never re-run.** A scripted zero-paid harness's counters belong to the
@@ -66,7 +68,8 @@ implicated.
 | `npm run wiki:check -- --emit-class-map` | the derived routing table, for review — never committed |
 | `npm run wiki:check -- --print-sections` | each branch section's line range and normalized hash |
 | `npm run wiki:check -- --json` / `-- --list-classes` | the report as JSON / the roster |
-| `npm run wiki:check -- --negative-control` | the falsifier. Plants **twenty-five** conditions the gate must detect; **healthy is exit 3**, matching [`check:repo-surface`](../../tools/repository-surface/cli.ts) and the judge drills |
+| `npm run wiki:check -- --budget` | the tier-length gate alone: every tier inside the declared band, and no class ending longer than it starts. Exit **0** clean, **1** on breach — independent of whether `--verify` gates on it |
+| `npm run wiki:check -- --negative-control` | the falsifier. Plants **thirty-two** conditions the gate must detect; **healthy is exit 3**, matching [`check:repo-surface`](../../tools/repository-surface/cli.ts) and the judge drills |
 
 **The split is deliberate.** `--verify` runs in CI because its invariants hold at any history
 depth — and CI checks out shallow, so the staleness diff would silently see nothing there. Staleness
